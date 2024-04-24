@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>REP</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions, REP">
+</OBJECT>
+
+<P><A NAME="cmd_rep"></A><B><CODE>REP</CODE></B>  (Reset bits in P register) (only processor 65816) Tags: none</P>
+
+<P>Description:</P>
+
+<P>Resets bits in the P register. Takes an Immediate value.  That value is EOR'ed with the P regsiter and P register is updated.</P>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>        REP #$20; Set 16 bit accumulator</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

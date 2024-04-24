@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>Operators</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Macroasembler">
+	<PARAM NAME="Keyword" VALUE="Macroasembler,  operators">
+</OBJECT>
+
+<P><A NAME="operators"></A> Operators</P>
+
+<P>Operator board:</P>
+
+<TABLE border=1 cols=4 frame=box rules=all width=615>
+
+<TR VALIGN="top">
+<TD width=13%><B><CODE>Priority</CODE></B></TD>
+<TD width=37%><B><CODE>Unary</CODE></B></TD>
+<TD width=12%><B><CODE>Priority</CODE></B></TD>
+<TD width=38%><B><CODE>Binary operators</CODE></B></TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=13%><CODE>1.</CODE></TD>
+<TD width=37%>
+<PRE><B><CODE>% $</CODE></B></PRE>
+</TD>
+<TD width=12%><CODE>3.</CODE></TD>
+<TD width=38%>
+<PRE><B><CODE>* / %</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=13%><CODE>2.</CODE></TD>
+<TD width=37%>
+<PRE><B><CODE>{ } ~ ! - &gt; &lt;</CODE></B></PRE>
+</TD>
+<TD width=12%><CODE>4.</CODE></TD>
+<TD width=38%>
+<PRE><B><CODE>&lt;&lt; &gt;&gt;</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=13%>&nbsp;</TD>
+<TD width=37%>&nbsp;</TD>
+<TD width=12%><CODE>5.</CODE></TD>
+<TD width=38%>
+<PRE><B><CODE>+ -</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=13%>&nbsp;</TD>
+<TD width=37%>&nbsp;</TD>
+<TD width=12%><CODE>6.</CODE></TD>
+<TD width=38%>
+<PRE><B><CODE>&amp; | ^</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=13%>&nbsp;</TD>
+<TD width=37%>&nbsp;</TD>
+<TD width=12%><CODE>7.</CODE></TD>
+<TD width=38%>
+<PRE><B><CODE>&gt; &lt; &gt;= &lt;= == !=</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=13%>&nbsp;</TD>
+<TD width=37%>&nbsp;</TD>
+<TD width=12%><CODE>8.</CODE></TD>
+<TD width=38%>
+<PRE><B><CODE>&amp;&amp;</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=13%>&nbsp;</TD>
+<TD width=37%>&nbsp;</TD>
+<TD width=12%><CODE>9.</CODE></TD>
+<TD width=38%>
+<PRE><B><CODE>||</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Description:</P>
+
+<P>Unary.</P>
+
+<PRE><CODE>%&lt;constant&gt;</CODE></PRE>
+
+<P><CODE>%&lt;constant&gt;$</CODE>Reference operator to macro definition parameter. Parameters are numbered from 1. Call %0 is the number of parameters passed to the macro definition. Placing the '<CODE>$</CODE>' character after the parameter reference means that a text type parameter is expected. Calling %0$ returns the name of the macro definition.</P>
+
+<P><CODE>{ }</CODE> Braces are used to change the order of calculations resulting from operator priorities.</P>
+
+<P><CODE>~</CODE> Bit negation - replace all expression bits with the opposite.</P>
+
+<P><CODE>! </CODE> Logical negation - replace a non-zero expression with 0 and zero expression to 1.</P>
+
+<P><CODE>-</CODE> Change the number character.</P>
+
+<P><CODE>&gt;</CODE> Upper (older) byte of the word.</P>
+
+<P><CODE>&lt;</CODE> Lower (younger) byte of the word.</P>
+
+<P>Two-argument operators.</P>
+
+<P><CODE>* / %</CODE> Multiplication, integer division, and modulo operation.</P>
+
+<P><CODE>&lt;&lt; &gt;&gt;</CODE> Swipe left and right expressions by a given number of bits.</P>
+
+<P><CODE>+ -</CODE> Addition and subtraction.</P>
+
+<P><CODE>&amp; | ^</CODE> Bit conjunction (and), sum (or), and difference (xor) operations.</P>
+
+<P><CODE>&gt; &lt; &gt;= &lt;= == !=</CODE> Expression comparison operations. They return 1 as truth and 0 as false.</P>
+
+<P><CODE>&amp;&amp;</CODE>Logical conjunction (and). Returns 1 as truth and 0 as false.</P>
+
+<P><CODE>|| </CODE> Logical sum (or). Returns 1 as truth and 0 as false.</P>
+
+<P>Examples:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    LDA #%.n    ; loading macro number '.n' parameter</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .DB %2$    ; reference to text contained in the second macro parameter</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .REPEAT {n+1}*2    ; braces changing the order of calculations</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    LDA #~mask;    inversion of constant bits 'mask'</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .IF !. DEF(test)    ; if 'test' is NOT defined</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .BYTE -1;    equivalent to $FF</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    LDX #&gt;$ABCD    ; loading an upper address byte (here: $AB)</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    LDY #&lt;$ABCD    ;instilling a lower byte address (here: $CD)</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .WORD 1&lt;&lt;8    ; 8-bit swipe 1 gives $100</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .BYTE n&gt;&gt;1    ; move 'n' to the right by 1 bit</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .BYTE adr&amp;$FF    ; reducing 'adr' by masking bits</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    LDA #mask|$80    ; bit setting #7</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .DB hassk^$0F;    reverse the lower 4 bits to the opposite</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .IF alpha==beta    ; if the labels have the same values</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .IF alpha!=beta    ; if the labels have different values</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    . IF . REF(Get) || . REF(Put) ; if there was a reference to 'Get' or 'Put'</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

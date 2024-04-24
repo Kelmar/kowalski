@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>JSL</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions, JSL">
+</OBJECT>
+
+<P><B><A NAME="cmd_jsl"></A><CODE>JSL</CODE></B> (long jump to subroutine) (only processor 65816) Tags: none</P>
+
+<P>Description:</P>
+
+<P>Long-jumps to the subroutine. This command enters a new value in the PC command counter and K register and places the full return address (3 bytes) on the stack. The return address is the address of the order following the JSL less one. The RTL command is used to return from the subroutine.</P>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    JSL Print    ; procedure call 'Print'</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

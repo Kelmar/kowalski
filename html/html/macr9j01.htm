@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>.XWORD or .DX</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Directives">
+	<PARAM NAME="Keyword" VALUE="Directives, .XWORD">
+	<PARAM NAME="Keyword" VALUE="Directives, .DX">
+</OBJECT>
+
+<P><A NAME="cmd_word"></A><B><CODE>.XWORD</CODE></B>  or <B><CODE> .DX</CODE></B></P>
+
+<P>Directives that specify 24 bit values of the resulting code. According to Convention 6502, the least significant byte is placed first, followed by more significant bytes.</P>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%><PRE><B><CODE>[&lt;label&gt;[:]] .DX expr { </CODE></B> <B><CODE>, expr }</CODE></B></PRE></TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]] .XWORD expr { , expr }</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>alpha:    .DX $123456, 0    ; will generate $56, $34, $12, 0, 0, 0</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>beta:     .XWORD alpha</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>          .XWORD alpha-1, beta</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

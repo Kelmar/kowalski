@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>SBC</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions, SBC">
+</OBJECT>
+
+<P><A NAME="cmd_sbc"></A><B><CODE>SBC</CODE></B>  (subtract with borrow)  Tags: NVZC</P>
+
+<P>Description:</P>
+
+<P>It subtracts the byte of data from the accumulator along with the Carry flag (C bit). If the data is larger than the accumulator, it will clear C bit (which means a borrow), otherwise it sets the C bit. The result of the subtraction remains in the accumulator.</P>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    SBC #0;        ; subtract zero from A register</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>      SBC (src),Y</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    SBC date,X</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>TRB</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions, TRB">
+</OBJECT>
+
+<P><A NAME="cmd_trb"></A><B><CODE>TRB</CODE></B>  (test and reset bits)  (65C02 and 65816 processor only)  Tags: NVZ</P>
+
+<P>Description:</P>
+
+<P>Executes logical AND on bits of a given value with the accumulator’s compliment (~A AND M -&gt; M). The result is written to the specified memory byte. The Z bit is set if the result of (A AND M) is zero.  The accumulator is not changed.</P>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    TRB    date; logical AND accumulator negation with a given</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>ADC</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions, ADC">
+</OBJECT>
+
+<P><A NAME="cmd_adc"></A><B><CODE>ADC</CODE></B>  (add with carry)  Tags: NVZC</P>
+
+<P>Description:</P>
+
+<P>Adds a byte of data to the accumulator plus move C. If the result does not fit in the byte, sets the transfer C, otherwise it will zero it. The result of the addition remains in the accumulator.</P>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    ADC        #0; addition of transfer to A</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>      ADC (src),Y</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    ADC data,X</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

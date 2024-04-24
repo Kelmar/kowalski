@@ -1,0 +1,114 @@
+.topic IDH_OPT_SYM_PROTECT_MEM
+Enable Memory Write Protection.  Will stop the simulator if a write to this range is detected.
+.topic IDH_OPT_SYM_FIN_BRK
+Stops the Simulator when a BRK ($00) is executed.
+.topic IDH_OPT_SYM_FIN_FF
+Stops the Simulator when a Opcode ($BB) is executed.
+.topic IDH_OPT_SYM_FIN_RTS
+Stops the Simulator when a RTS ($60) is executed.
+.topic IDH_OPT_SYM_IO_ADDR
+Start address to the 256 byte I/O page.  Should be page aligned (0x??00).
+.topic IDH_OPT_SYM_IO_ENABLE
+Enable the Simulator's built in I/O window.
+.topic IDH_OPT_SYM_IO_WND_W
+I/O Window Width in character columns.
+.topic IDH_OPT_SYM_IO_WND_H
+I/O Window Height in character rows.
+.topic IDH_OPT_SYM_WND_TXT_COL
+txtc
+.topic IDH_OPT_SYM_WND_BGND_COL
+bgc
+.topic IDH_OPT_SYM_FONT_BTN
+font
+.topic IDH_OPT_SYM_FONT_NAME
+fname
+.topic IDH_OPT_ASM_CASE_N
+Labels in the source assembler files are not case sensitive.
+.topic IDH_OPT_ASM_CASE_Y
+Labels in the source assembler files are case sensitive.
+.topic IDH_OPT_ASM_INSTR_DOT
+Assembler directive are always prefixed with a period.
+.topic IDH_OPT_ASM_GENERATE_LIST
+Generate a listing file of the assembler output.  Must have a valid file entered.
+.topic IDH_OPT_ASM_FILE_LISTING
+File with optional path for the assembler listing.
+.topic IDH_OPT_ASM_GENERATE_BYTE
+Generate an extra byte after a BRK opcode.  
+.topic IDH_OPT_ASM_EXTRA_BYTE
+The value of the extra byte generated after a BRK opcode.
+.topic IDH_OPT_ASM_CHOOSE_FILE
+Select an assembly listing file.
+.topic IDH_OPT_DA_ADDR_COL
+Select the color for addresses in the disassembler.
+.topic IDH_OPT_DA_CODE
+Display the code bytes in the disassembly.
+.topic IDH_OPT_DA_CODE_COL
+Select the color for code bytes in the disassembler.
+.topic IDH_OPT_DA_INSTR_COL
+Select the color for addresses in the disassembler.
+.topic IDH_OPT_ED_AUTO_INDENT
+Automatically indent the next line to the first non-white-space character of the line above.
+.topic IDH_OPT_ED_AUTO_SYNTAX
+Check syntax while you are typing to reduce errors.
+.topic IDH_OPT_ED_AUTO_UPPER_CASE
+Automatically capitalize opcodes and directives when pressing Enter.
+.topic IDH_OPT_ED_FONT_BTN
+ed font
+.topic IDH_OPT_ED_FONT_NAME
+edf name
+.topic IDH_OPT_ED_NEW_FILE
+Opens a blank assembly source document on startup.
+.topic IDH_OPT_ED_TAB_SPIN
+Increase or decrease the tab steps.
+.topic IDH_OPT_ED_TAB_STEP
+Number of spaces for each TAB key.
+.topic IDH_OPT_MARK_BRKP_COL
+Select color for the Breakpoint marker.
+.topic IDH_OPT_MARK_ERR_COL
+Select color for the Error marker.
+.topic IDH_OPT_MARK_PTR_COL
+Select color for the current instruction marker.
+.topic IDH_OPT_6502
+Select the 6502 processor to simulate.
+.topic IDH_OPT_65C02
+Select the 65C02 or 6501 processor to simulate.
+.topic IDH_OPT_65816
+Select the 65816 processor to simulate.
+.topic IDH_OPT_HELP_CHM
+Select the 6502.CHM file for help content.
+.topic IDH_OPT_HELP_HTM
+Select the 6502.HTM file for help content.
+.topic IDH_OPT_BUS_SPIN
+Select the number of address bus pins to simulate from 10 to 16.
+.topic IDH_OPT_BUS_WIDTH
+Select the number of address bus pins to simulate from 10 to 16.
+.topic IDH_OPT_SYM_W_SPIN
+I/O Window Width in character columns.
+.topic IDH_OPT_SYM_H_SPIN
+I/O Window Height in character rows.
+.topic IDH_OPT_SYM_PROT_FROM
+Lower limit of protected memory.
+.topic IDH_OPT_SYM_PROT_TO
+Upper limit of protected memory.
+.topic IDH_OPT_ED_COLOR_SYNTAX
+Use color syntax
+.topic IDH_OPT_ED_ELEMENT
+Select an element to edit
+.topic IDH_OPT_ED_COLOR
+Select the font color for the highlighted element.
+.topic IDH_OPT_ED_BOLD_FONT
+Make selected element's font bold. 
+.topic IDH_OPT_ED_EXAMPLE
+Visual example of the font and colors of the selected element.
+.topic IDH_OPT_VIEW_BKGND_COL
+Select background color for highlighted feature.
+.topic IDH_OPT_VIEW_WND
+Select the feature you want to change.
+.topic IDH_OPT_VIEW_TXT_COL
+Select text color for highlighted feature.
+.topic IDH_OPT_VIEW_EXAMPLE
+Visual example of the font and colors selected.
+.topic IDH_OPT_VIEW_FONT_BTN
+Select a font for the highlighted feature.
+.topic IDH_OPT_VIEW_FONT_NAME
+Current selected font for the highlighted feature.

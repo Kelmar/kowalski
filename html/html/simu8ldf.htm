@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>Simulator anomalies</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="simulator">
+	<PARAM NAME="Keyword" VALUE="simulator, anomalies">
+</OBJECT>
+
+<P><A NAME="simulator anomalies"></A><B>Incompatibility of simulator and microprocessors 6502 and 65C02</B></P>
+
+<P>Compared to 6502 and 65C02 microprocessors, the simulator is characterized by the following different components:
+
+<UL>
+	<LI>There is no relationship between the speed of different opcodes.<BR><BR></LI>
+
+	<LI>Illegal codes in 6502 mode are not executed, but cause the program to stop.<BR><BR></LI>
+
+	<LI>Illegal codes in 65C02 mode are treated as NOP statements and do <U>not</U> cause the program to stop.<BR><BR></LI>
+
+	<LI>BRK, RTS, and $DB are privileged because one of them, depending on the settings, ends the program.<BR><BR></LI>
+
+	<LI>Reserved bits in the Status register (P) are always set to 1 (as in 65C02, but not in 6502).<BR><BR></LI>
+</UL>
+
+</BODY>
+</HTML>

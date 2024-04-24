@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>.RS or .DS</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Directives">
+	<PARAM NAME="Keyword" VALUE="Directives, .RS">
+	<PARAM NAME="Keyword" VALUE="Directives, .DS">
+</OBJECT>
+
+<P><B><A NAME="cmd_rs"></A><CODE>.RS</CODE></B>  or  <B><CODE>.DS</CODE></B></P>
+
+<P>A directive that reserves the memory area by moving the current content of the code site counter by the specified value. 
+The memory area reserved is filled with the value of $00.</P>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     .RS expr</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>buf:    .RS $100    ; reservation $100 bytes</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .RS size</CODE></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+</BODY>
+</HTML>

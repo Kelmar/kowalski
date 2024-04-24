@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>Simulator IO Functions</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="simulator">
+	<PARAM NAME="Keyword" VALUE="simulator, IO Functions">
+</OBJECT>
+
+<P><A NAME="simulator IO Functions"></A><B>Functions built into the Simulator's IO page.</B></P>
+
+<P>The following table lists the IO functions supported within the IO page.  The IO Page is set in the
+options menu.  The variable "IO_AREA" is reserved and will return the start address of the IO page.
+
+<UL>
+	<LI>IO_AREA+0: TERMINAL_CLS (w)<BR><BR></LI>
+
+	<LI>IO_AREA+1: TERMINAL_OUT (w)<BR><BR></LI>
+
+	<LI>IO_AREA+2: TERMINAL_OUT_CHR (w)<BR><BR></LI>
+
+	<LI>IO_AREA+3: TERMINAL_OUT_HEX (w)<BR><BR></LI>
+
+	<LI>IO_AREA+4: TERMINAL_IN (r)<BR><BR></LI>
+
+	<LI>IO_AREA+5: TERMINAL_X_POS (r/w)<BR><BR></LI>
+
+	<LI>IO_AREA+6: TERMINAL_Y_POS (r/w)<BR><BR></LI>
+
+	<LI>(w) means write only port, (r) read only, (r/w) read/write.<BR><BR></LI>
+
+	
+</UL>
+
+TERMINAL_CLS - clear terminal window, set cursor at (0,0) position.<BR>
+TERMINAL_OUT - output single character interpreting control characters.<BR>
+ Terminal can only recognize those characters:<BR>
+ ASCII $0D (carriage return) moving cursor to the beginning of line,<BR>
+ ASCII $0A (line feed) moving cursor to the next line and scrolling window if necessary,<BR>
+ ASCII $08 (backspace) moving one position to the left and erasing char below cursor.<BR>
+TERMINAL_OUT_CHR - outputs single character; control chars are being output just like regular characters.<BR>
+TERMINAL_OUT_HEX - outputs single byte as a two-digit hexadecimal number.<BR>
+TERMINAL_IN - input single byte, returns 0 if there's no characters available in terminal's buffer; when I/O terminal window is active it can accept keyboard input; press [Ins] key to paste clipboard's contents into terminal.<BR>
+TERMINAL_X_POS - cursor X position (column).<BR>
+TERMINAL_Y_POS - cursor Y position (row).<BR>
+
+</BODY>
+</HTML>

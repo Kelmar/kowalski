@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>Source Program Line</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Macroasembler">
+	<PARAM NAME="Keyword" VALUE="Macroasembler,  source program line">
+</OBJECT>
+
+<P><A NAME="src_line"></A>Source Program Line</P>
+
+<P>Line syntax (three characters):</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE><B>&lt;label&gt;[:]</B>    <B>[&lt;opcode&gt;|&lt;directive&gt;] [&lt;comment&gt;] &lt;EOL&gt;</B></CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE><B>&lt;spacing&gt;</B>    <B>[&lt;command&gt;|&lt;directive&gt;] [&lt;comment&gt;] &lt;EOL&gt;</B></CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;comment&gt;] &lt;EOL&gt;</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;comment&gt; ::= ';' &lt;characters&gt;</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;gap&gt; ::= ' ' | &lt;TAB&gt; {' ' | &lt;TAB&gt;}</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Description:</P>
+
+<P>Each source program line consists of label and opcode fields. A label or white space may appear in the label field. In the command field, there is a 6502 processor command or a macro-assembler directive. You can place a comment anywhere on the line.</P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>.LSTR or .LSTRING</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Directives">
+	<PARAM NAME="Keyword" VALUE="Directives, .LSTR">
+	<PARAM NAME="Keyword" VALUE="Directives, .LSTRING">
+</OBJECT>
+
+<P><A NAME="cmd_str"></A><B><CODE> .LSTR</CODE></B>  or <B><CODE> .LSTRING</CODE></B></P>
+
+<P>Directives that specify the byte values in the resulting code based on the specified string of characters. A word that contains the lengthof  string characters is placed at the beginning. The total string is limited to 1016 characters.</P>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     .LSTR expr { , expr }</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     .LSTRING expr { , expr }</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>alpha:    .LSTRING "ABC", $D    ; will generate 4,0, 'A', 'B', 'C', $0D</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>beta:    .LSTR "Trial Inscription", $D, $A</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>    .LSTR "AB", "CD", 13    ; will generate 5,0,'A', 'B', 'C', 'D', $0D</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

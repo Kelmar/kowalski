@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>ORA</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions, ORA">
+</OBJECT>
+
+<P><A NAME="cmd_ora"></A><B><CODE>ORA</CODE></B>  (logical OR) Tags: NZ</P>
+
+<P>Description:</P>
+
+<P>Performs a logical OR (alternative) on the bits of the given and the accumulator. The result remains in the accumulator.</P>
+
+<P>OR function:</P>
+
+<TABLE border=1 cols=3 frame=box rules=all width=152>
+
+<TR VALIGN="top">
+<TD width=25%>Until</TD>
+<TD width=25%>B</TD>
+<TD width=50%>(a) OR b</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=25%>1</TD>
+<TD width=25%>1</TD>
+<TD width=50%>1</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=25%>1</TD>
+<TD width=25%>0</TD>
+<TD width=50%>1</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=25%>0</TD>
+<TD width=25%>1</TD>
+<TD width=50%>1</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=25%>0</TD>
+<TD width=25%>0</TD>
+<TD width=50%>0</TD>
+</TR>
+</TABLE><BR>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    ORA #@00000011;    setting the two lower bits in A</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    ORA #$80        ; highest bit setting</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

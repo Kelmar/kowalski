@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>Labels</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Macroasembler">
+	<PARAM NAME="Keyword" VALUE="Macroasembler,  labels">
+</OBJECT>
+
+<P><A NAME="labels"></A> Labels</P>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;label&gt; ::= '.'|'?'|' _'|&lt;letter&gt; {'.'|'?'|' _'|&lt;letter&gt;|&lt;digit&gt;} [#</CODE></B><B><CODE>Constant</CODE></B><B><CODE>]</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Description:</P>
+
+<P>Labels in a macro assembler can be divided by extent into global and local, and because of the value represented on fixed labels and assembly variables. In addition, there is a group of labels that are the names of the macro definition and numbered labels.</P>
+
+<P>Global labels are visible from anywhere in the program. These are labels whose names do not begin with a period character '<CODE>.</CODE> '. Local labels are labels with a range limited to the local area that occurs between global label definitions. Additionally, there is a new local area within the drop-down macro definition. The names of all local labels begin with a period character '<CODE>.</CODE> '.</P>
+
+<P>Fixed assemble labels are labels defined by assigning a value to an operator <CODE>= or</CODE> by a sum in the label field that indicates the assignment of the current address. These labels cannot be re-labeled.</P>
+
+<P>Assembly variable labels are labels defined by assigning values to an operator <CODE>.=</CODE>  or  <CODE>. SET</CODE>. Their value may change when reassigned.</P>
+
+<P>Numbered labels are a way to dynamically define new labels by placing a <CODE>#</CODE> and a constant (label number) label behind the label name.</P>
+
+<P>Macro definition name labels are global labels (cannot begin with a period'<CODE>.</CODE> ') and do not interfere with identically named fixed or variable labels.</P>
+
+<P>Examples of definitions:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>alpha:        ; global fixed label 'alpha' with a value equal to</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>            ; current address</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%><CODE>beta= 5; global fixed label 'beta' with</CODE> a value of<CODE> 5.</CODE></TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>.loop            ; local constant label '.loop'</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>.n    .= 0        ; local variable label '.n' with a value of 0.</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>adr#4            ; global numbered fixed label</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>.adr#[.n+1]        ; local numbered constant label</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%><CODE>Print. MACRO; global label macro </CODE>definition <CODE>name</CODE></TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

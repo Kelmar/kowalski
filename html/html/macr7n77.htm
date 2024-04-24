@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>6502 and 65C02 processor addressing modes</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Macroasembler">
+	<PARAM NAME="Keyword" VALUE="Macroasembler,  6502 and 65C02 processor addressing modes">
+</OBJECT>
+
+<P><A NAME="addr_modes"></A>6502 and 65C02 Processor Addressing Modes</P>
+
+<P>Addressing mode syntax:</P>
+
+<TABLE border=1 cols=2 frame=box rules=all width=714>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt;</CODE></B></PRE>
+</TD>
+<TD width=64%>implied or battery (IMP, ACC)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; # &lt;expression&gt;</CODE></B></PRE>
+</TD>
+<TD width=64%>Immediate (IMM)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; &lt;expression&gt;</CODE></B></PRE>
+</TD>
+<TD width=64%>(ZPG) (*)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; &lt;expression&gt;</CODE></B></PRE>
+</TD>
+<TD width=64%>absolute (ABS)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; &lt;expression&gt; , X</CODE></B></PRE>
+</TD>
+<TD width=64%>absolute indexed by X (ABS X)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; &lt;expression&gt; , Y</CODE></B></PRE>
+</TD>
+<TD width=64%>absolute indexed by Y (ABS Y)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; &lt;image&gt; , X</CODE></B></PRE>
+</TD>
+<TD width=64%>zero page indexed by X (ZPG X) (*)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; &lt;expression&gt; , Y</CODE></B></PRE>
+</TD>
+<TD width=64%>zero page indexed by Y (ZPG Y) (*)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; ( &lt;expression&gt; , X )</CODE></B></PRE>
+</TD>
+<TD width=64%>zero-page pre-indexed indirect by X (ZPGI X)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; ( &lt;expression&gt; ) , Y</CODE></B></PRE>
+</TD>
+<TD width=64%>zero page post-indexed indirect by Y (ZPGI Y)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; &lt;expression&gt;</CODE></B></PRE>
+</TD>
+<TD width=64%>relative (REL)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; ( &lt;expression&gt; )</CODE></B></PRE>
+</TD>
+<TD width=64%>absolute indirect (ABSI)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; ( &lt;expression&gt; )</CODE></B></PRE>
+</TD>
+<TD width=64%>indirect zero side (ZPGI) (65C02 only) (*)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>
+<PRE><B><CODE>&lt;mnemonic&gt; ( &lt;expression&gt; , X )</CODE></B></PRE>
+</TD>
+<TD width=64%>absolute indirect indexed by X (ABSI X) (only 65C02)</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=36%>&nbsp;</TD>
+<TD width=64%>(*) if the expression is a number between &lt;–255, 255&gt;</TD>
+</TR>
+</TABLE><BR>
+
+<P>In addition, the 65C02 processor has two addressing modes for bitwise commands (SMB, RMB, and BBS, BBR):</P>
+
+<TABLE border=1 cols=2 frame=box rules=all width=709>
+
+<TR VALIGN="top">
+<TD width=64%><B><CODE>&lt;SMB&gt; | &lt;RMB&gt; # &lt;expression&gt; , &lt;expression&gt;</CODE></B></TD>
+<TD width=36%>bit number, address on zero page</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=64%><B><CODE>&lt;BBS&gt; | &lt;BBR&gt; # &lt;expression&gt; , &lt;expression&gt; , &lt;expression&gt;</CODE></B></TD>
+<TD width=36%>bit number, address on zero page, relative offset</TD>
+</TR>
+</TABLE><BR>
+
+<P>Description of addressing modes</P>
+
+<P><B>Implied or battery</B> are modes that do not have explicit arguments. They are the default, e.g. for CLC – transfer marker, for LSR – battery.</P>
+
+<P><B>Instant</B> means entering a given (byte size) directly in program code, e.g. LDA #10,ADC #2.</P>
+
+<P><B>A zero page</B> indicates the address of a cell on a zero page (byte-sized address). In the specified cell on the zero page there is a given (argument) for the order, e.g. STA $80.</P>
+
+<P><B>Absolute means</B> entering a cell address (a word-sized address). In the specified cell there is a given (argument) for the order, e.g. ROL $1000.</P>
+
+<P><B>Absolute indexed by X</B> indicates the address of the cell (the address of the word size). The contents of the X register are added to the specified address.</P>
+
+<P><B>Absolute indexed by Y</B> indicates the address of the cell (the address of the word size). The contents of the Y-register are added to the given address.</P>
+
+<P><B>A zero page indexed by X</B> indicates the address of the cell on the null page (byte size a). The contents of the X register are added to the specified address.</P>
+
+<P><B>A zero page indexed by Y</B> indicates that the cell address is zero (byte-sized address). The contents of the Y-register are added to the specified address.</P>
+
+<P><B>A zero page indirect by X indicates</B> that the cell address on the zero page (byte-sized address). The contents of the X register are added to the specified address. This cell and the subsequent cell contain the address of the given (argument) for the order, e.g. AND ($A 4, X).</P>
+
+<P><B>A zero page indirect that is post-indexed by Y</B> indicates that the cell address is on the zero page (byte-sized address). This cell and the subsequent one contain the address to which the y-register contents is added.</P>
+
+<P><B>Relative means</B> entering as an argument the address to which the assembler calculates the distance from the current order. The result is a number with a character between –128 and 127.</P>
+
+<P><B>Absolute indirect</B></P>
+
+<P><B>Intermediate zero pages (65C02 only)</B></P>
+
+<P><B>Absolute indirect indexed by X (only 65C02)</B></P>
+
+</BODY>
+</HTML>

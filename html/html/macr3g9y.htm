@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>.IF</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Directives">
+	<PARAM NAME="Keyword" VALUE="Directives, .IF">
+</OBJECT>
+
+<P><A NAME="cmd_if"></A><B><CODE> .IF</CODE></B></P>
+
+<P>Directive opening conditional assemblacia.</P>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>    .IF expr</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .IF . REF(alpha)    ; if there was a return to the label 'alpha'</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .IF a==5        ; if the label 'a' has a value of 5</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .IF b            ; if label 'b' has a non-err on-label value</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .IF %0&gt;2        ; if you have exported a macro with more than two</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>                ; Parameters</CODE></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+</BODY>
+</HTML>

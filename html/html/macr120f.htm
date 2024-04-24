@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>.MACRO</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Directives">
+	<PARAM NAME="Keyword" VALUE="Directives, .MACRO">
+</OBJECT>
+
+<P><A NAME="cmd_macro"></A><B><CODE> .MACRO</CODE></B></P>
+
+<P>A directive that opens the definition of a macro.</P>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;label&gt;[:]    .MACRO [param {, param} [, ...]] | [...]</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>PushX        .MACRO        ; parameterless macro</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%><CODE>Print:.MACRO ...</CODE> <CODE>; macro with any number of parameters</CODE></TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%><CODE>Put:.MACRO chr; macro with </CODE>a specific <CODE>parameter</CODE></TD>
+</TR>
+</TABLE><BR>
+
+<P>Description:</P>
+
+<P>Directive .MACRO is used to define macros. Label before directive .MACRO is the name of the macro definition and is placed in the macro name dictionary (separated from the name dictionary of the remaining labels).</P>
+
+<P>In favor of the Directive .MACRO magicians have macro parameter names and ellipses (...). The name of the parameter can be used in the macro definition. This parameter is required when you call a macro. The ellipse (...) symbolizes any number of parameters (including none).</P>
+
+<P>You can use their names or sequence numbers preceded by '%' to deter parameters. The numbered parameters are from 1. Parameter number 0 (%0) has a special meaning - a macro has been exported to the number of parameters.</P>
+
+<P>In the macro call with a name, we place commas separated by an express that corresponds to the next parameters. These expressions are interpreted and evaluated by the assembler.</P>
+
+<P>All labels that begin with a period (.) used in the macro definition are local and not externally available. The remaining labels are global. In the drop-down macro definition, you can denote global labels, local program labels, and local macros.</P>
+
+<P>Example of use:</P>
+
+<PRE><CODE>Put:    .MACRO chr        ; character printing
+    LDA #chr;         tru ‘chr’
+    JSR sys_put_char
+    .ENDM
+; call:
+    Put 'A'
+</CODE></PRE>
+
+<P><CODE>Print:.MACRO ...</CODE> <CODE>; printing</CODE></P>
+
+<PRE><CODE>.cnt    .= 0            ; parameter counter
+    .REPEAT %0
+.cnt    .= .cnt + 1
+    .IF .PARAMTYPE(%.cnt) == 2    ; text type parameter?</CODE></PRE>
+
+<P><CODE>JSRsys_print_text;</CODE> <CODE> </CODE></P>
+
+<PRE><CODE>      .BYTE .STRLEN(%.cnt), %.cnt
+    . ELSE            ; numeric parameter -&gt; address
+      LDA #&gt;%.cnt        ; older address byte
+      LDX #&lt;%.cnt        ;
+      JSR sys_print
+    .ENDIF
+    .ENDR
+    .ENDM</CODE></PRE>
+
+</BODY>
+</HTML>

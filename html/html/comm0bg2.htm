@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>BBR</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions, BBR">
+</OBJECT>
+
+<P><A NAME="cmd_bbr"></A><B><CODE>BBR</CODE></B>  (branch if bit reset)  (65C02 processor only)  Tags: none</P>
+
+<P>Description:</P>
+
+<P>Performs a jump relative to the current position if the bit with the specified number in the cell/register on the zero page is set to y. Bit numbers after the '#' character can range from 0 to 7.</P>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    BBR #0,$F8,.skip    ; jump to label '.skip' if bit No. 0</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>                ; in cell $F8 is set to</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

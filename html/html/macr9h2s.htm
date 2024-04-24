@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>Numeric constants</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Macroasembler">
+	<PARAM NAME="Keyword" VALUE="Macroasembler,  numeric constants">
+</OBJECT>
+
+<P><A NAME="num_const"></A>Numeric constants</P>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;fixed a_numeric&gt; ::= &lt;fixed a_dec&gt; | &lt;fixed a_hex&gt; | &lt;fixed a_bin&gt;</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;fixed a_dec&gt; ::= &lt;digit_dec&gt;{&lt;digit_dec&gt;}</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;becamea_hex&gt; ::= $&lt;digit_hex&gt;{&lt;digit_hex&gt;}</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;fixed a_bin&gt; ::= @&lt;digit_bin&gt;{&lt;digit_bin&gt;}</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;digit_dec&gt; ::= 0|1|2|3|4|5|6|7|8| 9</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;digit_hex&gt; ::= &lt;digit_dec&gt;|a|b|c|d|e|f| A| B| C| D| E| F</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>&lt;digit_bin&gt; ::= 0|1</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Description:</P>
+
+<P>Macroasembler allows the use of numeric constants in decimal, hexadecimal, and binary places. Hexadecimal constants start the dollar sign '<CODE>$</CODE>', fixed binary sign at '<CODE>@</CODE>', decimal constants do not require any designation.</P>
+
+<P>Examples:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%><CODE>alpha= $A 12E</CODE>; <CODE>hexadecimal constant</CODE></TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>mask    = @00001111        ; binary constant</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>cnt    .= 5            ; decimal constant</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>.n    . SET 07        ; decimal constant</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

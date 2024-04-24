@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>.BYTE or . DB</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Directives">
+	<PARAM NAME="Keyword" VALUE="Directives, .BYTE">
+	<PARAM NAME="Keyword" VALUE="Directives, .DB">
+</OBJECT>
+
+<P><A NAME="cmd_byte"></A><B><CODE>.BYTE</CODE></B>  or  <B><CODE>.DB</CODE></B>  or  <B><CODE>.ASCII</CODE></B></P>
+
+<P>Directives that specify the values of individual bytes in the resulting code.</P>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     .DB &lt;expr&gt; | txtexpr { , &lt;expr&gt; | txtexpr }</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     .BYTE &lt;expr&gt; | txtexpr { , &lt;expr&gt; | txtexpr }</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     .ASCII &lt;expr&gt; | txtexpr { , &lt;expr&gt; | txtexpr }</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>alpha:    .DB "ABC", 0    ; generates 'A', 'B', 'C', 0</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>beta:     .DB %1, %1$        ; macro parameters</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>           .BYTE &lt;[alpha-1], &gt;[alpha-1]</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>        .ASCII "Inscription"</CODE></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Description:</P>
+
+<P>Directive .DB (.Byte .ASCII) allows you to generate individual bytes in the memory of the program code. The data can be provided in the form of numerical or textual information.</P>
+
+<P>For example, applications:</P>
+
+<PRE><CODE>msg:    .DB "Out of memory", 0</CODE></PRE>
+
+</BODY>
+</HTML>

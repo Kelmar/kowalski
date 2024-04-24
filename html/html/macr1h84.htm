@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>.OPT</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Directives">
+	<PARAM NAME="Keyword" VALUE="Directives, .OPT">
+</OBJECT>
+
+<P><A NAME="cmd_opt"></A><B><CODE>.OPT</CODE></B></P>
+
+<P>Directive that changes assembler options. The only options allowed are:</P>
+
+<TABLE border=1 cols=2 frame=box rules=all width=615>
+
+<TR VALIGN="top">
+<TD width=19%><B>Option name</B></TD>
+<TD width=81%><B>Importance</B> </TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=19%>  Proc6502 </TD>
+<TD width=81%>selecting the basic set of 6502 processor commands </TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=19%>Proc65c02 </TD>
+<TD width=81%>selecting an extended set of 65c02, 6501, and other processors. </TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=19%>Proc6501</TD>
+<TD width=81%>Same as Proc65c02. </TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=19%>Proc65816</TD>
+<TD width=81%>Select the 65816 processor.</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=19%>CaseSensitive </TD>
+<TD width=81%>Differentiating lowercase and uppercase letters in label names </TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=19%>  CaseInsensitive </TD>
+<TD width=81%>treated as equal lowercase and uppercase letters in label names  </TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=19%>  SwapBin </TD>
+<TD width=81%>swap binary radix @ and modulo % operators - % now becomes binary radix and @ becomes modulo.  </TD>
+</TR>
+
+</TABLE><BR>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>    .OPT option_name { , option_name }</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>    .OPT Proc65c02, CaseInsensitive </CODE>
+<CODE>    .OPT Proc65816, CaseSensitive, SwapBin </CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

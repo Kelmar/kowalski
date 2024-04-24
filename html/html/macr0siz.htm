@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>Overriding Expression Sizes</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Macroasembler">
+	<PARAM NAME="Keyword" VALUE="Macroasembler,  overriding expression sizes">
+</OBJECT>
+
+<P><A NAME="ovr_parm"></A>Overriding Expression Sizes</P>
+
+<P>With the 65816 comes addressing modes with byte, word, and xword (24 bits) sizes.  There are times where you want to use 16-bit immediate values, Absolute, or Absolute Long addressing modes
+ but the value equates to a smaller size and the assembler "optimizes" the addressing mode.  The methods described here allows you to force a parameter size to your needs.</P>
+
+<P>Syntax:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     LDA  !#expr ; '!#' forces 2 byte immediate value</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     LDA  \1expr ; force 1 byte using direct page addressing modes</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     LDA  \2expr ; force 2 bytes using absolute addressing modes</CODE></B></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><B><CODE>[&lt;label&gt;[:]]     LDA  \3expr ; force 3 bytes using absolute long addressing modes</CODE></B></PRE>
+</TD>
+</TR>
+</TABLE><BR>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=rows width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>alpha:    LDA  !#$1234        ; will generate $1234 for the immediate value. </CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>alpha:    LDA  !#$12          ; will generate $0012 for the immediate value. </CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>alpha:    LDA  \1$12345678    ; will generate $78 - taking the lease significant byte of the expression.</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>beta:     LDA  \2alpha        ; will generate the 2 least significant bytes of the value of alpha.</CODE></PRE>
+</TD>
+</TR>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>          LDA  \3alpha-1      ; will generate the 3 least significant bytes of the value of alpha minus 1.</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

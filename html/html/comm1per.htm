@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>PEA</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions">
+	<PARAM NAME="Keyword" VALUE="Processor Instructions, PER">
+</OBJECT>
+
+<P><A NAME="cmd_per"></A><B><CODE>PER</CODE></B>  (push effective relative) (only processor 65816) Tags: none</P>
+
+<P>Description:</P>
+
+<P>The PER instruction pushes an effective program counter relative address onto the stack, a capability helpful in writing relocatable code. The operand you specify to the assembler is a location in the program, for example, of a data area; the operand the assembler generates is a sixteen-bit relative displacement, the difference between the next instruction’s address and the operand address. Decreases stack indicator S by two.</P>
+
+<P>Example:</P>
+
+<TABLE border=1 cols=1 frame=box rules=none width=615>
+
+<TR VALIGN="top">
+<TD width=100%>
+<PRE><CODE>        PER Data1    ; move relative address of data1 to the stack</CODE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

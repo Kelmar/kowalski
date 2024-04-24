@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="HtmlHelp"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="MakeHHelp"
+			DisplayName="Make HTML Help file"
+			CommandLine="hhc.exe html\$(InputName).hhp&#x0D;&#x0A;echo.&#x0D;&#x0A;copy html\$(InputName).chm $(OutDir)\$(InputName).chm"
+			Outputs="html\$(InputName).chm"
+			AdditionalDependencies="html\$(TargetName).hm"
+			FileExtensions="*.hhp"
+			>
+			<Properties>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>
