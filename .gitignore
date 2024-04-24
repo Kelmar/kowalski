@@ -7,6 +7,11 @@
 *.o
 *.obj
 
+# Visual Studio generated files
+*.suo
+*.ncb
+.vs/*
+
 # Precompiled Headers
 *.gch
 *.pch
