@@ -29,19 +29,19 @@ class CLeksem : public CAsm
 {
 public:
     /*
-      enum IdentInfo	// info o identyfikatorze
-      {
-        I_UNDEF,		// identyfikator niezdefiniowany
-        I_ADDRESS,		// identyfikator zawiera adres
-        I_VALUE		// identyfikator zawiera wartoœæ liczbow¹
-      };
+    enum IdentInfo // Info about the identifier
+    {
+        I_UNDEF,    // Undefined identifier
+        I_ADDRESS,  // The ID contains the address
+        I_VALUE     // The identifier contains a numeric value
+    };
 
-      struct Ident
-      {
+    structIdent
+    {
         IdentInfo info;
         int value;
         CString *str;
-      };
+    };
     */
 
     struct Code
@@ -50,8 +50,7 @@ public:
         CodeAdr adr;
     };
 
-
-    enum InstrArg		// rodzaj argumentów dyrektywy
+    enum InstrArg   // Type of directive arguments
     {
         A_BYTE,
         A_NUM,
@@ -66,14 +65,13 @@ public:
         InstrArg arg;
     };
 
-
-    enum NumType		// rodzaj liczby
+    enum NumType    // Type of number
     {
         N_DEC,
         N_HEX,
         N_BIN,
-        N_CHR,	// znak
-        N_CHR2	// dwa znaki, np. 'ab'
+        N_CHR,	// character
+        N_CHR2	// Two characters, e.g. 'ab'
     };
 
     struct Num
@@ -88,36 +86,35 @@ public:
         ERR_NUM_DEC,
         ERR_NUM_BIN,
         ERR_NUM_CHR,
-        ERR_NUM_BIG,	// b³¹d przekroczenia zakresu
+        ERR_NUM_BIG,    // Out of bounds error
         ERR_BAD_CHR,
-        ERR_STR_UNLIM	// niezamkniêty ³añcuch znaków
+        ERR_STR_UNLIM	// An unclosed string of characters
     };
 
     //...........................................................................
-
 
     enum LeksType
     {
         L_UNKNOWN,		// nierozpoznany znak
 
         L_NUM,		// liczba (dec, hex, bin, lub znak)
-        L_STR,		// ci¹g znaków w apostrofach lub cudzys³owach
+        L_STR,		// ciï¿½g znakï¿½w w apostrofach lub cudzysï¿½owach
         L_IDENT,		// identyfikator
-        L_IDENT_N,		// numerowany identyfikator (zakoñczony przez '#' i numer)
-        L_SPACE,		// odstêp
+        L_IDENT_N,		// numerowany identyfikator (zakoï¿½czony przez '#' i numer)
+        L_SPACE,		// odstï¿½p
         L_OPER,		// operator
         L_BRACKET_L,	// lewy nawias '('
         L_BRACKET_R,	// prawy nawias ')'
         L_LBRACKET_L,	// lewy nawias '('
         L_LBRACKET_R,	// prawy nawias ')'
-        L_EXPR_BRACKET_L,	// lewy nawias dla wyra¿eñ '['
-        L_EXPR_BRACKET_R,	// prawy nawias dla wyra¿eñ ']'
+        L_EXPR_BRACKET_L,	// lewy nawias dla wyraï¿½eï¿½ '['
+        L_EXPR_BRACKET_R,	// prawy nawias dla wyraï¿½eï¿½ ']'
         L_COMMENT,		// znak komentarza ';'
         L_LABEL,		// znak etykiety ':'
         L_COMMA,		// znak przecinka ','
-        L_STR_ARG,		// znak dolara '$', koñczy parametr typu tekstowego
+        L_STR_ARG,		// znak dolara '$', koï¿½czy parametr typu tekstowego
         L_MULTI,		// znak wielokropka '...'
-        L_INV_COMMAS,	// znak cudzys³owu
+        L_INV_COMMAS,	// znak cudzysï¿½owu
         L_LHASH,		// '!#'
         L_HASH,		// znak '#'
         L_EQUAL,		// znak przypisania '='
@@ -125,7 +122,7 @@ public:
         L_ASM_INSTR,	// dyrektywa asemblera
         L_CR,		// koniec wiersza
         L_FIN,		// koniec danych
-        L_ERROR		// b³¹d
+        L_ERROR		// bï¿½ï¿½d
     };
 
     const LeksType type;
@@ -137,15 +134,19 @@ public:
         static char s_buf_1[];
         static char s_buf_2[];
         static const size_t s_cnMAX;
+
     public:
         CLString() : CString()
         {}
-        CLString(const CString& str) : CString(str)
+
+        CLString(const std::wstring& str) : CString(str)
         {}
-        CLString(const TCHAR* ptr, int size) : CString(ptr,size)
+
+        CLString(const TCHAR* ptr, int size) : CString(ptr ,size)
         {}
+
 #ifdef _DEBUG
-        void* operator new(size_t size, LPCSTR /*lpszFileName*/, int /*nLine*/)
+        void* operator new(size_t size, const std::wstring & /*lpszFileName*/, int /*nLine*/)
 #else
         void* operator new(size_t size)
 #endif
@@ -159,6 +160,7 @@ public:
             else
                 return CObject::operator new(size);
         }
+
         void operator delete(void* ptr)
         {
             if (ptr == s_ptr_1)
@@ -178,9 +180,9 @@ private:
         OperType op;	// operator binarny lub unarny
         OpCode code;	// mnomonik
         InstrType instr;	// dyrektywa
-//    int val;		// sta³a liczbowa lub znakowa
-        Num num;		// sta³a liczbowa lub znakowa
-        CLString *str;	// identyfikator lub ci¹g znaków
+//    int val;		// staï¿½a liczbowa lub znakowa
+        Num num;		// staï¿½a liczbowa lub znakowa
+        CLString *str;	// identyfikator lub ciï¿½g znakï¿½w
         Error err;
     };
 
@@ -191,25 +193,34 @@ public:
 
     CLeksem(LeksType type) : type(type)
     {}
+
     CLeksem(OperType oper) : type(L_OPER), op(oper)
     {}
+
     CLeksem(OpCode code) : type(L_PROC_INSTR), code(code)
     {}
+
     CLeksem(InstrType it) : type(L_ASM_INSTR), instr(it)
     {}
+
     CLeksem(Error err) : type(L_ERROR), err(err)
     {}
+
     CLeksem(NumType type, SINT32 val) : type(L_NUM)
     {
         num.type=type;
         num.value=val;
     }
+
     CLeksem(CLString *str) : type(L_STR), str(str)
     {}
+
     CLeksem(CLString *str, int dummy) : type(L_IDENT), str(str)
     {}
+
     CLeksem(CLString *str, long dummy) : type(L_IDENT_N), str(str)
     {}
+
 //  CLeksem(const CLeksem &leks, long dummy) : type(L_IDENT_N)
 //  { ASSERT(leks.type == L_IDENT);  str = new CString(*leks.str); }
 
@@ -217,69 +228,70 @@ public:
 
     const CString *GetIdent() const
     {
-        ASSERT(type==L_IDENT);
+        ASSERT(type == L_IDENT);
         return str;
     }
 
     OperType GetOper()
     {
-        ASSERT(type==L_OPER);
+        ASSERT(type == L_OPER);
         return op;
     }
 
     OpCode GetCode()
     {
-        ASSERT(type==L_PROC_INSTR);
+        ASSERT(type == L_PROC_INSTR);
         return code;
     }
 
     InstrType GetInstr()
     {
-        ASSERT(type==L_ASM_INSTR);
+        ASSERT(type == L_ASM_INSTR);
         return instr;
     }
 
     int GetValue()
     {
-        ASSERT(type==L_NUM);
+        ASSERT(type == L_NUM);
         return num.value;
     }
 
     const CString* GetString() const
     {
-        ASSERT(type==L_STR || type==L_IDENT || type==L_IDENT_N);
+        ASSERT(type == L_STR || type == L_IDENT || type == L_IDENT_N);
         return str;
     }
 
-    void Format(SINT32 val)	// znormalizowanie postaci etykiety numerycznej
+    void Format(SINT32 val) // Normalize the form of the numeric label
     {
-        ASSERT(type==L_IDENT_N);
-        CString num(' ',9);
-        num.Format("#%08X",(int)val);
-        *str += num;		// do³¹czenie numeru
+        ASSERT(type == L_IDENT_N);
+        CString num(' ', 9);
+        num.Format("#%08X", (int)val);
+        *str += num;    // Adding a number
     }
 
     //debugging log  use= leks.Logger(cs);
-    void Logger( const char * logMsg )
+    void Logger(const char *logMsg)
     {
         FILE* pFile = fopen("logfile.txt", "a");
-        fprintf(pFile, "%s\n",logMsg);
+        fprintf(pFile, "%s\n", logMsg);
         fclose(pFile);
     }
-
 };
 
 //-----------------------------------------------------------------------------
 
-// tablica asocjacyjna identyfikatorów
+#if 0
+// Associative array of identifiers
 class CIdentTable : public CMap<CString, LPCTSTR, CIdent, CIdent>
 {
 
 public:
-    CIdentTable(int nSize= 500) : CMap<CString, LPCTSTR, CIdent, CIdent>(nSize)
+    CIdentTable(int nSize = 500) : CMap<CString, LPCTSTR, CIdent, CIdent>(nSize)
     {
         InitHashTable(1021);
     }
+    
     ~CIdentTable()
     {}
 
@@ -288,27 +300,30 @@ public:
 
     bool lookup(const CString &str, CIdent &ident) const
     {
-        return Lookup(str,ident);
+        return Lookup(str, ident);
     }
 
     void clr_table()
     {
         RemoveAll();
     }
-
 };
+#endif
+
+typedef std::unordered_map<std::wstring, CIdent> CIdentTable;
 
 //=============================================================================
 
-class CInputBase	// klasa bazowa dla klas odczytu danych Ÿród³owych
+class CInputBase    // Base class for classes reading source data
 {
 protected:
     int m_nLine;
-    CString m_strFileName;
+    std::wstring m_strFileName;
     bool m_bOpened;
 
 public:
-    CInputBase(const TCHAR *str= NULL) : m_strFileName(str)
+    CInputBase(const wchar *str = nullptr)
+        : m_strFileName(str)
     {
         m_nLine = 0;
         m_bOpened = false;
@@ -316,7 +331,7 @@ public:
 
     virtual ~CInputBase()
     {
-        ASSERT(m_bOpened==false);
+        ASSERT(m_bOpened == false);
     }
 
     virtual void open()
@@ -334,17 +349,14 @@ public:
         m_nLine = 0;
     }
 
-    virtual LPTSTR read_line(LPTSTR str, UINT max_len)= 0;
+    virtual wchar *read_line(std::wstring buffer) = 0;
 
-    virtual int get_line_no()
+    virtual int get_line_no() const
     {
-        return m_nLine-1;    // numeracja wierszy od 0
+        return m_nLine - 1; // Line numbering from 0
     }
 
-    virtual const CString &get_file_name()
-    {
-        return CInputBase::m_strFileName;
-    }
+    virtual const std::wstring &get_file_name() const { return CInputBase::m_strFileName; }
 };
 
 //-----------------------------------------------------------------------------
@@ -360,17 +372,19 @@ public:
 
     virtual void open()
     {
-        ASSERT(m_bOpened==false);	    // plik nie mo¿e byæ jeszcze otwarty
-        CFileException *ex= new CFileException;
-        if (!Open(CInputBase::m_strFileName, CFile::modeRead|CFile::shareDenyWrite|CFile::typeText, ex))
+        ASSERT(m_bOpened == false); // The file cannot be opened yet.
+        CFileException *ex = new CFileException;
+
+        if (!Open(CInputBase::m_strFileName, CFile::modeRead | CFile::shareDenyWrite | CFile::typeText, ex))
             throw (ex);
+
         m_bOpened = true;
         /*delete*/ ex->Delete();
     }
 
     virtual void close()
     {
-        ASSERT(m_bOpened==true);	    // plik musi byæ otworzony
+        ASSERT(m_bOpened == true);	    // The file must be opened
         Close();
         m_bOpened = false;
     }
@@ -381,7 +395,7 @@ public:
         m_nLine = 0;
     }
 
-    virtual LPTSTR read_line(LPTSTR str, UINT max_len);
+    virtual wchar *read_line(wchar *str, UINT max_len);
 
 //  virtual int get_line_no()
 
@@ -390,12 +404,15 @@ public:
 
 //-----------------------------------------------------------------------------
 
-class CInputWin : public CInputBase, public CAsm	// odczyt danych z okna dokumentu
+// Reading data from the document window
+class CInputWin : public CInputBase, public CAsm
 {
-    CWnd *m_pWnd;
+    wxWindow *m_pWnd;
+
 public:
     CInputWin(CWnd *pWnd) : m_pWnd(pWnd)
     {}
+
     virtual LPTSTR read_line(LPTSTR str, UINT max_len);
     virtual const CString &get_file_name();
     virtual void seek_to_begin();
@@ -411,25 +428,34 @@ class CInput : CList<CInputBase*, CInputBase*>, CAsm
     int calc_index(POSITION pos);
 
 public:
-    void open_file(const CString& fname);
-    void open_file(CWnd* pWin);
+    void open_file(const std::wstring& fname);
+    void open_file(wxWindow* pWin);
     void close_file();
 
-    CInput(const CString& fname) : fuid(0)
+    CInput(const std::wstring& fname)
+        : fuid(0)
+        , tail(nullptr)
     {
         open_file(fname);
     }
-    CInput(CWnd* pWin) : fuid(0)
+
+    CInput(wxWindow* pWin)
+        : fuid(0)
+        , tail(nullptr)
     {
         open_file(pWin);
     }
-    CInput() : fuid(0), tail(NULL)
+
+    CInput()
+        : fuid(0)
+        , tail(nullptr)
     {}
+
     ~CInput();
 
-    LPTSTR read_line(LPTSTR str, UINT max_len)
+    wchar *read_line(std::wstring &buffer)
     {
-        return tail->read_line(str,max_len);
+        return tail->read_line(buffer);
     }
 
     void seek_to_begin()
@@ -447,54 +473,55 @@ public:
         return GetCount();
     }
 
-    const CString& get_file_name()
-    {
-        return tail->get_file_name();
-    }
+    const std::wstring& get_file_name() const { return tail->get_file_name(); }
 
-    FileUID get_file_UID()
-    {
-        return fuid;
-    }
+    FileUID get_file_UID() const { return fuid; }
+    void set_file_UID(FileUID fuid) { this->fuid = fuid; }
 
-    void set_file_UID(FileUID fuid)
-    {
-        this->fuid = fuid;
-    }
-
-    bool is_present()
-    {
-        return tail != NULL;
-    }
+    bool is_present() const {  return tail != nullptr; }
 };
 
 //-----------------------------------------------------------------------------
 
-struct Expr		 // klasa do opisu wyra¿enia arytmetycznego/logicznego/tekstowego
+/**
+ * @brief A class to describe an arithmetic/logical/text expression
+ */
+struct Expr		 
 {
     SINT32 value;
     CString string;
+    
     enum
     {
-        EX_UNDEF,		// wartoœæ nieznana
-        EX_BYTE,		// bajt, tj. od -255 do 255 (sic!)
-        EX_WORD,		// s³owo, od -65535 do 65535
-        EX_LONG,		// outside the above range
-        EX_STRING		// ci¹g znaków
+        EX_UNDEF,   // Unknown value
+        EX_BYTE,    // Byte i.e. from -255 to 255 (sic!)
+        EX_WORD,    // Word, from -65535 to 65535
+        EX_LONG,    // outside the above range
+        EX_STRING   // String of characters
     } inf;
 
-    Expr() : inf(EX_UNDEF)
+    Expr()
+        : inf(EX_UNDEF)
+        , value(0)
     {}
-    Expr(SINT32 value) : inf(EX_LONG), value(value)
+
+    Expr(SINT32 value)
+        : inf(EX_LONG)
+        , value(value)
     {}
 };
 
 //-----------------------------------------------------------------------------
-class CConditionalAsm : public CAsm	// asemblacja warunkowa (automat ze stosem)
+
+// Conditional assembly (stack machine)
+class CConditionalAsm : public CAsm
 {
 public:
     enum State
-    { BEFORE_ELSE, AFTER_ELSE };
+    {
+        BEFORE_ELSE,
+        AFTER_ELSE
+    };
 
 private:
     CByteArray stack;
@@ -502,83 +529,95 @@ private:
 
     State get_state()
     {
-        ASSERT(level>=0);
+        ASSERT(level >= 0);
         return stack.GetAt(level)&1 ? BEFORE_ELSE : AFTER_ELSE;
     }
+
     bool get_assemble()
     {
-        ASSERT(level>=0);
+        ASSERT(level >= 0);
         return stack.GetAt(level)&2 ? true : false;
     }
+
     bool get_prev_assemble()
     {
-        ASSERT(level>0);
+        ASSERT(level > 0);
         return stack.GetAt(level-1)&2 ? true : false;
     }
+
     void set_state(State state, bool assemble)
     {
-        stack.SetAtGrow(level,BYTE((state==BEFORE_ELSE ? 1 : 0) + (assemble ? 2 : 0)));
+        stack.SetAtGrow(level,BYTE((state == BEFORE_ELSE ? 1 : 0) + (assemble ? 2 : 0)));
     }
+
 public:
-    CConditionalAsm() : level(-1)
+    CConditionalAsm()
+        : level(-1)
     {
         stack.SetSize(16, 16);
     }
+
     Stat instr_if_found(Stat condition);
     Stat instr_else_found();
     Stat instr_endif_found();
+
     bool in_cond() const
     {
         return level >= 0;
     }
+
     int get_level() const
     {
         return level;
     }
+
     void restore_level(int level);
 };
 
 //-----------------------------------------------------------------------------
 
-// elementy wspólne odczytu wierszy dla .MACRO, .REPEAT i normalnego odczytu
-class CSource : public CObject, public CAsm
+// Line reading common elements for .MACRO, .REPEAT and normal reading
+class CSource : /*public CObject,*/ public CAsm
 {
     FileUID m_fuid;
     int cond_level_;
+
 public:
-    CSource() : m_fuid(0)
+    CSource()
+        : m_fuid(0)
     {}
+
     virtual ~CSource()
     {}
 
-    virtual void Start(CConditionalAsm* cond)			// rozpoczêcie odczytu wierszy
+    virtual void Start(CConditionalAsm* cond)
     {
         cond_level_ = cond ? cond->get_level() : INT_MAX;
     }
 
-    virtual void Fin(CConditionalAsm* cond)				// zakoñczenie odczytu wierszy
+    virtual void Fin(CConditionalAsm* cond)
     {
         if (cond && cond_level_ != INT_MAX)
             cond->restore_level(cond_level_);
     }
 
-    virtual const TCHAR* GetCurrLine(CString &str) = 0;	// odczyt bie¿¹cego wiersza
+    virtual const wchar* GetCurrLine(std::wstring &str) = 0;
 
-    virtual int GetLineNo() = 0;		// odczyt numeru wiersza
+    virtual int GetLineNo() const = 0;
 
-    virtual FileUID GetFileUID()	// odczyt ID pliku
+    virtual FileUID GetFileUID() const
     {
         return m_fuid;
     }
 
-    void SetFileUID(FileUID fuid)	// ustawienie ID pliku
+    void SetFileUID(FileUID fuid)
     {
         m_fuid = fuid;
     }
 
-    virtual const CString& GetFileName() = 0;	// nazwa aktualnego pliku
+    virtual const std::wstring& GetFileName() const = 0;
 
-    static const CString s_strEmpty;
+    static const std::wstring s_strEmpty;
 
 private:
     // remember nesting level of conditional assemblation
@@ -586,6 +625,7 @@ private:
     {
         cond_level_ = level;
     }
+
     int GetConditionLevel() const
     {
         return cond_level_;
@@ -594,58 +634,75 @@ private:
 
 //.............................................................................
 
+#if 0
 struct CStrLines : public CStringArray
 {
     CStrLines(int nInitSize, int nGrowBy)
     {
-        SetSize(nInitSize,nGrowBy);
+        SetSize(nInitSize, nGrowBy);
     }
 };
+#endif
 
-
-// elementy wymagane do zapamiêtywania i odtwarzania wierszy Ÿród³owych programu
+// Elements required for storing and reproducing program source lines
 class CRecorder
 {
-    CStrLines m_strarrLines;
-    CDWordArray m_narrLineNums;
+private:
+    //CStrLines m_strarrLines;
+    //CDWordArray m_narrLineNums;
+
+    std::vector<std::wstring> m_strarrLines;
+    std::vector<uint32_t> m_narrLineNums;
+
+    int m_growBy;
+
     int m_nLine;
+
 public:
-    CRecorder(int nInitSize=10, int nGrowBy=10) :	// pocz¹tkowe rozmiary tablic
-        m_strarrLines(nInitSize,nGrowBy), m_nLine(0)
+    CRecorder(int nInitSize = 10, int nGrowBy = 10) // Initial array sizes
+        : m_strarrLines(nInitSize)
+        , m_narrLineNums(nInitSize)
+        , m_growBy(nGrowBy)
+        , m_nLine(0)
     {
-        m_narrLineNums.SetSize(nInitSize,nGrowBy);
     }
+
     virtual ~CRecorder()
     {}
 
-    void AddLine(const CString &strLine, int num)	// zapamiêtanie kolejnego wiersza
+    void AddLine(const std::wstring &strLine, int num) // Save the next line
     {
-        m_strarrLines.SetAtGrow(m_nLine,strLine);
-        m_narrLineNums.SetAtGrow(m_nLine,num);
-        m_nLine++;
+        m_strarrLines[m_nLine] = strLine;
+        m_narrLineNums[m_nLine] = num;
+
+        ++m_nLine;
+        
+        //m_strarrLines.SetAtGrow(m_nLine, strLine);
+        //m_narrLineNums.SetAtGrow(m_nLine, num);
+
+        //m_nLine++;
     }
 
-    const CString& GetLine(int nLineNo)	// odczyt wiersza 'nLineNo'
+    const std::wstring& GetLine(int nLineNo) // reading the 'nLineNo' line
     {
         return m_strarrLines[nLineNo];
     }
 
-    int GetLineNo(int nLineNo)	// odczyt numeru wiersza w pliku Ÿród³owym
+    int GetLineNo(int nLineNo) // read the line number in the source file
     {
         return m_narrLineNums[nLineNo];
     }
 
-    int GetSize()			// odczyt iloœci wierszy w tablicy
+    int GetSize() // Reading the number of rows in the array
     {
-//    ASSERT( m_narrLineNums.GetSize() == m_narrLineNums.GetSize() );
+        //ASSERT(m_narrLineNums.GetSize() == m_narrLineNums.GetSize());
         return m_nLine;
     }
-
 };
 
-//.............................................................................
+//............................................................. .............................
 /*
-  // obs³uga tablicy identyfikatorów etykiet lokalnych
+// Support for an array of local label IDs
 class CLabels : CIdentTable
 {
 
@@ -658,62 +715,70 @@ class CAsm6502;
 
 class CMacroDef : public CSource, public CRecorder
 {
-    CIdentTable param_names;	// tablica nazw parametrów makra
+private:
+    CIdentTable param_names; // Table of macro parameter names
+    
     int m_nParams;		// required number of parameters
     int m_nParamCount;		// number of parameters in a macro call
-    CStringArray m_strarrArgs;	// kolejne argumenty wywo³ania - tylko ³añcuchy znaków
-    CDWordArray m_narrArgs;	// kolejne argumenty wywo³ania - tylko wartoœci wyra¿eñ
+    CStringArray m_strarrArgs;	// kolejne argumenty wywoï¿½ania - tylko ï¿½aï¿½cuchy znakï¿½w
+    CDWordArray m_narrArgs;	// kolejne argumenty wywoï¿½ania - tylko wartoï¿½ci wyraï¿½eï¿½
     enum ArgType { NUM, STR, UNDEF_EXPR };
-    CByteArray m_arrArgType;	// typy argumentów (NUM - liczba, STR - ³añcuch znaków)
+    CByteArray m_arrArgType;	// typy argumentï¿½w (NUM - liczba, STR - ï¿½aï¿½cuch znakï¿½w)
     int m_nLineNo;		// nr aktualnego wiersza (przy odczycie)
-    int m_nFirstLineNo;		// numer wiersza, z którego wywo³ywane jest makro
-    FileUID m_nFirstLineFuid;	// ID pliku, z którego wywo³ywane jest makro
-public:
-    CString m_strName;		// nazwa makra
-    bool m_bFirstCodeLine;	// flaga odczytu pierwszego wiersza makra zawieraj¹cego instr. 6502
+    int m_nFirstLineNo;		// numer wiersza, z ktï¿½rego wywoï¿½ywane jest makro
+    FileUID m_nFirstLineFuid;	// ID pliku, z ktï¿½rego wywoï¿½ywane jest makro
 
-    CMacroDef() : param_names(2), m_nParams(0), m_nLineNo(0), m_nFirstLineNo(-1),
-        m_nFirstLineFuid(FileUID(-1)), m_bFirstCodeLine(true)
+public:
+    std::wstring m_strName; // nazwa makra
+    bool m_bFirstCodeLine;  // flaga odczytu pierwszego wiersza makra zawierajï¿½cego instr. 6502
+
+    CMacroDef()
+        : param_names(2)
+        , m_nParams(0)
+        , m_nLineNo(0)
+        , m_nFirstLineNo(-1)
+        , m_nFirstLineFuid(FileUID(-1))
+        , m_bFirstCodeLine(true)
     {}
+
     ~CMacroDef()
     {}
 
-    int AddParam(const CString &strParam)	// dopisanie nazwy kolejnego parametru
+    int AddParam(const std::wstring &strParam)//adding the name of the next parameter
     {
         if (strParam.Compare(MULTIPARAM) == 0)
         {
             m_nParams = -(m_nParams + 1);
-            return 1;		// koniec listy parametrów
+            return 1; // end of parameter list
         }
-        if (!param_names.insert(strParam,CIdent(CIdent::I_VALUE,m_nParams)))
-            return -1;	// powtórzona nazwa parametru!
-        m_nParams++;
+
+        std::pair<auto, bool> res = param_names.insert(strParam, CIdent(CIdent::I_VALUE, m_nParams));
+
+        if (!res.second)
+            return -1; // repeated parameter name!
+
+        ++m_nParams;
         return 0;
     }
 
-    int GetParamsFormat()			// iloœæ przekazywanych parametrów
+    // Number of passed parameters
+    int GetParamsFormat() const
     {
         return m_nParams;
     }
 
-    virtual const TCHAR* GetCurrLine(CString &str);	// odczyt aktualnego wiersza makra
+    virtual const wchar* GetCurrLine(CString &str);
 
     virtual int GetLineNo()
     {
-        return CRecorder::GetLineNo(m_nLineNo-1);
+        return CRecorder::GetLineNo(m_nLineNo - 1);
     }
 
-    int GetFirstLineNo()
-    {
-        return m_nFirstLineNo;
-    }
+    int GetFirstLineNo() const { return m_nFirstLineNo; }
 
-    FileUID GetFirstLineFileUID()
-    {
-        return m_nFirstLineFuid;
-    }
+    FileUID GetFirstLineFileUID() { return m_nFirstLineFuid; }
 
-    void Start(CConditionalAsm* cond, int line, FileUID file)	// przygotowanie do odczytu
+    void Start(CConditionalAsm* cond, int line, FileUID file) // prepare for reading
     {
         CSource::Start(cond);
         m_nLineNo = 0;
@@ -723,10 +788,10 @@ public:
 
     virtual void Fin(CConditionalAsm* cond)
     {
-        CSource::Fin(cond);    // zakoñczenie rozwijania bie¿¹cego makra
+        CSource::Fin(cond); // End expansion of the current macro
     }
 
-    // wczytanie argumentów wywo³ania
+    // Load the arguments of the call
     CAsm::Stat ParseArguments(CLeksem &leks, CAsm6502 &asmb);
 
     CAsm::Stat ParamLookup(CLeksem &leks, const CString& param_name, Expr &expr, bool &found, CAsm6502 &asmb);
@@ -736,12 +801,12 @@ public:
     CAsm::Stat ParamType(const CString param_name, bool& found, int& type);
     CAsm::Stat ParamType(int param_number, bool& found, int& type);
 
-//  virtual bool IsMacro()		// Ÿród³em danych jest rozwijane makro
-//  { return true; }
+    //virtual bool IsMacro() // The data source is the expanded macro
+    //{ return true; }
 
     CMacroDef &operator= (const CMacroDef &src)
     {
-        ASSERT(false);	// nie wolno przypisywaæ obiektów typu CMacroDef
+        ASSERT(false); // objects of type C cannot be assigned to MacroDef
         return *this;
     }
 
@@ -751,55 +816,61 @@ public:
     }
 };
 
+#if 0
 
 class CMacroDefs : public CArray<CMacroDef, CMacroDef&>
 {
 };
 
+#endif
+
 //-----------------------------------------------------------------------------
 
 class CRepeatDef : public CSource, public CRecorder
 {
-    int m_nLineNo;		// nr aktualnego wiersza (przy odczycie)
-    int m_nRepeat;		// iloœæ powtórzeñ wierszy
+private:
+    int m_nLineNo; // current line number (when reading)
+    int m_nRepeat; // number of repeated lines
+
 public:
 
-    CRepeatDef(int nRept= 0) : m_nLineNo(0), m_nRepeat(nRept)
+    CRepeatDef(int nRept = 0)
+        : m_nLineNo(0)
+        , m_nRepeat(nRept)
     {}
+
     ~CRepeatDef()
     {}
 
-    virtual const TCHAR* GetCurrLine(CString &str);	// odczyt aktualnego wiersza
+    virtual const wchar* GetCurrLine(std::wstring &str); // Read the current line
 
     virtual int GetLineNo()
     {
-        return CRecorder::GetLineNo(m_nLineNo-1);
+        return CRecorder::GetLineNo(m_nLineNo - 1);
     }
 
     virtual void Start(CConditionalAsm* cond)
     {
-        CSource::Start(cond);    // licznik wierszy na koniec
+        CSource::Start(cond); // Line counter at the end
         m_nLineNo = GetSize();
     }
-    virtual void Fin(CConditionalAsm* cond)			// zakoñczenie powtórki wierszy
+
+    virtual void Fin(CConditionalAsm* cond) // end repeat lines
     {
         CSource::Fin(cond);
         delete this;
     }
 
-//  virtual bool IsRepeat()		// Ÿród³em danych jest powtórzenie (.REPEAT)
-//  { return true; }
+    //virtual bool IsRepeat() //data source is repeat (.REPEAT)
+    //{ return true; }
 
     CRepeatDef &operator= (const CRepeatDef &src)
     {
-        ASSERT(false);	// nie wolno przypisywaæ obiektów typu CRepeatDef
+        ASSERT(false); // objects of type CRepeatDef cannot be assigned
         return *this;
     }
 
-    virtual const CString &GetFileName()	// nazwa aktualnego pliku
-    {
-        return s_strEmpty;
-    }
+    virtual const std::wstring &GetFileName() const { return s_strEmpty; }
 };
 
 
@@ -811,34 +882,40 @@ class CRepeatDefs : public CArray<CRepeatDef, CRepeatDef&>
 
 class CSourceText : public CSource
 {
+private:
     CInput input;
+
 public:
-    CSourceText(const CString &file_in_name) : input(file_in_name)
+    CSourceText(const std::wstring &file_in_name)
+        : input(file_in_name)
     {}
-    CSourceText(CWnd* pWnd) : input(pWnd)
+
+    CSourceText(wxWindow* pWnd)
+        : input(pWnd)
     {}
+
     CSourceText()
     {}
 
-    virtual void Start(CConditionalAsm* cond)			// rozpoczêcie odczytu wierszy
+    virtual void Start(CConditionalAsm* cond) // start reading lines
     {
         CSource::Start(cond);
         input.seek_to_begin();
     }
 
-    virtual const TCHAR* GetCurrLine(CString &str)// odczyt bie¿¹cego wiersza
+    virtual const wchar* GetCurrLine(std::wstring &str) // reading less than an entire line
     {
-        const TCHAR* ret= input.read_line(str.GetBuffer(1024+4), 1024+4);
-        str.ReleaseBuffer(-1);
-        return ret;
+        str.reserve(1024 + 4);
+
+        return input.read_line(str);
     }
 
-    virtual int GetLineNo()		// odczyt numeru wiersza
+    virtual int GetLineNo() // read the line number
     {
         return input.get_line_no();
     }
 
-    FileUID GetFileUID()			// odczyt ID pliku
+    FileUID GetFileUID() // read file ID
     {
         return input.get_file_UID();
     }
@@ -849,52 +926,56 @@ public:
             input.set_file_UID(pDebugInfo->GetFileUID(input.get_file_name()));
     }
 
-    void Include(const CString &fname, CDebugInfo* pDebugInfo= NULL)	// w³¹czenie pliku
+    void Include(const std::wstring &fname, CDebugInfo* pDebugInfo= NULL) // include file
     {
         input.open_file(fname);
+
         if (pDebugInfo)
             input.set_file_UID(pDebugInfo->GetFileUID(fname));
     }
 
-    bool TextFin()			// zakoñczony bie¿¹cy plik
+    bool TextFin() // Current file finished
     {
-        if (input.get_count() > 1)	// zagnie¿d¿ony odczyt (.include) ?
+        if (input.get_count() > 1) // nested read (.include) ?
         {
             input.close_file();
             return true;
         }
         else
-            return false;	// koniec plików Ÿród³owych
+            return false; // End of source files
     }
+
     /*
-      bool IsPresent()			// spr. czy jest jakiœ odczytywany plik
-      { return input.is_present(); }
+    bool IsPresent() const // Check whether there is any file being read
+    { return input.is_present(); }
     */
-    virtual const CString &GetFileName()	// nazwa aktualnego pliku
+   
+    virtual const std::wstring &GetFileName() const
     {
         return input.get_file_name();
     }
 };
 
-
 //-----------------------------------------------------------------------------
 
-
-class CSourceStack : CTypedPtrArray<CObArray,CSource *>	// Stos obiektów bêd¹cych Ÿród³em wierszy
+class CSourceStack : CTypedPtrArray<CObArray,CSource *>	// Stos obiektï¿½w bï¿½dï¿½cych ï¿½rï¿½dï¿½em wierszy
 {
+private:
     int m_nIndex;
+
 public:
     CSourceStack()
     {
         m_nIndex = -1;
     }
+
     ~CSourceStack()
     {
         for (int i=m_nIndex; i>=0; i--)
             GetAt(i)->Fin(0);
     }
 
-    void Push(CSource *pSrc)		// Dodanie elementu na wierzcho³ku stosu
+    void Push(CSource *pSrc)		// Dodanie elementu na wierzchoï¿½ku stosu
     {
         ++m_nIndex;
         SetAtGrow(m_nIndex,pSrc);
@@ -905,7 +986,7 @@ public:
         return m_nIndex < 0 ? NULL : GetAt(m_nIndex);
     }
 
-    CSource *Pop()			// Zdjêcie elementu ze stosu
+    CSource *Pop()			// Zdjï¿½cie elementu ze stosu
     {
         return GetAt(m_nIndex--);
     }
@@ -920,7 +1001,7 @@ public:
                 return pSrc;
         return NULL;
     }
-    CSource* FindRepeat()			// odszukanie ostatniego powtórzenia
+    CSource* FindRepeat()			// odszukanie ostatniego powtï¿½rzenia
     {
         for (int i=m_nIndex; i>=0; i--)
             if (CRepeatDef* pSrc= dynamic_cast<CRepeatDef*>(GetAt(i)))
@@ -935,45 +1016,45 @@ public:
 //-----------------------------------------------------------------------------
 class CMarkArea;
 
-class CAsm6502 : public CAsm, public CObject
+class CAsm6502 : public CAsm /*, public CObject */
 {
     friend class CMacroDef;
 
     CString current_line;
-    const TCHAR *ptr;				// do œledzenia aktualnego wiersza
+    const TCHAR *ptr;				// do ï¿½ledzenia aktualnego wiersza
     const TCHAR *err_start;
-    const TCHAR *ident_start;		// po³o¿enie identyfikatora w wierszu
-    const TCHAR *ident_fin;			// po³o¿enie koñca identyfikatora w wierszu
+    const TCHAR *ident_start;		// poï¿½oï¿½enie identyfikatora w wierszu
+    const TCHAR *ident_fin;			// poï¿½oï¿½enie koï¿½ca identyfikatora w wierszu
 
     bool check_line;				// flaga: true - analiza jednego wiersza, false - programu
     UINT32 origin;
-    bool originWrapped;				// true - jeœli licznik rozkazów "przewin¹³ siê"
-    UINT32 program_start;			// pocz¹tek programu
-    UINT32 mem_mask;				// granica pamiêci procesora (maska), normalnie $FFFF
+    bool originWrapped;				// true - jeï¿½li licznik rozkazï¿½w "przewinï¿½ï¿½ siï¿½"
+    UINT32 program_start;			// poczï¿½tek programu
+    UINT32 mem_mask;				// granica pamiï¿½ci procesora (maska), normalnie $FFFF
     int local_area;					// nr obszaru etykiet lokalnych
     int proc_area;					// nr obszaru etykiet lokalnych
     int macro_local_area;			// nr obszaru etykiet lokalnych makrodefinicji
-    int pass;						// numer przejœcia (1 lub 2)
-    //int conditional;				// asemblacja warunkowa - poziom zag³êbienia
+    int pass;						// numer przejï¿½cia (1 lub 2)
+    //int conditional;				// asemblacja warunkowa - poziom zagï¿½ï¿½bienia
     CString include_fname;
-    CString user_error_text;		// tekst b³êdu u¿ytkownika (dyrektywy .ERROR)
-    const TCHAR *instr_start;		// do zapamiêtania pocz¹tku
-    const TCHAR *instr_fin;			// i koñca instrukcji w wierszu
+    CString user_error_text;		// tekst bï¿½ï¿½du uï¿½ytkownika (dyrektywy .ERROR)
+    const TCHAR *instr_start;		// do zapamiï¿½tania poczï¿½tku
+    const TCHAR *instr_fin;			// i koï¿½ca instrukcji w wierszu
     CMacroDefs macros;				// makrodefinicje
 
-    CSource *text;					// bie¿¹cy tekst Ÿród³owy
-    CSourceText entire_text;		// pierwszy (pocz¹tkowy) tekst Ÿród³owy
+    CSource *text;					// bieï¿½ï¿½cy tekst ï¿½rï¿½dï¿½owy
+    CSourceText entire_text;		// pierwszy (poczï¿½tkowy) tekst ï¿½rï¿½dï¿½owy
     CRepeatDef *pRept;
 
     // leksyka:
-    CLeksem get_dec_num();			// interpretacja liczby dziesiêtnej
+    CLeksem get_dec_num();			// interpretacja liczby dziesiï¿½tnej
     CLeksem get_hex_num();			// interpretacja liczby szesnastkowej
-    CLeksem get_bin_num();			// interpretacja liczby dwójkowej
-    CLeksem get_char_num();			// interpretacja sta³ej znakowej
-//  CLeksem get_ident();			// wyodrêbnienie napisu
-    CLeksem::CLString* get_ident();	// wyodrêbnienie napisu
-    CLeksem get_string(TCHAR lim);	// wyodrêbnienie ³añcucha znaków
-    CLeksem eat_space();			// ominiêcie odstêpu
+    CLeksem get_bin_num();			// interpretacja liczby dwï¿½jkowej
+    CLeksem get_char_num();			// interpretacja staï¿½ej znakowej
+//  CLeksem get_ident();			// wyodrï¿½bnienie napisu
+    CLeksem::CLString* get_ident();	// wyodrï¿½bnienie napisu
+    CLeksem get_string(TCHAR lim);	// wyodrï¿½bnienie ï¿½aï¿½cucha znakï¿½w
+    CLeksem eat_space();			// ominiï¿½cie odstï¿½pu
     bool proc_instr(const CString &str, OpCode &code);
     bool asm_instr(const CString &str, InstrType &it);
     CLeksem next_leks(bool nospace= true);	// pobranie kolejnego symbolu
@@ -981,19 +1062,19 @@ class CAsm6502 : public CAsm, public CObject
 
     COutputMem *out;				// memory for the object code
     CMarkArea *markArea;			// to mark used memory areas with 'out'
-    CIdentTable local_ident;		// tablica identyfikatorów lokalnych
-    CIdentTable proc_local_ident;		// tablica identyfikatorów lokalnych
-    CIdentTable global_ident;		// tablica identyfikatorów globalnych
+    CIdentTable local_ident;		// tablica identyfikatorï¿½w lokalnych
+    CIdentTable proc_local_ident;		// tablica identyfikatorï¿½w lokalnych
+    CIdentTable global_ident;		// tablica identyfikatorï¿½w globalnych
     CIdentTable macro_name;			// tablica nazw makrodefinicji
-    CIdentTable macro_ident;		// tablica identyfikatorów w makrorozwiniêciach
+    CIdentTable macro_ident;		// tablica identyfikatorï¿½w w makrorozwiniï¿½ciach
     CDebugInfo *debug;				// commissioning information for the simulator
 
-//	CString err_file;				// nazwa pliku, którego odczyt spowodowa³ b³¹d
-//	int err_line;					// nr wiersza, w którym napotkano b³¹d
-    CString err_ident;				// nazwa etykiety, która spowodowa³a b³¹d
+//	CString err_file;				// nazwa pliku, ktï¿½rego odczyt spowodowaï¿½ bï¿½ï¿½d
+//	int err_line;					// nr wiersza, w ktï¿½rym napotkano bï¿½ï¿½d
+    CString err_ident;				// nazwa etykiety, ktï¿½ra spowodowaï¿½a bï¿½ï¿½d
 
-    bool temporary_out;				// flaga - 'out' zosta³o alokowane w konstruktorze
-    bool abort_asm;					// zmienna do wymuszenia przerwania asemblacji z zewn¹trz
+    bool temporary_out;				// flaga - 'out' zostaï¿½o alokowane w konstruktorze
+    bool abort_asm;					// zmienna do wymuszenia przerwania asemblacji z zewnï¿½trz
     bool is_aborted()
     {
         return abort_asm ? abort_asm=false, true : false;
@@ -1038,19 +1119,19 @@ class CAsm6502 : public CAsm, public CObject
     Stat cmp_expr(CLeksem &leks, Expr &expr);
     Stat bool_expr_and(CLeksem &leks, Expr &expr);
     Stat bool_expr_or(CLeksem &leks, Expr &expr);
-    Stat expression(CLeksem &leks, Expr &expr, bool str= false);	// interpretacja wyra¿enia
+    Stat expression(CLeksem &leks, Expr &expr, bool str= false);	// interpretacja wyraï¿½enia
     bool is_expression(const CLeksem &leks);
     Stat assemble_line();			// interpretacja wiersza
     Stat assemble();
     const TCHAR *get_next_line();	// wczytanie kolejnego wiersza do asemblacji
     const TCHAR *play_macro();		// odczyt kolejnego wiersza makra
-    const TCHAR *play_repeat();		// odczyt kolejnego wiersza powtórki
-//  CPtrStack <CSource> source;		// stos obiektów zwracaj¹cych wiersze Ÿród³owe
-    CSourceStack source;			// stos obiektów zwracaj¹cych wiersze Ÿród³owe
-    void asm_start();				// rozpoczêcie asemblacji
-    void asm_fin();					// zakoñczenie asemblacji
-    void asm_start_pass();			// rozpoczêcie przejœcia asemblacji
-    void asm_fin_pass();			// zakoñczenie przejœcia asemblacji
+    const TCHAR *play_repeat();		// odczyt kolejnego wiersza powtï¿½rki
+//  CPtrStack <CSource> source;		// stos obiektï¿½w zwracajï¿½cych wiersze ï¿½rï¿½dï¿½owe
+    CSourceStack source;			// stos obiektï¿½w zwracajï¿½cych wiersze ï¿½rï¿½dï¿½owe
+    void asm_start();				// rozpoczï¿½cie asemblacji
+    void asm_fin();					// zakoï¿½czenie asemblacji
+    void asm_start_pass();			// rozpoczï¿½cie przejï¿½cia asemblacji
+    void asm_fin_pass();			// zakoï¿½czenie przejï¿½cia asemblacji
     Stat chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, int &length);
     void generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit, Expr expr_zpg);
     Stat inc_prog_counter(int dist);
@@ -1062,17 +1143,17 @@ class CAsm6502 : public CAsm, public CObject
     void generate_debug();
     Stat look_for_endm();
     Stat record_macro();
-//  void MacroExpandStart(CMacroDef *pMacro);	// przejœcie do trybu rozwijania makrodefinicji
-//  void MacroExpandFin();			// zakoñczenie trybu rozwijania makrodefinicji
+//  void MacroExpandStart(CMacroDef *pMacro);	// przejï¿½cie do trybu rozwijania makrodefinicji
+//  void MacroExpandFin();			// zakoï¿½czenie trybu rozwijania makrodefinicji
     CMacroDef *in_macro;			// aktualnie rejestrowane makro lub NULL
     CMacroDef *expanding_macro;		// aktualnie rozwijane makro lub NULL
 //  CPtrStack<CMacroDef> expand_macros;	// lista rozwijanych makr
-    CRepeatDef *repeating;			// aktualna powtórka (.REPEAT)
-//  CPtrStack<CRepeatDef> repeats;	// lista powtórek
+    CRepeatDef *repeating;			// aktualna powtï¿½rka (.REPEAT)
+//  CPtrStack<CRepeatDef> repeats;	// lista powtï¿½rek
     Stat record_rept(CRepeatDef *pRept);
     Stat look_for_repeat();			// szukanie .ENDR lub .REPEAT
-    int reptInit;					// wartoœæ do zainicjowania iloœci powtórzeñ
-    int reptNested;					// licznik zagnie¿d¿eñ .REPEAT (przy rejestracji)
+    int reptInit;					// wartoï¿½ï¿½ do zainicjowania iloï¿½ci powtï¿½rzeï¿½
+    int reptNested;					// licznik zagnieï¿½dï¿½eï¿½ .REPEAT (przy rejestracji)
 //  void RepeatStart(CRepeatDef *pRept);
 //  void RepeatFin();
     bool b_listing;
@@ -1089,8 +1170,8 @@ class CAsm6502 : public CAsm, public CObject
     class CListing
     {
         CStdioFile m_File;	// wsk. do pliku z listingiem
-        CString m_Str;		// bie¿¹cy wiersz listingu
-        int m_nLine;		// bie¿¹cy wiersz
+        CString m_Str;		// bieï¿½ï¿½cy wiersz listingu
+        int m_nLine;		// bieï¿½ï¿½cy wiersz
 
         void Open(const TCHAR *fname)
         {
@@ -1129,11 +1210,11 @@ class CAsm6502 : public CAsm, public CObject
 
 public:
     UINT8 bProc6502;						// 0=6502, 1=65C02 or 6501, 2=65816
-    static bool case_insensitive;		// true -> ma³e i du¿e litery w etykietach nie s¹ rozró¿niane
+    static bool case_insensitive;		// true -> maï¿½e i duï¿½e litery w etykietach nie sï¿½ rozrï¿½niane
     static bool swapbin;
     static UINT8 forcelong;
-    static bool generateBRKExtraByte;	// generowaæ dodatkowy bajt za instrukcj¹ BRK?
-    static UINT8 BRKExtraByte;			// wartoœæ dodatkowego bajtu za instrukcj¹ BRK
+    static bool generateBRKExtraByte;	// generowaï¿½ dodatkowy bajt za instrukcjï¿½ BRK?
+    static UINT8 BRKExtraByte;			// wartoï¿½ï¿½ dodatkowego bajtu za instrukcjï¿½ BRK
 
     CAsm6502(const CString &file_in_name, COutputMem *out= NULL, CDebugInfo *debug= NULL,
              CMarkArea *area= NULL, UINT8 proc6502= 0, const TCHAR *listing_file= NULL) :
@@ -1171,9 +1252,9 @@ public:
             pRept->Fin(0);
     }
 
-    // sprawdzenie sk³adni w wierszu 'str'
-    // w 'instr_idx_start' zwracane po³o¿enie instrukcji w wierszu lub 0
-    // w 'instr_idx_fin' zwracane po³o¿enie koñca instrukcji w wierszu lub 0
+    // sprawdzenie skï¿½adni w wierszu 'str'
+    // w 'instr_idx_start' zwracane poï¿½oï¿½enie instrukcji w wierszu lub 0
+    // w 'instr_idx_fin' zwracane poï¿½oï¿½enie koï¿½ca instrukcji w wierszu lub 0
     Stat CheckLine(const TCHAR *str, int &instr_idx_start, int &instr_idx_fin);
 
     void Abort()
@@ -1181,14 +1262,14 @@ public:
         abort_asm = true;
     }
 
-    CString GetErrMsg(Stat stat);		// opis b³êdu
+    CString GetErrMsg(Stat stat);		// opis bï¿½ï¿½du
 
     Stat Assemble()						// asemblacja
     {
         return assemble();
     }
 
-    UINT32 GetProgramStart()			// pocz¹tek programu
+    UINT32 GetProgramStart()			// poczï¿½tek programu
     {
         return program_start;
     }
