@@ -7,6 +7,19 @@
 *.o
 *.obj
 
+# CMake files to ignore
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.ccmake
+_deps
+
 # Visual Studio generated files
 *.suo
 *.ncb
