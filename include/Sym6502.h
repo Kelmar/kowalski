@@ -170,9 +170,20 @@ struct CmdInfo	// single command info (for logging)
 
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
     CmdInfo(uint8_t a, uint8_t x, uint8_t y, uint8_t s, uint8_t flags, uint8_t cmd, uint8_t arg1, uint8_t arg2, uint32_t pc)
-        : a(a), x(x), y(y), s(s), flags(flags), pc(pc), cmd(cmd), arg1(arg1), arg2(arg2), arg3(arg3), uCycles(uCycles), intFlag(intFlag)
+        : a(a)
+        , x(x)
+        , y(y)
+        , s(s)
+        , flags(flags)
+        , pc(pc)
+        , cmd(cmd)
+        , arg1(arg1)
+        , arg2(arg2)
+        , arg3(arg3)
+        , uCycles(0)
+        , intFlag(0)
+        , argVal(0)
     {
-        argVal = 0;
     }
 
     CmdInfo() {}
@@ -232,8 +243,9 @@ public:
 
 private:
     IOFunc io_func;
-    CWnd *io_window();		// odszukanie okna terminala
-    CWnd *io_open_window();	// otwarcie okna terminala
+
+    wxWindow *io_window();      // Finding the terminal window
+    wxWindow *io_open_window(); // Opening a terminal window
 
     void inc_prog_counter(int step = 1)
     {
@@ -246,11 +258,11 @@ private:
     int m_nInterruptTrigger;
 
     SymStat perform_cmd();
-    SymStat skip_cmd();		// omini�cie bie��cej instrukcji
+    SymStat skip_cmd();         // Skip the current statement
     SymStat step_over();
     SymStat run_till_ret();
     SymStat run(bool animate= false);
-    void interrupt(int& nInterrupt);	// interrupt requested: load pc
+    void interrupt(int& nInterrupt);    // interrupt requested: load pc
     SymStat perform_step(bool animate);
     SymStat perform_command();
 
@@ -264,7 +276,7 @@ private:
 
     void push_addr_on_stack(uint16_t arg)
     {
-        ctx.mem[0x100 + ctx.s--] = (arg>>8) & 0xFF;
+        ctx.mem[0x100 + ctx.s--] = (arg >> 8) & 0xFF;
         ctx.mem[0x100 + ctx.s--] = arg & 0xFF;
     }
 
@@ -275,29 +287,37 @@ private:
 
     uint16_t pull_addr_from_stack()
     {
-        uint16_t tmp= ctx.mem[0x100 + ++ctx.s];
+        uint16_t tmp = ctx.mem[0x100 + ++ctx.s];
         tmp |= uint16_t(ctx.mem[0x100 + ++ctx.s]) << uint16_t(8);
         return tmp;
     }
 
     uint16_t get_irq_addr();
 
-    static UINT start_step_over_thread(LPVOID ptr);
-    static UINT start_run_thread(LPVOID ptr);
-    static UINT start_animate_thread(LPVOID ptr);
-    static UINT start_run_till_ret_thread(LPVOID ptr);
-    HANDLE hThread;
+    static UINT start_step_over_thread(void *ptr);
+    static UINT start_run_thread(void *ptr);
+    static UINT start_animate_thread(void *ptr);
+    static UINT start_run_till_ret_thread(void *ptr);
 
-    void SetPointer(const CLine &line, uint32_t addr);	// ustawienie strza�ki (->) przed aktualnym wierszem
+    //HANDLE hThread;
+
+    /*
+     * Looks like drawing functions in here; thinking these need to be moved 
+     * into whatever view that is actually showing the source code. 
+     * 
+     *          -- B.Simonds (April 25, 2024)
+     */
+
+    void SetPointer(const CLine &line, uint32_t addr);	// Placing an arrow (->) in front of the current line
     void SetPointer(CSrc6502View* pView, int nLine, bool bScroll); // helper fn
-    void ResetPointer();			// schowanie strza�ki
-    CSrc6502View *FindDocView(FileUID fuid);	// odszukanie okna dokumentu
-    FileUID m_fuidLastView;			// zapami�tanie okna, w kt�rym narysowana jest strza�ka
-    HWND m_hwndLastView;				// j.w.
+    void ResetPointer();			// Hiding the arrow
+    CSrc6502View *FindDocView(FileUID fuid);	// Find the document window
+    FileUID m_fuidLastView;			// Remembering the window in which the arrow is drawn
+    //HWND m_hwndLastView;				// j.w.
     void AddBranchCycles(uint8_t arg);
 
-    // Thread based event object
-    CEvent eventRedraw;			// synchronizacja od�wie�ania okna przy animacji
+    // This was problematic for me -- B.Simonds (April 25, 2024)
+    //CEvent eventRedraw;			// Window refresh synchronization during animation
 
     void init();
     void set_translation_tables();
@@ -313,7 +333,7 @@ private:
     const uint8_t* m_vCodeToMode;
 
 public:
-    Finish finish;		// okre�lenie sposobu zako�czenia wykonania programu
+    Finish finish;		// Specifying how to end program execution
 
     uint16_t get_rst_addr();
     uint16_t get_nmi_addr();
@@ -338,7 +358,7 @@ public:
         : ctx(mem, addr_bus_width)
         , pre(ctx)
         , old(ctx)
-        , eventRedraw(true, true)
+        //, eventRedraw(true, true)
     {
         init();
     }
@@ -348,7 +368,7 @@ public:
         : ctx(mem, addr_bus_width)
         , pre(ctx)
         , old(ctx)
-        , eventRedraw(true)
+        //, eventRedraw(true)
         , debug(debug)
     {
         init();
@@ -366,7 +386,7 @@ public:
 
     bool IsFinished() const
     {
-        return fin_stat==SYM_FIN;
+        return fin_stat == SYM_FIN;
     }
 
     bool IsRunning() const { return running; }

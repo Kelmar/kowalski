@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define UCHAR unsigned char
 #define USHORT unsigned short
 #define UINT unsigned int
+#define ULONG unsigned long
 
 #ifdef _DEBUG
 # include <cassert>
