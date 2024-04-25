@@ -27,30 +27,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CAboutDlg : public CDialog
 {
-  CFont m_TitleFont;
+    CFont m_TitleFont;
 
 public:
-  CAboutDlg();
+    CAboutDlg();
 
 // Dialog Data
-  //{{AFX_DATA(CAboutDlg)
-  enum { IDD = IDD_ABOUTBOX };
-  CStatic	m_wndTitle;
-  CString	m_strVersion;
-  //}}AFX_DATA
+    //{{AFX_DATA(CAboutDlg)
+    enum { IDD = IDD_ABOUTBOX };
+    CStatic	m_wndTitle;
+    CString	m_strVersion;
+    //}}AFX_DATA
 
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CAboutDlg)
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CAboutDlg)
 protected:
-  virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-  //}}AFX_VIRTUAL
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
 
 // Implementation
 protected:
-  //{{AFX_MSG(CAboutDlg)
-  virtual BOOL OnInitDialog();
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    //{{AFX_MSG(CAboutDlg)
+    virtual BOOL OnInitDialog();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 
-  CStaticLink m_StaticLink;
+    CStaticLink m_StaticLink;
 };

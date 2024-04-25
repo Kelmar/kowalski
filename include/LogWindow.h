@@ -34,44 +34,44 @@ struct CmdInfo;
 
 class CLogWindow : public CMiniFrameWnd
 {
-	DECLARE_DYNCREATE(CLogWindow)
+    DECLARE_DYNCREATE(CLogWindow)
 
 // Attributes
 public:
-	void SetText(const CommandLog& log);
-	void Invalidate();
-	CRect m_WndRect;
-	bool m_bHidden;
+    void SetText(const CommandLog& log);
+    void Invalidate();
+    CRect m_WndRect;
+    bool m_bHidden;
 
 // Operations
 public:
-	bool Create();
+    bool Create();
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CLogWindow)
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CLogWindow)
 protected:
-	virtual void PostNcDestroy();
-	//}}AFX_VIRTUAL
+    virtual void PostNcDestroy();
+    //}}AFX_VIRTUAL
 
 // Implementation
 public:
-	CLogWindow();
-	virtual ~CLogWindow();
+    CLogWindow();
+    virtual ~CLogWindow();
 
-	// Generated message map functions
-	//{{AFX_MSG(CLogWindow)
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnDestroy();
-	afx_msg void OnClose();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+    // Generated message map functions
+    //{{AFX_MSG(CLogWindow)
+    afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+    afx_msg void OnDestroy();
+    afx_msg void OnClose();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 
-	CFont m_fntMono;
-	CBrush m_brBackground;
-	afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnStartDebug(WPARAM /*wParam*/, LPARAM /* lParam */);
-	afx_msg LRESULT OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */);
+    CFont m_fntMono;
+    CBrush m_brBackground;
+    afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
+    afx_msg LRESULT OnStartDebug(WPARAM /*wParam*/, LPARAM /* lParam */);
+    afx_msg LRESULT OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */);
 };
 
 /////////////////////////////////////////////////////////////////////////////

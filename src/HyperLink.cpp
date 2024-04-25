@@ -18,5 +18,5 @@ static char THIS_FILE[] = __FILE__;
 //
 HINSTANCE CHyperlink::Navigate()
 {
-  return IsEmpty() ? NULL : ShellExecute(0, _T("open"), *this, 0, 0, SW_SHOWNORMAL);
+    return IsEmpty() ? NULL : ShellExecute(0, _T("open"), *this, 0, 0, SW_SHOWNORMAL);
 }

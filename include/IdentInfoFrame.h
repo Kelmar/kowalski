@@ -28,30 +28,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CIdentInfoFrame : public CMiniFrameWnd //CFrameWnd
 {
-  DECLARE_DYNCREATE(CIdentInfoFrame)
+    DECLARE_DYNCREATE(CIdentInfoFrame)
 protected:
-  CIdentInfoFrame();           // protected constructor used by dynamic creation
-  
-  // Attributes
+    CIdentInfoFrame();           // protected constructor used by dynamic creation
+
+    // Attributes
 public:
 
-  // Operations
+    // Operations
 public:
-  
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CIdentInfoFrame)
-	//}}AFX_VIRTUAL
-  
-  // Implementation
+
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CIdentInfoFrame)
+    //}}AFX_VIRTUAL
+
+    // Implementation
 protected:
 //  CIdentInfoFrame();
-  virtual ~CIdentInfoFrame();
-  
-  // Generated message map functions
-  //{{AFX_MSG(CIdentInfoFrame)
-	//}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    virtual ~CIdentInfoFrame();
+
+    // Generated message map functions
+    //{{AFX_MSG(CIdentInfoFrame)
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -27,56 +27,58 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CIdentInfoDoc : public CDocument
 {
-  CDebugInfo *m_pDebug;
+    CDebugInfo *m_pDebug;
 
 public:
-  void GetIdent(int index, CString &str, CIdent &info)
-  {
-    ASSERT(m_pDebug != NULL);
-    m_pDebug->GetIdent(index,str,info);
-  }
-  int GetIdentCount()
-  {
-    ASSERT(m_pDebug != NULL);
-    return m_pDebug->GetIdentCount();
-  }
+    void GetIdent(int index, CString &str, CIdent &info)
+    {
+        ASSERT(m_pDebug != NULL);
+        m_pDebug->GetIdent(index,str,info);
+    }
+    int GetIdentCount()
+    {
+        ASSERT(m_pDebug != NULL);
+        return m_pDebug->GetIdentCount();
+    }
 //protected:
 //  CIdentInfoDoc();           // protected constructor used by dynamic creation
-  DECLARE_DYNCREATE(CIdentInfoDoc)
+    DECLARE_DYNCREATE(CIdentInfoDoc)
 
 public:
 //  CIdentInfoDoc(CDebugInfo *pDebug);
-  void SetDebugInfo(CDebugInfo *pDebug)
-  { m_pDebug = pDebug; }
+    void SetDebugInfo(CDebugInfo *pDebug)
+    {
+        m_pDebug = pDebug;
+    }
 
-  // Attributes
+    // Attributes
 public:
 
-  // Operations
+    // Operations
 public:
 
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CIdentInfoDoc)
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CIdentInfoDoc)
 public:
-  virtual void Serialize(CArchive& ar);   // overridden for document i/o
+    virtual void Serialize(CArchive& ar);   // overridden for document i/o
 protected:
-  virtual BOOL OnNewDocument();
-  //}}AFX_VIRTUAL
+    virtual BOOL OnNewDocument();
+    //}}AFX_VIRTUAL
 
-  // Implementation
+    // Implementation
 public:
-  CIdentInfoDoc();
-  virtual ~CIdentInfoDoc();
+    CIdentInfoDoc();
+    virtual ~CIdentInfoDoc();
 #ifdef _DEBUG
-  virtual void AssertValid() const;
-  virtual void Dump(CDumpContext& dc) const;
+    virtual void AssertValid() const;
+    virtual void Dump(CDumpContext& dc) const;
 #endif
 
-  // Generated message map functions
+    // Generated message map functions
 protected:
-  //{{AFX_MSG(CIdentInfoDoc)
+    //{{AFX_MSG(CIdentInfoDoc)
     // NOTE - the ClassWizard will add and remove member functions here.
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };

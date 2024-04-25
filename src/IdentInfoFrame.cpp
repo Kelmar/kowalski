@@ -46,8 +46,8 @@ CIdentInfoFrame::~CIdentInfoFrame()
 
 
 BEGIN_MESSAGE_MAP(CIdentInfoFrame, CMiniFrameWnd) //CFrameWnd)
-  //{{AFX_MSG_MAP(CIdentInfoFrame)
-	//}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CIdentInfoFrame)
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

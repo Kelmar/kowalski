@@ -25,9 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
 BEGIN_MESSAGE_MAP(CIdentInfo, CIdentInfoFrame)
-  //{{AFX_MSG_MAP(CIdentInfo)
-  ON_WM_DESTROY()
-  //}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CIdentInfo)
+    ON_WM_DESTROY()
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -41,12 +41,12 @@ CString CIdentInfo::m_strClass;
 
 void CIdentInfo::RegisterWndClass()
 {
-  ASSERT(!m_bRegistered);
-  if (m_bRegistered)
-    return;
-  m_strClass = AfxRegisterWndClass(CS_DBLCLKS,::LoadCursor(NULL,IDC_ARROW),0,
-    AfxGetApp()->LoadIcon(IDR_IDENT_INFO));
-  m_bRegistered = TRUE;
+    ASSERT(!m_bRegistered);
+    if (m_bRegistered)
+        return;
+    m_strClass = AfxRegisterWndClass(CS_DBLCLKS,::LoadCursor(NULL,IDC_ARROW),0,
+                                     AfxGetApp()->LoadIcon(IDR_IDENT_INFO));
+    m_bRegistered = TRUE;
 }
 
 //-----------------------------------------------------------------------------
@@ -54,16 +54,16 @@ void CIdentInfo::RegisterWndClass()
 
 void CIdentInfo::init()
 {
-  if (!m_bRegistered)
-    RegisterWndClass();
-  m_doc.m_bAutoDelete = FALSE;
+    if (!m_bRegistered)
+        RegisterWndClass();
+    m_doc.m_bAutoDelete = FALSE;
 }
 
 
 CIdentInfo::CIdentInfo(CDebugInfo *pDebugInfo)
 {
-  m_pDebugInfo = pDebugInfo;
-  init();
+    m_pDebugInfo = pDebugInfo;
+    init();
 }
 
 CIdentInfo::~CIdentInfo()
@@ -72,7 +72,7 @@ CIdentInfo::~CIdentInfo()
 
 void CIdentInfo::PostNcDestroy()
 {
-  m_hWnd = NULL;
+    m_hWnd = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -80,38 +80,38 @@ void CIdentInfo::PostNcDestroy()
 
 bool CIdentInfo::Create(CDebugInfo *pDebugInfo/*= NULL*/)
 {
-  if (pDebugInfo)
-    m_pDebugInfo = pDebugInfo;
-  ASSERT(m_pDebugInfo);
-  CString title;
-  title.LoadString(IDS_IDENT_TITLE);
-  CCreateContext ctx;
-  ctx.m_pNewViewClass = RUNTIME_CLASS(CIdentInfoView);
-  ctx.m_pCurrentDoc = &m_doc;	// dokument
-  ctx.m_pNewDocTemplate = NULL;	// template
-  ctx.m_pLastView = NULL;	// lastView
-  ctx.m_pCurrentFrame = this;	// current frame
+    if (pDebugInfo)
+        m_pDebugInfo = pDebugInfo;
+    ASSERT(m_pDebugInfo);
+    CString title;
+    title.LoadString(IDS_IDENT_TITLE);
+    CCreateContext ctx;
+    ctx.m_pNewViewClass = RUNTIME_CLASS(CIdentInfoView);
+    ctx.m_pCurrentDoc = &m_doc;	// dokument
+    ctx.m_pNewDocTemplate = NULL;	// template
+    ctx.m_pLastView = NULL;	// lastView
+    ctx.m_pCurrentFrame = this;	// current frame
 
-  if (!CIdentInfoFrame::Create(m_strClass,title,
-    WS_POPUP | WS_CAPTION | WS_SYSMENU | MFS_THICKFRAME | MFS_SYNCACTIVE,
-    m_WndRect,AfxGetMainWnd()))
-    return FALSE;
-  if (!CreateView(&ctx))
-  {
-    delete this;
-    return FALSE;
-  }
-  RecalcLayout();
-  m_doc.SetDebugInfo(m_pDebugInfo);
-  InitialUpdateFrame(&m_doc,TRUE);
+    if (!CIdentInfoFrame::Create(m_strClass,title,
+                                 WS_POPUP | WS_CAPTION | WS_SYSMENU | MFS_THICKFRAME | MFS_SYNCACTIVE,
+                                 m_WndRect,AfxGetMainWnd()))
+        return FALSE;
+    if (!CreateView(&ctx))
+    {
+        delete this;
+        return FALSE;
+    }
+    RecalcLayout();
+    m_doc.SetDebugInfo(m_pDebugInfo);
+    InitialUpdateFrame(&m_doc,TRUE);
 
-  return TRUE;
+    return TRUE;
 
 }
 
 
-void CIdentInfo::OnDestroy() 
+void CIdentInfo::OnDestroy()
 {
-  GetWindowRect(m_WndRect);
-  CIdentInfoFrame::OnDestroy();
+    GetWindowRect(m_WndRect);
+    CIdentInfoFrame::OnDestroy();
 }

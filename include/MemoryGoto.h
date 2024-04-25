@@ -34,30 +34,30 @@ class CMemoryGoto : public CDialog
 {
 // Construction
 public:
-	CMemoryGoto(CWnd* pParent = NULL);   // standard constructor
+    CMemoryGoto(CWnd* pParent = NULL);   // standard constructor
 
 // Dialog Data
-	//{{AFX_DATA(CMemoryGoto)
-	enum { IDD = IDD_MEMORY_GOTO };
-	UINT	m_uAddr;
-	//}}AFX_DATA
+    //{{AFX_DATA(CMemoryGoto)
+    enum { IDD = IDD_MEMORY_GOTO };
+    UINT	m_uAddr;
+    //}}AFX_DATA
 
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CMemoryGoto)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CMemoryGoto)
+protected:
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
 
 // Implementation
 protected:
 
-	// Generated message map functions
-	//{{AFX_MSG(CMemoryGoto)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+    // Generated message map functions
+    //{{AFX_MSG(CMemoryGoto)
+    // NOTE: the ClassWizard will add member functions here
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

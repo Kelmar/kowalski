@@ -28,33 +28,37 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CIdentInfo : public CIdentInfoFrame
 {
-  CDebugInfo *m_pDebugInfo;
+    CDebugInfo *m_pDebugInfo;
 
-  static bool m_bRegistered;
-  static CString m_strClass;
-  static void RegisterWndClass();
-  void init();
-  enum { ID_TITLE = IDS_IDENT_TITLE };
+    static bool m_bRegistered;
+    static CString m_strClass;
+    static void RegisterWndClass();
+    void init();
+    enum { ID_TITLE = IDS_IDENT_TITLE };
 
-  CIdentInfoDoc m_doc;
+    CIdentInfoDoc m_doc;
 public:
-  static CRect m_WndRect;
+    static CRect m_WndRect;
 
-  CIdentInfo() : m_pDebugInfo(NULL)
-  { init(); }
-  CIdentInfo(CDebugInfo *pDebugInfo);
-  ~CIdentInfo();
+    CIdentInfo() : m_pDebugInfo(NULL)
+    {
+        init();
+    }
+    CIdentInfo(CDebugInfo *pDebugInfo);
+    ~CIdentInfo();
 
-  void SetDebugInfo(CDebugInfo *pDebugInfo)
-  { m_doc.SetDebugInfo(pDebugInfo); }
+    void SetDebugInfo(CDebugInfo *pDebugInfo)
+    {
+        m_doc.SetDebugInfo(pDebugInfo);
+    }
 
-  bool Create(CDebugInfo *pDebugInfo= NULL);
+    bool Create(CDebugInfo *pDebugInfo= NULL);
 
-  virtual void PostNcDestroy();
-  // Generated message map functions
+    virtual void PostNcDestroy();
+    // Generated message map functions
 protected:
-  //{{AFX_MSG(CIdentInfo)
-  afx_msg void OnDestroy();
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    //{{AFX_MSG(CIdentInfo)
+    afx_msg void OnDestroy();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };

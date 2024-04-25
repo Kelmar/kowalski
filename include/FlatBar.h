@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////
-// CFlatToolBar 1997 Microsoft Systems Journal. 
+// CFlatToolBar 1997 Microsoft Systems Journal.
 // If this code works, it was written by Paul DiLascia.
 // If not, I don't know who wrote it.
 // This code compiles with Visual C++ 5.0 on Windows 95
@@ -20,13 +20,15 @@
 class CFlatToolBar : public CToolBar
 {
 public:
-  BOOL LoadToolBar(LPCTSTR lpszResourceName);
-  BOOL LoadToolBar(UINT nIDResource)
-  { return LoadToolBar(MAKEINTRESOURCE(nIDResource)); }
+    BOOL LoadToolBar(LPCTSTR lpszResourceName);
+    BOOL LoadToolBar(UINT nIDResource)
+    {
+        return LoadToolBar(MAKEINTRESOURCE(nIDResource));
+    }
 protected:
-  DECLARE_DYNAMIC(CFlatToolBar)
-  virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
-  DECLARE_MESSAGE_MAP()
-  afx_msg void OnWindowPosChanging(LPWINDOWPOS lpWndPos);
-  afx_msg void OnWindowPosChanged(LPWINDOWPOS lpWndPos);
+    DECLARE_DYNAMIC(CFlatToolBar)
+    virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
+    DECLARE_MESSAGE_MAP()
+    afx_msg void OnWindowPosChanging(LPWINDOWPOS lpWndPos);
+    afx_msg void OnWindowPosChanged(LPWINDOWPOS lpWndPos);
 };

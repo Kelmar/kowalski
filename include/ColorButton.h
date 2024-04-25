@@ -29,40 +29,40 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CColorButton : public CButton
 {
-  const COLORREF *m_prgbColor;
-  int m_nDx;
-  int m_nDy;
+    const COLORREF *m_prgbColor;
+    int m_nDx;
+    int m_nDy;
 
-  void PaintIt(int offset);
+    void PaintIt(int offset);
 
-  // Construction
+    // Construction
 public:
-  CColorButton();
+    CColorButton();
 
-  // Attributes
+    // Attributes
 public:
-  void SetColorRef(const COLORREF *pColor);
-  afx_msg LRESULT OnSetState(WPARAM wParam, LPARAM /* lParam */);
+    void SetColorRef(const COLORREF *pColor);
+    afx_msg LRESULT OnSetState(WPARAM wParam, LPARAM /* lParam */);
 
-  // Operations
+    // Operations
 public:
-  
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CColorButton)
-  //}}AFX_VIRTUAL
-  
-  // Implementation
+
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CColorButton)
+    //}}AFX_VIRTUAL
+
+    // Implementation
 public:
-  virtual ~CColorButton();
-  
-  // Generated message map functions
+    virtual ~CColorButton();
+
+    // Generated message map functions
 protected:
-  //{{AFX_MSG(CColorButton)
-  afx_msg void OnPaint();
-	//}}AFX_MSG
-  
-  DECLARE_MESSAGE_MAP()
+    //{{AFX_MSG(CColorButton)
+    afx_msg void OnPaint();
+    //}}AFX_MSG
+
+    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

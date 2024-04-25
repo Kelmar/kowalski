@@ -36,14 +36,14 @@ static char THIS_FILE[] = __FILE__;
 
 CColorButton::CColorButton()
 {
-  m_nDx = ::GetSystemMetrics(SM_CXEDGE);
-  if (m_nDx == 0)
-    m_nDx = 2;
-  m_nDy = ::GetSystemMetrics(SM_CYEDGE);
-  if (m_nDy == 0)
-    m_nDy = 2;
-  m_nDx += 3;
-  m_nDy += 3;
+    m_nDx = ::GetSystemMetrics(SM_CXEDGE);
+    if (m_nDx == 0)
+        m_nDx = 2;
+    m_nDy = ::GetSystemMetrics(SM_CYEDGE);
+    if (m_nDy == 0)
+        m_nDy = 2;
+    m_nDx += 3;
+    m_nDy += 3;
 }
 
 
@@ -53,53 +53,53 @@ CColorButton::~CColorButton()
 
 
 BEGIN_MESSAGE_MAP(CColorButton, CButton)
-  //{{AFX_MSG_MAP(CColorButton)
-  ON_WM_PAINT()
-  //}}AFX_MSG_MAP
-  ON_MESSAGE(BM_SETSTATE, OnSetState)
+    //{{AFX_MSG_MAP(CColorButton)
+    ON_WM_PAINT()
+    //}}AFX_MSG_MAP
+    ON_MESSAGE(BM_SETSTATE, OnSetState)
 END_MESSAGE_MAP()
 
 
 void CColorButton::SetColorRef(const COLORREF *pColor)
 {
-  m_prgbColor = pColor;
+    m_prgbColor = pColor;
 
-	if (m_hWnd)
-		Invalidate();
+    if (m_hWnd)
+        Invalidate();
 }
 
 
 void CColorButton::PaintIt(int offset)
 {
-  RECT rect;
-  GetClientRect(&rect);
-  rect.bottom -= m_nDy-offset;
-  rect.right -= m_nDx-offset;
-  rect.top += m_nDy+offset;
-  rect.left += m_nDx+offset;
+    RECT rect;
+    GetClientRect(&rect);
+    rect.bottom -= m_nDy-offset;
+    rect.right -= m_nDx-offset;
+    rect.top += m_nDy+offset;
+    rect.left += m_nDx+offset;
 
-  CClientDC dc(this);
-  CBrush brush(::GetSysColor(COLOR_BTNTEXT));
-  dc.FillSolidRect(&rect,*m_prgbColor);
-  dc.FrameRect(&rect,&brush);
+    CClientDC dc(this);
+    CBrush brush(::GetSysColor(COLOR_BTNTEXT));
+    dc.FillSolidRect(&rect,*m_prgbColor);
+    dc.FrameRect(&rect,&brush);
 }
 
 
 /////////////////////////////////////////////////////////////////////////////
 // CColorButton message handlers
 
-void CColorButton::OnPaint() 
+void CColorButton::OnPaint()
 {
 //  CPaintDC dc(this); // device context for painting
-  CButton::OnPaint();	// wywo³anie Default() - narysowanie guzika
-  int x= SendMessage(BM_GETSTATE,0,0);
-  PaintIt(x & BST_PUSHED ? 1 : 0);
+    CButton::OnPaint();	// wywo³anie Default() - narysowanie guzika
+    int x= SendMessage(BM_GETSTATE,0,0);
+    PaintIt(x & BST_PUSHED ? 1 : 0);
 }
 
 
 afx_msg LRESULT CColorButton::OnSetState(WPARAM wParam, LPARAM /* lParam */)
 {
-  CButton::Default();
-  PaintIt(wParam ? 1 : 0);
-  return 0;
+    CButton::Default();
+    PaintIt(wParam ? 1 : 0);
+    return 0;
 }

@@ -26,44 +26,44 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CIdentInfoView : public CListView
 {
-  static int CALLBACK CompareLVIFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-  int m_nSortBy;
+    static int CALLBACK CompareLVIFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+    int m_nSortBy;
 
 protected:
-  CIdentInfoView();           // protected constructor used by dynamic creation
-  DECLARE_DYNCREATE(CIdentInfoView)
-    
+    CIdentInfoView();           // protected constructor used by dynamic creation
+    DECLARE_DYNCREATE(CIdentInfoView)
+
     // Attributes
 public:
-  
-  // Operations
+
+    // Operations
 public:
-  
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CIdentInfoView)
+
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CIdentInfoView)
 public:
-  virtual void OnInitialUpdate();
+    virtual void OnInitialUpdate();
 protected:
-  virtual void OnDraw(CDC* pDC);      // overridden to draw this view
-  virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-  //}}AFX_VIRTUAL
-  
-  // Implementation
+    virtual void OnDraw(CDC* pDC);      // overridden to draw this view
+    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+    //}}AFX_VIRTUAL
+
+    // Implementation
 protected:
-  virtual ~CIdentInfoView();
+    virtual ~CIdentInfoView();
 #ifdef _DEBUG
-  virtual void AssertValid() const;
-  virtual void Dump(CDumpContext& dc) const;
+    virtual void AssertValid() const;
+    virtual void Dump(CDumpContext& dc) const;
 #endif
-  
-  // Generated message map functions
+
+    // Generated message map functions
 protected:
-  //{{AFX_MSG(CIdentInfoView)
-  afx_msg void OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
-  afx_msg void OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult);
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    //{{AFX_MSG(CIdentInfoView)
+    afx_msg void OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
+    afx_msg void OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult);
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

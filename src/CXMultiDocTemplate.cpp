@@ -26,15 +26,15 @@ bool CXMultiDocTemplate::s_bRegistrationExt= true;
 
 BOOL CXMultiDocTemplate::GetDocString(CString& rString, enum DocStringIndex i) const
 {
-	if (!CMultiDocTemplate::GetDocString(rString, i))
-		return false;
+    if (!CMultiDocTemplate::GetDocString(rString, i))
+        return false;
 
-	if (i == filterExt)
-	{
-		if (s_bRegistrationExt)
-			if (rString.GetLength() > 4)
-				rString = rString.Left(4);
-	}
+    if (i == filterExt)
+    {
+        if (s_bRegistrationExt)
+            if (rString.GetLength() > 4)
+                rString = rString.Left(4);
+    }
 
-	return true;
+    return true;
 }

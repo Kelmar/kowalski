@@ -26,31 +26,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CLoadCodeOptions : public CDialog
 {
-  // Construction
+    // Construction
 public:
-  CLoadCodeOptions(CWnd* pParent = NULL);   // standard constructor
-  
-  // Dialog Data
-  //{{AFX_DATA(CLoadCodeOptions)
-	enum { IDD = IDD_LOAD_CODE_OPT };
-	//}}AFX_DATA
-	static UINT m_uStart;
-	static BOOL m_bClearMem;
-	static UINT m_uFill;
+    CLoadCodeOptions(CWnd* pParent = NULL);   // standard constructor
 
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CLoadCodeOptions)
+    // Dialog Data
+    //{{AFX_DATA(CLoadCodeOptions)
+    enum { IDD = IDD_LOAD_CODE_OPT };
+    //}}AFX_DATA
+    static UINT m_uStart;
+    static BOOL m_bClearMem;
+    static UINT m_uFill;
+
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CLoadCodeOptions)
 protected:
-  virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-  //}}AFX_VIRTUAL
-  
-  // Implementation
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
+
+    // Implementation
 protected:
-  
-  // Generated message map functions
-  //{{AFX_MSG(CLoadCodeOptions)
-	// NOTE: the ClassWizard will add member functions here
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+
+    // Generated message map functions
+    //{{AFX_MSG(CLoadCodeOptions)
+    // NOTE: the ClassWizard will add member functions here
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };

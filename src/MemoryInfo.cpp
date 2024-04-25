@@ -45,12 +45,12 @@ CString CMemoryInfo::m_strClass;
 
 void CMemoryInfo::RegisterWndClass()
 {
-  ASSERT(!m_bRegistered);
-  if (m_bRegistered)
-    return;
-  m_strClass = AfxRegisterWndClass(CS_VREDRAW|CS_HREDRAW/*CS_DBLCLKS*/,::LoadCursor(NULL,IDC_ARROW),0,
-    AfxGetApp()->LoadIcon(IDI_MEMORY_INFO));
-  m_bRegistered = TRUE;
+    ASSERT(!m_bRegistered);
+    if (m_bRegistered)
+        return;
+    m_strClass = AfxRegisterWndClass(CS_VREDRAW|CS_HREDRAW/*CS_DBLCLKS*/,::LoadCursor(NULL,IDC_ARROW),0,
+                                     AfxGetApp()->LoadIcon(IDI_MEMORY_INFO));
+    m_bRegistered = TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -61,17 +61,17 @@ IMPLEMENT_DYNCREATE(CMemoryInfo, CMiniFrameWnd)
 
 void CMemoryInfo::init()
 {
-  if (!m_bRegistered)
-    RegisterWndClass();
-  m_Doc.m_bAutoDelete = FALSE;
+    if (!m_bRegistered)
+        RegisterWndClass();
+    m_Doc.m_bAutoDelete = FALSE;
 }
 
 
 CMemoryInfo::CMemoryInfo()
 {
-  m_hWnd = 0;
-  init();
-  m_bHidden = false;
+    m_hWnd = 0;
+    init();
+    m_bHidden = false;
 }
 
 CMemoryInfo::~CMemoryInfo()
@@ -83,48 +83,50 @@ CMemoryInfo::~CMemoryInfo()
 
 bool CMemoryInfo::Create(COutputMem *pMem, UINT32 uAddr, ViewType bView)
 {
-  m_pMem = pMem;
-  m_uAddr = uAddr;
+    m_pMem = pMem;
+    m_uAddr = uAddr;
 
-  CString title;
-  CCreateContext ctx;
-  if (bView == VIEW_MEMORY)
-  {
-    ctx.m_pNewViewClass = RUNTIME_CLASS(CMemoryView);
-    title.LoadString(IDS_MEMORY_TITLE);
-  }
-  else if (bView == VIEW_ZEROPAGE)
-  {
-    ctx.m_pNewViewClass = RUNTIME_CLASS(CZeroPageView);
-    title.LoadString(IDS_ZMEMORY_TITLE);
-  }
-  else if (bView == VIEW_STACK)
-  {
-    ctx.m_pNewViewClass = RUNTIME_CLASS(CStackView);
-    title.LoadString(IDS_STACK);
-  }
-  else
-  { ASSERT(false); }
+    CString title;
+    CCreateContext ctx;
+    if (bView == VIEW_MEMORY)
+    {
+        ctx.m_pNewViewClass = RUNTIME_CLASS(CMemoryView);
+        title.LoadString(IDS_MEMORY_TITLE);
+    }
+    else if (bView == VIEW_ZEROPAGE)
+    {
+        ctx.m_pNewViewClass = RUNTIME_CLASS(CZeroPageView);
+        title.LoadString(IDS_ZMEMORY_TITLE);
+    }
+    else if (bView == VIEW_STACK)
+    {
+        ctx.m_pNewViewClass = RUNTIME_CLASS(CStackView);
+        title.LoadString(IDS_STACK);
+    }
+    else
+    {
+        ASSERT(false);
+    }
 
-  ctx.m_pCurrentDoc = &m_Doc;	// dokument
-  ctx.m_pNewDocTemplate = NULL;	// template
-  ctx.m_pLastView = NULL;	// lastView
-  ctx.m_pCurrentFrame = this;	// current frame
+    ctx.m_pCurrentDoc = &m_Doc;	// dokument
+    ctx.m_pNewDocTemplate = NULL;	// template
+    ctx.m_pLastView = NULL;	// lastView
+    ctx.m_pCurrentFrame = this;	// current frame
 
-  if (!CMiniFrameWnd::Create(m_strClass, title,
-    WS_POPUP | WS_CAPTION | WS_SYSMENU | MFS_THICKFRAME | MFS_SYNCACTIVE,
-    m_WndRect, AfxGetMainWnd(), 0))
-    return FALSE;
+    if (!CMiniFrameWnd::Create(m_strClass, title,
+                               WS_POPUP | WS_CAPTION | WS_SYSMENU | MFS_THICKFRAME | MFS_SYNCACTIVE,
+                               m_WndRect, AfxGetMainWnd(), 0))
+        return FALSE;
 
-  if (!CreateView(&ctx))
-  {
+    if (!CreateView(&ctx))
+    {
 //    delete this;
-    return FALSE;
-  }
-  RecalcLayout();
-  m_Doc.SetData(m_pMem, m_uAddr);
-  InitialUpdateFrame(&m_Doc, FALSE);
-  return TRUE;
+        return FALSE;
+    }
+    RecalcLayout();
+    m_Doc.SetData(m_pMem, m_uAddr);
+    InitialUpdateFrame(&m_Doc, FALSE);
+    return TRUE;
 }
 
 //-----------------------------------------------------------------------------
@@ -132,41 +134,41 @@ bool CMemoryInfo::Create(COutputMem *pMem, UINT32 uAddr, ViewType bView)
 #include <AFXPRIV.H>
 
 BEGIN_MESSAGE_MAP(CMemoryInfo, CMiniFrameWnd)
-  //{{AFX_MSG_MAP(CMemoryInfo)
-  ON_WM_DESTROY()
-  ON_WM_SHOWWINDOW()
-  ON_WM_CLOSE()
-  //}}AFX_MSG_MAP
-  ON_MESSAGE(CBroadcast::WM_USER_PROG_MEM_CHANGED, OnChangeCode)
-  ON_MESSAGE(CBroadcast::WM_USER_START_DEBUGGER, OnStartDebug)
-  ON_MESSAGE(CBroadcast::WM_USER_EXIT_DEBUGGER, OnExitDebug)
+    //{{AFX_MSG_MAP(CMemoryInfo)
+    ON_WM_DESTROY()
+    ON_WM_SHOWWINDOW()
+    ON_WM_CLOSE()
+    //}}AFX_MSG_MAP
+    ON_MESSAGE(CBroadcast::WM_USER_PROG_MEM_CHANGED, OnChangeCode)
+    ON_MESSAGE(CBroadcast::WM_USER_START_DEBUGGER, OnStartDebug)
+    ON_MESSAGE(CBroadcast::WM_USER_EXIT_DEBUGGER, OnExitDebug)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CMemoryInfo message handlers
 
 
-void CMemoryInfo::PostNcDestroy() 
+void CMemoryInfo::PostNcDestroy()
 {
 // CMiniFrameWnd::PostNcDestroy();
 }
 
 
-void CMemoryInfo::OnDestroy() 
+void CMemoryInfo::OnDestroy()
 {
-  GetWindowRect(m_WndRect);
-  CMiniFrameWnd::OnDestroy();
+    GetWindowRect(m_WndRect);
+    CMiniFrameWnd::OnDestroy();
 }
 
 //-----------------------------------------------------------------------------
 
 afx_msg LRESULT CMemoryInfo::OnChangeCode(WPARAM wParam, LPARAM lParam)
 {
-  if (lParam == -1)
-    SendMessage(WM_CLOSE);		// nie ma kodu - zamkniêcie okna
-  else
-    InvalidateRect(NULL);		// przerysowanie ca³ego okna
-  return 0;
+    if (lParam == -1)
+        SendMessage(WM_CLOSE);		// nie ma kodu - zamkniêcie okna
+    else
+        InvalidateRect(NULL);		// przerysowanie ca³ego okna
+    return 0;
 }
 
 //=============================================================================
@@ -174,28 +176,28 @@ afx_msg LRESULT CMemoryInfo::OnChangeCode(WPARAM wParam, LPARAM lParam)
 afx_msg LRESULT CMemoryInfo::OnStartDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
 
-  if (!m_bHidden)		// okno by³o widoczne?
-    if (m_hWnd)
-      ShowWindow(SW_NORMAL);
+    if (!m_bHidden)		// okno by³o widoczne?
+        if (m_hWnd)
+            ShowWindow(SW_NORMAL);
 //    else
 //      Create();
 
-  return 1;
+    return 1;
 }
 
 
 afx_msg LRESULT CMemoryInfo::OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
 
-  if (m_hWnd && (GetStyle() & WS_VISIBLE))	// okno aktualnie wyœwietlone?
-  {
-    m_bHidden = FALSE;				// info - okno by³o wyœwietlane
-    ShowWindow(SW_HIDE);			// ukrycie okna
-  }
-  else
-    m_bHidden = TRUE;				// info - okno by³o ukryte
+    if (m_hWnd && (GetStyle() & WS_VISIBLE))	// okno aktualnie wyœwietlone?
+    {
+        m_bHidden = FALSE;				// info - okno by³o wyœwietlane
+        ShowWindow(SW_HIDE);			// ukrycie okna
+    }
+    else
+        m_bHidden = TRUE;				// info - okno by³o ukryte
 
-  return 1;
+    return 1;
 }
 
 //=============================================================================
@@ -203,9 +205,9 @@ afx_msg LRESULT CMemoryInfo::OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 
 void CMemoryInfo::OnShowWindow(BOOL bShow, UINT nStatus)
 {
-  CMiniFrameWnd::OnShowWindow(bShow, nStatus);
+    CMiniFrameWnd::OnShowWindow(bShow, nStatus);
 
-  m_Doc.UpdateAllViews(0, 'show', 0);
+    m_Doc.UpdateAllViews(0, 'show', 0);
 }
 
 
@@ -213,19 +215,19 @@ void CMemoryInfo::OnClose()
 {
     m_bHidden = FALSE;
 
-	CMiniFrameWnd::OnClose();
+    CMiniFrameWnd::OnClose();
 }
 
 
 void CMemoryInfo::InvalidateView(UINT16 uStackPtr/*= 0*/)
 {
-  m_Doc.m_uStackPtr = uStackPtr;
-  m_Doc.UpdateAllViews(0, 'invl', 0);
+    m_Doc.m_uStackPtr = uStackPtr;
+    m_Doc.UpdateAllViews(0, 'invl', 0);
 }
 
 
 void CMemoryInfo::Invalidate()
 {
-	if (CWnd* pView= GetActiveView())
-		pView->Invalidate();
+    if (CWnd* pView= GetActiveView())
+        pView->Invalidate();
 }

@@ -23,26 +23,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CXMultiDocTemplate: public CMultiDocTemplate
 {
-  bool m_bNormalMatch;
+    bool m_bNormalMatch;
 
 public:
-  CXMultiDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass,
-    CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass, bool bNormalMatch= true) :
-      m_bNormalMatch(bNormalMatch),
-      CMultiDocTemplate(nIDResource,pDocClass,pFrameClass,pViewClass)
-  {}
-  virtual ~CXMultiDocTemplate()
-  {}
+    CXMultiDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass,
+                       CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass, bool bNormalMatch= true) :
+        m_bNormalMatch(bNormalMatch),
+        CMultiDocTemplate(nIDResource,pDocClass,pFrameClass,pViewClass)
+    {}
+    virtual ~CXMultiDocTemplate()
+    {}
 
-  virtual Confidence MatchDocType(LPCTSTR lpszPathName, CDocument*& rpDocMatch)
-  {
-    if (m_bNormalMatch)
-      return CMultiDocTemplate::MatchDocType(lpszPathName,rpDocMatch);
-    else
-      return CDocTemplate::noAttempt;
-  }
+    virtual Confidence MatchDocType(LPCTSTR lpszPathName, CDocument*& rpDocMatch)
+    {
+        if (m_bNormalMatch)
+            return CMultiDocTemplate::MatchDocType(lpszPathName,rpDocMatch);
+        else
+            return CDocTemplate::noAttempt;
+    }
 
-  virtual BOOL GetDocString(CString& rString, enum DocStringIndex i) const;
+    virtual BOOL GetDocString(CString& rString, enum DocStringIndex i) const;
 
-  static bool s_bRegistrationExt;
+    static bool s_bRegistrationExt;
 };

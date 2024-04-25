@@ -29,17 +29,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #pragma once
 #endif // _MSC_VER > 1000
 
-class CIntGenerator  
+class CIntGenerator
 {
 public:
-	CIntGenerator();
-	~CIntGenerator();
+    CIntGenerator();
+    ~CIntGenerator();
 
-	int m_nIRQTimeLapse;
-	bool m_bGenerateIRQ;
+    int m_nIRQTimeLapse;
+    bool m_bGenerateIRQ;
 
-	int m_nNMITimeLapse;
-	bool m_bGenerateNMI;
+    int m_nNMITimeLapse;
+    bool m_bGenerateNMI;
 };
 
 #endif // !defined(AFX_INTGENERATOR_H__95B80699_804F_41D1_9BFE_B7618C2D1151__INCLUDED_)

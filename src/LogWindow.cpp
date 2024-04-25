@@ -37,8 +37,8 @@ IMPLEMENT_DYNCREATE(CLogWindow, CMiniFrameWnd)
 
 CLogWindow::CLogWindow()
 {
-	m_bHidden = false;
-	m_WndRect.SetRect(100, 100, 400, 600);
+    m_bHidden = false;
+    m_WndRect.SetRect(100, 100, 400, 600);
 }
 
 CLogWindow::~CLogWindow()
@@ -47,15 +47,15 @@ CLogWindow::~CLogWindow()
 
 
 BEGIN_MESSAGE_MAP(CLogWindow, CMiniFrameWnd)
-	//{{AFX_MSG_MAP(CLogWindow)
-	ON_WM_CTLCOLOR()
-	ON_WM_DESTROY()
-	ON_WM_CLOSE()
-	//}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CLogWindow)
+    ON_WM_CTLCOLOR()
+    ON_WM_DESTROY()
+    ON_WM_CLOSE()
+    //}}AFX_MSG_MAP
 //	ON_NOTIFY(EN_CHANGE, OnChange())
-	ON_MESSAGE(CBroadcast::WM_USER_PROG_MEM_CHANGED, OnChangeCode)
-	ON_MESSAGE(CBroadcast::WM_USER_START_DEBUGGER, OnStartDebug)
-	ON_MESSAGE(CBroadcast::WM_USER_EXIT_DEBUGGER, OnExitDebug)
+    ON_MESSAGE(CBroadcast::WM_USER_PROG_MEM_CHANGED, OnChangeCode)
+    ON_MESSAGE(CBroadcast::WM_USER_START_DEBUGGER, OnStartDebug)
+    ON_MESSAGE(CBroadcast::WM_USER_EXIT_DEBUGGER, OnExitDebug)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -64,149 +64,149 @@ END_MESSAGE_MAP()
 
 bool CLogWindow::Create()
 {
-	m_brBackground.DeleteObject();
-	m_brBackground.CreateSolidBrush(::GetSysColor(COLOR_WINDOW));
+    m_brBackground.DeleteObject();
+    m_brBackground.CreateSolidBrush(::GetSysColor(COLOR_WINDOW));
 
-	CString strClass= AfxRegisterWndClass(CS_VREDRAW | CS_HREDRAW/*CS_DBLCLKS*/, ::LoadCursor(NULL,IDC_ARROW), 0,
-			AfxGetApp()->LoadIcon(IDI_MEMORY_INFO));
+    CString strClass= AfxRegisterWndClass(CS_VREDRAW | CS_HREDRAW/*CS_DBLCLKS*/, ::LoadCursor(NULL,IDC_ARROW), 0,
+                                          AfxGetApp()->LoadIcon(IDI_MEMORY_INFO));
 
-	if (!CMiniFrameWnd::Create(strClass, "Command Log",
-		WS_POPUP | WS_CAPTION | WS_SYSMENU | MFS_THICKFRAME | MFS_SYNCACTIVE,
-		m_WndRect, AfxGetMainWnd(), 0))
-		return false;
+    if (!CMiniFrameWnd::Create(strClass, "Command Log",
+                               WS_POPUP | WS_CAPTION | WS_SYSMENU | MFS_THICKFRAME | MFS_SYNCACTIVE,
+                               m_WndRect, AfxGetMainWnd(), 0))
+        return false;
 
-	CCreateContext ctx;
-	ctx.m_pNewViewClass = RUNTIME_CLASS(CEditView);
-	ctx.m_pCurrentDoc = 0;			// document
-	ctx.m_pNewDocTemplate = NULL;	// template
-	ctx.m_pLastView = NULL;			// lastView
-	ctx.m_pCurrentFrame = this;		// current frame
+    CCreateContext ctx;
+    ctx.m_pNewViewClass = RUNTIME_CLASS(CEditView);
+    ctx.m_pCurrentDoc = 0;			// document
+    ctx.m_pNewDocTemplate = NULL;	// template
+    ctx.m_pLastView = NULL;			// lastView
+    ctx.m_pCurrentFrame = this;		// current frame
 
-	CEditView* pView= static_cast<CEditView*>(CreateView(&ctx));
+    CEditView* pView= static_cast<CEditView*>(CreateView(&ctx));
 
-	if (pView == 0)
-		return false;
+    if (pView == 0)
+        return false;
 
-	pView->ModifyStyle(ES_AUTOHSCROLL | WS_HSCROLL,
-		ES_LEFT | ES_AUTOVSCROLL | ES_MULTILINE, SWP_FRAMECHANGED);
+    pView->ModifyStyle(ES_AUTOHSCROLL | WS_HSCROLL,
+                       ES_LEFT | ES_AUTOVSCROLL | ES_MULTILINE, SWP_FRAMECHANGED);
 
-	pView->GetEditCtrl().SetReadOnly();
+    pView->GetEditCtrl().SetReadOnly();
 
-	if (m_fntMono.m_hObject == 0)
-	{
-		HFONT hFont= static_cast<HFONT>(::GetStockObject(DEFAULT_GUI_FONT));
-		LOGFONT lf;
-		::GetObject(hFont, sizeof(lf), &lf);
-		lf.lfPitchAndFamily = FIXED_PITCH;
-		strcpy(lf.lfFaceName, "FixedSys");
-		m_fntMono.CreateFontIndirect(&lf);
-	}
-	pView->SetFont(&m_fntMono);
+    if (m_fntMono.m_hObject == 0)
+    {
+        HFONT hFont= static_cast<HFONT>(::GetStockObject(DEFAULT_GUI_FONT));
+        LOGFONT lf;
+        ::GetObject(hFont, sizeof(lf), &lf);
+        lf.lfPitchAndFamily = FIXED_PITCH;
+        strcpy(lf.lfFaceName, "FixedSys");
+        m_fntMono.CreateFontIndirect(&lf);
+    }
+    pView->SetFont(&m_fntMono);
 
-	RecalcLayout();
+    RecalcLayout();
 
-	InitialUpdateFrame(0, FALSE);
+    InitialUpdateFrame(0, FALSE);
 
-	return true;
+    return true;
 }
 
 
 void CLogWindow::PostNcDestroy()
 {
-	// skip default: deletes this
+    // skip default: deletes this
 }
 
 
 HBRUSH CLogWindow::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-	pDC->SetBkColor(::GetSysColor(COLOR_WINDOW));
-	pDC->SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
-	return m_brBackground;
+    pDC->SetBkColor(::GetSysColor(COLOR_WINDOW));
+    pDC->SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
+    return m_brBackground;
 }
 
 
 void CLogWindow::SetText(const CommandLog& log)
 {
-	int nCount= log.GetCount();
+    int nCount= log.GetCount();
 
-	if (nCount == 0)
-	{
-		if (CWnd* pView= GetActiveView())
-			pView->SetWindowText("");
-		return;
-	}
+    if (nCount == 0)
+    {
+        if (CWnd* pView= GetActiveView())
+            pView->SetWindowText("");
+        return;
+    }
 
-	CString strBuf;
-	strBuf.GetBuffer(nCount * 16);	// estimate
-	strBuf.ReleaseBuffer(0);
+    CString strBuf;
+    strBuf.GetBuffer(nCount * 16);	// estimate
+    strBuf.ReleaseBuffer(0);
 
-	for (int i= 0; i < nCount; ++i)
-		strBuf += log[i].Asm() + "\r\n";
+    for (int i= 0; i < nCount; ++i)
+        strBuf += log[i].Asm() + "\r\n";
 
-	if (CWnd* pView= GetActiveView())
-	{
-		CEdit* pEdit= static_cast<CEdit*>(pView);
-		pEdit->SetWindowText(strBuf);
-		int nLen= strBuf.GetLength();
-		pEdit->SetSel(nLen, nLen);
-	}
+    if (CWnd* pView= GetActiveView())
+    {
+        CEdit* pEdit= static_cast<CEdit*>(pView);
+        pEdit->SetWindowText(strBuf);
+        int nLen= strBuf.GetLength();
+        pEdit->SetSel(nLen, nLen);
+    }
 }
 
 
 void CLogWindow::Invalidate()
 {
-	if (CWnd* pView= GetActiveView())
-		pView->Invalidate();
+    if (CWnd* pView= GetActiveView())
+        pView->Invalidate();
 }
 
 //=============================================================================
 
 afx_msg LRESULT CLogWindow::OnChangeCode(WPARAM wParam, LPARAM lParam)
 {
-	if (lParam == -1)
-		SendMessage(WM_CLOSE);		// nie ma kodu - zamkniêcie okna
-	else
-		InvalidateRect(NULL);		// przerysowanie ca³ego okna
-	return 0;
+    if (lParam == -1)
+        SendMessage(WM_CLOSE);		// nie ma kodu - zamkniêcie okna
+    else
+        InvalidateRect(NULL);		// przerysowanie ca³ego okna
+    return 0;
 }
 
 
 afx_msg LRESULT CLogWindow::OnStartDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
 
-	if (!m_bHidden)		// okno by³o widoczne?
-		if (m_hWnd)
-			ShowWindow(SW_NORMAL);
-		//    else
-		//      Create();
-		
-	return 1;
+    if (!m_bHidden)		// okno by³o widoczne?
+        if (m_hWnd)
+            ShowWindow(SW_NORMAL);
+    //    else
+    //      Create();
+
+    return 1;
 }
 
 
 afx_msg LRESULT CLogWindow::OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
-	if (m_hWnd && (GetStyle() & WS_VISIBLE))	// okno aktualnie wyœwietlone?
-	{
-		m_bHidden = FALSE;				// info - okno by³o wyœwietlane
-		ShowWindow(SW_HIDE);			// ukrycie okna
-	}
-	else
-		m_bHidden = TRUE;				// info - okno by³o ukryte
+    if (m_hWnd && (GetStyle() & WS_VISIBLE))	// okno aktualnie wyœwietlone?
+    {
+        m_bHidden = FALSE;				// info - okno by³o wyœwietlane
+        ShowWindow(SW_HIDE);			// ukrycie okna
+    }
+    else
+        m_bHidden = TRUE;				// info - okno by³o ukryte
 
-	return 1;
+    return 1;
 }
 
 
 void CLogWindow::OnDestroy()
 {
-	GetWindowRect(m_WndRect);
-	CMiniFrameWnd::OnDestroy();
+    GetWindowRect(m_WndRect);
+    CMiniFrameWnd::OnDestroy();
 }
 
 
 void CLogWindow::OnClose()
 {
-	ShowWindow(SW_HIDE);		// ukrycie okna
+    ShowWindow(SW_HIDE);		// ukrycie okna
 //	CMiniFrameWnd::OnClose();
 }

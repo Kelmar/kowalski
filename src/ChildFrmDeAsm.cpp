@@ -36,10 +36,10 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(CChildFrameDeAsm, CMDIChildWnd)
 
 BEGIN_MESSAGE_MAP(CChildFrameDeAsm, CMDIChildWnd)
-  //{{AFX_MSG_MAP(CChildFrameDeAsm)
+    //{{AFX_MSG_MAP(CChildFrameDeAsm)
     // NOTE - the ClassWizard will add and remove mapping macros here.
     //    DO NOT EDIT what you see in these blocks of generated code !
-  //}}AFX_MSG_MAP
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -47,8 +47,8 @@ END_MESSAGE_MAP()
 
 CChildFrameDeAsm::CChildFrameDeAsm()
 {
-  // TODO: add member initialization code here
-	
+    // TODO: add member initialization code here
+
 }
 
 CChildFrameDeAsm::~CChildFrameDeAsm()
@@ -57,10 +57,10 @@ CChildFrameDeAsm::~CChildFrameDeAsm()
 
 BOOL CChildFrameDeAsm::PreCreateWindow(CREATESTRUCT& cs)
 {
-  // TODO: Modify the Window class or styles here by modifying
-  //  the CREATESTRUCT cs
+    // TODO: Modify the Window class or styles here by modifying
+    //  the CREATESTRUCT cs
 
-  return CMDIChildWnd::PreCreateWindow(cs);
+    return CMDIChildWnd::PreCreateWindow(cs);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -69,12 +69,12 @@ BOOL CChildFrameDeAsm::PreCreateWindow(CREATESTRUCT& cs)
 #ifdef _DEBUG
 void CChildFrameDeAsm::AssertValid() const
 {
-  CMDIChildWnd::AssertValid();
+    CMDIChildWnd::AssertValid();
 }
 
 void CChildFrameDeAsm::Dump(CDumpContext& dc) const
 {
-  CMDIChildWnd::Dump(dc);
+    CMDIChildWnd::Dump(dc);
 }
 
 #endif //_DEBUG
@@ -82,7 +82,7 @@ void CChildFrameDeAsm::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CChildFrameDeAsm message handlers
 
-BOOL CChildFrameDeAsm::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
+BOOL CChildFrameDeAsm::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 {
-	return CMDIChildWnd::OnCreateClient(lpcs, pContext);
+    return CMDIChildWnd::OnCreateClient(lpcs, pContext);
 }

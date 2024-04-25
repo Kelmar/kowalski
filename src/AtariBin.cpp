@@ -44,40 +44,40 @@ CAtariBin::~CAtariBin()
 
 bool CAtariBin::LoadAtaBinFormat(CArchive& ar, COutputMem& mem, CMarkArea& area, int& prog_start)
 {
-	WORD wTemp;
-	ar >> wTemp;
-	if (wTemp != 0xFFFF)
-		return false;
+    WORD wTemp;
+    ar >> wTemp;
+    if (wTemp != 0xFFFF)
+        return false;
 
-	WORD wBegin= 0;
+    WORD wBegin= 0;
 
-	for (;;)
-	{
-		WORD wFrom, wTo;
-		ar >> wFrom;
-		ar >> wTo;
-		if (wTo < wFrom)
-			return false;
+    for (;;)
+    {
+        WORD wFrom, wTo;
+        ar >> wFrom;
+        ar >> wTo;
+        if (wTo < wFrom)
+            return false;
 
-		if (wBegin == 0)
-			wBegin = wFrom;
+        if (wBegin == 0)
+            wBegin = wFrom;
 
-		area.SetStart(wFrom);
-		area.SetEnd(wTo);
+        area.SetStart(wFrom);
+        area.SetEnd(wTo);
 
-		mem.Load(ar, wFrom, wTo);
+        mem.Load(ar, wFrom, wTo);
 
-		if (ar.GetFile()->GetLength() >= ar.GetFile()->GetPosition() && ar.IsBufferEmpty())
-			break;
-	}
+        if (ar.GetFile()->GetLength() >= ar.GetFile()->GetPosition() && ar.IsBufferEmpty())
+            break;
+    }
 
-	int nStart= mem[0x2e0] + mem[0x2e1] * 256;		// run address
-	if (nStart == 0)
-		nStart = mem[0x2e2] + mem[0x2e3] * 256;		// init address
-	if (nStart == 0)
-		nStart = wBegin;	// beginning of first block
-	if (nStart != 0)
-		prog_start = nStart;
+    int nStart= mem[0x2e0] + mem[0x2e1] * 256;		// run address
+    if (nStart == 0)
+        nStart = mem[0x2e2] + mem[0x2e3] * 256;		// init address
+    if (nStart == 0)
+        nStart = wBegin;	// beginning of first block
+    if (nStart != 0)
+        prog_start = nStart;
 
-	return true;
+    return true;
 }

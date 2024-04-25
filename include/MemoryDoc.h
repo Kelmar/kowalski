@@ -35,49 +35,49 @@ class CMemoryDoc : public CDocument
 {
 protected:
 //  CMemoryDoc();           // protected constructor used by dynamic creation
-  DECLARE_DYNCREATE(CMemoryDoc)
+    DECLARE_DYNCREATE(CMemoryDoc)
 
-	virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bReplace = TRUE);
+    virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bReplace = TRUE);
 
     // Attributes
 public:
-  UINT32 m_uAddress;
-  UINT16 m_uStackPtr;
-  COutputMem* m_pMem;
+    UINT32 m_uAddress;
+    UINT16 m_uStackPtr;
+    COutputMem* m_pMem;
 
-  // Operations
+    // Operations
 public:
-  CMemoryDoc();
+    CMemoryDoc();
 
-  void SetData(COutputMem* pMem, UINT32 uAddress)
-  {
-    m_uAddress = uAddress;
-    m_pMem = pMem;
-  }
+    void SetData(COutputMem* pMem, UINT32 uAddress)
+    {
+        m_uAddress = uAddress;
+        m_pMem = pMem;
+    }
 
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CMemoryDoc)
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CMemoryDoc)
 public:
-  virtual void Serialize(CArchive& ar);   // overridden for document i/o
+    virtual void Serialize(CArchive& ar);   // overridden for document i/o
 protected:
-  virtual BOOL OnNewDocument();
-  //}}AFX_VIRTUAL
+    virtual BOOL OnNewDocument();
+    //}}AFX_VIRTUAL
 
-  // Implementation
+    // Implementation
 public:
-  virtual ~CMemoryDoc();
+    virtual ~CMemoryDoc();
 #ifdef _DEBUG
-  virtual void AssertValid() const;
-  virtual void Dump(CDumpContext& dc) const;
+    virtual void AssertValid() const;
+    virtual void Dump(CDumpContext& dc) const;
 #endif
 
-  // Generated message map functions
+    // Generated message map functions
 protected:
-  //{{AFX_MSG(CMemoryDoc)
-		// NOTE - the ClassWizard will add and remove member functions here.
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    //{{AFX_MSG(CMemoryDoc)
+    // NOTE - the ClassWizard will add and remove member functions here.
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };
 
 #endif

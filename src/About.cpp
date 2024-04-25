@@ -25,65 +25,65 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 {
-  //{{AFX_DATA_INIT(CAboutDlg)
-  m_strVersion = _T("");
-  //}}AFX_DATA_INIT
+    //{{AFX_DATA_INIT(CAboutDlg)
+    m_strVersion = _T("");
+    //}}AFX_DATA_INIT
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-  CDialog::DoDataExchange(pDX);
-  //{{AFX_DATA_MAP(CAboutDlg)
-  DDX_Control(pDX, IDC_6502, m_wndTitle);
-  DDX_Text(pDX, IDC_ABOUT_VER, m_strVersion);
-  //}}AFX_DATA_MAP
+    CDialog::DoDataExchange(pDX);
+    //{{AFX_DATA_MAP(CAboutDlg)
+    DDX_Control(pDX, IDC_6502, m_wndTitle);
+    DDX_Text(pDX, IDC_ABOUT_VER, m_strVersion);
+    //}}AFX_DATA_MAP
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-  //{{AFX_MSG_MAP(CAboutDlg)
-  //}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CAboutDlg)
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
 
 BOOL CAboutDlg::OnInitDialog()
 {
-  HRSRC hRsrc= ::FindResource(AfxGetInstanceHandle(),MAKEINTRESOURCE(VS_VERSION_INFO),RT_VERSION);
-  HGLOBAL hGlobal;
-  if ( hRsrc && (hGlobal = ::LoadResource(AfxGetInstanceHandle(),hRsrc)) != NULL )
-  {
-    VS_FIXEDFILEINFO *pVer= (VS_FIXEDFILEINFO *)( (char *)::LockResource(hGlobal) + 0x28 );
-    if (pVer->dwSignature == 0xfeef04bd)
-      m_strVersion.Format( IDS_ABOUT_VER,
-        (int)HIWORD(pVer->dwProductVersionMS),
-	(int)LOWORD(pVer->dwProductVersionMS),
-	(int)HIWORD(pVer->dwProductVersionLS),// );
-	(int)LOWORD(pVer->dwProductVersionLS) );
+    HRSRC hRsrc= ::FindResource(AfxGetInstanceHandle(),MAKEINTRESOURCE(VS_VERSION_INFO),RT_VERSION);
+    HGLOBAL hGlobal;
+    if ( hRsrc && (hGlobal = ::LoadResource(AfxGetInstanceHandle(),hRsrc)) != NULL )
+    {
+        VS_FIXEDFILEINFO *pVer= (VS_FIXEDFILEINFO *)( (char *)::LockResource(hGlobal) + 0x28 );
+        if (pVer->dwSignature == 0xfeef04bd)
+            m_strVersion.Format( IDS_ABOUT_VER,
+                                 (int)HIWORD(pVer->dwProductVersionMS),
+                                 (int)LOWORD(pVer->dwProductVersionMS),
+                                 (int)HIWORD(pVer->dwProductVersionLS),// );
+                                 (int)LOWORD(pVer->dwProductVersionLS) );
 
-    ::FreeResource(hGlobal);
-  }
+        ::FreeResource(hGlobal);
+    }
 
-  CDialog::OnInitDialog();
+    CDialog::OnInitDialog();
 
-  LOGFONT lf;
-  m_wndTitle.GetFont()->GetLogFont(&lf);
+    LOGFONT lf;
+    m_wndTitle.GetFont()->GetLogFont(&lf);
 
-  GetFont()->GetLogFont(&lf);
+    GetFont()->GetLogFont(&lf);
 //  CClientDC dc(this);
 //    lf.lfHeight = -MulDiv(9, dc.GetDeviceCaps(LOGPIXELSY), 96);
-  lf.lfWeight = 700;      // bold
-  lf.lfHeight -= 2;
-  m_TitleFont.CreateFontIndirect(&lf);
-  m_wndTitle.SetFont(&m_TitleFont);
+    lf.lfWeight = 700;      // bold
+    lf.lfHeight -= 2;
+    m_TitleFont.CreateFontIndirect(&lf);
+    m_wndTitle.SetFont(&m_TitleFont);
 
-  m_StaticLink.SubclassDlgItem(IDC_LINK, this, "http://home.pacbell.net/michal_k/");
+    m_StaticLink.SubclassDlgItem(IDC_LINK, this, "http://home.pacbell.net/michal_k/");
 
-  return true;	// return true unless you set the focus to a control
-		// EXCEPTION: OCX Property Pages should return false
+    return true;	// return true unless you set the focus to a control
+    // EXCEPTION: OCX Property Pages should return false
 }
 
 /*
-void CAboutDlg::OnPaint() 
+void CAboutDlg::OnPaint()
 {
   CPaintDC dc(this); // device context for painting
 

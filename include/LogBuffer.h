@@ -37,51 +37,55 @@ template <class T>
 class CLogBuffer
 {
 public:
-	CLogBuffer(int nSize= 100000)
-	{ m_vBuffer.resize(nSize); m_pHead = &m_vBuffer.front(); m_bFull = false; }
+    CLogBuffer(int nSize= 100000)
+    {
+        m_vBuffer.resize(nSize);
+        m_pHead = &m_vBuffer.front();
+        m_bFull = false;
+    }
 
-	~CLogBuffer() {}
+    ~CLogBuffer() {}
 
-	// record item
-	void Record(const T& t)
-	{
-		*m_pHead++ = t;
-		if (m_pHead >= &m_vBuffer.back() + 1)
-		{
-			m_pHead = &m_vBuffer.front();
-			m_bFull = true;
-		}
-	}
+    // record item
+    void Record(const T& t)
+    {
+        *m_pHead++ = t;
+        if (m_pHead >= &m_vBuffer.back() + 1)
+        {
+            m_pHead = &m_vBuffer.front();
+            m_bFull = true;
+        }
+    }
 
-	// no of items recorded
-	int GetCount() const
-	{
-		return m_bFull ? m_vBuffer.size() : m_pHead - &m_vBuffer.front();
-	}
+    // no of items recorded
+    int GetCount() const
+    {
+        return m_bFull ? m_vBuffer.size() : m_pHead - &m_vBuffer.front();
+    }
 
-	// get n-th item
-	const T& operator [] (int nIndex) const
-	{
-		ASSERT(nIndex >= 0 && nIndex < GetCount());
-		const T* pStart= m_bFull ? m_pHead : &m_vBuffer.front();
-		pStart += nIndex;
-		if (pStart >= &m_vBuffer.back() + 1)
-			return pStart[0-m_vBuffer.size()];
-		else
-			return *pStart;
-	}
+    // get n-th item
+    const T& operator [] (int nIndex) const
+    {
+        ASSERT(nIndex >= 0 && nIndex < GetCount());
+        const T* pStart= m_bFull ? m_pHead : &m_vBuffer.front();
+        pStart += nIndex;
+        if (pStart >= &m_vBuffer.back() + 1)
+            return pStart[0-m_vBuffer.size()];
+        else
+            return *pStart;
+    }
 
-	// empty buffer
-	void Clear()
-	{
-		m_pHead = &m_vBuffer.front();
-		m_bFull = false;
-	}
+    // empty buffer
+    void Clear()
+    {
+        m_pHead = &m_vBuffer.front();
+        m_bFull = false;
+    }
 
 private:
-	std::vector<T> m_vBuffer;
-	T* m_pHead;
-	bool m_bFull;
+    std::vector<T> m_vBuffer;
+    T* m_pHead;
+    bool m_bFull;
 };
 
 #endif // !defined(AFX_LOGBUFFER_H__F7F5D1B0_569C_4E6D_A034_D79FB77DB930__INCLUDED_)

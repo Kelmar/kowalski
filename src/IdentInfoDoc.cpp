@@ -43,9 +43,9 @@ CIdentInfoDoc::CIdentInfoDoc()
 
 BOOL CIdentInfoDoc::OnNewDocument()
 {
-  if (!CDocument::OnNewDocument())
-    return false;
-  return true;
+    if (!CDocument::OnNewDocument())
+        return false;
+    return true;
 }
 
 
@@ -55,9 +55,9 @@ CIdentInfoDoc::~CIdentInfoDoc()
 
 
 BEGIN_MESSAGE_MAP(CIdentInfoDoc, CDocument)
-  //{{AFX_MSG_MAP(CIdentInfoDoc)
-  // NOTE - the ClassWizard will add and remove mapping macros here.
-  //}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CIdentInfoDoc)
+    // NOTE - the ClassWizard will add and remove mapping macros here.
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -66,12 +66,12 @@ END_MESSAGE_MAP()
 #ifdef _DEBUG
 void CIdentInfoDoc::AssertValid() const
 {
-  CDocument::AssertValid();
+    CDocument::AssertValid();
 }
 
 void CIdentInfoDoc::Dump(CDumpContext& dc) const
 {
-  CDocument::Dump(dc);
+    CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -80,14 +80,14 @@ void CIdentInfoDoc::Dump(CDumpContext& dc) const
 
 void CIdentInfoDoc::Serialize(CArchive& ar)
 {
-  if (ar.IsStoring())
-  {
-    // TODO: add storing code here
-  }
-  else
-  {
-    // TODO: add loading code here
-  }
+    if (ar.IsStoring())
+    {
+        // TODO: add storing code here
+    }
+    else
+    {
+        // TODO: add loading code here
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////

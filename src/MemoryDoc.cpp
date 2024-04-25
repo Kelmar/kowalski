@@ -38,16 +38,16 @@ IMPLEMENT_DYNCREATE(CMemoryDoc, CDocument)
 
 CMemoryDoc::CMemoryDoc()
 {
-	m_uStackPtr = 0x1ff;
-	m_uAddress = 0;
-	m_pMem = 0;
+    m_uStackPtr = 0x1ff;
+    m_uAddress = 0;
+    m_pMem = 0;
 }
 
 BOOL CMemoryDoc::OnNewDocument()
 {
-  if (!CDocument::OnNewDocument())
-    return FALSE;
-  return TRUE;
+    if (!CDocument::OnNewDocument())
+        return FALSE;
+    return TRUE;
 }
 
 CMemoryDoc::~CMemoryDoc()
@@ -56,8 +56,8 @@ CMemoryDoc::~CMemoryDoc()
 
 
 BEGIN_MESSAGE_MAP(CMemoryDoc, CDocument)
-  //{{AFX_MSG_MAP(CMemoryDoc)
-  //}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CMemoryDoc)
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -66,12 +66,12 @@ END_MESSAGE_MAP()
 #ifdef _DEBUG
 void CMemoryDoc::AssertValid() const
 {
-  CDocument::AssertValid();
+    CDocument::AssertValid();
 }
 
 void CMemoryDoc::Dump(CDumpContext& dc) const
 {
-  CDocument::Dump(dc);
+    CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -80,14 +80,14 @@ void CMemoryDoc::Dump(CDumpContext& dc) const
 
 void CMemoryDoc::Serialize(CArchive& ar)
 {
-  if (ar.IsStoring())
-  {
-    // TODO: add storing code here
-  }
-  else
-  {
-    // TODO: add loading code here
-  }
+    if (ar.IsStoring())
+    {
+        // TODO: add storing code here
+    }
+    else
+    {
+        // TODO: add loading code here
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -95,6 +95,6 @@ void CMemoryDoc::Serialize(CArchive& ar)
 
 BOOL CMemoryDoc::DoSave(LPCTSTR lpszPathName, BOOL bReplace/*= TRUE*/)
 {
-	// nop
-	return false;
+    // nop
+    return false;
 }

@@ -24,20 +24,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 template <class T> class CPtrStack : public CTypedPtrList< CObList, T* >
 {
 public:
-  // Add element to top of stack
-  void Push( T* newT )
-  { AddHead( newT ); }
+    // Add element to top of stack
+    void Push( T* newT )
+    {
+        AddHead( newT );
+    }
 
-  // Peek at top element of stack
-  T* Peek()
-  { return IsEmpty() ? NULL : GetHead(); }
+    // Peek at top element of stack
+    T* Peek()
+    {
+        return IsEmpty() ? NULL : GetHead();
+    }
 
-  // Pop top element off stack
-  T* Pop()
-  { return RemoveHead(); }
+    // Pop top element off stack
+    T* Pop()
+    {
+        return RemoveHead();
+    }
 
-  void RemoveAll()
-  { RemoveAll(); }
+    void RemoveAll()
+    {
+        RemoveAll();
+    }
 };
 
 
@@ -45,18 +53,26 @@ public:
 template <class T> class CStack : public CList< T, T >
 {
 public:
-  // Add element to top of stack
-  void Push( T newT )
-  { AddHead( newT ); }
+    // Add element to top of stack
+    void Push( T newT )
+    {
+        AddHead( newT );
+    }
 
-  // Peek at top element of stack
-  T Peek()
-  { return IsEmpty() ? NULL : GetHead(); }
+    // Peek at top element of stack
+    T Peek()
+    {
+        return IsEmpty() ? NULL : GetHead();
+    }
 
-  // Pop top element off stack
-  T Pop()
-  { return RemoveHead(); }
+    // Pop top element off stack
+    T Pop()
+    {
+        return RemoveHead();
+    }
 
-  void RemoveAll()
-  { RemoveAll(); }
+    void RemoveAll()
+    {
+        RemoveAll();
+    }
 };

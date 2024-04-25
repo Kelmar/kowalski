@@ -23,36 +23,45 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CMarkArea
 {
-  struct Pair
-  { int a,b; };
-  int start;
-  UINT n;
-  CArray<Pair,Pair&> arr;
+    struct Pair
+    {
+        int a,b;
+    };
+    int start;
+    UINT n;
+    CArray<Pair,Pair&> arr;
 
 public:
 
-  CMarkArea() : start(-1), n(0)
-  { }
+    CMarkArea() : start(-1), n(0)
+    { }
 
-  void SetStart(int s)
-  { ASSERT(s>=0); start = s; }
+    void SetStart(int s)
+    {
+        ASSERT(s>=0);
+        start = s;
+    }
 
-  void SetEnd(int end);
+    void SetEnd(int end);
 
-  bool IsStartSet()
-  { return start != -1; }
+    bool IsStartSet()
+    {
+        return start != -1;
+    }
 
-  UINT GetSize()
-  { return n; }
+    UINT GetSize()
+    {
+        return n;
+    }
 
-  bool GetPartition(UINT no, int &a, int &b);
+    bool GetPartition(UINT no, int &a, int &b);
 
-  void Clear()
-  {
-    start = -1;
-    n = 0;
-    arr.RemoveAll();
-  }
+    void Clear()
+    {
+        start = -1;
+        n = 0;
+        arr.RemoveAll();
+    }
 };
 
 #endif

@@ -26,24 +26,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CLoadCode : public CFileDialog
 {
-  CString m_strTitle;
-  int m_nPos;
-  static int m_nInitPos;
+    CString m_strTitle;
+    int m_nPos;
+    static int m_nInitPos;
 
-  DECLARE_DYNAMIC(CLoadCode)
-    
+    DECLARE_DYNAMIC(CLoadCode)
+
 public:
-  CLoadCode(LPCTSTR lpszFileName = NULL,
-    LPCTSTR lpszFilter = NULL,
-    CWnd* pParentWnd = NULL);
+    CLoadCode(LPCTSTR lpszFileName = NULL,
+              LPCTSTR lpszFilter = NULL,
+              CWnd* pParentWnd = NULL);
 
-  void LoadCode();
+    void LoadCode();
 
 protected:
-  //{{AFX_MSG(CLoadCode)
-  virtual BOOL OnInitDialog();
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    //{{AFX_MSG(CLoadCode)
+    virtual BOOL OnInitDialog();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 
 //  virtual void OnTypeChange();
 };

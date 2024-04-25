@@ -26,33 +26,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CDialEditBreakpoint : public CDialog, CAsm
 {
-  // Construction
+    // Construction
 public:
-  CDialEditBreakpoint(Breakpoint bp, CWnd* pParent = NULL);   // standard constructor
+    CDialEditBreakpoint(Breakpoint bp, CWnd* pParent = NULL);   // standard constructor
 
-  // Dialog Data
-  //{{AFX_DATA(CDialEditBreakpoint)
-  enum { IDD = IDD_EDIT_BREAKPOINT };
-  bool	m_Disabled;
-  bool	m_Execute;
-  bool	m_Read;
-  bool	m_Write;
-  //}}AFX_DATA
+    // Dialog Data
+    //{{AFX_DATA(CDialEditBreakpoint)
+    enum { IDD = IDD_EDIT_BREAKPOINT };
+    bool	m_Disabled;
+    bool	m_Execute;
+    bool	m_Read;
+    bool	m_Write;
+    //}}AFX_DATA
 
 
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CDialEditBreakpoint)
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CDialEditBreakpoint)
 protected:
-  virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-  //}}AFX_VIRTUAL
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
 
-  // Implementation
+    // Implementation
 protected:
 
-  // Generated message map functions
-  //{{AFX_MSG(CDialEditBreakpoint)
-		// NOTE: the ClassWizard will add member functions here
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    // Generated message map functions
+    //{{AFX_MSG(CDialEditBreakpoint)
+    // NOTE: the ClassWizard will add member functions here
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };

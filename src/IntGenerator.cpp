@@ -37,11 +37,11 @@ static char THIS_FILE[]=__FILE__;
 
 CIntGenerator::CIntGenerator()
 {
-	m_nIRQTimeLapse = 100;
-	m_bGenerateIRQ = false;
+    m_nIRQTimeLapse = 100;
+    m_bGenerateIRQ = false;
 
-	m_nNMITimeLapse = 50;
-	m_bGenerateNMI = false;
+    m_nNMITimeLapse = 50;
+    m_bGenerateNMI = false;
 }
 
 CIntGenerator::~CIntGenerator()

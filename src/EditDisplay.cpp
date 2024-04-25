@@ -44,44 +44,44 @@ CEditDisplay::~CEditDisplay()
 
 
 BEGIN_MESSAGE_MAP(CEditDisplay, CEdit)
-  //{{AFX_MSG_MAP(CEditDisplay)
-  ON_WM_PAINT()
-  ON_WM_CHAR()
-  ON_WM_KEYUP()
-  //}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CEditDisplay)
+    ON_WM_PAINT()
+    ON_WM_CHAR()
+    ON_WM_KEYUP()
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
 void CEditDisplay::Subclass(CSrc6502View *pView)
 {
-  m_pView = pView;
-  SubclassWindow(pView->GetEditCtrl().m_hWnd);
+    m_pView = pView;
+    SubclassWindow(pView->GetEditCtrl().m_hWnd);
 }
 
 
 /////////////////////////////////////////////////////////////////////////////
 // CEditDisplay message handlers
 
-void CEditDisplay::OnPaint() 
+void CEditDisplay::OnPaint()
 {
 //  CPaintDC dc(this); // device context for painting
-  
-  // TODO: Add your message handler code here
-  
-  // Do not call CEdit::OnPaint() for painting messages
+
+    // TODO: Add your message handler code here
+
+    // Do not call CEdit::OnPaint() for painting messages
 }
 
-void CEditDisplay::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void CEditDisplay::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-  // TODO: Add your message handler code here and/or call default
-  
+    // TODO: Add your message handler code here and/or call default
+
 //  CEdit::OnChar(nChar, nRepCnt, nFlags);
 }
 
-void CEditDisplay::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void CEditDisplay::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-  // TODO: Add your message handler code here and/or call default
-  
+    // TODO: Add your message handler code here and/or call default
+
 //  CEdit::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 

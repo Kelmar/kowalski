@@ -36,35 +36,35 @@ static char THIS_FILE[] = __FILE__;
 
 
 CIntRequestGeneratorDlg::CIntRequestGeneratorDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CIntRequestGeneratorDlg::IDD, pParent)
+    : CDialog(CIntRequestGeneratorDlg::IDD, pParent)
 {
-	//{{AFX_DATA_INIT(CIntRequestGeneratorDlg)
-	m_bGenerateIRQ = FALSE;
-	m_bGenerateNMI = FALSE;
-	m_uIRQTimeLapse = 0;
-	m_uNMITimeLapse = 0;
-	//}}AFX_DATA_INIT
+    //{{AFX_DATA_INIT(CIntRequestGeneratorDlg)
+    m_bGenerateIRQ = FALSE;
+    m_bGenerateNMI = FALSE;
+    m_uIRQTimeLapse = 0;
+    m_uNMITimeLapse = 0;
+    //}}AFX_DATA_INIT
 }
 
 
 void CIntRequestGeneratorDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CIntRequestGeneratorDlg)
-	DDX_Check(pDX, IDC_GEN_IRQ, m_bGenerateIRQ);
-	DDX_Check(pDX, IDC_GEN_NMI, m_bGenerateNMI);
-	DDX_Text(pDX, IDC_IRQ_LAPSE, m_uIRQTimeLapse);
-	DDV_MinMaxUInt(pDX, m_uIRQTimeLapse, 1, 2147483647);
-	DDX_Text(pDX, IDC_NMI_LAPSE, m_uNMITimeLapse);
-	DDV_MinMaxUInt(pDX, m_uNMITimeLapse, 1, 2147483647);
-	//}}AFX_DATA_MAP
+    CDialog::DoDataExchange(pDX);
+    //{{AFX_DATA_MAP(CIntRequestGeneratorDlg)
+    DDX_Check(pDX, IDC_GEN_IRQ, m_bGenerateIRQ);
+    DDX_Check(pDX, IDC_GEN_NMI, m_bGenerateNMI);
+    DDX_Text(pDX, IDC_IRQ_LAPSE, m_uIRQTimeLapse);
+    DDV_MinMaxUInt(pDX, m_uIRQTimeLapse, 1, 2147483647);
+    DDX_Text(pDX, IDC_NMI_LAPSE, m_uNMITimeLapse);
+    DDV_MinMaxUInt(pDX, m_uNMITimeLapse, 1, 2147483647);
+    //}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CIntRequestGeneratorDlg, CDialog)
-	//{{AFX_MSG_MAP(CIntRequestGeneratorDlg)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CIntRequestGeneratorDlg)
+    // NOTE: the ClassWizard will add message map macros here
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

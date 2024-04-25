@@ -26,20 +26,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CMapFile : CArray<CString,LPCTSTR>, public CAsm
 {
-  CMap<CString, LPCTSTR, FileUID, FileUID> m_PathToFuid;
-  int m_nLastUID;
+    CMap<CString, LPCTSTR, FileUID, FileUID> m_PathToFuid;
+    int m_nLastUID;
 
 public:
-  CMapFile() : m_nLastUID(0)
-  {}
-  ~CMapFile()
-  {}
+    CMapFile() : m_nLastUID(0)
+    {}
+    ~CMapFile()
+    {}
 
-  void Reset()
-  { m_nLastUID = 0; m_PathToFuid.RemoveAll(); RemoveAll(); }
+    void Reset()
+    {
+        m_nLastUID = 0;
+        m_PathToFuid.RemoveAll();
+        RemoveAll();
+    }
 
-  LPCTSTR GetPath(FileUID fuid);
-  FileUID GetFileUID(LPCTSTR path);
+    LPCTSTR GetPath(FileUID fuid);
+    FileUID GetFileUID(LPCTSTR path);
 };
 
 

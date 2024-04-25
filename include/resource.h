@@ -79,7 +79,7 @@
 #define IDS_REGS_S_EMPTY                1042
 #define IDC_COM_DIAL                    0x045f
 #define IDC_OPT_HELP_CHM                1181
-#define IDC_OPT_HELP_HTM                1182 
+#define IDC_OPT_HELP_HTM                1182
 #define IDS_OPT_VIEW_EXAMPLE            1200
 #define IDS_OPT_VIEW_EXAMPLE_1          1201
 #define IDS_OPT_VIEW_EXAMPLE_2          1202
@@ -100,8 +100,8 @@
 #define IDC_EDIT_BP_EXEC                1366
 #define IDC_EDIT_BP_READ                1367
 #define IDC_EDIT_BP_WRITE               1368
-#define IDC_GOTO_LINENUMBER             1371 
-#define IDC_GOTO_LN_PROMPT              1372 
+#define IDC_GOTO_LINENUMBER             1371
+#define IDC_GOTO_LN_PROMPT              1372
 #define IDC_DIAL_ASM_ICN1               1374
 #define IDC_DIAL_ASM_ICN2               1375
 #define IDC_DIAL_ASM_ICN3               1376
@@ -433,7 +433,7 @@
 #define ID_VIEW_ZEROPAGEBAR             0xE805
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1

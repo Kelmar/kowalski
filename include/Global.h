@@ -27,145 +27,191 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CGlobal : public CObject, CAsm, virtual CBroadcast
 {
-	UINT m_uAddrBusWidth;			// szerokoœæ szyny adresowej
-	bool m_bCodePresent;			// true -> po udanej asemblacji
-	COutputMem m_ProgMem;			// pamiêæ zapisywana w procesie asemblacji
-	CDebugInfo m_Debug;				// informacja uruchomieniowa dla symulatora
-	UINT32 m_uOrigin;				// pocz¹tek programu 6502
-	CSym6502 *m_pSym6502;			// symulator
-	Finish m_SymFinish;				// sposób koñczenia programu przez symulator
-	CMarkArea m_MarkArea;			// oznaczenie fragmentów pamiêci zawieraj¹cej kod wynikowy
+private:
+    UINT m_uAddrBusWidth;			// szerokoï¿½ï¿½ szyny adresowej
+    bool m_bCodePresent;			// true -> po udanej asemblacji
+    COutputMem m_ProgMem;			// pamiï¿½ï¿½ zapisywana w procesie asemblacji
+    CDebugInfo m_Debug;				// informacja uruchomieniowa dla symulatora
+    UINT32 m_uOrigin;				// poczï¿½tek programu 6502
+    CSym6502 *m_pSym6502;			// symulator
+    Finish m_SymFinish;				// sposï¿½b koï¿½czenia programu przez symulator
+    CMarkArea m_MarkArea;			// oznaczenie fragmentï¿½w pamiï¿½ci zawierajï¿½cej kod wynikowy
+
 public:
-	UINT8 m_bProc6502;				// typ procesora
-	UINT8 m_bHelpFile;              // ^^ help file type
-	COutputMem m_Mem;				// pamiêæ dla kodu wynikowego i symulatora
-	bool m_bGenerateListing;		// generowaæ listing przy asemblacji?
-	CString m_strListingFile;		// plik z listingiem
-	CIntGenerator m_IntGenerator;	// interrupt request generator data
+    UINT8 m_bProc6502;				// typ procesora
+    UINT8 m_bHelpFile;              // ^^ help file type
+    COutputMem m_Mem;				// pamiï¿½ï¿½ dla kodu wynikowego i symulatora
+    bool m_bGenerateListing;		// generowaï¿½ listing przy asemblacji?
+    CString m_strListingFile;		// plik z listingiem
+    CIntGenerator m_IntGenerator;	// interrupt request generator data
 
-	CGlobal() : m_pSym6502(NULL), m_bCodePresent(false)
-	{ SetAddrBusWidth(16); }
+    CGlobal() : m_pSym6502(NULL), m_bCodePresent(false)
+    {
+        SetAddrBusWidth(16);
+    }
 
-	~CGlobal()
-	{ if (m_pSym6502) delete m_pSym6502; }
+    ~CGlobal()
+    {
+        if (m_pSym6502) delete m_pSym6502;
+    }
 
-	void SetAddrBusWidth(UINT w)
-	{
-		m_uAddrBusWidth = w;
-		if (m_pSym6502)
-			m_pSym6502->set_addr_bus_width(w);
-	}
+    void SetAddrBusWidth(UINT w)
+    {
+        m_uAddrBusWidth = w;
+        if (m_pSym6502)
+            m_pSym6502->set_addr_bus_width(w);
+    }
 
-	CDebugInfo *GetDebug()
-	{ return &m_Debug; }
+    CDebugInfo *GetDebug()
+    {
+        return &m_Debug;
+    }
 
-	COutputMem *GetMemForAsm()	// pamiêæ na kod wynikowy (asemblacja)
-	{ 
-		m_ProgMem.ClearMem();
-		return &m_ProgMem;
-	}
+    COutputMem *GetMemForAsm()	// pamiï¿½ï¿½ na kod wynikowy (asemblacja)
+    {
+        m_ProgMem.ClearMem();
+        return &m_ProgMem;
+    }
 
-	COutputMem *GetMemForSym()	// pamiêæ z kodem wynikowym (symulator)
-	{
-		if (m_bCodePresent)
-		{
-			m_Mem = m_ProgMem;
-			return &m_Mem;
-		}
-		return NULL;
-	}
+    COutputMem *GetMemForSym()	// pamiï¿½ï¿½ z kodem wynikowym (symulator)
+    {
+        if (m_bCodePresent)
+        {
+            m_Mem = m_ProgMem;
+            return &m_Mem;
+        }
+        return NULL;
+    }
 
-	CMarkArea *GetMarkArea()
-	{ return &m_MarkArea; }
+    CMarkArea *GetMarkArea()
+    {
+        return &m_MarkArea;
+    }
 
-	COutputMem *GetMem()		// pamiêæ z kodem wynikowym
-	{ return &m_Mem; }
-	UINT32 GetStartAddr()		// pocz¹tek programu
-	{ return m_uOrigin; }
+    COutputMem *GetMem()		// pamiï¿½ï¿½ z kodem wynikowym
+    {
+        return &m_Mem;
+    }
+    UINT32 GetStartAddr()		// poczï¿½tek programu
+    {
+        return m_uOrigin;
+    }
 
-	bool IsCodePresent()
-	{ return m_bCodePresent; }
+    bool IsCodePresent()
+    {
+        return m_bCodePresent;
+    }
 
-	bool IsDebugInfoPresent()
-	{ return m_bCodePresent; }	// do poprawienia
+    bool IsDebugInfoPresent()
+    {
+        return m_bCodePresent;    // do poprawienia
+    }
 
-	bool IsDebugger()
-	{ return m_pSym6502 != NULL; }
+    bool IsDebugger()
+    {
+        return m_pSym6502 != NULL;
+    }
 
-	bool IsProgramRunning()
-	{ return m_pSym6502 ? m_pSym6502->IsRunning() : false; }
+    bool IsProgramRunning()
+    {
+        return m_pSym6502 ? m_pSym6502->IsRunning() : false;
+    }
 
-	bool IsProgramFinished()
-	{ return m_pSym6502 ? m_pSym6502->IsFinished() : false; }
+    bool IsProgramFinished()
+    {
+        return m_pSym6502 ? m_pSym6502->IsFinished() : false;
+    }
 
-	void SetCodePresence(bool present)
-	{
-		if (present)
-			m_Mem = m_ProgMem;
-		m_bCodePresent = present;
-	}
+    void SetCodePresence(bool present)
+    {
+        if (present)
+            m_Mem = m_ProgMem;
+        m_bCodePresent = present;
+    }
 
-	void StartDebug();
+    void StartDebug();
 
-	void RestartProgram()
-	{ StartDebug(); }
+    void RestartProgram()
+    {
+        StartDebug();
+    }
 
-	void ExitDebugger();
+    void ExitDebugger();
 
-	void SetStart(UINT32 prog_start)
-	{ m_uOrigin = prog_start; }
+    void SetStart(UINT32 prog_start)
+    {
+        m_uOrigin = prog_start;
+    }
 
-	CSym6502 *GetSimulator()
-	{ return m_pSym6502; }
+    CSym6502 *GetSimulator()
+    {
+        return m_pSym6502;
+    }
 
-	CString GetStatMsg()
-	{ return m_pSym6502->GetLastStatMsg(); }
+    CString GetStatMsg()
+    {
+        return m_pSym6502->GetLastStatMsg();
+    }
 
-	Finish GetSymFinish()
-	{ ASSERT(m_pSym6502==NULL || m_pSym6502->finish==m_SymFinish); return m_SymFinish; }
+    Finish GetSymFinish()
+    {
+        ASSERT(m_pSym6502==NULL || m_pSym6502->finish==m_SymFinish);
+        return m_SymFinish;
+    }
 
-	void SetSymFinish(Finish fin)
-	{ m_SymFinish = fin;  if (m_pSym6502) m_pSym6502->finish = fin; }
+    void SetSymFinish(Finish fin)
+    {
+        m_SymFinish = fin;
+        if (m_pSym6502) m_pSym6502->finish = fin;
+    }
 
-	Breakpoint SetBreakpoint(int line, CString doc_title);
-	Breakpoint GetBreakpoint(int line, CString doc_title);
-	Breakpoint ModifyBreakpoint(int line, CString doc_title, Breakpoint bp);
-	void ClrBreakpoint(int line, CString doc_title);
-	DbgFlag GetLineDebugFlags(int line, CString doc_title);
-	UINT32 GetLineCodeAddr(int line, CString doc_title);
-	bool SetTempExecBreakpoint(int line, CString doc_title);
+    Breakpoint SetBreakpoint(int line, CString doc_title);
+    Breakpoint GetBreakpoint(int line, CString doc_title);
+    Breakpoint ModifyBreakpoint(int line, CString doc_title, Breakpoint bp);
+    void ClrBreakpoint(int line, CString doc_title);
+    DbgFlag GetLineDebugFlags(int line, CString doc_title);
+    UINT32 GetLineCodeAddr(int line, CString doc_title);
+    bool SetTempExecBreakpoint(int line, CString doc_title);
 
-	void AbortProg()
-	{
-		if (m_pSym6502 != NULL)
-			m_pSym6502->AbortProg();
-	}
+    void AbortProg()
+    {
+        if (m_pSym6502 != NULL)
+            m_pSym6502->AbortProg();
+    }
 
-	//---------------------------------------------------------------------------
+    //---------------------------------------------------------------------------
 
-	UINT8 GetProcType()
-	{ return m_bProc6502; }
+    UINT8 GetProcType()
+    {
+        return m_bProc6502;
+    }
 
-	void SetProcType(UINT8 b6502)
-	{ m_bProc6502 = b6502; }
+    void SetProcType(UINT8 b6502)
+    {
+        m_bProc6502 = b6502;
+    }
 
     UINT8 GetHelpType()               //^^ Help
-	{ return m_bHelpFile; }
+    {
+        return m_bHelpFile;
+    }
 
-	void SetHelpType(UINT8 bHelp)     //^^ Help
-	{ m_bHelpFile = bHelp; }
+    void SetHelpType(UINT8 bHelp)     //^^ Help
+    {
+        m_bHelpFile = bHelp;
+    }
 
+    //---------------------------------------------------------------------------
 
-	//---------------------------------------------------------------------------
+    bool CreateDeasm();			// nowe okno deasemblera
 
-	bool CreateDeasm();			// nowe okno deasemblera
+    Breakpoint GetBreakpoint(UINT32 addr)	// pobranie przerwania pod danym adresem
+    {
+        return m_Debug.GetBreakpoint(addr);
+    }
 
-	Breakpoint GetBreakpoint(UINT32 addr)	// pobranie przerwania pod danym adresem
-	{ return m_Debug.GetBreakpoint(addr); }
+    //---------------------------------------------------------------------------
 
-	//---------------------------------------------------------------------------
-
-	void SaveCode(CArchive &archive, UINT32 start, UINT32 end, int info);
-	void LoadCode(CArchive &archive, UINT32 start, UINT32 end, int info, int nClear= 0);
-
+    void SaveCode(CArchive &archive, UINT32 start, UINT32 end, int info);
+    void LoadCode(CArchive &archive, UINT32 start, UINT32 end, int info, int nClear= 0);
 };

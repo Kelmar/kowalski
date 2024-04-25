@@ -22,20 +22,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
 template<class T> class MemPtr : class CObject
-{
-  T* ptr;
+    {
+        T* ptr;
 
-public:
+    public:
 
-  MemPtr(size_t size= 1)
-  {
-    ASSERT(size>0);
-    ptr = new T[size];
-  }
+        MemPtr(size_t size= 1)
+        {
+            ASSERT(size>0);
+            ptr = new T[size];
+        }
 
-  ~MemPtr()
-  { delete [] ptr; }
+        ~MemPtr()
+        {
+            delete [] ptr;
+        }
 
-  operator T* ()
-  { return ptr; }
-};
+        operator T* ()
+        {
+            return ptr;
+        }
+    };

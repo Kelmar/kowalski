@@ -24,10 +24,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
 BEGIN_MESSAGE_MAP(CDialBar, CDialogBar)
-	//{{AFX_MSG_MAP(CDialBar)
-	ON_WM_GETMINMAXINFO()
-	ON_WM_LBUTTONDOWN()
-	//}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CDialBar)
+    ON_WM_GETMINMAXINFO()
+    ON_WM_LBUTTONDOWN()
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -44,14 +44,14 @@ CDialBar::~CDialBar()
 }
 
 
-void CDialBar::OnGetMinMaxInfo(MINMAXINFO *lpMMI) 
+void CDialBar::OnGetMinMaxInfo(MINMAXINFO *lpMMI)
 {
-  CDialogBar::OnGetMinMaxInfo(lpMMI);
+    CDialogBar::OnGetMinMaxInfo(lpMMI);
 
-  lpMMI->ptMaxSize = CPoint(200,600);
-  lpMMI->ptMaxPosition = CPoint(20,20);
-  lpMMI->ptMaxTrackSize = CPoint(200,600);
-  lpMMI->ptMinTrackSize = CPoint(100,100);
+    lpMMI->ptMaxSize = CPoint(200,600);
+    lpMMI->ptMaxPosition = CPoint(20,20);
+    lpMMI->ptMaxTrackSize = CPoint(200,600);
+    lpMMI->ptMinTrackSize = CPoint(100,100);
 }
 
 
@@ -59,96 +59,96 @@ CSize CDialBar::CalcDynamicLayout(int nLength, DWORD dwMode)
 {
 //  TRACE2("length = %d \tmode = %x\n", nLength, (int)dwMode);
 
-  if ((nLength == -1) && !(dwMode & LM_MRUWIDTH) && !(dwMode & LM_COMMIT) &&
-    ((dwMode & LM_HORZDOCK) || (dwMode & LM_VERTDOCK)))
-  {
-    return CalcFixedLayout(dwMode & LM_STRETCH, dwMode & LM_HORZDOCK);
-  }
-  return CalcLayout(nLength,dwMode);
+    if ((nLength == -1) && !(dwMode & LM_MRUWIDTH) && !(dwMode & LM_COMMIT) &&
+            ((dwMode & LM_HORZDOCK) || (dwMode & LM_VERTDOCK)))
+    {
+        return CalcFixedLayout(dwMode & LM_STRETCH, dwMode & LM_HORZDOCK);
+    }
+    return CalcLayout(nLength,dwMode);
 }
 
 
 CSize CDialBar::CalcLayout(int nLength, DWORD dwMode)
 {
-  if (dwMode & LM_HORZDOCK)
-    return m_lastSize;
-/*  {
-    CRect rect;
-    AfxGetMainWnd()->GetClientRect(rect);
-    return CSize( rect.Width(), m_lastSize.cy );
-  }*/
+    if (dwMode & LM_HORZDOCK)
+        return m_lastSize;
+    /*  {
+        CRect rect;
+        AfxGetMainWnd()->GetClientRect(rect);
+        return CSize( rect.Width(), m_lastSize.cy );
+      }*/
 //    return m_lastSize;
 //    return CSize( GetSystemMetrics(SM_CXSCREEN), m_lastSize.cy );
-  else if (dwMode & LM_VERTDOCK)
-    return m_lastSize;
-/*  {
-    CRect rect;
-    AfxGetMainWnd()->GetClientRect(rect);
-    return CSize( m_lastSize.cx, rect.Height() );
-  }*/
+    else if (dwMode & LM_VERTDOCK)
+        return m_lastSize;
+    /*  {
+        CRect rect;
+        AfxGetMainWnd()->GetClientRect(rect);
+        return CSize( m_lastSize.cx, rect.Height() );
+      }*/
 //    return m_lastSize;
 //    return CSize( m_lastSize.cx, GetSystemMetrics(SM_CYSCREEN) );
-  else if (nLength!=-1 && !(dwMode & LM_MRUWIDTH) && !(dwMode & LM_COMMIT))
-  {
-    nLength &= ~0xF;
-    if (nLength < 50)
-      nLength = 50;
+    else if (nLength!=-1 && !(dwMode & LM_MRUWIDTH) && !(dwMode & LM_COMMIT))
+    {
+        nLength &= ~0xF;
+        if (nLength < 50)
+            nLength = 50;
 
-    if (dwMode & LM_LENGTHY)
-      m_lastSize.cy = nLength;
-    else
-      m_lastSize.cx = nLength;
-  }
+        if (dwMode & LM_LENGTHY)
+            m_lastSize.cy = nLength;
+        else
+            m_lastSize.cx = nLength;
+    }
 
-  return m_lastSize;
+    return m_lastSize;
 }
 
 
 CSize CDialBar::CalcFixedLayout(bool bStretch, bool bHorz)
 {
-  return m_lastSize;
-/*
-  DWORD dwMode = bStretch ? LM_STRETCH : 0;
-  dwMode |= bHorz ? LM_HORZ : 0;
+    return m_lastSize;
+    /*
+      DWORD dwMode = bStretch ? LM_STRETCH : 0;
+      dwMode |= bHorz ? LM_HORZ : 0;
 
-  return CalcLayout(-1,dwMode);
-*/
-/*
-  CRect rect;
-  GetWindowRect(rect);
-  CSize size(rect.Size());
-  if (size.cx == 0)
-    size.cx = 50;
-  if (size.cy == 0)
-    size.cy = 50;
-  if (bStretch)	   // if not docked stretch to fit
-    return CSize(bHorz ? 32767 : size.cx, bHorz ? size.cy : 32767);
-  else
-    return size;
-*/
+      return CalcLayout(-1,dwMode);
+    */
+    /*
+      CRect rect;
+      GetWindowRect(rect);
+      CSize size(rect.Size());
+      if (size.cx == 0)
+        size.cx = 50;
+      if (size.cy == 0)
+        size.cy = 50;
+      if (bStretch)	   // if not docked stretch to fit
+        return CSize(bHorz ? 32767 : size.cx, bHorz ? size.cy : 32767);
+      else
+        return size;
+    */
 }
 
 BOOL CDialBar::Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID)
 {
-  bool ret= CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID);
+    bool ret= CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID);
 
-  if (!ret)
-    return false;
+    if (!ret)
+        return false;
 
-  CString title;
-  if (title.LoadString(nIDTemplate))
-    SetWindowText(title);
+    CString title;
+    if (title.LoadString(nIDTemplate))
+        SetWindowText(title);
 
-  return true;
+    return true;
 }
 
 // style &= ~MFS_4THICKFRAME;
 
 void CDialBar::OnLButtonDown(UINT nFlags, CPoint point)
 {
-  CWnd *pWnd= GetParent();
-  if (pWnd && (pWnd=pWnd->GetParent()))
-    pWnd->ModifyStyle(MFS_4THICKFRAME,MFS_THICKFRAME);
+    CWnd *pWnd= GetParent();
+    if (pWnd && (pWnd=pWnd->GetParent()))
+        pWnd->ModifyStyle(MFS_4THICKFRAME,MFS_THICKFRAME);
 
-  CDialogBar::OnLButtonDown(nFlags, point);
+    CDialogBar::OnLButtonDown(nFlags, point);
 }

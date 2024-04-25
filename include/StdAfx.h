@@ -30,21 +30,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define WINVER 0xA00
 
-#include <afxwin.h>         // MFC core and standard components
-#include <afxext.h>         // MFC extensions
-#include <afxtempl.h>
-#include <AFXCVIEW.H>
-#ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>			// MFC support for Windows 95 Common Controls
-#endif // _AFX_NO_AFXCMN_SUPPORT
+#include <wx/wx.h>
+#include <string>
 
-#include <afxpriv.h>
-#include <afxole.h>
+#define __AFXWIN_H__
 
-#include <AFXMT.H>
+//#include <afxwin.h>         // MFC core and standard components
+//#include <afxext.h>         // MFC extensions
+//#include <afxtempl.h>
+//#include <AFXCVIEW.H>
+//#ifndef _AFX_NO_AFXCMN_SUPPORT
+//#include <afxcmn.h>			// MFC support for Windows 95 Common Controls
+//#endif // _AFX_NO_AFXCMN_SUPPORT
 
-#pragma warning(disable : 4800)
+//#include <afxpriv.h>
+//#include <afxole.h>
 
-#include "Shlwapi.h"
+//#include <AFXMT.H>
+
+//#pragma warning(disable : 4800)
+
+//#include "Shlwapi.h"
 
 #include "6502.h"

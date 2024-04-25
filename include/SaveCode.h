@@ -26,30 +26,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CSaveCode : public CFileDialog
 {
-  static UINT m_uStart;
-  static UINT m_uEnd;
-  CString m_strTitle;
-  int m_nPos;
-  static int m_nInitPos;
+    static UINT m_uStart;
+    static UINT m_uEnd;
+    CString m_strTitle;
+    int m_nPos;
+    static int m_nInitPos;
 
-  void EnableOptions(bool bRedraw= TRUE);
+    void EnableOptions(bool bRedraw= TRUE);
 
-  DECLARE_DYNAMIC(CSaveCode)
+    DECLARE_DYNAMIC(CSaveCode)
 
 public:
-  CSaveCode(LPCTSTR lpszFileName = NULL,
-    LPCTSTR lpszFilter = NULL,
-    CWnd* pParentWnd = NULL);
-  void SaveCode();
+    CSaveCode(LPCTSTR lpszFileName = NULL,
+              LPCTSTR lpszFilter = NULL,
+              CWnd* pParentWnd = NULL);
+    void SaveCode();
 
 protected:
-  //{{AFX_MSG(CSaveCode)
-  virtual BOOL OnInitDialog();
-  //}}AFX_MSG
+    //{{AFX_MSG(CSaveCode)
+    virtual BOOL OnInitDialog();
+    //}}AFX_MSG
 //  afx_msg LRESULT OnNotify(WPARAM wParam, LPARAM lParam);
-  void OnOptions();
+    void OnOptions();
 
-  virtual void OnTypeChange();
+    virtual void OnTypeChange();
 
-  DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 };

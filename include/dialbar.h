@@ -20,24 +20,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CDialBar : public CDialogBar
 {
-  DECLARE_DYNAMIC(CDialBar)
+    DECLARE_DYNAMIC(CDialBar)
 
-  // Construction
+    // Construction
 public:
-  BOOL Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID);
-  virtual CSize CalcFixedLayout(bool bStretch, bool bHorz);
-  virtual CSize CalcDynamicLayout(int nLength, DWORD dwMode);
-  CDialBar();
-  ~CDialBar();
+    BOOL Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID);
+    virtual CSize CalcFixedLayout(bool bStretch, bool bHorz);
+    virtual CSize CalcDynamicLayout(int nLength, DWORD dwMode);
+    CDialBar();
+    ~CDialBar();
 
-  //{{AFX_MSG(CDialBar)
-  afx_msg void OnGetMinMaxInfo(MINMAXINFO *lpMMI);
-  afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-  //}}AFX_MSG
+    //{{AFX_MSG(CDialBar)
+    afx_msg void OnGetMinMaxInfo(MINMAXINFO *lpMMI);
+    afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+    //}}AFX_MSG
 
-  DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 
 private:
-  CSize m_lastSize;
-  CSize CalcLayout(int nLength, DWORD dwMode);
+    CSize m_lastSize;
+    CSize CalcLayout(int nLength, DWORD dwMode);
 };

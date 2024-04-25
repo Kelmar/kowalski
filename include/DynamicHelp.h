@@ -33,64 +33,64 @@ struct TEXTBLOCK;
 
 class CDynamicHelp : public CControlBar
 {
-	typedef CControlBar inherited;
-	static PCSTR s_pcszWndClass;
-	void SizeToolBar(int nLength, bool bVert= false);
-	CToolTipCtrl m_ToolTip;
-	CRichEditCtrl m_wndHelp;
-	int m_nHeaderHeight;
-	CToolBarCtrl m_wndClose;
+    typedef CControlBar inherited;
+    static PCSTR s_pcszWndClass;
+    void SizeToolBar(int nLength, bool bVert= false);
+    CToolTipCtrl m_ToolTip;
+    CRichEditCtrl m_wndHelp;
+    int m_nHeaderHeight;
+    CToolBarCtrl m_wndClose;
 
 // Construction
 public:
-	CDynamicHelp();
+    CDynamicHelp();
 
 // Attributes
 public:
-	void SetContextHelp(const TCHAR* pcszText, const TCHAR* pcszHeader= 0);
+    void SetContextHelp(const TCHAR* pcszText, const TCHAR* pcszHeader= 0);
 
-	void DisplayHelp(const CString& strLine, int nWordStart, int nWordEnd);
+    void DisplayHelp(const CString& strLine, int nWordStart, int nWordEnd);
 
 // Operations
 public:
-	bool Create(CWnd* pParentWnd, UINT nID);
+    bool Create(CWnd* pParentWnd, UINT nID);
 
 
 // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CDynamicHelp)
-  //}}AFX_VIRTUAL
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CDynamicHelp)
+    //}}AFX_VIRTUAL
 
 // Implementation
 public:
-	virtual ~CDynamicHelp();
-	virtual void DoPaint(CDC* pDC);
-	virtual CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz);
-	virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
-	virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
-	CSize CalcLayout(DWORD dwMode, int nLength);
-	virtual void OnBarStyleChange(DWORD dwOldStyle, DWORD dwNewStyle);
+    virtual ~CDynamicHelp();
+    virtual void DoPaint(CDC* pDC);
+    virtual CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz);
+    virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
+    virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
+    CSize CalcLayout(DWORD dwMode, int nLength);
+    virtual void OnBarStyleChange(DWORD dwOldStyle, DWORD dwNewStyle);
 
-  // Generated message map functions
+    // Generated message map functions
 protected:
-	//{{AFX_MSG(CDynamicHelp)
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnNcPaint();
-	afx_msg void OnDestroy();
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnCloseWnd();
-	//}}AFX_MSG
-	afx_msg BOOL OnToolTipGetText(UINT uId, NMHDR* pNmHdr, LRESULT* pResult);
+    //{{AFX_MSG(CDynamicHelp)
+    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    afx_msg void OnSize(UINT nType, int cx, int cy);
+    afx_msg void OnNcPaint();
+    afx_msg void OnDestroy();
+    afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+    afx_msg void OnCloseWnd();
+    //}}AFX_MSG
+    afx_msg BOOL OnToolTipGetText(UINT uId, NMHDR* pNmHdr, LRESULT* pResult);
 
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 
-	static CString s_strWndClass;
-	void RegisterWndClass();
-	CSize m_sizeDefault;
-	void Resize();
+    static CString s_strWndClass;
+    void RegisterWndClass();
+    CSize m_sizeDefault;
+    void Resize();
 
-	LRESULT OnDelayedResize(WPARAM, LPARAM);
+    LRESULT OnDelayedResize(WPARAM, LPARAM);
 };
 
 /////////////////////////////////////////////////////////////////////////////

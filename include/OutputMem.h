@@ -23,63 +23,83 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class COutputMem : private CByteArray
 {
-  UINT m_uMask;
+    UINT m_uMask;
 
 public:
-  COutputMem()
-  { SetSize(0x1000000); m_uMask = 0xFFFFFF; }
+    COutputMem()
+    {
+        SetSize(0x1000000);
+        m_uMask = 0xFFFFFF;
+    }
 
-  void ClearMem()	// wyzerowanie pamiêci
-  { memset(m_pData, 0, m_nSize*sizeof(BYTE)); }
+    void ClearMem()	// wyzerowanie pamiêci
+    {
+        memset(m_pData, 0, m_nSize*sizeof(BYTE));
+    }
 
-	void ClearMem(int nByte)
-	{ memset(m_pData, nByte, m_nSize*sizeof(BYTE)); }
+    void ClearMem(int nByte)
+    {
+        memset(m_pData, nByte, m_nSize*sizeof(BYTE));
+    }
 
-  COutputMem &operator= (const COutputMem &src)
-  {
-    ASSERT(m_nSize == src.m_nSize);		// wymiary musz¹ byæ identyczne
-    memcpy(m_pData, src.m_pData, m_nSize * sizeof(BYTE));
-    m_uMask = src.m_uMask;
-    return *this;
-  }
+    COutputMem &operator= (const COutputMem &src)
+    {
+        ASSERT(m_nSize == src.m_nSize);		// wymiary musz¹ byæ identyczne
+        memcpy(m_pData, src.m_pData, m_nSize * sizeof(BYTE));
+        m_uMask = src.m_uMask;
+        return *this;
+    }
 
-  void Save(CArchive &archive, UINT32 start, UINT32 end)
-  {
-    ASSERT(end >= start);
-    archive.Write(m_pData + start, int(end) - start + 1);
-  }
+    void Save(CArchive &archive, UINT32 start, UINT32 end)
+    {
+        ASSERT(end >= start);
+        archive.Write(m_pData + start, int(end) - start + 1);
+    }
 
-  void Load(CArchive &archive, UINT32 start, UINT32 end)
-  {
-    ASSERT(end >= start);
-    archive.Read(m_pData + start, int(end) - start + 1);
-  }
+    void Load(CArchive &archive, UINT32 start, UINT32 end)
+    {
+        ASSERT(end >= start);
+        archive.Read(m_pData + start, int(end) - start + 1);
+    }
 
-  const UINT8 *Mem()
-  { return m_pData; }
+    const UINT8 *Mem()
+    {
+        return m_pData;
+    }
 
-  void SetMask(UINT32 uMask)  { m_uMask = uMask; }
+    void SetMask(UINT32 uMask)
+    {
+        m_uMask = uMask;
+    }
 
-  UINT8& operator[] (UINT32 uAddr)        { ASSERT(m_uMask > 0);  return m_pData[uAddr & m_uMask]; } // ElementAt(uAddr & m_uMask); }
-  UINT8  operator[] (UINT32 uAddr) const  { ASSERT(m_uMask > 0);  return m_pData[uAddr & m_uMask]; } // GetAt(uAddr & m_uMask); }
+    UINT8& operator[] (UINT32 uAddr)
+    {
+        ASSERT(m_uMask > 0);
+        return m_pData[uAddr & m_uMask];
+    } // ElementAt(uAddr & m_uMask); }
+    UINT8  operator[] (UINT32 uAddr) const
+    {
+        ASSERT(m_uMask > 0);
+        return m_pData[uAddr & m_uMask];
+    } // GetAt(uAddr & m_uMask); }
 
-  UINT16 GetWord(UINT16 uLo, UINT16 uHi) const
-  {
-    ASSERT(m_uMask > 0);
-    return GetAt(uLo & m_uMask) + (UINT32(GetAt(uHi & m_uMask)) << 8);
-  }
-  UINT16 GetWord(UINT32 uAddr) const
-  {
-    ASSERT(m_uMask > 0);
-    return GetAt(uAddr & m_uMask) + (UINT32(GetAt((uAddr + 1) & m_uMask)) << 8);
-  }
-  UINT16 GetWordInd(UINT8 uZpAddr) const
-  {
-    ASSERT(m_uMask > 0);
-    return GetAt(uZpAddr) + (GetAt(uZpAddr + UINT8(1)) << 8);
+    UINT16 GetWord(UINT16 uLo, UINT16 uHi) const
+    {
+        ASSERT(m_uMask > 0);
+        return GetAt(uLo & m_uMask) + (UINT32(GetAt(uHi & m_uMask)) << 8);
+    }
+    UINT16 GetWord(UINT32 uAddr) const
+    {
+        ASSERT(m_uMask > 0);
+        return GetAt(uAddr & m_uMask) + (UINT32(GetAt((uAddr + 1) & m_uMask)) << 8);
+    }
+    UINT16 GetWordInd(UINT8 uZpAddr) const
+    {
+        ASSERT(m_uMask > 0);
+        return GetAt(uZpAddr) + (GetAt(uZpAddr + UINT8(1)) << 8);
 //    UINT8 uAddr= GetAt(uZpAddr);
 //    return GetAt(uZpAddr) + UINT16(GetAt(uZpAddr + UINT8(1)) << 8);
-  }
+    }
 };
 
 #endif

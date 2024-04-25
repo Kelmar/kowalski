@@ -34,43 +34,43 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CMemoryChg : public CDialog
 {
-  COutputMem& m_Mem;
+    COutputMem& m_Mem;
 
-  void Modify();
+    void Modify();
 // Construction
 public:
-  CMemoryChg(COutputMem& mem, CWnd* pParent = NULL);   // standard constructor
+    CMemoryChg(COutputMem& mem, CWnd* pParent = NULL);   // standard constructor
 
 // Dialog Data
-  //{{AFX_DATA(CMemoryChg)
-  enum { IDD = IDD_MEMORY_CHG };
-  UINT	m_uAddr;
-  int	m_nData;
-  int	m_nByte;
-  BOOL	m_bSigned;
-  //}}AFX_DATA
+    //{{AFX_DATA(CMemoryChg)
+    enum { IDD = IDD_MEMORY_CHG };
+    UINT	m_uAddr;
+    int	m_nData;
+    int	m_nByte;
+    BOOL	m_bSigned;
+    //}}AFX_DATA
 
 
 // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CMemoryChg)
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CMemoryChg)
 protected:
-  virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-  //}}AFX_VIRTUAL
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
 
 // Implementation
 protected:
 
-  // Generated message map functions
-  //{{AFX_MSG(CMemoryChg)
-  afx_msg void OnChangeMemoryAddr();
-  afx_msg void OnMemorySigned();
-  afx_msg void OnMemoryByte();
-  afx_msg void OnMemoryWord();
-  virtual void OnOK();
-  afx_msg void OnMemoryChg();
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    // Generated message map functions
+    //{{AFX_MSG(CMemoryChg)
+    afx_msg void OnChangeMemoryAddr();
+    afx_msg void OnMemorySigned();
+    afx_msg void OnMemoryByte();
+    afx_msg void OnMemoryWord();
+    virtual void OnOK();
+    afx_msg void OnMemoryChg();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };
 
 //{{AFX_INSERT_LOCATION}}

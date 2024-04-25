@@ -41,10 +41,10 @@ UINT CLoadCodeOptions::m_uFill= 0x00;
 
 
 CLoadCodeOptions::CLoadCodeOptions(CWnd* pParent /*=NULL*/)
-: CDialog(CLoadCodeOptions::IDD, pParent)
+    : CDialog(CLoadCodeOptions::IDD, pParent)
 {
-	//{{AFX_DATA_INIT(CLoadCodeOptions)
-	//}}AFX_DATA_INIT
+    //{{AFX_DATA_INIT(CLoadCodeOptions)
+    //}}AFX_DATA_INIT
 }
 
 
@@ -52,24 +52,24 @@ extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num
 
 void CLoadCodeOptions::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CLoadCodeOptions)
-	DDX_HexDec(pDX, IDC_LOAD_CODE_START, m_uStart);
-	if (theApp.m_global.m_bProc6502==2)  // 1.3.3 support for 24-bit addressing
-	  DDV_MinMaxUInt(pDX, m_uStart, 0, 0xFFFFFF);
-	else
-	  DDV_MinMaxUInt(pDX, m_uStart, 0, 65535);
-	DDX_Check(pDX, IDC_LOAD_CODE_CLR, m_bClearMem);
-	DDX_HexDec(pDX, IDC_LOAD_CODE_FILL_VALUE, m_uFill, false);
-	DDV_MinMaxUInt(pDX, m_uFill, 0, 255);
-	//}}AFX_DATA_MAP
+    CDialog::DoDataExchange(pDX);
+    //{{AFX_DATA_MAP(CLoadCodeOptions)
+    DDX_HexDec(pDX, IDC_LOAD_CODE_START, m_uStart);
+    if (theApp.m_global.m_bProc6502==2)  // 1.3.3 support for 24-bit addressing
+        DDV_MinMaxUInt(pDX, m_uStart, 0, 0xFFFFFF);
+    else
+        DDV_MinMaxUInt(pDX, m_uStart, 0, 65535);
+    DDX_Check(pDX, IDC_LOAD_CODE_CLR, m_bClearMem);
+    DDX_HexDec(pDX, IDC_LOAD_CODE_FILL_VALUE, m_uFill, false);
+    DDV_MinMaxUInt(pDX, m_uFill, 0, 255);
+    //}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CLoadCodeOptions, CDialog)
-  //{{AFX_MSG_MAP(CLoadCodeOptions)
-  // NOTE: the ClassWizard will add message map macros here
-  //}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CLoadCodeOptions)
+    // NOTE: the ClassWizard will add message map macros here
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

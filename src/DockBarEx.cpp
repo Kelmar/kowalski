@@ -36,9 +36,9 @@ static char THIS_FILE[] = __FILE__;
 
 CDockBarEx::CDockBarEx()
 {
-	m_bResize = false;
-	m_bResizing = false;
-	m_nDeltaWidth = 0;
+    m_bResize = false;
+    m_bResizing = false;
+    m_nDeltaWidth = 0;
 }
 
 CDockBarEx::~CDockBarEx()
@@ -46,14 +46,14 @@ CDockBarEx::~CDockBarEx()
 
 
 BEGIN_MESSAGE_MAP(CDockBarEx, CDockBar)
-	//{{AFX_MSG_MAP(CDockBarEx)
-	ON_WM_SETCURSOR()
-	ON_WM_NCHITTEST()
-	ON_WM_SIZE()
-	ON_MESSAGE(WM_ENTERSIZEMOVE, OnEnterSizeMove)
-	ON_MESSAGE(WM_EXITSIZEMOVE, OnExitSizeMove)
-	ON_WM_WINDOWPOSCHANGING()
-	//}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CDockBarEx)
+    ON_WM_SETCURSOR()
+    ON_WM_NCHITTEST()
+    ON_WM_SIZE()
+    ON_MESSAGE(WM_ENTERSIZEMOVE, OnEnterSizeMove)
+    ON_MESSAGE(WM_EXITSIZEMOVE, OnExitSizeMove)
+    ON_WM_WINDOWPOSCHANGING()
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -69,23 +69,23 @@ END_MESSAGE_MAP()
 
 BOOL CDockBarEx::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-	if (GetDockedVisibleCount() == 0)
-		return CDockBar::OnSetCursor(pWnd, nHitTest, message);
+    if (GetDockedVisibleCount() == 0)
+        return CDockBar::OnSetCursor(pWnd, nHitTest, message);
 
-	switch (nHitTest)
-	{
-	case HTLEFT:
-	case HTRIGHT:
-		::SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
-		return true;
-/*	case HTTOP:
-	case HTBOTTOM:
-		::SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZENS));
-		return true; */
-	}
+    switch (nHitTest)
+    {
+    case HTLEFT:
+    case HTRIGHT:
+        ::SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
+        return true;
+        /*	case HTTOP:
+        	case HTBOTTOM:
+        		::SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZENS));
+        		return true; */
+    }
 
-	::SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
-	return true;
+    ::SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
+    return true;
 
 //	return CDockBar::OnSetCursor(pWnd, nHitTest, message);
 }
@@ -97,57 +97,57 @@ const int nMARGIN= 5;
 //
 CRect CDockBarEx::ResizeArea()
 {
-	CRect rect;
-	GetWindowRect(rect);
+    CRect rect;
+    GetWindowRect(rect);
 
-	switch (GetDlgCtrlID())
-	{
-	case AFX_IDW_DOCKBAR_LEFT:
-		rect.left = rect.right - nMARGIN;
-		break;
-	case AFX_IDW_DOCKBAR_RIGHT:
-		rect.right = rect.left + nMARGIN;
-		break;
-	}
+    switch (GetDlgCtrlID())
+    {
+    case AFX_IDW_DOCKBAR_LEFT:
+        rect.left = rect.right - nMARGIN;
+        break;
+    case AFX_IDW_DOCKBAR_RIGHT:
+        rect.right = rect.left + nMARGIN;
+        break;
+    }
 
-	return rect;
+    return rect;
 }
 
 // Resize docked bars to requested width
 //
 void CDockBarEx::ResizeBars(int nWidth)
 {
-	for (int i = 0; i < m_arrBars.GetSize(); i++)
-	{
-		if (CControlBar* pBar= GetDockedControlBar(i))
-			pBar->CalcDynamicLayout(nWidth, LM_HORZ | LM_HORZDOCK | 0x8000);
-	}
+    for (int i = 0; i < m_arrBars.GetSize(); i++)
+    {
+        if (CControlBar* pBar= GetDockedControlBar(i))
+            pBar->CalcDynamicLayout(nWidth, LM_HORZ | LM_HORZDOCK | 0x8000);
+    }
 
-	if (CFrameWnd* pFrame= static_cast<CFrameWnd*>(GetParent()))
-	{
-		pFrame->RecalcLayout();
-		for (int i = 0; i < m_arrBars.GetSize(); i++)
-		{
-			if (CControlBar* pBar= GetDockedControlBar(i))
-			{
-				pBar->RedrawWindow(0, 0, RDW_INVALIDATE | RDW_ERASE | RDW_UPDATENOW | RDW_ALLCHILDREN);
-			}
-		}
-		pFrame->UpdateWindow();
-	}
+    if (CFrameWnd* pFrame= static_cast<CFrameWnd*>(GetParent()))
+    {
+        pFrame->RecalcLayout();
+        for (int i = 0; i < m_arrBars.GetSize(); i++)
+        {
+            if (CControlBar* pBar= GetDockedControlBar(i))
+            {
+                pBar->RedrawWindow(0, 0, RDW_INVALIDATE | RDW_ERASE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+            }
+        }
+        pFrame->UpdateWindow();
+    }
 }
 
 
 BOOL CDockBarEx::PreCreateWindow(CREATESTRUCT& cs)
 {
-	// turn on resizing edge
-	if (cs.style & CBRS_ALIGN_LEFT)
-		m_cyBottomBorder = nMARGIN;
-	else if (cs.style & CBRS_ALIGN_RIGHT)
-		m_cyTopBorder = nMARGIN;
-	cs.style |= WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+    // turn on resizing edge
+    if (cs.style & CBRS_ALIGN_LEFT)
+        m_cyBottomBorder = nMARGIN;
+    else if (cs.style & CBRS_ALIGN_RIGHT)
+        m_cyTopBorder = nMARGIN;
+    cs.style |= WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
-	return CDockBar::PreCreateWindow(cs);
+    return CDockBar::PreCreateWindow(cs);
 }
 
 
@@ -158,72 +158,72 @@ LRESULT CDockBarEx::OnNcHitTest(CPoint ptPos)
 //	CPoint ptPos(0, 0);
 //	::GetCursorPos(&ptPos);
 
-	if (ResizeArea().PtInRect(ptPos))
-	{
-		switch (GetDlgCtrlID())
-		{
-		case AFX_IDW_DOCKBAR_LEFT:
-			return HTRIGHT;
-		case AFX_IDW_DOCKBAR_RIGHT:
-			return HTLEFT;
-		case AFX_IDW_DOCKBAR_TOP:
-			return HTBOTTOM;
-		case AFX_IDW_DOCKBAR_BOTTOM:
-			return HTTOP;
-		}
-	}
+    if (ResizeArea().PtInRect(ptPos))
+    {
+        switch (GetDlgCtrlID())
+        {
+        case AFX_IDW_DOCKBAR_LEFT:
+            return HTRIGHT;
+        case AFX_IDW_DOCKBAR_RIGHT:
+            return HTLEFT;
+        case AFX_IDW_DOCKBAR_TOP:
+            return HTBOTTOM;
+        case AFX_IDW_DOCKBAR_BOTTOM:
+            return HTTOP;
+        }
+    }
 
-	return CDockBar::OnNcHitTest(ptPos);
+    return CDockBar::OnNcHitTest(ptPos);
 }
 
 // Resizing
 //
 void CDockBarEx::OnSize(UINT nType, int cx, int cy)
 {
-	CDockBar::OnSize(nType, cx, cy);
+    CDockBar::OnSize(nType, cx, cy);
 
-	if (m_bResizing)
-	{
-		CRect rect;
-		GetClientRect(rect);
-		m_bResizing = false;
-		ResizeBars(rect.Width() + m_nDeltaWidth);
-		m_bResizing = true;
-	}
+    if (m_bResizing)
+    {
+        CRect rect;
+        GetClientRect(rect);
+        m_bResizing = false;
+        ResizeBars(rect.Width() + m_nDeltaWidth);
+        m_bResizing = true;
+    }
 }
 
 // Entering user initiated resizing
 //
 LRESULT CDockBarEx::OnEnterSizeMove(WPARAM wParam, LPARAM lParam)
 {
-	m_nDeltaWidth = 4;
-	// Calc difference between dockbar client area and docked bar width
-/*	for (int i = 0; i < m_arrBars.GetSize(); i++)
-	{
-		if (CControlBar* pBar= GetDockedControlBar(i))
-			if (pBar->IsWindowVisible())
-			{
-				CRect rect;
-				GetClientRect(rect);
-				m_nDeltaWidth = rect.Width() - CalcDynamicLayout(0, LM_HORZ | LM_HORZDOCK).cx;
-				break;
-			}
-	}*/
-	m_bResizing = true;
-	return Default();
+    m_nDeltaWidth = 4;
+    // Calc difference between dockbar client area and docked bar width
+    /*	for (int i = 0; i < m_arrBars.GetSize(); i++)
+    	{
+    		if (CControlBar* pBar= GetDockedControlBar(i))
+    			if (pBar->IsWindowVisible())
+    			{
+    				CRect rect;
+    				GetClientRect(rect);
+    				m_nDeltaWidth = rect.Width() - CalcDynamicLayout(0, LM_HORZ | LM_HORZDOCK).cx;
+    				break;
+    			}
+    	}*/
+    m_bResizing = true;
+    return Default();
 }
 
 LRESULT CDockBarEx::OnExitSizeMove(WPARAM wParam, LPARAM lParam)
 {
-	m_bResizing = false;
-	return Default();
+    m_bResizing = false;
+    return Default();
 }
 
 // Suppress z-order changing (important for RecalcLayout)
 //
 void CDockBarEx::OnWindowPosChanging(WINDOWPOS FAR* pWndPos)
 {
-	if (m_bResizing)
-		pWndPos->flags |= SWP_NOZORDER;
-	CDockBar::OnWindowPosChanging(pWndPos);
+    if (m_bResizing)
+        pWndPos->flags |= SWP_NOZORDER;
+    CDockBar::OnWindowPosChanging(pWndPos);
 }

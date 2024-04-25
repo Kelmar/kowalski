@@ -36,26 +36,26 @@ static char THIS_FILE[] = __FILE__;
 
 
 CToolBox::CToolBox(CWnd* pParent /*=NULL*/)
-: CDialog(CToolBox::IDD, pParent), created(FALSE)
+    : CDialog(CToolBox::IDD, pParent), created(FALSE)
 {
-  //{{AFX_DATA_INIT(CToolBox)
+    //{{AFX_DATA_INIT(CToolBox)
     // NOTE: the ClassWizard will add member initialization here
-  //}}AFX_DATA_INIT
+    //}}AFX_DATA_INIT
 }
 
 
 void CToolBox::DoDataExchange(CDataExchange* pDX)
 {
-  CDialog::DoDataExchange(pDX);
-  //{{AFX_DATA_MAP(CToolBox)
+    CDialog::DoDataExchange(pDX);
+    //{{AFX_DATA_MAP(CToolBox)
     // NOTE: the ClassWizard will add DDX and DDV calls here
-  //}}AFX_DATA_MAP
+    //}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CToolBox, CDialog)
 //{{AFX_MSG_MAP(CToolBox)
-  // NOTE: the ClassWizard will add message map macros here
+    // NOTE: the ClassWizard will add message map macros here
 //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -65,42 +65,42 @@ END_MESSAGE_MAP()
 BOOL CToolBox::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 
-  return CDialog::Create(IDD, pParentWnd);
+    return CDialog::Create(IDD, pParentWnd);
 }
 
 
 BOOL CToolBox::Create(int rsc_id, CWnd* pParentWnd)
 {
-  this->rsc_id = rsc_id;
+    this->rsc_id = rsc_id;
 
-  int ret= CDialog::Create(IDD, pParentWnd);
-  if (!ret)
-    return ret;
+    int ret= CDialog::Create(IDD, pParentWnd);
+    if (!ret)
+        return ret;
 
-  CString regs;
-  if (regs.LoadString(rsc_id))
-    SetWindowText(regs);	// nazwa (tytu³) okna
+    CString regs;
+    if (regs.LoadString(rsc_id))
+        SetWindowText(regs);	// nazwa (tytu³) okna
 
-  created = true;
+    created = true;
 
-  return true;
+    return true;
 }
 
 
-BOOL CToolBox::OnCommand(WPARAM wParam, LPARAM lParam) 
+BOOL CToolBox::OnCommand(WPARAM wParam, LPARAM lParam)
 {
-  if (LOWORD(wParam) == rsc_id)
-  {
-    
+    if (LOWORD(wParam) == rsc_id)
+    {
 
-    return true;
-  }
-  else
-    return CDialog::OnCommand(wParam, lParam);
+
+        return true;
+    }
+    else
+        return CDialog::OnCommand(wParam, lParam);
 }
 
 CToolBox::~CToolBox()
 {
-  if (created)
-    DestroyWindow();
+    if (created)
+        DestroyWindow();
 }

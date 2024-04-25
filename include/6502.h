@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Global.h"
 
 #ifndef __AFXWIN_H__
-	#error include 'stdafx.h' before including this file for PCH
+#error include 'stdafx.h' before including this file for PCH
 #endif
 
 //#include "resource.h"       // main symbols
@@ -35,40 +35,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // See 6502.cpp for the implementation of this class
 //
 
-class C6502App : public CWinApp
+class C6502App : public wxApp
 {
-  static const TCHAR REGISTRY_KEY[];
-  static const TCHAR PROFILE_NAME[];
-  HINSTANCE m_hInstRes;
-  HMODULE m_hRichEdit;
+private:
+    //static const TCHAR REGISTRY_KEY[];
+    //static const TCHAR PROFILE_NAME[];
+
+    //HINSTANCE m_hInstRes;
+    //HMODULE m_hRichEdit;
 
 public:
-  static bool m_bMaximize;	// flaga - maksymalne wymiary okna przy starcie;
-  static bool m_bFileNew;	// flaga - owieranie pustego dokumentu przy starcie
-  CGlobal m_global;		// zmienne globalne aplikacji
-  bool m_bDoNotAddToRecentFileList;
-  CDocTemplate *m_pDocDeasmTemplate;
+    static bool m_bMaximize;	// flag - maximum window dimensions at startup;
+    static bool m_bFileNew;	// flag - opening a blank document at startup
+    CGlobal m_global;		// application global variables
+    bool m_bDoNotAddToRecentFileList;
+    //CDocTemplate *m_pDocDeasmTemplate;
 
-  C6502App();
+    C6502App();
 
-// Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(C6502App)
-public:
-  virtual BOOL InitInstance();
-  virtual void AddToRecentFileList(LPCTSTR lpszPathName);
-  virtual int ExitInstance();
-  //}}AFX_VIRTUAL
+    bool OnInit() override;
 
-// Implementation
+    virtual void AddToRecentFileList(const std::wstring &pathName);
+    //virtual int ExitInstance();
 
-  //{{AFX_MSG(C6502App)
-  afx_msg void OnAppAbout();
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    void OnAppAbout();
+    //DECLARE_MESSAGE_MAP()
 };
 
-
-extern C6502App theApp;
+//extern C6502App theApp;
 
 /////////////////////////////////////////////////////////////////////////////

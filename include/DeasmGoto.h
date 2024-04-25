@@ -26,30 +26,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CDeasmGoto : public CDialog
 {
-  // Construction
+    // Construction
 public:
-  CDeasmGoto(CWnd* pParent = NULL);   // standard constructor
-  
-  // Dialog Data
-  //{{AFX_DATA(CDeasmGoto)
-  enum { IDD = IDD_DEASM_GOTO };
-  UINT m_uAddress;
-  //}}AFX_DATA
-  
-  
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CDeasmGoto)
+    CDeasmGoto(CWnd* pParent = NULL);   // standard constructor
+
+    // Dialog Data
+    //{{AFX_DATA(CDeasmGoto)
+    enum { IDD = IDD_DEASM_GOTO };
+    UINT m_uAddress;
+    //}}AFX_DATA
+
+
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CDeasmGoto)
 protected:
-  virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-  //}}AFX_VIRTUAL
-  
-  // Implementation
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
+
+    // Implementation
 protected:
-  
-  // Generated message map functions
-  //{{AFX_MSG(CDeasmGoto)
-		// NOTE: the ClassWizard will add member functions here
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+
+    // Generated message map functions
+    //{{AFX_MSG(CDeasmGoto)
+    // NOTE: the ClassWizard will add member functions here
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };

@@ -33,69 +33,69 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 LOGFONT* const CConfigSettings::fonts[]=
 {
-	&CSrc6502View::m_LogFont,
-	&CIOWindow::m_LogFont,
-	&CDeasm6502View::m_LogFont,
-	&CMemoryView::m_LogFont,
-	&CZeroPageView::m_LogFont,
-	&CStackView::m_LogFont,
-	NULL
+    &CSrc6502View::m_LogFont,
+    &CIOWindow::m_LogFont,
+    &CDeasm6502View::m_LogFont,
+    &CMemoryView::m_LogFont,
+    &CZeroPageView::m_LogFont,
+    &CStackView::m_LogFont,
+    NULL
 };
 
 CFont* const CConfigSettings::cfonts[]=	// struktury CFont w ca³ym programie
 {
-	&CSrc6502View::m_Font,
-	&CIOWindow::m_Font,
-	&CDeasm6502View::m_Font,
-	&CMemoryView::m_Font,
-	&CZeroPageView::m_Font,
-	&CStackView::m_Font,
-	NULL
+    &CSrc6502View::m_Font,
+    &CIOWindow::m_Font,
+    &CDeasm6502View::m_Font,
+    &CMemoryView::m_Font,
+    &CZeroPageView::m_Font,
+    &CStackView::m_Font,
+    NULL
 };
 
 COLORREF* CConfigSettings::text_color[]=
 {
-	&CSrc6502View::m_rgbTextColor,
-	&CIOWindow::m_rgbTextColor,
-	&CDeasm6502View::m_rgbInstr,
-	&CMemoryView::m_rgbTextColor,
-	&CZeroPageView::m_rgbTextColor,
-	&CStackView::m_rgbTextColor,
-	NULL
+    &CSrc6502View::m_rgbTextColor,
+    &CIOWindow::m_rgbTextColor,
+    &CDeasm6502View::m_rgbInstr,
+    &CMemoryView::m_rgbTextColor,
+    &CZeroPageView::m_rgbTextColor,
+    &CStackView::m_rgbTextColor,
+    NULL
 };
 
 
 COLORREF* CConfigSettings::bkgnd_color[]=
 {
-	&CSrc6502View::m_rgbBkgndColor,
-	&CIOWindow::m_rgbBackgndColor,
-	&CDeasm6502View::m_rgbBkgnd,
-	&CMemoryView::m_rgbBkgndColor,
-	&CZeroPageView::m_rgbBkgndColor,
-	&CStackView::m_rgbBkgndColor,
-	NULL
+    &CSrc6502View::m_rgbBkgndColor,
+    &CIOWindow::m_rgbBackgndColor,
+    &CDeasm6502View::m_rgbBkgnd,
+    &CMemoryView::m_rgbBkgndColor,
+    &CZeroPageView::m_rgbBkgndColor,
+    &CStackView::m_rgbBkgndColor,
+    NULL
 };
 
 
 COLORREF* CConfigSettings::color_syntax[]=
 {
-	&CSrc6502View::m_vrgbColorSyntax[0],
-	&CSrc6502View::m_vrgbColorSyntax[1],
-	&CSrc6502View::m_vrgbColorSyntax[2],
-	&CSrc6502View::m_vrgbColorSyntax[3],
-	&CSrc6502View::m_vrgbColorSyntax[4],
-	&CSrc6502View::m_vrgbColorSyntax[5],
-	0
+    &CSrc6502View::m_vrgbColorSyntax[0],
+    &CSrc6502View::m_vrgbColorSyntax[1],
+    &CSrc6502View::m_vrgbColorSyntax[2],
+    &CSrc6502View::m_vrgbColorSyntax[3],
+    &CSrc6502View::m_vrgbColorSyntax[4],
+    &CSrc6502View::m_vrgbColorSyntax[5],
+    0
 };
 
 
 BYTE* CConfigSettings::syntax_font_style[]=
 {
-	&CSrc6502View::m_vbyFontStyle[0],
-	&CSrc6502View::m_vbyFontStyle[1],
-	&CSrc6502View::m_vbyFontStyle[2],
-	&CSrc6502View::m_vbyFontStyle[3],
-	&CSrc6502View::m_vbyFontStyle[4],
-	&CSrc6502View::m_vbyFontStyle[5],
-	0
+    &CSrc6502View::m_vbyFontStyle[0],
+    &CSrc6502View::m_vbyFontStyle[1],
+    &CSrc6502View::m_vbyFontStyle[2],
+    &CSrc6502View::m_vbyFontStyle[3],
+    &CSrc6502View::m_vbyFontStyle[4],
+    &CSrc6502View::m_vbyFontStyle[5],
+    0
 };

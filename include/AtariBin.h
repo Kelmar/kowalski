@@ -32,10 +32,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CAtariBin
 {
 public:
-  CAtariBin();
-  virtual ~CAtariBin();
+    CAtariBin();
+    virtual ~CAtariBin();
 
-  bool LoadAtaBinFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
+    bool LoadAtaBinFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
 };
 
 #endif // !defined(AFX_ATARIBIN_H__CDA48FC2_1432_11D2_809C_AEA13AAADC12__INCLUDED_)

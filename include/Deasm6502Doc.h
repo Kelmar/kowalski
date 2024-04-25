@@ -32,53 +32,53 @@ class CContext;
 
 class CDeasm6502Doc : public CDocument, CAsm
 {
-  UINT m_uStart;		// zmienne wykorzystane przy zapisie
-  UINT m_uEnd;			// deasemblowanego programu
-  UINT m_uLength;
-  bool m_bSaveAsData;
+    UINT m_uStart;		// zmienne wykorzystane przy zapisie
+    UINT m_uEnd;			// deasemblowanego programu
+    UINT m_uLength;
+    bool m_bSaveAsData;
 
 protected:
-  CDeasm6502Doc();		// protected constructor used by dynamic creation
-  DECLARE_DYNCREATE(CDeasm6502Doc)
+    CDeasm6502Doc();		// protected constructor used by dynamic creation
+    DECLARE_DYNCREATE(CDeasm6502Doc)
 
-  const CContext *m_pCtx;
-  UINT32 m_uStartAddr;
-  int m_nPointerAddr;		//  adres wsk. przez strza³kê (->) lub -1
+    const CContext *m_pCtx;
+    UINT32 m_uStartAddr;
+    int m_nPointerAddr;		//  adres wsk. przez strza³kê (->) lub -1
 
-  virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bReplace = TRUE);
-  void DeassembleSave(CArchive &ar, const CContext &ctx, UINT32 start, UINT32 end, int opt);
-  // Attributes
+    virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bReplace = TRUE);
+    void DeassembleSave(CArchive &ar, const CContext &ctx, UINT32 start, UINT32 end, int opt);
+    // Attributes
 public:
-  void SetContext(const CContext *pCtx);
-  void SetStart(UINT32 addr, bool bDraw= TRUE);
-  
-  // Operations
+    void SetContext(const CContext *pCtx);
+    void SetStart(UINT32 addr, bool bDraw= TRUE);
+
+    // Operations
 public:
-  void SetPointer(int addr, bool scroll= FALSE);
-  
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CDeasm6502Doc)
+    void SetPointer(int addr, bool scroll= FALSE);
+
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CDeasm6502Doc)
 public:
-  virtual void Serialize(CArchive& ar);   // overridden for document i/o
+    virtual void Serialize(CArchive& ar);   // overridden for document i/o
 protected:
-  virtual BOOL OnNewDocument();
-  //}}AFX_VIRTUAL
-  
-  // Implementation
+    virtual BOOL OnNewDocument();
+    //}}AFX_VIRTUAL
+
+    // Implementation
 public:
-  virtual ~CDeasm6502Doc();
+    virtual ~CDeasm6502Doc();
 #ifdef _DEBUG
-  virtual void AssertValid() const;
-  virtual void Dump(CDumpContext& dc) const;
+    virtual void AssertValid() const;
+    virtual void Dump(CDumpContext& dc) const;
 #endif
-  
-  // Generated message map functions
+
+    // Generated message map functions
 protected:
-  //{{AFX_MSG(CDeasm6502Doc)
-		// NOTE - the ClassWizard will add and remove member functions here.
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    //{{AFX_MSG(CDeasm6502Doc)
+    // NOTE - the ClassWizard will add and remove member functions here.
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };
 
 

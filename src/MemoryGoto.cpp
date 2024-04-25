@@ -38,32 +38,32 @@ extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num
 
 
 CMemoryGoto::CMemoryGoto(CWnd* pParent /*=NULL*/)
-	: CDialog(CMemoryGoto::IDD, pParent)
+    : CDialog(CMemoryGoto::IDD, pParent)
 {
-  //{{AFX_DATA_INIT(CMemoryGoto)
-  m_uAddr = 0;
-  //}}AFX_DATA_INIT
+    //{{AFX_DATA_INIT(CMemoryGoto)
+    m_uAddr = 0;
+    //}}AFX_DATA_INIT
 }
 
 
 void CMemoryGoto::DoDataExchange(CDataExchange* pDX)
 {
-  CDialog::DoDataExchange(pDX);
+    CDialog::DoDataExchange(pDX);
 //  DDX_Text(pDX, IDC_MEMORY_ADDR, m_uAddr);
-  DDX_HexDec(pDX, IDC_MEMORY_ADDR, m_uAddr);
-  //{{AFX_DATA_MAP(CMemoryGoto)
-  if (theApp.m_global.m_bProc6502==2)   // 65816
-    DDV_MinMaxUInt(pDX, m_uAddr, 0, 0xFFFFFF);
-  else
-    DDV_MinMaxUInt(pDX, m_uAddr, 0, 0xFFFF);
-  //}}AFX_DATA_MAP
+    DDX_HexDec(pDX, IDC_MEMORY_ADDR, m_uAddr);
+    //{{AFX_DATA_MAP(CMemoryGoto)
+    if (theApp.m_global.m_bProc6502==2)   // 65816
+        DDV_MinMaxUInt(pDX, m_uAddr, 0, 0xFFFFFF);
+    else
+        DDV_MinMaxUInt(pDX, m_uAddr, 0, 0xFFFF);
+    //}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CMemoryGoto, CDialog)
-  //{{AFX_MSG_MAP(CMemoryGoto)
-	  // NOTE: the ClassWizard will add message map macros here
-  //}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CMemoryGoto)
+    // NOTE: the ClassWizard will add message map macros here
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

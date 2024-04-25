@@ -26,29 +26,29 @@ class CMarkArea;
 
 class CIntelHex
 {
-  UINT geth(const TCHAR *&ptr, UINT &sum);	// interpretacja dwucyfrowej liczby hex
-  UINT row;
+    UINT geth(const TCHAR *&ptr, UINT &sum);	// interpretacja dwucyfrowej liczby hex
+    UINT row;
 
 public:
-  void SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start= -1);
+    void SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start= -1);
 
-  void LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
+    void LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
 
-  class CIntelHexException //: public CException
-  {
-  public:
-    enum Err { E_NONE, E_BAD_FORMAT, E_CHKSUM, E_FORMAT };
-  private:
-    Err error;
-    UINT row;
-  public:
-    CIntelHexException(Err err= E_NONE, UINT row= 0) : error(err), row(row)
-    { }
-    /*virtual*/ ~CIntelHexException()
-    {}
+    class CIntelHexException //: public CException
+    {
+    public:
+        enum Err { E_NONE, E_BAD_FORMAT, E_CHKSUM, E_FORMAT };
+    private:
+        Err error;
+        UINT row;
+    public:
+        CIntelHexException(Err err= E_NONE, UINT row= 0) : error(err), row(row)
+        { }
+        /*virtual*/ ~CIntelHexException()
+        {}
 
-    /*virtual*/ bool GetErrorMessage(LPTSTR lpszError, UINT nMaxError, PUINT pnHelpContext = NULL);
-  };
+        /*virtual*/ bool GetErrorMessage(LPTSTR lpszError, UINT nMaxError, PUINT pnHelpContext = NULL);
+    };
 };
 
 

@@ -28,57 +28,57 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class COptionsViewPage : public CPropertyPage
 {
-  CColorButton m_ColorButtonText;
-  CColorButton m_ColorButtonBkgnd;
-  BOOL m_bSubclassed;
-  int m_nSelection;
-  COLORREF m_rgbBkgndCol;
-  COLORREF m_rgbTextCol;
+    CColorButton m_ColorButtonText;
+    CColorButton m_ColorButtonBkgnd;
+    BOOL m_bSubclassed;
+    int m_nSelection;
+    COLORREF m_rgbBkgndCol;
+    COLORREF m_rgbTextCol;
 
-  void repaint_example();
+    void repaint_example();
 
-  DECLARE_DYNCREATE(COptionsViewPage)
+    DECLARE_DYNCREATE(COptionsViewPage)
     // Construction
 public:
-	struct TextDef
-	{
-		COLORREF text, bkgnd;
-		CFont font;
-		int changed;
-		CBrush brush;
-	};
-	static TextDef m_Text[];
+    struct TextDef
+    {
+        COLORREF text, bkgnd;
+        CFont font;
+        int changed;
+        CBrush brush;
+    };
+    static TextDef m_Text[];
 
-  COptionsViewPage();
-  ~COptionsViewPage();
-  
-  // Dialog Data
-  //{{AFX_DATA(COptionsViewPage)
-  enum { IDD = IDD_PROPPAGE_VIEW };
-	// NOTE - ClassWizard will add data members here.
-	//    DO NOT EDIT what you see in these blocks of generated code !
-  //}}AFX_DATA
-  
-  
-  // Overrides
-  // ClassWizard generate virtual function overrides
-  //{{AFX_VIRTUAL(COptionsViewPage)
+    COptionsViewPage();
+    ~COptionsViewPage();
+
+    // Dialog Data
+    //{{AFX_DATA(COptionsViewPage)
+    enum { IDD = IDD_PROPPAGE_VIEW };
+    // NOTE - ClassWizard will add data members here.
+    //    DO NOT EDIT what you see in these blocks of generated code !
+    //}}AFX_DATA
+
+
+    // Overrides
+    // ClassWizard generate virtual function overrides
+    //{{AFX_VIRTUAL(COptionsViewPage)
 public:
-  virtual BOOL OnSetActive();
+    virtual BOOL OnSetActive();
 protected:
-  virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-  //}}AFX_VIRTUAL
-  
-  // Implementation
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
+
+    // Implementation
 protected:
-  // Generated message map functions
-  //{{AFX_MSG(COptionsViewPage)
-  afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-  afx_msg void OnSelchangeViewWnd();
-  afx_msg void OnViewTxtCol();
-  afx_msg void OnViewBkgndCol();
-  afx_msg void OnViewFontBtn();
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
-    
+    // Generated message map functions
+    //{{AFX_MSG(COptionsViewPage)
+    afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+    afx_msg void OnSelchangeViewWnd();
+    afx_msg void OnViewTxtCol();
+    afx_msg void OnViewBkgndCol();
+    afx_msg void OnViewFontBtn();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
+
 };

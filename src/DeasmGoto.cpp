@@ -38,19 +38,19 @@ extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num
 
 CDeasmGoto::CDeasmGoto(CWnd* pParent /*=NULL*/) : CDialog(CDeasmGoto::IDD, pParent)
 {
-  //{{AFX_DATA_INIT(CDeasmGoto)
-  m_uAddress = 0;
-  //}}AFX_DATA_INIT
+    //{{AFX_DATA_INIT(CDeasmGoto)
+    m_uAddress = 0;
+    //}}AFX_DATA_INIT
 }
 
 
 void CDeasmGoto::DoDataExchange(CDataExchange* pDX)
 {
-  CDialog::DoDataExchange(pDX);
-  DDX_HexDec(pDX, IDC_DEASM_ADDR, m_uAddress);
-  //{{AFX_DATA_MAP(CDeasmGoto)
-  DDV_MinMaxUInt(pDX, m_uAddress, 0, 65535);
-  //}}AFX_DATA_MAP
+    CDialog::DoDataExchange(pDX);
+    DDX_HexDec(pDX, IDC_DEASM_ADDR, m_uAddress);
+    //{{AFX_DATA_MAP(CDeasmGoto)
+    DDV_MinMaxUInt(pDX, m_uAddress, 0, 65535);
+    //}}AFX_DATA_MAP
 }
 
 

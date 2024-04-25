@@ -36,52 +36,56 @@ class CLeftBar : public CControlBar, public CMarks
 {
 // Construction
 public:
-  CLeftBar();
+    CLeftBar();
 
 // Attributes
 public:
 
 // Operations
 public:
-  bool Create(CWnd* pParent, CSrc6502View* pView);
+    bool Create(CWnd* pParent, CSrc6502View* pView);
 
-  void DrawMark();
-  void SetWidth(int nWidth);
+    void DrawMark();
+    void SetWidth(int nWidth);
 
-  void RedrawLine(int nLine);
+    void RedrawLine(int nLine);
 
 // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CLeftBar)
-  //}}AFX_VIRTUAL
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CLeftBar)
+    //}}AFX_VIRTUAL
 
 // Implementation
 public:
-  virtual ~CLeftBar();
+    virtual ~CLeftBar();
 
-  virtual CSize CalcFixedLayout( BOOL bStretch, BOOL bHorz )
-  { return MySize(); }
-  virtual CSize CalcDynamicLayout( int nLength, DWORD dwMode )
-  { return MySize(); }
-  virtual void OnUpdateCmdUI( CFrameWnd* pTarget, BOOL bDisableIfNoHndler )
-  { }
-  CSize MySize();
+    virtual CSize CalcFixedLayout( BOOL bStretch, BOOL bHorz )
+    {
+        return MySize();
+    }
+    virtual CSize CalcDynamicLayout( int nLength, DWORD dwMode )
+    {
+        return MySize();
+    }
+    virtual void OnUpdateCmdUI( CFrameWnd* pTarget, BOOL bDisableIfNoHndler )
+    { }
+    CSize MySize();
 
-  virtual void DoPaint(CDC* pDC);
+    virtual void DoPaint(CDC* pDC);
 
-  COLORREF GetBkColor();
+    COLORREF GetBkColor();
 
-  // Generated message map functions
+    // Generated message map functions
 protected:
-  //{{AFX_MSG(CLeftBar)
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	//}}AFX_MSG
+    //{{AFX_MSG(CLeftBar)
+    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    //}}AFX_MSG
 
-  DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 
 private:
-  int m_nBarWidth;
-  CSrc6502View* m_pEditView;
+    int m_nBarWidth;
+    CSrc6502View* m_pEditView;
 };
 
 /////////////////////////////////////////////////////////////////////////////

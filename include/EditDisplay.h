@@ -27,43 +27,43 @@ class CSrc6502View;
 
 class CEditDisplay : public CEdit
 {
-  CSrc6502View *m_pView;
+    CSrc6502View *m_pView;
 
-  void draw_pointer(CDC &dc, int x, int y, int h);
-  void draw_breakpoint(CDC &dc, int x, int y, int h, bool active);
+    void draw_pointer(CDC &dc, int x, int y, int h);
+    void draw_breakpoint(CDC &dc, int x, int y, int h, bool active);
 
-  void MarkBreakpoint(int line);
+    void MarkBreakpoint(int line);
 
 // Construction
 public:
-  CEditDisplay();
+    CEditDisplay();
 //  CEditDisplay(CSrc6502View *pView);
-  
-  // Attributes
-public:
-  
-  // Operations
-public:
-  void Subclass(CSrc6502View *pView);
 
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CEditDisplay)
-  //}}AFX_VIRTUAL
-  
-  // Implementation
+    // Attributes
 public:
-  virtual ~CEditDisplay();
-  
-  // Generated message map functions
+
+    // Operations
+public:
+    void Subclass(CSrc6502View *pView);
+
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CEditDisplay)
+    //}}AFX_VIRTUAL
+
+    // Implementation
+public:
+    virtual ~CEditDisplay();
+
+    // Generated message map functions
 protected:
-  //{{AFX_MSG(CEditDisplay)
-  afx_msg void OnPaint();
-  afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
-  afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-  //}}AFX_MSG
-  
-  DECLARE_MESSAGE_MAP()
+    //{{AFX_MSG(CEditDisplay)
+    afx_msg void OnPaint();
+    afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+    afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
+    //}}AFX_MSG
+
+    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

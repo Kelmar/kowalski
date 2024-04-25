@@ -38,53 +38,53 @@ static char THIS_FILE[]=__FILE__;
 bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, UINT32 start, UINT32 end)
 {
     if (start > 0xFFFF)  // 1.3.3 support for 24-bit addressing
-	  {
-		CString cs;
-		cs.Format("The Program File format does not support memory above 65,535");
-		MessageBoxA(NULL, cs, "Error", MB_OK );
-	  }
+    {
+        CString cs;
+        cs.Format("The Program File format does not support memory above 65,535");
+        MessageBoxA(NULL, cs, "Error", MB_OK );
+    }
     else
-	  {
+    {
         int header = 0xFFFF;
         archive.Write(&header,2);
-		archive.Write(&start,2);
-		archive.Write(&end,2);
+        archive.Write(&start,2);
+        archive.Write(&end,2);
         archive.Write(&mem[start],end-start+1);
-	  }
+    }
 
-	return true;
+    return true;
 }
 bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start)
 {
-  int header = 0xFFFF;
-  archive.Write(&header,2);
+    int header = 0xFFFF;
+    archive.Write(&header,2);
 
-  for (UINT part=0; part<area.GetSize(); part++)
-  {
-    int start,end;
+    for (UINT part=0; part<area.GetSize(); part++)
+    {
+        int start,end;
 
-    area.GetPartition(part,start,end);
+        area.GetPartition(part,start,end);
 
-    if (part==0)
-      if (prog_start == -1)
-        prog_start = start;
+        if (part==0)
+            if (prog_start == -1)
+                prog_start = start;
 
-    ASSERT(start >= 0 && start <= 0xFFFF);
-    ASSERT(end >= 0 && end <= 0xFFFF);
-    ASSERT(start <= end);
+        ASSERT(start >= 0 && start <= 0xFFFF);
+        ASSERT(end >= 0 && end <= 0xFFFF);
+        ASSERT(start <= end);
 
-    if (start > 0xFFFF)  // 1.3.3 support for 24-bit addressing
-	  {
-		CString cs;
-		cs.Format("The Program File format does not support memory above 65,535");
-		MessageBoxA(NULL, cs, "Error", MB_OK );	
-	  }
-    else
-	  {
-		archive.Write(&start,2);
-		archive.Write(&end,2);
-		archive.Write(&mem[start],end-start+1);
-	  }
-  }
-  return true; 
+        if (start > 0xFFFF)  // 1.3.3 support for 24-bit addressing
+        {
+            CString cs;
+            cs.Format("The Program File format does not support memory above 65,535");
+            MessageBoxA(NULL, cs, "Error", MB_OK );
+        }
+        else
+        {
+            archive.Write(&start,2);
+            archive.Write(&end,2);
+            archive.Write(&mem[start],end-start+1);
+        }
+    }
+    return true;
 }

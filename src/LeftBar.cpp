@@ -38,8 +38,8 @@ static char THIS_FILE[] = __FILE__;
 
 CLeftBar::CLeftBar()
 {
-  m_nBarWidth = 0;
-  m_pEditView = 0;
+    m_nBarWidth = 0;
+    m_pEditView = 0;
 }
 
 CLeftBar::~CLeftBar()
@@ -47,9 +47,9 @@ CLeftBar::~CLeftBar()
 
 
 BEGIN_MESSAGE_MAP(CLeftBar, CControlBar)
-  //{{AFX_MSG_MAP(CLeftBar)
-	ON_WM_ERASEBKGND()
-	//}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CLeftBar)
+    ON_WM_ERASEBKGND()
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -57,23 +57,23 @@ END_MESSAGE_MAP()
 
 CSize CLeftBar::MySize()
 {
-  CRect rect;
-  GetParent()->GetClientRect(rect);
-  return CSize(m_nBarWidth, rect.Height());
+    CRect rect;
+    GetParent()->GetClientRect(rect);
+    return CSize(m_nBarWidth, rect.Height());
 }
 
 
 bool CLeftBar::Create(CWnd* pParent, CSrc6502View* pView)
 {
-  CRect rect(0,0,0,0);
-  bool bRet= !!CWnd::CreateEx(0, "STATIC", "", WS_CHILD | WS_VISIBLE,
-    rect, pParent, AFX_IDW_CONTROLBAR_LAST);
+    CRect rect(0,0,0,0);
+    bool bRet= !!CWnd::CreateEx(0, "STATIC", "", WS_CHILD | WS_VISIBLE,
+                                rect, pParent, AFX_IDW_CONTROLBAR_LAST);
 
-  m_dwStyle = CBRS_ALIGN_LEFT;
+    m_dwStyle = CBRS_ALIGN_LEFT;
 
-  m_pEditView = pView;
+    m_pEditView = pView;
 
-  return bRet;
+    return bRet;
 }
 
 
@@ -83,48 +83,48 @@ static const int LEFT_ERR_MARGIN= 4;	// margin for error marker
 
 void CLeftBar::DoPaint(CDC* pDC)
 {
-	CRect rect;
-	GetClientRect(rect);
+    CRect rect;
+    GetClientRect(rect);
 
 //  pDC->DrawFrameControl(rect, DFC_SCROLL, DFCS_SCROLLCOMBOBOX);
 
-  COLORREF rgbLight= GetBkColor();
+    COLORREF rgbLight= GetBkColor();
 
-  CMemoryDC dcMem(*pDC, this, rgbLight);
+    CMemoryDC dcMem(*pDC, this, rgbLight);
 
-  if (m_pEditView != 0)
-  {
-    int nTopLine= 0, nLineCount= 0, nLineHeight= 0;
-    m_pEditView->GetDispInfo(nTopLine, nLineCount, nLineHeight);
-    if (nLineHeight > 0)
+    if (m_pEditView != 0)
     {
+        int nTopLine= 0, nLineCount= 0, nLineHeight= 0;
+        m_pEditView->GetDispInfo(nTopLine, nLineCount, nLineHeight);
+        if (nLineHeight > 0)
+        {
 //      int nCtrlBottom= (rect.Height() + nLineHeight - 1) / nLineHeight;
 
-      int nPointerLine= m_pEditView->GetPointerLine();
-      int nErrMarkLine= m_pEditView->GetErrorMarkLine();
+            int nPointerLine= m_pEditView->GetPointerLine();
+            int nErrMarkLine= m_pEditView->GetErrorMarkLine();
 
-      int nLine= nTopLine;
-      for (int y= 0; y < rect.Height(); y += nLineHeight, ++nLine)
-      {
-        if (nLine > nLineCount)
-          break;
+            int nLine= nTopLine;
+            for (int y= 0; y < rect.Height(); y += nLineHeight, ++nLine)
+            {
+                if (nLine > nLineCount)
+                    break;
 
-        if (BYTE bp= m_pEditView->GetBreakpoint(nLine))
-          draw_breakpoint(dcMem, LEFT_MARGIN, y, nLineHeight, !(bp & CAsm::BPT_DISABLED));
+                if (BYTE bp= m_pEditView->GetBreakpoint(nLine))
+                    draw_breakpoint(dcMem, LEFT_MARGIN, y, nLineHeight, !(bp & CAsm::BPT_DISABLED));
 
-        if (nPointerLine == nLine)
-          draw_pointer(dcMem, LEFT_MARGIN, y, nLineHeight);
+                if (nPointerLine == nLine)
+                    draw_pointer(dcMem, LEFT_MARGIN, y, nLineHeight);
 
-        if (nErrMarkLine == nLine)
-          draw_mark(dcMem, LEFT_ERR_MARGIN, y, nLineHeight);
-      }
+                if (nErrMarkLine == nLine)
+                    draw_mark(dcMem, LEFT_ERR_MARGIN, y, nLineHeight);
+            }
 
+        }
     }
-  }
 
-  dcMem.BitBlt();
+    dcMem.BitBlt();
 
-  //pDC->FillSolidRect(rect, rgbLight);
+    //pDC->FillSolidRect(rect, rgbLight);
 }
 
 
@@ -135,27 +135,27 @@ void CLeftBar::DrawMark()
 
 void CLeftBar::SetWidth(int nWidth)
 {
-  m_nBarWidth = nWidth + 1;
-  Invalidate();
+    m_nBarWidth = nWidth + 1;
+    Invalidate();
 }
 
 
 void CLeftBar::RedrawLine(int nLine)
 {
-  CClientDC dc(this);
-  DoPaint(&dc);
+    CClientDC dc(this);
+    DoPaint(&dc);
 }
 
 
 COLORREF CLeftBar::GetBkColor()
 {
-  COLORREF rgbGray= ::GetSysColor(COLOR_3DFACE);
-  COLORREF rgbLight= RGB(0x80 + GetRValue(rgbGray) / 2, 0x80 + GetGValue(rgbGray) / 2, 0x80 + GetBValue(rgbGray) / 2);
-  return rgbLight;
+    COLORREF rgbGray= ::GetSysColor(COLOR_3DFACE);
+    COLORREF rgbLight= RGB(0x80 + GetRValue(rgbGray) / 2, 0x80 + GetGValue(rgbGray) / 2, 0x80 + GetBValue(rgbGray) / 2);
+    return rgbLight;
 }
 
 
 BOOL CLeftBar::OnEraseBkgnd(CDC* pDC)
 {
-  return true;
+    return true;
 }

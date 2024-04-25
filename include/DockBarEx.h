@@ -34,7 +34,7 @@ class CDockBarEx : public CDockBar
 {
 // Construction
 public:
-	CDockBarEx();
+    CDockBarEx();
 
 // Attributes
 public:
@@ -43,35 +43,35 @@ public:
 public:
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CDockBarEx)
-	//}}AFX_VIRTUAL
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CDockBarEx)
+    //}}AFX_VIRTUAL
 
 // Implementation
 public:
-	virtual ~CDockBarEx();
+    virtual ~CDockBarEx();
 //	virtual CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz);
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
-	// Generated message map functions
+    // Generated message map functions
 protected:
-	//{{AFX_MSG(CDockBarEx)
-	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-	afx_msg LRESULT OnNcHitTest(CPoint point);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-	afx_msg LRESULT OnEnterSizeMove(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnExitSizeMove(WPARAM wParam, LPARAM lParam);
+    //{{AFX_MSG(CDockBarEx)
+    afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+    afx_msg LRESULT OnNcHitTest(CPoint point);
+    afx_msg void OnSize(UINT nType, int cx, int cy);
+    afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
+    afx_msg LRESULT OnEnterSizeMove(WPARAM wParam, LPARAM lParam);
+    afx_msg LRESULT OnExitSizeMove(WPARAM wParam, LPARAM lParam);
 
-	CRect ResizeArea();
-	bool m_bResize;
-	CPoint m_ptStart;
-	int m_nStartWidth;
-	void ResizeBars(int nWidth);
-	bool m_bResizing;
-	int m_nDeltaWidth;
+    CRect ResizeArea();
+    bool m_bResize;
+    CPoint m_ptStart;
+    int m_nStartWidth;
+    void ResizeBars(int nWidth);
+    bool m_bResizing;
+    int m_nDeltaWidth;
 };
 
 /////////////////////////////////////////////////////////////////////////////

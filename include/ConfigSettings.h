@@ -24,12 +24,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 struct CConfigSettings
 {
-  static LOGFONT* const fonts[];	// struktury LOGFONT w ca造m programie
-  static CFont* const cfonts[];	// struktury CFont w ca造m programie
-  static COLORREF* text_color[];
-  static COLORREF* bkgnd_color[];
-  static COLORREF* color_syntax[];
-  static BYTE* syntax_font_style[];
+    static LOGFONT* const fonts[];	// struktury LOGFONT w ca造m programie
+    static CFont* const cfonts[];	// struktury CFont w ca造m programie
+    static COLORREF* text_color[];
+    static COLORREF* bkgnd_color[];
+    static COLORREF* color_syntax[];
+    static BYTE* syntax_font_style[];
 };
 
 

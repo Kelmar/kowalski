@@ -33,8 +33,8 @@ class CMarkArea;
 class CCode65p
 {
 public:
-  bool SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start=-1);
-  bool SaveCode65p(CArchive &archive, COutputMem &mem, UINT32 start, UINT32 end);
- 
+    bool SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start=-1);
+    bool SaveCode65p(CArchive &archive, COutputMem &mem, UINT32 start, UINT32 end);
+
 };
 

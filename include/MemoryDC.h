@@ -32,19 +32,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CMemoryDC : public CDC
 {
 public:
-	CMemoryDC(CDC& dc, CWnd* pWnd, COLORREF rgbClrBack= -1);
-	CMemoryDC(CDC& dc, const CRect& rect);
-	virtual ~CMemoryDC();
+    CMemoryDC(CDC& dc, CWnd* pWnd, COLORREF rgbClrBack= -1);
+    CMemoryDC(CDC& dc, const CRect& rect);
+    virtual ~CMemoryDC();
 
-	void BitBlt();
+    void BitBlt();
 
 private:
-	CDC* m_pDC;
-	CBitmap m_bmpScreen;
-	CPoint m_ptPos;
-	CSize m_Size;
+    CDC* m_pDC;
+    CBitmap m_bmpScreen;
+    CPoint m_ptPos;
+    CSize m_Size;
 
-	void Init(CDC& dc, const CRect& rect, COLORREF rgbClrBack);
+    void Init(CDC& dc, const CRect& rect, COLORREF rgbClrBack);
 };
 
 #endif // !defined(AFX_MEMORYDC_H__1DFA018A_CA70_45E4_87EE_865C0E9982AC__INCLUDED_)

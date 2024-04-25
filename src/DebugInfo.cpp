@@ -25,72 +25,72 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // ustawienie przerwania
 CAsm::Breakpoint CDebugInfo::SetBreakpoint(int line, FileUID file, int bp)
 {
-  ASSERT( (bp & ~BPT_MASK) == 0 );	// niedozwolona kombinacja bitów okreœlaj¹cych przerwanie
+    ASSERT( (bp & ~BPT_MASK) == 0 );	// niedozwolona kombinacja bitów okreœlaj¹cych przerwanie
 
-  CDebugLine dl;
-  GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
-  if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
-    return BPT_NO_CODE;		// nie ma kodu w wierszu 'line'
-  if (bp == BPT_NONE)		// rodzaj przerwania nie zosta³ podany?
-    bp = dl.flags & DBG_CODE ? BPT_EXECUTE : BPT_READ|BPT_WRITE|BPT_EXECUTE;
-  return m_breakpoints.Set(dl.addr,bp);
+    CDebugLine dl;
+    GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
+    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
+        return BPT_NO_CODE;		// nie ma kodu w wierszu 'line'
+    if (bp == BPT_NONE)		// rodzaj przerwania nie zosta³ podany?
+        bp = dl.flags & DBG_CODE ? BPT_EXECUTE : BPT_READ|BPT_WRITE|BPT_EXECUTE;
+    return m_breakpoints.Set(dl.addr,bp);
 }
 
 
 CAsm::Breakpoint CDebugInfo::ModifyBreakpoint(int line, FileUID file, int bp)
 {
-  ASSERT( (bp & ~(BPT_MASK|BPT_DISABLED)) == 0 );	// niedozwolona kombinacja bitów okreœlaj¹cych przerwanie
+    ASSERT( (bp & ~(BPT_MASK|BPT_DISABLED)) == 0 );	// niedozwolona kombinacja bitów okreœlaj¹cych przerwanie
 
-  CDebugLine dl;
-  GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
-  if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
-    return BPT_NO_CODE;		// nie ma kodu w wierszu 'line'
-  if ((bp & BPT_MASK) == BPT_NONE)
-  {
-    m_breakpoints.ClrBrkp(dl.addr);	// skasowanie przerwania
-    return BPT_NONE;
-  }
-  bp = m_breakpoints.Set(dl.addr,bp & ~BPT_DISABLED);
-  m_breakpoints.Enable(dl.addr, !(bp & BPT_DISABLED) );
-  return (Breakpoint)bp;
+    CDebugLine dl;
+    GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
+    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
+        return BPT_NO_CODE;		// nie ma kodu w wierszu 'line'
+    if ((bp & BPT_MASK) == BPT_NONE)
+    {
+        m_breakpoints.ClrBrkp(dl.addr);	// skasowanie przerwania
+        return BPT_NONE;
+    }
+    bp = m_breakpoints.Set(dl.addr,bp & ~BPT_DISABLED);
+    m_breakpoints.Enable(dl.addr, !(bp & BPT_DISABLED) );
+    return (Breakpoint)bp;
 }
 
 
 CAsm::Breakpoint CDebugInfo::GetBreakpoint(int line, FileUID file)
 {
-  CDebugLine dl;
-  GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
-  if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
-  {
+    CDebugLine dl;
+    GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
+    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
+    {
 //    ASSERT(FALSE);
-    return BPT_NO_CODE;		// nie ma kodu w wierszu 'line'
-  }
-  return m_breakpoints.Get(dl.addr);
+        return BPT_NO_CODE;		// nie ma kodu w wierszu 'line'
+    }
+    return m_breakpoints.Get(dl.addr);
 }
 
 
 CAsm::Breakpoint CDebugInfo::ToggleBreakpoint(int line, FileUID file)
 {
-  CDebugLine dl;
-  GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
-  if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
-    return BPT_NO_CODE;		// nie ma kodu w wierszu 'line'
+    CDebugLine dl;
+    GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
+    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
+        return BPT_NO_CODE;		// nie ma kodu w wierszu 'line'
 
-  if (m_breakpoints.Get(dl.addr) != BPT_NONE)	// jest ju¿ ustawione przerwanie?
-    return m_breakpoints.Clr(dl.addr);
-  else
-    return m_breakpoints.Set(dl.addr, dl.flags & DBG_CODE ? BPT_EXECUTE : BPT_READ|BPT_WRITE|BPT_EXECUTE);
+    if (m_breakpoints.Get(dl.addr) != BPT_NONE)	// jest ju¿ ustawione przerwanie?
+        return m_breakpoints.Clr(dl.addr);
+    else
+        return m_breakpoints.Set(dl.addr, dl.flags & DBG_CODE ? BPT_EXECUTE : BPT_READ|BPT_WRITE|BPT_EXECUTE);
 }
 
 
 void CDebugInfo::ClrBreakpoint(int line, FileUID file)
 {
-  CDebugLine dl;
-  GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
-  if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
-  {
-    ASSERT(FALSE);		// nie ma kodu w wierszu 'line'
-    return;
-  }
-  m_breakpoints.Clr(dl.addr);
+    CDebugLine dl;
+    GetAddress(dl,line,file);	// znalezienie adresu odpowiadaj¹cego wierszowi
+    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
+    {
+        ASSERT(FALSE);		// nie ma kodu w wierszu 'line'
+        return;
+    }
+    m_breakpoints.Clr(dl.addr);
 }

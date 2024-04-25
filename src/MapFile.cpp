@@ -24,24 +24,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 LPCTSTR CMapFile::GetPath(FileUID fuid)
 {
-  if (fuid == 0 || fuid > m_nLastUID)
-  {
-    ASSERT(FALSE);		// b³êdna wartoœæ FUID
-    return NULL;
-  }
-  return GetAt((int)fuid - 1);
+    if (fuid == 0 || fuid > m_nLastUID)
+    {
+        ASSERT(FALSE);		// b³êdna wartoœæ FUID
+        return NULL;
+    }
+    return GetAt((int)fuid - 1);
 }
 
 
 CAsm::FileUID CMapFile::GetFileUID(LPCTSTR path)
 {
-  FileUID fuid;
-  if (m_PathToFuid.Lookup(path,fuid))
-    return fuid;
+    FileUID fuid;
+    if (m_PathToFuid.Lookup(path,fuid))
+        return fuid;
 
-  SetAtGrow(m_nLastUID,path);
-  m_nLastUID++;
-  m_PathToFuid[path] = (FileUID)m_nLastUID;
+    SetAtGrow(m_nLastUID,path);
+    m_nLastUID++;
+    m_PathToFuid[path] = (FileUID)m_nLastUID;
 
-  return (FileUID)m_nLastUID;
+    return (FileUID)m_nLastUID;
 }

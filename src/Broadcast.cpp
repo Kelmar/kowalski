@@ -22,36 +22,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "MainFrm.h"
 
 
-  // wys³anie komunikatu do wszystkich okien otwartych dokumentów
+// wys³anie komunikatu do wszystkich okien otwartych dokumentów
 void CBroadcast::SendMessageToViews(UINT msg, WPARAM wParam/*= 0*/, LPARAM lParam/*= 0*/)
 {
-  CWinApp *pApp= AfxGetApp();
-  POSITION posTempl= pApp->GetFirstDocTemplatePosition();
-  while (posTempl != NULL)
-  {
-    CDocTemplate *pTempl= pApp->GetNextDocTemplate(posTempl);
-    POSITION posDoc= pTempl->GetFirstDocPosition();
-    while (posDoc != NULL)
+    CWinApp *pApp= AfxGetApp();
+    POSITION posTempl= pApp->GetFirstDocTemplatePosition();
+    while (posTempl != NULL)
     {
-      CDocument *pDoc= pTempl->GetNextDoc(posDoc);
-      POSITION posView = pDoc->GetFirstViewPosition();
-      while (posView != NULL)
-      {
-	CView* pView = pDoc->GetNextView(posView);
-	pView->SendMessage(msg,wParam,lParam);
-      }
+        CDocTemplate *pTempl= pApp->GetNextDocTemplate(posTempl);
+        POSITION posDoc= pTempl->GetFirstDocPosition();
+        while (posDoc != NULL)
+        {
+            CDocument *pDoc= pTempl->GetNextDoc(posDoc);
+            POSITION posView = pDoc->GetFirstViewPosition();
+            while (posView != NULL)
+            {
+                CView* pView = pDoc->GetNextView(posView);
+                pView->SendMessage(msg,wParam,lParam);
+            }
+        }
     }
-  }   
 }
 
 
-  // wys³anie komunikatu do okien zapisanych w g_hWindows[]
+// wys³anie komunikatu do okien zapisanych w g_hWindows[]
 void CBroadcast::SendMessageToPopups(UINT msg, WPARAM wParam/*= 0*/, LPARAM lParam/*= 0*/)
 {
-  for (int i=0; CMainFrame::m_hWindows[i]; i++)
-  {
-    HWND hWnd= *CMainFrame::m_hWindows[i];
-    if (hWnd && ::IsWindow(hWnd))
-      ::SendMessage(hWnd, msg, wParam, lParam);
-  }
+    for (int i=0; CMainFrame::m_hWindows[i]; i++)
+    {
+        HWND hWnd= *CMainFrame::m_hWindows[i];
+        if (hWnd && ::IsWindow(hWnd))
+            ::SendMessage(hWnd, msg, wParam, lParam);
+    }
 }

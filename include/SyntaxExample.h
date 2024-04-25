@@ -34,42 +34,42 @@ class CSyntaxExample : public CButton
 {
 // Construction
 public:
-	CSyntaxExample();
+    CSyntaxExample();
 
 // Attributes
 public:
-	int m_nTabStop;
-	HFONT m_hEditorFont;
-	COLORREF m_rgbBackground;
-	COLORREF m_rgbText;
-	COLORREF m_rgbInstruction;
-	COLORREF m_rgbDirective;
-	COLORREF m_rgbComment;
-	COLORREF m_rgbNumber;
-	COLORREF m_rgbString;
-	COLORREF m_rgbSelection;
-	bool m_vbBold[5];
+    int m_nTabStop;
+    HFONT m_hEditorFont;
+    COLORREF m_rgbBackground;
+    COLORREF m_rgbText;
+    COLORREF m_rgbInstruction;
+    COLORREF m_rgbDirective;
+    COLORREF m_rgbComment;
+    COLORREF m_rgbNumber;
+    COLORREF m_rgbString;
+    COLORREF m_rgbSelection;
+    bool m_vbBold[5];
 
 // Operations
 public:
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+    virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CSyntaxExample)
-	//}}AFX_VIRTUAL
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CSyntaxExample)
+    //}}AFX_VIRTUAL
 
 // Implementation
 public:
-	virtual ~CSyntaxExample();
+    virtual ~CSyntaxExample();
 
-	// Generated message map functions
+    // Generated message map functions
 protected:
-	//{{AFX_MSG(CSyntaxExample)
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	//}}AFX_MSG
+    //{{AFX_MSG(CSyntaxExample)
+    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    //}}AFX_MSG
 
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

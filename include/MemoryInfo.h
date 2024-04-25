@@ -31,51 +31,51 @@ class COutputMem;
 
 class CMemoryInfo : public CMiniFrameWnd
 {
-  COutputMem *m_pMem;
-  UINT32 m_uAddr;
-  CMemoryDoc m_Doc;
+    COutputMem *m_pMem;
+    UINT32 m_uAddr;
+    CMemoryDoc m_Doc;
 
-  static CString m_strClass;
-  static bool m_bRegistered;
-  void RegisterWndClass();
-  void init();
+    static CString m_strClass;
+    static bool m_bRegistered;
+    void RegisterWndClass();
+    void init();
 
-  DECLARE_DYNCREATE(CMemoryInfo)
+    DECLARE_DYNCREATE(CMemoryInfo)
 
-  // Attributes
+    // Attributes
 public:
-  CMemoryInfo();
-  virtual ~CMemoryInfo();
-  CRect m_WndRect;
-  bool m_bHidden;
+    CMemoryInfo();
+    virtual ~CMemoryInfo();
+    CRect m_WndRect;
+    bool m_bHidden;
 
-  // Operations
+    // Operations
 public:
-  enum ViewType { VIEW_MEMORY, VIEW_ZEROPAGE, VIEW_STACK };
-  bool Create(COutputMem *pMem, UINT32 uAddr, ViewType bView);
+    enum ViewType { VIEW_MEMORY, VIEW_ZEROPAGE, VIEW_STACK };
+    bool Create(COutputMem *pMem, UINT32 uAddr, ViewType bView);
 
-  void InvalidateView(UINT16 uStackPtr= 0);
-  void Invalidate();
+    void InvalidateView(UINT16 uStackPtr= 0);
+    void Invalidate();
 
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CMemoryInfo)
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CMemoryInfo)
 protected:
-  virtual void PostNcDestroy();
-  //}}AFX_VIRTUAL
-  
-  // Implementation
+    virtual void PostNcDestroy();
+    //}}AFX_VIRTUAL
+
+    // Implementation
 protected:
-  afx_msg LRESULT OnStartDebug(WPARAM wParam, LPARAM lParam);
-  afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);
-  // Generated message map functions
-  //{{AFX_MSG(CMemoryInfo)
-  afx_msg void OnDestroy();
-  afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-  afx_msg void OnClose();
-  //}}AFX_MSG
-  afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
-  DECLARE_MESSAGE_MAP()
+    afx_msg LRESULT OnStartDebug(WPARAM wParam, LPARAM lParam);
+    afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);
+    // Generated message map functions
+    //{{AFX_MSG(CMemoryInfo)
+    afx_msg void OnDestroy();
+    afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+    afx_msg void OnClose();
+    //}}AFX_MSG
+    afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
+    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

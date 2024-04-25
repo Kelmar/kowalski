@@ -36,10 +36,10 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(CSrc6502Doc, CDocument)
 
 BEGIN_MESSAGE_MAP(CSrc6502Doc, CDocument)
-  //{{AFX_MSG_MAP(CSrc6502Doc)
+    //{{AFX_MSG_MAP(CSrc6502Doc)
     // NOTE - the ClassWizard will add and remove mapping macros here.
     //    DO NOT EDIT what you see in these blocks of generated code!
-  //}}AFX_MSG_MAP
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ END_MESSAGE_MAP()
 
 CSrc6502Doc::CSrc6502Doc()
 {
-	m_TextBuffer.m_pOwnerDoc = this;
+    m_TextBuffer.m_pOwnerDoc = this;
 }
 
 CSrc6502Doc::~CSrc6502Doc()
@@ -59,19 +59,19 @@ CSrc6502Doc::~CSrc6502Doc()
 
 BOOL CSrc6502Doc::OnNewDocument()
 {
-  if (!CDocument::OnNewDocument())
-    return FALSE;
+    if (!CDocument::OnNewDocument())
+        return FALSE;
 
 #ifdef USE_CRYSTAL_EDIT
-	m_TextBuffer.InitNew();
+    m_TextBuffer.InitNew();
 #endif
 
-  static UINT no= 1;
-  CString name;
-  name.Format(_T("NewFile%u"),no++);
-  SetPathName(name,false);
+    static UINT no= 1;
+    CString name;
+    name.Format(_T("NewFile%u"),no++);
+    SetPathName(name,false);
 
-  return TRUE;
+    return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -80,10 +80,10 @@ BOOL CSrc6502Doc::OnNewDocument()
 void CSrc6502Doc::Serialize(CArchive& ar)
 {
 #ifdef USE_CRYSTAL_EDIT
-	//no-op
+    //no-op
 #else
-  // CEditView contains an edit control which handles all serialization
-  ((CEditView*)m_viewList.GetHead())->SerializeRaw(ar);
+    // CEditView contains an edit control which handles all serialization
+    ((CEditView*)m_viewList.GetHead())->SerializeRaw(ar);
 #endif
 }
 
@@ -93,12 +93,12 @@ void CSrc6502Doc::Serialize(CArchive& ar)
 #ifdef _DEBUG
 void CSrc6502Doc::AssertValid() const
 {
-  CDocument::AssertValid();
+    CDocument::AssertValid();
 }
 
 void CSrc6502Doc::Dump(CDumpContext& dc) const
 {
-  CDocument::Dump(dc);
+    CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -108,43 +108,43 @@ void CSrc6502Doc::Dump(CDumpContext& dc) const
 
 void CSrc6502Doc::DeleteContents()
 {
-	CDocument::DeleteContents();
-	m_TextBuffer.FreeAll();
+    CDocument::DeleteContents();
+    m_TextBuffer.FreeAll();
 }
 
 
 BOOL CSrc6502Doc::OnOpenDocument(LPCTSTR lpszPathName)
 {
-	if (!CDocument::OnOpenDocument(lpszPathName))
-		return FALSE;
+    if (!CDocument::OnOpenDocument(lpszPathName))
+        return FALSE;
 
-	return m_TextBuffer.LoadFromFile(lpszPathName);
+    return m_TextBuffer.LoadFromFile(lpszPathName);
 }
 
 
 BOOL CSrc6502Doc::OnSaveDocument(LPCTSTR lpszPathName)
 {
-	m_TextBuffer.SaveToFile(lpszPathName);
-	return true;
+    m_TextBuffer.SaveToFile(lpszPathName);
+    return true;
 }
 
 #else
 
 void CSrc6502Doc::DeleteContents()
 {
-	CDocument::DeleteContents();
+    CDocument::DeleteContents();
 }
 
 
 BOOL CSrc6502Doc::OnOpenDocument(LPCTSTR lpszPathName)
 {
-	return CDocument::OnOpenDocument(lpszPathName);
+    return CDocument::OnOpenDocument(lpszPathName);
 }
 
 
 BOOL CSrc6502Doc::OnSaveDocument(LPCTSTR lpszPathName)
 {
-	return CDocument::OnSaveDocument(lpszPathName);
+    return CDocument::OnSaveDocument(lpszPathName);
 }
 
 #endif

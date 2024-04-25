@@ -27,40 +27,40 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CSaveCodeBlockOptions : public CDialog, CFormatNums
 {
-  bool m_bModify;
-  void CalculateNums(int pos);
-  // Construction
+    bool m_bModify;
+    void CalculateNums(int pos);
+    // Construction
 public:
-  CSaveCodeBlockOptions(CWnd* pParent = NULL);   // standard constructor
+    CSaveCodeBlockOptions(CWnd* pParent = NULL);   // standard constructor
 
-  // Dialog Data
-  //{{AFX_DATA(CSaveCodeBlockOptions)
-  enum { IDD = IDD_SAVE_CODE_OPT_2 };
-  UINT	m_uEnd;
-  UINT	m_uLength;
-  UINT	m_uStart;
-  //}}AFX_DATA
+    // Dialog Data
+    //{{AFX_DATA(CSaveCodeBlockOptions)
+    enum { IDD = IDD_SAVE_CODE_OPT_2 };
+    UINT	m_uEnd;
+    UINT	m_uLength;
+    UINT	m_uStart;
+    //}}AFX_DATA
 
 
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CSaveCodeBlockOptions)
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CSaveCodeBlockOptions)
 protected:
-  virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-  //}}AFX_VIRTUAL
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
 
-  // Implementation
+    // Implementation
 protected:
 
-  // Generated message map functions
-  //{{AFX_MSG(CSaveCodeBlockOptions)
-  virtual BOOL OnInitDialog();
-  afx_msg void OnDeltaposSpinStart(NMHDR* pNMHDR, LRESULT* pResult);
-  afx_msg void OnDeltaposSpinEnd(NMHDR* pNMHDR, LRESULT* pResult);
-  afx_msg void OnDeltaposSpinLength(NMHDR* pNMHDR, LRESULT* pResult);
-  afx_msg void OnChangeFieldStart();
-  afx_msg void OnChangeFieldEnd();
-  afx_msg void OnChangeFieldLength();
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    // Generated message map functions
+    //{{AFX_MSG(CSaveCodeBlockOptions)
+    virtual BOOL OnInitDialog();
+    afx_msg void OnDeltaposSpinStart(NMHDR* pNMHDR, LRESULT* pResult);
+    afx_msg void OnDeltaposSpinEnd(NMHDR* pNMHDR, LRESULT* pResult);
+    afx_msg void OnDeltaposSpinLength(NMHDR* pNMHDR, LRESULT* pResult);
+    afx_msg void OnChangeFieldStart();
+    afx_msg void OnChangeFieldEnd();
+    afx_msg void OnChangeFieldLength();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };

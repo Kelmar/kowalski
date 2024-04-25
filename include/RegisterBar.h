@@ -31,71 +31,71 @@ class CContext;
 
 class CRegisterBar : public CDialogBar, public CAsm
 {
-  bool m_bInUpdate;
+    bool m_bInUpdate;
 
-  bool UpdateItem(int itemID);
+    bool UpdateItem(int itemID);
 
-  void UpdateRegA(const CContext *pCtx, const CContext *pOld= NULL);
-  void UpdateRegX(const CContext *pCtx, const CContext *pOld= NULL);
-  void UpdateRegY(const CContext *pCtx, const CContext *pOld= NULL);
-  void UpdateRegP(const CContext *pCtx, const CContext *pOld= NULL);
-  void UpdateRegS(const CContext *pCtx, const CContext *pOld= NULL);
-  void UpdateRegPC(const CContext *pCtx, const CContext *pOld= NULL);
-  void UpdateCycles(ULONG uCycles);
-  void ChangeRegister(int ID, int reg_no);
-  void ChangeFlags(int flag_bit, bool set);	// zmiana bitu rej. flagowego
+    void UpdateRegA(const CContext *pCtx, const CContext *pOld= NULL);
+    void UpdateRegX(const CContext *pCtx, const CContext *pOld= NULL);
+    void UpdateRegY(const CContext *pCtx, const CContext *pOld= NULL);
+    void UpdateRegP(const CContext *pCtx, const CContext *pOld= NULL);
+    void UpdateRegS(const CContext *pCtx, const CContext *pOld= NULL);
+    void UpdateRegPC(const CContext *pCtx, const CContext *pOld= NULL);
+    void UpdateCycles(ULONG uCycles);
+    void ChangeRegister(int ID, int reg_no);
+    void ChangeFlags(int flag_bit, bool set);	// zmiana bitu rej. flagowego
 
-  afx_msg LRESULT OnUpdate(WPARAM wParam, LPARAM lParam);
-  afx_msg LRESULT OnStartDebug(WPARAM wParam, LPARAM lParam);
-  afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);
+    afx_msg LRESULT OnUpdate(WPARAM wParam, LPARAM lParam);
+    afx_msg LRESULT OnStartDebug(WPARAM wParam, LPARAM lParam);
+    afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);
 
-  virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
+    virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
 
-  // Construction
+    // Construction
 public:
-  static bool m_bHidden;
-  void Update(const CContext *pCtx, const CString &stat, const CContext *pOld= NULL, bool bDraw= TRUE);
-  bool Create(CWnd* pParentWnd, UINT nStyle, UINT nID);
-  CRegisterBar();	// standard constructor
+    static bool m_bHidden;
+    void Update(const CContext *pCtx, const CString &stat, const CContext *pOld= NULL, bool bDraw= TRUE);
+    bool Create(CWnd* pParentWnd, UINT nStyle, UINT nID);
+    CRegisterBar();	// standard constructor
 
-  // Dialog Data
-  //{{AFX_DATA(CRegisterBar)
-  enum { IDD = IDD_REGISTERBAR };
-	// NOTE: the ClassWizard will add data members here
-  //}}AFX_DATA
+    // Dialog Data
+    //{{AFX_DATA(CRegisterBar)
+    enum { IDD = IDD_REGISTERBAR };
+    // NOTE: the ClassWizard will add data members here
+    //}}AFX_DATA
 
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CRegisterBar)
-  //}}AFX_VIRTUAL
- 
-  // Implementation
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CRegisterBar)
+    //}}AFX_VIRTUAL
+
+    // Implementation
 protected:
- 
-  // Generated message map functions
-  //{{AFX_MSG(CRegisterBar)
-  afx_msg void OnChangeRegA();
-  afx_msg void OnChangeRegX();
-  afx_msg void OnChangeRegY();
-  afx_msg void OnChangeRegS();
-  afx_msg void OnChangeRegP();
-  afx_msg void OnChangeRegPC();
-  afx_msg void OnRegFlagNeg();
-  afx_msg void OnRegFlagCarry();
-  afx_msg void OnRegFlagDec();
-  afx_msg void OnRegFlagInt();
-  afx_msg void OnRegFlagOver();
-  afx_msg void OnRegFlagZero();
-  afx_msg void OnRegFlagBrk();
-  afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
-  afx_msg void OnRegsCyclesClr();
-  //}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+
+    // Generated message map functions
+    //{{AFX_MSG(CRegisterBar)
+    afx_msg void OnChangeRegA();
+    afx_msg void OnChangeRegX();
+    afx_msg void OnChangeRegY();
+    afx_msg void OnChangeRegS();
+    afx_msg void OnChangeRegP();
+    afx_msg void OnChangeRegPC();
+    afx_msg void OnRegFlagNeg();
+    afx_msg void OnRegFlagCarry();
+    afx_msg void OnRegFlagDec();
+    afx_msg void OnRegFlagInt();
+    afx_msg void OnRegFlagOver();
+    afx_msg void OnRegFlagZero();
+    afx_msg void OnRegFlagBrk();
+    afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
+    afx_msg void OnRegsCyclesClr();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 private:
-  CString Binary(UINT8 val);
-  void SetDlgItemInf(int nID, UINT8 val);
-  void SetDlgItemMem(int nID, int nBytes, UINT16 ptr, const CContext *pCtx);
-  void SetDlgItemWordHex(int nID, UINT16 val);
-  void SetDlgItemByteHex(int nID, UINT8 val);
+    CString Binary(UINT8 val);
+    void SetDlgItemInf(int nID, UINT8 val);
+    void SetDlgItemMem(int nID, int nBytes, UINT16 ptr, const CContext *pCtx);
+    void SetDlgItemWordHex(int nID, UINT16 val);
+    void SetDlgItemByteHex(int nID, UINT8 val);
 
 };

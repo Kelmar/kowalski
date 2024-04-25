@@ -31,79 +31,81 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CMemoryView : public CView
 {
-  int m_nCx;	// iloœæ kolumn
-  int m_nCy;	// iloœæ wierszy
-  int m_nChrW;	// szerokoœæ znaków (font mono)
-  int m_nChrH;	// wysokoœæ znaków
+    int m_nCx;	// iloœæ kolumn
+    int m_nCy;	// iloœæ wierszy
+    int m_nChrW;	// szerokoœæ znaków (font mono)
+    int m_nChrH;	// wysokoœæ znaków
 
-  int max_mem;
+    int max_mem;
 
-  void calc(CDC *pDC);
-  void scroll(UINT nSBCODE, int nPos, int nRepeat= 1);
-  int set_scroll_range();
-  void get_view_rect(RECT &rect)
-  { GetClientRect(&rect); }
-  int bytes_in_line();
-  int find_prev_addr(UINT32 &addr, const COutputMem &mem, int cnt= 1, int bytes= 0);
-  int find_next_addr(UINT32 &addr, const COutputMem &mem, int cnt= 1, int bytes= 0);
-  int find_delta(UINT32 &addr, UINT32 dest, const COutputMem &mem, int max_lines);
+    void calc(CDC *pDC);
+    void scroll(UINT nSBCODE, int nPos, int nRepeat= 1);
+    int set_scroll_range();
+    void get_view_rect(RECT &rect)
+    {
+        GetClientRect(&rect);
+    }
+    int bytes_in_line();
+    int find_prev_addr(UINT32 &addr, const COutputMem &mem, int cnt= 1, int bytes= 0);
+    int find_next_addr(UINT32 &addr, const COutputMem &mem, int cnt= 1, int bytes= 0);
+    int find_delta(UINT32 &addr, UINT32 dest, const COutputMem &mem, int max_lines);
 
-  enum Dump { FULL, HEX, TEXT } m_eDump;
+    enum Dump { FULL, HEX, TEXT } m_eDump;
 protected:
-  CMemoryView();           // protected constructor used by dynamic creation
-  DECLARE_DYNCREATE(CMemoryView)
-    
+    CMemoryView();           // protected constructor used by dynamic creation
+    DECLARE_DYNCREATE(CMemoryView)
+
     // Attributes
 public:
-  static CFont m_Font;
-  static LOGFONT m_LogFont;
-  static COLORREF m_rgbTextColor;
-  static COLORREF m_rgbBkgndColor;
-  
-  // Operations
+    static CFont m_Font;
+    static LOGFONT m_LogFont;
+    static COLORREF m_rgbTextColor;
+    static COLORREF m_rgbBkgndColor;
+
+    // Operations
 public:
-  
-  // Overrides
-  // ClassWizard generated virtual function overrides
-  //{{AFX_VIRTUAL(CMemoryView)
-	public:
-  virtual void OnPrepareDC(CDC* pDC, CPrintInfo* pInfo = NULL);
-  virtual void OnInitialUpdate();
-	protected:
-  virtual void OnDraw(CDC* pDC);      // overridden to draw this view
-  virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
-	//}}AFX_VIRTUAL
-  
-  // Implementation
+
+    // Overrides
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CMemoryView)
+public:
+    virtual void OnPrepareDC(CDC* pDC, CPrintInfo* pInfo = NULL);
+    virtual void OnInitialUpdate();
 protected:
-  virtual ~CMemoryView();
+    virtual void OnDraw(CDC* pDC);      // overridden to draw this view
+    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+    virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+    //}}AFX_VIRTUAL
+
+    // Implementation
+protected:
+    virtual ~CMemoryView();
 #ifdef _DEBUG
-  virtual void AssertValid() const;
-  virtual void Dump(CDumpContext& dc) const;
+    virtual void AssertValid() const;
+    virtual void Dump(CDumpContext& dc) const;
 #endif
-  
-  // Generated message map functions
+
+    // Generated message map functions
 protected:
-  //{{AFX_MSG(CMemoryView)
-  afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-  afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-  afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-  afx_msg void OnSize(UINT nType, int cx, int cy);
-  afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-  afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-  afx_msg void OnUpdateMemoryGoto(CCmdUI* pCmdUI);
-  afx_msg void OnMemoryGoto();
-  afx_msg void OnUpdateMemoryChg(CCmdUI* pCmdUI);
-  afx_msg void OnMemoryChg();
-  afx_msg void OnMemoryFull();
-  afx_msg void OnMemoryHex();
-  afx_msg void OnMemoryText();
-  afx_msg void OnUpdateMemoryFull(CCmdUI* pCmdUI);
-  afx_msg void OnUpdateMemoryHex(CCmdUI* pCmdUI);
-  afx_msg void OnUpdateMemoryText(CCmdUI* pCmdUI);
-	//}}AFX_MSG
-  DECLARE_MESSAGE_MAP()
+    //{{AFX_MSG(CMemoryView)
+    afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+    afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+    afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+    afx_msg void OnSize(UINT nType, int cx, int cy);
+    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+    afx_msg void OnUpdateMemoryGoto(CCmdUI* pCmdUI);
+    afx_msg void OnMemoryGoto();
+    afx_msg void OnUpdateMemoryChg(CCmdUI* pCmdUI);
+    afx_msg void OnMemoryChg();
+    afx_msg void OnMemoryFull();
+    afx_msg void OnMemoryHex();
+    afx_msg void OnMemoryText();
+    afx_msg void OnUpdateMemoryFull(CCmdUI* pCmdUI);
+    afx_msg void OnUpdateMemoryHex(CCmdUI* pCmdUI);
+    afx_msg void OnUpdateMemoryText(CCmdUI* pCmdUI);
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////
