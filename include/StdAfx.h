@@ -30,8 +30,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define WINVER 0xA00
 
+#include <stdint.h>
+
 #include <wx/wx.h>
 #include <string>
+#include <vector>
+
+#define UCHAR unsigned char
+#define USHORT unsigned short
+#define UINT unsigned int
+
+#ifdef _DEBUG
+# include <cassert>
+// Just mapping this to the C assert() function for now.
+# define ASSERT(X_) std::assert(X_)
+#else
+# define ASSERT(X_)
+#endif
 
 #define __AFXWIN_H__
 

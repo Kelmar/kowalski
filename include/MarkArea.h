@@ -23,13 +23,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CMarkArea
 {
+private:
     struct Pair
     {
-        int a,b;
+        int a, b;
     };
+
     int start;
     UINT n;
-    CArray<Pair,Pair&> arr;
+
+    std::vector<Pair> arr;
 
 public:
 
@@ -38,7 +41,7 @@ public:
 
     void SetStart(int s)
     {
-        ASSERT(s>=0);
+        ASSERT(s >= 0);
         start = s;
     }
 
@@ -60,7 +63,7 @@ public:
     {
         start = -1;
         n = 0;
-        arr.RemoveAll();
+        arr.clear();
     }
 };
 

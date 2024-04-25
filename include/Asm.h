@@ -201,7 +201,7 @@ public:
         A_IMM2,
         A_NO_OF_MODES,	// ilo�� tryb�w adresowania
 
-        A_ABS_OR_ZPG= A_NO_OF_MODES,	// niezdeterminowany tryb adresowania
+        A_ABS_OR_ZPG = A_NO_OF_MODES,   // Undetermined addressing mode
         A_ABSX_OR_ZPGX,
         A_ABSY_OR_ZPGY,
         A_ABSI_OR_ZPGI,

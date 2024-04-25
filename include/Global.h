@@ -24,26 +24,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "MarkArea.h"
 #include "IntGenerator.h"
 
+// Temporary place holder for now
+class CArchive;
 
-class CGlobal : public CObject, CAsm, virtual CBroadcast
+class CGlobal : public /*CObject,*/ CAsm, virtual CBroadcast
 {
 private:
-    UINT m_uAddrBusWidth;			// szeroko�� szyny adresowej
-    bool m_bCodePresent;			// true -> po udanej asemblacji
-    COutputMem m_ProgMem;			// pami�� zapisywana w procesie asemblacji
-    CDebugInfo m_Debug;				// informacja uruchomieniowa dla symulatora
-    UINT32 m_uOrigin;				// pocz�tek programu 6502
-    CSym6502 *m_pSym6502;			// symulator
-    Finish m_SymFinish;				// spos�b ko�czenia programu przez symulator
-    CMarkArea m_MarkArea;			// oznaczenie fragment�w pami�ci zawieraj�cej kod wynikowy
+    UINT m_uAddrBusWidth;           // width of the address bus
+    bool m_bCodePresent;            // true -> after successful assembly
+    COutputMem m_ProgMem;           // memory written in the assembly process
+    CDebugInfo m_Debug;             // startup information for the simulator
+    uint32_t m_uOrigin;             // start of program 6502
+    CSym6502 *m_pSym6502;           // simulator
+    Finish m_SymFinish;             // how the simulator ends the program
+    CMarkArea m_MarkArea;           // designation of fragments of memory containing the object code
 
 public:
-    UINT8 m_bProc6502;				// typ procesora
-    UINT8 m_bHelpFile;              // ^^ help file type
-    COutputMem m_Mem;				// pami�� dla kodu wynikowego i symulatora
-    bool m_bGenerateListing;		// generowa� listing przy asemblacji?
-    CString m_strListingFile;		// plik z listingiem
-    CIntGenerator m_IntGenerator;	// interrupt request generator data
+    uint8_t m_bProc6502;            // processor type
+    uint8_t m_bHelpFile;            // ^^ help file type
+    COutputMem m_Mem;               // memory for the object code and the simulator
+    bool m_bGenerateListing;        // generate listing during assembly?
+    std::wstring m_strListingFile;       // listing file
+    CIntGenerator m_IntGenerator;   // interrupt request generator data
 
     CGlobal() : m_pSym6502(NULL), m_bCodePresent(false)
     {
@@ -92,6 +94,7 @@ public:
     {
         return &m_Mem;
     }
+
     UINT32 GetStartAddr()		// pocz�tek programu
     {
         return m_uOrigin;
@@ -148,14 +151,14 @@ public:
         return m_pSym6502;
     }
 
-    CString GetStatMsg()
+    std::wstring GetStatMsg()
     {
         return m_pSym6502->GetLastStatMsg();
     }
 
     Finish GetSymFinish()
     {
-        ASSERT(m_pSym6502==NULL || m_pSym6502->finish==m_SymFinish);
+        ASSERT(m_pSym6502 == NULL || m_pSym6502->finish == m_SymFinish);
         return m_SymFinish;
     }
 
@@ -165,13 +168,13 @@ public:
         if (m_pSym6502) m_pSym6502->finish = fin;
     }
 
-    Breakpoint SetBreakpoint(int line, CString doc_title);
-    Breakpoint GetBreakpoint(int line, CString doc_title);
-    Breakpoint ModifyBreakpoint(int line, CString doc_title, Breakpoint bp);
-    void ClrBreakpoint(int line, CString doc_title);
-    DbgFlag GetLineDebugFlags(int line, CString doc_title);
-    UINT32 GetLineCodeAddr(int line, CString doc_title);
-    bool SetTempExecBreakpoint(int line, CString doc_title);
+    Breakpoint SetBreakpoint(int line, const std::wstring &doc_title);
+    Breakpoint GetBreakpoint(int line, const std::wstring &doc_title);
+    Breakpoint ModifyBreakpoint(int line, const std::wstring &doc_title, Breakpoint bp);
+    void ClrBreakpoint(int line, const std::wstring &doc_title);
+    DbgFlag GetLineDebugFlags(int line, const std::wstring &doc_title);
+    UINT32 GetLineCodeAddr(int line, const std::wstring &doc_title);
+    bool SetTempExecBreakpoint(int line, const std::wstring &doc_title);
 
     void AbortProg()
     {
@@ -181,22 +184,22 @@ public:
 
     //---------------------------------------------------------------------------
 
-    UINT8 GetProcType()
+    uint8_t GetProcType()
     {
         return m_bProc6502;
     }
 
-    void SetProcType(UINT8 b6502)
+    void SetProcType(uint8_t b6502)
     {
         m_bProc6502 = b6502;
     }
 
-    UINT8 GetHelpType()               //^^ Help
+    uint8_t GetHelpType()               //^^ Help
     {
         return m_bHelpFile;
     }
 
-    void SetHelpType(UINT8 bHelp)     //^^ Help
+    void SetHelpType(uint8_t bHelp)     //^^ Help
     {
         m_bHelpFile = bHelp;
     }
@@ -205,13 +208,13 @@ public:
 
     bool CreateDeasm();			// nowe okno deasemblera
 
-    Breakpoint GetBreakpoint(UINT32 addr)	// pobranie przerwania pod danym adresem
+    Breakpoint GetBreakpoint(uint32_t addr)	// pobranie przerwania pod danym adresem
     {
         return m_Debug.GetBreakpoint(addr);
     }
 
     //---------------------------------------------------------------------------
 
-    void SaveCode(CArchive &archive, UINT32 start, UINT32 end, int info);
-    void LoadCode(CArchive &archive, UINT32 start, UINT32 end, int info, int nClear= 0);
+    void SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info);
+    void LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info, int nClear = 0);
 };

@@ -26,60 +26,56 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Code65p.h"
 
 
-CAsm::Breakpoint CGlobal::SetBreakpoint(int line, CString doc_title)
+CAsm::Breakpoint CGlobal::SetBreakpoint(int line, const std::wstring &doc_title)
 {
-    FileUID fuid= m_Debug.GetFileUID(doc_title);
+    FileUID fuid = m_Debug.GetFileUID(doc_title);
     return m_Debug.ToggleBreakpoint(line,fuid);	// ustawienie/skasowanie przerwania
 }
 
-
-CAsm::Breakpoint CGlobal::GetBreakpoint(int line, CString doc_title)
+CAsm::Breakpoint CGlobal::GetBreakpoint(int line, const std::wstring &doc_title)
 {
-    FileUID fuid= m_Debug.GetFileUID(doc_title);
+    FileUID fuid = m_Debug.GetFileUID(doc_title);
     return m_Debug.GetBreakpoint(line,fuid);	// ustawienie/skasowanie przerwania
 }
 
-
-CAsm::Breakpoint CGlobal::ModifyBreakpoint(int line, CString doc_title, Breakpoint bp)
+CAsm::Breakpoint CGlobal::ModifyBreakpoint(int line, const std::wstring &doc_title, Breakpoint bp)
 {
-    FileUID fuid= m_Debug.GetFileUID(doc_title);
+    FileUID fuid = m_Debug.GetFileUID(doc_title);
     return m_Debug.ModifyBreakpoint(line,fuid,bp);// ustawienie przerwania
 }
 
-
-void CGlobal::ClrBreakpoint(int line, CString doc_title)
+void CGlobal::ClrBreakpoint(int line, const std::wstring & doc_title)
 {
-    FileUID fuid= m_Debug.GetFileUID(doc_title);
+    FileUID fuid = m_Debug.GetFileUID(doc_title);
     m_Debug.ClrBreakpoint(line,fuid);	// skasowanie przerwania
 }
 
-CAsm::DbgFlag CGlobal::GetLineDebugFlags(int line, CString doc_title)
+CAsm::DbgFlag CGlobal::GetLineDebugFlags(int line, const std::wstring &doc_title)
 {
-    FileUID fuid= m_Debug.GetFileUID(doc_title);	// ID pliku
+    FileUID fuid = m_Debug.GetFileUID(doc_title);	// ID pliku
     CDebugLine dl;
-    m_Debug.GetAddress(dl,line,fuid);	// znalezienie adresu odpowiadaj¹cego wierszowi
-    return (DbgFlag)dl.flags;		// flagi opisuj¹ce wiersz programu
+    m_Debug.GetAddress(dl,line,fuid);	// znalezienie adresu odpowiadajï¿½cego wierszowi
+    return (DbgFlag)dl.flags;		// flagi opisujï¿½ce wiersz programu
 }
 
-UINT32 CGlobal::GetLineCodeAddr(int line, CString doc_title)
+UINT32 CGlobal::GetLineCodeAddr(int line, const std::wstring &doc_title)
 {
-    FileUID fuid= m_Debug.GetFileUID(doc_title);	// ID pliku
+    FileUID fuid = m_Debug.GetFileUID(doc_title);	// ID pliku
     CDebugLine dl;
-    m_Debug.GetAddress(dl,line,fuid);	// znalezienie adresu odpowiadaj¹cego wierszowi
+    m_Debug.GetAddress(dl,line,fuid);	// znalezienie adresu odpowiadajï¿½cego wierszowi
     return dl.addr;
 }
 
-bool CGlobal::SetTempExecBreakpoint(int line, CString doc_title)
+bool CGlobal::SetTempExecBreakpoint(int line, const std::wstring &doc_title)
 {
-    FileUID fuid= m_Debug.GetFileUID(doc_title);	// ID pliku
+    FileUID fuid = m_Debug.GetFileUID(doc_title);	// ID pliku
     CDebugLine dl;
-    m_Debug.GetAddress(dl,line,fuid);	// znalezienie adresu odpowiadaj¹cego wierszowi
+    m_Debug.GetAddress(dl,line,fuid);	// znalezienie adresu odpowiadajï¿½cego wierszowi
     if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
         return FALSE;		// nie ma kodu w wierszu 'line'
     m_Debug.SetTemporaryExecBreakpoint(dl.addr);
     return TRUE;
 }
-
 
 bool CGlobal::CreateDeasm()
 {
@@ -106,29 +102,40 @@ void CGlobal::StartDebug()
 
     GetMemForSym();
     bool restart;
+
     if (m_pSym6502 == NULL)
-        restart=FALSE, m_pSym6502 = new CSym6502(m_Mem,&m_Debug,m_uAddrBusWidth);
+    {
+        restart = FALSE;
+        m_pSym6502 = new CSym6502(m_Mem,&m_Debug,m_uAddrBusWidth);
+    }
     else
-        restart=TRUE, m_pSym6502->Restart(m_Mem);
+    {
+        restart = TRUE;
+        m_pSym6502->Restart(m_Mem);
+    }
+
     m_pSym6502->finish = m_SymFinish;
     m_pSym6502->SymStart(m_uOrigin);
     m_pSym6502->Update(CAsm::SYM_OK,TRUE);
+
     /*
-      struct { const CString *pStr, const CContext *pCtx } data;
-      CString str= m_pSym6502->GetStatMsg(stat);
+      struct { const std::wstring *pStr, const CContext *pCtx } data;
+      std::wstring str= m_pSym6502->GetStatMsg(stat);
       data.pStr = &str;
       data.pCtx = m_pSym6502->GetContext();
     */
+
     SendMessageToViews(WM_USER_START_DEBUGGER);
     SendMessageToPopups(WM_USER_START_DEBUGGER,(WPARAM)restart);
 }
-
 
 void CGlobal::ExitDebugger()
 {
     if (m_pSym6502 == NULL)
         return;
+
     ASSERT(!m_pSym6502->IsRunning());
+
     SendMessageToViews(WM_USER_EXIT_DEBUGGER);
     SendMessageToPopups(WM_USER_EXIT_DEBUGGER);
     m_pSym6502->ExitSym();
@@ -136,10 +143,9 @@ void CGlobal::ExitDebugger()
     m_pSym6502 = NULL;
 }
 
-
 //-----------------------------------------------------------------------------
 
-void CGlobal::SaveCode(CArchive &archive, UINT32 start, UINT32 end, int info)
+void CGlobal::SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info)
 {
 //  ASSERT(m_bCodePresent);
     switch (info)
@@ -150,15 +156,18 @@ void CGlobal::SaveCode(CArchive &archive, UINT32 start, UINT32 end, int info)
         hex.SaveHexFormat(archive, m_Mem, m_MarkArea, m_uOrigin);
         break;
     }
+
     case 1:		// format s-rekord Motoroli kodu wynikowego (*.65m/*.s9)
     {
         CMotorolaSRecord srec;
         srec.SaveHexFormat(archive, m_Mem, m_MarkArea, m_uOrigin);
         break;
     }
+
     case 2:		// binary image of the object code (*.bin/*.65b)
         m_Mem.Save(archive, start, end);
         break;
+
     case 3:		// resulting program (*.65p)
         CCode65p code;
         if (m_MarkArea.GetSize()==0)
@@ -166,15 +175,15 @@ void CGlobal::SaveCode(CArchive &archive, UINT32 start, UINT32 end, int info)
         else
             code.SaveCode65p(archive, m_Mem, m_MarkArea, m_uOrigin);
         break;
+
     default:
         ASSERT(FALSE);
     }
 }
 
-
-void CGlobal::LoadCode(CArchive &archive, UINT32 start, UINT32 end, int info, int nClear/*= 0*/)
+void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info, int nClear/*= 0*/)
 {
-    COutputMem mem;	// pamiêæ na ³adowany program
+    COutputMem mem;	// pamiï¿½ï¿½ na ï¿½adowany program
     int prog_start= -1;
 
     if (nClear != -1)
@@ -210,7 +219,7 @@ void CGlobal::LoadCode(CArchive &archive, UINT32 start, UINT32 end, int info, in
         if (wTemp != 0xFFFF)
             throw new CFileException(CFileException::invalidFile);
 
-        int nLen= static_cast<int>(archive.GetFile()->GetLength() - 2);
+        int nLen = static_cast<int>(archive.GetFile()->GetLength() - 2);
 
         do
         {
@@ -222,8 +231,10 @@ void CGlobal::LoadCode(CArchive &archive, UINT32 start, UINT32 end, int info, in
                 nLen -= 2;
                 archive >> wFrom;
             }
+
             archive >> wTo;
             nLen -= 4;
+            
             if (wTo < wFrom)
                 throw new CFileException(CFileException::invalidFile);
 
@@ -246,7 +257,7 @@ void CGlobal::LoadCode(CArchive &archive, UINT32 start, UINT32 end, int info, in
         ASSERT(false);
     }
 
-    m_ProgMem = mem;	// uda³o siê za³adowaæ program
+    m_ProgMem = mem;	// udaï¿½o siï¿½ zaï¿½adowaï¿½ program
     SetCodePresence(TRUE);
     SetStart(prog_start != -1 ? prog_start : start);
     StartDebug();

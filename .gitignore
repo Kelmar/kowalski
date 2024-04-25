@@ -23,7 +23,8 @@ _deps
 # Visual Studio generated files
 *.suo
 *.ncb
-.vs/*
+.vs/
+.vscode/
 
 # Precompiled Headers
 *.gch

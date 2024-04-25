@@ -41,9 +41,9 @@ class CContext
     }
 
 public:
-    UINT8 a, x, y, s;
-//	UINT16 pc;
-    UINT32 pc;
+    uint8_t a, x, y, s;
+    uint32_t pc;
+
     ULONG uCycles;
     bool intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
 
@@ -62,7 +62,7 @@ public:
         CARRY     = 0x01,
         NONE      = 0x00,
         ALL       = 0xFF,
-        // numery bitów
+        // bit numbers
         N_NEGATIVE  = 7,
         N_OVERFLOW  = 6,
         N_RESERVED  = 5,
@@ -75,47 +75,51 @@ public:
 
     COutputMem &mem;
 
-    UINT32 mem_mask;		// maska pamiêci - zale¿na od szerokoœci szyny adresowej,
-    // zawiera jedynki w miejscu wa¿nych bitów adresów
+    uint32_t mem_mask;		// memory mask - depends on the width of the address bus,
+    // contains ones in place of valid address bits
     bool io;
-    UINT16 io_from, io_to;
+    uint16_t io_from, io_to;
 
-    // funkcje zmieniaj¹ce zawartoœæ rejestru flagowego
+    // functions that change the contents of the flag register
     void set_status_reg_VZNC(bool v, bool z, bool n, bool c)
     {
-        negative=!!n;
-        overflow=!!v;
-        zero=!!z;
-        carry=!!c;
+        negative = !!n;
+        overflow = !!v;
+        zero = !!z;
+        carry = !!c;
     }
+    
     void set_status_reg_ZNC(bool z, bool n, bool c)
     {
-        negative=!!n;
-        zero=!!z;
-        carry=!!c;
+        negative = !!n;
+        zero = !!z;
+        carry = !!c;
     }
+
     void set_status_reg_VZN(bool v, bool z, bool n)
     {
-        negative=!!n;
-        overflow=!!v;
-        zero=!!z;
+        negative = !!n;
+        overflow = !!v;
+        zero = !!z;
     }
+
     void set_status_reg_ZN(bool z, bool n)
     {
-        negative=!!n;
-        zero=!!z;
+        negative = !!n;
+        zero = !!z;
     }
-    void set_status_reg(UINT8 val)
+
+    void set_status_reg(uint8_t val)
     {
-        zero = val==0;
+        zero = val == 0;
         negative = !!(val & 0x80);
     }
 
-    UINT8 get_status_reg() const;
-    void set_status_reg_bits(UINT8 reg);
-    void set_addr_bus_width(UINT32 w)
+    uint8_t get_status_reg() const;
+    void set_status_reg_bits(uint8_t reg);
+    void set_addr_bus_width(uint32_t w)
     {
-        mem_mask = UINT32((1 << w) - 1);
+        mem_mask = uint32_t((1 << w) - 1);
         mem.SetMask(mem_mask);
         ASSERT(w >= 10 && w <= 16);
     }
@@ -165,7 +169,7 @@ struct CmdInfo	// single command info (for logging)
     }
 
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
-    CmdInfo(UINT8 a, UINT8 x, UINT8 y, UINT8 s, UINT8 flags, UINT8 cmd, UINT8 arg1, UINT8 arg2, UINT32 pc)
+    CmdInfo(uint8_t a, uint8_t x, uint8_t y, uint8_t s, uint8_t flags, uint8_t cmd, uint8_t arg1, uint8_t arg2, uint32_t pc)
         : a(a), x(x), y(y), s(s), flags(flags), pc(pc), cmd(cmd), arg1(arg1), arg2(arg2), arg3(arg3), uCycles(uCycles), intFlag(intFlag)
     {
         argVal = 0;
@@ -173,21 +177,21 @@ struct CmdInfo	// single command info (for logging)
 
     CmdInfo() {}
 
-    CString Asm() const;
+    std::wstring Asm() const;
 
-    UINT8 a;
-    UINT8 x;
-    UINT8 y;
-    UINT8 s;
-    UINT8 flags;
-    UINT8 cmd;
-    UINT8 arg1;
-    UINT8 arg2;
-    UINT8 arg3;  //% 65816
-    UINT32 pc;
+    uint8_t a;
+    uint8_t x;
+    uint8_t y;
+    uint8_t s;
+    uint8_t flags;
+    uint8_t cmd;
+    uint8_t arg1;
+    uint8_t arg2;
+    uint8_t arg3;  //% 65816
+    uint32_t pc;
     ULONG uCycles;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
     bool intFlag;
-    UINT16 argVal;
+    uint16_t argVal;
 };
 
 typedef CLogBuffer<CmdInfo> CommandLog;
@@ -199,15 +203,16 @@ class CSym6502 : public CAsm
     CContext pre, ctx, old;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers (added pre)
     CDebugInfo *debug;
     CommandLog m_Log;
+
 public:
     static int bus_width;
-    static UINT16 io_addr;	// pocz¹tek obszaru we/wy symulatora
+    static uint16_t io_addr;	// the beginning of the simulator I/O area
     static bool io_enabled;
     static bool s_bWriteProtectArea;
-    static UINT16 s_uProtectFromAddr;
-    static UINT16 s_uProtectToAddr;
+    static uint16_t s_uProtectFromAddr;
+    static uint16_t s_uProtectToAddr;
 
-    enum IOFunc			// funkcje kolejnych bajtów z obszaru we/wy symulatora
+    enum IOFunc			// functions of subsequent bytes from the simulator's I/O area
     {
         IO_NONE      = -1,
         TERMINAL_CLS = 0,
@@ -219,20 +224,20 @@ public:
         TERMINAL_GET_Y_POS,
         TERMINAL_SET_X_POS,
         TERMINAL_SET_Y_POS,
-        IO_LAST_FUNC= TERMINAL_SET_X_POS
+        IO_LAST_FUNC = TERMINAL_SET_X_POS
     };
 
     // interrupt types
-    enum IntType { NONE= 0, IRQ= 1, NMI= 2, RST= 4 };
+    enum IntType { NONE = 0, IRQ = 1, NMI = 2, RST = 4 };
 
 private:
     IOFunc io_func;
     CWnd *io_window();		// odszukanie okna terminala
     CWnd *io_open_window();	// otwarcie okna terminala
 
-    void inc_prog_counter(int step= 1)
+    void inc_prog_counter(int step = 1)
     {
-        ctx.pc = UINT32(ctx.pc + step);
+        ctx.pc = uint32_t(ctx.pc + step);
     }
 
     bool running;
@@ -241,7 +246,7 @@ private:
     int m_nInterruptTrigger;
 
     SymStat perform_cmd();
-    SymStat skip_cmd();		// ominiêcie bie¿¹cej instrukcji
+    SymStat skip_cmd();		// ominiï¿½cie bieï¿½ï¿½cej instrukcji
     SymStat step_over();
     SymStat run_till_ret();
     SymStat run(bool animate= false);
@@ -249,33 +254,33 @@ private:
     SymStat perform_step(bool animate);
     SymStat perform_command();
 
-    UINT16 get_argument_address(bool bWrite);	// get current cmd argument address
-    UINT8 get_argument_value();					// get current cmd argument value
+    uint16_t get_argument_address(bool bWrite); // get current cmd argument address
+    uint8_t get_argument_value();               // get current cmd argument value
 
-    void push_on_stack(UINT8 arg)
+    void push_on_stack(uint8_t arg)
     {
         ctx.mem[0x100 + ctx.s--] = arg;
     }
 
-    void push_addr_on_stack(UINT16 arg)
+    void push_addr_on_stack(uint16_t arg)
     {
         ctx.mem[0x100 + ctx.s--] = (arg>>8) & 0xFF;
         ctx.mem[0x100 + ctx.s--] = arg & 0xFF;
     }
 
-    UINT8 pull_from_stack()
+    uint8_t pull_from_stack()
     {
         return ctx.mem[0x100 + ++ctx.s];
     }
 
-    UINT16 pull_addr_from_stack()
+    uint16_t pull_addr_from_stack()
     {
-        UINT16 tmp= ctx.mem[0x100 + ++ctx.s];
-        tmp |= UINT16(ctx.mem[0x100 + ++ctx.s]) << UINT16(8);
+        uint16_t tmp= ctx.mem[0x100 + ++ctx.s];
+        tmp |= uint16_t(ctx.mem[0x100 + ++ctx.s]) << uint16_t(8);
         return tmp;
     }
 
-    UINT16 get_irq_addr();
+    uint16_t get_irq_addr();
 
     static UINT start_step_over_thread(LPVOID ptr);
     static UINT start_run_thread(LPVOID ptr);
@@ -283,73 +288,74 @@ private:
     static UINT start_run_till_ret_thread(LPVOID ptr);
     HANDLE hThread;
 
-    void SetPointer(const CLine &line, UINT32 addr);	// ustawienie strza³ki (->) przed aktualnym wierszem
+    void SetPointer(const CLine &line, uint32_t addr);	// ustawienie strzaï¿½ki (->) przed aktualnym wierszem
     void SetPointer(CSrc6502View* pView, int nLine, bool bScroll); // helper fn
-    void ResetPointer();			// schowanie strza³ki
+    void ResetPointer();			// schowanie strzaï¿½ki
     CSrc6502View *FindDocView(FileUID fuid);	// odszukanie okna dokumentu
-    FileUID m_fuidLastView;			// zapamiêtanie okna, w którym narysowana jest strza³ka
+    FileUID m_fuidLastView;			// zapamiï¿½tanie okna, w ktï¿½rym narysowana jest strzaï¿½ka
     HWND m_hwndLastView;				// j.w.
-    void AddBranchCycles(UINT8 arg);
+    void AddBranchCycles(uint8_t arg);
 
-    CEvent eventRedraw;			// synchronizacja odœwie¿ania okna przy animacji
+    // Thread based event object
+    CEvent eventRedraw;			// synchronizacja odï¿½wieï¿½ania okna przy animacji
 
     void init();
     void set_translation_tables();
 
-    bool check_io_write(UINT16 addr);
-    bool check_io_read(UINT16 addr);
+    bool check_io_write(uint16_t addr);
+    bool check_io_read(uint16_t addr);
 
-    SymStat io_function(UINT8 arg);
-    UINT8 io_function();
+    SymStat io_function(uint8_t arg);
+    uint8_t io_function();
 
-    const UINT8* m_vCodeToCommand;
-    const UINT8* m_vCodeToCycles;
-    const UINT8* m_vCodeToMode;
+    const uint8_t* m_vCodeToCommand;
+    const uint8_t* m_vCodeToCycles;
+    const uint8_t* m_vCodeToMode;
 
 public:
-    Finish finish;		// okreœlenie sposobu zakoñczenia wykonania programu
-    UINT16 get_rst_addr();
-    UINT16 get_nmi_addr();
-    void Update(SymStat stat, bool no_ok= false);
-    CString GetStatMsg(SymStat stat);
-    CString GetLastStatMsg();
-    SymStat SkipInstr();
-    void SkipToAddr(UINT16 addr);
-    void set_addr_bus_width(UINT w)
-    {}
-    UINT16 get_pc()
-    {
-        return ctx.pc;
-    }
-    void set_pc(UINT32 pc)
-    {
-        ctx.pc = pc;
-    }
+    Finish finish;		// okreï¿½lenie sposobu zakoï¿½czenia wykonania programu
 
-    void SetContext(CContext &context)
-    {
-        ctx = context;
-    }
-    const CContext* GetContext()
-    {
-        return &ctx;
-    }
+    uint16_t get_rst_addr();
+    uint16_t get_nmi_addr();
+
+    void Update(SymStat stat, bool no_ok = false);
+
+    std::wstring GetStatMsg(SymStat stat);
+    std::wstring GetLastStatMsg();
+
+    SymStat SkipInstr();
+    void SkipToAddr(uint16_t addr);
+    void set_addr_bus_width(UINT w) {}
+
+    uint32_t get_pc() const { return ctx.pc; }
+    void set_pc(uint32_t pc) { ctx.pc = pc; }
+
+    const CContext* GetContext() { return &ctx; }
+    void SetContext(CContext &context) { ctx = context; }
 
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502(COutputMem &mem, int addr_bus_width) : ctx(mem,addr_bus_width), pre(ctx), old(ctx),
-        eventRedraw(true,true)
+    CSym6502(COutputMem &mem, int addr_bus_width)
+        : ctx(mem, addr_bus_width)
+        , pre(ctx)
+        , old(ctx)
+        , eventRedraw(true, true)
     {
         init();
     }
+
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502(COutputMem &mem, CDebugInfo *debug, int addr_bus_width) : ctx(mem,addr_bus_width),
-        pre(ctx), old(ctx), eventRedraw(true), debug(debug)
+    CSym6502(COutputMem &mem, CDebugInfo *debug, int addr_bus_width) 
+        : ctx(mem, addr_bus_width)
+        , pre(ctx)
+        , old(ctx)
+        , eventRedraw(true)
+        , debug(debug)
     {
         init();
     }
 
     void Restart(const COutputMem &mem);
-    void SymStart(UINT32 org);
+    void SymStart(uint32_t org);
 
     SymStat StepInto();
     SymStat StepOver();
@@ -362,18 +368,13 @@ public:
     {
         return fin_stat==SYM_FIN;
     }
-    bool IsRunning() const
-    {
-        return running;
-    }
-    void Break()
-    {
-        stop_prog = true;
-    }
-    bool IsBroken() const
-    {
-        return stop_prog;
-    }
+
+    bool IsRunning() const { return running; }
+
+    void Break() { stop_prog = true; }
+
+    bool IsBroken() const { return stop_prog; }
+
     void AbortProg();
     void ExitSym();
 
