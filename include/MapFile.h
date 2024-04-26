@@ -23,28 +23,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Asm.h"
 
-
-class CMapFile : CArray<CString,LPCTSTR>, public CAsm
+class CMapFile : std::vector<std::string>  // CArray<CString,LPCTSTR>, public CAsm
 {
-    CMap<CString, LPCTSTR, FileUID, FileUID> m_PathToFuid;
+    //CMap<CString, LPCTSTR, FileUID, FileUID> m_PathToFuid;
+    std::unordered_map<std::string, CAsm::FileUID> m_pathToFuid;
+
     int m_nLastUID;
 
 public:
-    CMapFile() : m_nLastUID(0)
-    {}
+    CMapFile()
+        : m_nLastUID(0)
+    {
+    }
+
     ~CMapFile()
-    {}
+    {
+    }
 
     void Reset()
     {
         m_nLastUID = 0;
-        m_PathToFuid.RemoveAll();
-        RemoveAll();
+        m_pathToFuid.clear();
+        clear();
     }
 
-    LPCTSTR GetPath(FileUID fuid);
-    FileUID GetFileUID(LPCTSTR path);
+    std::string GetPath(CAsm::FileUID fuid);
+    CAsm::FileUID GetFileUID(const std::string &path);
 };
-
 
 #endif

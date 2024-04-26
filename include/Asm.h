@@ -372,7 +372,7 @@ public:
 
 CAsm::DeasmFmt inline operator | (CAsm::DeasmFmt f1, CAsm::DeasmFmt f2)
 {
-    return static_cast<CAsm::DeasmFmt>(DWORD(f1) | DWORD(f2));
+    return static_cast<CAsm::DeasmFmt>(uint32_t(f1) | uint32_t(f2));
 }
 
 #endif

@@ -23,24 +23,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 struct CIdent
 {
-    enum IdentInfo	// info o identyfikatorze
+    // ID info
+    enum IdentInfo
     {
         I_INIT,
-        I_UNDEF,		// identyfikator niezdefiniowany
-        I_ADDRESS,		// identyfikator zawiera adres
-        I_VALUE,		// identyfikator zawiera wartoœæ liczbow¹
-        I_MACRONAME,	// identyfikator jest nazw¹ makrodefinicji
-        I_MACROADDR		// identyfikator zawiera adres w makrodefinicji
+        I_UNDEF,        // Undefined identifier
+        I_ADDRESS,      // The identifier contains the address
+        I_VALUE,        // The identifier contains a numeric value
+        I_MACRONAME,    // The identifier is the name of the macro definition
+        I_MACROADDR     // The identifier contains the address in the macro definition
     } info;
-    SINT32 val;		// numerical value
-    UINT8 checked;	// identifier definition confirmed in the second pass of assembly
-    UINT8 variable;	// variable identifier
+    
+    int32_t val;        // numerical value
+    uint8_t checked;    // identifier definition confirmed in the second pass of assembly
+    uint8_t variable;   // variable identifier
 
-    CIdent() : info(I_INIT), checked(FALSE), variable(FALSE)
+    CIdent()
+        : info(I_INIT)
+        , checked(FALSE)
+        , variable(FALSE)
     { }
 
-    CIdent(IdentInfo info, SINT32 value= 0, bool variable= FALSE) :
-        info(info), val(value), checked(FALSE), variable(variable)
+    CIdent(IdentInfo info, int32_t value = 0, bool variable = FALSE)
+        : info(info)
+        , val(value)
+        , checked(FALSE)
+        , variable(variable)
     { }
 };
 
