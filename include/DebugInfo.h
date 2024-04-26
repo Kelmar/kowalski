@@ -338,7 +338,7 @@ public:
         return m_map_file.GetFileUID(doc_title); // File ID
     }
 
-    const std::string &GetFilePath(FileUID fuid)
+    const std::string GetFilePath(FileUID fuid)
     {
         return fuid ? m_map_file.GetPath(fuid) : NULL; // name (path to) file
     }

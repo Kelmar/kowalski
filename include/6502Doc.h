@@ -22,15 +22,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 /////////////////////////////////////////////////////////////////////////////
 #ifdef USE_CRYSTAL_EDIT
-#include "CCrystalTextBuffer.h"
+#include "crystal/CCrystalTextBuffer.h"
 #endif
 
-
-class CSrc6502Doc : public CDocument
+class CSrc6502Doc //: public CDocument
 {
 protected: // create from serialization only
     CSrc6502Doc();
-    DECLARE_DYNCREATE(CSrc6502Doc)
+
+    //DECLARE_DYNCREATE(CSrc6502Doc)
 
 // Attributes
 public:
@@ -82,11 +82,11 @@ public:
     // ClassWizard generated virtual function overrides
     //{{AFX_VIRTUAL(CSrc6502Doc)
 public:
-    virtual BOOL OnNewDocument();
-    virtual void Serialize(CArchive& ar);
+    virtual bool OnNewDocument();
+    virtual void Serialize(CArchive &ar);
     virtual void DeleteContents();
-    virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
-    virtual BOOL OnSaveDocument(LPCTSTR lpszPathName);
+    virtual bool OnOpenDocument(const char *pathName);
+    virtual bool OnSaveDocument(const char *pathName);
     //}}AFX_VIRTUAL
 
 // Implementation
@@ -105,7 +105,7 @@ protected:
     // NOTE - the ClassWizard will add and remove member functions here.
     //    DO NOT EDIT what you see in these blocks of generated code !
     //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    //DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

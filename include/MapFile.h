@@ -23,9 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Asm.h"
 
-class CMapFile : std::vector<std::string>  // CArray<CString,LPCTSTR>, public CAsm
+class CMapFile : std::vector<std::string>
 {
-    //CMap<CString, LPCTSTR, FileUID, FileUID> m_PathToFuid;
     std::unordered_map<std::string, CAsm::FileUID> m_pathToFuid;
 
     int m_nLastUID;
