@@ -33,11 +33,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdint.h>
 
 #include <wx/wx.h>
-#include <pair>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
+#include <cstdio>
 
 #define UCHAR unsigned char
 #define USHORT unsigned short

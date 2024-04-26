@@ -21,84 +21,99 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _output_mem_h_
 #define _output_mem_h_
 
-class COutputMem : private CByteArray
+class COutputMem
 {
+private:
+    uint8_t *m_data;
+    size_t m_size;
     UINT m_uMask;
 
 public:
     COutputMem()
+        : m_data(nullptr)
+        , m_size(0x1000000)
+        , m_uMask(0xFFFFFF)
     {
-        SetSize(0x1000000);
-        m_uMask = 0xFFFFFF;
+        m_data = new uint8_t[m_size];
+        memset(m_data, 0, m_size);
     }
 
-    void ClearMem()	// wyzerowanie pamiêci
+    // Disable copy constructor
+    COutputMem(const COoutputMem &) delete;
+
+    virtual ~COutputMem()
     {
-        memset(m_pData, 0, m_nSize*sizeof(BYTE));
+        delete[] m_data;
+    }
+
+    void ClearMem()	// wyzerowanie pamiï¿½ci
+    {
+        memset(m_data, 0, m_size);
     }
 
     void ClearMem(int nByte)
     {
-        memset(m_pData, nByte, m_nSize*sizeof(BYTE));
+        memset(m_data, nByte, m_size);
     }
 
-    COutputMem &operator= (const COutputMem &src)
+    // Disable copy constructor
+    COutputMem &operator= (const COutputMem &src) delete;
+    /*
     {
-        ASSERT(m_nSize == src.m_nSize);		// wymiary musz¹ byæ identyczne
+        ASSERT(m_nSize == src.m_nSize); // Dimensions must be identical
         memcpy(m_pData, src.m_pData, m_nSize * sizeof(BYTE));
         m_uMask = src.m_uMask;
         return *this;
     }
+    */
 
-    void Save(CArchive &archive, UINT32 start, UINT32 end)
+    void Save(CArchive &archive, uint32_t start, uint32_t end)
     {
         ASSERT(end >= start);
-        archive.Write(m_pData + start, int(end) - start + 1);
+        archive.Write(m_data + start, int(end) - start + 1);
     }
 
-    void Load(CArchive &archive, UINT32 start, UINT32 end)
+    void Load(CArchive &archive, uint32_t start, uint32_t end)
     {
         ASSERT(end >= start);
-        archive.Read(m_pData + start, int(end) - start + 1);
+        archive.Read(m_data + start, int(end) - start + 1);
     }
 
-    const UINT8 *Mem()
-    {
-        return m_pData;
-    }
+    const uint8_t *Mem() const { return m_data; }
 
-    void SetMask(UINT32 uMask)
+    void SetMask(uint32_t uMask)
     {
         m_uMask = uMask;
     }
 
-    UINT8& operator[] (UINT32 uAddr)
+    uint8_t& operator[] (uint32_t uAddr)
     {
         ASSERT(m_uMask > 0);
-        return m_pData[uAddr & m_uMask];
+        return m_data[uAddr & m_uMask];
     } // ElementAt(uAddr & m_uMask); }
-    UINT8  operator[] (UINT32 uAddr) const
+
+    uint8_t operator[] (uint32_t uAddr) const
     {
         ASSERT(m_uMask > 0);
-        return m_pData[uAddr & m_uMask];
+        return m_data[uAddr & m_uMask];
     } // GetAt(uAddr & m_uMask); }
 
-    UINT16 GetWord(UINT16 uLo, UINT16 uHi) const
+    uint16_t GetWord(uint16_t uLo, uint16_t uHi) const
     {
         ASSERT(m_uMask > 0);
-        return GetAt(uLo & m_uMask) + (UINT32(GetAt(uHi & m_uMask)) << 8);
+        return GetAt(uLo & m_uMask) + (uint32_t(GetAt(uHi & m_uMask)) << 8);
     }
-    UINT16 GetWord(UINT32 uAddr) const
+
+    uint16_t GetWord(uint32_t uAddr) const
     {
         ASSERT(m_uMask > 0);
-        return GetAt(uAddr & m_uMask) + (UINT32(GetAt((uAddr + 1) & m_uMask)) << 8);
+        return GetAt(uAddr & m_uMask) + (uint32_t(GetAt((uAddr + 1) & m_uMask)) << 8);
     }
-    UINT16 GetWordInd(UINT8 uZpAddr) const
+
+    uint16_t GetWordInd(uint8_t uZpAddr) const
     {
         ASSERT(m_uMask > 0);
-        return GetAt(uZpAddr) + (GetAt(uZpAddr + UINT8(1)) << 8);
-//    UINT8 uAddr= GetAt(uZpAddr);
-//    return GetAt(uZpAddr) + UINT16(GetAt(uZpAddr + UINT8(1)) << 8);
+        return GetAt(uZpAddr) + (GetAt(uZpAddr + uint8_t(1)) << 8);
     }
 };
 

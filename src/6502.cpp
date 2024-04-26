@@ -42,8 +42,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static char THIS_FILE[] = __FILE__;
 #endif
 
-//const TCHAR C6502App::REGISTRY_KEY[]= _T("MiKSoft");
-//const TCHAR C6502App::PROFILE_NAME[]= _T("6502 Simulator\\1.3");
+//const char C6502App::REGISTRY_KEY[]= "MiKSoft";
+//const char C6502App::PROFILE_NAME[]= "6502 Simulator\\1.3";
 
 /////////////////////////////////////////////////////////////////////////////
 // C6502App
@@ -96,7 +96,7 @@ bool C6502App::OnInit()
 
 BOOL C6502App::InitInstance()
 {
-    CString strHelpFile = m_pszHelpFilePath;
+    std::string strHelpFile = m_pszHelpFilePath;
     strHelpFile = strHelpFile.Left(strHelpFile.GetLength()-4) + ".chm";
 
     //First free the string allocated by MFC at CWinApp startup.
@@ -214,7 +214,7 @@ BOOL C6502App::InitInstance()
 /////////////////////////////////////////////////////////////////////////////
 // C6502App commands
 
-void C6502App::AddToRecentFileList(const std::wstring &pathName)
+void C6502App::AddToRecentFileList(const std::string &pathName)
 {
     if (m_bDoNotAddToRecentFileList)
         return;

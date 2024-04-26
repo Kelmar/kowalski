@@ -25,36 +25,46 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _debug_info_h_
 #define _debug_info_h_
 
-
 struct CLine : CAsm
 {
-    int ln;		// nr wiersza w pliku Ÿród³owym
-    FileUID file;		// identyfikator pliku
-    CLine(int ln, FileUID file) : ln(ln), file(file)
+    int ln;       // Line number in the source file
+    FileUID file; // File ID
+
+    CLine(int ln, FileUID file)
+        : ln(ln), file(file)
     { }
-    CLine() : ln(0), file(0)
+
+    CLine()
+        : ln(0), file(0)
     { }
-    int operator==(const CLine &arg) const
+
+    int operator ==(const CLine &arg) const
     {
-        return ln==arg.ln && file==arg.file;
+        return ln == arg.ln && file == arg.file;
     }
-    operator DWORD()	// konwersja dla funkcji mieszaj¹cej (CMap<>::HashKey())
+
+    operator DWORD() // Conversion for hash function (CMap<>::HashKey())
     {
-        return DWORD( (ln<<4) ^ (file<<8) );
+        return DWORD((ln << 4) ^ (file << 8));
     }
 };
 
-
-struct CDebugLine : CAsm	// info dla symulatora o jednym wierszu Ÿród³owym programu
+// Info for the simulator with one line of program source
+struct CDebugLine : CAsm
 {
-    UINT8 flags;		// flagi opisuj¹ce wiersz (DbgFlag)
-    UINT32 addr;		// adres programu 6502
+    uint8_t flags; // Flags describing the line (Dbg Flag)
+    uint32_t addr; // Program address 6502
     CLine line;
+
     CDebugLine() : flags(CAsm::DBG_EMPTY), addr(0)
     { }
-    CDebugLine(int ln, FileUID uid, UINT32 addr, int flg) : flags((UINT8)flg), addr(addr),
-        line(ln,uid)
+
+    CDebugLine(int ln, FileUID uid, uint32_t addr, int flg)
+        : flags((uint8_t)flg)
+        , addr(addr)
+        , line(ln,uid)
     { }
+
     CDebugLine(const CDebugLine &src)
     {
         memcpy(this,&src,sizeof(*this));
@@ -62,17 +72,15 @@ struct CDebugLine : CAsm	// info dla symulatora o jednym wierszu Ÿród³owym progr
 
     const CDebugLine &operator=(const CDebugLine &src)
     {
-        memcpy(this,&src,sizeof(*this));
+        memcpy(this, &src, sizeof(*this));
         return *this;
     }
 };
 
-
-
 class CDebugLines : CArray<CDebugLine,CDebugLine&>, public CAsm
 {
-
-    CMap<UINT32, UINT32, int, int> addr_to_idx;	// tablice asocjacyjne do szybkiego
+private:
+    CMap<uint32_t, uint32_t, int, int> addr_to_idx;	// tablice asocjacyjne do szybkiego
     CMap<CLine, CLine&, int, int> line_to_idx;	// odszukiwania adresu lub wiersza
 
 public:
@@ -81,8 +89,8 @@ public:
         SetSize(50,50);
     }
 
-    // znalezienie wiersza odpowiadaj¹cego adresowi
-    void GetLine(CDebugLine &ret, UINT32 addr)
+    // znalezienie wiersza odpowiadajï¿½cego adresowi
+    void GetLine(CDebugLine &ret, uint32_t addr)
     {
         static const CDebugLine empty;	// pusty obiekt - do oznaczenia "nie znaleziony wiersz"
         int idx;
@@ -105,8 +113,8 @@ public:
 
     void AddLine(CDebugLine &dl)
     {
-        ASSERT(dl.flags != DBG_EMPTY);	// niewype³niony opis wiersza
-        int idx = Add(dl);			// dopisanie info o wierszu, zapamiêtanie indeksu
+        ASSERT(dl.flags != DBG_EMPTY);	// niewypeï¿½niony opis wiersza
+        int idx = Add(dl);			// dopisanie info o wierszu, zapamiï¿½tanie indeksu
         addr_to_idx.SetAt(dl.addr,idx);	// zapisanie indeksu
         line_to_idx.SetAt(dl.line,idx);	// j.w.
     }
@@ -119,109 +127,123 @@ public:
     }
 };
 
-
-class CDebugBreakpoints : CAsm, CByteArray	// informacja o miejscach przerwañ
+// Tracks locations of breakpoints
+class CDebugBreakpoints : CAsm, CByteArray
 {
-    UINT32 temp_bp_index;
+private:
+    uint32_t temp_bp_index;
+
 public:
     CDebugBreakpoints() : temp_bp_index(0)
     {
         SetSize(0x10000);
     }
 
-    Breakpoint Set(UINT32 addr, int bp= BPT_EXECUTE)	// ustawienie przerwania
+    Breakpoint Set(uint32_t addr, int bp = BPT_EXECUTE) // Set a breakpoint
     {
-        ASSERT( (bp & ~BPT_MASK) == 0 );	// niedozwolona kombinacja bitów okreœlaj¹cych przerwanie
-        return Breakpoint( (*this)[addr] |= bp );
-    }
-    Breakpoint Clr(UINT32 addr, int bp= BPT_MASK)		// skasowanie przerwania
-    {
-        ASSERT( (bp & ~BPT_MASK) == 0 );	// niedozwolona kombinacja bitów okreœlaj¹cych przerwanie
-        return Breakpoint( (*this)[addr] &= ~bp );
-    }
-    Breakpoint Toggle(UINT32 addr, int bp)
-    {
-        ASSERT( (bp & ~BPT_MASK) == 0 );	// niedozwolona kombinacja bitów okreœlaj¹cych przerwanie
-        return Breakpoint( (*this)[addr] &= ~bp );
-    }
-    Breakpoint Get(UINT32 addr)
-    {
-        return Breakpoint( (*this)[addr] );
+        ASSERT((bp & ~BPT_MASK) == 0); // Illegal combination of breakpoint bits
+        return Breakpoint((*this)[addr] |= bp);
     }
 
-    void Enable(UINT32 addr, bool enable= true)
+    Breakpoint Clr(uint32_t addr, int bp = BPT_MASK) // Clear a breakpoint
     {
-        ASSERT( (*this)[addr] & BPT_MASK );	// pod danym adresem nie ma przerwania
+        ASSERT((bp & ~BPT_MASK) == 0); // Illegal combination of breakpoint bits
+        return Breakpoint((*this)[addr] &= ~bp);
+    }
+
+    Breakpoint Toggle(uint32_t addr, int bp)
+    {
+        ASSERT((bp & ~BPT_MASK) == 0); // Illegal combination of breakpoint bits
+        return Breakpoint((*this)[addr] &= ~bp);
+    }
+
+    Breakpoint Get(uint32_t addr)
+    {
+        return Breakpoint((*this)[addr]);
+    }
+
+    void Enable(uint32_t addr, bool enable= true)
+    {
+        ASSERT((*this)[addr] & BPT_MASK); // There is no breakpoint at the given address
+
         if (enable)
             (*this)[addr] &= ~BPT_DISABLED;
         else
             (*this)[addr] |= BPT_DISABLED;
     }
-    void ClrBrkp(UINT32 addr)		// skasowanie przerwania
+
+    void ClrBrkp(uint32_t addr) // clear the breakpoint
     {
         (*this)[addr] = BPT_NONE;
     }
 
-    void SetTemporaryExec(UINT32 addr)
+    void SetTemporaryExec(uint32_t addr)
     {
         temp_bp_index = addr;
         (*this)[addr] |= BPT_TEMP_EXEC;
     }
+
     void RemoveTemporaryExec()
     {
         (*this)[temp_bp_index] &= ~BPT_TEMP_EXEC;
     }
 
-    void ClearAll()		// usuniêcie wszystkich przerwañ
+    void ClearAll() // Remove all breakpoints
     {
-        memset(m_pData,BPT_NONE,m_nSize*sizeof(BYTE));
+        memset(m_pData, BPT_NONE, m_nSize * sizeof(uint8_t));
     }
 };
 
-
-
-class CDebugIdents				// informacja o identyfikatorach
+// Information about identifiers
+class CDebugIdents
 {
-    CStringArray m_name;
-    CArray<CIdent, const CIdent&> m_info;
+    std::vector<std::string> m_name;
+    std::vector<CIdent> m_info;
+
+    //CArray<CIdent, const CIdent&> m_info;
 
 public:
     void SetArrSize(int size)
     {
-        m_name.RemoveAll();
-        m_info.RemoveAll();
-        m_name.SetSize(size);
-        m_info.SetSize(size);
+        m_name.clear();
+        m_info.clear();
+
+        m_name.size(size);
+        m_info.size(size);
     }
-    void SetIdent(int index, const CString &name, const CIdent &info)
+    
+    void SetIdent(int index, const std::string &name, const CIdent &info)
     {
-        m_name.SetAt(index,name);
-        m_info.SetAt(index,info);
+        m_name[index] = name;
+        m_info[index] = info;
     }
-    void GetIdent(int index, CString &name, CIdent &info)
+
+    void GetIdent(int index, std::string &name, CIdent &info)
     {
-        name = m_name[index];	// m_name.ElementAt(index);
-        info = m_info[index];	// m_info.ElementAt(index);
+        name = m_name[index];
+        info = m_info[index];
     }
+
     int GetCount()
     {
-        ASSERT(m_name.GetSize() == m_info.GetSize());
-        return m_name.GetSize();
+        ASSERT(m_name.size() == m_info.size());
+        return m_name.size();
     }
+
     void Empty()
     {
-        m_name.RemoveAll();
-        m_info.RemoveAll();
+        m_name.clear();
+        m_info.clear();
     }
 };
 
 
 class CDebugInfo : CAsm
 {
-    CDebugLines m_lines;			// informacja o wierszach
-    CDebugIdents m_idents;		// informacja o identyfikatorach
-    CDebugBreakpoints m_breakpoints;	// informacja o miejscach przerwañ
-    CMapFile m_map_file;			// odwzorowania fazwy pliku Ÿród³owego na 'fuid' i odwrotnie
+    CDebugLines m_lines;             // Information about lines
+    CDebugIdents m_idents;           // Information about identifiers
+    CDebugBreakpoints m_breakpoints; // Information about places of interruptions
+    CMapFile m_map_file;             // Mapping the phase of the source file to 'fuid' and vice versa
 
 public:
 
@@ -236,27 +258,28 @@ public:
         m_lines.AddLine(dl);
     }
 
-    void GetLine(CDebugLine &ret, UINT32 addr)	// znalezienie wiersza odpowiadaj¹cego adresowi
+    void GetLine(CDebugLine &ret, uint32_t addr) // Finding the line corresponding to the address
     {
         m_lines.GetLine(ret,addr);
     }
 
-    void GetAddress(CDebugLine &ret, int ln, FileUID file)	// znalezienie adresu odp. wierszowi
+    void GetAddress(CDebugLine &ret, int ln, FileUID file) // Finding the address corresponding to the line
     {
         m_lines.GetAddress(ret,ln,file);
     }
 
-    Breakpoint SetBreakpoint(int line, FileUID file, int bp= BPT_NONE);// ustawienie przerwania
+    Breakpoint SetBreakpoint(int line, FileUID file, int bp= BPT_NONE); // Interrupt setting
     Breakpoint ToggleBreakpoint(int line, FileUID file);
     Breakpoint GetBreakpoint(int line, FileUID file);
     Breakpoint ModifyBreakpoint(int line, FileUID file, int bp);
     void ClrBreakpoint(int line, FileUID file);
-    Breakpoint GetBreakpoint(UINT32 addr)
+
+    Breakpoint GetBreakpoint(uint32_t addr)
     {
         return m_breakpoints.Get(addr);
     }
 
-    void SetTemporaryExecBreakpoint(UINT32 addr)
+    void SetTemporaryExecBreakpoint(uint32_t addr)
     {
         m_breakpoints.SetTemporaryExec(addr);
     }
@@ -266,14 +289,16 @@ public:
         m_breakpoints.RemoveTemporaryExec();
     }
 
-    FileUID GetFileUID(const CString &doc_title)
+    FileUID GetFileUID(const std::string &doc_title)
     {
-        return m_map_file.GetFileUID(doc_title);    // ID pliku
+        return m_map_file.GetFileUID(doc_title); // File ID
     }
-    LPCTSTR GetFilePath(FileUID fuid)
+
+    const std::string &GetFilePath(FileUID fuid)
     {
-        return fuid ? m_map_file.GetPath(fuid) : NULL;    // nazwa (œcie¿ka do) pliku
+        return fuid ? m_map_file.GetPath(fuid) : NULL; // name (path to) file
     }
+
     void ResetFileMap()
     {
         m_map_file.Reset();
@@ -283,14 +308,17 @@ public:
     {
         m_idents.SetArrSize(size);
     }
-    void SetIdent(int index, const CString &name, const CIdent &info)
+
+    void SetIdent(int index, const std::string &name, const CIdent &info)
     {
         m_idents.SetIdent(index,name,info);
     }
-    void GetIdent(int index, CString &name, CIdent &info)
+
+    void GetIdent(int index, std::string &name, CIdent &info)
     {
         m_idents.GetIdent(index,name,info);
     }
+
     int GetIdentCount()
     {
         return m_idents.GetCount();

@@ -55,7 +55,7 @@ public:
 
     bool OnInit() override;
 
-    virtual void AddToRecentFileList(const std::wstring &pathName);
+    virtual void AddToRecentFileList(const std::string &pathName);
     //virtual int ExitInstance();
 
     void OnAppAbout();

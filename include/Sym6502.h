@@ -188,7 +188,7 @@ struct CmdInfo	// single command info (for logging)
 
     CmdInfo() {}
 
-    std::wstring Asm() const;
+    std::string Asm() const;
 
     uint8_t a;
     uint8_t x;
@@ -340,8 +340,8 @@ public:
 
     void Update(SymStat stat, bool no_ok = false);
 
-    std::wstring GetStatMsg(SymStat stat);
-    std::wstring GetLastStatMsg();
+    std::string GetStatMsg(SymStat stat);
+    std::string GetLastStatMsg();
 
     SymStat SkipInstr();
     void SkipToAddr(uint16_t addr);

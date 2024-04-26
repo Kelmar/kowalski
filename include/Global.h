@@ -44,7 +44,7 @@ public:
     uint8_t m_bHelpFile;            // ^^ help file type
     COutputMem m_Mem;               // memory for the object code and the simulator
     bool m_bGenerateListing;        // generate listing during assembly?
-    std::wstring m_strListingFile;       // listing file
+    std::string m_strListingFile;       // listing file
     CIntGenerator m_IntGenerator;   // interrupt request generator data
 
     CGlobal() : m_pSym6502(NULL), m_bCodePresent(false)
@@ -95,7 +95,7 @@ public:
         return &m_Mem;
     }
 
-    UINT32 GetStartAddr()		// pocz�tek programu
+    uint32_t GetStartAddr()		// pocz�tek programu
     {
         return m_uOrigin;
     }
@@ -141,7 +141,7 @@ public:
 
     void ExitDebugger();
 
-    void SetStart(UINT32 prog_start)
+    void SetStart(uint32_t prog_start)
     {
         m_uOrigin = prog_start;
     }
@@ -151,7 +151,7 @@ public:
         return m_pSym6502;
     }
 
-    std::wstring GetStatMsg()
+    std::string GetStatMsg()
     {
         return m_pSym6502->GetLastStatMsg();
     }
@@ -168,13 +168,13 @@ public:
         if (m_pSym6502) m_pSym6502->finish = fin;
     }
 
-    Breakpoint SetBreakpoint(int line, const std::wstring &doc_title);
-    Breakpoint GetBreakpoint(int line, const std::wstring &doc_title);
-    Breakpoint ModifyBreakpoint(int line, const std::wstring &doc_title, Breakpoint bp);
-    void ClrBreakpoint(int line, const std::wstring &doc_title);
-    DbgFlag GetLineDebugFlags(int line, const std::wstring &doc_title);
-    UINT32 GetLineCodeAddr(int line, const std::wstring &doc_title);
-    bool SetTempExecBreakpoint(int line, const std::wstring &doc_title);
+    Breakpoint SetBreakpoint(int line, const std::string &doc_title);
+    Breakpoint GetBreakpoint(int line, const std::string &doc_title);
+    Breakpoint ModifyBreakpoint(int line, const std::string &doc_title, Breakpoint bp);
+    void ClrBreakpoint(int line, const std::string &doc_title);
+    DbgFlag GetLineDebugFlags(int line, const std::string &doc_title);
+    uint32_t GetLineCodeAddr(int line, const std::string &doc_title);
+    bool SetTempExecBreakpoint(int line, const std::string &doc_title);
 
     void AbortProg()
     {

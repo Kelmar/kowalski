@@ -260,8 +260,8 @@ public:
         O_SHL, O_SHR
     };
 
-    static const wchar LOCAL_LABEL_CHAR; // Sign that starts the local tag
-    static const wchar MULTIPARAM[];     // Ellipsis - Any number of parameters
+    static const char LOCAL_LABEL_CHAR; // Sign that starts the local tag
+    static const char MULTIPARAM[];     // Ellipsis - Any number of parameters
 
 #if 0
     // TODO: Replace with wx events. -- B.Simonds (April 25, 2024)
