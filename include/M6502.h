@@ -23,7 +23,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "DebugInfo.h"
 #include "OutputMem.h"
 
-//#pragma warning(disable: 4291)
+// No idication as to what this POSITION type actually is, we're stubbing in an int for now. -- B.Simonds (April 25, 2024)
+typedef int POSITION;
+
+// Stub for now
+class CFileException
+{
+public:
+    CFileException(int err) { }
+    virtual ~CFileException() { }
+};
 
 // Leksem == Lex
 
@@ -81,7 +90,7 @@ public:
     struct Num
     {
         NumType type;
-        SINT32 value;
+        int32_t value;
     };
 
     enum Error
@@ -99,37 +108,39 @@ public:
 
     enum LeksType
     {
-        L_UNKNOWN,		// nierozpoznany znak
+        L_UNKNOWN,      // Unrecognized character
 
-        L_NUM,		// liczba (dec, hex, bin, lub znak)
-        L_STR,		// ci�g znak�w w apostrofach lub cudzys�owach
-        L_IDENT,		// identyfikator
-        L_IDENT_N,		// numerowany identyfikator (zako�czony przez '#' i numer)
-        L_SPACE,		// odst�p
-        L_OPER,		// operator
-        L_BRACKET_L,	// lewy nawias '('
-        L_BRACKET_R,	// prawy nawias ')'
-        L_LBRACKET_L,	// lewy nawias '('
-        L_LBRACKET_R,	// prawy nawias ')'
-        L_EXPR_BRACKET_L,	// lewy nawias dla wyra�e� '['
-        L_EXPR_BRACKET_R,	// prawy nawias dla wyra�e� ']'
-        L_COMMENT,		// znak komentarza ';'
-        L_LABEL,		// znak etykiety ':'
-        L_COMMA,		// znak przecinka ','
-        L_STR_ARG,		// znak dolara '$', ko�czy parametr typu tekstowego
-        L_MULTI,		// znak wielokropka '...'
-        L_INV_COMMAS,	// znak cudzys�owu
+        L_NUM,          // Number (dec, hex, bin, or sign)
+        L_STR,          // A string of characters in apostrophes or quotation marks
+        L_IDENT,        // Identifier
+        L_IDENT_N,      // Numbered identifier (ending with '#' and a number)
+        L_SPACE,        // Space
+        L_OPER,         // Operator
+        L_BRACKET_L,    // Left paren '('
+        L_BRACKET_R,    // Right paren ')'
+        L_LBRACKET_L,   // Left bracket '('
+        L_LBRACKET_R,   // Right bracket ')'
+        L_EXPR_BRACKET_L, // Left square bracket '['
+        L_EXPR_BRACKET_R, // Right square bracket ']'
+        L_COMMENT,      // Comment character ';'
+        L_LABEL,        // Label character ':'
+        L_COMMA,        // Comma character ','
+        L_STR_ARG,      // Dollar sign '$', ends text type parameter
+        L_MULTI,        // Ellipsis character '...'
+        L_INV_COMMAS,   // Sign cudzys�owu ????
         L_LHASH,		// '!#'
-        L_HASH,		// znak '#'
-        L_EQUAL,		// znak przypisania '='
-        L_PROC_INSTR,	// instrukcja procesora
-        L_ASM_INSTR,	// dyrektywa asemblera
-        L_CR,		// koniec wiersza
-        L_FIN,		// koniec danych
-        L_ERROR		// b��d
+        L_HASH,         // Hash sign '#'
+        L_EQUAL,        // Assignment character '='
+        L_PROC_INSTR,   // Processor instruction
+        L_ASM_INSTR,    // Assembler directive
+        L_CR,           // End of line
+        L_FIN,          // End of data
+        L_ERROR         // Bad token type
     };
 
     const LeksType type;
+
+#if 0
 
     class CLString : public CString
     {
@@ -176,17 +187,17 @@ public:
         }
     };
 
-private:
+#endif
 
+private:
     union
     {
-//    Ident id;		// identyfikator
-        OperType op;	// operator binarny lub unarny
-        OpCode code;	// mnomonik
-        InstrType instr;	// dyrektywa
-//    int val;		// sta�a liczbowa lub znakowa
-        Num num;		// sta�a liczbowa lub znakowa
-        CLString *str;	// identyfikator lub ci�g znak�w
+        //Id id;            // Identifier
+        OperType op;        // Binary or unary operator
+        OpCode code;        // Polynomial
+        InstrType instr;    // Directive
+        Num num;            // Numeric or character constant
+        std::string *str;   // Identifier or string
         Error err;
     };
 
@@ -216,13 +227,13 @@ public:
         num.value = val;
     }
 
-    CLeksem(CLString *str) : type(L_STR), str(str)
+    CLeksem(std::string *str) : type(L_STR), str(str)
     {}
 
-    CLeksem(CLString *str, int dummy) : type(L_IDENT), str(str)
+    CLeksem(std::string *str, int dummy) : type(L_IDENT), str(str)
     {}
 
-    CLeksem(CLString *str, long dummy) : type(L_IDENT_N), str(str)
+    CLeksem(std::string *str, long dummy) : type(L_IDENT_N), str(str)
     {}
 
 //  CLeksem(const CLeksem &leks, long dummy) : type(L_IDENT_N)
@@ -266,20 +277,31 @@ public:
         return str;
     }
 
-    void Format(SINT32 val) // Normalize the form of the numeric label
+    void Format(int32_t val) // Normalize the form of the numeric label
     {
+#if 0
         ASSERT(type == L_IDENT_N);
-        std::string num(' ', 9);
+        CString num(' ', 9);
         num.Format("#%08X", (int)val);
-        *str += num;    // Adding a number
+        *str += num; // Append number
+#endif
+
+        // TODO: Definately need to verify this change. -- B.Simonds (April 25, 2024)
+
+        ASSERT(type == L_IDENT_N);
+
+        char tmp[64];
+
+        snprintf(tmp, sizeof(tmp), "       #%08X%d", (int)val, num.value);
+        str = new std::string(tmp);
     }
 
     //debugging log  use= leks.Logger(cs);
     void Logger(const char *logMsg)
     {
-        FILE* pFile = fopen("logfile.txt", "a");
-        fprintf(pFile, "%s\n", logMsg);
-        fclose(pFile);
+        std::FILE* file = std::fopen("logfile.txt", "a");
+        std::fprintf(file, "%s\n", logMsg);
+        std::fclose(file);
     }
 };
 
@@ -353,7 +375,7 @@ public:
         m_nLine = 0;
     }
 
-    virtual char *read_line(std::string buffer) = 0;
+    virtual const std::string &read_line(std::string buffer) = 0;
 
     virtual int get_line_no() const
     {
@@ -365,41 +387,50 @@ public:
 
 //-----------------------------------------------------------------------------
 
-class CInputFile : public CInputBase, CStdioFile
+class CInputFile : public CInputBase
 {
+private:
+    std::FILE *m_file;
+
 public:
-    CInputFile(const std::string &str) : CInputBase(str)
-    {}
+    CInputFile(const std::string &str) 
+        : CInputBase(str.c_str())
+        , m_file(nullptr)
+    {
+    }
 
     ~CInputFile()
-    {}
+    {
+    }
 
     virtual void open()
     {
-        ASSERT(m_bOpened == false); // The file cannot be opened yet.
-        CFileException *ex = new CFileException;
+        ASSERT(m_bOpened == false); // File is already open
 
-        if (!Open(CInputBase::m_strFileName, CFile::modeRead | CFile::shareDenyWrite | CFile::typeText, ex))
-            throw (ex);
+        m_file = std::fopen(m_strFileName.c_str(), "r");
+
+        if (m_file == nullptr)
+            throw new CFileException(errno);
 
         m_bOpened = true;
-        /*delete*/ ex->Delete();
     }
 
     virtual void close()
     {
         ASSERT(m_bOpened == true);	    // The file must be opened
-        Close();
+
+        std::fclose(m_file);
+        m_file = nullptr;
         m_bOpened = false;
     }
 
     virtual void seek_to_begin()
     {
-        SeekToBegin();
+        std::fseek(m_file, 0, SEEK_SET);
         m_nLine = 0;
     }
 
-    virtual char *read_line(char *str, UINT max_len);
+    virtual const std::string &read_line(std::string &buffer);
 
 //  virtual int get_line_no()
 
@@ -411,20 +442,21 @@ public:
 // Reading data from the document window
 class CInputWin : public CInputBase, public CAsm
 {
+private:
     wxWindow *m_pWnd;
 
 public:
     CInputWin(wxWindow *pWnd) : m_pWnd(pWnd)
     {}
 
-    virtual LPTSTR read_line(LPTSTR str, UINT max_len);
+    virtual const std::string &read_line(std::string &buffer);
     virtual const std::string &get_file_name();
     virtual void seek_to_begin();
 };
 
 //-----------------------------------------------------------------------------
 
-class CInput //: /* CList<CInputBase*, CInputBase*>, */
+class CInput : std::list<CInputBase*>
 {
     CInputBase* tail;
     CAsm::FileUID fuid;
@@ -457,7 +489,7 @@ public:
 
     ~CInput();
 
-    char *read_line(std::string &buffer)
+    const std::string &read_line(std::string &buffer)
     {
         return tail->read_line(buffer);
     }
@@ -472,15 +504,12 @@ public:
         return tail->get_line_no();
     }
 
-    int get_count()
-    {
-        return GetCount();
-    }
+    int get_count() const { return size(); }
 
     const std::string& get_file_name() const { return tail->get_file_name(); }
 
     CAsm::FileUID get_file_UID() const { return fuid; }
-    void set_file_UID(FileUID fuid) { this->fuid = fuid; }
+    void set_file_UID(CAsm::FileUID fuid) { this->fuid = fuid; }
 
     bool is_present() const { return tail != nullptr; }
 };
@@ -509,7 +538,7 @@ struct Expr
         , value(0)
     {}
 
-    Expr(SINT32 value)
+    Expr(int32_t value)
         : inf(EX_LONG)
         , value(value)
     {}
@@ -518,7 +547,7 @@ struct Expr
 //-----------------------------------------------------------------------------
 
 // Conditional assembly (stack machine)
-class CConditionalAsm : public CAsm
+class CConditionalAsm //: public CAsm
 {
 public:
     enum State
@@ -528,42 +557,46 @@ public:
     };
 
 private:
-    CByteArray stack;
+    std::vector<uint8_t> stack;
     int level;
 
     State get_state()
     {
         ASSERT(level >= 0);
-        return stack.GetAt(level)&1 ? BEFORE_ELSE : AFTER_ELSE;
+        return stack[level] & 1 ? BEFORE_ELSE : AFTER_ELSE;
     }
 
     bool get_assemble()
     {
         ASSERT(level >= 0);
-        return stack.GetAt(level)&2 ? true : false;
+        return stack[level] & 2 ? true : false;
     }
 
     bool get_prev_assemble()
     {
         ASSERT(level > 0);
-        return stack.GetAt(level-1)&2 ? true : false;
+        return stack[level - 1] & 2 ? true : false;
     }
 
     void set_state(State state, bool assemble)
     {
-        stack.SetAtGrow(level,BYTE((state == BEFORE_ELSE ? 1 : 0) + (assemble ? 2 : 0)));
+        if (stack.capacity() < level)
+            stack.reserve(level);
+
+        stack[level] = uint8_t((state == BEFORE_ELSE ? 1 : 0) + (assemble ? 2 : 0));
     }
 
 public:
     CConditionalAsm()
-        : level(-1)
+        : stack()
+        , level(-1)
     {
-        stack.SetSize(16, 16);
+        stack.reserve(16);
     }
 
-    Stat instr_if_found(Stat condition);
-    Stat instr_else_found();
-    Stat instr_endif_found();
+    CAsm::Stat instr_if_found(CAsm::Stat condition);
+    CAsm::Stat instr_else_found();
+    CAsm::Stat instr_endif_found();
 
     bool in_cond() const
     {
@@ -605,7 +638,7 @@ public:
             cond->restore_level(cond_level_);
     }
 
-    virtual const char* GetCurrLine(std::string &str) = 0;
+    virtual const std::string &GetCurrLine(std::string &str) = 0;
 
     virtual int GetLineNo() const = 0;
 
@@ -715,11 +748,11 @@ private:
     int m_nParams;              // Required number of parameters
     int m_nParamCount;          // Number of parameters in a macro call
     std::vector<std::string> m_strarrArgs;  // Subsequent call arguments -only strings
-    CDWordArray m_narrArgs;     // Subsequent call arguments -only expression values
+    std::vector<uint32_t> m_narrArgs;     // Subsequent call arguments -only expression values
 
     enum ArgType { NUM, STR, UNDEF_EXPR };
 
-    CByteArray m_arrArgType;    // Argument types (NUM -number, STR -string)
+    std::vector<ArgType> m_arrArgType;    // Argument types (NUM -number, STR -string)
 
     int m_nLineNo;              // Current line number (when reading)
     int m_nFirstLineNo;         // The line number from which the macro is called
@@ -766,7 +799,7 @@ public:
         return m_nParams;
     }
 
-    virtual const char* GetCurrLine(std::string &str);
+    virtual const std::string &GetCurrLine(std::string &str);
 
     virtual int GetLineNo() const
     {
@@ -835,7 +868,7 @@ public:
     ~CRepeatDef()
     {}
 
-    virtual const char* GetCurrLine(std::string &str); // Read the current line
+    virtual const std::string &GetCurrLine(std::string &str); // Read the current line
 
     virtual int GetLineNo()
     {
@@ -899,7 +932,7 @@ public:
         input.seek_to_begin();
     }
 
-    virtual const char* GetCurrLine(std::string &str) // reading less than an entire line
+    virtual const std::string &GetCurrLine(std::string &str) // reading less than an entire line
     {
         str.reserve(1024 + 4);
 
@@ -1052,8 +1085,7 @@ class CAsm6502 : public CAsm /*, public CObject */
     CLeksem get_hex_num();          // Interpretation of a hexadecimal number
     CLeksem get_bin_num();          // Interpretation of binary number
     CLeksem get_char_num();         // Interpretation of the character constant
-    //KLexem get_ident();           // Extract the string
-    CLeksem::CLString* get_ident(); // Extract the string
+    std::string* get_ident();       // Extract the string
     CLeksem get_string(char lim);	// Extracting a string of characters
     CLeksem eat_space();			// Skip whitespace
     bool proc_instr(const std::string &str, OpCode &code);

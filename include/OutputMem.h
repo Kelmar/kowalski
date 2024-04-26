@@ -38,9 +38,6 @@ public:
         memset(m_data, 0, m_size);
     }
 
-    // Disable copy constructor
-    COutputMem(const COoutputMem &) delete;
-
     virtual ~COutputMem()
     {
         delete[] m_data;
@@ -56,17 +53,15 @@ public:
         memset(m_data, nByte, m_size);
     }
 
-    // Disable copy constructor
-    COutputMem &operator= (const COutputMem &src) delete;
-    /*
+    COutputMem &operator= (const COutputMem &src)
     {
-        ASSERT(m_nSize == src.m_nSize); // Dimensions must be identical
-        memcpy(m_pData, src.m_pData, m_nSize * sizeof(BYTE));
+        ASSERT(m_size == src.m_size); // Dimensions must be identical
+        memcpy(m_data, src.m_data, m_size);
         m_uMask = src.m_uMask;
         return *this;
     }
-    */
 
+#if 0
     void Save(CArchive &archive, uint32_t start, uint32_t end)
     {
         ASSERT(end >= start);
@@ -78,6 +73,7 @@ public:
         ASSERT(end >= start);
         archive.Read(m_data + start, int(end) - start + 1);
     }
+#endif
 
     const uint8_t *Mem() const { return m_data; }
 
@@ -101,19 +97,22 @@ public:
     uint16_t GetWord(uint16_t uLo, uint16_t uHi) const
     {
         ASSERT(m_uMask > 0);
-        return GetAt(uLo & m_uMask) + (uint32_t(GetAt(uHi & m_uMask)) << 8);
+        return m_data[uLo & m_uMask] + uint32_t(m_data[uHi & m_uMask] << 8);
+        //return GetAt(uLo & m_uMask) + (uint32_t(GetAt(uHi & m_uMask)) << 8);
     }
 
     uint16_t GetWord(uint32_t uAddr) const
     {
         ASSERT(m_uMask > 0);
-        return GetAt(uAddr & m_uMask) + (uint32_t(GetAt((uAddr + 1) & m_uMask)) << 8);
+        return m_data[uAddr & m_uMask] + uint32_t(m_data[(uAddr + 1) & m_uMask] << 8);
+        //return GetAt(uAddr & m_uMask) + (uint32_t(GetAt((uAddr + 1) & m_uMask)) << 8);
     }
 
     uint16_t GetWordInd(uint8_t uZpAddr) const
     {
         ASSERT(m_uMask > 0);
-        return GetAt(uZpAddr) + (GetAt(uZpAddr + uint8_t(1)) << 8);
+        return m_data[uZpAddr] + (m_data[uZpAddr + uint8_t(1)] << 8);
+        //return GetAt(uZpAddr) + (GetAt(uZpAddr + uint8_t(1)) << 8);
     }
 };
 

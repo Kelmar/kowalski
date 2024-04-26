@@ -25,12 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _debug_info_h_
 #define _debug_info_h_
 
-struct CLine : CAsm
+struct CLine
 {
-    int ln;       // Line number in the source file
-    FileUID file; // File ID
+    int ln;             // Line number in the source file
+    CAsm::FileUID file; // File ID
 
-    CLine(int ln, FileUID file)
+    CLine(int ln, CAsm::FileUID file)
         : ln(ln), file(file)
     { }
 
@@ -42,32 +42,43 @@ struct CLine : CAsm
     {
         return ln == arg.ln && file == arg.file;
     }
+};
 
-    operator DWORD() // Conversion for hash function (CMap<>::HashKey())
+template<>
+struct std::hash<CLine>
+{
+    std::size_t operator()(const CLine &line) const noexcept
     {
-        return DWORD((ln << 4) ^ (file << 8));
+        std::size_t h1 = std::hash<int> {} (line.ln);
+        std::size_t h2 = std::hash<CAsm::FileUID> {} (line.file);
+
+        return (h1 << 4) ^ (h2 << 8);
     }
 };
 
 // Info for the simulator with one line of program source
-struct CDebugLine : CAsm
+struct CDebugLine
 {
     uint8_t flags; // Flags describing the line (Dbg Flag)
     uint32_t addr; // Program address 6502
     CLine line;
 
-    CDebugLine() : flags(CAsm::DBG_EMPTY), addr(0)
-    { }
+    CDebugLine()
+        : flags(CAsm::DBG_EMPTY)
+        , addr(0)
+    {
+    }
 
-    CDebugLine(int ln, FileUID uid, uint32_t addr, int flg)
+    CDebugLine(int ln, CAsm::FileUID uid, uint32_t addr, int flg)
         : flags((uint8_t)flg)
         , addr(addr)
-        , line(ln,uid)
-    { }
+        , line(ln, uid)
+    {
+    }
 
     CDebugLine(const CDebugLine &src)
     {
-        memcpy(this,&src,sizeof(*this));
+        memcpy(this, &src, sizeof(*this));
     }
 
     const CDebugLine &operator=(const CDebugLine &src)
@@ -77,120 +88,154 @@ struct CDebugLine : CAsm
     }
 };
 
-class CDebugLines : CArray<CDebugLine,CDebugLine&>, public CAsm
+class CDebugLines : std::vector<CDebugLine>
 {
 private:
-    CMap<uint32_t, uint32_t, int, int> addr_to_idx;	// tablice asocjacyjne do szybkiego
-    CMap<CLine, CLine&, int, int> line_to_idx;	// odszukiwania adresu lub wiersza
+    // Associative arrays for quick finding an address or line
+    std::unordered_map<uint32_t, int> addr_to_idx;
+    std::unordered_map<CLine, int> line_to_idx;
 
 public:
-    CDebugLines() : addr_to_idx(50), line_to_idx(50)
+    CDebugLines() 
+        : addr_to_idx(50)
+        , line_to_idx(50)
     {
-        SetSize(50,50);
+        reserve(50);
     }
 
-    // znalezienie wiersza odpowiadaj�cego adresowi
+    // Finding the line corresponding to the address
     void GetLine(CDebugLine &ret, uint32_t addr)
     {
-        static const CDebugLine empty;	// pusty obiekt - do oznaczenia "nie znaleziony wiersz"
-        int idx;
-        if (addr_to_idx.Lookup(addr,idx))
-            ret = GetAt(idx);
-        else
-            ret = empty;
+        static const CDebugLine empty; // empty object -to mark "line not found"
+
+        auto search = addr_to_idx.find(addr);
+
+        if (search != addr_to_idx.end())
+            ret = at(search->second);
+
+        ret = empty;
     }
 
-    // znalezienie adresu odp. wierszowi
-    void GetAddress(CDebugLine &ret, int ln, FileUID file)
+    // Finding the address corresponding to the line
+    void GetAddress(CDebugLine &ret, int ln, CAsm::FileUID file)
     {
-        static const CDebugLine empty;	// pusty obiekt - do oznaczenia "nie znaleziony adres"
-        int idx;
-        if (line_to_idx.Lookup(CLine(ln,file),idx))
-            ret = GetAt(idx);
-        else
-            ret = empty;
+        static const CDebugLine empty; // empty object -to mark "address not found"
+
+        auto search = line_to_idx.find(CLine(ln, file));
+
+        if (search != line_to_idx.end())
+            ret = at(search->second);
+
+        ret = empty;
     }
 
     void AddLine(CDebugLine &dl)
     {
-        ASSERT(dl.flags != DBG_EMPTY);	// niewype�niony opis wiersza
-        int idx = Add(dl);			// dopisanie info o wierszu, zapami�tanie indeksu
-        addr_to_idx.SetAt(dl.addr,idx);	// zapisanie indeksu
-        line_to_idx.SetAt(dl.line,idx);	// j.w.
+        ASSERT(dl.flags != DBG_EMPTY); // Unfilled line description
+
+        int idx = size();
+        push_back(dl); // Adding information about the line, remembering the index
+
+        addr_to_idx[dl.addr] = idx; // Saving the index
+        line_to_idx[dl.line] = idx; // As above
     }
 
     void Empty()
     {
-        RemoveAll();
-        addr_to_idx.RemoveAll();
-        line_to_idx.RemoveAll();
+        clear();
+
+        addr_to_idx.clear();
+        line_to_idx.clear();
     }
 };
 
 // Tracks locations of breakpoints
-class CDebugBreakpoints : CAsm, CByteArray
+class CDebugBreakpoints
 {
 private:
+    const size_t NUM_ELEMENTS = 0x10000;
+
+    uint8_t *m_data;
+
     uint32_t temp_bp_index;
 
 public:
-    CDebugBreakpoints() : temp_bp_index(0)
+    CDebugBreakpoints()
+        : m_data(nullptr)
+        , temp_bp_index(0)
     {
-        SetSize(0x10000);
+        m_data = new uint8_t[NUM_ELEMENTS];
     }
 
-    Breakpoint Set(uint32_t addr, int bp = BPT_EXECUTE) // Set a breakpoint
+    virtual ~CDebugBreakpoints()
     {
-        ASSERT((bp & ~BPT_MASK) == 0); // Illegal combination of breakpoint bits
-        return Breakpoint((*this)[addr] |= bp);
+        delete[] m_data;
     }
 
-    Breakpoint Clr(uint32_t addr, int bp = BPT_MASK) // Clear a breakpoint
+    uint8_t operator[](uint32_t addr) const 
     {
-        ASSERT((bp & ~BPT_MASK) == 0); // Illegal combination of breakpoint bits
-        return Breakpoint((*this)[addr] &= ~bp);
+        ASSERT(addr < NUM_ELEMENTS);
+        return m_data[addr]; 
     }
 
-    Breakpoint Toggle(uint32_t addr, int bp)
-    {
-        ASSERT((bp & ~BPT_MASK) == 0); // Illegal combination of breakpoint bits
-        return Breakpoint((*this)[addr] &= ~bp);
+    uint8_t &operator[](uint32_t addr) 
+    { 
+        ASSERT(addr < NUM_ELEMENTS);
+        return m_data[addr];
     }
 
-    Breakpoint Get(uint32_t addr)
+    CAsm::Breakpoint Set(uint32_t addr, int bp = CAsm::BPT_EXECUTE) // Set a breakpoint
     {
-        return Breakpoint((*this)[addr]);
+        ASSERT((bp & ~CAsm::BPT_MASK) == 0); // Illegal combination of breakpoint bits
+        return static_cast<CAsm::Breakpoint>((*this)[addr] |= bp);
     }
 
-    void Enable(uint32_t addr, bool enable= true)
+    CAsm::Breakpoint Clr(uint32_t addr, int bp = CAsm::BPT_MASK) // Clear a breakpoint
     {
-        ASSERT((*this)[addr] & BPT_MASK); // There is no breakpoint at the given address
+        ASSERT((bp & ~CAsm::BPT_MASK) == 0); // Illegal combination of breakpoint bits
+        return static_cast<CAsm::Breakpoint>((*this)[addr] &= ~bp);
+    }
+
+    CAsm::Breakpoint Toggle(uint32_t addr, int bp)
+    {
+        ASSERT((bp & ~CAsm::BPT_MASK) == 0); // Illegal combination of breakpoint bits
+        return static_cast<CAsm::Breakpoint>((*this)[addr] &= ~bp);
+    }
+
+    CAsm::Breakpoint Get(uint32_t addr)
+    {
+        return static_cast<CAsm::Breakpoint>((*this)[addr]);
+    }
+
+    void Enable(uint32_t addr, bool enable = true)
+    {
+        ASSERT((*this)[addr] & CAsm::BPT_MASK); // There is no breakpoint at the given address
 
         if (enable)
-            (*this)[addr] &= ~BPT_DISABLED;
+            (*this)[addr] &= ~CAsm::BPT_DISABLED;
         else
-            (*this)[addr] |= BPT_DISABLED;
+            (*this)[addr] |= CAsm::BPT_DISABLED;
     }
 
     void ClrBrkp(uint32_t addr) // clear the breakpoint
     {
-        (*this)[addr] = BPT_NONE;
+        (*this)[addr] = CAsm::BPT_NONE;
     }
 
     void SetTemporaryExec(uint32_t addr)
     {
         temp_bp_index = addr;
-        (*this)[addr] |= BPT_TEMP_EXEC;
+        (*this)[addr] |= CAsm::BPT_TEMP_EXEC;
     }
 
     void RemoveTemporaryExec()
     {
-        (*this)[temp_bp_index] &= ~BPT_TEMP_EXEC;
+        (*this)[temp_bp_index] &= ~CAsm::BPT_TEMP_EXEC;
     }
 
     void ClearAll() // Remove all breakpoints
     {
-        memset(m_pData, BPT_NONE, m_nSize * sizeof(uint8_t));
+        memset(m_data, CAsm::BPT_NONE, NUM_ELEMENTS);
     }
 };
 
@@ -208,8 +253,8 @@ public:
         m_name.clear();
         m_info.clear();
 
-        m_name.size(size);
-        m_info.size(size);
+        m_name.reserve(size);
+        m_info.reserve(size);
     }
     
     void SetIdent(int index, const std::string &name, const CIdent &info)
@@ -236,7 +281,6 @@ public:
         m_info.clear();
     }
 };
-
 
 class CDebugInfo : CAsm
 {

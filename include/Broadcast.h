@@ -25,18 +25,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CBroadcast
 {
 public:
+    // Replace with wx event
+    
+#if 0
     enum WinMsg
     {
         WM_USER_OFFSET = WM_USER + 4100,
         WM_USER_EXIT_DEBUGGER =	WM_USER_OFFSET,
         WM_USER_START_DEBUGGER,
         WM_USER_UPDATE_REG_WND,
-        WM_USER_PROG_MEM_CHANGED,	// ca³a pamiêæ 6502 zosta³a zmieniona (po LOAD lub asemblacji)
-        WM_USER_REMOVE_ERR_MARK	// usun¹æ znaczniki b³êdu
+        WM_USER_PROG_MEM_CHANGED,	// caï¿½a pamiï¿½ï¿½ 6502 zostaï¿½a zmieniona (po LOAD lub asemblacji)
+        WM_USER_REMOVE_ERR_MARK	// usunï¿½ï¿½ znaczniki bï¿½ï¿½du
     };
 
-    void SendMessageToViews(UINT msg, WPARAM wParam= 0, LPARAM lParam= 0);
-    void SendMessageToPopups(UINT msg, WPARAM wParam= 0, LPARAM lParam= 0);
+    void SendMessageToViews(UINT msg, WPARAM wParam = 0, LPARAM lParam = 0);
+    void SendMessageToPopups(UINT msg, WPARAM wParam = 0, LPARAM lParam = 0);
+#endif
 };
 
 #endif
