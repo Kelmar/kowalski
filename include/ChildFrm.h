@@ -31,19 +31,10 @@ public:
     //CSplitterWnd m_wndSplitter;
 
     /* constructor */ CChildFrame();
-    virtual          ~CChildFrame();
-
-    //virtual bool PreCreateWindow(CREATESTRUCT& cs);
+    virtual          ~CChildFrame() { }
 
 protected:
     //virtual bool OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
-
-public:
-    
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
 };
 
 /////////////////////////////////////////////////////////////////////////////

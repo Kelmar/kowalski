@@ -21,19 +21,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "stdafx.h"
 #include "MainFrm.h"
 
+wxDEFINE_EVENT(EVT_EXIT_DEBUGGER, wxCommandEvent);
+wxDEFINE_EVENT(EVT_START_DEBUGER, wxCommandEvent);
+wxDEFINE_EVENT(EVT_UPDATE_REG_WND, wxCommandEvent);
+wxDEFINE_EVENT(EVT_PROG_MEM_CHANGED, wxCommandEvent); // All 6502 memory has been changed (after LOAD or assembly)
+wxDEFINE_EVENT(EVT_REMOVE_ERR_MARK, wxCommandEvent);
 
-// wys³anie komunikatu do wszystkich okien otwartych dokumentów
+#if REWRITE_TO_WX_WIDGET
+
+// I susspect we want these functions to be in our app, not here. -- B.Simonds (April 27, 2024)
+
+// Sending a message to all open document windows
 void CBroadcast::SendMessageToViews(UINT msg, WPARAM wParam/*= 0*/, LPARAM lParam/*= 0*/)
 {
-    CWinApp *pApp= AfxGetApp();
-    POSITION posTempl= pApp->GetFirstDocTemplatePosition();
+    CWinApp *pApp = AfxGetApp();
+    POSITION posTempl = pApp->GetFirstDocTemplatePosition();
     while (posTempl != NULL)
     {
-        CDocTemplate *pTempl= pApp->GetNextDocTemplate(posTempl);
+        CDocTemplate *pTempl = pApp->GetNextDocTemplate(posTempl);
         POSITION posDoc= pTempl->GetFirstDocPosition();
         while (posDoc != NULL)
         {
-            CDocument *pDoc= pTempl->GetNextDoc(posDoc);
+            CDocument *pDoc = pTempl->GetNextDoc(posDoc);
             POSITION posView = pDoc->GetFirstViewPosition();
             while (posView != NULL)
             {
@@ -44,14 +53,15 @@ void CBroadcast::SendMessageToViews(UINT msg, WPARAM wParam/*= 0*/, LPARAM lPara
     }
 }
 
-
-// wys³anie komunikatu do okien zapisanych w g_hWindows[]
+// Sending a message to windows stored in g_hWindows[]
 void CBroadcast::SendMessageToPopups(UINT msg, WPARAM wParam/*= 0*/, LPARAM lParam/*= 0*/)
 {
-    for (int i=0; CMainFrame::m_hWindows[i]; i++)
+    for (int i = 0; CMainFrame::m_hWindows[i]; i++)
     {
-        HWND hWnd= *CMainFrame::m_hWindows[i];
+        HWND hWnd = *CMainFrame::m_hWindows[i];
         if (hWnd && ::IsWindow(hWnd))
             ::SendMessage(hWnd, msg, wParam, lParam);
     }
 }
+
+#endif

@@ -18,31 +18,53 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// zmodyfikowana klasa CMultiDocTemplate - zamieniona funkcja rozpoznaj¹ca
-// otwierane dokumenty
+#ifndef CX_MULTI_DOC_TEMPLATE_H__
+#define CX_MULTI_DOC_TEMPLATE_H__
 
-class CXMultiDocTemplate: public CMultiDocTemplate
+/*
+ * It isn't entirely clear from the Microsoft docs what the CMultiDocTemplate 
+ * actually DOES.  It appears to have something to do with how it builds up
+ * the list of file types that can be created in the File->New/Open/Save but
+ * I'm not sure.
+ * 
+ *              -- B.Simonds (April 27, 2024)
+ */
+
+#if 0
+
+// modified CMultiDocTemplate class -replaced recognition function
+// opened documents
+
+class CXMultiDocTemplate : public CMultiDocTemplate
 {
+private:
     bool m_bNormalMatch;
 
 public:
     CXMultiDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass,
-                       CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass, bool bNormalMatch= true) :
-        m_bNormalMatch(bNormalMatch),
-        CMultiDocTemplate(nIDResource,pDocClass,pFrameClass,pViewClass)
-    {}
-    virtual ~CXMultiDocTemplate()
-    {}
+                       CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass, bool bNormalMatch = true)
+        : m_bNormalMatch(bNormalMatch)
+        //, CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass)
+    {
+    }
 
-    virtual Confidence MatchDocType(LPCTSTR lpszPathName, CDocument*& rpDocMatch)
+    virtual ~CXMultiDocTemplate()
+    {
+    }
+
+    virtual Confidence MatchDocType(const char *pathName, CDocument*& rpDocMatch)
     {
         if (m_bNormalMatch)
-            return CMultiDocTemplate::MatchDocType(lpszPathName,rpDocMatch);
+            return CMultiDocTemplate::MatchDocType(pathName, rpDocMatch);
         else
             return CDocTemplate::noAttempt;
     }
 
-    virtual BOOL GetDocString(CString& rString, enum DocStringIndex i) const;
+    virtual bool GetDocString(std::string& rString, enum DocStringIndex i) const;
 
     static bool s_bRegistrationExt;
 };
+
+#endif
+
+#endif /* CX_MULTI_DOC_TEMPLATE_H__ */

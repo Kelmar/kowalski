@@ -21,20 +21,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "CXMultiDocTemplate.h"
 
-bool CXMultiDocTemplate::s_bRegistrationExt= true;
+#if 0
 
+bool CXMultiDocTemplate::s_bRegistrationExt = true;
 
-BOOL CXMultiDocTemplate::GetDocString(CString& rString, enum DocStringIndex i) const
+bool CXMultiDocTemplate::GetDocString(std::string& str, enum DocStringIndex i) const
 {
-    if (!CMultiDocTemplate::GetDocString(rString, i))
+    if (!CMultiDocTemplate::GetDocString(str, i))
         return false;
 
     if (i == filterExt)
     {
         if (s_bRegistrationExt)
-            if (rString.GetLength() > 4)
-                rString = rString.Left(4);
+            str = str.substr(0, 4);
     }
 
     return true;
 }
+
+#endif

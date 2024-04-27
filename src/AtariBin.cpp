@@ -36,48 +36,63 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 CAtariBin::CAtariBin()
-{}
+{
+}
 
 CAtariBin::~CAtariBin()
-{}
-
-
-bool CAtariBin::LoadAtaBinFormat(CArchive& ar, COutputMem& mem, CMarkArea& area, int& prog_start)
 {
-    WORD wTemp;
-    ar >> wTemp;
-    if (wTemp != 0xFFFF)
+}
+
+bool CAtariBin::LoadAtaBinFormat(CArchive &ar, COutputMem &mem, CMarkArea &area, int &prog_start)
+{
+    ASSERT(false);
+    return false;
+
+    // TODO: Write replacement for CArchive class.
+
+#if 0
+    uint16_t temp;
+
+    ar >> temp;
+
+    if (temp != 0xFFFF)
         return false;
 
-    WORD wBegin= 0;
+    uint16_t begin = 0;
 
     for (;;)
     {
-        WORD wFrom, wTo;
-        ar >> wFrom;
-        ar >> wTo;
-        if (wTo < wFrom)
+        uint16_t from, to;
+
+        ar >> from;
+        ar >> to;
+
+        if (to < from)
             return false;
 
-        if (wBegin == 0)
-            wBegin = wFrom;
+        if (begin == 0)
+            begin = from;
 
-        area.SetStart(wFrom);
-        area.SetEnd(wTo);
+        area.SetStart(from);
+        area.SetEnd(to);
 
-        mem.Load(ar, wFrom, wTo);
+        mem.Load(ar, from, to);
 
         if (ar.GetFile()->GetLength() >= ar.GetFile()->GetPosition() && ar.IsBufferEmpty())
             break;
     }
 
-    int nStart= mem[0x2e0] + mem[0x2e1] * 256;		// run address
-    if (nStart == 0)
-        nStart = mem[0x2e2] + mem[0x2e3] * 256;		// init address
-    if (nStart == 0)
-        nStart = wBegin;	// beginning of first block
-    if (nStart != 0)
-        prog_start = nStart;
+    int start = mem[0x2e0] + mem[0x2e1] * 256; // run address
+
+    if (start == 0)
+        start = mem[0x2e2] + mem[0x2e3] * 256; // init address
+
+    if (start == 0)
+        start = begin; // beginning of first block
+
+    if (start != 0)
+        prog_start = start;
 
     return true;
+#endif
 }

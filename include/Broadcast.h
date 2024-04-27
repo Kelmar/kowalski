@@ -21,21 +21,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _broadcast_
 #define _broadcast_
 
+wxDECLARE_EVENT(EVT_EXIT_DEBUGGER, wxCommandEvent);
+wxDECLARE_EVENT(EVT_START_DEBUGER, wxCommandEvent);
+wxDECLARE_EVENT(EVT_UPDATE_REG_WND, wxCommandEvent);
+wxDECLARE_EVENT(EVT_PROG_MEM_CHANGED, wxCommandEvent); // All 6502 memory has been changed (after LOAD or assembly)
+wxDECLARE_EVENT(EVT_REMOVE_ERR_MARK, wxCommandEvent);
 
 class CBroadcast
 {
 public:
-    // Replace with wx event
+    
     
 #if 0
+    // Replace with wx events
+
     enum WinMsg
     {
         WM_USER_OFFSET = WM_USER + 4100,
         WM_USER_EXIT_DEBUGGER =	WM_USER_OFFSET,
         WM_USER_START_DEBUGGER,
         WM_USER_UPDATE_REG_WND,
-        WM_USER_PROG_MEM_CHANGED,	// ca�a pami�� 6502 zosta�a zmieniona (po LOAD lub asemblacji)
-        WM_USER_REMOVE_ERR_MARK	// usun�� znaczniki b��du
+        WM_USER_PROG_MEM_CHANGED, 
+        WM_USER_REMOVE_ERR_MARK
     };
 
     void SendMessageToViews(UINT msg, WPARAM wParam = 0, LPARAM lParam = 0);

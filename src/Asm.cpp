@@ -22,14 +22,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //-----------------------------------------------------------------------------
 
-const TCHAR CAsm::LOCAL_LABEL_CHAR = _T('.');	// znak rozpoczynaj¹cy etykietê lokaln¹
-const TCHAR CAsm::MULTIPARAM[]= _T("...");	// wielokropek - dowolna iloœæ parametrów
+const char CAsm::LOCAL_LABEL_CHAR = '.'; // Character that starts the local label
+const char CAsm::MULTIPARAM[] = "...";   // Ellipsis -any number of parameters
+
+static const uint8_t NA = 0x42; // Invalid in 6502 and 65C02 and WDM in 65816
 
 //-----------------------------------------------------------------------------
-static const UINT8 NA= 0x42;  // Invalid in 6502 and 65C02 and WDM in 65816
 
-// zamiana rozkazu w danym trybie adresowania na kod (65XX)
-const UINT8 CAsm::trans_table[C_ILL][A_NO_OF_MODES]=
+// Converting an instruction in a given addressing mode into a code (65XX)
+const uint8_t CAsm::trans_table[C_ILL][A_NO_OF_MODES] =
 {
 // IMP   ACC   IMM   ZPG   ABS  ABS_X ABS_Y ZPG_X ZPG_Y  REL  ZPGI ZPGI_X ZPGI_Y  ABSI ABSI_X ZREL ZPG2 ABSL ABSL_X ZPIL  ZPIL_Y INDL   SR  SRI_Y A_RELL A_XYC A_IMM2
     NA,   NA, 0xA9, 0xA5, 0xAD, 0xBD, 0xB9, 0xB5, NA, NA, NA, 0xA1,  0xB1,  NA, NA, NA, NA, NA, NA,  NA,  NA, NA, NA, NA,   NA, NA,  NA,                               // C_LDA
@@ -134,8 +135,8 @@ const UINT8 CAsm::trans_table[C_ILL][A_NO_OF_MODES]=
 
 //-----------------------------------------------------------------------------
 
-// zamiana rozkazu w danym trybie adresowania na kod (65C02)
-const UINT8 CAsm::trans_table_c[C_ILL][A_NO_OF_MODES]=
+// Converting an instruction in a given addressing mode into a code (65C02)
+const uint8_t CAsm::trans_table_c[C_ILL][A_NO_OF_MODES] =
 {
 // IMP   ACC   IMM   ZPG   ABS  ABS_X ABS_Y ZPG_X ZPG_Y  REL  ZPGI ZPGI_X ZPGI_Y  ABSI ABSI_X ZREL ZPG2 ABSL ABSL_X ZPIL  ZPIL_Y INDL  SR  SRI_Y A_RELL A_XYC A_IMM2
     NA, NA, 0xA9, 0xA5, 0xAD, 0xBD, 0xB9, 0xB5, NA, NA, 0xB2, 0xA1,  0xB1,  NA, NA, NA, NA, NA, NA,  NA,  NA, NA, NA, NA,   NA, NA,   NA,                              // C_LDA
@@ -238,7 +239,7 @@ const UINT8 CAsm::trans_table_c[C_ILL][A_NO_OF_MODES]=
     NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,  NA,  NA, NA, NA, NA, NA, NA,  NA,  NA, NA, NA, NA,   NA, NA,   NA                                                 // C_XCE
 };
 
-const UINT8 CAsm::trans_table_8[C_ILL][A_NO_OF_MODES]=
+const uint8_t CAsm::trans_table_8[C_ILL][A_NO_OF_MODES] =
 {
 // IMP   ACC   IMM   ZPG   ABS  ABS_X ABS_Y ZPG_X ZPG_Y  REL ZPGI ZPGI_X ZPGI_Y ABSI ABSI_X ZREL  ZPG2  ABSL ABSL_X ZPIL ZPIL_Y INDL  SR SRI_Y, A_RELL, A_XYC  A_IMM2
     NA,  NA, 0xA9, 0xA5, 0xAD, 0xBD, 0xB9, 0xB5,  NA,  NA, 0xB2, 0xA1, 0xB1,  NA,  NA,  NA,  NA, 0xAF, 0xBF, 0xA7, 0xB7, NA, 0xA3, 0xB3,  NA,  NA,  0xA9,             // C_LDA A9
@@ -343,8 +344,8 @@ const UINT8 CAsm::trans_table_8[C_ILL][A_NO_OF_MODES]=
 
 //-----------------------------------------------------------------------------
 
-// tablica transformacji kodu rozkazu na odpowiadaj¹cy mu tryb adresowania 6502
-const UINT8 CAsm::code_to_mode[]=
+// Transformation table of the instruction code to the corresponding addressing mode 6502
+const uint8_t CAsm::code_to_mode[] =
 {
     // x0     x1	     x2     x3     x4      x5       x6       x7     x8     x9       xA     xB     xC      xD 	   xE	    xF
     A_IMP2,A_ZPGI_X, A_ILL, A_ILL, A_ILL,  A_ZPG,   A_ZPG,   A_ILL, A_IMP, A_IMM,   A_ACC, A_ILL, A_ILL,  A_ABS,   A_ABS,   A_ILL,
@@ -366,7 +367,7 @@ const UINT8 CAsm::code_to_mode[]=
 };
 
 //% bug fix 1.2.13.2 - 65c02 code to mode table - added unused opcode addressing modes to allow simulation
-const UINT8 CAsm::code_to_mode_c[]=
+const uint8_t CAsm::code_to_mode_c[] =
 {
     // x0     x1	     x2     x3     x4      x5       x6       x7      x8     x9       xA     xB     xC       xD 	     xE       xF
     A_IMP2,A_ZPGI_X, A_IMM,  A_IMP, A_ZPG,   A_ZPG,   A_ZPG,   A_ZPG2, A_IMP, A_IMM,   A_ACC, A_IMP, A_ABS,   A_ABS,   A_ABS,   A_ZREL,  // 0x
@@ -387,7 +388,7 @@ const UINT8 CAsm::code_to_mode_c[]=
     A_REL, A_ZPGI_Y, A_ZPGI, A_IMP, A_ZPG_X, A_ZPG_X, A_ZPG_X, A_ZPG2, A_IMP, A_ABS_Y, A_IMP, A_IMP, A_ABS,   A_ABS_X, A_ABS_X, A_ZREL   // Fx
 };
 
-const UINT8 CAsm::code_to_mode_8[]=
+const uint8_t CAsm::code_to_mode_8[] =
 {
     // x0     x1	     x2      x3       x4       x5       x6       x7        x8     x9       xA     xB     xC        xD 	    xE       xF
     A_IMP, A_ZPGI_X, A_IMM,  A_SR,    A_ZPG,   A_ZPG,   A_ZPG,   A_ZPIL,   A_IMP, A_IMM,   A_ACC, A_IMP, A_ABS,    A_ABS,   A_ABS,   A_ABSL,    // 0x
@@ -409,8 +410,8 @@ const UINT8 CAsm::code_to_mode_8[]=
 };
 
 
-// tablica transformacji kodu rozkazu na odpowiadaj¹cy mu rozkaz (dzia³anie) procesora 6502
-const UINT8 CAsm::code_to_command[]=
+// Transformation table of the instruction code into the corresponding instruction (action) of the 6502 processor
+const uint8_t CAsm::code_to_command[] =
 {
     // x0     x1	  x2     x3     x4     x5     x6     x7     x8     x9     xA     xB     xC     xD     xE     xF
     C_BRK, C_ORA, C_ILL, C_ILL, C_ILL, C_ORA, C_ASL, C_ILL, C_PHP, C_ORA, C_ASL, C_ILL, C_ILL, C_ORA, C_ASL, C_ILL, // 0
@@ -432,8 +433,8 @@ const UINT8 CAsm::code_to_command[]=
     C_BEQ, C_SBC, C_ILL, C_ILL, C_ILL, C_SBC, C_INC, C_ILL, C_SED, C_SBC, C_ILL, C_ILL, C_ILL, C_SBC, C_INC, C_ILL  // F
 };
 
-// j.w. dla 65c02
-const UINT8 CAsm::code_to_command_c[]=
+// As above for 65c02
+const uint8_t CAsm::code_to_command_c[] =
 {
     // x0     x1	  x2     x3     x4     x5     x6     x7     x8     x9     xA     xB     xC     xD     xE     xF
     C_BRK, C_ORA, C_ILL, C_ILL, C_TSB, C_ORA, C_ASL, C_RMB, C_PHP, C_ORA, C_ASL, C_ILL, C_TSB, C_ORA, C_ASL, C_BBR,
@@ -455,7 +456,7 @@ const UINT8 CAsm::code_to_command_c[]=
     C_BEQ, C_SBC, C_SBC, C_ILL, C_ILL, C_SBC, C_INC, C_SMB, C_SED, C_SBC, C_PLX, C_ILL, C_ILL, C_SBC, C_INC, C_BBS
 };
 
-const UINT8 CAsm::code_to_command_8[]=
+const uint8_t CAsm::code_to_command_8[] =
 {
     // x0     x1	  x2     x3     x4     x5     x6     x7     x8     x9     xA     xB     xC     xD     xE     xF
     C_BRK, C_ORA, C_COP, C_ORA, C_TSB, C_ORA, C_ASL, C_ORA, C_PHP, C_ORA, C_ASL, C_PHD, C_TSB, C_ORA, C_ASL, C_ORA,	// 0x
@@ -477,7 +478,7 @@ const UINT8 CAsm::code_to_command_8[]=
 };
 
 
-const UINT8 CAsm::mode_to_len[]=	// zamiana trybu adresowania na d³ugoœæ rozkazu i argumentów
+const uint8_t CAsm::mode_to_len[] = // Changing the addressing mode to the length of the instruction and arguments
 {
     1,	// A_IMP,	 implied
     1,	// A_ACC,	 accumulator
@@ -495,7 +496,7 @@ const UINT8 CAsm::mode_to_len[]=	// zamiana trybu adresowania na d³ugoœæ rozkazu
     3,	// A_ABSI,	 absolute indirect
     3,	// A_ABSI_X,	 absolute indirect, indexed X
     3,	// A_ZREL,	 zero page / relative -> BBS i BBR z 6501
-    2,	// A_ZPG2,	 zero page dla rozkazów RMB SMB z 6501
+    2,	// A_ZPG2,	 zero page for RMB SMB commands from 6501
     4,	// A_ABSL,
     4,	// A_ABSL_X,
     2,	// A_ZPIL,
@@ -505,20 +506,20 @@ const UINT8 CAsm::mode_to_len[]=	// zamiana trybu adresowania na d³ugoœæ rozkazu
     3,	// A_RELL	rel long
     3,	// A_XYC		MVN,MVP
     3,  // A_IMM2 - 16 bit immediate
-    0,	// A_NO_OF_MODES,	 iloœæ trybów adresowania
-    // A_ABS_OR_ZPG= A_NO_OF_MODES,	 niezdeterminowany tryb adresowania
+    0,  // A_NO_OF_MODES, number of addressing modes
+    //A_ABS_OR_ZPG= A_NO_OF_MODES, undetermined addressing mode
     0,	// A_ABSX_OR_ZPGX,
     0,	// A_ABSY_OR_ZPGY,
     0,	// A_ABSI_OR_ZPGI,
     0,	// A_IMP_OR_ACC,
     0,	// A_ABSIX_OR_ZPGIX,
-    2,	// A_IMP2,	 implied dla rozkazu BRK
-    1	// A_ILL	 wartoœæ do oznaczania nielegalnych rozkazów w symulatorze (ILLEGAL)
+    2,	// A_IMP2,	 implied for the BRK command
+    1	// A_ILL	 value for marking illegal commands in the simulator (ILLEGAL)
 };
 
 
 //% bug fix 1.2.13.1 - This timing table updated by Daryl Rictor
-const UINT8 CAsm::code_cycles[256]=
+const uint8_t CAsm::code_cycles[256] =
 {
 //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
     7, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 0, 0, 4, 6, 0,   // 0x
@@ -540,7 +541,7 @@ const UINT8 CAsm::code_cycles[256]=
 };
 
 //% bug fix 1.2.13.1 - This timing table updated by Daryl Rictor
-const UINT8 CAsm::code_cycles_c[256]=
+const uint8_t CAsm::code_cycles_c[256] =
 {
 //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
     7, 6, 2, 1, 5, 3, 5, 5, 3, 2, 2, 1, 6, 4, 6, 5,   // 0
@@ -561,7 +562,7 @@ const UINT8 CAsm::code_cycles_c[256]=
     2, 5, 5, 1, 4, 4, 6, 5, 2, 4, 4, 1, 4, 4, 7, 5	// fx
 };
 
-const UINT8 CAsm::code_cycles_8[256]=
+const uint8_t CAsm::code_cycles_8[256] =
 {
 //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
     7, 6, 2, 1, 5, 3, 5, 5, 3, 2, 2, 1, 6, 4, 6, 5,   // 0
@@ -582,66 +583,61 @@ const UINT8 CAsm::code_cycles_8[256]=
     2, 5, 5, 1, 4, 4, 6, 5, 2, 4, 4, 1, 4, 4, 7, 5	// fx
 };
 
-extern C6502App theApp;
-
-const UINT8 (&CAsm::TransformTable(const UINT8 bProc6502))[C_ILL][A_NO_OF_MODES]
+const uint8_t (&CAsm::TransformTable(const uint8_t bProc6502))[C_ILL][A_NO_OF_MODES]
 {
-    if (bProc6502==0)
+    if (bProc6502 == 0)
         return trans_table;
-    else if (bProc6502==1)
+    else if (bProc6502 == 1)
         return trans_table_c;
     else
         return trans_table_8;
 }
 
-
-const UINT8 (&CAsm::CodeToCommand())[0x100]
+const uint8_t (&CAsm::CodeToCommand())[0x100]
 {
-    return CodeToCommand(theApp.m_global.m_bProc6502);
+    return CodeToCommand(wxGetApp().m_global.m_bProc6502);
 }
 
-const UINT8 (&CAsm::CodeToCommand(const UINT8 bProc6502))[0x100]
+const uint8_t (&CAsm::CodeToCommand(const uint8_t bProc6502))[0x100]
 {
-    if (bProc6502==0)
+    if (bProc6502 == 0)
         return code_to_command;
-    else if (bProc6502==1)
+    else if (bProc6502 == 1)
         return code_to_command_c;
     else
         return code_to_command_8;
 }
 
-
-const UINT8 (&CAsm::CodeToMode())[0x100]
+const uint8_t (&CAsm::CodeToMode())[0x100]
 {
-    return CodeToMode(theApp.m_global.m_bProc6502);
+    return CodeToMode(wxGetApp().m_global.m_bProc6502);
 }
-const UINT8 (&CAsm::CodeToMode(const UINT8 bProc6502))[0x100]
+
+const uint8_t (&CAsm::CodeToMode(const uint8_t bProc6502))[0x100]
 {
-    if (bProc6502==0)
+    if (bProc6502 == 0)
         return code_to_mode;
-    else if (bProc6502==1)
+    else if (bProc6502 == 1)
         return code_to_mode_c;
     else
         return code_to_mode_8;
 }
 
-
-inline UINT8 CAsm::ProcType()
+inline uint8_t CAsm::ProcType()
 {
-    return theApp.m_global.m_bProc6502;
+    return wxGetApp().m_global.m_bProc6502;
 }
 
-
-const UINT8 (&CAsm::CodeToCycles())[0x100]
+const uint8_t (&CAsm::CodeToCycles())[0x100]
 {
-    return CodeToCycles(theApp.m_global.m_bProc6502);
+    return CodeToCycles(wxGetApp().m_global.m_bProc6502);
 }
 
-const UINT8 (&CAsm::CodeToCycles(const UINT8 bProc6502))[0x100]
+const uint8_t (&CAsm::CodeToCycles(const uint8_t bProc6502))[0x100]
 {
-    if (bProc6502==0)
+    if (bProc6502 == 0)
         return code_cycles;
-    else if (bProc6502==1)
+    else if (bProc6502 == 1)
         return code_cycles_c;
     else
         return code_cycles_8;
