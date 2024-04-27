@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef IDENT_INFO_DOC_H__
+#define IDENT_INFO_DOC_H__
+
 // IdentInfoDoc.h : header file
 //
 #include "DebugInfo.h"
@@ -25,60 +28,43 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 // CIdentInfoDoc document
 
-class CIdentInfoDoc : public CDocument
+class CIdentInfoDoc : public wxDocument
 {
-    CDebugInfo *m_pDebug;
+private:
+    CDebugInfo *m_debug;
 
 public:
-    void GetIdent(int index, CString &str, CIdent &info)
+    /* constructor */ CIdentInfoDoc();
+    virtual          ~CIdentInfoDoc();
+
+    void GetIdent(int index, std::string &str, CIdent &info)
     {
-        ASSERT(m_pDebug != NULL);
-        m_pDebug->GetIdent(index,str,info);
+        ASSERT(m_debug != nullptr);
+        m_debug->GetIdent(index, str, info);
     }
+
     int GetIdentCount()
     {
-        ASSERT(m_pDebug != NULL);
-        return m_pDebug->GetIdentCount();
+        ASSERT(m_debug != NULL);
+        return m_debug->GetIdentCount();
     }
-//protected:
-//  CIdentInfoDoc();           // protected constructor used by dynamic creation
-    DECLARE_DYNCREATE(CIdentInfoDoc)
 
-public:
-//  CIdentInfoDoc(CDebugInfo *pDebug);
-    void SetDebugInfo(CDebugInfo *pDebug)
+    void SetDebugInfo(CDebugInfo *debug)
     {
-        m_pDebug = pDebug;
+        m_debug = debug;
     }
 
-    // Attributes
-public:
-
-    // Operations
-public:
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CIdentInfoDoc)
-public:
     virtual void Serialize(CArchive& ar);   // overridden for document i/o
-protected:
-    virtual BOOL OnNewDocument();
-    //}}AFX_VIRTUAL
 
-    // Implementation
+protected:
+    virtual bool OnNewDocument();
+
 public:
-    CIdentInfoDoc();
-    virtual ~CIdentInfoDoc();
+    
 #ifdef _DEBUG
     virtual void AssertValid() const;
     virtual void Dump(CDumpContext& dc) const;
 #endif
-
-    // Generated message map functions
-protected:
-    //{{AFX_MSG(CIdentInfoDoc)
-    // NOTE - the ClassWizard will add and remove member functions here.
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 };
+
+#endif /* IDENT_INFO_DOC_H__ */

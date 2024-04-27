@@ -22,49 +22,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _ChildFrame_
-#define _ChildFrame_
+#ifndef CHILD_FRAME_H__
+#define CHILD_FRAME_H__
 
-
-class CChildFrame : public CMDIChildWnd
+class CChildFrame : public wxMDIChildFrame //CMDIChildWnd
 {
-    DECLARE_DYNCREATE(CChildFrame)
 public:
-    CChildFrame();
+    //CSplitterWnd m_wndSplitter;
 
-    // Attributes
-public:
-    CSplitterWnd m_wndSplitter;
+    /* constructor */ CChildFrame();
+    virtual          ~CChildFrame();
 
-    // Operations
-public:
+    //virtual bool PreCreateWindow(CREATESTRUCT& cs);
 
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CChildFrame)
-public:
-    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
-    virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
-    //}}AFX_VIRTUAL
+    //virtual bool OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
 
-    // Implementation
 public:
-    virtual ~CChildFrame();
+    
 #ifdef _DEBUG
     virtual void AssertValid() const;
     virtual void Dump(CDumpContext& dc) const;
 #endif
-
-    // Generated message map functions
-protected:
-    //{{AFX_MSG(CChildFrame)
-    // NOTE - the ClassWizard will add and remove member functions here.
-    //    DO NOT EDIT what you see in these blocks of generated code!
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif /* CHILD_FRAME_H__ */

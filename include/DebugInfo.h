@@ -355,12 +355,12 @@ public:
 
     void SetIdent(int index, const std::string &name, const CIdent &info)
     {
-        m_idents.SetIdent(index,name,info);
+        m_idents.SetIdent(index, name, info);
     }
 
     void GetIdent(int index, std::string &name, CIdent &info)
     {
-        m_idents.GetIdent(index,name,info);
+        m_idents.GetIdent(index, name, info);
     }
 
     int GetIdentCount()

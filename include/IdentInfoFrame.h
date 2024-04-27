@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef IDENT_INFO_FRAME_H__
+#define IDENT_INFO_FRAME_H__
+
 // IdentInfoFrame.h : header file
 //
 
@@ -26,32 +29,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 // CIdentInfoFrame frame
 
-class CIdentInfoFrame : public CMiniFrameWnd //CFrameWnd
+class CIdentInfoFrame : public wxWindow //CMiniFrameWnd
 {
-    DECLARE_DYNCREATE(CIdentInfoFrame)
 protected:
-    CIdentInfoFrame();           // protected constructor used by dynamic creation
+    CIdentInfoFrame(); // protected constructor used by dynamic creation
 
     // Attributes
 public:
-
-    // Operations
-public:
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CIdentInfoFrame)
-    //}}AFX_VIRTUAL
-
-    // Implementation
-protected:
-//  CIdentInfoFrame();
     virtual ~CIdentInfoFrame();
-
-    // Generated message map functions
-    //{{AFX_MSG(CIdentInfoFrame)
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+#endif /* IDENT_INFO_FRAME_H__ */

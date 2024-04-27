@@ -18,8 +18,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// Klasa wspomagaj¹ce wyœwietlanie okna (CListView)
-// wyœwietlaj¹cego zdefiniowane etykiety (po asemblacji)
+#ifndef IDENT_INFO_H__
+#define IDENT_INFO_H__
+
+// Window Display Support Class (CListView)
+// displaying defined labels (after assembly)
 
 #include "IdentInfoDoc.h"
 #include "IdentInfoFrame.h"
@@ -28,37 +31,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CIdentInfo : public CIdentInfoFrame
 {
+private:
     CDebugInfo *m_pDebugInfo;
 
     static bool m_bRegistered;
-    static CString m_strClass;
+    static std::string m_strClass;
     static void RegisterWndClass();
+
     void init();
+    
     enum { ID_TITLE = IDS_IDENT_TITLE };
 
     CIdentInfoDoc m_doc;
 public:
-    static CRect m_WndRect;
+    static wxRect m_WndRect;
 
-    CIdentInfo() : m_pDebugInfo(NULL)
+    CIdentInfo()
+        : m_pDebugInfo(nullptr)
     {
         init();
     }
-    CIdentInfo(CDebugInfo *pDebugInfo);
-    ~CIdentInfo();
 
-    void SetDebugInfo(CDebugInfo *pDebugInfo)
+    /* constructor */ CIdentInfo(CDebugInfo *debugInfo);
+    virtual          ~CIdentInfo();
+
+    void SetDebugInfo(CDebugInfo *debugInfo)
     {
-        m_doc.SetDebugInfo(pDebugInfo);
+        m_doc.SetDebugInfo(debugInfo);
     }
 
-    bool Create(CDebugInfo *pDebugInfo= NULL);
+    bool Create(CDebugInfo *debugInfo = nullptr);
 
     virtual void PostNcDestroy();
-    // Generated message map functions
+
 protected:
-    //{{AFX_MSG(CIdentInfo)
     afx_msg void OnDestroy();
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 };
+
+#endif /* IDENT_INFO_H__ */
