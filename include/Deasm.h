@@ -18,29 +18,30 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-
-class CDeasm : public CAsm, public CObject
+class CDeasm : public CAsm
 {
-    static const TCHAR mnemonics[];
+    static const char mnemonics[];
 
-    CString SetMemZPGInfo(UINT8 addr, UINT8 val);	// opis komórki strony zerowej pamiêci
-    CString SetMemInfo(UINT32 addr, UINT8 val);	// opis komórki pamiêci
-    CString SetValInfo(UINT8 val);		// opis wartoœci 'val'
+    std::string SetMemZPGInfo(uint8_t addr, uint8_t val);   // Cell description of page zero of memory
+    std::string SetMemInfo(uint32_t addr, uint8_t val);     // Memory cell description
+    std::string SetValInfo(uint8_t val);                    // Value description 'val'
 
 public:
-    CDeasm()
-    { }
-    ~CDeasm()
+    /* constructor */ CDeasm()
     { }
 
-    CString DeasmInstr(const CContext& ctx, DeasmFmt flags, int& ptr);
-    CString DeasmInstr(const CmdInfo& ci, DeasmFmt flags);
-    CString ArgumentValue(const CContext &ctx, int ptr= -1);
+    virtual ~CDeasm()
+    { }
 
-    CString Mnemonic(UINT8 code, UINT8 bUse6502, bool bUseBrk= false);
-    CString Argument(UINT8 cmd, CodeAdr mode, UINT32 addr, UINT8 arg1, UINT8 arg2, UINT8 arg3, bool bLabel= false, bool bHelp= false);
-    CString Binary(UINT8 val);
-    int FindPrevAddr(UINT32 &addr, const CContext &ctx, int cnt= 1);
-    int FindNextAddr(UINT32 &addr, const CContext &ctx, int cnt= 1);
-    int FindDelta(UINT32 &addr, UINT32 dest, const CContext &ctx, int max_lines);
+    std::string DeasmInstr(const CContext& ctx, DeasmFmt flags, int& ptr);
+    std::string DeasmInstr(const CmdInfo& ci, DeasmFmt flags);
+    std::string ArgumentValue(const CContext &ctx, int ptr= -1);
+
+    std::string Mnemonic(uint8_t code, uint8_t bUse6502, bool bUseBrk = false);
+    std::string Argument(uint8_t cmd, CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel = false, bool bHelp = false);
+    std::string Binary(uint8_t val);
+
+    int FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt = 1);
+    int FindNextAddr(uint32_t &addr, const CContext &ctx, int cnt = 1);
+    int FindDelta(uint32_t &addr, uint32_t dest, const CContext &ctx, int max_lines);
 };

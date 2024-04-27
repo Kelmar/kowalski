@@ -21,8 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Deasm6502View.h : header file
 //
 
-#ifndef _Deasm6502View_
-#define _Deasm6502View_
+#ifndef DEASM_6502_VIEW_H__
+#define DEASM_6502_VIEW_H__
 
 #include "DrawMarks.h"
 #include "Asm.h"
@@ -30,23 +30,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 // CDeasm6502View view
 
-class CDeasm6502View : public CView, public CMarks, CAsm
+class CDeasm6502View : public wxView //, public CMarks, CAsm
 {
     int m_nFontHeight;
     int m_nFontWidth;
     int max_mem;
 
-    int no_of_lines(RECT &prect);
+    int no_of_lines(wxRect &prect);
     void scroll(UINT nSBCODE, int nPos, int nRepeat= 1);
     void set_scroll_range();
 
-    void get_view_rect(RECT &rect)
+    void get_view_rect(wxRect &rect)
     {
-        GetClientRect(&rect);
-//    if (rect.bottom > m_nFontHeight)
-//      rect.bottom -= rect.bottom % m_nFontHeight;	// obszar zaj�ty przez napisy
+        wxWindow *window = GetFrame();
+
+        if (window)
+            rect = window->GetClientRect();
+
+        //if (rect.bottom > m_nFontHeight)
+            //rect.bottom -= rect.bottom % m_nFontHeight; // Area occupied by strings
     }
-    void ScrollToLine(UINT32 addr);
+    void ScrollToLine(uint32_t addr);
 
 public:
     static wxColour m_rgbAddress;
@@ -57,54 +61,36 @@ public:
     static wxFont m_Font;
     static wxFontInfo m_LogFont;
 
+    virtual ~CDeasm6502View();
+
 protected:
     CDeasm6502View();           // protected constructor used by dynamic creation
-    DECLARE_DYNCREATE(CDeasm6502View)
 
-    // Attributes
 public:
-
-    // Operations
-public:
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CDeasm6502View)
-public:
-    virtual void OnPrepareDC(CDC* pDC, CPrintInfo* pInfo = NULL);
-    virtual BOOL OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll = TRUE);
+    //virtual void OnPrepareDC(wxDC* pDC, CPrintInfo* pInfo = NULL);
+    virtual bool OnScroll(UINT nScrollCode, UINT nPos, bool bDoScroll = TRUE);
     virtual void OnInitialUpdate();
-protected:
-    virtual void OnDraw(CDC* pDC);      // overridden to draw this view
-    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-    virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE);
-    virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
-    //}}AFX_VIRTUAL
 
-    // Implementation
 protected:
-    virtual ~CDeasm6502View();
+    virtual void OnDraw(wxDC* pDC);      // overridden to draw this view
+    //virtual bool PreCreateWindow(CREATESTRUCT& cs);
+    virtual bool OnScrollBy(wxSize sizeScroll, bool bDoScroll = true);
+    virtual void OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint);
+
 #ifdef _DEBUG
     virtual void AssertValid() const;
     virtual void Dump(CDumpContext& dc) const;
 #endif
 
     afx_msg LRESULT OnExitDebugger(WPARAM /* wParam */, LPARAM /* lParam */);
-    // Generated message map functions
-protected:
-    //{{AFX_MSG(CDeasm6502View)
-    afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-    afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+    afx_msg void OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);
+    afx_msg bool OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt);
     afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    afx_msg bool OnEraseBkgnd(wxDC* pDC);
     afx_msg void OnDeasmGoto();
     afx_msg void OnUpdateDeasmGoto(CCmdUI* pCmdUI);
-    afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
     afx_msg void OnSize(UINT nType, int cx, int cy);
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 };
 
-/////////////////////////////////////////////////////////////////////////////
-
-#endif
+#endif /* DEASM_6502_VIEW_H__ */
