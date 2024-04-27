@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef REGISTER_BAR_H__
+#define REGISTER_BAR_H__
+
 // RegisterBar.h : header file
 //
 
@@ -29,51 +32,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CContext;
 
-class CRegisterBar : public CDialogBar, public CAsm
+class CRegisterBar : public wxFrame //CDialogBar, public CAsm
 {
+private:
     bool m_bInUpdate;
 
     bool UpdateItem(int itemID);
 
-    void UpdateRegA(const CContext *pCtx, const CContext *pOld= NULL);
-    void UpdateRegX(const CContext *pCtx, const CContext *pOld= NULL);
-    void UpdateRegY(const CContext *pCtx, const CContext *pOld= NULL);
-    void UpdateRegP(const CContext *pCtx, const CContext *pOld= NULL);
-    void UpdateRegS(const CContext *pCtx, const CContext *pOld= NULL);
-    void UpdateRegPC(const CContext *pCtx, const CContext *pOld= NULL);
+    void UpdateRegA(const CContext *pCtx, const CContext *pOld = NULL);
+    void UpdateRegX(const CContext *pCtx, const CContext *pOld = NULL);
+    void UpdateRegY(const CContext *pCtx, const CContext *pOld = NULL);
+    void UpdateRegP(const CContext *pCtx, const CContext *pOld = NULL);
+    void UpdateRegS(const CContext *pCtx, const CContext *pOld = NULL);
+    void UpdateRegPC(const CContext *pCtx, const CContext *pOld = NULL);
     void UpdateCycles(ULONG uCycles);
     void ChangeRegister(int ID, int reg_no);
-    void ChangeFlags(int flag_bit, bool set);	// zmiana bitu rej. flagowego
+    void ChangeFlags(int flag_bit, bool set); // Change the flag register bit
 
     afx_msg LRESULT OnUpdate(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnStartDebug(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);
 
-    virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
+    //virtual void OnUpdateCmdUI(CFrameWnd* pTarget, bool disableIfNoHndler);
 
-    // Construction
 public:
     static bool m_bHidden;
-    void Update(const CContext *pCtx, const CString &stat, const CContext *pOld= NULL, bool bDraw= TRUE);
-    bool Create(CWnd* pParentWnd, UINT nStyle, UINT nID);
-    CRegisterBar();	// standard constructor
 
-    // Dialog Data
-    //{{AFX_DATA(CRegisterBar)
+    /* constructor */ CRegisterBar();
+
+    void Update(const CContext *ctx, const std::string &stat, const CContext *old = NULL, bool draw = true);
+
+    bool Create(wxWindow* pParentWnd, UINT nStyle, UINT nID);
+    
     enum { IDD = IDD_REGISTERBAR };
-    // NOTE: the ClassWizard will add data members here
-    //}}AFX_DATA
 
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CRegisterBar)
-    //}}AFX_VIRTUAL
-
-    // Implementation
 protected:
-
-    // Generated message map functions
-    //{{AFX_MSG(CRegisterBar)
     afx_msg void OnChangeRegA();
     afx_msg void OnChangeRegX();
     afx_msg void OnChangeRegY();
@@ -87,15 +80,16 @@ protected:
     afx_msg void OnRegFlagOver();
     afx_msg void OnRegFlagZero();
     afx_msg void OnRegFlagBrk();
-    afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
     afx_msg void OnRegsCyclesClr();
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
-private:
-    CString Binary(UINT8 val);
-    void SetDlgItemInf(int nID, UINT8 val);
-    void SetDlgItemMem(int nID, int nBytes, UINT16 ptr, const CContext *pCtx);
-    void SetDlgItemWordHex(int nID, UINT16 val);
-    void SetDlgItemByteHex(int nID, UINT8 val);
 
+    //afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
+
+private:
+    std::string Binary(uint8_t val);
+    void SetDlgItemInf(int nID, uint8_t val);
+    void SetDlgItemMem(int nID, int nBytes, uint16_t ptr, const CContext *pCtx);
+    void SetDlgItemWordHex(int nID, uint16_t val);
+    void SetDlgItemByteHex(int nID, uint8_t val);
 };
+
+#endif /* REGISTER_BAR_H__ */

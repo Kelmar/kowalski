@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef APP_6502_H__
+#define APP_6502_H__
+
 // 6502.h : main header file for the 6502 application
 //
 
@@ -71,3 +74,5 @@ public:
 wxDECLARE_APP(C6502App);
 
 /////////////////////////////////////////////////////////////////////////////
+
+#endif /* APP_6502_H__ */

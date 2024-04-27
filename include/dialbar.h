@@ -18,26 +18,26 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-class CDialBar : public CDialogBar
+#ifndef DIAL_BAR_H__
+#define DIAL_BAR_H__
+
+class CDialBar : public wxFrame // CDialogBar
 {
-    DECLARE_DYNAMIC(CDialBar)
-
-    // Construction
 public:
-    BOOL Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID);
-    virtual CSize CalcFixedLayout(bool bStretch, bool bHorz);
-    virtual CSize CalcDynamicLayout(int nLength, DWORD dwMode);
-    CDialBar();
-    ~CDialBar();
+    /* construtor */ CDialBar();
+    virtual         ~CDialBar();
 
-    //{{AFX_MSG(CDialBar)
-    afx_msg void OnGetMinMaxInfo(MINMAXINFO *lpMMI);
-    afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-    //}}AFX_MSG
+    bool Create(wxWindow* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID);
 
-    DECLARE_MESSAGE_MAP()
-
+    virtual wxSize CalcFixedLayout(bool stretch, bool horz);
+    virtual wxSize CalcDynamicLayout(int length, uint32_t mode);
+    
+    //afx_msg void OnGetMinMaxInfo(MINMAXINFO *lpMMI);
+    afx_msg void OnLButtonDown(UINT nFlags, wxPoint point);
+    
 private:
-    CSize m_lastSize;
-    CSize CalcLayout(int nLength, DWORD dwMode);
+    wxSize m_lastSize;
+    wxSize CalcLayout(int length, uint32_t mode);
 };
+
+#endif /* DIAL_BAR_H__ */

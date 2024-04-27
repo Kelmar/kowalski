@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef GLOBAL_H__
+#define GLOBAL_H__
+
 #include "Broadcast.h"
 #include "M6502.h"
 #include "Sym6502.h"
@@ -218,3 +221,5 @@ public:
     void SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info);
     void LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info, int nClear = 0);
 };
+
+#endif /* GLOBAL_H__ */

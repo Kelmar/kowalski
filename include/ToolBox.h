@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef TOOLBOX_H__
+#define TOOLBOX_H__
+
 // ToolBox.h : header file
 //
 
@@ -26,41 +29,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 // CToolBox dialog
 
-class CToolBox : public CDialog
+class CToolBox : public wxDialog
 {
 private:
     int rsc_id;
-    BOOL created;
+    bool created;
 
-    // Construction
 public:
-    ~CToolBox();
-    CToolBox(CWnd* pParent = NULL);   // standard constructor
+    /* constructor */ CToolBox(wxWindow* parent = nullptr);
+    virtual          ~CToolBox();
+    
+    bool Create(int rsc_id, wxWindow* parent);
 
-    BOOL Create(int rsc_id, CWnd* pParentWnd);
-    // Dialog Data
-    //{{AFX_DATA(CToolBox)
     enum { IDD = IDD_ZEROPAGEBAR };
-    // NOTE: the ClassWizard will add data members here
-    //}}AFX_DATA
 
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CToolBox)
 public:
-    virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
-protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-    //}}AFX_VIRTUAL
+    //virtual bool Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 
-    // Implementation
 protected:
-
-    // Generated message map functions
-    //{{AFX_MSG(CToolBox)
-    // NOTE: the ClassWizard will add member functions here
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //virtual bool OnCommand(WPARAM wParam, LPARAM lParam);
 };
+
+#endif /* TOOLBOX_H__ */
