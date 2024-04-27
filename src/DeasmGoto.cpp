@@ -24,26 +24,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "stdafx.h"
 #include "DeasmGoto.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num, bool bWord= true);
+//extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num, bool bWord = true);
 
 /////////////////////////////////////////////////////////////////////////////
 // CDeasmGoto dialog
 
-
-CDeasmGoto::CDeasmGoto(CWnd* pParent /*=NULL*/) : CDialog(CDeasmGoto::IDD, pParent)
+#if 0
+CDeasmGoto::CDeasmGoto(wxWindow* parent /*= NULL*/) 
+    : wxDialog(parent)
+    , m_uAddress(0)
 {
-    //{{AFX_DATA_INIT(CDeasmGoto)
-    m_uAddress = 0;
-    //}}AFX_DATA_INIT
 }
+#endif
 
-
+#if 0
 void CDeasmGoto::DoDataExchange(CDataExchange* pDX)
 {
     CDialog::DoDataExchange(pDX);
@@ -52,13 +46,4 @@ void CDeasmGoto::DoDataExchange(CDataExchange* pDX)
     DDV_MinMaxUInt(pDX, m_uAddress, 0, 65535);
     //}}AFX_DATA_MAP
 }
-
-
-BEGIN_MESSAGE_MAP(CDeasmGoto, CDialog)
-//{{AFX_MSG_MAP(CDeasmGoto)
-// NOTE: the ClassWizard will add message map macros here
-//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CDeasmGoto message handlers
+#endif

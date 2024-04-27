@@ -18,38 +18,22 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef DEASM_GOTO_H__
+#define DEASM_GOTO_H__
+
 // DeasmGoto.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
 // CDeasmGoto dialog
 
-class CDeasmGoto : public CDialog
+class CDeasmGoto : public wxDialog
 {
-    // Construction
 public:
-    CDeasmGoto(CWnd* pParent = NULL);   // standard constructor
+    ///* constructor */ CDeasmGoto(wxWindow* parent = NULL); // standard constructor
+    virtual          ~CDeasmGoto();
 
-    // Dialog Data
-    //{{AFX_DATA(CDeasmGoto)
-    enum { IDD = IDD_DEASM_GOTO };
-    UINT m_uAddress;
-    //}}AFX_DATA
-
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CDeasmGoto)
-protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
-
-    // Implementation
-protected:
-
-    // Generated message map functions
-    //{{AFX_MSG(CDeasmGoto)
-    // NOTE: the ClassWizard will add member functions here
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    uint32_t m_uAddress;
 };
+
+#endif /* DEASM_GOTO_H__ */

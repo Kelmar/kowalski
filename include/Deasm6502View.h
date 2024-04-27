@@ -27,6 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "DrawMarks.h"
 #include "Asm.h"
 
+#include "Deasm6502Doc.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CDeasm6502View view
 
@@ -36,20 +38,20 @@ class CDeasm6502View : public wxView //, public CMarks, CAsm
     int m_nFontWidth;
     int max_mem;
 
-    int no_of_lines(wxRect &prect);
-    void scroll(UINT nSBCODE, int nPos, int nRepeat= 1);
-    void set_scroll_range();
+    int CalcLineCount(const wxRect &prect);
+    void Scroll(UINT nSBCODE, int nPos, int nRepeat= 1);
+    void UpdateScrollRange();
 
-    void get_view_rect(wxRect &rect)
+    wxRect GetViewRect()
     {
         wxWindow *window = GetFrame();
 
         if (window)
-            rect = window->GetClientRect();
+            return window->GetClientRect();
 
-        //if (rect.bottom > m_nFontHeight)
-            //rect.bottom -= rect.bottom % m_nFontHeight; // Area occupied by strings
+        return wxRect(0, 0, 0, 0);
     }
+
     void ScrollToLine(uint32_t addr);
 
 public:
@@ -63,8 +65,26 @@ public:
 
     virtual ~CDeasm6502View();
 
+    CDeasm6502Doc *GetDocument() { return static_cast<CDeasm6502Doc *>(wxView::GetDocument()); }
+
+    /**
+     * Invalidates the owning frame.
+     */
+    void Refresh()
+    {
+        wxWindow *window = GetFrame();
+
+        if (window)
+            window->Refresh();
+    }
+
+    void UpdateWindow()
+    {
+        // Stub for now. -- B.Simonds (April 27, 2024)
+    }
+
 protected:
-    CDeasm6502View();           // protected constructor used by dynamic creation
+    CDeasm6502View(); // protected constructor used by dynamic creation
 
 public:
     //virtual void OnPrepareDC(wxDC* pDC, CPrintInfo* pInfo = NULL);
@@ -76,11 +96,6 @@ protected:
     //virtual bool PreCreateWindow(CREATESTRUCT& cs);
     virtual bool OnScrollBy(wxSize sizeScroll, bool bDoScroll = true);
     virtual void OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint);
-
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
 
     afx_msg LRESULT OnExitDebugger(WPARAM /* wParam */, LPARAM /* lParam */);
     afx_msg void OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);
