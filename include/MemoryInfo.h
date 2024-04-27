@@ -18,64 +18,58 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef MEMORY_INFO_H__
+#define MEMORY_INFO_H__
+
 // MemoryInfo.h : header file
 //
 
 #include "MemoryView.h"
 #include "MemoryDoc.h"
 
-
 /////////////////////////////////////////////////////////////////////////////
 // CMemoryInfo frame
 class COutputMem;
 
-class CMemoryInfo : public CMiniFrameWnd
+class CMemoryInfo : public wxWindow //CMiniFrameWnd
 {
+private:
     COutputMem *m_pMem;
-    UINT32 m_uAddr;
+    uint32_t m_uAddr;
     CMemoryDoc m_Doc;
 
-    static CString m_strClass;
+    static std::string m_strClass;
     static bool m_bRegistered;
     void RegisterWndClass();
     void init();
 
-    DECLARE_DYNCREATE(CMemoryInfo)
-
-    // Attributes
 public:
-    CMemoryInfo();
-    virtual ~CMemoryInfo();
-    CRect m_WndRect;
+    /* constructor */ CMemoryInfo();
+    virtual          ~CMemoryInfo();
+
+    wxRect m_WndRect;
     bool m_bHidden;
 
-    // Operations
 public:
     enum ViewType { VIEW_MEMORY, VIEW_ZEROPAGE, VIEW_STACK };
-    bool Create(COutputMem *pMem, UINT32 uAddr, ViewType bView);
 
-    void InvalidateView(UINT16 uStackPtr= 0);
+    bool Create(COutputMem *mem, uint32_t addr, ViewType view);
+
+    void InvalidateView(uint16_t stackPtr = 0);
     void Invalidate();
 
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CMemoryInfo)
 protected:
     virtual void PostNcDestroy();
-    //}}AFX_VIRTUAL
 
-    // Implementation
-protected:
     afx_msg LRESULT OnStartDebug(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);
     // Generated message map functions
-    //{{AFX_MSG(CMemoryInfo)
     afx_msg void OnDestroy();
-    afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+    afx_msg void OnShowWindow(bool show, UINT nStatus);
     afx_msg void OnClose();
-    //}}AFX_MSG
     afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
-    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+#endif /* MEMORY_INFO_H__ */

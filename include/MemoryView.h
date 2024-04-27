@@ -29,57 +29,59 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 // CMemoryView view
 
-class CMemoryView : public CView
+class CMemoryView : public wxView //CView
 {
-    int m_nCx;	// iloœæ kolumn
-    int m_nCy;	// iloœæ wierszy
-    int m_nChrW;	// szerokoœæ znaków (font mono)
-    int m_nChrH;	// wysokoœæ znaków
+private:
+    int m_nCx;      // Number of columns
+    int m_nCy;      // Number of lines
+    int m_nChrW;    // Character width (mono font)
+    int m_nChrH;    // Character height
 
     int max_mem;
 
-    void calc(CDC *pDC);
-    void scroll(UINT nSBCODE, int nPos, int nRepeat= 1);
+    void calc(wxDC *dc);
+    void scroll(UINT nSBCODE, int nPos, int nRepeat = 1);
     int set_scroll_range();
-    void get_view_rect(RECT &rect)
+
+    void get_view_rect(wxRect &rect)
     {
-        GetClientRect(&rect);
+        wxWindow *window = GetFrame();
+
+        if (window)
+            rect = window->GetClientRect();
+        else
+            rect = wxRect(0, 0, 0, 0);
     }
+
     int bytes_in_line();
-    int find_prev_addr(UINT32 &addr, const COutputMem &mem, int cnt= 1, int bytes= 0);
-    int find_next_addr(UINT32 &addr, const COutputMem &mem, int cnt= 1, int bytes= 0);
-    int find_delta(UINT32 &addr, UINT32 dest, const COutputMem &mem, int max_lines);
+
+    int find_prev_addr(uint32_t &addr, const COutputMem &mem, int cnt = 1, int bytes = 0);
+    int find_next_addr(uint32_t &addr, const COutputMem &mem, int cnt = 1, int bytes = 0);
+    int find_delta(uint32_t &addr, uint32_t dest, const COutputMem &mem, int max_lines);
 
     enum Dump { FULL, HEX, TEXT } m_eDump;
 protected:
-    CMemoryView();           // protected constructor used by dynamic creation
-    DECLARE_DYNCREATE(CMemoryView)
+    /* constructor */ CMemoryView();           // protected constructor used by dynamic creation
 
+public:
+    virtual ~CMemoryView();
+    
     // Attributes
 public:
-    static CFont m_Font;
-    static LOGFONT m_LogFont;
-    static COLORREF m_rgbTextColor;
-    static COLORREF m_rgbBkgndColor;
+    static wxFont m_Font;
+    static wxFontInfo m_LogFont;
+    static wxColour m_rgbTextColor;
+    static wxColour m_rgbBkgndColor;
 
-    // Operations
 public:
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CMemoryView)
-public:
-    virtual void OnPrepareDC(CDC* pDC, CPrintInfo* pInfo = NULL);
+    //virtual void OnPrepareDC(wxDC *dc, CPrintInfo* pInfo = NULL);
     virtual void OnInitialUpdate();
-protected:
-    virtual void OnDraw(CDC* pDC);      // overridden to draw this view
-    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-    virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
-    //}}AFX_VIRTUAL
 
-    // Implementation
 protected:
-    virtual ~CMemoryView();
+    virtual void OnDraw(wxDC *dc);      // overridden to draw this view
+    //virtual bool PreCreateWindow(CREATESTRUCT& cs);
+    virtual void OnUpdate(wxView *sender, LPARAM lHint, wxObject *hint);
+    
 #ifdef _DEBUG
     virtual void AssertValid() const;
     virtual void Dump(CDumpContext& dc) const;
@@ -87,13 +89,12 @@ protected:
 
     // Generated message map functions
 protected:
-    //{{AFX_MSG(CMemoryView)
-    afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-    afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+    afx_msg void OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);
+    afx_msg bool OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt);
     afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
     afx_msg void OnSize(UINT nType, int cx, int cy);
-    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-    afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+    afx_msg bool OnEraseBkgnd(wxDC *pDC);
+    afx_msg void OnContextMenu(wxWindow* wnd, wxPoint point);
     afx_msg void OnUpdateMemoryGoto(CCmdUI* pCmdUI);
     afx_msg void OnMemoryGoto();
     afx_msg void OnUpdateMemoryChg(CCmdUI* pCmdUI);
@@ -104,8 +105,6 @@ protected:
     afx_msg void OnUpdateMemoryFull(CCmdUI* pCmdUI);
     afx_msg void OnUpdateMemoryHex(CCmdUI* pCmdUI);
     afx_msg void OnUpdateMemoryText(CCmdUI* pCmdUI);
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

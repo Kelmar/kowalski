@@ -21,63 +21,51 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // MemoryDoc.h : header file
 //
 
-#ifndef _MemoryDoc_
-#define _MemoryDoc_
+#ifndef MEMORY_DOC_H__
+#define MEMORY_DOC_H__
 
 #include "Asm.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// CMemoryDoc document
 class COutputMem;
 
-
-class CMemoryDoc : public CDocument
+/////////////////////////////////////////////////////////////////////////////
+// CMemoryDoc document
+class CMemoryDoc : public wxDocument
 {
 protected:
-//  CMemoryDoc();           // protected constructor used by dynamic creation
-    DECLARE_DYNCREATE(CMemoryDoc)
-
-    virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bReplace = TRUE);
+    virtual bool DoSave(const char *pathName, bool replace = true);
 
     // Attributes
 public:
-    UINT32 m_uAddress;
-    UINT16 m_uStackPtr;
-    COutputMem* m_pMem;
+    uint32_t m_address;
+    uint16_t m_stackPtr;
+
+    COutputMem *m_pMem;
+
+    virtual ~CMemoryDoc();
 
     // Operations
 public:
     CMemoryDoc();
 
-    void SetData(COutputMem* pMem, UINT32 uAddress)
+    void SetData(COutputMem* pMem, uint32_t address)
     {
-        m_uAddress = uAddress;
+        m_address = address;
         m_pMem = pMem;
     }
 
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CMemoryDoc)
 public:
-    virtual void Serialize(CArchive& ar);   // overridden for document i/o
-protected:
-    virtual BOOL OnNewDocument();
-    //}}AFX_VIRTUAL
+    virtual void Serialize(CArchive &ar);   // overridden for document i/o
 
-    // Implementation
+protected:
+    virtual bool OnNewDocument();
+
 public:
-    virtual ~CMemoryDoc();
+
 #ifdef _DEBUG
     virtual void AssertValid() const;
     virtual void Dump(CDumpContext& dc) const;
 #endif
-
-    // Generated message map functions
-protected:
-    //{{AFX_MSG(CMemoryDoc)
-    // NOTE - the ClassWizard will add and remove member functions here.
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 };
 
-#endif
+#endif /* MEMORY_DOC_H__ */

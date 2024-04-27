@@ -114,7 +114,7 @@ public:
 
     enum Commands // Commands for the terminal window
     { 
-        CMD_CLS = 100 //CBroadcast::WM_USER_OFFSET + 100,
+        CMD_CLS = 100, //CBroadcast::WM_USER_OFFSET + 100,
         CMD_PUTC, 
         CMD_PUTS, 
         CMD_IN, 
