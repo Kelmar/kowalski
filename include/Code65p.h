@@ -22,10 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //////////////////////////////////////////////////////////////////////
 
-
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
+#ifndef CODE_65P_H__
+#define CODE_65P_H__
 
 class COutputMem;
 class CMarkArea;
@@ -33,8 +31,9 @@ class CMarkArea;
 class CCode65p
 {
 public:
-    bool SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start=-1);
-    bool SaveCode65p(CArchive &archive, COutputMem &mem, UINT32 start, UINT32 end);
+    bool SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start = -1);
+    bool SaveCode65p(CArchive &archive, COutputMem &mem, uint32_t start, uint32_t end);
 
 };
 
+#endif /* CODE_65P_H__ */

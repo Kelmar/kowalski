@@ -22,48 +22,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _ChildFrameDeAsm_
-#define _ChildFrameDeAsm_
+#ifndef CHILD_FRAME_DEASM_H__
+#define CHILD_FRAME_DEASM_H__
 
-
-class CChildFrameDeAsm : public CMDIChildWnd
+class CChildFrameDeAsm : public wxMDIChildFrame
 {
-    DECLARE_DYNCREATE(CChildFrameDeAsm)
 public:
-    CChildFrameDeAsm();
-
-    // Attributes
-public:
-
-    // Operations
-public:
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CChildFrameDeAsm)
-public:
-    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-protected:
-    virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
-    //}}AFX_VIRTUAL
-
-    // Implementation
-public:
-    virtual ~CChildFrameDeAsm();
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
-
-    // Generated message map functions
-protected:
-    //{{AFX_MSG(CChildFrameDeAsm)
-    // NOTE - the ClassWizard will add and remove member functions here.
-    //    DO NOT EDIT what you see in these blocks of generated code!
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    /* constructor */ CChildFrameDeAsm();
+    virtual          ~CChildFrameDeAsm() { }
 };
 
-/////////////////////////////////////////////////////////////////////////////
-
-#endif
+#endif /* CHILD_FRAME_DEASM_H__ */
