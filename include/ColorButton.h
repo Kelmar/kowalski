@@ -21,15 +21,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // ColorButton.h : header file
 //
 
-#ifndef _color_button_
-#define _color_button_
+#ifndef COLOR_BUTTON_H__
+#define COLOR_BUTTON_H__
 
 /////////////////////////////////////////////////////////////////////////////
 // CColorButton window
 
-class CColorButton : public CButton
+/*
+ * wxWidgets suggests that we not try and override a platform's default paint
+ * method for buttons.  For now we're deriving from wxControl so we can paint
+ * ourselves in a controlled way.
+ * 
+ *              -- B.Simonds (April 27, 2024)
+ */
+
+class CColorButton : public wxControl // CButton
 {
-    const COLORREF *m_prgbColor;
+private:
+    wxColour m_color;
+
     int m_nDx;
     int m_nDy;
 
@@ -37,34 +47,18 @@ class CColorButton : public CButton
 
     // Construction
 public:
-    CColorButton();
+    /* constructor */ CColorButton();
+    virtual          ~CColorButton() { }
 
-    // Attributes
 public:
-    void SetColorRef(const COLORREF *pColor);
-    afx_msg LRESULT OnSetState(WPARAM wParam, LPARAM /* lParam */);
+    void SetColorRef(const wxColour &color)
+    {
+        m_color = color;
+        Refresh();
+    }
 
-    // Operations
-public:
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CColorButton)
-    //}}AFX_VIRTUAL
-
-    // Implementation
-public:
-    virtual ~CColorButton();
-
-    // Generated message map functions
 protected:
-    //{{AFX_MSG(CColorButton)
     afx_msg void OnPaint();
-    //}}AFX_MSG
-
-    DECLARE_MESSAGE_MAP()
 };
 
-/////////////////////////////////////////////////////////////////////////////
-
-#endif
+#endif /* COLOR_BUTTON_H__ */

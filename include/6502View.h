@@ -72,6 +72,9 @@ public:
     static wxColour s_rgbTextColor;
     static wxColour s_rgbBkgndColor;
 
+    static wxFontInfo s_logFont;
+    static wxFont s_font;
+
     static bool m_bAutoIndent;
     static int m_nTabStep;
     static bool m_bAutoSyntax;

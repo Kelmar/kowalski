@@ -30,10 +30,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502View.h"
 #include "StackView.h"
 
+using namespace ConfigSettings;
 
-LOGFONT* const CConfigSettings::fonts[]=
+wxFontInfo* const fonts[] =
 {
-    &CSrc6502View::m_LogFont,
+    &CSrc6502View::s_logFont,
     &CIOWindow::m_LogFont,
     &CDeasm6502View::m_LogFont,
     &CMemoryView::m_LogFont,
@@ -42,9 +43,9 @@ LOGFONT* const CConfigSettings::fonts[]=
     NULL
 };
 
-CFont* const CConfigSettings::cfonts[]=	// struktury CFont w ca³ym programie
+wxFont* const cfonts[] = // CFont structures throughout the program
 {
-    &CSrc6502View::m_Font,
+    &CSrc6502View::s_font,
     &CIOWindow::m_Font,
     &CDeasm6502View::m_Font,
     &CMemoryView::m_Font,
@@ -53,9 +54,9 @@ CFont* const CConfigSettings::cfonts[]=	// struktury CFont w ca³ym programie
     NULL
 };
 
-COLORREF* CConfigSettings::text_color[]=
+wxColour* text_color[] =
 {
-    &CSrc6502View::m_rgbTextColor,
+    &CSrc6502View::s_rgbTextColor,
     &CIOWindow::m_rgbTextColor,
     &CDeasm6502View::m_rgbInstr,
     &CMemoryView::m_rgbTextColor,
@@ -64,10 +65,9 @@ COLORREF* CConfigSettings::text_color[]=
     NULL
 };
 
-
-COLORREF* CConfigSettings::bkgnd_color[]=
+wxColour* bkgnd_color[] =
 {
-    &CSrc6502View::m_rgbBkgndColor,
+    &CSrc6502View::s_rgbBkgndColor,
     &CIOWindow::m_rgbBackgndColor,
     &CDeasm6502View::m_rgbBkgnd,
     &CMemoryView::m_rgbBkgndColor,
@@ -76,20 +76,19 @@ COLORREF* CConfigSettings::bkgnd_color[]=
     NULL
 };
 
-
-COLORREF* CConfigSettings::color_syntax[]=
+wxColour* color_syntax[] =
 {
-    &CSrc6502View::m_vrgbColorSyntax[0],
-    &CSrc6502View::m_vrgbColorSyntax[1],
-    &CSrc6502View::m_vrgbColorSyntax[2],
-    &CSrc6502View::m_vrgbColorSyntax[3],
-    &CSrc6502View::m_vrgbColorSyntax[4],
-    &CSrc6502View::m_vrgbColorSyntax[5],
+    &CSrc6502View::s_vrgbColorSyntax[0],
+    &CSrc6502View::s_vrgbColorSyntax[1],
+    &CSrc6502View::s_vrgbColorSyntax[2],
+    &CSrc6502View::s_vrgbColorSyntax[3],
+    &CSrc6502View::s_vrgbColorSyntax[4],
+    &CSrc6502View::s_vrgbColorSyntax[5],
+    &CSrc6502View::s_vrgbColorSyntax[6],
     0
 };
 
-
-BYTE* CConfigSettings::syntax_font_style[]=
+uint8_t* syntax_font_style[] =
 {
     &CSrc6502View::m_vbyFontStyle[0],
     &CSrc6502View::m_vbyFontStyle[1],

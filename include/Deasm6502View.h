@@ -44,18 +44,18 @@ class CDeasm6502View : public CView, public CMarks, CAsm
     {
         GetClientRect(&rect);
 //    if (rect.bottom > m_nFontHeight)
-//      rect.bottom -= rect.bottom % m_nFontHeight;	// obszar zajêty przez napisy
+//      rect.bottom -= rect.bottom % m_nFontHeight;	// obszar zajï¿½ty przez napisy
     }
     void ScrollToLine(UINT32 addr);
 
 public:
-    static COLORREF m_rgbAddress;
-    static COLORREF m_rgbCode;
-    static COLORREF m_rgbInstr;
-    static COLORREF m_rgbBkgnd;
+    static wxColour m_rgbAddress;
+    static wxColour m_rgbCode;
+    static wxColour m_rgbInstr;
+    static wxColour m_rgbBkgnd;
     static bool m_bDrawCode;
-    static CFont m_Font;
-    static LOGFONT m_LogFont;
+    static wxFont m_Font;
+    static wxFontInfo m_LogFont;
 
 protected:
     CDeasm6502View();           // protected constructor used by dynamic creation

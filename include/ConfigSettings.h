@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef CONFIG_SETTINGS_H__
 #define CONFIG_SETTINGS_H__
 
-namespace CConfigSettings
+namespace ConfigSettings
 {
     extern wxFontInfo *const fonts[];    // LOGFONT structures throughout the program
     extern wxFont *const cfonts[];     // CFont structures throughout the program
