@@ -21,21 +21,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _draw_marks_h_
 #define _draw_marks_h_
 
+enum class MarkType
+{
+    MT_ERASE,
+    MT_POINTER,
+    MT_BREAKPOINT,
+    MT_DISBRKP,
+    MT_ERROR
+};
+
 class CMarks
 {
 public:
     static wxColour s_rgbPointer;
     static wxColour s_rgbBreakpoint;
     static wxColour s_rgbError;
-
-    enum MarkType
-    {
-        MT_ERASE,
-        MT_POINTER,
-        MT_BREAKPOINT,
-        MT_DISBRKP,
-        MT_ERROR
-    };
 
     static void draw_breakpoint(wxDC &dc, int x, int y, int h, bool active);
     static void draw_pointer(wxDC &dc, int x, int y, int h);

@@ -18,84 +18,69 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#if !defined(AFX_ELEMENTBAR_H__3BAE8904_36AA_11D2_809C_ABC7258C6120__INCLUDED_)
-#define AFX_ELEMENTBAR_H__3BAE8904_36AA_11D2_809C_ABC7258C6120__INCLUDED_
+#ifndef DYNAMIC_HELP__
+#define DYNAMIC_HELP__
 
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-// PropertyBar.h : header file
-//
-/////////////////////////////////////////////////////////////////////////////
-// CDynamicHelp window
 struct TEXTBLOCK;
 
-
-class CDynamicHelp : public CControlBar
+/**
+ * @brief CDynamicHelp window
+ * 
+ * Provides the quick help tips on the right side of the window.
+ */
+class CDynamicHelp : public wxPanel //CControlBar
 {
-    typedef CControlBar inherited;
-    static PCSTR s_pcszWndClass;
-    void SizeToolBar(int nLength, bool bVert= false);
-    CToolTipCtrl m_ToolTip;
-    CRichEditCtrl m_wndHelp;
+private:
+    //typedef CControlBar inherited;
+
+    //wxToolTip m_ToolTip;
+    //CToolBarCtrl m_wndClose;
+    wxRichTextCtrl m_wndHelp;    // What actually displays the formatted help.
+
     int m_nHeaderHeight;
-    CToolBarCtrl m_wndClose;
 
-// Construction
+    void SizeToolBar(int length, bool vert = false);
+
 public:
-    CDynamicHelp();
+    /* constructor */ CDynamicHelp();
+    virtual          ~CDynamicHelp();
 
-// Attributes
 public:
-    void SetContextHelp(const TCHAR* pcszText, const TCHAR* pcszHeader= 0);
+    void SetContextHelp(const char *text, const char *header = 0);
 
-    void DisplayHelp(const CString& strLine, int nWordStart, int nWordEnd);
+    void DisplayHelp(const std::string &line, int wordStart, int wordEnd);
 
-// Operations
 public:
-    bool Create(CWnd* pParentWnd, UINT nID);
+    bool Create(wxWindow *parent, UINT id);
 
+    virtual void DoPaint(wxDC* pDC);
 
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CDynamicHelp)
-    //}}AFX_VIRTUAL
+    virtual wxSize CalcFixedLayout(bool stretch, bool horz);
+    virtual wxSize CalcDynamicLayout(int length, uint32_t mode);
 
-// Implementation
-public:
-    virtual ~CDynamicHelp();
-    virtual void DoPaint(CDC* pDC);
-    virtual CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz);
-    virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
-    virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
-    CSize CalcLayout(DWORD dwMode, int nLength);
-    virtual void OnBarStyleChange(DWORD dwOldStyle, DWORD dwNewStyle);
+    //virtual void OnUpdateCmdUI(CFrameWnd* pTarget, bool bDisableIfNoHndler);
+
+    wxSize CalcLayout(uint32_t mode, int length);
+
+    virtual void OnBarStyleChange(uint32_t dwOldStyle, uint32_t dwNewStyle);
 
     // Generated message map functions
 protected:
-    //{{AFX_MSG(CDynamicHelp)
-    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    afx_msg bool OnEraseBkgnd(wxDC* pDC);
     afx_msg void OnSize(UINT nType, int cx, int cy);
     afx_msg void OnNcPaint();
     afx_msg void OnDestroy();
-    afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+    //afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
     afx_msg void OnCloseWnd();
-    //}}AFX_MSG
-    afx_msg BOOL OnToolTipGetText(UINT uId, NMHDR* pNmHdr, LRESULT* pResult);
+    //afx_msg bool OnToolTipGetText(UINT uId, NMHDR* pNmHdr, LRESULT* pResult);
 
-    DECLARE_MESSAGE_MAP()
+    static std::string s_strWndClass;
 
-    static CString s_strWndClass;
     void RegisterWndClass();
-    CSize m_sizeDefault;
+    wxSize m_sizeDefault;
     void Resize();
 
     LRESULT OnDelayedResize(WPARAM, LPARAM);
 };
 
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_ELEMENTBAR_H__3BAE8904_36AA_11D2_809C_ABC7258C6120__INCLUDED_)
+#endif /* DYNAMIC_HELP__ */

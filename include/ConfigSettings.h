@@ -18,19 +18,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#ifndef _config_settings_
-#define _config_settings_
+#ifndef CONFIG_SETTINGS_H__
+#define CONFIG_SETTINGS_H__
 
-
-struct CConfigSettings
+namespace CConfigSettings
 {
-    static LOGFONT* const fonts[];	// struktury LOGFONT w ca³ym programie
-    static CFont* const cfonts[];	// struktury CFont w ca³ym programie
-    static COLORREF* text_color[];
-    static COLORREF* bkgnd_color[];
-    static COLORREF* color_syntax[];
-    static BYTE* syntax_font_style[];
+    extern wxFontInfo *const fonts[];    // LOGFONT structures throughout the program
+    extern wxFont *const cfonts[];     // CFont structures throughout the program
+    extern wxColour *text_color[];
+    extern wxColour *bkgnd_color[];
+    extern wxColour *color_syntax[];
+    extern uint8_t *syntax_font_style[];
 };
 
-
-#endif
+#endif /* CONFIG_SETTINGS_H__ */

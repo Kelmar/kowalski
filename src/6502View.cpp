@@ -61,8 +61,6 @@ uint8_t CSrc6502View::m_vbyFontStyle[6] =
     0, 0, 0, 0, 0, 0
 };
 
-static CMarks s_LeftMarginMarker;
-
 /////////////////////////////////////////////////////////////////////////////
 // CSrc6502View
 
@@ -700,7 +698,7 @@ void CSrc6502View::RedrawMarks(int line/*= -1*/)
 #else
     if (line == -1) // Redraw tags on all lines?
     {
-        m_wndLeftBar.RedrawWindow();
+        m_wndLeftBar.Refresh();
 
         /*    draw_breakpoints();
             if (m_nActualPointerLine != -1)
@@ -711,7 +709,7 @@ void CSrc6502View::RedrawMarks(int line/*= -1*/)
     else  // redraw only given line
     {
         ASSERT(line >= 0);
-        m_wndLeftBar.RedrawLine(line);
+        m_wndLeftBar.RedrawLine(line); // Really the same as Refresh() right now. -- B.Simonds (April 26, 2024)
         /*
             uint8_t bp;
             if (m_mapBreakpoints.Lookup(line, bp))
@@ -832,16 +830,18 @@ CCrystalTextBuffer* CSrc6502View::LocateTextBuffer()
 
 void CSrc6502View::DrawMarginMarker(int nLine, CDC* pDC, const CRect &rect)
 {
+    // Really this shouldn't be here, we should just use the LeftBar. -- B.Simonds (April 26, 2024)
+
     int nLeft = rect.left + rect.Width() / 6;
 
     if (BYTE bp = GetBreakpoint(nLine))
-        s_LeftMarginMarker.draw_breakpoint(*pDC, nLeft, rect.top, rect.Height(), !(bp & CAsm::BPT_DISABLED));
+        CMarks.draw_breakpoint(*pDC, nLeft, rect.top, rect.Height(), !(bp & CAsm::BPT_DISABLED));
 
     if (nLine == GetPointerLine())
-        s_LeftMarginMarker.draw_pointer(*pDC, nLeft, rect.top, rect.Height());
+        CMarks.draw_pointer(*pDC, nLeft, rect.top, rect.Height());
 
     if (nLine == GetErrorMarkLine())
-        s_LeftMarginMarker.draw_mark(*pDC, nLeft, rect.top, rect.Height());
+        CMarks.draw_mark(*pDC, nLeft, rect.top, rect.Height());
 }
 
 

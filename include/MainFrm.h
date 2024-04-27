@@ -18,9 +18,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef MAIN_FRM_H__
+#define MAIN_FRM_H__
+
 // MainFrm.h : interface of the CMainFrame class
 //
 /////////////////////////////////////////////////////////////////////////////
+
+#include "StdAfx.h"
 
 #include "DialBar.h"
 #include "ToolBox.h"
@@ -37,33 +42,38 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CSrc6502Doc;
 class CSrc6502View;
 
-class CMainFrame : public CMDIFrameWnd, virtual CBroadcast, CConfigSettings
+class CMainFrame : public wxDocMDIParentFrame, virtual CBroadcast
+//class CMainFrame : public CMDIFrameWnd, virtual CBroadcast
 {
-    static const TCHAR REG_ENTRY_LAYOUT[];
-    static const TCHAR REG_ENTRY_MAINFRM[];
-    static const TCHAR REG_POSX[], REG_POSY[], REG_SIZX[], REG_SIZY[], REG_STATE[];
+private:
+    wxStatusBar m_statusBar;
 
-    static WNDPROC m_pfnOldProc;
-    static LRESULT CALLBACK StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-    static CBitmap m_bmpCode;
-    static CBitmap m_bmpDebug;
+    static const char REG_ENTRY_LAYOUT[];
+    static const char REG_ENTRY_MAINFRM[];
+    static const char REG_POSX[], REG_POSY[], REG_SIZX[], REG_SIZY[], REG_STATE[];
 
-    CString m_strFormat;	// znaki formatuj¹ce do ust. wiersza/kolumny w pasku stanu
+    //static WNDPROC m_pfnOldProc;
+    //static LRESULT CALLBACK StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-//  enum { WND_REG, WND_IO, WND_MEM, WND_ID, WND_ZPG } Windows;
+    //static CBitmap m_bmpCode;
+    //static CBitmap m_bmpDebug;
 
-    afx_msg LRESULT OnUpdateState(WPARAM wParam, LPARAM lParam);
+    std::string m_strFormat; // Formatting characters for paragraph. row/column in the status bar
 
-    int RedrawAllViews(int chgHint= 0);
+    //afx_msg LRESULT OnUpdateState(WPARAM wParam, LPARAM lParam);
+
+    int RedrawAllViews(int chgHint = 0);
     int Options(int page);
     int m_nLastPage;
     void ConfigSettings(bool load);
     void ExitDebugMode();
 
-    DECLARE_DYNAMIC(CMainFrame)
-
     UINT m_uTimer;
+
 public:
+    /* constructor */ CMainFrame();
+    virtual          ~CMainFrame();
+
 //  virtual HMENU GetWindowMenuPopup(HMENU hMenuBar);
 
 //  void ShowRegisterBar(bool bShow= TRUE);
@@ -71,8 +81,8 @@ public:
 //  void SetRowColumn(CEdit &edit);
     CSrc6502View *GetCurrentView();
     CSrc6502Doc *GetCurrentDocument();
-    CMainFrame();
-    static CString ProjName;
+
+    static std::string ProjName;
 
 // Attributes
 public:
@@ -87,31 +97,27 @@ public:
 
 // Operations
 public:
-    static const HWND * /*const*/ m_hWindows[];
+    //static const HWND * m_hWindows[];
 
     void UpdateAll();
     void DelayedUpdateAll();
 
-    void ShowDynamicHelp(const CString& strLine, int nWordStart, int nWordEnd);
+    void ShowDynamicHelp(const std::string& strLine, int nWordStart, int nWordEnd);
 
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CMainFrame)
 public:
-    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-    virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
-    //}}AFX_VIRTUAL
+#if 0
+    virtual bool PreCreateWindow(CREATESTRUCT& cs);
+    virtual bool OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+#endif
 
 // Implementation
 public:
-    virtual ~CMainFrame();
+    
 #ifdef _DEBUG
-    virtual void AssertValid() const;
+    //virtual void AssertValid() const;
     virtual void Dump(CDumpContext& dc) const;
 #endif
 
-public:
-    CStatusBar m_wndStatusBar;
 protected:  // control bar embedded members
 //  CDialBar m_wndZeroPageBar;
 //  CToolBar m_wndToolBar;
@@ -125,7 +131,7 @@ protected:  // control bar embedded members
 // Generated message map functions
 protected:
     //{{AFX_MSG(CMainFrame)
-    afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+    //afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
     afx_msg void OnClose();
     afx_msg void OnAssemble();
     afx_msg void OnUpdateAssemble(CCmdUI* pCmdUI);
@@ -190,7 +196,7 @@ protected:
     afx_msg void OnUpdateSymGenNMI(CCmdUI* pCmdUI);
     afx_msg void OnSymGenReset();
     afx_msg void OnUpdateSymGenReset(CCmdUI* pCmdUI);
-    afx_msg void CMainFrame::OnHtmlHelp();  //% Bug fix 1.2.14.1 - convert to HTML help
+    afx_msg void OnHtmlHelp();  //% Bug fix 1.2.14.1 - convert to HTML help
     afx_msg void OnSymGenIntDlg();
     afx_msg void OnUpdateSymGenIntDlg(CCmdUI* pCmdUI);
     afx_msg void OnViewLog();
@@ -202,14 +208,16 @@ protected:
     afx_msg LRESULT OnStartDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
-    DECLARE_MESSAGE_MAP()
+    //DECLARE_MESSAGE_MAP()
 
 private:
-    void EnableDockingEx(DWORD dwDockStyle);
-    static const DWORD dwDockBarMapEx[4][2];
+    void EnableDockingEx(uint32_t dwDockStyle);
+    static const uint32_t dwDockBarMapEx[4][2];
 
     void AddBreakpoint(CSrc6502View* pView, int nLine, CAsm::Breakpoint bp);
     void RemoveBreakpoint(CSrc6502View* pView, int nLine);
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+#endif /* MAIN_FRM_H__ */

@@ -4,6 +4,10 @@
 // If not, I don't know who wrote it.
 // This code compiles with Visual C++ 5.0 on Windows 95
 //
+
+#ifndef FLATBAR_H__
+#define FLATBAR_H__
+
 #ifndef TBSTYLE_FLAT
 #define TBSTYLE_FLAT 0x0800	// (in case you don't have the new commctrl.h)
 #endif
@@ -17,18 +21,22 @@
 // don't create your toolbar by loading it from a resource, you should call
 // ModifyStyle(0, TBSTYLE_FLAT) yourself.
 //
-class CFlatToolBar : public CToolBar
+class CFlatToolBar : public wxToolBar //CToolBar
 {
 public:
-    BOOL LoadToolBar(LPCTSTR lpszResourceName);
-    BOOL LoadToolBar(UINT nIDResource)
+    bool LoadToolBar(const char *resourceName);
+
+    bool LoadToolBar(UINT resourceId)
     {
-        return LoadToolBar(MAKEINTRESOURCE(nIDResource));
+        //return LoadToolBar(MAKEINTRESOURCE(resourceId));
+        return false;
     }
+
 protected:
-    DECLARE_DYNAMIC(CFlatToolBar)
-    virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
-    DECLARE_MESSAGE_MAP()
-    afx_msg void OnWindowPosChanging(LPWINDOWPOS lpWndPos);
-    afx_msg void OnWindowPosChanged(LPWINDOWPOS lpWndPos);
+    //virtual void OnUpdateCmdUI(CFrameWnd* target, bool disableIfNoHndler);
+
+    //afx_msg void OnWindowPosChanging(LPWINDOWPOS lpWndPos);
+    //afx_msg void OnWindowPosChanged(LPWINDOWPOS lpWndPos);
 };
+
+#endif /* FLATBAR_H__ */

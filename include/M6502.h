@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef M6502_H__
+#define M6502_H__
+
 #include "Asm.h"
 #include "Ident.h"
 #include "DebugInfo.h"
@@ -1340,3 +1343,5 @@ public:
         return program_start;
     }
 };
+
+#endif /* M6502_H__ */

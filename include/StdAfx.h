@@ -35,7 +35,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdint.h>
 
 #include <wx/wx.h>
+#include <wx/docmdi.h>
 #include <wx/docview.h>
+#include <wx/richtext/richtextctrl.h>
 
 #include <list>
 #include <string>
@@ -59,6 +61,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #define __AFXWIN_H__
+
+// Some Win32/MFC temp place holders
+
+#define afx_msg
+
+#define LRESULT int
+#define WPARAM uint32_t
+#define LPARAM uint32_t
+
+class CCmdUI;
 
 //#include <afxwin.h>         // MFC core and standard components
 //#include <afxext.h>         // MFC extensions
