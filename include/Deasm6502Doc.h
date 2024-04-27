@@ -21,65 +21,44 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Deasm6502Doc.h : header file
 //
 
-#ifndef _deasm_6502_doc_h_
-#define _deasm_6502_doc_h_
+#ifndef DEASM_6502_DOC_H__
+#define DEASM_6502_DOC_H__
 
 #include "Asm.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// CDeasm6502Doc document
 class CContext;
 
-class CDeasm6502Doc : public CDocument, CAsm
+/////////////////////////////////////////////////////////////////////////////
+// CDeasm6502Doc document
+class CDeasm6502Doc : public wxDocument //, CAsm
 {
-    UINT m_uStart;		// zmienne wykorzystane przy zapisie
-    UINT m_uEnd;			// deasemblowanego programu
+private:
+    // Variables used when saving program disassembly
+    UINT m_uStart;
+    UINT m_uEnd; 
     UINT m_uLength;
     bool m_bSaveAsData;
 
+public:
+    virtual ~CDeasm6502Doc() { }
+
 protected:
-    CDeasm6502Doc();		// protected constructor used by dynamic creation
-    DECLARE_DYNCREATE(CDeasm6502Doc)
+    /* constructor */ CDeasm6502Doc(); // protected constructor used by dynamic creation
 
     const CContext *m_pCtx;
-    UINT32 m_uStartAddr;
-    int m_nPointerAddr;		//  adres wsk. przez strza³kê (->) lub -1
+    uint32_t m_uStartAddr;
+    int m_nPointerAddr; // pointer address by arrow (->) or -1
 
-    virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bReplace = TRUE);
-    void DeassembleSave(CArchive &ar, const CContext &ctx, UINT32 start, UINT32 end, int opt);
-    // Attributes
+    bool GetSaveOptions();
+    void DeassembleSave(std::ostream &stream, const CContext &ctx, uint32_t start, uint32_t end, int opt);
+    
 public:
     void SetContext(const CContext *pCtx);
-    void SetStart(UINT32 addr, bool bDraw= TRUE);
+    void SetStart(uint32_t addr, bool draw = true);
+    void SetPointer(int addr, bool scroll = false);
 
-    // Operations
-public:
-    void SetPointer(int addr, bool scroll= FALSE);
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CDeasm6502Doc)
-public:
-    virtual void Serialize(CArchive& ar);   // overridden for document i/o
-protected:
-    virtual BOOL OnNewDocument();
-    //}}AFX_VIRTUAL
-
-    // Implementation
-public:
-    virtual ~CDeasm6502Doc();
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
-
-    // Generated message map functions
-protected:
-    //{{AFX_MSG(CDeasm6502Doc)
-    // NOTE - the ClassWizard will add and remove member functions here.
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    bool OnNewDocument() override;
+    std::ostream &SaveObject(std::ostream &stream) override;
 };
 
-
-#endif
+#endif /* DEASM_6502_DOC_H__ */
