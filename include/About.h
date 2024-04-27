@@ -18,39 +18,32 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef ABOUT_DLG_H__
+#define ABOUT_DLG_H__
+
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDlg dialog used for App About
 
 #include "resource.h"
-#include "StaticLink.h"
+//#include "StaticLink.h"
 
-
-class CAboutDlg : public CDialog
+class CAboutDlg : public wxDialog
 {
-    CFont m_TitleFont;
+private:
+    wxFont m_TitleFont;
 
 public:
-    CAboutDlg();
+    /* constructor */ CAboutDlg();
 
-// Dialog Data
-    //{{AFX_DATA(CAboutDlg)
-    enum { IDD = IDD_ABOUTBOX };
-    CStatic	m_wndTitle;
-    CString	m_strVersion;
-    //}}AFX_DATA
+    //CStatic m_wndTitle;
+    std::string m_strVersion;
 
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CAboutDlg)
 protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
+    //virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support
 
-// Implementation
-protected:
-    //{{AFX_MSG(CAboutDlg)
-    virtual BOOL OnInitDialog();
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    virtual bool OnInitDialog();
 
-    CStaticLink m_StaticLink;
+    wxHyperlinkCtrl m_StaticLink;
 };
+
+#endif /* ABOUT_DLG_H__ */

@@ -21,35 +21,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "About.h"
 
-
-
-CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
+CAboutDlg::CAboutDlg()
+    : m_strVersion("")
 {
-    //{{AFX_DATA_INIT(CAboutDlg)
-    m_strVersion = _T("");
-    //}}AFX_DATA_INIT
 }
 
+#if REWRITE_TO_WX_WIDGET
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialog::DoDataExchange(pDX);
-    //{{AFX_DATA_MAP(CAboutDlg)
+    
     DDX_Control(pDX, IDC_6502, m_wndTitle);
     DDX_Text(pDX, IDC_ABOUT_VER, m_strVersion);
-    //}}AFX_DATA_MAP
 }
+#endif
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-    //{{AFX_MSG_MAP(CAboutDlg)
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-
-
-BOOL CAboutDlg::OnInitDialog()
+bool CAboutDlg::OnInitDialog()
 {
-    HRSRC hRsrc= ::FindResource(AfxGetInstanceHandle(),MAKEINTRESOURCE(VS_VERSION_INFO),RT_VERSION);
+#if REWRITE_TO_WX_WIDGET
+
+    HRSRC hRsrc = ::FindResource(AfxGetInstanceHandle(), MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION);
+
     HGLOBAL hGlobal;
+
     if ( hRsrc && (hGlobal = ::LoadResource(AfxGetInstanceHandle(),hRsrc)) != NULL )
     {
         VS_FIXEDFILEINFO *pVer= (VS_FIXEDFILEINFO *)( (char *)::LockResource(hGlobal) + 0x28 );
@@ -80,37 +74,7 @@ BOOL CAboutDlg::OnInitDialog()
 
     return true;	// return true unless you set the focus to a control
     // EXCEPTION: OCX Property Pages should return false
+#endif
+
+    return true;
 }
-
-/*
-void CAboutDlg::OnPaint()
-{
-  CPaintDC dc(this); // device context for painting
-
-  RECT rectWindow;
-  POINT org;
-  DWORD dbu= ::GetDialogBaseUnits();
-  CWnd *pFrm = GetDlgItem(IDC_TEST);
-  pFrm->GetWindowRect(&rectWindow);
-  ScreenToClient(&rectWindow);
-  org.x = (rectWindow.left * LOWORD(dbu)) / 4;
-  org.y = (rectWindow.top * HIWORD(dbu)) / 8;
-
-  CBitmap bmp, mask;
-  bmp.LoadBitmap(IDB_BITMAP1);
-  mask.LoadBitmap(IDB_BITMAP2);
-
-  CDC dcComp;
-  dcComp.CreateCompatibleDC(&dc);
-
-
-  dcComp.SelectObject(&mask);
-  BITMAP info;
-  bmp.GetObject(sizeof(info),&info);
-  dc.BitBlt(1,1,info.bmWidth,info.bmHeight,&dcComp,0,0,SRCAND);
-  dcComp.SelectObject(&bmp);
-  dc.BitBlt(1,1,info.bmWidth,info.bmHeight,&dcComp,0,0,SRCPAINT);
-
-  // Do not call CDialog::OnPaint() for painting messages
-}
-*/
