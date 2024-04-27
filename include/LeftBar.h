@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#if !defined(AFX_LEFTBAR_H__6B81B5B6_5388_11D3_B4BA_000000000000__INCLUDED_)
-#define AFX_LEFTBAR_H__6B81B5B6_5388_11D3_B4BA_000000000000__INCLUDED_
+#ifndef LEFT_BAR_H__
+#define LEFT_BAR_H__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -32,67 +32,41 @@ class CSrc6502View;
 /////////////////////////////////////////////////////////////////////////////
 // CLeftBar window
 
-class CLeftBar : public CControlBar, public CMarks
+/**
+ * Draws breakpoints and current line markers for debgging runs.
+ */
+//class CLeftBar : public CControlBar, public CMarks
+class CLeftBar : public wxControl, public CMarks
 {
-// Construction
+private:
+    int m_barWidth;
+    CSrc6502View* m_editView;
+
 public:
     CLeftBar();
 
-    void RedrawWindow() { } // Stub for now.
+    bool Create(wxWindow* parent, CSrc6502View* view);
 
-// Attributes
-public:
-
-// Operations
-public:
-    bool Create(CWnd* pParent, CSrc6502View* pView);
-
-    void DrawMark();
     void SetWidth(int nWidth);
 
     void RedrawLine(int nLine);
-
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CLeftBar)
-    //}}AFX_VIRTUAL
 
 // Implementation
 public:
     virtual ~CLeftBar();
 
-    virtual CSize CalcFixedLayout( BOOL bStretch, BOOL bHorz )
+    virtual wxSize CalcFixedLayout(bool, bool) { return MySize(); }
+    virtual wxSize CalcDynamicLayout(int, uint32_t) { return MySize(); }
+
+#if 0
+    virtual void OnUpdateCmdUI(CFrameWnd *target, bool disableIfNoHndler)
     {
-        return MySize();
     }
-    virtual CSize CalcDynamicLayout( int nLength, DWORD dwMode )
-    {
-        return MySize();
-    }
-    virtual void OnUpdateCmdUI( CFrameWnd* pTarget, BOOL bDisableIfNoHndler )
-    { }
-    CSize MySize();
+#endif
 
-    virtual void DoPaint(CDC* pDC);
+    wxSize MySize();
 
-    COLORREF GetBkColor();
-
-    // Generated message map functions
-protected:
-    //{{AFX_MSG(CLeftBar)
-    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-    //}}AFX_MSG
-
-    DECLARE_MESSAGE_MAP()
-
-private:
-    int m_nBarWidth;
-    CSrc6502View* m_pEditView;
+    virtual void OnPaint(wxPaintEvent &event);
 };
 
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_LEFTBAR_H__6B81B5B6_5388_11D3_B4BA_000000000000__INCLUDED_)
+#endif /* LEFT_BAR_H__ */

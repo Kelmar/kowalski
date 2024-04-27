@@ -23,22 +23,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CMarks
 {
-
 public:
-    static COLORREF m_rgbPointer;
-    static COLORREF m_rgbBreakpoint;
-    static COLORREF m_rgbError;
+    static wxColour s_rgbPointer;
+    static wxColour s_rgbBreakpoint;
+    static wxColour s_rgbError;
 
     enum MarkType
-    { MT_ERASE, MT_POINTER, MT_BREAKPOINT, MT_DISBRKP, MT_ERROR };
+    {
+        MT_ERASE,
+        MT_POINTER,
+        MT_BREAKPOINT,
+        MT_DISBRKP,
+        MT_ERROR
+    };
 
-    static void draw_breakpoint(CDC &dc, int x, int y, int h, bool active);
-    static void draw_pointer(CDC &dc, int x, int y, int h);
-    static void draw_mark(CDC &dc, int x, int y, int h);
-
-//  virtual int ScrollToLine(int line, int &height, BOOL scroll)= 0;
-//  void DrawMark(CDC &dc, int line, MarkType type, BOOL scroll);
-
+    static void draw_breakpoint(wxDC &dc, int x, int y, int h, bool active);
+    static void draw_pointer(wxDC &dc, int x, int y, int h);
+    static void draw_mark(wxDC &dc, int x, int y, int h);
 };
 
 #endif

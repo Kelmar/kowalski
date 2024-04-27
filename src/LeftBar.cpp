@@ -27,135 +27,106 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "MemoryDC.h"
 #include "6502View.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CLeftBar
 
 CLeftBar::CLeftBar()
+    : m_barWidth(0)
+    , m_editView(nullptr)
 {
-    m_nBarWidth = 0;
-    m_pEditView = 0;
 }
 
 CLeftBar::~CLeftBar()
-{}
-
-
-BEGIN_MESSAGE_MAP(CLeftBar, CControlBar)
-    //{{AFX_MSG_MAP(CLeftBar)
-    ON_WM_ERASEBKGND()
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
+{
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CLeftBar message handlers
 
-CSize CLeftBar::MySize()
+wxSize CLeftBar::MySize()
 {
-    CRect rect;
-    GetParent()->GetClientRect(rect);
-    return CSize(m_nBarWidth, rect.Height());
+    wxRect rect = GetParent()->GetClientRect();
+    return wxSize(m_barWidth, rect.Height());
 }
 
-
-bool CLeftBar::Create(CWnd* pParent, CSrc6502View* pView)
+bool CLeftBar::Create(dxWindow *parent, CSrc6502View* view)
 {
-    CRect rect(0,0,0,0);
-    bool bRet= !!CWnd::CreateEx(0, "STATIC", "", WS_CHILD | WS_VISIBLE,
-                                rect, pParent, AFX_IDW_CONTROLBAR_LAST);
+    m_editView = view;
+
+    wxRect rect(0, 0, 0, 0);
+
+/*
+    bool bRet = !!CWnd::CreateEx(0, "STATIC", "", WS_CHILD | WS_VISIBLE,
+                                rect, parent, AFX_IDW_CONTROLBAR_LAST);
 
     m_dwStyle = CBRS_ALIGN_LEFT;
 
-    m_pEditView = pView;
-
     return bRet;
+*/
+
+    return false;
 }
 
+static const int LEFT_MARGIN = 1;       // margin for markers
+static const int LEFT_ERR_MARGIN = 4;   // margin for error marker
 
-static const int LEFT_MARGIN= 1;		// margin for markers
-static const int LEFT_ERR_MARGIN= 4;	// margin for error marker
-
-
-void CLeftBar::DoPaint(CDC* pDC)
+void CLeftBar::DoPaint(wxPaintEvent &event)
 {
-    CRect rect;
-    GetClientRect(rect);
+    wxPaintDC dc(this);
 
-//  pDC->DrawFrameControl(rect, DFC_SCROLL, DFCS_SCROLLCOMBOBOX);
+    wxRect rect = GetClientRect();
 
-    COLORREF rgbLight= GetBkColor();
+    wxBitmap offScreen;
+    offScreen.CreateWithDPISize(GetClientSize(), GetDPIScaleFactor());
 
-    CMemoryDC dcMem(*pDC, this, rgbLight);
-
-    if (m_pEditView != 0)
     {
-        int nTopLine= 0, nLineCount= 0, nLineHeight= 0;
-        m_pEditView->GetDispInfo(nTopLine, nLineCount, nLineHeight);
-        if (nLineHeight > 0)
+        wxMemoryDC dcMem(offScreen);
+
+        if (m_pEditView != 0)
         {
-//      int nCtrlBottom= (rect.Height() + nLineHeight - 1) / nLineHeight;
+            int topLine = 0, lineCount = 0, lineHeight = 0;
 
-            int nPointerLine= m_pEditView->GetPointerLine();
-            int nErrMarkLine= m_pEditView->GetErrorMarkLine();
+            m_editView->GetDispInfo(topLine, lineCount, lineHeight);
 
-            int nLine= nTopLine;
-            for (int y= 0; y < rect.Height(); y += nLineHeight, ++nLine)
+            if (lineHeight > 0)
             {
-                if (nLine > nLineCount)
-                    break;
+                //int ctrlBottom = (rect.Height() + lineHeight - 1) / lineHeight;
 
-                if (BYTE bp= m_pEditView->GetBreakpoint(nLine))
-                    draw_breakpoint(dcMem, LEFT_MARGIN, y, nLineHeight, !(bp & CAsm::BPT_DISABLED));
+                int pointerLine = m_editView->GetPointerLine();
+                int errMarkLine = m_editView->GetErrorMarkLine();
 
-                if (nPointerLine == nLine)
-                    draw_pointer(dcMem, LEFT_MARGIN, y, nLineHeight);
+                int line = topLine;
 
-                if (nErrMarkLine == nLine)
-                    draw_mark(dcMem, LEFT_ERR_MARGIN, y, nLineHeight);
+                for (int y = 0; y < rect.Height(); y += lineHeight, ++line)
+                {
+                    if (line > lineCount)
+                        break;
+
+                    if (uint8_t bp = m_editView->GetBreakpoint(line))
+                        CMarks::draw_breakpoint(dcMem, LEFT_MARGIN, y, nLineHeight, !(bp & CAsm::BPT_DISABLED));
+
+                    if (pointerLine == line)
+                        CMarks::draw_pointer(dcMem, LEFT_MARGIN, y, nLineHeight);
+
+                    if (errMarkLine == line)
+                        CMarks::draw_mark(dcMem, LEFT_ERR_MARGIN, y, nLineHeight);
+                }
             }
-
         }
-    }
+    } // End of memDC
 
-    dcMem.BitBlt();
-
-    //pDC->FillSolidRect(rect, rgbLight);
+    dc.DrawBitmap(offScreen, wxPoint(0, 0));
 }
 
-
-void CLeftBar::DrawMark()
+void CLeftBar::SetWidth(int width)
 {
+    m_barWidth = width + 1;
+    Refresh();
 }
-
-
-void CLeftBar::SetWidth(int nWidth)
-{
-    m_nBarWidth = nWidth + 1;
-    Invalidate();
-}
-
 
 void CLeftBar::RedrawLine(int nLine)
 {
-    CClientDC dc(this);
-    DoPaint(&dc);
-}
-
-
-COLORREF CLeftBar::GetBkColor()
-{
-    COLORREF rgbGray= ::GetSysColor(COLOR_3DFACE);
-    COLORREF rgbLight= RGB(0x80 + GetRValue(rgbGray) / 2, 0x80 + GetGValue(rgbGray) / 2, 0x80 + GetBValue(rgbGray) / 2);
-    return rgbLight;
-}
-
-
-BOOL CLeftBar::OnEraseBkgnd(CDC* pDC)
-{
-    return true;
+    Refresh();
+    //CClientDC dc(this);
+    //DoPaint(&dc);
 }

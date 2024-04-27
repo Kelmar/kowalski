@@ -38,7 +38,7 @@ class CMainFrame;
 /**
  * View for assembly source code.
  */
-class CSrc6502View : public wxView, public CMarks
+class CSrc6502View : public wxView
 {
 private:
     //void set_position_info(HWND hWnd);
