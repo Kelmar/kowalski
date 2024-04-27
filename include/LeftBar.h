@@ -38,6 +38,8 @@ class CLeftBar : public CControlBar, public CMarks
 public:
     CLeftBar();
 
+    void RedrawWindow() { } // Stub for now.
+
 // Attributes
 public:
 

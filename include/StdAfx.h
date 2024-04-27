@@ -30,9 +30,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define WINVER 0xA00
 
+#define REWRITE_TO_WX_WIDGET 0
+
 #include <stdint.h>
 
 #include <wx/wx.h>
+#include <wx/docview.h>
 
 #include <list>
 #include <string>

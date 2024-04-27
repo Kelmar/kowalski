@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "crystal/CCrystalTextBuffer.h"
 #endif
 
-class CSrc6502Doc //: public CDocument
+class CSrc6502Doc : public wxDocument
 {
 protected: // create from serialization only
     CSrc6502Doc();
@@ -45,7 +45,7 @@ public:
             m_pOwnerDoc = 0;
         };
 
-        virtual void SetModified(BOOL bModified= TRUE) // Fix 1.3.4.4 - corrected dirty file flag *
+        virtual void SetModified(bool bModified = true) // Fix 1.3.4.4 - corrected dirty file flag *
         {
             m_pOwnerDoc->SetModifiedFlag(bModified);
 
@@ -53,7 +53,7 @@ public:
             {
                 CString title;
                 title = m_pOwnerDoc->GetTitle();
-                if (title.Right(1)!="*")
+                if (title.Right(1) != "*")
                 {
                     title += " *";
                     m_pOwnerDoc->SetTitle(title);
@@ -84,7 +84,7 @@ public:
 public:
     virtual bool OnNewDocument();
     virtual void Serialize(CArchive &ar);
-    virtual void DeleteContents();
+    virtual bool DeleteContents();
     virtual bool OnOpenDocument(const char *pathName);
     virtual bool OnSaveDocument(const char *pathName);
     //}}AFX_VIRTUAL

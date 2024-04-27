@@ -133,18 +133,17 @@ bool CSrc6502Doc::OnSaveDocument(const char *pathName)
 
 #else
 
-void CSrc6502Doc::DeleteContents()
+bool CSrc6502Doc::DeleteContents()
 {
     //CDocument::DeleteContents();
+    return false;
 }
-
 
 bool CSrc6502Doc::OnOpenDocument(const char *pathName)
 {
     //return CDocument::OnOpenDocument(pathName);
     return false;
 }
-
 
 bool CSrc6502Doc::OnSaveDocument(const char *pathName)
 {

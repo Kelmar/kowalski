@@ -81,13 +81,9 @@ bool C6502App::m_bFileNew = true; // flag - opening a blank document at startup
 
 bool C6502App::OnInit()
 {
-#if 0
-    // Create the main window frame.
-    CMainFrame* mainFrame = new CMainFrame();
-
-    // The main window has been initialized, so show and update it.
-    mainFrame->Show();
-#endif
+    // Create main MDI Frame window
+    m_mainFrame = new wxFrame();
+    m_mainFrame->Show();
 
     return true;
 }
@@ -108,7 +104,7 @@ BOOL C6502App::InitInstance()
     m_pszHelpFilePath = _tcsdup(strHelpFile);
 
     //-------------------------------------------------------------------------------------
-    // wczytanie zasob�w
+    // load resources
     m_hInstRes = LoadLibrary("Res.dll");
     if (m_hInstRes == NULL)
     {
@@ -221,6 +217,10 @@ void C6502App::AddToRecentFileList(const std::string &pathName)
 
     //CWinApp::AddToRecentFileList(lpszPathName);
 }
+
+ void C6502App::SetStatusBar(const std::string &message)
+ {
+ }
 
 // App command to run the dialog
 void C6502App::OnAppAbout()

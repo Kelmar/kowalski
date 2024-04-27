@@ -44,16 +44,22 @@ private:
     //HINSTANCE m_hInstRes;
     //HMODULE m_hRichEdit;
 
+    wxFrame *m_mainFrame;
+
 public:
-    static bool m_bMaximize;	// flag - maximum window dimensions at startup;
-    static bool m_bFileNew;	// flag - opening a blank document at startup
-    CGlobal m_global;		// application global variables
+    static bool m_bMaximize;    // flag - maximum window dimensions at startup;
+    static bool m_bFileNew;     // flag - opening a blank document at startup
+
+    CGlobal m_global;           // application global variables
+
     bool m_bDoNotAddToRecentFileList;
     //CDocTemplate *m_pDocDeasmTemplate;
 
     C6502App();
 
     bool OnInit() override;
+
+    virtual void SetStatusBar(const std::string &message);
 
     virtual void AddToRecentFileList(const std::string &pathName);
     //virtual int ExitInstance();
@@ -62,6 +68,6 @@ public:
     //DECLARE_MESSAGE_MAP()
 };
 
-//extern C6502App theApp;
+wxDECLARE_APP(C6502App);
 
 /////////////////////////////////////////////////////////////////////////////

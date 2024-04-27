@@ -1,15 +1,29 @@
 cmake_minimum_required(VERSION 3.20)
 
-project (6502 C CXX)
+if (WIN32)
+  include(FetchContent)
 
-find_package(wxWidgets COMPONENTS core base REQUIRED)
+  FetchContent_Declare(
+      wxWidgets
+      GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
+  )
+
+  FetchContent_MakeAvailable(wxWidgets)
+else ()
+  find_package(wxWidgets COMPONENTS core base REQUIRED)
+endif (WIN32)
+
+project (6502 C CXX)
 
 include_directories(
     include/
     include/crystal
 )
 
-include("${wxWidgets_USE_FILE}")
+if (WIN32)
+else ()
+  include("${wxWidgets_USE_FILE}")
+endif (WIN32)
 
 file (GLOB_RECURSE SRCS src/*.cpp)
 

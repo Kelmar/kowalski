@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
 #include "stdafx.h"
+
 #include "MainFrm.h"
 #include "6502Doc.h"
 #include "6502View.h"
@@ -33,24 +34,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static char THIS_FILE[] = __FILE__;
 #endif
 
-bool CSrc6502View::m_bAutoIndent= TRUE;		// sk³adowa statyczna - automatyczne wciêcia
-int CSrc6502View::m_nTabStep= 8;		// krok tabulacji
-bool CSrc6502View::m_bAutoSyntax = TRUE;
-bool CSrc6502View::m_bAutoUppercase = TRUE;
-CFont CSrc6502View::m_Font;
-LOGFONT CSrc6502View::m_LogFont;
-COLORREF CSrc6502View::m_rgbTextColor;
-COLORREF CSrc6502View::m_rgbBkgndColor;
-COLORREF CSrc6502View::m_vrgbColorSyntax[6]=
+bool CSrc6502View::m_bAutoIndent = true; // static component -automatic indentation
+int CSrc6502View::m_nTabStep = 8;
+bool CSrc6502View::m_bAutoSyntax = true;
+bool CSrc6502View::m_bAutoUppercase = true;
+
+//wxFont CSrc6502View::s_Font;
+//wxFontInfo CSrc6502View::s_LogFont;
+
+wxColour CSrc6502View::s_rgbTextColor;
+wxColour CSrc6502View::s_rgbBkgndColor;
+
+wxColour CSrc6502View::s_vrgbColorSyntax[] =
 {
-    RGB(0, 0, 160),		// instructions
-    RGB(128, 0, 128),	// directives
-    RGB(128, 128, 128),	// comments
-    RGB(0, 0, 255),		// number
-    RGB(0, 128, 128),	// string
-    RGB(192, 192, 224)	// selection
+    wxColour(0, 0, 160),        // instructions
+    wxColour(128, 0, 128),      // directives
+    wxColour(128, 128, 128),    // comments
+    wxColour(0, 0, 255),        // number
+    wxColour(0, 128, 128),      // string
+    wxColour(192, 192, 224),    // selection
+    wxColour(128, 0, 0)         // operator
 };
-BYTE CSrc6502View::m_vbyFontStyle[6]=
+
+uint8_t CSrc6502View::m_vbyFontStyle[6] =
 {
     0, 0, 0, 0, 0, 0
 };
@@ -61,24 +67,24 @@ static CMarks s_LeftMarginMarker;
 // CSrc6502View
 
 #ifdef USE_CRYSTAL_EDIT
-IMPLEMENT_DYNCREATE(CSrc6502View, CCrystalEditView)
+//IMPLEMENT_DYNCREATE(CSrc6502View, CCrystalEditView)
 #else
-IMPLEMENT_DYNCREATE(CSrc6502View, CEditView)
+//IMPLEMENT_DYNCREATE(CSrc6502View, CEditView)
 #endif
 
-BEGIN_MESSAGE_MAP(CSrc6502View, CBaseView)
+//BEGIN_MESSAGE_MAP(CSrc6502View, CBaseView)
     //{{AFX_MSG_MAP(CSrc6502View)
-    ON_WM_CREATE()
-    ON_CONTROL_REFLECT(EN_UPDATE, OnEnUpdate)
-    ON_WM_CONTEXTMENU()
-    ON_WM_CTLCOLOR_REFLECT()
+//    ON_WM_CREATE()
+//    ON_CONTROL_REFLECT(EN_UPDATE, OnEnUpdate)
+//    ON_WM_CONTEXTMENU()
+//    ON_WM_CTLCOLOR_REFLECT()
     //}}AFX_MSG_MAP
     // Standard printing commands
-    ON_COMMAND(ID_FILE_PRINT, CBaseView::OnFilePrint)
-    ON_COMMAND(ID_FILE_PRINT_DIRECT, CBaseView::OnFilePrint)
-    ON_COMMAND(ID_FILE_PRINT_PREVIEW, CBaseView::OnFilePrintPreview)
-    ON_MESSAGE(CBroadcast::WM_USER_REMOVE_ERR_MARK, OnRemoveErrMark)
-END_MESSAGE_MAP()
+//    ON_COMMAND(ID_FILE_PRINT, CBaseView::OnFilePrint)
+//    ON_COMMAND(ID_FILE_PRINT_DIRECT, CBaseView::OnFilePrint)
+//    ON_COMMAND(ID_FILE_PRINT_PREVIEW, CBaseView::OnFilePrintPreview)
+//    ON_MESSAGE(CBroadcast::WM_USER_REMOVE_ERR_MARK, OnRemoveErrMark)
+//END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CSrc6502View construction/destruction
@@ -103,6 +109,8 @@ CSrc6502View::~CSrc6502View()
 {
 }
 
+#if REWRITE_TO_WX_WIDGET
+
 BOOL CSrc6502View::PreCreateWindow(CREATESTRUCT& cs)
 {
     // TODO: Modify the Window class or styles here by modifying
@@ -116,10 +124,12 @@ BOOL CSrc6502View::PreCreateWindow(CREATESTRUCT& cs)
     return bPreCreated;
 }
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CSrc6502View drawing
 
-void CSrc6502View::OnDraw(CDC* pDC)  // overridden to draw this view
+void CSrc6502View::OnDraw(wxDC* pDC)  // overridden to draw this view
 {
 #ifdef USE_CRYSTAL_EDIT
     CBaseView::OnDraw(pDC);
@@ -129,7 +139,9 @@ void CSrc6502View::OnDraw(CDC* pDC)  // overridden to draw this view
 /////////////////////////////////////////////////////////////////////////////
 // CSrc6502View printing
 
-BOOL CSrc6502View::OnPreparePrinting(CPrintInfo* pInfo)
+#if REWRITE_TO_WX_WIDGET
+
+bool CSrc6502View::OnPreparePrinting(CPrintInfo* pInfo)
 {
     // default CBaseView preparation
     return CBaseView::OnPreparePrinting(pInfo);
@@ -147,23 +159,25 @@ void CSrc6502View::OnEndPrinting(CDC* pDC, CPrintInfo* pInfo)
     CBaseView::OnEndPrinting(pDC, pInfo);
 }
 
+#endif /* REWRITE_TO_WX_WIDGET */
+
 /////////////////////////////////////////////////////////////////////////////
 // CSrc6502View diagnostics
 
 #ifdef _DEBUG
 void CSrc6502View::AssertValid() const
 {
-    CBaseView::AssertValid();
+    //CBaseView::AssertValid();
 }
 
 void CSrc6502View::Dump(CDumpContext& dc) const
 {
-    CBaseView::Dump(dc);
+    //CBaseView::Dump(dc);
 }
 
 CSrc6502Doc* CSrc6502View::GetDocument() // non-debug version is inline
 {
-    ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CSrc6502Doc)));
+    //ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CSrc6502Doc)));
     return (CSrc6502Doc*)m_pDocument;
 }
 #endif //_DEBUG
@@ -173,26 +187,28 @@ CSrc6502Doc* CSrc6502View::GetDocument() // non-debug version is inline
 
 void CSrc6502View::OnInitialUpdate()
 {
-    CBaseView::OnInitialUpdate();
+    //CBaseView::OnInitialUpdate();
 
     SelectEditFont();
     /*
       SetFont(&m_Font,FALSE);
-      CEdit &edit= GetEditCtrl();
-      DWORD margins= edit.GetMargins();
-      edit.SetMargins(16u,UINT(HIWORD(margins)));  // ustawienie lewego marginesu
+      CEdit &edit = GetEditCtrl();
+      uint32_t margins = edit.GetMargins();
+      edit.SetMargins(16u, UINT(HIWORD(margins)));  // ustawienie lewego marginesu
     */
-    SetAutoIndent(CSrc6502View::m_bAutoIndent);
+
+    // Looks like this is a CrystalView thing. -- B.Simonds (April 26, 2024)
+    //SetAutoIndent(CSrc6502View::m_bAutoIndent);
 }
 
-
+#if REWRITE_TO_WX_WIDGET
 int CSrc6502View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
     if (CBaseView::OnCreate(lpCreateStruct) == -1)
         return -1;
 
 #ifndef USE_CRYSTAL_EDIT
-    m_pfnOldProc = (LRESULT (CALLBACK *)(HWND,UINT,WPARAM,LPARAM)) ::SetWindowLong(m_hWnd,GWL_WNDPROC,(LONG)EditWndProc);
+    m_pfnOldProc = (LRESULT (CALLBACK *)(HWND, UINT, WPARAM, LPARAM)) ::SetWindowLong(m_hWnd, GWL_WNDPROC, (LONG)EditWndProc);
 
     m_wndLeftBar.Create(CWnd::FromHandlePermanent(lpCreateStruct->hwndParent), this);
 #endif
@@ -200,66 +216,77 @@ int CSrc6502View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
     return 0;
 }
+#endif /* REWRITE_TO_WX_WIDGET */
 
+//LRESULT (CALLBACK *CSrc6502View::m_pfnOldProc)(HWND, UINT, WPARAM, LPARAM) = NULL;
 
-LRESULT (CALLBACK *CSrc6502View::m_pfnOldProc)(HWND,UINT,WPARAM,LPARAM) = NULL;
-
-
-void CSrc6502View::check_line(const TCHAR* buf, CAsm::Stat &stat, int &start, int &fin, CString &msg)
+void CSrc6502View::check_line(const char* buf, CAsm::Stat &stat, int &start, int &fin, std::string &msg)
 {
     CAsm6502 xasm;
-    xasm.bProc6502 = theApp.m_global.GetProcType();
-    stat= xasm.CheckLine(buf,start,fin);
+
+    xasm.bProc6502 = wxGetApp().m_global.GetProcType();
+    stat = xasm.CheckLine(buf, start, fin);
+
     if (stat)
         msg = xasm.GetErrMsg(stat);
     else
-        msg.Empty();
+        msg.clear();
 }
 
-void CSrc6502View::disp_warning(int line, CString &msg) // debugging message use?
+void CSrc6502View::disp_warning(int line, std::string &msg) // debugging message use?
 {
-    SetErrMark(line);	// zaznaczenie wiersza zawieraj¹cego b³¹d
-    CMainFrame *pMain = (CMainFrame*) AfxGetApp()->m_pMainWnd;
-    pMain->m_wndStatusBar.SetPaneText(0,msg);
+    SetErrMark(line); // Select the line containing the error
+    wxGetApp().SetStatusBar(msg);
+
+    //CMainFrame *pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;
+    //pMain->m_wndStatusBar.SetPaneText(0,msg);
 }
 
 //-----------------------------------------------------------------------------
-
+#if REWRITE_TO_WX_WIDGET
 void CSrc6502View::set_position_info(HWND hWnd)
 {
-    static CString strLine;
+    static std::string strLine;
     int nStart;
-    (*m_pfnOldProc)(hWnd,EM_GETSEL,WPARAM(&nStart),LPARAM(NULL));
-    int nLine= (*m_pfnOldProc)(hWnd,EM_LINEFROMCHAR,WPARAM(nStart),LPARAM(0));
-    nStart -= (*m_pfnOldProc)(hWnd,EM_LINEINDEX,WPARAM(nLine),LPARAM(0));
+
+    (*m_pfnOldProc)(hWnd, EM_GETSEL, WPARAM(&nStart), LPARAM(NULL));
+
+    int nLine = (*m_pfnOldProc)(hWnd,EM_LINEFROMCHAR, WPARAM(nStart), LPARAM(0));
+    nStart -= (*m_pfnOldProc)(hWnd, EM_LINEINDEX, WPARAM(nLine), LPARAM(0));
+
     if (nLine < 0 || nStart < 0)
         return;
-    TCHAR *pBuf= strLine.GetBuffer(1024+2);
+
+    char *pBuf = strLine.GetBuffer(1024+2);
     *((WORD *)pBuf) = 1024;
-    int nChars = (*m_pfnOldProc)(hWnd,EM_GETLINE,WPARAM(nLine),LPARAM(pBuf));
+    int nChars = (*m_pfnOldProc)(hWnd, EM_GETLINE, WPARAM(nLine), LPARAM(pBuf));
     pBuf[nChars] = 0;
     int nColumn= 0;
-    for (int i=0; i<nChars && i<nStart; i++)	// obl. numeru kolumny
+
+    for (int i = 0; i < nChars && i < nStart; i++) // calc. column number
     {
-        if (pBuf[i] == _T('\t'))	// tabulator?
+        if (pBuf[i] == _T('\t')) // tabulator?
             nColumn += m_nTabStep - nColumn % m_nTabStep;
         else
             nColumn++;
     }
+
     strLine.ReleaseBuffer(0);
 
-    CMainFrame* pMain = (CMainFrame*) AfxGetApp()->m_pMainWnd;
+    CMainFrame* pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;
     pMain->SetPositionText(nLine+1,nColumn+1);
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
+#if REWRITE_TO_WX_WIDGET
 LRESULT CALLBACK CSrc6502View::EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    CWnd *pWnd= FromHandlePermanent(hWnd);
+    CWnd *pWnd = FromHandlePermanent(hWnd);
     ASSERT (pWnd->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
-    CSrc6502View *pView= (CSrc6502View *)pWnd;
-    bool cr= false;
+    CSrc6502View *pView = (CSrc6502View *)pWnd;
+    bool cr = false;
 
     switch (msg)
     {
@@ -274,67 +301,70 @@ LRESULT CALLBACK CSrc6502View::EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, L
         LRESULT ret;
         if (cr && m_bAutoIndent)
         {
-            ret = (*m_pfnOldProc)(hWnd,msg,wParam,lParam);
+            ret = (*m_pfnOldProc)(hWnd, msg, wParam, lParam);
             pView->set_position_info(hWnd);
-            int line_idx= (*m_pfnOldProc)(hWnd,EM_LINEINDEX,WPARAM(-1),0);
-            int line= (*m_pfnOldProc)(hWnd,EM_LINEFROMCHAR,line_idx,0) - 1;	// nr aktualnego wiersza - 1
-            line_idx= (*m_pfnOldProc)(hWnd,EM_LINEINDEX,WPARAM(line),0);
-            int line_len= (*m_pfnOldProc)(hWnd,EM_LINELENGTH,line_idx,0);
-            line= (*m_pfnOldProc)(hWnd,EM_LINEFROMCHAR,line_idx,0);
+            int line_idx = (*m_pfnOldProc)(hWnd, EM_LINEINDEX, WPARAM(-1), 0);
+            int line = (*m_pfnOldProc)(hWnd, EM_LINEFROMCHAR, line_idx, 0) - 1;	// nr aktualnego wiersza - 1
+            line_idx = (*m_pfnOldProc)(hWnd, EM_LINEINDEX, WPARAM(line), 0);
+            int line_len = (*m_pfnOldProc)(hWnd, EM_LINELENGTH, line_idx, 0);
+            line = (*m_pfnOldProc)(hWnd, EM_LINEFROMCHAR, line_idx, 0);
             TCHAR buf[260];
             const int size= sizeof(buf) / sizeof(TCHAR) - 2;
             *(WORD *)(buf+2) = (WORD)size;
-            (*m_pfnOldProc)(hWnd,EM_GETLINE,line,(LPARAM)(buf+2));
-            buf[2+min(size-1,line_len)] = 0;
+            (*m_pfnOldProc)(hWnd, EM_GETLINE, line, (LPARAM)(buf + 2));
+            buf[2 + min(size - 1, line_len)] = 0;
+
             /*
-            	int line_idx= (*m_pfnOldProc)(hWnd,EM_LINEINDEX,WPARAM(-1),0);
-            	int line_len= (*m_pfnOldProc)(hWnd,EM_LINELENGTH,line_idx,0);
-            	int line= (*m_pfnOldProc)(hWnd,EM_LINEFROMCHAR,line_idx,0);	// nr aktualnego wiersza
+            	int line_idx = (*m_pfnOldProc)(hWnd, EM_LINEINDEX, WPARAM(-1), 0);
+            	int line_len = (*m_pfnOldProc)(hWnd, EM_LINELENGTH, line_idx, 0);
+            	int line = (*m_pfnOldProc)(hWnd, EM_LINEFROMCHAR, line_idx, 0);	// nr aktualnego wiersza
             	TCHAR buf[260];
-            	const int size= sizeof(buf) / sizeof(TCHAR) - 2;
-            	*(WORD *)(buf+2) = (WORD)size;
-            	(*m_pfnOldProc)(hWnd,EM_GETLINE,line,(LPARAM)(buf+2));
-            	buf[2+min(size-1,line_len)] = 0;
+            	const int size = sizeof(buf) / sizeof(TCHAR) - 2;
+            	*(WORD *)(buf + 2) = (WORD)size;
+            	(*m_pfnOldProc)(hWnd, EM_GETLINE, line, (LPARAM)(buf + 2));
+            	buf[2 + min(size - 1, line_len)] = 0;
             */
             int start,fin;
-            CAsm::Stat stat= CAsm::OK;
-            CString strmsg;
+            CAsm::Stat stat = CAsm::OK;
+            std::string strmsg;
+
             if (m_bAutoSyntax || m_bAutoUppercase)
-                check_line(buf+2,stat,start,fin,strmsg);
-            if (m_bAutoUppercase && start>0 && fin>0)	// jest instrukcja do zamiany na du¿e litery?
+                check_line(buf + 2, stat, start, fin, strmsg);
+
+            if (m_bAutoUppercase && start>0 && fin>0)	// jest instrukcja do zamiany na duï¿½e litery?
             {
                 TCHAR instr[32];
-                ASSERT(fin-start < 32);
-                _tcsncpy(instr,buf+2+start,fin-start);
+                ASSERT(fin - start < 32);
+                _tcsncpy(instr, buf + 2 + start, fin - start);
                 instr[fin-start] = 0;
                 _tcsupr(instr);
-                int c_start,c_end;
-                (*m_pfnOldProc)(hWnd,EM_GETSEL,WPARAM(&c_start),LPARAM(&c_end));
-                (*m_pfnOldProc)(hWnd,EM_SETSEL,line_idx+start,line_idx+fin);
-                (*m_pfnOldProc)(hWnd,EM_REPLACESEL,0,(LPARAM)instr);
-                (*m_pfnOldProc)(hWnd,EM_SETSEL,c_start,c_start);
-//	  (*m_pfnOldProc)(hWnd,EM_SETSEL,line_idx+line_len,line_idx+line_len);
+                int c_start, c_end;
+                (*m_pfnOldProc)(hWnd, EM_GETSEL, WPARAM(&c_start), LPARAM(&c_end));
+                (*m_pfnOldProc)(hWnd, EM_SETSEL, line_idx + start, line_idx + fin);
+                (*m_pfnOldProc)(hWnd, EM_REPLACESEL, 0, (LPARAM)instr);
+                (*m_pfnOldProc)(hWnd, EM_SETSEL, c_start, c_start);
+//	  (*m_pfnOldProc)(hWnd, EM_SETSEL, line_idx + line_len, line_idx + line_len);
             }
-            int len= _tcsspn(buf+2,_T(" \t"));	// iloœæ spacji i tabulatorów na pocz¹tku wiersza
-            if (!(m_bAutoSyntax && stat))		// jeœli nie ma b³êdu (jeœli spr. b³êdów), to  wciêcie
+            int len= _tcsspn(buf + 2, _T(" \t"));	// iloï¿½ï¿½ spacji i tabulatorï¿½w na poczï¿½tku wiersza
+            if (!(m_bAutoSyntax && stat))		// jeï¿½li nie ma bï¿½ï¿½du (jeï¿½li spr. bï¿½ï¿½dï¿½w), to  wciï¿½cie
             {
-                if (len)		// jeœli jest wciêcie w wierszu powy¿ej, to kopiujemy je
+                if (len)		// jeï¿½li jest wciï¿½cie w wierszu powyï¿½ej, to kopiujemy je
                 {
                     buf[len+2] = 0;
                     buf[0] = 0xD;
                     buf[1] = 0xA;
-                    ret = (*m_pfnOldProc)(hWnd,EM_REPLACESEL,TRUE,(LPARAM)(buf+2));	  // wciêcie tekstu
+                    ret = (*m_pfnOldProc)(hWnd, EM_REPLACESEL, TRUE, (LPARAM)(buf + 2));	  // wciï¿½cie tekstu
                 }
                 else
                     ;
-//	    ret = (*m_pfnOldProc)(hWnd,msg,wParam,lParam);	  // CR i rozsuniêcie wierszy
+//	    ret = (*m_pfnOldProc)(hWnd, msg, wParam, lParam);	  // CR i rozsuniï¿½cie wierszy
             }
             if (m_bAutoSyntax && stat)
-                pView->disp_warning(line,strmsg);
+                pView->disp_warning(line, strmsg);
         }
         else
         {
-            ret = (*m_pfnOldProc)(hWnd,msg,wParam,lParam);
+            ret = (*m_pfnOldProc)(hWnd, msg, wParam, lParam);
             pView->set_position_info(hWnd);
         }
 
@@ -377,7 +407,7 @@ LRESULT CALLBACK CSrc6502View::EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, L
     }
 
 }
-
+#endif 
 
 //=============================================================================
 /*
@@ -395,20 +425,20 @@ void CSrc6502View::drawMark(CDC &dc, int line, MarkType type, bool scroll)
       dc.GetWindow()->RedrawWindow(CRect(1, y, 1 + h, y + h));
       break;
     }
-    case MT_POINTER:	// narysowanie strza³ki wskazuj¹cej inst. do wykonania
+    case MT_POINTER:	// narysowanie strzaï¿½ki wskazujï¿½cej inst. do wykonania
       draw_pointer(dc,1,y,h);
       break;
     case MT_BREAKPOINT:	// narysowanie aktywnego miejsca przerwania
       draw_breakpoint(dc,1,y,h,TRUE);
       break;
-    case MT_DISBRKP:	// narysowanie wy³¹czonego miejsca przerwania
+    case MT_DISBRKP:	// narysowanie wyï¿½ï¿½czonego miejsca przerwania
       draw_breakpoint(dc,1,y,h,FALSE);
       break;
-    case MT_ERROR:	// narysowanie strza³ki wskazuj¹cej b³¹d
+    case MT_ERROR:	// narysowanie strzaï¿½ki wskazujï¿½cej bï¿½ï¿½d
       draw_mark(dc,4,y,h);
       break;
     default:
-      ASSERT(FALSE);	// b³êdna wartoœæ typu
+      ASSERT(FALSE);	// bï¿½ï¿½dna wartoï¿½ï¿½ typu
       break;
   }
 }
@@ -417,57 +447,69 @@ void CSrc6502View::drawMark(CDC &dc, int line, MarkType type, bool scroll)
 int CSrc6502View::ScrollToLine(int line, int &height, bool scroll)
 {
     ASSERT(line >= 0);
+    
 #ifdef USE_CRYSTAL_EDIT
     GoToLine(line);
     return 0;
 #else
-    CEdit &edit= GetEditCtrl();
-    if (line > edit.GetLineCount()-1)
+# if REWRITE_TO_WX_WIDGET
+    CEdit &edit = GetEditCtrl();
+
+    if (line > edit.GetLineCount() - 1)
     {
-        ASSERT(FALSE);	// za du¿y numer wiersza
+        ASSERT(FALSE); // line number too large
         return -1;
     }
-    int top_line= edit.GetFirstVisibleLine();
+
+    int top_line = edit.GetFirstVisibleLine();
+
     if (line < top_line)
     {
         if (!scroll)
             return -2;
-        edit.LineScroll(line-top_line);	// wiersz nie jest widoczny - przesuniêcie zawartoœci okna
+
+        edit.LineScroll(line-top_line); // The line is not visible -window content shift
         top_line = edit.GetFirstVisibleLine();
-        int top_char= edit.LineIndex(top_line);
-        edit.SendMessage(EM_SETSEL,top_char,top_char);	// przesuniêcie karetki do wiersza 'top_line'
+        int top_char = edit.LineIndex(top_line);
+        edit.SendMessage(EM_SETSEL, top_char, top_char); // carriage to line 'top_line'
     }
+
     CClientDC dc(&edit);
-    CFont* pOld= dc.SelectObject(&m_Font);
+    CFont* pOld = dc.SelectObject(&s_Font);
     TEXTMETRIC tm;
     dc.GetTextMetrics(&tm);
     dc.SelectObject(pOld);
-    int h= (int)tm.tmHeight + (int)tm.tmExternalLeading;
-    int y= (line - top_line) * h;		// po³o¿enie wiersza w pionie
+    int h = (int)tm.tmHeight + (int)tm.tmExternalLeading;
+    int y = (line - top_line) * h; // Vertical position of the line
     CRect rect;
     edit.GetClientRect(rect);
-    if (y+h-1 >= rect.bottom)
+
+    if (y + h - 1 >= rect.bottom)
     {
         if (!scroll)
             return -2;
-        edit.LineScroll(1 + (y+h-1 - rect.bottom) / h);	// iloœæ wierszy do przesuniêcia
-//    edit.SendMessage(EM_SCROLLCARET,0,0);
+        edit.LineScroll(1 + (y + h - 1 - rect.bottom) / h); // Number of rows to shift
+        //edit.SendMessage(EM_SCROLLCARET, 0, 0);
         top_line = edit.GetFirstVisibleLine();
-        int bottom_char= edit.LineIndex(line);
-        edit.SendMessage(EM_SETSEL,bottom_char,bottom_char);// przesuniêcie karetki do wiersza 'line'
+        int bottom_char = edit.LineIndex(line);
+        edit.SendMessage(EM_SETSEL, bottom_char, bottom_char); // carriage move to line 'line'
     }
-    y = (line - top_line) * h;		// po³o¿enie wiersza w pionie
-    if (y+h-1 >= rect.bottom)
+
+    y = (line - top_line) * h; // Vertical position of the line
+
+    if (y + h - 1 >= rect.bottom)
     {
-        ASSERT(FALSE);	// b³êdne przesuniêcia albo obliczenia w tej funkcji
+        ASSERT(FALSE); // Incorrect shifts or calculations in this function
         return -1;
     }
 
     height = h;
     return y;
+# endif
 #endif
-}
 
+    return 0;
+}
 
 // edit view info
 //
@@ -477,16 +519,18 @@ void CSrc6502View::GetDispInfo(int& nTopLine, int& nLineCount, int& nLineHeight)
     nLineHeight = GetLineHeight();
     return;
 #else
-    CEdit& edit= GetEditCtrl();
+# if REWRITE_TO_WX_WIDGET
+    CEdit& edit = GetEditCtrl();
     nLineCount = edit.GetLineCount();
     nTopLine = edit.GetFirstVisibleLine();
 
     CClientDC dc(&edit);
-    CFont* pOld= dc.SelectObject(&m_Font);
+    CFont* pOld = dc.SelectObject(&s_Font);
     TEXTMETRIC tm;
     dc.GetTextMetrics(&tm);
     nLineHeight = (int)tm.tmHeight + (int)tm.tmExternalLeading;
     dc.SelectObject(pOld);
+# endif
 #endif
 }
 
@@ -516,7 +560,7 @@ void CSrc6502View::draw_breakpoints(HDC hDC)
 {
   if (m_mapBreakpoints.IsEmpty())
     return;
-  POSITION pos= m_mapBreakpoints.GetStartPosition();
+  POSITION pos = m_mapBreakpoints.GetStartPosition();
   int line;
   BYTE bp;
   do
@@ -529,16 +573,17 @@ void CSrc6502View::draw_breakpoints(HDC hDC)
 
 //-----------------------------------------------------------------------------
 
-
-void CSrc6502View::SetPointer(int line, bool scroll)	// narysowanie/zmazanie strza³ki w wierszu
+void CSrc6502View::SetPointer(int line, bool scroll) // draw/erase an arrow in the line
 {
     if (m_nActualPointerLine != -1)
     {
-        int tmp_line= m_nActualPointerLine;
+        int tmp_line = m_nActualPointerLine;
         m_nActualPointerLine = -1;
-        EraseMark(tmp_line);	// zmazanie starej strza³ki
+        EraseMark(tmp_line); // delete the old thread
     }
+
     m_nActualPointerLine = line;
+
     if (line != -1)
     {
         int h;
@@ -547,93 +592,105 @@ void CSrc6502View::SetPointer(int line, bool scroll)	// narysowanie/zmazanie str
     }
 }
 
-
-void CSrc6502View::SetErrMark(int line)		// narysowanie/zmazanie strza³ki wsk. b³¹d
+void CSrc6502View::SetErrMark(int line) // draw/erase the pointer arrow error
 {
     if (m_nActualErrMarkLine != -1)
     {
-        int tmp= m_nActualErrMarkLine;
+        int tmp = m_nActualErrMarkLine;
         m_nActualErrMarkLine = -1;
-        EraseMark(tmp);			// zmazanie starej strza³ki
+        EraseMark(tmp); // Delete the old thread
     }
     m_nActualErrMarkLine = line;
+
     if (line != -1)
     {
         int h;
-        ScrollToLine(line,h,TRUE);
+        ScrollToLine(line, h, TRUE);
         RedrawMarks(line);
+
 #ifdef USE_CRYSTAL_EDIT
         GoToLine(line);
 #else
-        CEdit &edit= GetEditCtrl();
-        int char_index= edit.LineIndex(line);
-        edit.SendMessage(EM_SETSEL,char_index,char_index);	// przesuniêcie karetki do wiersza 'line'
+# if REWRITE_To_WX_WIDGET
+        CEdit &edit = GetEditCtrl();
+        int char_index = edit.LineIndex(line);
+        edit.SendMessage(EM_SETSEL, char_index, char_index);//carriage to line 'line'
+# endif
 #endif
     }
 }
 
-
-void CSrc6502View::OnEnUpdate()		// po zmianie tekstu
+void CSrc6502View::OnEnUpdate() // After changing the text
 {
     if (m_nActualErrMarkLine != -1)
     {
-        SetErrMark(-1);			// zmazujemy wsk. b³êdnego wiersza
-        CMainFrame *pMain = (CMainFrame*) AfxGetApp()->m_pMainWnd;
-        pMain->m_wndStatusBar.SetPaneText(0,NULL);	// i komunikat b³êdu
+        SetErrMark(-1); // Erase the pointer, wrong line
+
+#if REWRITE_TO_WX_WIDGET
+        CMainFrame *pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;
+        pMain->m_wndStatusBar.SetPaneText(0, NULL); // and error message
+#endif
     }
 }
 
-
 void CSrc6502View::SelectEditFont()
 {
+#if REWRITE_TO_WX_WIDGET
+
 #ifdef USE_CRYSTAL_EDIT
     SetFont(m_LogFont);
 //	m_wndLeftBar.SetWidth(0);
     SetTabSize(m_nTabStep);
 #else
-    SetFont(&m_Font);
-    CEdit &edit= GetEditCtrl();
+    SetFont(&s_Font);
+    CEdit &edit = GetEditCtrl();
     CClientDC dc(&edit);
-    dc.SelectObject(&m_Font);
+    dc.SelectObject(&s_Font);
     TEXTMETRIC tm;
     dc.GetTextMetrics(&tm);
-    int h= (int)tm.tmHeight + (int)tm.tmExternalLeading;
-//  DWORD margins= edit.GetMargins();
-//  edit.SetMargins(h+1,UINT(HIWORD(margins)));	// ustawienie lewego marginesu
+    int h = (int)tm.tmHeight + (int)tm.tmExternalLeading;
+    //DWORD margins = edit.GetMargins();
+    //edit.SetMargins(h + 1, UINT(HIWORD(margins))); // set the left margin
     m_wndLeftBar.SetWidth(h + 1);
     dynamic_cast<CFrameWnd*>(GetParent())->RecalcLayout();
 #endif
-}
 
-
-int CSrc6502View::GetCurrLineNo()	// aktualny wiersz
-{
-#ifdef USE_CRYSTAL_EDIT
-    return GetCursorPos().y;
-#else
-    CEdit &edit= GetEditCtrl();
-    int idx= edit.LineIndex();
-    ASSERT(idx != -1);
-    return edit.LineFromChar(idx);
 #endif
 }
 
+int CSrc6502View::GetCurrLineNo()	// aktualny wiersz
+{
+#if REWRITE_TO_WX_WIDGET
+
+#ifdef USE_CRYSTAL_EDIT
+    return GetCursorPos().y;
+#else
+    CEdit &edit = GetEditCtrl();
+    int idx = edit.LineIndex();
+    ASSERT(idx != -1);
+    return edit.LineFromChar(idx);
+#endif
+
+#endif
+
+    return 0;
+}
 
 void CSrc6502View::AddBreakpoint(int line, CAsm::Breakpoint bp, bool draw)
 {
-    m_mapBreakpoints[line] = (BYTE)bp;
+    m_mapBreakpoints[line] = (uint8_t)bp;
+
     if (draw)
         RedrawMarks(line);
 }
-
 
 void CSrc6502View::RemoveBreakpoint(int line, bool draw)
 {
-    m_mapBreakpoints.RemoveKey(line);
+    m_mapBreakpoints.erase(line);
+
     if (draw)
         RedrawMarks(line);
 }
-
 
 void CSrc6502View::RedrawMarks(int line/*= -1*/)
 {
@@ -641,9 +698,10 @@ void CSrc6502View::RedrawMarks(int line/*= -1*/)
     if (line >= 0)
         InvalidateLines(line, line, true);
 #else
-    if (line == -1)	// przerysowaæ znaczniki we wszystkich wierszach?
+    if (line == -1) // Redraw tags on all lines?
     {
         m_wndLeftBar.RedrawWindow();
+
         /*    draw_breakpoints();
             if (m_nActualPointerLine != -1)
               DrawMark(m_nActualPointerLine,MT_POINTER);
@@ -655,11 +713,11 @@ void CSrc6502View::RedrawMarks(int line/*= -1*/)
         ASSERT(line >= 0);
         m_wndLeftBar.RedrawLine(line);
         /*
-            BYTE bp;
+            uint8_t bp;
             if (m_mapBreakpoints.Lookup(line, bp))
-              DrawMark(line, bp & CAsm::BPT_DISABLED ? MT_DISBRKP : MT_BREAKPOINT);// znaczek miejsca przerwania
+              DrawMark(line, bp & CAsm::BPT_DISABLED ? MT_DISBRKP : MT_BREAKPOINT); // break point stamp
             else
-              DrawMark(line, MT_ERASE);					// zmazanie znaku przerwania
+              DrawMark(line, MT_ERASE); // Erase the break character
             if (m_nActualPointerLine == line)
               DrawMark(m_nActualPointerLine, MT_POINTER);
             if (m_nActualErrMarkLine == line)
@@ -676,40 +734,41 @@ void CSrc6502View::EraseMark(int line)
     RedrawMarks(line);
 }
 
-
-
-void CSrc6502View::OnContextMenu(CWnd* pWnd, CPoint point)
+void CSrc6502View::OnContextMenu(wxWindow* pWnd, const wxPoint &point)
 {
+#if 0
     CMenu menu;
+
     if (!menu.LoadMenu(IDR_POPUP_EDIT))
         return;
+
     CMenu *pPopup = menu.GetSubMenu(0);
     ASSERT(pPopup != NULL);
 
-    if (point.x == -1 && point.y == -1)     // menu wywo³ane przy pomocy klawiatury?
+    if (point.x == -1 && point.y == -1) // Menu accessed via keyboard?
     {
         CRect rect;
         GetClientRect(rect);
 
         point = rect.TopLeft();
-        CPoint ptTopLeft(0, 0);
+        wxPoint ptTopLeft(0, 0);
         ClientToScreen(&ptTopLeft);
-        point.x = ptTopLeft.x + rect.Width() / 2;   // ustawiamy siê na œrodku okna
+
+        point.x = ptTopLeft.x + rect.Width() / 2; // Position ourselves in the middle of the window
         point.y = ptTopLeft.y + rect.Height() / 2;
     }
 
     pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
+#endif
 }
 
-
-afx_msg LRESULT CSrc6502View::OnRemoveErrMark(WPARAM wParam, LPARAM lParam)
+void CSrc6502View::OnRemoveErrMark()
 {
-    SetErrMark(-1);			// zmazujemy wsk. b³êdnego wiersza
-    return 1;
+    SetErrMark(-1); // erase the pointer, wrong line
 }
 
-
-HBRUSH CSrc6502View::CtlColor(CDC* pDC, UINT nCtlColor)
+// TODO: Remove this?  Not doing anything? -- B.Simonds (April 26, 2024)
+void *CSrc6502View::CtlColor(wxDC* pDC, UINT nCtlColor)
 {
     /*  pDC->SetTextColor(m_rgbTextColor);
       pDC->SetBkColor(m_rgbBkgndColor); */
@@ -720,6 +779,8 @@ HBRUSH CSrc6502View::CtlColor(CDC* pDC, UINT nCtlColor)
     // TODO: Return a non-NULL brush if the parent's handler should not be called
     return NULL;
 }
+
+#if 0
 
 void CSrc6502View::CalcWindowRect(LPRECT lpClientRect, UINT nAdjustType)
 {
@@ -740,27 +801,28 @@ void CSrc6502View::CalcWindowRect(LPRECT lpClientRect, UINT nAdjustType)
 
 //	CBaseView::CalcWindowRect(lpClientRect, nAdjustType);
 }
-
+#endif
 
 // return breakpoint info for line 'nLine'
 //
-BYTE CSrc6502View::GetBreakpoint(int nLine) const
+uint8_t CSrc6502View::GetBreakpoint(int nLine) const
 {
-    BYTE bp= 0;
-    m_mapBreakpoints.Lookup(nLine, bp);
-    return bp;
+    auto search = m_mapBreakpoints.find(nLine);
+
+    if (search != m_mapBreakpoints.end())
+        return search->second;
+
+    return 0;
 }
 
-
-void CSrc6502View::GetText(CString& strText)
+void CSrc6502View::GetText(std::string& strText)
 {
 #ifdef USE_CRYSTAL_EDIT
-    GetDocument()->GetText(strText);
+    //GetDocument()->GetText(strText);
 #else
-    GetEditCtrl().GetWindowText(strText);
+    //GetEditCtrl().GetWindowText(strText);
 #endif
 }
-
 
 #ifdef USE_CRYSTAL_EDIT
 CCrystalTextBuffer* CSrc6502View::LocateTextBuffer()
@@ -768,12 +830,11 @@ CCrystalTextBuffer* CSrc6502View::LocateTextBuffer()
     return GetDocument()->GetBuffer();
 }
 
-
 void CSrc6502View::DrawMarginMarker(int nLine, CDC* pDC, const CRect &rect)
 {
-    int nLeft= rect.left + rect.Width() / 6;
+    int nLeft = rect.left + rect.Width() / 6;
 
-    if (BYTE bp= GetBreakpoint(nLine))
+    if (BYTE bp = GetBreakpoint(nLine))
         s_LeftMarginMarker.draw_breakpoint(*pDC, nLeft, rect.top, rect.Height(), !(bp & CAsm::BPT_DISABLED));
 
     if (nLine == GetPointerLine())
@@ -784,24 +845,24 @@ void CSrc6502View::DrawMarginMarker(int nLine, CDC* pDC, const CRect &rect)
 }
 
 
-CCrystalEditView::LineChange CSrc6502View::NotifyEnterPressed(CPoint ptCursor, CString& strLine)
+CCrystalEditView::LineChange CSrc6502View::NotifyEnterPressed(CPoint ptCursor, std::string& strLine)
 {
-    LineChange eChange= CCrystalEditView::NOTIF_NO_CHANGES;
+    LineChange eChange = CCrystalEditView::NOTIF_NO_CHANGES;
 
     if (m_bAutoSyntax || m_bAutoUppercase)
     {
-        int start= 0, fin= 0;
-        CAsm::Stat stat= CAsm::OK;
-        CString strMsg;
+        int start = 0, fin = 0;
+        CAsm::Stat stat = CAsm::OK;
+        std::string strMsg;
 
         check_line(strLine, stat, start, fin, strMsg);
 
-        if (m_bAutoUppercase && start > 0 && fin > 0)	// jest instrukcja do zamiany na du¿e litery?
+        if (m_bAutoUppercase && start > 0 && fin > 0)	// jest instrukcja do zamiany na duï¿½e litery?
         {
             for (int nIndex= start; nIndex < fin; ++nIndex)
             {
-                TCHAR c= strLine[nIndex];
-                TCHAR u= toupper(c);
+                char c = strLine[nIndex];
+                char u = toupper(c);
                 if (c != u)
                 {
                     strLine.SetAt(nIndex, u);
@@ -820,44 +881,41 @@ CCrystalEditView::LineChange CSrc6502View::NotifyEnterPressed(CPoint ptCursor, C
     return eChange;
 }
 
-
 void CSrc6502View::NotifyTextChanged() // 1.3.3 added * for changed file marker 1.3.3.4 - removed ;)
 {
     OnEnUpdate();
 }
 
-
-COLORREF CSrc6502View::GetColor(int nColorIndex)
+wxColor CSrc6502View::GetColor(int nColorIndex)
 {
     switch (nColorIndex)
     {
     case COLORINDEX_WHITESPACE:
     case COLORINDEX_BKGND:
-        return m_rgbBkgndColor;
+        return s_rgbBkgndColor;
 
     case COLORINDEX_NORMALTEXT:
-        return m_rgbTextColor;
+        return s_rgbTextColor;
 
     case COLORINDEX_KEYWORD:		// instructions
-        return m_vrgbColorSyntax[0];
+        return s_vrgbColorSyntax[0];
     case COLORINDEX_PREPROCESSOR:	// directives
-        return m_vrgbColorSyntax[1];
+        return s_vrgbColorSyntax[1];
     case COLORINDEX_COMMENT:
-        return m_vrgbColorSyntax[2];
+        return s_vrgbColorSyntax[2];
     case COLORINDEX_NUMBER:
-        return m_vrgbColorSyntax[3];
+        return s_vrgbColorSyntax[3];
     case COLORINDEX_STRING:
-        return m_vrgbColorSyntax[4];
+        return s_vrgbColorSyntax[4];
     case COLORINDEX_OPERATOR:
-        return RGB(128, 0, 0);
+        return s_vrgbColorSyntax[6];
     case COLORINDEX_SELBKGND:
-        return m_vrgbColorSyntax[5];
+        return s_vrgbColorSyntax[5];
 
     default:
         return CBaseView::GetColor(nColorIndex);
     }
 }
-
 
 BOOL CSrc6502View::GetBold(int nColorIndex)
 {
@@ -879,14 +937,12 @@ BOOL CSrc6502View::GetBold(int nColorIndex)
     }
 }
 
-
-void CSrc6502View::CaretMoved(const CString& strLine, int nWordStart, int nWordEnd)
+void CSrc6502View::CaretMoved(const std::string& strLine, int nWordStart, int nWordEnd)
 {
     if (m_pMainFrame)
         m_pMainFrame->ShowDynamicHelp(strLine, nWordStart, nWordEnd);
 
     //	TRACE("%s\n", strWord.IsEmpty() ? "=":(const char*)strWord);
 }
-
 
 #endif
