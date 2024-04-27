@@ -20,30 +20,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 #include "DialBar.h"
-#include "AFXPRIV.H"
 
-
-BEGIN_MESSAGE_MAP(CDialBar, CDialogBar)
-    //{{AFX_MSG_MAP(CDialBar)
-    ON_WM_GETMINMAXINFO()
-    ON_WM_LBUTTONDOWN()
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-
-IMPLEMENT_DYNAMIC(CDialBar, CDialogBar)
-
-
-CDialBar::CDialBar() : m_lastSize(50,50)
+CDialBar::CDialBar()
+    : m_lastSize(50, 50)
 {
 }
-
 
 CDialBar::~CDialBar()
 {
 }
 
-
+#if 0
 void CDialBar::OnGetMinMaxInfo(MINMAXINFO *lpMMI)
 {
     CDialogBar::OnGetMinMaxInfo(lpMMI);
@@ -53,23 +40,26 @@ void CDialBar::OnGetMinMaxInfo(MINMAXINFO *lpMMI)
     lpMMI->ptMaxTrackSize = CPoint(200,600);
     lpMMI->ptMinTrackSize = CPoint(100,100);
 }
+#endif
 
-
-CSize CDialBar::CalcDynamicLayout(int nLength, DWORD dwMode)
+wxSize CDialBar::CalcDynamicLayout(int nLength, uint32_t dwMode)
 {
+#if 0
 //  TRACE2("length = %d \tmode = %x\n", nLength, (int)dwMode);
 
     if ((nLength == -1) && !(dwMode & LM_MRUWIDTH) && !(dwMode & LM_COMMIT) &&
-            ((dwMode & LM_HORZDOCK) || (dwMode & LM_VERTDOCK)))
+        ((dwMode & LM_HORZDOCK) || (dwMode & LM_VERTDOCK)))
     {
         return CalcFixedLayout(dwMode & LM_STRETCH, dwMode & LM_HORZDOCK);
     }
-    return CalcLayout(nLength,dwMode);
+#endif
+
+    return CalcLayout(nLength, dwMode);
 }
 
-
-CSize CDialBar::CalcLayout(int nLength, DWORD dwMode)
+wxSize CDialBar::CalcLayout(int nLength, uint32_t dwMode)
 {
+#if 0
     if (dwMode & LM_HORZDOCK)
         return m_lastSize;
     /*  {
@@ -99,12 +89,12 @@ CSize CDialBar::CalcLayout(int nLength, DWORD dwMode)
         else
             m_lastSize.cx = nLength;
     }
+#endif
 
     return m_lastSize;
 }
 
-
-CSize CDialBar::CalcFixedLayout(bool bStretch, bool bHorz)
+wxSize CDialBar::CalcFixedLayout(bool stretch, bool horz)
 {
     return m_lastSize;
     /*
@@ -128,27 +118,33 @@ CSize CDialBar::CalcFixedLayout(bool bStretch, bool bHorz)
     */
 }
 
-BOOL CDialBar::Create(CWnd* pParentWnd, UINT nIDTemplate, UINT nStyle, UINT nID)
+bool CDialBar::Create(wxWindow* parent, UINT nIDTemplate, UINT nStyle, UINT nID)
 {
-    bool ret= CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID);
+#if 0
+    bool ret = CDialogBar::Create(parent, nIDTemplate, nStyle, nID);
 
     if (!ret)
         return false;
 
-    CString title;
+    std::string title;
+
     if (title.LoadString(nIDTemplate))
         SetWindowText(title);
+#endif
 
     return true;
 }
 
 // style &= ~MFS_4THICKFRAME;
 
-void CDialBar::OnLButtonDown(UINT nFlags, CPoint point)
+void CDialBar::OnLButtonDown(UINT nFlags, wxPoint point)
 {
-    CWnd *pWnd= GetParent();
-    if (pWnd && (pWnd=pWnd->GetParent()))
-        pWnd->ModifyStyle(MFS_4THICKFRAME,MFS_THICKFRAME);
+#if 0
+    wxWindow *parent = GetParent();
 
-    CDialogBar::OnLButtonDown(nFlags, point);
+    if (pWnd && (pWnd = pWnd->GetParent()))
+        pWnd->ModifyStyle(MFS_4THICKFRAME, MFS_THICKFRAME);
+
+    //CDialogBar::OnLButtonDown(nFlags, point);
+#endif
 }

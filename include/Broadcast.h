@@ -27,27 +27,10 @@ wxDECLARE_EVENT(EVT_UPDATE_REG_WND, wxCommandEvent);
 wxDECLARE_EVENT(EVT_PROG_MEM_CHANGED, wxCommandEvent); // All 6502 memory has been changed (after LOAD or assembly)
 wxDECLARE_EVENT(EVT_REMOVE_ERR_MARK, wxCommandEvent);
 
-class CBroadcast
+namespace Broadcast
 {
-public:
-    
-    
-#if 0
-    // Replace with wx events
-
-    enum WinMsg
-    {
-        WM_USER_OFFSET = WM_USER + 4100,
-        WM_USER_EXIT_DEBUGGER =	WM_USER_OFFSET,
-        WM_USER_START_DEBUGGER,
-        WM_USER_UPDATE_REG_WND,
-        WM_USER_PROG_MEM_CHANGED, 
-        WM_USER_REMOVE_ERR_MARK
-    };
-
-    void SendMessageToViews(UINT msg, WPARAM wParam = 0, LPARAM lParam = 0);
-    void SendMessageToPopups(UINT msg, WPARAM wParam = 0, LPARAM lParam = 0);
-#endif
-};
+    void ToViews(UINT msg, WPARAM wParam = 0, LPARAM lParam = 0);
+    void ToPopups(UINT msg, WPARAM wParam = 0, LPARAM lParam = 0);
+}
 
 #endif

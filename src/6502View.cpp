@@ -218,7 +218,7 @@ int CSrc6502View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 //LRESULT (CALLBACK *CSrc6502View::m_pfnOldProc)(HWND, UINT, WPARAM, LPARAM) = NULL;
 
-void CSrc6502View::check_line(const char* buf, CAsm::Stat &stat, int &start, int &fin, std::string &msg)
+void CSrc6502View::check_line(const char* buf, CAsm::Stat &stat, int &start, int &fin,  std::string &msg)
 {
     CAsm6502 xasm;
 
@@ -231,13 +231,12 @@ void CSrc6502View::check_line(const char* buf, CAsm::Stat &stat, int &start, int
         msg.clear();
 }
 
-void CSrc6502View::disp_warning(int line, std::string &msg) // debugging message use?
+void CSrc6502View::disp_warning(int line, const std::string &msg) // debugging message use?
 {
+    // TODO: Use logging. -- B.Simonds (April 27, 2024)
+    
     SetErrMark(line); // Select the line containing the error
-    wxGetApp().SetStatusBar(msg);
-
-    //CMainFrame *pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;
-    //pMain->m_wndStatusBar.SetPaneText(0,msg);
+    wxGetApp().SetStatusText(0, msg);
 }
 
 //-----------------------------------------------------------------------------

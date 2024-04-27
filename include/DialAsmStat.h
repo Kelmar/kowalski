@@ -18,15 +18,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// DialAsmStat.h : header file
-//
+#ifndef DIAL_ASM_STAT_H__
+#define DIAL_ASM_STAT_H__
 
 /////////////////////////////////////////////////////////////////////////////
 // CDialAsmStat dialog
 
-class CDialAsmStat : public CDialog, public CAsm, CBroadcast
+class CDialAsmStat : public wxDialog //, public CAsm, CBroadcast
 {
-    static UINT start_asm_thread(LPVOID pDial);
+private:
+    wxControl *FindControl(long id) const;
+
+    static UINT start_asm_thread(void *pDial);
+
     UINT StartAsm();
     void SetProgressRange(int max_line);
     void ProgressStep();
@@ -34,25 +38,26 @@ class CDialAsmStat : public CDialog, public CAsm, CBroadcast
     void SetLineNo(int val);
     void SetPassNo(int val);
 
-    DWORD m_dwTimer;
-//  int m_nUpdateInit;
-//  int m_nUpdateDelay;		// opóŸnienie odœwie¿enia inf. o asemblowanym wierszu
-//  int m_nUpdateLineDelay;
+    uint16_t m_dwTimer;
+    //int m_nUpdateInit;
+    //int m_nUpdateDelay; // Delay refreshing info. about the assembled line
+    //int m_nUpdateLineDelay;
 
-    Stat m_stAsmRetCode;
+    CAsm::Stat m_stAsmRetCode;
     CAsm6502 *m_pAsm6502;
     int m_nPassNo;
     int m_nCurrLine;
     int m_nLines;
-    CString m_strRow;
-    CString m_strPassNo;
+    std::string m_strRow;
+    std::string m_strPassNo;
     CSrc6502View *m_pView;
     bool m_bFinished;
-    CString m_strText;		// ca³y tekst do asemblacji
-    const TCHAR *m_pText;
+    std::string m_strText; // All text to assemble
+    const char *m_pText;
 
-    CString GetLine(int nLine);
-    void GetLine(int nLine, TCHAR *buf, int max_len);
+    std::string GetLine(int nLine);
+    void GetLine(int nLine, char *buf, size_t max_len);
+
     afx_msg LRESULT OnAbortAsm(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnGetNextLine(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnGetLineNo(WPARAM wParam, LPARAM lParam);
@@ -60,37 +65,25 @@ class CDialAsmStat : public CDialog, public CAsm, CBroadcast
     afx_msg LRESULT OnNextPass(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnFinished(WPARAM wParam, LPARAM /* lParam */);
 
-    // Construction
 public:
-    ~CDialAsmStat();
+    virtual ~CDialAsmStat();
 //  CDialAsmStat(CWnd* pParent = NULL);   // standard constructor
-    CDialAsmStat(CSrc6502View *pView);	// aktywny dokument (przez 'pView')
+    CDialAsmStat(CSrc6502View *pView); // Active document (via 'pView')
+
     bool Create();
     void SetValues(int row, int pass);
 
-    // Dialog Data
-    //{{AFX_DATA(CDialAsmStat)
     enum { IDD = IDD_ASSEMBLE };
-    CString   m_strCtrlRow;
-    CString   m_strCtrlPassNo;
-    //}}AFX_DATA
 
+    wxString m_strCtrlRow;
+    wxString m_strCtrlPassNo;
 
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CDialAsmStat)
 protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
+    //virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support
 
-    // Implementation
-protected:
-
-    // Generated message map functions
-    //{{AFX_MSG(CDialAsmStat)
-    virtual BOOL OnInitDialog();
+    virtual bool OnInitDialog();
     virtual void OnCancel();
-    afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    afx_msg bool OnSetCursor(wxWindow* pWnd, UINT nHitTest, UINT message);
 };
+
+#endif /* DIAL_ASM_STAT_H__ */

@@ -309,7 +309,7 @@ public:
 
     void GetAddress(CDebugLine &ret, int ln, FileUID file) // Finding the address corresponding to the line
     {
-        m_lines.GetAddress(ret,ln,file);
+        m_lines.GetAddress(ret, ln, file);
     }
 
     Breakpoint SetBreakpoint(int line, FileUID file, int bp= BPT_NONE); // Interrupt setting

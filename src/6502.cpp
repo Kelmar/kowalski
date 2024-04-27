@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "stdafx.h"
 
-//#include "MainFrm.h"
+#include "MainFrm.h"
 //#include "ChildFrm.h"
 //#include "ChildFrmDeAsm.h"
 //#include "6502Doc.h"
@@ -82,7 +82,7 @@ bool C6502App::m_bFileNew = true; // flag - opening a blank document at startup
 bool C6502App::OnInit()
 {
     // Create main MDI Frame window
-    m_mainFrame = new wxFrame();
+    m_mainFrame = new CMainFrame();
     m_mainFrame->Show();
 
     return true;
@@ -218,8 +218,10 @@ void C6502App::AddToRecentFileList(const std::string &pathName)
     //CWinApp::AddToRecentFileList(lpszPathName);
 }
 
- void C6502App::SetStatusBar(const std::string &message)
+ void C6502App::SetStatusText(int col, const std::string &message)
  {
+    if (m_mainFrame)
+        m_mainFrame->SetStatusText(col, message);
  }
 
 // App command to run the dialog

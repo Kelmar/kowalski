@@ -42,7 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CSrc6502Doc;
 class CSrc6502View;
 
-class CMainFrame : public wxDocMDIParentFrame, virtual CBroadcast
+class CMainFrame : public wxDocMDIParentFrame //, virtual CBroadcast
 //class CMainFrame : public CMDIFrameWnd, virtual CBroadcast
 {
 private:
@@ -81,6 +81,8 @@ public:
 //  void SetRowColumn(CEdit &edit);
     CSrc6502View *GetCurrentView();
     CSrc6502Doc *GetCurrentDocument();
+
+    void SetStatusText(int col, const std::string &text);
 
     static std::string ProjName;
 

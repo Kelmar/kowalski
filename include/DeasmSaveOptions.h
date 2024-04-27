@@ -35,7 +35,7 @@ private:
     void CalculateNums(int pos);
 
 public:
-    CDeasmSaveOptions(wxWindow* parent = nullptr);   // standard constructor
+    ///* constructor */ CDeasmSaveOptions(wxWindow* parent = nullptr);
 
     // Dialog Data
     

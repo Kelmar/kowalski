@@ -33,6 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#include "resource.h"       // main symbols
 
+class CMainFrame;
+
 /////////////////////////////////////////////////////////////////////////////
 // C6502App:
 // See 6502.cpp for the implementation of this class
@@ -47,7 +49,7 @@ private:
     //HINSTANCE m_hInstRes;
     //HMODULE m_hRichEdit;
 
-    wxFrame *m_mainFrame;
+    CMainFrame *m_mainFrame;
 
 public:
     static bool m_bMaximize;    // flag - maximum window dimensions at startup;
@@ -62,7 +64,7 @@ public:
 
     bool OnInit() override;
 
-    virtual void SetStatusBar(const std::string &message);
+    virtual void SetStatusText(int col, const std::string &message);
 
     virtual void AddToRecentFileList(const std::string &pathName);
     //virtual int ExitInstance();

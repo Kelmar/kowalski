@@ -62,7 +62,7 @@ private:
     int m_nActualErrMarkLine;	// TODO: move to the doc
 
     static void check_line(const char *buf, CAsm::Stat &stat, int &start, int &fin, std::string &msg);
-    void disp_warning(int line, std::string &msg);
+    void disp_warning(int line, const std::string &msg);
     void OnRemoveErrMark();
 
 public:
@@ -128,12 +128,6 @@ public:
 #endif
     void GetText(std::string& strText);
 
-// Operations
-public:
-
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CSrc6502View)
 public:
     virtual void OnDraw(wxDC* pDC);  // overridden to draw this view
     //virtual bool PreCreateWindow(CREATESTRUCT& cs);
@@ -145,30 +139,15 @@ protected:
     virtual void OnEndPrinting(wxDC* pDC, CPrintInfo* pInfo);
 #endif
 
-    //virtual void CalcWindowRect(LPRECT lpClientRect, UINT nAdjustType = adjustBorder);
-    //}}AFX_VIRTUAL
-
-// Implementation
 public:
     virtual ~CSrc6502View();
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
 
 protected:
-
-// Generated message map functions
-protected:
-    //{{AFX_MSG(CSrc6502View)
-    //int OnCreate(LPCREATESTRUCT lpCreateStruct);
     void OnEnUpdate();
     void OnContextMenu(wxWindow* pWnd, const wxPoint &point);
 
     // TODO: Remove this?  Not doing anything?
     void *CtlColor(wxDC* pDC, UINT nCtlColor);
-    //}}AFX_MSG
-    //DECLARE_MESSAGE_MAP()
 
 private:
     CLeftBar m_wndLeftBar;

@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Temporary place holder for now
 class CArchive;
 
-class CGlobal : public /*CObject,*/ CAsm, virtual CBroadcast
+class CGlobal : public /*CObject,*/ CAsm //, virtual CBroadcast
 {
 private:
     UINT m_uAddrBusWidth;           // width of the address bus

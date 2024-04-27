@@ -29,25 +29,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502View.h"
 #include "6502Doc.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CDialAsmStat dialog
 
-
-CDialAsmStat::CDialAsmStat(CSrc6502View *pView) :
-    CDialog(CDialAsmStat::IDD), m_pView(pView)
+CDialAsmStat::CDialAsmStat(CSrc6502View *pView)
+    : wxDialog() //pView)
+    , m_pView(pView)
 {
     ASSERT(pView != NULL);
-    ASSERT(pView->GetDocument());		  // musi byæ do³¹czony dokument
-    //{{AFX_DATA_INIT(CDialAsmStat)
-    m_strCtrlRow = _T("");
-    m_strCtrlPassNo = _T("");
-    //}}AFX_DATA_INIT
+    ASSERT(pView->GetDocument()); // Document must be attached
+
+    m_strCtrlRow = "";
+    m_strCtrlPassNo = "";
 
     m_nLines = m_pView->GetLineCount();
     m_nCurrLine = 0;
@@ -55,6 +48,20 @@ CDialAsmStat::CDialAsmStat(CSrc6502View *pView) :
     m_pAsm6502 = NULL;
 }
 
+CDialAsmStat::~CDialAsmStat()
+{
+    //DestroyWindow();
+    delete m_pAsm6502;
+}
+
+wxControl *CDialAsmStat::FindControl(long id) const
+{
+    wxWindow *res = FindWindow(id);
+    ASSERT(res); // Wrong object number in the dialog box
+    return dynamic_cast<wxControl*>(res);
+}
+
+#if 0
 
 void CDialAsmStat::DoDataExchange(CDataExchange* pDX)
 {
@@ -64,7 +71,6 @@ void CDialAsmStat::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_PASS_NO, m_strCtrlPassNo);
     //}}AFX_DATA_MAP
 }
-
 
 BEGIN_MESSAGE_MAP(CDialAsmStat, CDialog)
     //{{AFX_MSG_MAP(CDialAsmStat)
@@ -78,35 +84,31 @@ BEGIN_MESSAGE_MAP(CDialAsmStat, CDialog)
     ON_MESSAGE(WM_USER_FIN, OnFinished)
 END_MESSAGE_MAP()
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CDialAsmStat message handlers
 
 void CDialAsmStat::SetValues(int row, int pass)
 {
-    m_strCtrlRow.Format(_T("%d"),row);
-    m_strCtrlPassNo.Format(_T("%d"),pass);
-    UpdateData();
-    GetDlgItem(IDC_CURR_ROW)->Invalidate();
-    GetDlgItem(IDC_PASS_NO)->Invalidate();
-}
+    m_strCtrlRow.Printf("%d", row);
+    m_strCtrlPassNo.Printf("%d", pass);
 
+    //UpdateData();
+
+    //FindControl(IDC_CURR_ROW)->Refresh();
+    //FindControl(IDC_PASS_NO)->Refresh();
+}
 
 bool CDialAsmStat::Create()
 {
-    return CDialog::Create(IDD);
+    //return CDialog::Create(IDD);
+    return false;
 }
 
-
-CDialAsmStat::~CDialAsmStat()
+bool CDialAsmStat::OnInitDialog()
 {
-    DestroyWindow();
-    if (m_pAsm6502)
-        delete m_pAsm6502;
-}
-
-
-BOOL CDialAsmStat::OnInitDialog()
-{
+#if 0
     CDialog::OnInitDialog();
 
     try
@@ -136,301 +138,314 @@ BOOL CDialAsmStat::OnInitDialog()
     {
         ex->ReportError();
     }
+#endif
 
-    return TRUE;  // return TRUE unless you set the focus to a control
-    // EXCEPTION: OCX Property Pages should return FALSE
+    return true;
 }
 
-
-CString CDialAsmStat::GetLine(int nLine)
+std::string CDialAsmStat::GetLine(int nLine)
 {
+#if 0
+
 #ifdef USE_CRYSTAL_EDIT
     //TODO
     return "";
 #else
-    CString buff;
+    std::string buff;
+
     int chr_index= m_pView->GetEditCtrl().LineIndex(nLine);
+
     if (chr_index == -1)
         return buff;
-    int len= m_pView->GetEditCtrl().LineLength(chr_index) + 1;
-    TCHAR *ptr= buff.GetBuffer(len+1);		// przydzielenie miejsca na 'len' znaków w 'buff'
-    m_pView->GetEditCtrl().GetLine(nLine,ptr,len);
-    ptr[len-1] = _T('\n');			// do³¹czenie znaku koñca wiersza
+
+    int len = m_pView->GetEditCtrl().LineLength(chr_index) + 1;
+
+    char *ptr = buff.GetBuffer(len + 1); // Allocating space for 'len' characters in 'buff'
+
+    m_pView->GetEditCtrl().GetLine(nLine, ptr, len);
+
+    ptr[len - 1] = '\n'; // Include a line break character
     buff.ReleaseBuffer(len);
+
     return buff;
 #endif
+
+#endif
+
+    return "";
 }
 
-
-void CDialAsmStat::GetLine(int nLine, TCHAR *buf, int max_len)
+void CDialAsmStat::GetLine(int nLine, char *buf, size_t max_len)
 {
     if (m_pText == NULL)
     {
         buf[0] = 0;
         return;
     }
-    const TCHAR *ptr= _tcschr(m_pText,0xD);
+
+    const char *ptr = strchr(m_pText, 0xD);
+
     if (ptr >= m_pText)
     {
-        int len= min(ptr+1 - m_pText, max_len-1);
-        memcpy(buf,m_pText,len*sizeof(TCHAR));
+        size_t len = std::min((size_t)(ptr + 1 - m_pText), max_len - 1);
+        memcpy(buf, m_pText, len * sizeof(char));
         buf[len] = 0;
-        m_pText = ptr+1+1;		// ominiêcie 0D 0A
+        m_pText = ptr + 1 + 1;		// ominiï¿½cie 0D 0A
     }
-    else		// ostatni wiersz
+    else // Last line
     {
-        int len= min(int(_tcslen(m_pText)), max_len-1);
-        memcpy(buf,m_pText,len*sizeof(TCHAR));
-        buf[len++] = _T('\n');
+        size_t len = std::min(strlen(m_pText), max_len - 1);
+        memcpy(buf, m_pText, len * sizeof(char));
+        buf[len++] = '\n';
         buf[len] = 0;
         m_pText = NULL;
     }
+
     /*
-      int chr_index= m_edit.LineIndex(nLine);
+      int chr_index = m_edit.LineIndex(nLine);
       if (chr_index == -1)
       {
-        *buf = _T('\0');
+        *buf = '\0';
         return;
       }
-      int len= m_edit.GetLine(nLine,buf,max_len);
-      len = min(len,max_len);
-      buf[len++] = _T('\n');
-      buf[len] = _T('\0');
+      int len = m_edit.GetLine(nLine, buf, max_len);
+      len = min(len, max_len);
+      buf[len++] = '\n';
+      buf[len] = '\0';
     */
 }
 
-
 afx_msg LRESULT CDialAsmStat::OnAbortAsm(WPARAM wParam, LPARAM /* lParam */)
 {
-    EndDialog((int)wParam);
+    // TODO: I expect there to be more to this. -- B.Simonds (April 27, 2024)
+
+    EndModal(wxID_CANCEL);
     return LRESULT(0);
 }
 
-
 afx_msg LRESULT CDialAsmStat::OnGetNextLine(WPARAM wParam, LPARAM lParam)
 {
-//  CString test;
+#if 0
+//  std::string test;
 //  m_edit.GetWindowText(test);
 
-    ASSERT( (TCHAR *)lParam != NULL );	// wymagany adres bufora zwrotnego
-    ASSERT( wParam > 0 );			// wymagane podanie minimalnej d³. bufora
+    ASSERT((char *)lParam != NULL); // Required return buffer address
+    ASSERT(wParam > 0); // Minimum length required for buffer
+
     if (m_nCurrLine >= m_nLines)
     {
-        *(TCHAR *)lParam = _T('\0');
+        *(char *)lParam = '\0';
         return LRESULT(-1);
     }
-//  const CString &line= GetLine(m_nCurrLine++);
-//  int len= min((int)wParam-1,line.GetLength());
-//  _tcsncpy((TCHAR *)lParam, (const TCHAR *)line, len);
-//  *((TCHAR *)lParam + len) = _T('\0');
-    GetLine(m_nCurrLine++, (TCHAR *)lParam, (int)wParam-1);
 
-    DWORD timer= ::GetTickCount();
+//  const std::string &line = GetLine(m_nCurrLine++);
+//  int len= min((int)wParam - 1, line.GetLength());
+//  _tcsncpy((char *)lParam, (const char *)line, len);
+//  *((char *)lParam + len) = '\0';
+
+    GetLine(m_nCurrLine++, (char *)lParam, (int)wParam-1);
+
+    DWORD timer = ::GetTickCount();
     if (timer - m_dwTimer >= 100)
     {
         m_dwTimer = timer;
-        SendDlgItemMessage(IDC_ASM_PROGRESS,PBM_SETPOS,(m_nPassNo - 1) * m_nLines + m_nCurrLine);
-        SetLineNo(m_nCurrLine);		// wyœwietlenie numeru aktualnego wiersza
+        SendDlgItemMessage(IDC_ASM_PROGRESS, PBM_SETPOS, (m_nPassNo - 1) * m_nLines + m_nCurrLine);
+        SetLineNo(m_nCurrLine); // Display the current line number
     }
 
     return LRESULT(1);
+#endif
+    return 0;
 }
 
-
-void CDialAsmStat::SetPassNo(int val)	// wyœwietlenie numeru przejœcia asemblacji
+void CDialAsmStat::SetPassNo(int val) // Display the assembly pass number
 {
-    SetCtrlText(IDC_PASS_NO,val);
+    //SetCtrlText(IDC_PASS_NO, val);
 }
 
-
-void CDialAsmStat::SetLineNo(int val)	// wyœwietlenie numeru wiersza
+void CDialAsmStat::SetLineNo(int val) // Display the line number
 {
-    SetCtrlText(IDC_CURR_ROW,val);
+    //SetCtrlText(IDC_CURR_ROW, val);
 }
-
 
 void CDialAsmStat::SetCtrlText(int id, int val)
 {
-    SetDlgItemInt(id,val,FALSE);
+    //SetDlgItemInt(id, val, FALSE);
 }
-
 
 void CDialAsmStat::ProgressStep()
 {
-    CProgressCtrl *pProgress = (CProgressCtrl*) GetDlgItem(IDC_ASM_PROGRESS);
-    if (pProgress == NULL)
-    {
-        ASSERT(FALSE);		// z³y numer obiektu w oknie dialogowym
-        return;
-    }
-    pProgress->StepIt();
+    //CProgressCtrl *pProgress = static_cast<CProgressCtrl *>(GetDlgItem(IDC_ASM_PROGRESS));
+    //pProgress->StepIt();
 }
-
 
 void CDialAsmStat::SetProgressRange(int max_line)
 {
-    CProgressCtrl *pProgress = (CProgressCtrl*) GetDlgItem(IDC_ASM_PROGRESS);
-    if (pProgress == NULL)
-    {
-        ASSERT(FALSE);		// z³y numer obiektu w oknie dialogowym
-        return;
-    }
-    pProgress->SetRange(1,2*max_line);
+    //CProgressCtrl *pProgress = static_cast<CProgressCtrl *>(FindControl(IDC_ASM_PROGRESS));
+    //pProgress->SetRange(1, 2 * max_line);
 }
-
 
 afx_msg LRESULT CDialAsmStat::OnGetLineNo(WPARAM wParam, LPARAM lParam)
 {
-    ASSERT((int *)lParam != NULL);
-    *(int *)lParam = m_nCurrLine - 1;	  // bie¿¹cy wiersz (numery od 0)
+#if 0
+    ASSERT((int *)lParam != nullptr);
+    *(int *)lParam = m_nCurrLine - 1; // Current line (numbers from 0)
     return LRESULT(1);
+#endif
+    return 0;
 }
-
 
 afx_msg LRESULT CDialAsmStat::OnGetDocTitle(WPARAM wParam, LPARAM lParam)
 {
-    ASSERT( (TCHAR *)lParam != NULL );	// wymagany adres bufora zwrotnego
-    ASSERT( wParam > 0 );			// wymagane podanie minimalnej d³. bufora
-    CSrc6502Doc* pDoc= dynamic_cast<CSrc6502Doc*>(m_pView->GetDocument());
-//  if (pDoc && pDoc->m_strPath.IsEmpty())
-//    pDoc->m_strPath = pDoc->GetPathName();
-    const CString &title = pDoc ? pDoc->GetPathName()/*pDoc->m_strPath*/ : CString(_T(""));
-    int len= min((int)wParam-1,title.GetLength());	// nazwa dokumentu (ze œcie¿k¹)
-    _tcsncpy((TCHAR *)lParam, (const TCHAR *)title, len);
-    *((TCHAR *)lParam + len) = _T('\0');
-    return LRESULT(1);
-}
+#if 0
+    ASSERT((char *)lParam != nullptr); // Required return buffer address
+    ASSERT(wParam > 0); // Minimum length required for buffer
 
+    CSrc6502Doc* pDoc = dynamic_cast<CSrc6502Doc*>(m_pView->GetDocument());
+
+    //if (pDoc && pDoc->m_strPath.IsEmpty())
+    //    pDoc->m_strPath = pDoc->GetPathName();
+
+    const std::string &title = pDoc ? pDoc->GetPathName()/*pDoc->m_strPath*/ : "";
+
+    int len = min((int)wParam - 1, title.GetLength()); // Document name (with path)
+
+    _tcsncpy((char *)lParam, title.c_str(), len);
+
+    *((char *)lParam + len) = '\0';
+    return LRESULT(1);
+#endif
+    return 0;
+}
 
 afx_msg LRESULT CDialAsmStat::OnNextPass(WPARAM wParam, LPARAM /* lParam */)
 {
-//  ASSERT( wParam > 0 );			// wymagane podanie numeru przejœcia asemblacji
-    SetPassNo(++m_nPassNo);		// wyœwietlenie numeru przejœcia asemblacji
-    m_nCurrLine = 0;			// odczyt wraca na pocz¹tek
-    m_pText = m_strText;
+    //ASSERT(wParam > 0); // Assembly pass number required
+    SetPassNo(++m_nPassNo); // Display the assembly pass number
+    m_nCurrLine = 0; // Reading returns to the beginning
+    m_pText = m_strText.c_str();
     return LRESULT(1);
 }
-
 
 afx_msg LRESULT CDialAsmStat::OnFinished(WPARAM wParam, LPARAM /* lParam */)
 {
-    m_bFinished = TRUE;			// asemblacja zakoñczona
+    m_bFinished = true; // Assembly complete
 
-    CString ok;
-    if (ok.LoadString(IDS_DIAL_ASM_OK))	// zmiana napisu na przycisku z 'Przerwij' na 'OK'
-        SetDlgItemText(IDCANCEL,ok);
+#if 0
+    std:::string ok;
 
-    CWnd *prg= GetDlgItem(IDC_ASM_PROGRESS);
-    ASSERT(prg != NULL);			// z³y numer obiektu w oknie dialogowym
-    if (prg)
-        prg->ShowWindow(SW_HIDE);
-    CWnd *icn= GetDlgItem(IDC_DIAL_ASM_ICN1);
-    ASSERT(icn != NULL);			// z³y numer obiektu w oknie dialogowym
-    if (icn)
-        icn->ShowWindow(SW_HIDE);
-    icn = GetDlgItem(IDC_DIAL_ASM_ICN2);
-    ASSERT(icn != NULL);			// z³y numer obiektu w oknie dialogowym
-    if (icn)
-        icn->ShowWindow(SW_HIDE);
-    icn = GetDlgItem(IDC_DIAL_ASM_ICN3);
-    ASSERT(icn != NULL);			// z³y numer obiektu w oknie dialogowym
-    if (icn)
-        icn->ShowWindow(SW_HIDE);
+    if (ok.LoadString(IDS_DIAL_ASM_OK)) // change the text on the button from 'Abort' to 'OK'
+        SetDlgItemText(IDCANCEL, ok);
+#endif
 
-    theApp.m_global.SetCodePresence((Stat)wParam==OK);
-    theApp.m_global.SetStart(m_pAsm6502->GetProgramStart());
-    SendMessageToViews(WM_USER_PROG_MEM_CHANGED,(WPARAM)-1,(Stat)wParam==OK ? 0 : -1);
-    SendMessageToPopups(WM_USER_PROG_MEM_CHANGED,(WPARAM)-1,(Stat)wParam==OK ? 0 : -1);
+    wxControl *prg = FindControl(IDC_ASM_PROGRESS);
+    prg->Hide();
 
-    if (wParam)	    // b³¹d asemblacji?
+    wxControl *icn = FindControl(IDC_DIAL_ASM_ICN1);
+    icn->Hide();
+
+    icn = FindControl(IDC_DIAL_ASM_ICN2);
+    icn->Hide();
+
+    icn = FindControl(IDC_DIAL_ASM_ICN3);
+    icn->Hide();
+
+    CGlobal &globals = wxGetApp().m_global;
+
+    bool isStatusOkay = (CAsm::Stat)wParam == CAsm::Stat::OK;
+
+    globals.SetCodePresence(isStatusOkay);
+    globals.SetStart(m_pAsm6502->GetProgramStart());
+    
+    Broadcast::ToViews(EVT_PROG_MEM_CHANGED, (WPARAM)-1, isStatusOkay ? 0 : -1);
+    Broadcast::ToPopups(EVT_PROG_MEM_CHANGED, (WPARAM)-1, isStatusOkay ? 0 : -1);
+
+    if (wParam) // Assembly error?
     {
-        SetLineNo(m_nCurrLine);		// wyœwietlenie numeru aktualnego wiersza
-        const CString err= m_pAsm6502->GetErrMsg((Stat)wParam);
-        CWnd *ctrl= GetDlgItem(IDC_DIAL_ASM_ERR);
-        ASSERT(ctrl != NULL);		// z³y numer obiektu w oknie dialogowym
-        if (ctrl)
-        {
-            ctrl->SetWindowText(err);
-            ctrl->ShowWindow(SW_SHOWNORMAL);
-        }
+        SetLineNo(m_nCurrLine); // Display the current line number
+
+        const std::string err = m_pAsm6502->GetErrMsg((CAsm::Stat)wParam);
+
+        wxControl *ctrl = FindControl(IDC_DIAL_ASM_ERR);
+
+        ctrl->SetLabel(err);
+        ctrl->Show();
     }
     else
-        EndDialog(0);
-
+        EndModal(wxID_OK);
 
     return LRESULT(1);
 }
 
-
 void CDialAsmStat::OnCancel()
 {
-    if (m_bFinished)		// asemblacja zakoñczy³a siê?
+    if (m_bFinished) // Assembly finished?
     {
-        if (m_stAsmRetCode)		// wyst¹pi³ b³¹d?
+        if (m_stAsmRetCode) // Did we get an error?
         {
-            m_pView->SetErrMark(m_nCurrLine-1);	// zaznaczenie wiersza zawieraj¹cego b³¹d
-            CMainFrame *pMain = (CMainFrame*) AfxGetApp()->m_pMainWnd;
-            pMain->m_wndStatusBar.SetPaneText(0,m_pAsm6502->GetErrMsg(m_stAsmRetCode));
+            m_pView->SetErrMark(m_nCurrLine - 1); // Select the line containing the error
+
+            // This probably should be handled with the logging system. -- B.Simonds (April 27, 2024)
+            wxGetApp().SetStatusText(0, m_pAsm6502->GetErrMsg(m_stAsmRetCode));
         }
-        EndDialog(0);
+
+        EndModal(wxID_OK);
     }
-    else				// przerwanie asemblacji
+    else // Assembly interrupted
     {
         m_pAsm6502->Abort();
-        CDialog::OnCancel();
+        EndModal(wxID_CANCEL);
     }
 }
 
-
-UINT CDialAsmStat::start_asm_thread(LPVOID pDial)
+UINT CDialAsmStat::start_asm_thread(void *pDial)
 {
     return ((CDialAsmStat *)pDial)->StartAsm();
 }
 
-
 UINT CDialAsmStat::StartAsm()
 {
-    // get file name
+    // Get the file name
 
-    CSrc6502Doc* pDoc= dynamic_cast<CSrc6502Doc*>(m_pView->GetDocument());
-    const CString &title = pDoc ? pDoc->GetTitle()/*pDoc->m_strPath*/ : CString(_T(""));  //  GetPathName()
-    if (title.GetLength())
-    {
-        int x = 0;
-        for (x=0; x < title.GetLength(); x++)
-        {
-            if (title.Mid(x,1) == ".")
-                break;
-        }
-        CMainFrame::ProjName = title.Left(x); // save project name for saving code
-    }
-    m_stAsmRetCode = (Stat)(m_pAsm6502->Assemble());
-    PostMessage(WM_USER_FIN, WPARAM(m_stAsmRetCode));
+    CSrc6502Doc* pDoc = dynamic_cast<CSrc6502Doc*>(m_pView->GetDocument());
+    wxFileName path(pDoc ? pDoc->GetTitle() : "");
+    
+    if (path.HasName())
+        CMainFrame::ProjName = path.GetName();
+    
+    m_stAsmRetCode = (CAsm::Stat)(m_pAsm6502->Assemble());
+    //PostMessage(WM_USER_FIN, WPARAM(m_stAsmRetCode));
+
     return 0;
 }
 
-
-BOOL CDialAsmStat::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+bool CDialAsmStat::OnSetCursor(wxWindow* pWnd, UINT nHitTest, UINT message)
 {
-    if (!m_bFinished && nHitTest==HTCLIENT)
+#if 0
+    if (!m_bFinished && nHitTest == HTCLIENT)
     {
-        CWnd *btn= GetDlgItem(IDCANCEL);
-        ASSERT(btn != NULL);			// z³y numer obiektu w oknie dialogowym
-        if (btn)
-        {
-            // convert cursor position to client co-ordinates
-            CPoint point;
-            GetCursorPos(&point);
-//      pWnd->ScreenToClient(&point);
-            CRect rect;
-            btn->GetWindowRect(rect);		// wymiary przycisku
-            if (rect.PtInRect(point))		// mysz nad przyciskiem?
-                return CDialog::OnSetCursor(pWnd, nHitTest, message);
-        }
+        wxWindow *btn = GetDlgItem(IDCANCEL);
+        ASSERT(btn != NULL); // Wrong object number in the dialog box
+        
+        // Convert cursor position to client co-ordinates
+        wxPoint point;
+        GetCursorPos(&point);
 
-        ::SetCursor( AfxGetApp()->LoadStandardCursor(IDC_WAIT) );
+//      pWnd->ScreenToClient(&point);
+
+        wxRect rect;
+
+        btn->GetWindowRect(rect); // Button dimensions
+
+        if (rect.PtInRect(point)) // Mouse over button?
+            return CDialog::OnSetCursor(pWnd, nHitTest, message);
+
+        ::SetCursor(wxGetApp().LoadStandardCursor(IDC_WAIT));
         return true;
     }
 
-    return CDialog::OnSetCursor(pWnd, nHitTest, message);
+    return wxDialog::OnSetCursor(pWnd, nHitTest, message);
+#endif
+
+    return false;
 }
