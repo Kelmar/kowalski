@@ -26,16 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "DebugInfo.h"
 #include "OutputMem.h"
 
-// No idication as to what this POSITION type actually is, we're stubbing in an int for now. -- B.Simonds (April 25, 2024)
-typedef int POSITION;
-
-// Stub for now
-class CFileException
-{
-public:
-    CFileException(int err) { }
-    virtual ~CFileException() { }
-};
+#include "InputBase.h"
+#include "InputStack.h"
 
 // Leksem == Lex
 
@@ -342,180 +334,6 @@ public:
 typedef std::unordered_map<std::string, CIdent> CIdentTable;
 
 //=============================================================================
-
-class CInputBase    // Base class for classes reading source data
-{
-protected:
-    int m_nLine;
-    std::string m_strFileName;
-    bool m_bOpened;
-
-public:
-    CInputBase(const char *str = nullptr)
-        : m_strFileName(str)
-    {
-        m_nLine = 0;
-        m_bOpened = false;
-    }
-
-    virtual ~CInputBase()
-    {
-        ASSERT(m_bOpened == false);
-    }
-
-    virtual void open()
-    {
-        m_bOpened = true;
-    }
-
-    virtual void close()
-    {
-        m_bOpened = false;
-    }
-
-    virtual void seek_to_begin()
-    {
-        m_nLine = 0;
-    }
-
-    virtual const std::string &read_line(std::string buffer) = 0;
-
-    virtual int get_line_no() const
-    {
-        return m_nLine - 1; // Line numbering from 0
-    }
-
-    virtual const std::string &get_file_name() const { return CInputBase::m_strFileName; }
-};
-
-//-----------------------------------------------------------------------------
-
-class CInputFile : public CInputBase
-{
-private:
-    std::FILE *m_file;
-
-public:
-    CInputFile(const std::string &str) 
-        : CInputBase(str.c_str())
-        , m_file(nullptr)
-    {
-    }
-
-    ~CInputFile()
-    {
-    }
-
-    virtual void open()
-    {
-        ASSERT(m_bOpened == false); // File is already open
-
-        m_file = std::fopen(m_strFileName.c_str(), "r");
-
-        if (m_file == nullptr)
-            throw new CFileException(errno);
-
-        m_bOpened = true;
-    }
-
-    virtual void close()
-    {
-        ASSERT(m_bOpened == true);	    // The file must be opened
-
-        std::fclose(m_file);
-        m_file = nullptr;
-        m_bOpened = false;
-    }
-
-    virtual void seek_to_begin()
-    {
-        std::fseek(m_file, 0, SEEK_SET);
-        m_nLine = 0;
-    }
-
-    virtual const std::string &read_line(std::string &buffer);
-
-//  virtual int get_line_no()
-
-//  virtual const std::string &get_file_name()
-};
-
-//-----------------------------------------------------------------------------
-
-// Reading data from the document window
-class CInputWin : public CInputBase, public CAsm
-{
-private:
-    wxWindow *m_pWnd;
-
-public:
-    CInputWin(wxWindow *pWnd) : m_pWnd(pWnd)
-    {}
-
-    virtual const std::string &read_line(std::string &buffer);
-    virtual const std::string &get_file_name();
-    virtual void seek_to_begin();
-};
-
-//-----------------------------------------------------------------------------
-
-class CInput : std::list<CInputBase*>
-{
-    CInputBase* tail;
-    CAsm::FileUID fuid;
-
-    int calc_index(POSITION pos);
-
-public:
-    void open_file(const std::string& fname);
-    void open_file(wxWindow* pWin);
-    void close_file();
-
-    CInput(const std::string& fname)
-        : fuid(0)
-        , tail(nullptr)
-    {
-        open_file(fname);
-    }
-
-    CInput(wxWindow* pWin)
-        : fuid(0)
-        , tail(nullptr)
-    {
-        open_file(pWin);
-    }
-
-    CInput()
-        : fuid(0)
-        , tail(nullptr)
-    {}
-
-    ~CInput();
-
-    const std::string &read_line(std::string &buffer)
-    {
-        return tail->read_line(buffer);
-    }
-
-    void seek_to_begin()
-    {
-        tail->seek_to_begin();
-    }
-
-    int get_line_no() const
-    {
-        return tail->get_line_no();
-    }
-
-    int get_count() const { return size(); }
-
-    const std::string& get_file_name() const { return tail->get_file_name(); }
-
-    CAsm::FileUID get_file_UID() const { return fuid; }
-    void set_file_UID(CAsm::FileUID fuid) { this->fuid = fuid; }
-
-    bool is_present() const { return tail != nullptr; }
-};
 
 //-----------------------------------------------------------------------------
 
@@ -915,15 +733,15 @@ typedef std::vector<CRepeatDef> CRepeatDefs;
 class CSourceText : public CSource
 {
 private:
-    CInput input;
+    CInputStack input;
 
 public:
-    CSourceText(const std::string &file_in_name)
-        : input(file_in_name)
+    CSourceText(const std::string &fileName)
+        : input(fileName)
     {}
 
-    CSourceText(wxWindow* pWnd)
-        : input(pWnd)
+    CSourceText(wxWindow* window)
+        : input(window)
     {}
 
     CSourceText()
@@ -932,59 +750,53 @@ public:
     virtual void Start(CConditionalAsm* cond) // start reading lines
     {
         CSource::Start(cond);
-        input.seek_to_begin();
+        input.SeekToBegin();
     }
 
     virtual const std::string &GetCurrLine(std::string &str) // reading less than an entire line
     {
         str.reserve(1024 + 4);
 
-        return input.read_line(str);
+        return input.ReadLine(str);
     }
 
     virtual int GetLineNo() const // read the line number
     {
-        return input.get_line_no();
+        return input.GetLineNumber();
     }
 
     FileUID GetFileUID() // read file ID
     {
-        return input.get_file_UID();
+        return input.GetFileUID();
     }
 
     void SetFileUID(CDebugInfo* pDebugInfo)
     {
         if (pDebugInfo)
-            input.set_file_UID(pDebugInfo->GetFileUID(input.get_file_name()));
+            input.SetFileUID(pDebugInfo->GetFileUID(input.GetFileName()));
     }
 
-    void Include(const std::string &fname, CDebugInfo* pDebugInfo= NULL) // include file
+    void Include(const std::string &fname, CDebugInfo* pDebugInfo = nullptr) // include file
     {
-        input.open_file(fname);
+        input.OpenFile(fname);
 
         if (pDebugInfo)
-            input.set_file_UID(pDebugInfo->GetFileUID(fname));
+            input.SetFileUID(pDebugInfo->GetFileUID(fname));
     }
 
     bool TextFin() // Current file finished
     {
-        if (input.get_count() > 1) // nested read (.include) ?
-        {
-            input.close_file();
-            return true;
-        }
-        else
-            return false; // End of source files
+        return input.CloseFile();
     }
 
     /*
     bool IsPresent() const // Check whether there is any file being read
-    { return input.is_present(); }
+    { return input.IsPresent(); }
     */
    
     virtual const std::string &GetFileName() const
     {
-        return input.get_file_name();
+        return input.GetFileName();
     }
 };
 

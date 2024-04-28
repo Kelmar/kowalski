@@ -33,108 +33,6 @@ uint8_t CAsm6502::forcelong = 0;
 bool CAsm6502::generateBRKExtraByte = false; // generate extra byte after BRK command?
 uint8_t CAsm6502::BRKExtraByte = 0x0; // value of extra byte generated after BRK command
 
-/*************************************************************************/
-
-LPTSTR CInputFile::read_line(LPTSTR str, UINT max_len)
-{
-    LPTSTR ptr = ReadString(str, max_len);
-
-    if (ptr)
-        m_nLine++;
-
-    return ptr;
-}
-
-/*************************************************************************/
-
-LPTSTR CInputWin::read_line(LPTSTR str, UINT max_len)
-{
-    int ret = SendMessage(m_pWnd->GetSafeHwnd(), WM_USER_GET_NEXT_LINE,
-                          WPARAM(max_len), LPARAM(str));
-    ASSERT(ret);
-
-    if (ret>0)
-        m_nLine++;
-
-    return str;
-}
-
-
-const CString &CInputWin::get_file_name()
-{
-    CString fname;
-
-    int ret = SendMessage(m_pWnd->GetSafeHwnd(), WM_USER_GET_TITLE, WPARAM(_MAX_PATH),
-                          LPARAM(m_strFileName.GetBuffer(_MAX_PATH+1)));
-
-    m_strFileName.ReleaseBuffer();
-    ASSERT(ret);
-    return m_strFileName;
-}
-
-
-void CInputWin::seek_to_begin()
-{
-    int ret = SendMessage(m_pWnd->GetSafeHwnd(), WM_USER_NEXT_PASS, WPARAM(0), LPARAM(0));
-    ASSERT(ret);
-    m_nLine = 0;
-}
-
-/*************************************************************************/
-
-void CInput::open_file(const CString &fname)
-{
-    tail = ::new CInputFile(fname);
-    tail->open();
-    fuid = (FileUID)calc_index( AddTail(tail) );
-}
-
-
-void CInput::open_file(CWnd *pWnd)
-{
-    tail = ::new CInputWin(pWnd);
-    tail->open();
-    fuid = (FileUID)calc_index( AddTail(tail) );
-//  AddTail(tail);
-}
-
-
-int CInput::calc_index(POSITION pos)
-{
-    int idx= 0;
-    while (pos)
-    {
-        idx++;
-        GetPrev(pos);
-    }
-    return idx;
-}
-
-
-void CInput::close_file()
-{
-    tail->close();
-    ::delete RemoveTail();
-    tail = IsEmpty() ? NULL : GetTail();
-    if (tail)
-        fuid = (FileUID)calc_index(GetTailPosition());
-    else
-        fuid = 0;
-}
-
-
-CInput::~CInput()
-{
-    POSITION pos= GetHeadPosition();
-
-    while (pos)
-    {
-        CInputBase *inp= GetNext(pos);
-        inp->close();
-        ::delete inp;
-    }
-}
-
 //=============================================================================
 
 void CAsm6502::init_members()
@@ -169,7 +67,6 @@ void CAsm6502::init()
 
 //=============================================================================
 
-
 CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
 {
     if (!ptr)
@@ -201,13 +98,16 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
         return CLeksem(CLeksem::L_FIN);
 
     case '$':
-        if (!_istxdigit(*ptr))	// the '$' character at the end of a macro parameter?
+        if (!isxdigit(*ptr)) // the '$' character at the end of a macro parameter?
             return CLeksem(CLeksem::L_STR_ARG);
         break;
+
     case ';':
         return CLeksem(CLeksem::L_COMMENT);
+
     case ':':
         return CLeksem(CLeksem::L_LABEL);
+
     case '=':
         if (*ptr=='=')	// operator '==' r�wne?
         {
@@ -215,24 +115,33 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
             return CLeksem(O_EQ);
         }
         return CLeksem(CLeksem::L_EQUAL);
+
     case '\'':
         return get_char_num();
+
     case '"':
         return get_string('"');
+
     case ',':
         return CLeksem(CLeksem::L_COMMA);
+
     case '(':
         return CLeksem(CLeksem::L_BRACKET_L);
+
     case ')':
         return CLeksem(CLeksem::L_BRACKET_R);
+
     case '[':
-        return CLeksem(CLeksem::L_LBRACKET_L); //65816
+        return CLeksem(CLeksem::L_LBRACKET_L); // 65816
+
     case ']':
-        return CLeksem(CLeksem::L_LBRACKET_R); //65816
+        return CLeksem(CLeksem::L_LBRACKET_R); // 65816
+
     case '{':
-        return CLeksem(CLeksem::L_EXPR_BRACKET_L); //65816
+        return CLeksem(CLeksem::L_EXPR_BRACKET_L); // 65816
+
     case '}':
-        return CLeksem(CLeksem::L_EXPR_BRACKET_R);  //65816
+        return CLeksem(CLeksem::L_EXPR_BRACKET_R); // 65816
 
     case '>':
         if (*ptr=='>')		// operator '>>' przesuni�cia?
@@ -246,6 +155,7 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
             return CLeksem(O_GTE);
         }
         return CLeksem(O_GT);
+
     case '<':
         if (*ptr=='<')		// operator '<<' przesuni�cia?
         {
@@ -258,6 +168,7 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
             return CLeksem(O_LTE);
         }
         return CLeksem(O_LT);
+
     case '&':
         if (*ptr=='&')	// operator '&&' ?
         {
@@ -265,6 +176,7 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
             return CLeksem(O_AND);
         }
         return CLeksem(O_B_AND);
+
     case '|':
         if (*ptr=='|')	// operator '||' ?
         {
@@ -272,12 +184,16 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
             return CLeksem(O_OR);
         }
         return CLeksem(O_B_OR);
+
     case '^':
         return CLeksem(O_B_XOR);
+
     case '+':
         return CLeksem(O_PLUS);
+
     case '-':
         return CLeksem(O_MINUS);
+
     case '*':
         if (*ptr=='=')	// operator '*=' .ORG?
         {
@@ -285,16 +201,21 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
             return CLeksem(I_ORG);
         }
         return CLeksem(O_MUL);
+
     case '/':
         return CLeksem(O_DIV);
+
     case '%':
         if (!swapbin) return CLeksem(O_MOD);
         break;
+
     case '@':
         if (swapbin) return CLeksem(O_MOD);
         break;
+
     case '~':
         return CLeksem(O_B_NOT);
+
     case '!':
         if (*ptr=='=')	// operator '!=' ro�ne?
         {
@@ -310,6 +231,7 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
 
     case '#':
         return CLeksem(CLeksem::L_HASH);
+
     case '.':
         if (*ptr=='=')	// operator '.=' przypisania?
         {
@@ -324,39 +246,39 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
         break;
     };
 
-    if (_istspace(c))
+    if (isspace(c))
     {
-        if (!nospace)		// zwr�ci� leksem L_SPACE?
+        if (!nospace) // Return the L_SPACE token?
             return eat_space();
         eat_space();
         return next_leks();
     }
-    else if (_istdigit(c))	// a decimal digit?
+    else if (isdigit(c)) // a decimal digit?
     {
         ptr--;
         return get_dec_num();
     }
-    else if (c=='$')		// number hex?
+    else if (c == '$') // number hex?
         return get_hex_num();
-    else if (!swapbin && c=='@')		// number bin?
+    else if (!swapbin && c == '@') // number bin?
         return get_bin_num();
-    else if (swapbin && c=='%')		// number bin?
+    else if (swapbin && c == '%') // number bin?
         return get_bin_num();
-    else if (_istalpha(c) || c=='_' || c=='.' || c=='?') // || c=='$') - this is dead, cannot get here due to 4 lines above
+    else if (isalpha(c) || c == '_' || c == '.' || c == '?') // || c == '$') - this is dead, cannot get here due to 4 lines above
     {
         ptr--;
         //const CLeksem &leks=
-        CLeksem::CLString* pStr= get_ident();
-        if (pStr == NULL)
+        std::string* pStr = get_ident();
+        if (pStr == nullptr)
             return CLeksem(CLeksem::ERR_BAD_CHR);
 
         //% Bug Fix 1.2.12.18 - .commands commented out
         OpCode code;
         InstrType it;
 
-        if (c=='.')				// to mo�e by� dyrektywa
+        if (c == '.') // This could be a directive
         {
-            if (asm_instr(*pStr,it))  // only need to do this if c='.'
+            if (asm_instr(*pStr, it))  // only need to do this if c='.'
             {
                 if (it == CAsm::I_DB) //***
                 {
@@ -371,8 +293,7 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
             }
         }
 
-        if (pStr->GetLength()==3 && proc_instr(*pStr, code))	// to mo�e by� instrukcja
-            // end bug fix
+        if (pStr->size() == 3 && proc_instr(*pStr, code)) // This could be a statement
         {
             delete pStr;
             return CLeksem(code);
@@ -388,28 +309,26 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
             return CLeksem(O_LT);
         }
 
-        if (*ptr == '#')			// znak '#' na ko�cu etykiety?
+        if (*ptr == '#') // '#' character at the end of the label?
         {
             ptr++;
-            return CLeksem(pStr,1L);	// identyfikator numerowany (po '#' oczekiwana liczba)
+            return CLeksem(pStr, 1L); // Numbered identifier (expected number after '#')
         }
-        return CLeksem(pStr,1);	// L_IDENT
+        return CLeksem(pStr, 1);	// L_IDENT
     }
 
-    return CLeksem(CLeksem::L_UNKNOWN);	// niesklasyfikowany znak - b��d
+    return CLeksem(CLeksem::L_UNKNOWN); // Unknown character -error
 }
 
-
-
-CLeksem CAsm6502::get_hex_num()		// interpretacja liczby szesnastkowej
+CLeksem CAsm6502::get_hex_num() // Interpretation of a hexadecimal number
 {
-    uint32_t val= 0;
-    const char *tmp= ptr;
+    uint32_t val = 0;
+    const char *tmp = ptr;
 
-    if (!_istxdigit(*ptr))
+    if (!isxdigit(*ptr))
     {
         err_start = tmp;
-        return CLeksem(CLeksem::ERR_NUM_HEX);	// oczekiwana cyfra liczby szesnastkowej
+        return CLeksem(CLeksem::ERR_NUM_HEX); // Expected hexadecimal digit
     }
 
     do
@@ -417,34 +336,33 @@ CLeksem CAsm6502::get_hex_num()		// interpretacja liczby szesnastkowej
         if (val & 0xF0000000)
         {
             err_start = tmp;
-            return CLeksem(CLeksem::ERR_NUM_BIG);	// przekroczenie zakresu liczb 32-bitowych
+            return CLeksem(CLeksem::ERR_NUM_BIG); // Exceeding the range of 32-bit numbers
         }
 
         char c= *ptr++;
         val <<= 4;
-        if (c>='a')
-            val += c-'a'+10;
-        else if (c>='A')
-            val += c-'A'+10;
-        else
-            val += c-'0';
-    }
-    while (_istxdigit(*ptr));
 
-    return CLeksem(CLeksem::N_HEX,SINT32(val));
+        if (c >= 'a')
+            val += c - 'a' + 10;
+        else if (c >= 'A')
+            val += c - 'A' + 10;
+        else
+            val += c - '0';
+    }
+    while (isxdigit(*ptr));
+
+    return CLeksem(CLeksem::N_HEX, int32_t(val));
 }
 
-
-
-CLeksem CAsm6502::get_dec_num()		// interpretacja liczby dziesi�tnej
+CLeksem CAsm6502::get_dec_num() // Interpretation of a decimal number
 {
-    uint32_t val= 0;
-    const char *tmp= ptr;
+    uint32_t val = 0;
+    const char *tmp = ptr;
 
-    if (!_istdigit(*ptr))
+    if (!isdigit(*ptr))
     {
         err_start = tmp;
-        return CLeksem(CLeksem::ERR_NUM_DEC);	// oczekiwana cyfra
+        return CLeksem(CLeksem::ERR_NUM_DEC); // Expected digit
     }
 
     do
@@ -452,29 +370,26 @@ CLeksem CAsm6502::get_dec_num()		// interpretacja liczby dziesi�tnej
         if (val > ~0u / 10)
         {
             err_start = tmp;
-            return CLeksem(CLeksem::ERR_NUM_BIG); // przekroczenie zakresu liczb 32-bitowych
+            return CLeksem(CLeksem::ERR_NUM_BIG); // Exceeding the range of 32-bit numbers
         }
 
         val *= 10;
         val += *ptr++ - '0';
-
     }
-    while (_istdigit(*ptr));
+    while (isdigit(*ptr));
 
-    return CLeksem(CLeksem::N_DEC,SINT32(val));
+    return CLeksem(CLeksem::N_DEC, int32_t(val));
 }
 
-
-
-CLeksem CAsm6502::get_bin_num()		// interpretacja liczby dw�jkowej
+CLeksem CAsm6502::get_bin_num() // Interpretation of binary number
 {
-    uint32_t val= 0;
-    const char *tmp= ptr;
+    uint32_t val = 0;
+    const char *tmp = ptr;
 
-    if (*ptr!='0' && *ptr!='1')
+    if (*ptr != '0' && *ptr != '1')
     {
         err_start = tmp;
-        return CLeksem(CLeksem::ERR_NUM_HEX); // oczekiwana cyfra liczby szesnastkowej
+        return CLeksem(CLeksem::ERR_NUM_HEX); // Expected hexadecimal digit
     }
 
     do
@@ -482,7 +397,7 @@ CLeksem CAsm6502::get_bin_num()		// interpretacja liczby dw�jkowej
         if (val & 0x80000000u)
         {
             err_start = tmp;
-            return CLeksem(CLeksem::ERR_NUM_BIG); // przekroczenie zakresu liczb 32-bitowych
+            return CLeksem(CLeksem::ERR_NUM_BIG); // Exceeding the range of 32-bit numbers
         }
 
         val <<= 1;
@@ -490,16 +405,14 @@ CLeksem CAsm6502::get_bin_num()		// interpretacja liczby dw�jkowej
             val++;
 
     }
-    while (*ptr=='0' || *ptr=='1');
+    while (*ptr == '0' || *ptr == '1');
 
-    return CLeksem(CLeksem::N_BIN,SINT32(val));
+    return CLeksem(CLeksem::N_BIN, int32_t(val));
 }
 
-
-
-CLeksem CAsm6502::get_char_num()		// interpretacja sta�ej znakowej
+CLeksem CAsm6502::get_char_num() // interpretation of the character constant
 {
-    char c1= *ptr++;	// pierwszy znak w apostrofie
+    char c1 = *ptr++; // first character in apostrophe
 
     if (*ptr != '\'')
     {
@@ -509,38 +422,36 @@ CLeksem CAsm6502::get_char_num()		// interpretacja sta�ej znakowej
         char c2 = *ptr++;
         if (*ptr != '\'')
         {
-            err_start = ptr-2;
+            err_start = ptr - 2;
             return CLeksem(CLeksem::ERR_NUM_CHR);
         }
-        ptr++;		// omini�cie zamykaj�cego apostrofu
-        return CLeksem(CLeksem::N_CHR2,((c2 & 0xFF)<<8)+(c1 & 0xFF));
+        ptr++; // omitting the closing apostrophe
+        return CLeksem(CLeksem::N_CHR2, ((c2 & 0xFF) << 8) + (c1 & 0xFF));
     }
     else
     {
-        ptr++;		// omini�cie zamykaj�cego apostrofu
-        return CLeksem(CLeksem::N_CHR,c1 & 0xFF);
+        ptr++; // omitting the closing apostrophe
+        return CLeksem(CLeksem::N_CHR, c1 & 0xFF);
     }
 }
 
-
-
 //CLeksem
-CLeksem::CLString* CAsm6502::get_ident()	// wyodr�bnienie napisu
+std::string* CAsm6502::get_ident()
 {
-    const char *start= ptr;
-    char c= *ptr++;			// pierwszy znak
+    const char *start = ptr;
+    char c = *ptr++;
 
-    if (!(_istalpha(c) || c=='_' || c=='.' || c=='?'))
+    if (!(isalpha(c) || c == '_' || c == '.' || c == '?'))
     {
         err_start = start;
-        return NULL;  //CLeksem(CLeksem::ERR_BAD_CHR);
+        return nullptr;  //CLeksem(CLeksem::ERR_BAD_CHR);
     }
 
-    while (__iscsym(*ptr) || *ptr == '.')		// litera, cyfra lub '_'
+    while (isalnum(*ptr) || *ptr == '.') // Letter, digit or '_'
         ptr++;
 
-    CLeksem::CLString *pstr= new CLeksem::CLString(start,ptr-start);
-    ident_start = start;		// zapami�tanie po�o�enia identyfikatora w wierszu
+    std::string *pstr = new std::string(start, ptr - start);
+    ident_start = start; // Remembering the position of the identifier on the line
     ident_fin = ptr;
 
 //  return CLeksem(pstr,0);
@@ -550,17 +461,17 @@ CLeksem::CLString* CAsm6502::get_ident()	// wyodr�bnienie napisu
 
 CLeksem CAsm6502::get_string(char lim)		// wyodr�bnienie �a�cucha znak�w
 {
-    const char *fin= _tcschr(ptr,lim);
+    const char *fin = strchr(ptr, lim);
 
-    if (fin==NULL)
+    if (fin == nullptr)
     {
         err_start = ptr;
         return CLeksem(CLeksem::ERR_STR_UNLIM);
     }
 
-    CLeksem::CLString *pstr= new CLeksem::CLString(ptr,fin-ptr);
+    CLeksem::CLString *pstr = new CLeksem::CLString(ptr, fin - ptr);
 
-    ptr = fin+1;
+    ptr = fin + 1;
 
     return CLeksem(pstr);
 }
@@ -569,17 +480,18 @@ CLeksem CAsm6502::get_string(char lim)		// wyodr�bnienie �a�cucha znak�w
 CLeksem CAsm6502::eat_space()			// omini�cie odst�pu
 {
     ptr--;
-    while ( _istspace(*++ptr) && *ptr!=_T('\n') && *ptr!=_T('\r') )
-        ;		// "bia�e" znaki (ale nie CR)
+    while (isspace(*++ptr) && *ptr != '\n' && *ptr != '\r')
+        ;
+
+    // Whitespace characters (but not CR)
     return CLeksem(CLeksem::L_SPACE);
 }
-
 
 bool CAsm6502::proc_instr(const CString &str, OpCode &code)
 {
     ASSERT(str.GetLength() == 3);
 
-    switch (_totupper(str[0]))		// spr. czy 'str' jest kodem instrukcji
+    switch (_totupper(str[0])) // Check whether 'str' is the instruction code
     {
     case 'A':
         switch (_totupper(str[1]))
@@ -588,10 +500,12 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             if (_totupper(str[2])=='C')
                 return code=C_ADC, true;
             break;
+            
         case 'N':
             if (_totupper(str[2])=='D')
                 return code=C_AND, true;
             break;
+
         case 'S':
             if (_totupper(str[2])=='L')
                 return code=C_ASL, true;
@@ -610,32 +524,39 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             else if (_totupper(str[2])=='R')
                 return code=C_BBR, true;
             break;
+
         case 'C':
             if (_totupper(str[2])=='C')
                 return code=C_BCC, true;
             else if (_totupper(str[2])=='S')
                 return code=C_BCS, true;
             break;
+
         case 'E':
             if (_totupper(str[2])=='Q')
                 return code=C_BEQ, true;
             break;
+
         case 'I':
             if (_totupper(str[2])=='T')
                 return code=C_BIT, true;
             break;
+
         case 'M':
             if (_totupper(str[2])=='I')
                 return code=C_BMI, true;
             break;
+
         case 'N':
             if (_totupper(str[2])=='E')
                 return code=C_BNE, true;
             break;
+
         case 'P':
             if (_totupper(str[2])=='L')
                 return code=C_BPL, true;
             break;
+
         case 'R':
             if (!(bProc6502==0) && _totupper(str[2])=='A')
                 return code=C_BRA, true;
@@ -644,6 +565,7 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             else if ((bProc6502==2) && _totupper(str[2])=='L')  //% 65816
                 return code=C_BRL, true;
             break;
+
         case 'V':
             if (_totupper(str[2])=='C')
                 return code=C_BVC, true;
@@ -666,14 +588,17 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             else if (_totupper(str[2])=='V')
                 return code=C_CLV, true;
             break;
+
         case 'M':
             if (_totupper(str[2])=='P')
                 return code=C_CMP, true;
             break;
+
         case 'O':
             if ((bProc6502==2) && _totupper(str[2])=='P')  //% 65816
                 return code=C_COP, true;
             break;
+
         case 'P':
             if (_totupper(str[2])=='X')
                 return code=C_CPX, true;
@@ -701,6 +626,7 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
     case 'E':
         if (_totupper(str[1])=='O' && _totupper(str[2])=='R')
             return code=C_EOR, true;
+
         break;
 
     case 'I':
@@ -709,10 +635,13 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             {
             case 'A':
                 if (bProc6502!=0) return code=C_INA, true;
+
             case 'C':
                 return code=C_INC, true;
+
             case 'X':
                 return code=C_INX, true;
+
             case 'Y':
                 return code=C_INY, true;
             }
@@ -778,19 +707,25 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             {
             case 'A':
                 return code=C_PHA, true;
+
             case 'B':
                 if (bProc6502==2) return code=C_PHB, true;  //% 65816
                 break;
+
             case 'D':
                 if (bProc6502==2) return code=C_PHD, true;  //% 65816
                 break;
+
             case 'K':
                 if (bProc6502==2) return code=C_PHK, true;  //% 65816
                 break;
+
             case 'P':
                 return code=C_PHP, true;
+
             case 'X':
                 if (bProc6502!=0) return code=C_PHX, true;
+
             case 'Y':
                 if (bProc6502!=0) return code=C_PHY, true;
             }
@@ -799,16 +734,21 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             {
             case 'A':
                 return code=C_PLA, true;
+
             case 'B':
                 if (bProc6502==2) return code=C_PLB, true;  //% 65816
                 break;
+
             case 'D':
                 if (bProc6502==2) return code=C_PLD, true;  //% 65816
                 break;
+
             case 'P':
                 return code=C_PLP, true;
+
             case 'X':
                 if (bProc6502!=0) return code=C_PLX, true;
+                
             case 'Y':
                 if (bProc6502!=0) return code=C_PLY, true;
             }
@@ -821,16 +761,19 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             if ((bProc6502==2) && _totupper(str[2])=='P')  //% 65816
                 return code=C_REP, true;
             break;
+
         case 'O':
             if (_totupper(str[2])=='L')
                 return code=C_ROL, true;
             else if (_totupper(str[2])=='R')
                 return code=C_ROR, true;
             break;
+
         case 'M':
             if ((bProc6502==1) && _totupper(str[2])=='B')
                 return code=C_RMB, true;
             break;
+
         case 'T':
             if (_totupper(str[2])=='I')
                 return code=C_RTI, true;
@@ -849,6 +792,7 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             if (_totupper(str[2])=='C')
                 return code=C_SBC, true;
             break;
+
         case 'E':
             if (_totupper(str[2])=='C')
                 return code=C_SEC, true;
@@ -859,10 +803,12 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             else if ((bProc6502==2) && _totupper(str[2])=='P')  //% 65816
                 return code=C_SEP, true;
             break;
+
         case 'M':
             if ((bProc6502==1) && _totupper(str[2])=='B')
                 return code=C_SMB, true;
             break;
+
         case 'T':
             if (_totupper(str[2])=='A')
                 return code=C_STA, true;
@@ -887,20 +833,24 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             if (_totupper(str[2])=='Y')
                 return code=C_TAY, true;
             break;
+
         case 'C':
             if ((bProc6502==2) && _totupper(str[2])=='D')  //% 65816
                 return code=C_TCD, true;
             if ((bProc6502==2) && _totupper(str[2])=='S')  //% 65816
                 return code=C_TCS, true;
             break;
+
         case 'D':
             if ((bProc6502==2) && _totupper(str[2])=='C')  //% 65816
                 return code=C_TDC, true;
             break;
+
         case 'R':
             if (!(bProc6502==0) && _totupper(str[2])=='B')
                 return code=C_TRB, true;
             break;
+
         case 'S':
             if (!(bProc6502==0) && _totupper(str[2])=='B')
                 return code=C_TSB, true;
@@ -909,6 +859,7 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             if (_totupper(str[2])=='X')
                 return code=C_TSX, true;
             break;
+
         case 'X':
             if (_totupper(str[2])=='A')
                 return code=C_TXA, true;
@@ -917,6 +868,7 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             if ((bProc6502==2) && _totupper(str[2])=='Y')  //% 65816
                 return code=C_TXY, true;
             break;
+
         case 'Y':
             if (_totupper(str[2])=='A')
                 return code=C_TYA, true;
@@ -925,6 +877,7 @@ bool CAsm6502::proc_instr(const CString &str, OpCode &code)
             break;
         }
         break;
+
     case 'W':
         if ((bProc6502==2) && _totupper(str[1])=='A' && _totupper(str[2])=='I')  //% 65816
             return code=C_WAI, true;
@@ -4681,40 +4634,40 @@ CAsm::FileUID CAsm6502::get_file_UID()	// id pliku (dla debug info)
 
 void CAsm6502::generate_debug(uint32_t addr, int line_no, FileUID file_UID)
 {
-    ASSERT(debug != NULL);
-    debug->AddLine( CDebugLine(line_no,file_UID,addr,
-                               typeid(text) == typeid(CMacroDef) ? DBG_CODE|DBG_MACRO : DBG_CODE) );
-}
+    ASSERT(debug);
 
+    debug->AddLine(CDebugLine(line_no, file_UID,addr,
+                            typeid(text) == typeid(CMacroDef) ? DBG_CODE | DBG_MACRO : DBG_CODE) );
+}
 
 CAsm::Stat CAsm6502::generate_debug(InstrType it, int line_no, FileUID file_UID)
 {
-    ASSERT(debug != NULL);
+    ASSERT(debug);
 
     switch (it)
     {
-    case I_DD:		// def double byte
-    case I_DW:		// def word
-    case I_DB:		// def byte
-    case I_DS:		// def string
-    case I_DCB:		// declare block
-    case I_RS:		// reserve space
-    case I_ASCIS:	// ascii + $80 ostatni bajt
+    case I_DD:      // def double byte
+    case I_DW:      // def word
+    case I_DB:      // def byte
+    case I_DS:      // def string
+    case I_DCB:     // declare block
+    case I_RS:      // reserve space
+    case I_ASCIS:   // ascii + $80 ostatni bajt
     {
         if (origin > mem_mask)
-//			if (origin > 0xFFFF)		//65816 - rollover error
+//			if (origin > 0xFFFF)		// 65816 - rollover error
             return ERR_UNDEF_ORIGIN;
 
-        CDebugLine dl(line_no,file_UID,(uint32_t)origin,DBG_DATA);
+        CDebugLine dl(line_no,file_UID, (uint32_t)origin, DBG_DATA);
         debug->AddLine(dl);
         break;
     }
 
-    case I_ORG:		// origin
+    case I_ORG:
     case I_START:
-    case I_END:		// zako�czenie
-    case I_ERROR:	// zg�oszenie b��du
-    case I_INCLUDE:	// w��czenie pliku
+    case I_END:
+    case I_ERROR:
+    case I_INCLUDE:
     case I_IF:
     case I_ELSE:
     case I_ENDIF:
@@ -4725,31 +4678,36 @@ CAsm::Stat CAsm6502::generate_debug(InstrType it, int line_no, FileUID file_UID)
 
     default:
         ASSERT(false);
+        break;
     }
 
     return OK;
 }
 
-
 void CAsm6502::generate_debug()
 {
     CIdent info;
-    CString ident;
-    debug->SetIdentArrSize( global_ident.GetCount() + local_ident.GetCount() + proc_local_ident.GetCount() );
-    POSITION pos= global_ident.GetStartPosition();
-    int index= 0;
+    std::string ident;
+    debug->SetIdentArrSize(global_ident.GetCount() + local_ident.GetCount() + proc_local_ident.GetCount());
+    POSITION pos = global_ident.GetStartPosition();
+    int index = 0;
+
     while (pos)
     {
         global_ident.GetNextAssoc(pos,ident,info);
         debug->SetIdent(index++,ident,info);
     }
+
     pos = proc_local_ident.GetStartPosition();
+
     while (pos)
     {
         proc_local_ident.GetNextAssoc(pos, ident, info);
         debug->SetIdent(index++, ident, info);
     }
+
     pos = local_ident.GetStartPosition();
+
     while (pos)
     {
         local_ident.GetNextAssoc(pos, ident, info);
@@ -4759,23 +4717,26 @@ void CAsm6502::generate_debug()
 
 //=============================================================================
 
-CString CAsm6502::GetErrMsg(Stat stat)
+std::string CAsm6502::GetErrMsg(Stat stat)
 {
-    if ((stat<OK || stat>=ERR_LAST) && stat!=STAT_USER_DEF_ERR)
+#if 0
+    if ((stat < OK || stat >= ERR_LAST) && stat != STAT_USER_DEF_ERR)
     {
-        ASSERT(false);		// b��dna warto�� 'stat'
-        return CString(_T("???"));
+        ASSERT(false); // Invalid value 'stat'
+        return std::string("???");
     }
 
-    CString msg,form,txt;
+    wxString msg, form, txt;
 
-//  if (!text->IsPresent())	// asemblacja wiersza?
+    //if (!text->IsPresent()) // Line assembly?
     if (check_line)
     {
-        ASSERT(stat>0);
-        if (form.LoadString(IDS_ASM_FORM3) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST+stat))
-            msg.Format(form,(int)stat,(LPCTSTR)txt);
-        return msg;
+        ASSERT(stat > 0);
+
+        if (form.LoadString(IDS_ASM_FORM3) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
+            msg.Printf(form, (int)stat, txt);
+
+        return msg.ToStdString();
     }
 
     switch (stat)
@@ -4785,32 +4746,32 @@ CString CAsm6502::GetErrMsg(Stat stat)
         break;
 
     case ERR_OUT_OF_MEM:
-        if (form.LoadString(IDS_ASM_FORM3) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST+stat))
-            msg.Format(form,(int)stat,(LPCTSTR)txt);
+        if (form.LoadString(IDS_ASM_FORM3) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
+            msg.Printf(form, (int)stat, txt);
         break;
 
     case ERR_FILE_READ:
-        if (form.LoadString(IDS_ASM_FORM2) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST+stat))
-            msg.Format(form,(int)stat,(LPCTSTR)txt,(LPCTSTR)text->GetFileName());
+        if (form.LoadString(IDS_ASM_FORM2) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
+            msg.Printf(form, (int)stat, txt, (LPCTSTR)text->GetFileName());
         break;
 
-    case ERR_UNDEF_LABEL:	// niezdefiniowana etykieta
+    case ERR_UNDEF_LABEL: // Undefined label
     case ERR_PHASE:
-    case ERR_LABEL_REDEF:	// etykieta ju� zdefiniowana
-        if (form.LoadString(IDS_ASM_FORM4) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST+stat))
-            msg.Format(form, (int)stat, (LPCTSTR)txt, (LPCTSTR)err_ident, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
+    case ERR_LABEL_REDEF: // Label already defined
+        if (form.LoadString(IDS_ASM_FORM4) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
+            msg.Printf(form, (int)stat, txt, (LPCTSTR)err_ident, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
         break;
 
     case STAT_USER_DEF_ERR:
         if (!user_error_text.IsEmpty())
         {
             if (form.LoadString(IDS_ASM_FORM5))
-                msg.Format(form, (LPCTSTR)user_error_text, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
+                msg.Printf(form, (LPCTSTR)user_error_text, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
         }
         else
         {
             if (form.LoadString(IDS_ASM_FORM6))
-                msg.Format(form, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
+                msg.Printf(form, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
         }
         break;
 
@@ -4819,18 +4780,21 @@ CString CAsm6502::GetErrMsg(Stat stat)
         {
             try
             {
-                msg.Format(form,(int)stat,(LPCTSTR)txt,text->GetLineNo()+1,(LPCTSTR)text->GetFileName());
+                msg.Printf(form, (int)stat, txt, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
             }
             catch (CInvalidArgException *)
             {
                 form.LoadString(IDS_ASM_FORM3);
-                msg.Format(form,( int)stat, (LPCTSTR)txt);
+                msg.Printf(form, (int)stat, txt);
             }
         }
         break;
     }
 
     return msg;
+#endif
+
+    return "";
 }
 
 //=============================================================================

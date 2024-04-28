@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //      are changed infrequently
 //
 
+#ifndef STDAFX_H__
+#define STDAFX_H__
+
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 
 #define _SCL_SECURE_NO_WARNINGS
@@ -77,7 +80,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define WPARAM uint32_t
 #define LPARAM uint32_t
 
+// No idication as to what this POSITION type actually is, we're stubbing in an int for now. -- B.Simonds (April 25, 2024)
+typedef int POSITION;
+
+// Couple of class stubs from MFC that we need to convert.
+
 class CCmdUI;
+
+// Stub for now, need full exception system; wxWidgets doesn't provide one.
+class CFileException
+{
+public:
+    CFileException(int err) { }
+    virtual ~CFileException() { }
+};
 
 //#include <afxwin.h>         // MFC core and standard components
 //#include <afxext.h>         // MFC extensions
@@ -97,3 +113,5 @@ class CCmdUI;
 //#include "Shlwapi.h"
 
 #include "6502.h"
+
+#endif /* STDAFX_H__ */
