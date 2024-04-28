@@ -36,7 +36,7 @@ class CSrc6502View;
  * Draws breakpoints and current line markers for debgging runs.
  */
 //class CLeftBar : public CControlBar, public CMarks
-class CLeftBar : public wxControl, public CMarks
+class CLeftBar : public wxControl
 {
 private:
     int m_barWidth;
@@ -66,7 +66,7 @@ public:
 
     wxSize MySize();
 
-    virtual void OnPaint(wxPaintEvent &event);
+    virtual void DoPaint(wxPaintEvent &event);
 };
 
 #endif /* LEFT_BAR_H__ */

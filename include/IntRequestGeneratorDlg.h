@@ -18,52 +18,21 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#if !defined(AFX_INTREQUESTGENERATORDLG_H__1AEFC032_2D6B_4A3D_8DE5_5BB89CB76F80__INCLUDED_)
-#define AFX_INTREQUESTGENERATORDLG_H__1AEFC032_2D6B_4A3D_8DE5_5BB89CB76F80__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-// IntRequestGeneratorDlg.h : header file
-//
+#ifndef INT_GENERATE_DLG_H__
+#define INT_GENERATE_DLG_H__
 
 /////////////////////////////////////////////////////////////////////////////
 // CIntRequestGeneratorDlg dialog
 
-class CIntRequestGeneratorDlg : public CDialog
+class CIntRequestGeneratorDlg : public wxDialog
 {
-// Construction
 public:
-    CIntRequestGeneratorDlg(CWnd* pParent = NULL);   // standard constructor
+    /* consturctor */ CIntRequestGeneratorDlg();
 
-// Dialog Data
-    //{{AFX_DATA(CIntRequestGeneratorDlg)
-    enum { IDD = IDD_INTERRUPTS };
-    BOOL	m_bGenerateIRQ;
-    BOOL	m_bGenerateNMI;
-    UINT	m_uIRQTimeLapse;
-    UINT	m_uNMITimeLapse;
-    //}}AFX_DATA
-
-
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CIntRequestGeneratorDlg)
-protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
-
-// Implementation
-protected:
-
-    // Generated message map functions
-    //{{AFX_MSG(CIntRequestGeneratorDlg)
-    // NOTE: the ClassWizard will add member functions here
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    bool m_bGenerateIRQ;
+    bool m_bGenerateNMI;
+    UINT m_uIRQTimeLapse;
+    UINT m_uNMITimeLapse;
 };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_INTREQUESTGENERATORDLG_H__1AEFC032_2D6B_4A3D_8DE5_5BB89CB76F80__INCLUDED_)
+#endif /* INT_GENERATE_DLG_H__ */

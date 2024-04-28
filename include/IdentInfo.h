@@ -33,23 +33,12 @@ class CIdentInfo : public CIdentInfoFrame
 {
 private:
     CDebugInfo *m_pDebugInfo;
-
-    static bool m_bRegistered;
-    static std::string m_strClass;
-    static void RegisterWndClass();
-
-    void init();
-    
-    enum { ID_TITLE = IDS_IDENT_TITLE };
-
     CIdentInfoDoc m_doc;
-public:
-    static wxRect m_WndRect;
 
+public:
     CIdentInfo()
         : m_pDebugInfo(nullptr)
     {
-        init();
     }
 
     /* constructor */ CIdentInfo(CDebugInfo *debugInfo);
@@ -61,11 +50,6 @@ public:
     }
 
     bool Create(CDebugInfo *debugInfo = nullptr);
-
-    virtual void PostNcDestroy();
-
-protected:
-    afx_msg void OnDestroy();
 };
 
 #endif /* IDENT_INFO_H__ */

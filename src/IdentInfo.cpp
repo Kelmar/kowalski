@@ -22,57 +22,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "IdentInfo.h"
 #include "resource.h"
 
-
-
-BEGIN_MESSAGE_MAP(CIdentInfo, CIdentInfoFrame)
-    //{{AFX_MSG_MAP(CIdentInfo)
-    ON_WM_DESTROY()
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-
-CRect CIdentInfo::m_WndRect;
 //-----------------------------------------------------------------------------
-// Rejestracja klasy okien
-
-bool CIdentInfo::m_bRegistered= false;
-CString CIdentInfo::m_strClass;
-
-
-void CIdentInfo::RegisterWndClass()
-{
-    ASSERT(!m_bRegistered);
-    if (m_bRegistered)
-        return;
-    m_strClass = AfxRegisterWndClass(CS_DBLCLKS,::LoadCursor(NULL,IDC_ARROW),0,
-                                     AfxGetApp()->LoadIcon(IDR_IDENT_INFO));
-    m_bRegistered = TRUE;
-}
-
-//-----------------------------------------------------------------------------
-// Konstrukcja i zakoñczenie
-
-void CIdentInfo::init()
-{
-    if (!m_bRegistered)
-        RegisterWndClass();
-    m_doc.m_bAutoDelete = FALSE;
-}
-
+//Construction and ending
 
 CIdentInfo::CIdentInfo(CDebugInfo *pDebugInfo)
+    : m_pDebugInfo(pDebugInfo)
 {
-    m_pDebugInfo = pDebugInfo;
-    init();
 }
 
 CIdentInfo::~CIdentInfo()
 {
-}
-
-void CIdentInfo::PostNcDestroy()
-{
-    m_hWnd = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -80,6 +39,7 @@ void CIdentInfo::PostNcDestroy()
 
 bool CIdentInfo::Create(CDebugInfo *pDebugInfo/*= NULL*/)
 {
+#if 0
     if (pDebugInfo)
         m_pDebugInfo = pDebugInfo;
     ASSERT(m_pDebugInfo);
@@ -106,12 +66,8 @@ bool CIdentInfo::Create(CDebugInfo *pDebugInfo/*= NULL*/)
     InitialUpdateFrame(&m_doc,TRUE);
 
     return TRUE;
+#endif
 
+    return true;
 }
 
-
-void CIdentInfo::OnDestroy()
-{
-    GetWindowRect(m_WndRect);
-    CIdentInfoFrame::OnDestroy();
-}

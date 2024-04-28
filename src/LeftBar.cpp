@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "stdafx.h"
 //#include "6502.h"
 #include "LeftBar.h"
-#include "MemoryDC.h"
 #include "6502View.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -46,43 +45,26 @@ CLeftBar::~CLeftBar()
 wxSize CLeftBar::MySize()
 {
     wxRect rect = GetParent()->GetClientRect();
-    return wxSize(m_barWidth, rect.Height());
+    return wxSize(m_barWidth, rect.GetHeight());
 }
 
-bool CLeftBar::Create(dxWindow *parent, CSrc6502View* view)
-{
-    m_editView = view;
-
-    wxRect rect(0, 0, 0, 0);
-
-/*
-    bool bRet = !!CWnd::CreateEx(0, "STATIC", "", WS_CHILD | WS_VISIBLE,
-                                rect, parent, AFX_IDW_CONTROLBAR_LAST);
-
-    m_dwStyle = CBRS_ALIGN_LEFT;
-
-    return bRet;
-*/
-
-    return false;
-}
-
-static const int LEFT_MARGIN = 1;       // margin for markers
-static const int LEFT_ERR_MARGIN = 4;   // margin for error marker
+static const int LEFT_MARGIN = 1;     // margin for markers
+static const int LEFT_ERR_MARGIN = 4; // margin for error marker
 
 void CLeftBar::DoPaint(wxPaintEvent &event)
 {
     wxPaintDC dc(this);
 
     wxRect rect = GetClientRect();
+    wxSize sz = GetClientSize();
 
     wxBitmap offScreen;
-    offScreen.CreateWithDPISize(GetClientSize(), GetDPIScaleFactor());
+    offScreen.CreateScaled(sz.x, sz.y, wxBITMAP_SCREEN_DEPTH, GetContentScaleFactor());
 
-    {
+    { // Memory DC scoping
         wxMemoryDC dcMem(offScreen);
 
-        if (m_pEditView != 0)
+        if (m_editView != 0)
         {
             int topLine = 0, lineCount = 0, lineHeight = 0;
 
@@ -97,19 +79,19 @@ void CLeftBar::DoPaint(wxPaintEvent &event)
 
                 int line = topLine;
 
-                for (int y = 0; y < rect.Height(); y += lineHeight, ++line)
+                for (int y = 0; y < rect.height; y += lineHeight, ++line)
                 {
                     if (line > lineCount)
                         break;
 
                     if (uint8_t bp = m_editView->GetBreakpoint(line))
-                        CMarks::draw_breakpoint(dcMem, LEFT_MARGIN, y, nLineHeight, !(bp & CAsm::BPT_DISABLED));
+                        CMarks::draw_breakpoint(dcMem, LEFT_MARGIN, y, lineHeight, !(bp & CAsm::BPT_DISABLED));
 
                     if (pointerLine == line)
-                        CMarks::draw_pointer(dcMem, LEFT_MARGIN, y, nLineHeight);
+                        CMarks::draw_pointer(dcMem, LEFT_MARGIN, y, lineHeight);
 
                     if (errMarkLine == line)
-                        CMarks::draw_mark(dcMem, LEFT_ERR_MARGIN, y, nLineHeight);
+                        CMarks::draw_mark(dcMem, LEFT_ERR_MARGIN, y, lineHeight);
                 }
             }
         }
