@@ -18,32 +18,29 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef LOAD_CODE_H__
+#define LOAD_CODE_H__
+
 // LoadCode.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
 // CLoadCode dialog
 
-class CLoadCode : public CFileDialog
+class CLoadCode // : public CFileDialog
 {
-    CString m_strTitle;
+    std::string m_strTitle;
     int m_nPos;
     static int m_nInitPos;
 
-    DECLARE_DYNAMIC(CLoadCode)
-
 public:
-    CLoadCode(LPCTSTR lpszFileName = NULL,
-              LPCTSTR lpszFilter = NULL,
-              CWnd* pParentWnd = NULL);
+    CLoadCode(const char *fileName = nullptr,
+              const char *filter = nullptr);
 
     void LoadCode();
 
 protected:
-    //{{AFX_MSG(CLoadCode)
-    virtual BOOL OnInitDialog();
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
-
 //  virtual void OnTypeChange();
 };
+
+#endif /* LOAD_CODE_H__ */

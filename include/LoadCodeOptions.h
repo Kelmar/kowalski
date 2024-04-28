@@ -18,39 +18,24 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef LOAD_CODE_OPTIONS_H__
+#define LOAD_CODE_OPTIONS_H__
+
 // LoadCodeOptions.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
 // CLoadCodeOptions dialog
 
-class CLoadCodeOptions : public CDialog
+class CLoadCodeOptions : public wxDialog
 {
     // Construction
 public:
-    CLoadCodeOptions(CWnd* pParent = NULL);   // standard constructor
+    /* constructor */ CLoadCodeOptions();
 
-    // Dialog Data
-    //{{AFX_DATA(CLoadCodeOptions)
-    enum { IDD = IDD_LOAD_CODE_OPT };
-    //}}AFX_DATA
     static UINT m_uStart;
-    static BOOL m_bClearMem;
+    static bool m_bClearMem;
     static UINT m_uFill;
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CLoadCodeOptions)
-protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
-
-    // Implementation
-protected:
-
-    // Generated message map functions
-    //{{AFX_MSG(CLoadCodeOptions)
-    // NOTE: the ClassWizard will add member functions here
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 };
+
+#endif /* LOAD_CODE_OPTIONS_H__ */

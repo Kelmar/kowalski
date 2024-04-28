@@ -22,13 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_LOGBUFFER_H__F7F5D1B0_569C_4E6D_A034_D79FB77DB930__INCLUDED_)
-#define AFX_LOGBUFFER_H__F7F5D1B0_569C_4E6D_A034_D79FB77DB930__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-#include <vector>
+#ifndef LOG_BUFFER_H__
+#define LOG_BUFFER_H__
 
 // Logging class: recording consecutive items in the buffer overwriting
 // old values
@@ -37,7 +32,7 @@ template <class T>
 class CLogBuffer
 {
 public:
-    CLogBuffer(int nSize= 100000)
+    CLogBuffer(int nSize = 100000)
     {
         m_vBuffer.resize(nSize);
         m_pHead = &m_vBuffer.front();
@@ -67,7 +62,7 @@ public:
     const T& operator [] (int nIndex) const
     {
         ASSERT(nIndex >= 0 && nIndex < GetCount());
-        const T* pStart= m_bFull ? m_pHead : &m_vBuffer.front();
+        const T* pStart = m_bFull ? m_pHead : &m_vBuffer.front();
         pStart += nIndex;
         if (pStart >= &m_vBuffer.back() + 1)
             return pStart[0-m_vBuffer.size()];
@@ -88,4 +83,4 @@ private:
     bool m_bFull;
 };
 
-#endif // !defined(AFX_LOGBUFFER_H__F7F5D1B0_569C_4E6D_A034_D79FB77DB930__INCLUDED_)
+#endif /* LOG_BUFFER_H__ */

@@ -25,29 +25,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "LoadCodeOptions.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
-
-UINT CLoadCodeOptions::m_uStart= 0;
-BOOL CLoadCodeOptions::m_bClearMem= true;
-UINT CLoadCodeOptions::m_uFill= 0x00;
+UINT CLoadCodeOptions::m_uStart = 0;
+bool CLoadCodeOptions::m_bClearMem = true;
+UINT CLoadCodeOptions::m_uFill = 0x00;
 
 /////////////////////////////////////////////////////////////////////////////
 // CLoadCodeOptions dialog
 
 
-CLoadCodeOptions::CLoadCodeOptions(CWnd* pParent /*=NULL*/)
-    : CDialog(CLoadCodeOptions::IDD, pParent)
+CLoadCodeOptions::CLoadCodeOptions()
+    : wxDialog()
 {
-    //{{AFX_DATA_INIT(CLoadCodeOptions)
-    //}}AFX_DATA_INIT
 }
 
-
+#if 0
 extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num, bool bWord= true);
 
 void CLoadCodeOptions::DoDataExchange(CDataExchange* pDX)
@@ -64,13 +56,7 @@ void CLoadCodeOptions::DoDataExchange(CDataExchange* pDX)
     DDV_MinMaxUInt(pDX, m_uFill, 0, 255);
     //}}AFX_DATA_MAP
 }
-
-
-BEGIN_MESSAGE_MAP(CLoadCodeOptions, CDialog)
-    //{{AFX_MSG_MAP(CLoadCodeOptions)
-    // NOTE: the ClassWizard will add message map macros here
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CLoadCodeOptions message handlers
