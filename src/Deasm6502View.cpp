@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Deasm6502View.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "6502.h"
 #include "Deasm6502View.h"
 #include "Deasm6502Doc.h"

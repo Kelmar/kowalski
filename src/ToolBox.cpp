@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // ToolBox.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "6502.h"
 #include "ToolBox.h"
 
@@ -79,7 +79,7 @@ BOOL CToolBox::Create(int rsc_id, CWnd* pParentWnd)
 
     CString regs;
     if (regs.LoadString(rsc_id))
-        SetWindowText(regs);	// nazwa (tytu³) okna
+        SetWindowText(regs);	// nazwa (tytuï¿½) okna
 
     created = true;
 

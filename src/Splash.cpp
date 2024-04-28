@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Splash.cpp : implementation file
 //
 
-#include "stdafx.h"  // e. g. stdafx.h
+#include "StdAfx.h"  // e. g. stdafx.h
 #include "resource.h"  // e.g. resource.h
 
 #include "Splash.h"  // e.g. splash.h
@@ -112,7 +112,7 @@ bool CSplashWnd::Create(CWnd* pParentWnd /*= NULL*/)
     int nColors= ::GetDeviceCaps(hdc,NUMCOLORS);
     ::ReleaseDC(HWND_DESKTOP,hdc);
 
-    m_hdib = LoadImage(		// za³adowanie obrazka i palety kolorów
+    m_hdib = LoadImage(		// zaï¿½adowanie obrazka i palety kolorï¿½w
                  AfxGetResourceHandle(),	// handle of the instance that contains the image
                  (LPCTSTR)MAKEINTRESOURCE(nColors==-1 ? IDB_SPLASH : IDB_SPLASH16),
                  IMAGE_BITMAP,		// type of image
@@ -183,7 +183,7 @@ void CSplashWnd::OnPaint()
     // Paint the image.
     HGDIOBJ hOldBitmap = SelectObject(dcImage.GetSafeHdc(),(HGDIOBJ)m_hdib);
 
-    int nColors= dc.GetDeviceCaps(NUMCOLORS);	// iloœæ wpisów w palecie kolorów
+    int nColors= dc.GetDeviceCaps(NUMCOLORS);	// iloï¿½ï¿½ wpisï¿½w w palecie kolorï¿½w
     if (nColors != -1)
     {
         RGBQUAD rgbColors[16];

@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "resource.h"
 //#include "6502.h"
 #include "MainFrm.h"
@@ -29,10 +29,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //-----------------------------------------------------------------------------
 
-UINT16 CSym6502::io_addr= 0xE000;		// pocz¹tek obszaru we/wy symulatora
+UINT16 CSym6502::io_addr= 0xE000;		// poczï¿½tek obszaru we/wy symulatora
 bool CSym6502::io_enabled= true;
 int CSym6502::bus_width= 16;
-static const int SIM_THREAD_PRIORITY= THREAD_PRIORITY_BELOW_NORMAL; // priorytet (oprócz animate)
+static const int SIM_THREAD_PRIORITY= THREAD_PRIORITY_BELOW_NORMAL; // priorytet (oprï¿½cz animate)
 bool CSym6502::s_bWriteProtectArea= false;
 UINT16 CSym6502::s_uProtectFromAddr= 0xc000;
 UINT16 CSym6502::s_uProtectToAddr= 0xcfff;
@@ -82,7 +82,7 @@ UINT16 CSym6502::get_argument_address(bool bWrite)
     UINT8 mode= m_vCodeToMode[ctx.mem[ctx.pc]];
 //	UINT16 pc= ctx.pc;
     UINT32 pc= ctx.pc;
-    inc_prog_counter();			// ominiêcie rozkazu
+    inc_prog_counter();			// ominiï¿½cie rozkazu
 
     extracycle = false; //% bug Fix 1.2.12.1 - fix cycle timing
 
@@ -105,7 +105,7 @@ UINT16 CSym6502::get_argument_address(bool bWrite)
         break;
 
     case A_ZPGI:
-        arg = ctx.mem[ctx.pc];	// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];	// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg);
         inc_prog_counter();
         break;
@@ -128,13 +128,13 @@ UINT16 CSym6502::get_argument_address(bool bWrite)
         break;
 
     case A_ZPGI_X:
-        arg = ctx.mem[ctx.pc];			// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];			// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg + ctx.x);
         inc_prog_counter();
         break;
 
     case A_ZPGI_Y:
-        arg = ctx.mem[ctx.pc];			// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];			// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg) + ctx.y;
         if ((addr>>8) != (ctx.mem.GetWordInd(arg)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter();
@@ -155,12 +155,12 @@ UINT16 CSym6502::get_argument_address(bool bWrite)
         inc_prog_counter(2);
         break;
 
-    case A_ZREL:		// tu wyj¹tkowo: addr = zpg (lo) + relative (hi)
-        // na dolnym bajcie zwracany jest numer komórki ze strony zerowej
-        // na górnym bajcie przesuniêcie wzglêdne
+    case A_ZREL:		// tu wyjï¿½tkowo: addr = zpg (lo) + relative (hi)
+        // na dolnym bajcie zwracany jest numer komï¿½rki ze strony zerowej
+        // na gï¿½rnym bajcie przesuniï¿½cie wzglï¿½dne
         addr = ctx.mem.GetWord(ctx.pc);
         //		addr = ctx.mem[ctx.pc]; // adres na str. 0
-        //		addr += UINT16( ctx.mem[ctx.pc + 1] ) << 8; 	// przesuniêcie
+        //		addr += UINT16( ctx.mem[ctx.pc + 1] ) << 8; 	// przesuniï¿½cie
         inc_prog_counter(2);
         break;
 
@@ -175,13 +175,13 @@ UINT16 CSym6502::get_argument_address(bool bWrite)
         break;
 
     case A_ZPIL:
-        arg = ctx.mem[ctx.pc];	// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];	// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg);
         inc_prog_counter();
         break;
 
     case A_ZPIL_Y:
-        arg = ctx.mem[ctx.pc];			// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];			// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg) + ctx.y;
         if ((addr>>8) != (ctx.mem.GetWordInd(arg)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter();
@@ -193,7 +193,7 @@ UINT16 CSym6502::get_argument_address(bool bWrite)
         break;
 
     case A_SRI_Y:
-        arg = ctx.mem[ctx.pc];			// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];			// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg) + ctx.y;
         inc_prog_counter();
         break;
@@ -224,7 +224,7 @@ UINT8 CSym6502::get_argument_value()
     UINT32 addr;
 
     UINT8 mode= m_vCodeToMode[ctx.mem[ctx.pc]];
-    inc_prog_counter();			// ominiêcie rozkazu
+    inc_prog_counter();			// ominiï¿½cie rozkazu
 
     extracycle = false; //% bug Fix 1.2.12.1 - fix cycle timing
 
@@ -242,7 +242,7 @@ UINT8 CSym6502::get_argument_value()
         return arg;
 
     case A_ZPGI:
-        arg = ctx.mem[ctx.pc];			// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];			// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg);
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // liczba pod adresem
@@ -283,13 +283,13 @@ UINT8 CSym6502::get_argument_value()
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // liczba pod adresem
 
     case A_ZPGI_X:
-        arg = ctx.mem[ctx.pc];	// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];	// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg + ctx.x);
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // liczba pod adresem
 
     case A_ZPGI_Y:
-        arg = ctx.mem[ctx.pc];	// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];	// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg) + ctx.y;
         if ((addr>>8) != (ctx.mem.GetWordInd(arg)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter();
@@ -306,13 +306,13 @@ UINT8 CSym6502::get_argument_value()
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // liczba pod adresem
 
     case A_ZPIL:
-        arg = ctx.mem[ctx.pc];			// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];			// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg);
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // liczba pod adresem
 
     case A_ZPIL_Y:
-        arg = ctx.mem[ctx.pc];	// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];	// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg) + ctx.y;
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // liczba pod adresem
@@ -323,14 +323,14 @@ UINT8 CSym6502::get_argument_value()
         return arg;
 
     case A_SRI_Y:
-        arg = ctx.mem[ctx.pc];	// adres komórki na str. 0
+        arg = ctx.mem[ctx.pc];	// adres komï¿½rki na str. 0
         addr = ctx.mem.GetWordInd(arg) + ctx.y;
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // liczba pod adresem
 
     case A_RELL:
     case A_ABSI_X:
-    case A_ABSI:		// te tryby s¹ obs³ugiwane
+    case A_ABSI:		// te tryby sï¿½ obsï¿½ugiwane
     case A_ZREL:		// tylko przez
     case A_ZPG2:		// get_argument_address()
     default:
@@ -340,8 +340,8 @@ UINT8 CSym6502::get_argument_value()
 }
 
 
-// funkcja wykonuje rozkaz wskazywany przez ctx.pc zmieniaj¹c odpowiednio stan
-// rejestrów i pamiêci (ctx.mem)
+// funkcja wykonuje rozkaz wskazywany przez ctx.pc zmieniajï¿½c odpowiednio stan
+// rejestrï¿½w i pamiï¿½ci (ctx.mem)
 CAsm::SymStat CSym6502::perform_cmd()
 {
     try
@@ -460,7 +460,7 @@ CAsm::SymStat CSym6502::perform_command()
                 sets negativec
                 setz zeroc
             }
-            ctx.carry = !carry; 	// negacja po¿yczki zgodnie z konwencj¹ 6502
+            ctx.carry = !carry; 	// negacja poï¿½yczki zgodnie z konwencjï¿½ 6502
             ctx.overflow = !!overflow;
             ctx.negative = ((theApp.m_global.m_bProc6502==0) ? !!negative : !!negativec );
             ctx.zero = ((theApp.m_global.m_bProc6502==0) ? !!zero : !!zeroc );
@@ -494,7 +494,7 @@ CAsm::SymStat CSym6502::perform_command()
     case C_CMP:
         arg = get_argument_value();
         acc = ctx.a;
-        __asm 			// porównanie (zawsze binarne, nie ma BCD)
+        __asm 			// porï¿½wnanie (zawsze binarne, nie ma BCD)
         {
             mov al,acc
             cmp al,arg
@@ -510,7 +510,7 @@ CAsm::SymStat CSym6502::perform_command()
     case C_CPX:
         arg = get_argument_value();
         acc = ctx.x;
-        __asm 			// porównanie (zawsze binarne, nie ma BCD)
+        __asm 			// porï¿½wnanie (zawsze binarne, nie ma BCD)
         {
             mov al,acc
             cmp al,arg
@@ -525,7 +525,7 @@ CAsm::SymStat CSym6502::perform_command()
     case C_CPY:
         arg = get_argument_value();
         acc = ctx.y;
-        __asm 			// porównanie (zawsze binarne, nie ma BCD)
+        __asm 			// porï¿½wnanie (zawsze binarne, nie ma BCD)
         {
             mov al,acc
             cmp al,arg
@@ -540,7 +540,7 @@ CAsm::SymStat CSym6502::perform_command()
     case C_ASL:
         if (m_vCodeToMode[cmd] == A_ACC)	// adresowanie akumulatora
         {
-            inc_prog_counter(); 			// ominiêcie rozkazu
+            inc_prog_counter(); 			// ominiï¿½cie rozkazu
             acc = ctx.a;
             __asm
             {
@@ -576,7 +576,7 @@ CAsm::SymStat CSym6502::perform_command()
     case C_LSR:
         if (m_vCodeToMode[cmd] == A_ACC)	// adresowanie akumulatora
         {
-            inc_prog_counter(); 			// ominiêcie rozkazu
+            inc_prog_counter(); 			// ominiï¿½cie rozkazu
             acc = ctx.a;
             __asm
             {
@@ -613,7 +613,7 @@ CAsm::SymStat CSym6502::perform_command()
         carry = ctx.carry;
         if (m_vCodeToMode[cmd] == A_ACC)	// adresowanie akumulatora
         {
-            inc_prog_counter(); 			// ominiêcie rozkazu
+            inc_prog_counter(); 			// ominiï¿½cie rozkazu
             acc = ctx.a;
             __asm
             {
@@ -660,7 +660,7 @@ CAsm::SymStat CSym6502::perform_command()
         carry = ctx.carry;
         if (m_vCodeToMode[cmd] == A_ACC)	// adresowanie akumulatora
         {
-            inc_prog_counter(); 			// ominiêcie rozkazu
+            inc_prog_counter(); 			// ominiï¿½cie rozkazu
             acc = ctx.a;
             __asm
             {
@@ -920,7 +920,7 @@ CAsm::SymStat CSym6502::perform_command()
         if (!ctx.carry)
         {
             AddBranchCycles(arg);
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             else			// skok do przodu
                 ctx.pc += arg;
@@ -932,7 +932,7 @@ CAsm::SymStat CSym6502::perform_command()
         if (ctx.carry)
         {
             AddBranchCycles(arg);
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             else			// skok do przodu
                 ctx.pc += arg;
@@ -944,7 +944,7 @@ CAsm::SymStat CSym6502::perform_command()
         if (!ctx.overflow)
         {
             AddBranchCycles(arg);
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             else			// skok do przodu
                 ctx.pc += arg;
@@ -956,7 +956,7 @@ CAsm::SymStat CSym6502::perform_command()
         if (ctx.overflow)
         {
             AddBranchCycles(arg);
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             else			// skok do przodu
                 ctx.pc += arg;
@@ -968,7 +968,7 @@ CAsm::SymStat CSym6502::perform_command()
         if (!ctx.zero)
         {
             AddBranchCycles(arg);
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             else			// skok do przodu
                 ctx.pc += arg;
@@ -980,7 +980,7 @@ CAsm::SymStat CSym6502::perform_command()
         if (ctx.zero)
         {
             AddBranchCycles(arg);
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             else			// skok do przodu
                 ctx.pc += arg;
@@ -992,7 +992,7 @@ CAsm::SymStat CSym6502::perform_command()
         if (!ctx.negative)
         {
             AddBranchCycles(arg);
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             else			// skok do przodu
                 ctx.pc += arg;
@@ -1004,7 +1004,7 @@ CAsm::SymStat CSym6502::perform_command()
         if (ctx.negative)
         {
             AddBranchCycles(arg);
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             else			// skok do przodu
                 ctx.pc += arg;
@@ -1051,7 +1051,7 @@ CAsm::SymStat CSym6502::perform_command()
         break;
 
     case C_BRK:
-        if (finish == FIN_BY_BRK) 		// instrukcja BRK koñczy dzia³anie programu?
+        if (finish == FIN_BY_BRK) 		// instrukcja BRK koï¿½czy dziaï¿½anie programu?
             return SYM_FIN;
         inc_prog_counter(2);
 //% Bug Fix 1.2.12.8 - BRK not executing when IRQ bit set
@@ -1094,7 +1094,7 @@ CAsm::SymStat CSym6502::perform_command()
     case C_BRA:
         arg = get_argument_value();
         AddBranchCycles(arg);
-        if (arg & 0x80)	// skok do ty³u
+        if (arg & 0x80)	// skok do tyï¿½u
             ctx.pc -= 0x100 - arg;
         else				// skok do przodu
             ctx.pc += arg;
@@ -1148,7 +1148,7 @@ CAsm::SymStat CSym6502::perform_command()
         if (!( ctx.mem[addr & 0xFF] & UINT8(1 << ((cmd >> 4) & 0x07)) ))
         {
             arg = addr >> 8;
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             else			// skok do przodu
                 ctx.pc += arg;
@@ -1160,7 +1160,7 @@ CAsm::SymStat CSym6502::perform_command()
         if ( ctx.mem[addr & 0xFF] & UINT8(1 << ((cmd >> 4) & 0x07)) )
         {
             arg = addr >> 8;
-            if (arg & 0x80) // skok do ty³u
+            if (arg & 0x80) // skok do tyï¿½u
                 ctx.pc -= 0x100 - arg;
             ctx.pc += arg;
         }
@@ -1195,7 +1195,7 @@ CAsm::SymStat CSym6502::perform_command()
     case C_BRL:
         addr = ctx.mem.GetWord(ctx.pc);
         inc_prog_counter(2);
-        if (addr & 0x8000)	// skok do ty³u
+        if (addr & 0x8000)	// skok do tyï¿½u
             ctx.pc -= 0x10000 - addr;
         else				// skok do przodu
             ctx.pc += addr;
@@ -1243,7 +1243,7 @@ CAsm::SymStat CSym6502::perform_command()
 }
 
 
-CAsm::SymStat CSym6502::skip_cmd()      // ominiêcie bie¿¹cej instrukcji
+CAsm::SymStat CSym6502::skip_cmd()      // ominiï¿½cie bieï¿½ï¿½cej instrukcji
 {
     inc_prog_counter( mode_to_len[m_vCodeToMode[ctx.mem[ctx.pc]]] );
     return SYM_OK;
@@ -1271,7 +1271,7 @@ UINT16 CSym6502::get_rst_addr()
 
 CAsm::SymStat CSym6502::StepInto()
 {
-    ASSERT(fin_stat!=SYM_FIN);    // program ju¿ zakoñczy³ dzia³anie
+    ASSERT(fin_stat!=SYM_FIN);    // program juï¿½ zakoï¿½czyï¿½ dziaï¿½anie
 
     if (running)
     {
@@ -1281,7 +1281,7 @@ CAsm::SymStat CSym6502::StepInto()
     set_translation_tables();
     stop_prog = false;
     running = true;
-    old = ctx;            // zapamiêtanie stanu w celu znalezienia ró¿nic
+    old = ctx;            // zapamiï¿½tanie stanu w celu znalezienia rï¿½nic
     fin_stat = perform_cmd();
     running = false;
 
@@ -1294,7 +1294,7 @@ CAsm::SymStat CSym6502::StepInto()
 
 CAsm::SymStat CSym6502::StepOver()
 {
-    ASSERT(fin_stat!=SYM_FIN);    // program ju¿ zakoñczy³ dzia³anie
+    ASSERT(fin_stat!=SYM_FIN);    // program juï¿½ zakoï¿½czyï¿½ dziaï¿½anie
 
     if (running)
     {
@@ -1302,7 +1302,7 @@ CAsm::SymStat CSym6502::StepOver()
         return SYM_OK;
     }
     Update(SYM_RUN);
-    old = ctx;            // zapamiêtanie stanu w celu znalezienia ró¿nic
+    old = ctx;            // zapamiï¿½tanie stanu w celu znalezienia rï¿½nic
     stop_prog = false;
     running = true;
     CWinThread *thread = AfxBeginThread(CSym6502::start_step_over_thread, this, SIM_THREAD_PRIORITY, 0, CREATE_SUSPENDED);
@@ -1314,7 +1314,7 @@ CAsm::SymStat CSym6502::StepOver()
     else
     {
         hThread = (HANDLE)*thread;
-        ResetPointer();             // schowanie strza³ki
+        ResetPointer();             // schowanie strzaï¿½ki
         thread->ResumeThread();
     }
     return SYM_OK;
@@ -1326,7 +1326,7 @@ UINT CSym6502::start_step_over_thread(LPVOID ptr)
     CSym6502 *pSym= (CSym6502 *)ptr;
     pSym->fin_stat = pSym->step_over();
     pSym->running = false;
-    AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998,pSym->fin_stat,0);        // zg³oszenie zakoñczenia
+    AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998,pSym->fin_stat,0);        // zgï¿½oszenie zakoï¿½czenia
     return 0;
 }
 
@@ -1347,7 +1347,7 @@ CAsm::SymStat CSym6502::step_over()     // wykonanie instrukcji bez wchodzenia d
         jsr = true;
     case C_BRK:
         if (debug && !jsr)
-            debug->SetTemporaryExecBreakpoint((addr+2) & ctx.mem_mask);     // przerwanie za instrukcj¹
+            debug->SetTemporaryExecBreakpoint((addr+2) & ctx.mem_mask);     // przerwanie za instrukcjï¿½
 
         for (;;)
         {
@@ -1355,8 +1355,8 @@ CAsm::SymStat CSym6502::step_over()     // wykonanie instrukcji bez wchodzenia d
             if (stat != SYM_OK)
                 return stat;
 
-            if (jsr && ctx.s==stack)        // po rozkazie JSR zdjêty adres powrotu?
-                return SYM_BPT_TEMP;          // wiêc stop
+            if (jsr && ctx.s==stack)        // po rozkazie JSR zdjï¿½ty adres powrotu?
+                return SYM_BPT_TEMP;          // wiï¿½c stop
         }
         break;
 
@@ -1369,7 +1369,7 @@ CAsm::SymStat CSym6502::step_over()     // wykonanie instrukcji bez wchodzenia d
 
 CAsm::SymStat CSym6502::RunTillRet()
 {
-    ASSERT(fin_stat!=SYM_FIN);    // program ju¿ zakoñczy³ dzia³anie
+    ASSERT(fin_stat!=SYM_FIN);    // program juï¿½ zakoï¿½czyï¿½ dziaï¿½anie
 
     if (running)
     {
@@ -1377,7 +1377,7 @@ CAsm::SymStat CSym6502::RunTillRet()
         return SYM_OK;
     }
     Update(SYM_RUN);
-    old = ctx;            // zapamiêtanie stanu w celu znalezienia ró¿nic
+    old = ctx;            // zapamiï¿½tanie stanu w celu znalezienia rï¿½nic
     stop_prog = false;
     running = true;
     CWinThread *thread = AfxBeginThread(CSym6502::start_run_till_ret_thread, this, SIM_THREAD_PRIORITY, 0, CREATE_SUSPENDED);
@@ -1389,7 +1389,7 @@ CAsm::SymStat CSym6502::RunTillRet()
     else
     {
         hThread = (HANDLE)*thread;
-        ResetPointer();             // schowanie strza³ki
+        ResetPointer();             // schowanie strzaï¿½ki
         thread->ResumeThread();
     }
     return SYM_OK;
@@ -1401,7 +1401,7 @@ UINT CSym6502::start_run_till_ret_thread(LPVOID ptr)
     CSym6502 *pSym= (CSym6502 *)ptr;
     pSym->fin_stat = pSym->run_till_ret();
     pSym->running = false;
-    AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998, pSym->fin_stat, 0);      // zg³oszenie zakoñczenia
+    AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998, pSym->fin_stat, 0);      // zgï¿½oszenie zakoï¿½czenia
     return 0;
 }
 
@@ -1417,8 +1417,8 @@ CAsm::SymStat CSym6502::run_till_ret()  // uruchomienie do powrotu z podprogramu
         if (stat != SYM_OK)
             return stat;
 
-        if (ctx.s == stack)         // zdjêty ze stosu adres powrotu?
-            return SYM_BPT_TEMP;      // wiêc stop
+        if (ctx.s == stack)         // zdjï¿½ty ze stosu adres powrotu?
+            return SYM_BPT_TEMP;      // wiï¿½c stop
     }
 }
 
@@ -1426,7 +1426,7 @@ CAsm::SymStat CSym6502::run_till_ret()  // uruchomienie do powrotu z podprogramu
 
 CAsm::SymStat CSym6502::Run()
 {
-    ASSERT(fin_stat!=SYM_FIN);    // program ju¿ zakoñczy³ dzia³anie
+    ASSERT(fin_stat!=SYM_FIN);    // program juï¿½ zakoï¿½czyï¿½ dziaï¿½anie
 
     if (running)
     {
@@ -1434,7 +1434,7 @@ CAsm::SymStat CSym6502::Run()
         return SYM_OK;
     }
     Update(SYM_RUN);
-    old = ctx;            // zapamiêtanie stanu w celu znalezienia ró¿nic
+    old = ctx;            // zapamiï¿½tanie stanu w celu znalezienia rï¿½nic
     stop_prog = false;
     running = true;
     CWinThread *thread = AfxBeginThread(CSym6502::start_run_thread, this, SIM_THREAD_PRIORITY, 0, CREATE_SUSPENDED);
@@ -1446,7 +1446,7 @@ CAsm::SymStat CSym6502::Run()
     else
     {
         hThread = (HANDLE)*thread;
-        ResetPointer();             // schowanie strza³ki
+        ResetPointer();             // schowanie strzaï¿½ki
         thread->ResumeThread();
     }
     return SYM_OK;
@@ -1458,7 +1458,7 @@ UINT CSym6502::start_run_thread(LPVOID ptr)
     CSym6502 *pSym= (CSym6502 *)ptr;
     pSym->fin_stat = pSym->run();
     pSym->running = false;
-    AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998,pSym->fin_stat,0);        // zg³oszenie zakoñczenia
+    AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998,pSym->fin_stat,0);        // zgï¿½oszenie zakoï¿½czenia
     return 0;
 }
 
@@ -1487,8 +1487,8 @@ CAsm::SymStat CSym6502::perform_step(bool animate)
     if (animate)
     {
         eventRedraw.ResetEvent(); // stan oczekiwania
-        AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998, SYM_RUN, 1); // odœwie¿enie
-        eventRedraw.Lock();       // oczekiwanie na odœwie¿enie okna
+        AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998, SYM_RUN, 1); // odï¿½wieï¿½enie
+        eventRedraw.Lock();       // oczekiwanie na odï¿½wieï¿½enie okna
     }
 
     return SYM_OK;
@@ -1560,7 +1560,7 @@ void CSym6502::interrupt(int& nInterrupt)	// interrupt requested: load pc ***
 
 CAsm::SymStat CSym6502::Animate()
 {
-    ASSERT(fin_stat!=SYM_FIN);    // program ju¿ zakoñczy³ dzia³anie
+    ASSERT(fin_stat!=SYM_FIN);    // program juï¿½ zakoï¿½czyï¿½ dziaï¿½anie
 
     if (running)
     {
@@ -1568,7 +1568,7 @@ CAsm::SymStat CSym6502::Animate()
         return SYM_OK;
     }
     Update(SYM_RUN);
-    old = ctx;            // zapamiêtanie stanu w celu znalezienia ró¿nic
+    old = ctx;            // zapamiï¿½tanie stanu w celu znalezienia rï¿½nic
     stop_prog = false;
     running = true;
     CWinThread *thread = AfxBeginThread(CSym6502::start_animate_thread, this, THREAD_PRIORITY_IDLE, 0, CREATE_SUSPENDED);
@@ -1589,11 +1589,11 @@ CAsm::SymStat CSym6502::Animate()
 UINT CSym6502::start_animate_thread(LPVOID ptr)
 {
     //  CWinThread *pThread= AfxGetThread();
-    //  pThread->SetThreadPriority(THREAD_PRIORITY_IDLE);   // umo¿liwienie odœwie¿ania
+    //  pThread->SetThreadPriority(THREAD_PRIORITY_IDLE);   // umoï¿½liwienie odï¿½wieï¿½ania
     CSym6502 *pSym= (CSym6502 *)ptr;
     pSym->fin_stat = pSym->run(true);
     pSym->running = false;
-    AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998, pSym->fin_stat, 0);      // zg³oszenie zakoñczenia
+    AfxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998, pSym->fin_stat, 0);      // zgï¿½oszenie zakoï¿½czenia
     return 0;
 }
 
@@ -1601,10 +1601,10 @@ UINT CSym6502::start_animate_thread(LPVOID ptr)
 
 void CSym6502::SkipToAddr(UINT16 addr)
 {
-    ASSERT(fin_stat != SYM_FIN);  // program ju¿ zakoñczy³ dzia³anie
+    ASSERT(fin_stat != SYM_FIN);  // program juï¿½ zakoï¿½czyï¿½ dziaï¿½anie
 
     if (running)
-        return;             // program w³aœnie dzia³a
+        return;             // program wï¿½aï¿½nie dziaï¿½a
 
     ctx.pc = addr; // & ctx.mem_mask;
     Update(SYM_OK);
@@ -1613,10 +1613,10 @@ void CSym6502::SkipToAddr(UINT16 addr)
 
 CAsm::SymStat CSym6502::SkipInstr()
 {
-    ASSERT(fin_stat!=SYM_FIN);    // program ju¿ zakoñczy³ dzia³anie
+    ASSERT(fin_stat!=SYM_FIN);    // program juï¿½ zakoï¿½czyï¿½ dziaï¿½anie
 
     if (running)
-        return SYM_OK;      // program w³aœnie dzia³a
+        return SYM_OK;      // program wï¿½aï¿½nie dziaï¿½a
 
     fin_stat = skip_cmd();
 
@@ -1633,8 +1633,8 @@ void CSym6502::AbortProg()
     //  ::WaitForSingleObject(hThread,INFINITE);    // synchronizacja
     while (running)
     {
-        MSG msg;    // trzeba obs³ugiwaæ komunikaty w zwi¹zku z odœwie¿aniem
-        // ekranu (komenda 'Animacja') w czasie oczekiwania na zakoñczenie
+        MSG msg;    // trzeba obsï¿½ugiwaï¿½ komunikaty w zwiï¿½zku z odï¿½wieï¿½aniem
+        // ekranu (komenda 'Animacja') w czasie oczekiwania na zakoï¿½czenie
         if (!::GetMessage(&msg, NULL, NULL, NULL))
             break;
         // process this message
@@ -1650,7 +1650,7 @@ void CSym6502::AbortProg()
 void CSym6502::ExitSym()
 {
     ASSERT(running == false);
-    ResetPointer();               // schowanie strza³ki
+    ResetPointer();               // schowanie strzaï¿½ki
     CMainFrame* pMain = (CMainFrame*) AfxGetApp()->m_pMainWnd;
     //  pMain->ShowRegisterBar(false);
 }
@@ -1733,15 +1733,15 @@ void CSym6502::Update(SymStat stat, bool no_ok /*=false*/)
         CDebugLine dl;
         debug->GetLine(dl,ctx.pc);
         if (/*dl.flags == CAsm::DBG_EMPTY ||*/ fin_stat == SYM_FIN)
-            ResetPointer();           // schowanie strza³ki
+            ResetPointer();           // schowanie strzaï¿½ki
         else
-            SetPointer(dl.line,ctx.pc);       // ustawienie strza³ki (->) przed aktualnym wierszem
+            SetPointer(dl.line,ctx.pc);       // ustawienie strzaï¿½ki (->) przed aktualnym wierszem
     }
     pMain->m_wndRegisterBar.SendMessage(CBroadcast::WM_USER_UPDATE_REG_WND, (WPARAM)&reg, (LPARAM)&ctx);
     if (stat==SYM_OK && !no_ok)
         pMain->m_wndStatusBar.SetPaneText(0, reg);
     if (running)
-        eventRedraw.SetEvent();     // ju¿ odœwie¿one - wykonaj nastêpn¹ animowan¹ instrukcjê
+        eventRedraw.SetEvent();     // juï¿½ odï¿½wieï¿½one - wykonaj nastï¿½pnï¿½ animowanï¿½ instrukcjï¿½
 }
 
 //-----------------------------------------------------------------------------
@@ -1768,16 +1768,16 @@ void CSym6502::SymStart(UINT32 org)
     {
         CDebugLine dl;
         debug->GetLine(dl,org);
-        //    ASSERT(dl.flags != CAsm::DBG_EMPTY);      // brak wiersza odp. pocz¹tkowi programu
-        SetPointer(dl.line,org);    // ustawienie strza³ki (->) przed aktualnym wierszem
+        //    ASSERT(dl.flags != CAsm::DBG_EMPTY);      // brak wiersza odp. poczï¿½tkowi programu
+        SetPointer(dl.line,org);    // ustawienie strzaï¿½ki (->) przed aktualnym wierszem
     }
 }
 
 
-void CSym6502::SetPointer(const CLine &line, UINT32 addr) // ustawienie strza³ki (->) przed aktualnym wierszem
+void CSym6502::SetPointer(const CLine &line, UINT32 addr) // ustawienie strzaï¿½ki (->) przed aktualnym wierszem
 {
     POSITION posDoc= theApp.m_pDocDeasmTemplate->GetFirstDocPosition();
-    while (posDoc != NULL)        // s¹ okna z deasemblera?
+    while (posDoc != NULL)        // sï¿½ okna z deasemblera?
     {
         CDocument *pDoc= theApp.m_pDocDeasmTemplate->GetNextDoc(posDoc);
         ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CDeasm6502Doc)));
@@ -1788,14 +1788,14 @@ void CSym6502::SetPointer(const CLine &line, UINT32 addr) // ustawienie strza³ki
     if (m_fuidLastView != line.file && ::IsWindow(m_hwndLastView))        // zmiana okna?
     {
         if (CSrc6502View* pView= dynamic_cast<CSrc6502View*>(CWnd::FromHandlePermanent(m_hwndLastView)))
-            SetPointer(pView, -1, false);              // ukrycie strza³ki
+            SetPointer(pView, -1, false);              // ukrycie strzaï¿½ki
         m_hwndLastView = 0;
     }
     if (!pView && debug)
     {
         if (const TCHAR* path= debug->GetFilePath(line.file))
         {
-            // próba otwarcia dokumentu...
+            // prï¿½ba otwarcia dokumentu...
             C6502App* pApp= static_cast<C6502App*>( AfxGetApp() );
             pApp->m_bDoNotAddToRecentFileList = true;
             CDocument* pDoc= pApp->OpenDocumentFile(path);
@@ -1810,11 +1810,11 @@ void CSym6502::SetPointer(const CLine &line, UINT32 addr) // ustawienie strza³ki
     }
     if (!pView)
     {
-        //    ResetPointer();   // schowanie strza³ki, jeœli by³a
-        return;             // nie ma okna dokumentu zawieraj¹cego aktualny wiersz
+        //    ResetPointer();   // schowanie strzaï¿½ki, jeï¿½li byï¿½a
+        return;             // nie ma okna dokumentu zawierajï¿½cego aktualny wiersz
     }
 
-    SetPointer(pView, line.ln, true);  // wymuszenie przesuniêcia zawartoœci okna, jeœli potrzeba
+    SetPointer(pView, line.ln, true);  // wymuszenie przesuniï¿½cia zawartoï¿½ci okna, jeï¿½li potrzeba
     m_fuidLastView = line.file;
     m_hwndLastView = pView->m_hWnd;
 }
@@ -1834,10 +1834,10 @@ void CSym6502::SetPointer(CSrc6502View* pView, int nLine, bool bScroll)
 }
 
 
-void CSym6502::ResetPointer()   // schowanie strza³ki
+void CSym6502::ResetPointer()   // schowanie strzaï¿½ki
 {
     POSITION posDoc= theApp.m_pDocDeasmTemplate->GetFirstDocPosition();
-    while (posDoc != NULL)        // s¹ okna z deasemblera?
+    while (posDoc != NULL)        // sï¿½ okna z deasemblera?
     {
         if (CDeasm6502Doc* pDoc= dynamic_cast<CDeasm6502Doc*>( theApp.m_pDocDeasmTemplate->GetNextDoc(posDoc) ))
             pDoc->SetPointer(-1,true);
@@ -1846,7 +1846,7 @@ void CSym6502::ResetPointer()   // schowanie strza³ki
     if (m_fuidLastView)
     {
         if (CSrc6502View* pView= FindDocView(m_fuidLastView))
-            SetPointer(pView, -1, false);    // zmazanie strza³ki
+            SetPointer(pView, -1, false);    // zmazanie strzaï¿½ki
     }
     m_fuidLastView = 0;
 }
@@ -1986,15 +1986,15 @@ void CSym6502::AddBranchCycles(UINT8 arg)
 {
     ctx.uCycles++;       // skok wykonany -> dodatkowy cykl
 
-    if (arg & 0x80)       // skok do ty³u
+    if (arg & 0x80)       // skok do tyï¿½u
     {
         if (ctx.pc >> 8 != UINT16(ctx.pc - (0x100 - arg)) >> 8)
-            ctx.uCycles++;     // zmiana strony pamiêci -> dodatkowy cykl
+            ctx.uCycles++;     // zmiana strony pamiï¿½ci -> dodatkowy cykl
     }
     else          // skok do przodu
     {
         if (ctx.pc >> 8 != UINT16(ctx.pc + arg) >> 8)
-            ctx.uCycles++;     // zmiana strony pamiêci -> dodatkowy cykl
+            ctx.uCycles++;     // zmiana strony pamiï¿½ci -> dodatkowy cykl
     }
 }
 

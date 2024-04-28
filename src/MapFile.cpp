@@ -26,7 +26,7 @@ LPCTSTR CMapFile::GetPath(FileUID fuid)
 {
     if (fuid == 0 || fuid > m_nLastUID)
     {
-        ASSERT(FALSE);		// b³êdna wartoœæ FUID
+        ASSERT(FALSE);		// bï¿½ï¿½dna wartoï¿½ï¿½ FUID
         return NULL;
     }
     return GetAt((int)fuid - 1);

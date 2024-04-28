@@ -25,32 +25,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void CMarkArea::SetEnd(int end)
 {
-    ASSERT(start >= 0);		// przed 'SetEnd' musi byæ wywo³ane 'SetStart'
-//  ASSERT(end >= start);		// b³êdne krañce przedzia³ów
-    if (end < start)		// b³êdne krañce przedzia³ów?
+    ASSERT(start >= 0);		// przed 'SetEnd' musi byï¿½ wywoï¿½ane 'SetStart'
+//  ASSERT(end >= start);		// bï¿½ï¿½dne kraï¿½ce przedziaï¿½ï¿½w
+    if (end < start)		// bï¿½ï¿½dne kraï¿½ce przedziaï¿½ï¿½w?
         return;
 
     Pair pair= {start,end};
     for (UINT i=0; i<n; i++)
     {
         if (arr[i].a > end || arr[i].b < start)
-            continue;			// przedzia³y roz³¹czne
+            continue;			// przedziaï¿½y rozï¿½ï¿½czne
         if (arr[i].a <= start)
             if (arr[i].b >= end)
-                return;			// nowa para mieœci siê w przedziale
+                return;			// nowa para mieï¿½ci siï¿½ w przedziale
             else
             {
-                arr[i].b = end;		// przesuniêcie koñca przedzia³u
+                arr[i].b = end;		// przesuniï¿½cie koï¿½ca przedziaï¿½u
                 return;
             }
         else if (arr[i].b <= end)
         {
-            arr[i].a = start;		// przesuniêcie pocz¹tku przedzia³u
+            arr[i].a = start;		// przesuniï¿½cie poczï¿½tku przedziaï¿½u
             return;
         }
         else
         {
-            arr[i].a = start;		// poszerzenie ca³ego przedzia³u
+            arr[i].a = start;		// poszerzenie caï¿½ego przedziaï¿½u
             arr[i].b = end;
             return;
         }

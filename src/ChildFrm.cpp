@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // ChildFrm.cpp : implementation of the CChildFrame class
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "6502.h"
 
 #include "ChildFrm.h"

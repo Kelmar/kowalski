@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // MemoryView.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "resource.h"
 #include "MemoryView.h"
 #include "MemoryGoto.h"
@@ -81,13 +81,13 @@ int CMemoryView::bytes_in_line()
     switch (m_eDump)
     {
     case FULL:  // hex i tekst
-        lim = (m_nCx - 9) / 4;	// iloœæ wyœwietlanych w jednym wierszu bajtów
+        lim = (m_nCx - 9) / 4;	// iloï¿½ï¿½ wyï¿½wietlanych w jednym wierszu bajtï¿½w
         break;
     case HEX:   // tylko hex
-        lim = (m_nCx - 5) / 3;	// iloœæ wyœwietlanych w jednym wierszu bajtów
+        lim = (m_nCx - 5) / 3;	// iloï¿½ï¿½ wyï¿½wietlanych w jednym wierszu bajtï¿½w
         break;
     case TEXT:  // tylko tekst
-        lim = (m_nCx - 8) / 1;	// iloœæ wyœwietlanych w jednym wierszu bajtów
+        lim = (m_nCx - 8) / 1;	// iloï¿½ï¿½ wyï¿½wietlanych w jednym wierszu bajtï¿½w
         break;
     default:
         ASSERT(false);
@@ -106,7 +106,7 @@ void CMemoryView::OnDraw(CDC* pDC)
     CString line(_T(' '), 1 + max(m_nCx, 8));
     UINT32 addr= pDoc->m_uAddress;
     TCHAR hex[8];
-    int lim= bytes_in_line();	// iloœæ wyœwietlanych w jednym wierszu bajtów
+    int lim= bytes_in_line();	// iloï¿½ï¿½ wyï¿½wietlanych w jednym wierszu bajtï¿½w
 
     for (int i= 0, y= 0; i <= m_nCy; i++, y += m_nChrH)
     {
@@ -152,7 +152,7 @@ void CMemoryView::OnDraw(CDC* pDC)
 
         addr += UINT32(j);
         pDC->TextOut(1, y, line);
-        if (addr == 0)	// doszliœmy do koñca pamiêci?
+        if (addr == 0)	// doszliï¿½my do koï¿½ca pamiï¿½ci?
             break;
     }
 
@@ -188,9 +188,9 @@ void CMemoryView::calc(CDC *pDC)
     m_nChrH = (int)tm.tmHeight + (int)tm.tmExternalLeading;
     m_nChrW = tm.tmAveCharWidth;
 
-    m_nCx = (rect.right-1) / m_nChrW;	// iloœæ kolumn
-    m_nCy = rect.bottom / m_nChrH;	// iloœæ wierszy
-//  if (rect.bottom % m_nCharH)	// na dole wystaje kawa³ek wiersza?
+    m_nCx = (rect.right-1) / m_nChrW;	// iloï¿½ï¿½ kolumn
+    m_nCy = rect.bottom / m_nChrH;	// iloï¿½ï¿½ wierszy
+//  if (rect.bottom % m_nCharH)	// na dole wystaje kawaï¿½ek wiersza?
     if (m_nCy == 0)
         m_nCy++;
 }
@@ -212,16 +212,16 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         switch (find_next_addr(pDoc->m_uAddress,*pDoc->m_pMem))
         {
         case 0:
-            break;	// dalej ju¿ siê nie da
+            break;	// dalej juï¿½ siï¿½ nie da
         case 1:
             RECT rect;
             get_view_rect(rect);
-            UpdateWindow();	// dla unikniêcia problemów z odœwie¿aniem
+            UpdateWindow();	// dla unikniï¿½cia problemï¿½w z odï¿½wieï¿½aniem
             ScrollWindow(0,-m_nChrH,&rect,&rect);
             UpdateWindow();
             break;
         case 9999999:     // 1.3.3 changed to be beyond scroll value from 999999
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         }
         break;
@@ -230,16 +230,16 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         switch (find_prev_addr(pDoc->m_uAddress,*pDoc->m_pMem))
         {
         case 0:
-            break;	// jesteœmy ju¿ na pocz¹tku
+            break;	// jesteï¿½my juï¿½ na poczï¿½tku
         case 1:
             RECT rect;
             get_view_rect(rect);
-            UpdateWindow();	// dla unikniêcia problemów z odœwie¿aniem
+            UpdateWindow();	// dla unikniï¿½cia problemï¿½w z odï¿½wieï¿½aniem
             ScrollWindow(0,m_nChrH,&rect,&rect);
             UpdateWindow();
             break;
         case 9999999:	// 1.3.3 changed to be beyond scroll value from 999999
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         default:
             ASSERT(FALSE);
@@ -254,9 +254,9 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         switch (find_next_addr(pDoc->m_uAddress,*pDoc->m_pMem,m_nCy))
         {
         case 0:
-            break;	// dalej ju¿ siê nie da
+            break;	// dalej juï¿½ siï¿½ nie da
         default:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         }
         break;
@@ -269,9 +269,9 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         switch (find_prev_addr(pDoc->m_uAddress,*pDoc->m_pMem,m_nCy))
         {
         case 0:
-            break;	// jesteœmy ju¿ na pocz¹tku
+            break;	// jesteï¿½my juï¿½ na poczï¿½tku
         default:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna - zmieni³o siê kilka rozkazów
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna - zmieniï¿½o siï¿½ kilka rozkazï¿½w
             break;
         }
         break;
@@ -283,11 +283,11 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         get_view_rect(rect);
         int lines= find_delta(pDoc->m_uAddress,0,*pDoc->m_pMem,m_nCy);
         if (lines == 9999999)    // 1.3.3 changed to be beyond scroll value from 999999
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
         else if (lines > 0)
         {
             if (lines >= m_nCy)
-                InvalidateRect(NULL);	// przerysowanie ca³ego okna
+                InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             else
                 ScrollWindow(0,lines*m_nChrH,&rect,&rect);
         }
@@ -300,11 +300,11 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         get_view_rect(rect);
         int lines= find_delta(pDoc->m_uAddress,max_mem-1,*pDoc->m_pMem,m_nCy);
         if (lines == 9999999)     // 1.3.3 changed to be beyond scroll value from 999999
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
         else if (lines < 0)
         {
             if (-lines >= m_nCy)
-                InvalidateRect(NULL);	// przerysowanie ca³ego okna
+                InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             else
                 ScrollWindow(0,lines*m_nChrH,&rect,&rect);
         }
@@ -331,11 +331,11 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         pos -= pos % bytes_in_line();
         int lines= find_delta(pDoc->m_uAddress, pos, *pDoc->m_pMem, m_nCy);
         if (lines == 9999999)     // 1.3.3 changed to be beyond scroll value from 999999
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
         else if (lines)
         {
             if (abs(lines) >= m_nCy)
-                InvalidateRect(NULL);	// przerysowanie ca³ego okna
+                InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             else
                 ScrollWindow(0,lines*m_nChrH,&rect,&rect);
         }
@@ -346,10 +346,10 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
         switch (find_next_addr(pDoc->m_uAddress,*pDoc->m_pMem,1,1))
         {
-        case 0:			// ju¿ nie ma przesuniêcia
+        case 0:			// juï¿½ nie ma przesuniï¿½cia
             break;
         default:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         }
         break;
@@ -358,10 +358,10 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
         switch (find_prev_addr(pDoc->m_uAddress,*pDoc->m_pMem,1,1))
         {
-        case 0:			// ju¿ nie ma przesuniêcia
+        case 0:			// juï¿½ nie ma przesuniï¿½cia
             break;
         default:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         }
         break;
@@ -440,7 +440,7 @@ int CMemoryView::set_scroll_range()
     int scr= m_nCy * bytes_in_line();
     if (scr >= max_mem)
     {
-        SetScrollRange(SB_VERT,0,0);	// ca³oœæ mieœci siê w oknie
+        SetScrollRange(SB_VERT,0,0);	// caï¿½oï¿½ï¿½ mieï¿½ci siï¿½ w oknie
         return -1;
     }
     int rng= max_mem/2;
@@ -461,7 +461,7 @@ int CMemoryView::set_scroll_range()
 
 //-----------------------------------------------------------------------------
 
-// odszukanie adresu wiersza pamiêci poprzedzaj¹cego dany wiersz
+// odszukanie adresu wiersza pamiï¿½ci poprzedzajï¿½cego dany wiersz
 int CMemoryView::find_prev_addr(UINT32 &addr, const COutputMem &mem, int cnt/*= 1*/, int bytes/*= 0*/)
 {
     ASSERT(cnt > 0);
@@ -475,17 +475,17 @@ int CMemoryView::find_prev_addr(UINT32 &addr, const COutputMem &mem, int cnt/*= 
     if (pos < 0)
     {
         if (addr % bytes)
-            return addr=0, 9999999;	// trzeba przerysowaæ ca³e okno - 1.3.3 changed to be beyond scroll value from 999999
+            return addr=0, 9999999;	// trzeba przerysowaï¿½ caï¿½e okno - 1.3.3 changed to be beyond scroll value from 999999
         cnt = addr / bytes;
         addr = (UINT32)0;
     }
     else
         addr = (UINT32)pos;
-    return cnt;			// o tyle wierszy mo¿na przesun¹æ
+    return cnt;			// o tyle wierszy moï¿½na przesunï¿½ï¿½
 }
 
 
-// odszukanie adresu wiersza pamiêci nastêpuj¹cego po danym wierszu
+// odszukanie adresu wiersza pamiï¿½ci nastï¿½pujï¿½cego po danym wierszu
 int CMemoryView::find_next_addr(UINT32 &addr, const COutputMem &mem,
                                 int cnt/*= 1*/, int bytes/*= 0*/)
 {
@@ -494,8 +494,8 @@ int CMemoryView::find_next_addr(UINT32 &addr, const COutputMem &mem,
         return 0;
 
     if (!bytes)
-        bytes = bytes_in_line();		// iloœæ bajtów w wierszu
-    int scr= bytes * m_nCy;		// i na ca³ym oknie
+        bytes = bytes_in_line();		// iloï¿½ï¿½ bajtï¿½w w wierszu
+    int scr= bytes * m_nCy;		// i na caï¿½ym oknie
     int pos= addr + cnt * bytes;
     if (pos+scr > max_mem)
     {
@@ -504,7 +504,7 @@ int CMemoryView::find_next_addr(UINT32 &addr, const COutputMem &mem,
             pos = 0;
         cnt = pos - addr;
         if (cnt % bytes)
-            cnt = 9999999;			// trzeba przerysowaæ ca³e okno - 1.3.3 changed to be beyond scroll value from 999999
+            cnt = 9999999;			// trzeba przerysowaï¿½ caï¿½e okno - 1.3.3 changed to be beyond scroll value from 999999
         else
             cnt /= bytes;
     }
@@ -513,7 +513,7 @@ int CMemoryView::find_next_addr(UINT32 &addr, const COutputMem &mem,
 }
 
 
-// spr. o ile wierszy nale¿y przesun¹æ zawartoœæ okna aby dotrzeæ od 'addr' do 'dest'
+// spr. o ile wierszy naleï¿½y przesunï¿½ï¿½ zawartoï¿½ï¿½ okna aby dotrzeï¿½ od 'addr' do 'dest'
 int CMemoryView::find_delta(UINT32 &addr, UINT32 dest, const COutputMem &mem, int max_lines)
 {
     if (dest == addr)
@@ -616,7 +616,7 @@ void CMemoryView::OnContextMenu(CWnd* pWnd, CPoint point)
     CMenu *pPopup = menu.GetSubMenu(0);
     ASSERT(pPopup != NULL);
 
-    if (point.x == -1 && point.y == -1)     // menu wywo³ane przy pomocy klawiatury?
+    if (point.x == -1 && point.y == -1)     // menu wywoï¿½ane przy pomocy klawiatury?
     {
         CRect rect;
         GetClientRect(rect);
@@ -624,7 +624,7 @@ void CMemoryView::OnContextMenu(CWnd* pWnd, CPoint point)
         point = rect.TopLeft();
         CPoint ptTopLeft(0, 0);
         ClientToScreen(&ptTopLeft);
-        point.x = ptTopLeft.x + rect.Width() / 2;   // ustawiamy siê na œrodku okna
+        point.x = ptTopLeft.x + rect.Width() / 2;   // ustawiamy siï¿½ na ï¿½rodku okna
         point.y = ptTopLeft.y + rect.Height() / 2;
     }
 

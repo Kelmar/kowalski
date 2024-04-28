@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // MainFrm.cpp : implementation of the CMainFrame class
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "MainFrm.h"
 #include "DialAsmStat.h"
 #include "Options.h"
@@ -603,7 +603,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
         }
 
         m_wndStatusBar.GetPaneInfo(2, uID, uStyle, nWidth);
-        m_wndStatusBar.SetPaneInfo(2, uID, uStyle, 16);	// szerokoœæ obrazka
+        m_wndStatusBar.SetPaneInfo(2, uID, uStyle, 16);	// szerokoï¿½ï¿½ obrazka
 
         m_bmpCode.LoadMappedBitmap(IDB_CODE);
         m_bmpDebug.LoadMappedBitmap(IDB_DEBUG);
@@ -727,7 +727,7 @@ LRESULT CALLBACK CMainFrame::StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam
         if (ret == 0)
         {
             bool bCode;
-            if (theApp.m_global.IsDebugger())		// jest dzia³aj¹cy debugger ?
+            if (theApp.m_global.IsDebugger())		// jest dziaï¿½ajï¿½cy debugger ?
                 bCode = false;
             else if (theApp.m_global.IsCodePresent())	// jest kod programu?
                 bCode = true;
@@ -736,7 +736,7 @@ LRESULT CALLBACK CMainFrame::StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam
             CRect rect;
             (*m_pfnOldProc)(hWnd,SB_GETRECT,2,(LPARAM)(RECT *)rect);	// miejsce na obrazek - wymiary
             int borders[3];
-            (*m_pfnOldProc)(hWnd,SB_GETBORDERS,0,(LPARAM)borders);		// gruboœæ obwódki
+            (*m_pfnOldProc)(hWnd,SB_GETBORDERS,0,(LPARAM)borders);		// gruboï¿½ï¿½ obwï¿½dki
             rect.DeflateRect(borders[0]+1,borders[1]-1);
             CClientDC dc(pWnd);
             if (dc)
@@ -765,7 +765,7 @@ afx_msg LRESULT CMainFrame::OnStartDebugger(WPARAM /*wParam*/, LPARAM /*lParam*/
 {
     RECT rect;
     m_wndStatusBar.SendMessage(SB_GETRECT,2,(LPARAM)&rect);	// miejsce na obrazek - wymiary
-    m_wndStatusBar.InvalidateRect(&rect);		// obrazek pch³y do przerysowania
+    m_wndStatusBar.InvalidateRect(&rect);		// obrazek pchï¿½y do przerysowania
     return 0;
 }
 
@@ -774,7 +774,7 @@ afx_msg LRESULT CMainFrame::OnExitDebugger(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
     RECT rect;
     m_wndStatusBar.SendMessage(SB_GETRECT,2,(LPARAM)&rect);	// miejsce na obrazek - wymiary
-    m_wndStatusBar.InvalidateRect(&rect);		// obrazek pch³y do przerysowania
+    m_wndStatusBar.InvalidateRect(&rect);		// obrazek pchï¿½y do przerysowania
     return 0;
 }
 
@@ -783,7 +783,7 @@ afx_msg LRESULT CMainFrame::OnChangeCode(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
     RECT rect;
     m_wndStatusBar.SendMessage(SB_GETRECT,2,(LPARAM)&rect);	// miejsce na obrazek - wymiary
-    m_wndStatusBar.InvalidateRect(&rect);		// obrazek pch³y do przerysowania
+    m_wndStatusBar.InvalidateRect(&rect);		// obrazek pchï¿½y do przerysowania
     return 0;
 }
 
@@ -814,7 +814,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
     if (pApp->GetProfileInt(REG_ENTRY_MAINFRM, REG_STATE, 0))	// maximize?
         C6502App::m_bMaximize = true;
     //  C6502App::m_bFileNew = pApp->GetProfileInt(REG_ENTRY_MAINFRM,REG_FILENEW,1);	// new file
-    ConfigSettings(true);		// odczyt ustawieñ
+    ConfigSettings(true);		// odczyt ustawieï¿½
 
     return CMDIFrameWnd::PreCreateWindow(cs);
 }
@@ -906,12 +906,12 @@ void CMainFrame::OnClose()
 
     CWinApp* pApp = AfxGetApp();
 
-    SaveBarState(REG_ENTRY_LAYOUT);		   // zapisanie po³o¿enia pasków narzêdzi
+    SaveBarState(REG_ENTRY_LAYOUT);		   // zapisanie poï¿½oï¿½enia paskï¿½w narzï¿½dzi
 
     WINDOWPLACEMENT wp;
     if (GetWindowPlacement(&wp))
     {
-        // zapisanie po³o¿enia okna g³ównego
+        // zapisanie poï¿½oï¿½enia okna gï¿½ï¿½wnego
         CRect wnd(wp.rcNormalPosition);
         pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_POSX,wnd.left);
         pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_POSY,wnd.top);
@@ -928,7 +928,7 @@ void CMainFrame::OnDestroy()
 {
     if (m_uTimer)
         KillTimer(m_uTimer);
-    ConfigSettings(false);		// zapis ustawieñ
+    ConfigSettings(false);		// zapis ustawieï¿½
     CMDIFrameWnd::OnDestroy();
 }
 
@@ -948,11 +948,11 @@ void CMainFrame::OnAssemble()
 
     SendMessageToViews(WM_USER_REMOVE_ERR_MARK);
 
-    if (theApp.m_global.IsDebugger())	// dzia³a debugger?
+    if (theApp.m_global.IsDebugger())	// dziaï¿½a debugger?
     {
         if (AfxMessageBox(IDS_STOP_DEBUG,MB_OKCANCEL) != IDOK)
             return;
-        ExitDebugMode();			// wyjœcie z trybu debuggera
+        ExitDebugMode();			// wyjï¿½cie z trybu debuggera
     }
 
     if (CDocument* pDocument= pView->GetDocument())
@@ -1024,7 +1024,7 @@ void CMainFrame::OnUpdateSymDebug(CCmdUI* pCmdUI)
 
 void CMainFrame::OnSymDebug()		// uruchomienie debuggera
 {
-    if (theApp.m_global.IsDebugger())   // ju¿ uruchomiony?
+    if (theApp.m_global.IsDebugger())   // juï¿½ uruchomiony?
     {
         OnSymDebugStop();
     }
@@ -1102,8 +1102,8 @@ void CMainFrame::OnSymBreakpoint()
 
     if (pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)))
     {
-        int line= pView->GetCurrLineNo();	// bie¿¹cy wiersz
-        // ustawienie miejsca przerwania w kodzie wynikowym odpowiadaj¹cym bie¿¹cemu wierszowi
+        int line= pView->GetCurrLineNo();	// bieï¿½ï¿½cy wiersz
+        // ustawienie miejsca przerwania w kodzie wynikowym odpowiadajï¿½cym bieï¿½ï¿½cemu wierszowi
         CAsm::Breakpoint bp= theApp.m_global.SetBreakpoint( line, pView->GetDocument()->GetPathName() );
         if (bp != CAsm::BPT_NO_CODE)
         {
@@ -1128,7 +1128,7 @@ void CMainFrame::OnSymBreakpoint()
 
 void CMainFrame::OnUpdateSymBreakpoint(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     GetActiveFrame()->GetActiveView() );		// i aktywny dokument?
 }
 
@@ -1165,9 +1165,9 @@ void CMainFrame::OnSymEditBreakpoint()
 
     if (!theApp.m_global.IsDebugger() || pView==NULL)
         return;
-    int line= pView->GetCurrLineNo();	// bie¿¹cy wiersz
+    int line= pView->GetCurrLineNo();	// bieï¿½ï¿½cy wiersz
 
-    // pobranie parametrów przerwania w kodzie wynikowym odpowiadaj¹cym bie¿¹cemu wierszowi
+    // pobranie parametrï¿½w przerwania w kodzie wynikowym odpowiadajï¿½cym bieï¿½ï¿½cemu wierszowi
     CAsm::Breakpoint bp= theApp.m_global.GetBreakpoint( line, pView->GetDocument()->GetPathName() );
     if (bp != CAsm::BPT_NO_CODE)
     {
@@ -1192,7 +1192,7 @@ void CMainFrame::OnSymEditBreakpoint()
 
 void CMainFrame::OnUpdateSymEditBreakpoint(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     GetActiveFrame()->GetActiveView() );		// i aktywny dokument?
 }
 
@@ -1202,7 +1202,7 @@ void CMainFrame::OnSymBreak()
 {
     if (!theApp.m_global.IsProgramRunning())
         return;
-    theApp.m_global.GetSimulator()->Break();		// przerwanie dzia³aj¹cego programu
+    theApp.m_global.GetSimulator()->Break();		// przerwanie dziaï¿½ajï¿½cego programu
     DelayedUpdateAll();
 
     AfxGetMainWnd()->SetFocus();		// restore focus (so it's not in i/o window)
@@ -1210,12 +1210,12 @@ void CMainFrame::OnSymBreak()
 
 void CMainFrame::OnUpdateSymBreak(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable(theApp.m_global.IsProgramRunning());	// jest dzia³aj¹cy program i debugger?
+    pCmdUI->Enable(theApp.m_global.IsProgramRunning());	// jest dziaï¿½ajï¿½cy program i debugger?
 }
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnSymSkipInstr()	// ominiêcie bie¿¹cej instrukcji
+void CMainFrame::OnSymSkipInstr()	// ominiï¿½cie bieï¿½ï¿½cej instrukcji
 {
     if (!theApp.m_global.IsDebugger() || theApp.m_global.IsProgramRunning() ||
             theApp.m_global.IsProgramFinished() )
@@ -1225,9 +1225,9 @@ void CMainFrame::OnSymSkipInstr()	// ominiêcie bie¿¹cej instrukcji
 
 void CMainFrame::OnUpdateSymSkipInstr(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() );		// i niezakoñczony program?
+                    !theApp.m_global.IsProgramFinished() );		// i niezakoï¿½czony program?
 }
 
 //-----------------------------------------------------------------------------
@@ -1242,9 +1242,9 @@ void CMainFrame::OnSymGo()		// uruchomienie programu
 
 void CMainFrame::OnUpdateSymGo(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() );		// i niezakoñczony program?
+                    !theApp.m_global.IsProgramFinished() );		// i niezakoï¿½czony program?
 }
 
 //-----------------------------------------------------------------------------
@@ -1265,7 +1265,7 @@ void CMainFrame::OnSymGoToLine()	// uruchomienie do wiersza
         AfxMessageBox(IDS_SRC_NO_CODE2);
         return;
     }
-    else if (flg & CAsm::DBG_DATA)			// wiersz z danymi zamiast rozkazów?
+    else if (flg & CAsm::DBG_DATA)			// wiersz z danymi zamiast rozkazï¿½w?
     {
         if (AfxMessageBox(IDS_SRC_DATA,MB_YESNO) != IDYES)
             return;
@@ -1277,16 +1277,16 @@ void CMainFrame::OnSymGoToLine()	// uruchomienie do wiersza
 
 void CMainFrame::OnUpdateSymGoToLine(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() &&		// niezakoñczony program
+                    !theApp.m_global.IsProgramFinished() &&		// niezakoï¿½czony program
                     GetActiveFrame()->GetActiveView() &&		// i aktywny dokument?
                     GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)) );
 }
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bie¿¹cy wiersz
+void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bieï¿½ï¿½cy wiersz
 {
     CSrc6502View *pView= (CSrc6502View *)( GetActiveFrame()->GetActiveView() );
     ASSERT(pView==NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
@@ -1301,7 +1301,7 @@ void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bie¿¹cy wiersz
         AfxMessageBox(IDS_SRC_NO_CODE3);
         return;
     }
-    else if (flg & CAsm::DBG_DATA)			// wiersz z danymi zamiast rozkazów?
+    else if (flg & CAsm::DBG_DATA)			// wiersz z danymi zamiast rozkazï¿½w?
     {
         if (AfxMessageBox(IDS_SRC_DATA,MB_YESNO) != IDYES)
             return;
@@ -1312,9 +1312,9 @@ void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bie¿¹cy wiersz
 
 void CMainFrame::OnUpdateSymSkipToLine(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() &&		// niezakoñczony program
+                    !theApp.m_global.IsProgramFinished() &&		// niezakoï¿½czony program
                     GetActiveFrame()->GetActiveView() &&		// i aktywny dokument?
                     GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)) );
 }
@@ -1331,14 +1331,14 @@ void CMainFrame::OnSymGoToRts()		// uruchomienie do powrotu z podprogramu
 
 void CMainFrame::OnUpdateSymGoToRts(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() );		// i niezakoñczony program?
+                    !theApp.m_global.IsProgramFinished() );		// i niezakoï¿½czony program?
 }
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnSymStepInto()	// wykonanie bie¿¹cej instrukcji
+void CMainFrame::OnSymStepInto()	// wykonanie bieï¿½ï¿½cej instrukcji
 {
     if (!theApp.m_global.IsDebugger() || theApp.m_global.IsProgramRunning() ||
             theApp.m_global.IsProgramFinished() )
@@ -1349,9 +1349,9 @@ void CMainFrame::OnSymStepInto()	// wykonanie bie¿¹cej instrukcji
 
 void CMainFrame::OnUpdateSymStepInto(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() );		// i niezakoñczony program?
+                    !theApp.m_global.IsProgramFinished() );		// i niezakoï¿½czony program?
 }
 
 //-----------------------------------------------------------------------------
@@ -1366,9 +1366,9 @@ void CMainFrame::OnSymStepOver()
 
 void CMainFrame::OnUpdateSymStepOver(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() );		// i niezakoñczony program?
+                    !theApp.m_global.IsProgramFinished() );		// i niezakoï¿½czony program?
 }
 
 //-----------------------------------------------------------------------------
@@ -1383,7 +1383,7 @@ void CMainFrame::OnSymRestart()
 
 void CMainFrame::OnUpdateSymRestart(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     !theApp.m_global.IsProgramRunning() );		// oraz zatrzymany program?
 }
 
@@ -1399,9 +1399,9 @@ void CMainFrame::OnSymAnimate()
 
 void CMainFrame::OnUpdateSymAnimate(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
                     !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() );		// i niezakoñczony program?
+                    !theApp.m_global.IsProgramFinished() );		// i niezakoï¿½czony program?
 }
 
 //-----------------------------------------------------------------------------
@@ -1427,7 +1427,7 @@ void CMainFrame::OnSymDebugStop()
 
 //void CMainFrame::OnUpdateSymDebugStop(CCmdUI* pCmdUI)
 //{
-//  pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia³aj¹cy debugger
+//  pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dziaï¿½ajï¿½cy debugger
 //    !theApp.m_global.IsProgramRunning() );		// oraz zatrzymany program?
 //}
 
@@ -1486,7 +1486,7 @@ int CMainFrame::Options(int page)
     dial.m_AsmPage.m_uBrkExtraByte = CAsm6502::BRKExtraByte;
 
     int i;
-    for (i = 0; text_color[i]; i++)	// odczyt kolorów
+    for (i = 0; text_color[i]; i++)	// odczyt kolorï¿½w
     {
         dial.m_ViewPage.m_Text[i].text = *text_color[i];
         dial.m_ViewPage.m_Text[i].bkgnd = *bkgnd_color[i];
@@ -1555,7 +1555,7 @@ int CMainFrame::Options(int page)
         RedrawAllViews(dial.m_EditPage.m_bFontChanged);
       }
     */
-    for (i=0; text_color[i]; i++)	// zapis kolorów
+    for (i=0; text_color[i]; i++)	// zapis kolorï¿½w
     {
         *text_color[i] = dial.m_ViewPage.m_Text[i].text;
         *bkgnd_color[i] = dial.m_ViewPage.m_Text[i].bkgnd;
@@ -1578,8 +1578,8 @@ int CMainFrame::Options(int page)
             case 2:		// debugger
                 RedrawAllViews(dial.m_ViewPage.m_Text[i].changed & 2);
                 break;
-            case 3:		// pamiêæ 6502
-                if (m_Memory.m_hWnd)	// jest ju¿ okno?
+            case 3:		// pamiï¿½ï¿½ 6502
+                if (m_Memory.m_hWnd)	// jest juï¿½ okno?
                     m_Memory.Invalidate();
                 break;
             case 4:		// strona zerowa
@@ -1597,7 +1597,7 @@ int CMainFrame::Options(int page)
 
     // przerysowanie okien deasemblera
     POSITION posDoc= theApp.m_pDocDeasmTemplate->GetFirstDocPosition();
-    while (posDoc != NULL)	// s¹ okna z deasemblera?
+    while (posDoc != NULL)	// sï¿½ okna z deasemblera?
     {
         CDocument* pDoc= theApp.m_pDocDeasmTemplate->GetNextDoc(posDoc);
         pDoc->UpdateAllViews(NULL);
@@ -1664,7 +1664,7 @@ void CMainFrame::OnViewRegisterWnd()
     /*
       if (theApp.m_global.IsDebugger())		// jest program?
       {
-        if (m_wndRegisterBar.m_hWnd != 0)	// jest ju¿ okno?
+        if (m_wndRegisterBar.m_hWnd != 0)	// jest juï¿½ okno?
           m_wndRegisterBar.ShowWindow((m_wndRegisterBar.GetStyle() & WS_VISIBLE) ? SW_HIDE : SW_NORMAL);
         else
           m_wndRegisterBar.Create(this);
@@ -1680,7 +1680,7 @@ void CMainFrame::OnViewRegisterWnd()
 void CMainFrame::OnUpdateIdViewRegisterbar(CCmdUI* pCmdUI)
 {
 //  OnUpdateControlBarMenu(pCmdUI);
-    pCmdUI->Enable( theApp.m_global.IsDebugger() );	// jest dzia³aj¹cy debugger
+    pCmdUI->Enable( theApp.m_global.IsDebugger() );	// jest dziaï¿½ajï¿½cy debugger
     CControlBar* pBar = GetControlBar(pCmdUI->m_nID);
     if (pBar != NULL)
         pCmdUI->SetCheck(/*m_wndRegisterBar.m_hWnd &&*/ (pBar->GetStyle() & WS_VISIBLE) != 0);
@@ -1713,7 +1713,7 @@ void CMainFrame::OnUpdateFileSaveCode(CCmdUI* pCmdUI)
 
 void CMainFrame::OnViewDeasm()
 {
-    if (!theApp.m_global.IsDebugger())	// nie ma dzia³aj¹cego debuggera?
+    if (!theApp.m_global.IsDebugger())	// nie ma dziaï¿½ajï¿½cego debuggera?
         return;
 
     theApp.m_global.CreateDeasm();
@@ -1721,7 +1721,7 @@ void CMainFrame::OnViewDeasm()
 
 void CMainFrame::OnUpdateViewDeasm(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() );	// jest dzia³aj¹cy debugger?
+    pCmdUI->Enable( theApp.m_global.IsDebugger() );	// jest dziaï¿½ajï¿½cy debugger?
 }
 
 //-----------------------------------------------------------------------------
@@ -1730,7 +1730,7 @@ void CMainFrame::OnViewIdents()
 {
     if (theApp.m_global.IsDebugInfoPresent())	// jest zasemblowany program?
     {
-        if (m_Idents.m_hWnd != 0)	// jest ju¿ okno?
+        if (m_Idents.m_hWnd != 0)	// jest juï¿½ okno?
             m_Idents.ShowWindow((m_Idents.GetStyle() & WS_VISIBLE) ? SW_HIDE : SW_NORMAL);
         else
         {
@@ -1759,7 +1759,7 @@ void CMainFrame::OnViewMemory()
 {
     if (theApp.m_global.IsCodePresent())		// jest program?
     {
-        if (m_Memory.m_hWnd != 0)	// jest ju¿ okno?
+        if (m_Memory.m_hWnd != 0)	// jest juï¿½ okno?
             m_Memory.ShowWindow((m_Memory.GetStyle() & WS_VISIBLE) ? SW_HIDE : SW_NORMAL);
         else
         {
@@ -1796,7 +1796,7 @@ void CMainFrame::OnUpdateEditorOpt(CCmdUI* pCmdUI)
 
 void CMainFrame::OnViewIOWindow()
 {
-    if (!theApp.m_global.IsDebugger())	// nie ma dzia³aj¹cego debuggera?
+    if (!theApp.m_global.IsDebugger())	// nie ma dziaï¿½ajï¿½cego debuggera?
         return;
 
     if (!m_IOWindow.m_hWnd)	// nie ma okna?
@@ -1813,8 +1813,8 @@ void CMainFrame::OnViewIOWindow()
 
 void CMainFrame::OnUpdateViewIOWindow(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() );	// jest dzia³aj¹cy debugger?
-//  pCmdUI->Enable( true );	// jest dzia³aj¹cy debugger?
+    pCmdUI->Enable( theApp.m_global.IsDebugger() );	// jest dziaï¿½ajï¿½cy debugger?
+//  pCmdUI->Enable( true );	// jest dziaï¿½ajï¿½cy debugger?
     pCmdUI->SetCheck(m_IOWindow.m_hWnd != 0 && (m_IOWindow.GetStyle() & WS_VISIBLE) != 0);
 }
 
@@ -1843,7 +1843,7 @@ void CMainFrame::ExitDebugMode()
     {
         if (m_IOWindow.IsWaiting())
             m_IOWindow.ExitModalLoop();
-        theApp.m_global.GetSimulator()->AbortProg();	// przerwanie dzia³aj¹cego programu
+        theApp.m_global.GetSimulator()->AbortProg();	// przerwanie dziaï¿½ajï¿½cego programu
     }
     OnSymDebugStop();
 }
@@ -1885,7 +1885,7 @@ void CMainFrame::OnViewZeropage()
 {
     if (theApp.m_global.IsCodePresent())		// jest program?
     {
-        if (m_ZeroPage.m_hWnd != 0) 	// jest ju¿ okno?
+        if (m_ZeroPage.m_hWnd != 0) 	// jest juï¿½ okno?
             m_ZeroPage.ShowWindow((m_ZeroPage.GetStyle() & WS_VISIBLE) ? SW_HIDE : SW_NORMAL);
         else
         {
@@ -1908,7 +1908,7 @@ void CMainFrame::OnViewLog()
 {
     if (theApp.m_global.IsDebugger())		// is simulator present?
     {
-        if (m_wndLog.m_hWnd != 0) 	// jest ju¿ okno?
+        if (m_wndLog.m_hWnd != 0) 	// jest juï¿½ okno?
             m_wndLog.ShowWindow((m_wndLog.GetStyle() & WS_VISIBLE) ? SW_HIDE : SW_NORMAL);
         else
         {
@@ -1933,7 +1933,7 @@ void CMainFrame::OnViewStack()
 {
     if (theApp.m_global.IsCodePresent())		// jest program?
     {
-        if (m_Stack.m_hWnd != 0) 	// jest ju¿ okno?
+        if (m_Stack.m_hWnd != 0) 	// jest juï¿½ okno?
             m_Stack.ShowWindow((m_Stack.GetStyle() & WS_VISIBLE) ? SW_HIDE : SW_NORMAL);
         else
         {
@@ -1961,7 +1961,7 @@ void CMainFrame::OnUpdateMemoryOptions(CCmdUI* pCmdUI)
 
 void CMainFrame::OnMemoryOptions()
 {
-    m_nLastPage = Options(5);		// opcje wygl¹du okna pamiêci
+    m_nLastPage = Options(5);		// opcje wyglï¿½du okna pamiï¿½ci
 }
 
 //-----------------------------------------------------------------------------

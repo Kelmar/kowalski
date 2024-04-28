@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // RegisterBar.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "6502.h"
 #include "RegisterBar.h"
 #include "Sym6502.h"
@@ -100,7 +100,7 @@ bool CRegisterBar::Create(CWnd* pParentWnd, UINT nStyle, UINT nID)
 }
 
 
-bool CRegisterBar::UpdateItem(int itemID)	// odœwie¿enie obiektu okna dialogowego
+bool CRegisterBar::UpdateItem(int itemID)	// odï¿½wieï¿½enie obiektu okna dialogowego
 {
     HWND hWnd= ::GetDlgItem(m_hWnd,itemID);
     if (hWnd)
@@ -141,9 +141,9 @@ void CRegisterBar::Update(const CContext *pCtx, const CString &stat, const CCont
     SetDlgItemByteHex(IDC_REGS_S, pCtx->s);
     UpdateRegS(pCtx);
     /*
-      if (pCtx->s != 0xFF)		// jest coœ na stosie?
+      if (pCtx->s != 0xFF)		// jest coï¿½ na stosie?
         SetDlgItemMem(IDC_REGS_S_MEM, 0xFF - pCtx->s, pCtx->s+0x0100, pCtx);
-      else				// wypisujemy, ¿e nic
+      else				// wypisujemy, ï¿½e nic
       {
         CString str;
         str.LoadString(IDS_REGS_S_EMPTY);
@@ -244,7 +244,7 @@ afx_msg LRESULT CRegisterBar::OnUpdate(WPARAM wParam, LPARAM lParam)
 afx_msg LRESULT CRegisterBar::OnStartDebug(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
     CFrameWnd *pWnd= GetDockingFrame();
-    if (!m_bHidden)		// okno by³o widoczne?
+    if (!m_bHidden)		// okno byï¿½o widoczne?
         if (pWnd)
             pWnd->ShowControlBar(this,TRUE,TRUE);
 //    ShowWindow(SW_SHOW);
@@ -256,15 +256,15 @@ afx_msg LRESULT CRegisterBar::OnExitDebug(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
     CFrameWnd *pWnd= GetDockingFrame();
 
-    if (m_hWnd && IsVisible() /*(GetStyle() & WS_VISIBLE)*/)// okno aktualnie wyœwietlone?
+    if (m_hWnd && IsVisible() /*(GetStyle() & WS_VISIBLE)*/)// okno aktualnie wyï¿½wietlone?
     {
-        m_bHidden = FALSE;				// info - okno by³o wyœwietlane
+        m_bHidden = FALSE;				// info - okno byï¿½o wyï¿½wietlane
         if (pWnd)
             pWnd->ShowControlBar(this,FALSE,TRUE);
 //    ShowWindow(SW_HIDE);			// ukrycie okna
     }
     else
-        m_bHidden = TRUE;				// info - okno by³o ukryte
+        m_bHidden = TRUE;				// info - okno byï¿½o ukryte
     return 1;
 }
 
@@ -314,9 +314,9 @@ void CRegisterBar::UpdateRegPC(const CContext *pCtx, const CContext *pOld /*= NU
 void CRegisterBar::UpdateRegS(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
 //  SetDlgItemByteHex(IDC_REGS_S,pCtx->s);
-    if (pCtx->s != 0xFF)		// jest coœ na stosie?
+    if (pCtx->s != 0xFF)		// jest coï¿½ na stosie?
         SetDlgItemMem(IDC_REGS_S_MEM, 0xFF - pCtx->s, pCtx->s + 0x0100 + 1, pCtx);
-    else				// wypisujemy, ¿e nic
+    else				// wypisujemy, ï¿½e nic
     {
         CString str;
         str.LoadString(IDS_REGS_S_EMPTY);
@@ -335,7 +335,7 @@ void CRegisterBar::UpdateCycles(ULONG uCycles)
 
 void CRegisterBar::ChangeRegister(int ID, int reg_no)
 {
-    if (m_bInUpdate || theApp.m_global.IsProgramRunning())  // update lub dzia³a program?
+    if (m_bInUpdate || theApp.m_global.IsProgramRunning())  // update lub dziaï¿½a program?
         return;					// zignorowanie zmian
     CString buf;
     if (GetDlgItemText(ID,buf) == 0)
@@ -552,7 +552,7 @@ void CRegisterBar::OnWindowPosChanging(WINDOWPOS FAR* lpwndpos)
 
 void CRegisterBar::OnRegsCyclesClr()
 {
-    if (theApp.m_global.IsProgramRunning())  // dzia³a program?
+    if (theApp.m_global.IsProgramRunning())  // dziaï¿½a program?
     {
         MessageBeep(-2);
         return;

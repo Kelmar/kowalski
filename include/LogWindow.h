@@ -32,7 +32,7 @@ protected:
 public:
     void SetText(const CommandLog& log);
     void Invalidate();
-    wxRect m_WndRect;
+
     bool m_bHidden;
 
     /* constructor */ CLogWindow();
@@ -41,7 +41,6 @@ public:
     bool Create();
 
     afx_msg int OnCtlColor(wxDC* dc, wxWindow* wnd, UINT ctlColor);
-    afx_msg void OnDestroy();
     afx_msg void OnClose();
 
     wxFont m_fntMono;

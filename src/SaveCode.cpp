@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // SaveCode.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "6502.h"
 #include "SaveCode.h"
 #include <Dlgs.h>
@@ -175,7 +175,7 @@ void CSaveCode::SaveCode()		// zapisanie kodu wynikowego
 
     try
     {
-//    file.SetLength(0);	// obcinamy koniec, jeœli jest
+//    file.SetLength(0);	// obcinamy koniec, jeï¿½li jest
 
         CString ext= GetFileExt();
         CString extensions;
@@ -200,7 +200,7 @@ void CSaveCode::SaveCode()		// zapisanie kodu wynikowego
         case 24:	// 65p
             m_nPos = 3;
             break;
-        }	// jeœli nierozpoznane rozszerzenie, u¿ywamy typu wybranego w pude³ku dialogowym
+        }	// jeï¿½li nierozpoznane rozszerzenie, uï¿½ywamy typu wybranego w pudeï¿½ku dialogowym
 
         CArchive archive(&file,CArchive::store,1024*8);
 

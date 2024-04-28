@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // 6502Doc.cpp : implementation of the CSrc6502Doc class
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "6502Doc.h"
 
 #ifdef _DEBUG

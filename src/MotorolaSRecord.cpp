@@ -46,8 +46,8 @@ void CMotorolaSRecord::SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
         {
             int sum= 0;				// suma kontrolna
             int lim= min(i+STEP-1, end);
-            // pocz¹tek wiersza: iloœæ danych, adres (hi, lo), zero
-            int cnt= i+STEP<=end ? STEP : end-i+1;	// iloœæ bajtów do wys³ania (w wierszu)
+            // poczï¿½tek wiersza: iloï¿½ï¿½ danych, adres (hi, lo), zero
+            int cnt= i+STEP<=end ? STEP : end-i+1;	// iloï¿½ï¿½ bajtï¿½w do wysï¿½ania (w wierszu)
             if (start > 0xFFFF)  // 1.3.3 support for 24-bit addressing
             {
                 ptr = buf + wsprintf(buf,_T("S2%02X%02X%02X%02X"),cnt+4,(i>>16)&0xFF,(i>>8)&0xFF,i&0xFF);
@@ -63,7 +63,7 @@ void CMotorolaSRecord::SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
             {
                 ptr += wsprintf(ptr,_T("%02X"),mem[j]);
                 sum += mem[j];
-            }		// suma wszystkich bajtów w wierszu musi byæ równa zeru
+            }		// suma wszystkich bajtï¿½w w wierszu musi byï¿½ rï¿½wna zeru
             ptr += wsprintf(ptr,_T("%02X\r\n"),~sum & 0xFF);	// wygenerowanie bajtu kontrolnego
             archive.Write(buf,sizeof(TCHAR)*(ptr-buf));
         }
@@ -184,7 +184,7 @@ void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
         if (!archive.ReadString(buf,sizeof buf))
             break;
 
-        if (_tcsclen(buf) == sizeof(buf)-1)		// za d³ugi wiersz?
+        if (_tcsclen(buf) == sizeof(buf)-1)		// za dï¿½ugi wiersz?
             CMotorolaSRecordException(CMotorolaSRecordException::E_BAD_FORMAT,row);
 
         const TCHAR *ptr= buf;
@@ -192,7 +192,7 @@ void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
             throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_BAD_FORMAT,row));
         UINT info= *ptr++;		// bajt informacyjny
         UINT sum= 0;		// zmienna do liczenia sumy kontrolnej
-        UINT cnt= geth(ptr,sum);	// iloœæ bajtów danych
+        UINT cnt= geth(ptr,sum);	// iloï¿½ï¿½ bajtï¿½w danych
         if (cnt < 3)		// nierozpoznany format?
             throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
         cnt -= 3;
@@ -207,12 +207,12 @@ void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
                 area.SetStart(addr);
             for (UINT i=0; i<cnt; i++)
             {
-                if (addr > 0xFFFF)	// za du¿y adres?
+                if (addr > 0xFFFF)	// za duï¿½y adres?
                     throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
                 mem[addr++] = (UINT8)geth(ptr,sum);
             }
             geth(ptr,sum);		// bajt sumy kontrolnej
-            if (sum != 0xFF)	// b³¹d sumy kontrolnej
+            if (sum != 0xFF)	// bï¿½ï¿½d sumy kontrolnej
                 throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM,row));
             if (cnt)
                 area.SetEnd(addr-1);
@@ -232,7 +232,7 @@ void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
                 mem[addr++] = (UINT8)geth(ptr,sum);
 
             geth(ptr,sum);		// bajt sumy kontrolnej
-            if (sum != 0xFF)	// b³¹d sumy kontrolnej
+            if (sum != 0xFF)	// bï¿½ï¿½d sumy kontrolnej
                 throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM,row));
             if (cnt)
                 area.SetEnd(addr-1);
@@ -246,7 +246,7 @@ void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
             if (cnt)	// nieoczekiwane dane?
                 throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
             geth(ptr,sum);		// bajt sumy kontrolnej
-            if (sum != 0xFF)	// b³¹d sumy kontrolnej?
+            if (sum != 0xFF)	// bï¿½ï¿½d sumy kontrolnej?
                 throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM,row));
             prog_start = (int)addr;
             break;
@@ -255,14 +255,14 @@ void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
             if (cnt)	// nieoczekiwane dane?
                 throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
             geth(ptr,sum);		// bajt sumy kontrolnej
-            if (sum != 0xFF)	// b³¹d sumy kontrolnej?
+            if (sum != 0xFF)	// bï¿½ï¿½d sumy kontrolnej?
                 throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM,row));
-            if (addr > 0xFFFF)	// za du¿y adres?
+            if (addr > 0xFFFF)	// za duï¿½y adres?
                 throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
             prog_start = (int)addr;
             break;
 
-        default:		// nieznana wartoœæ
+        default:		// nieznana wartoï¿½ï¿½
             throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
         }
     }
@@ -281,13 +281,13 @@ void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
     wsprintf(num,_T("%u"),row);
     switch (error)
     {
-    case E_BAD_FORMAT:		// b³êdny format pliku
+    case E_BAD_FORMAT:		// bï¿½ï¿½dny format pliku
         msg.LoadString(IDS_INTEL_HEX_ERR_2);
         break;
-    case E_CHKSUM:		// b³¹d sumy kontrolnej
+    case E_CHKSUM:		// bï¿½ï¿½d sumy kontrolnej
         AfxFormatString1(msg,IDS_INTEL_HEX_ERR_1,num);
         break;
-    case E_FORMAT:		// b³êdny format danych
+    case E_FORMAT:		// bï¿½ï¿½dny format danych
         AfxFormatString1(msg,IDS_INTEL_HEX_ERR_3,num);
         break;
     default:

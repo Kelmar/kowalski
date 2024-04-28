@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // ZeroPageView.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "resource.h"
 #include "ZeroPageView.h"
 #include "MemoryGoto.h"
@@ -76,7 +76,7 @@ void CZeroPageView::OnDraw(CDC* pDC)
     CString line(_T(' '), 1 + max(m_nCx, 8));
     UINT16 addr= pDoc->m_uAddress;
     TCHAR hex[8];
-    int lim= bytes_in_line();	// iloœæ wyœwietlanych w jednym wierszu bajtów
+    int lim= bytes_in_line();	// iloï¿½ï¿½ wyï¿½wietlanych w jednym wierszu bajtï¿½w
     COutputMem& mem= *pDoc->m_pMem;
     CMemoryDC dcMem(*pDC, this, m_rgbBkgndColor);
     if (dcMem.m_hDC == 0)
@@ -102,7 +102,7 @@ void CZeroPageView::OnDraw(CDC* pDC)
 
         addr++;
         dcMem.TextOut(1, y, line);
-        if (addr >= 0x100)	// doszliœmy do koñca strony zerowej?
+        if (addr >= 0x100)	// doszliï¿½my do koï¿½ca strony zerowej?
             break;
     }
 
@@ -139,9 +139,9 @@ void CZeroPageView::calc(CDC *pDC)
     m_nChrH = (int)tm.tmHeight + (int)tm.tmExternalLeading;
     m_nChrW = tm.tmAveCharWidth;
 
-    m_nCx = (rect.right-1) / m_nChrW;	// iloœæ kolumn
-    m_nCy = rect.bottom / m_nChrH;	// iloœæ wierszy
-//  if (rect.bottom % m_nCharH)	// na dole wystaje kawa³ek wiersza?
+    m_nCx = (rect.right-1) / m_nChrW;	// iloï¿½ï¿½ kolumn
+    m_nCy = rect.bottom / m_nChrH;	// iloï¿½ï¿½ wierszy
+//  if (rect.bottom % m_nCharH)	// na dole wystaje kawaï¿½ek wiersza?
     if (m_nCy == 0)
         m_nCy++;
 }
@@ -162,16 +162,16 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
         switch (find_next_addr(pDoc->m_uAddress,*pDoc->m_pMem))
         {
         case 0:
-            break;	// dalej ju¿ siê nie da
+            break;	// dalej juï¿½ siï¿½ nie da
         case 1:
             RECT rect;
             get_view_rect(rect);
-            UpdateWindow();	// dla unikniêcia problemów z odœwie¿aniem
+            UpdateWindow();	// dla unikniï¿½cia problemï¿½w z odï¿½wieï¿½aniem
             ScrollWindow(0,-m_nChrH,&rect,&rect);
             UpdateWindow();
             break;
         case 999999:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         }
         break;
@@ -180,16 +180,16 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
         switch (find_prev_addr(pDoc->m_uAddress,*pDoc->m_pMem))
         {
         case 0:
-            break;	// jesteœmy ju¿ na pocz¹tku
+            break;	// jesteï¿½my juï¿½ na poczï¿½tku
         case 1:
             RECT rect;
             get_view_rect(rect);
-            UpdateWindow();	// dla unikniêcia problemów z odœwie¿aniem
+            UpdateWindow();	// dla unikniï¿½cia problemï¿½w z odï¿½wieï¿½aniem
             ScrollWindow(0,m_nChrH,&rect,&rect);
             UpdateWindow();
             break;
         case 999999:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         default:
             ASSERT(FALSE);
@@ -204,9 +204,9 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
         switch (find_next_addr(pDoc->m_uAddress,*pDoc->m_pMem,m_nCy))
         {
         case 0:
-            break;	// dalej ju¿ siê nie da
+            break;	// dalej juï¿½ siï¿½ nie da
         default:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         }
         break;
@@ -219,9 +219,9 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
         switch (find_prev_addr(pDoc->m_uAddress,*pDoc->m_pMem,m_nCy))
         {
         case 0:
-            break;	// jesteœmy ju¿ na pocz¹tku
+            break;	// jesteï¿½my juï¿½ na poczï¿½tku
         default:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna - zmieni³o siê kilka rozkazów
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna - zmieniï¿½o siï¿½ kilka rozkazï¿½w
             break;
         }
         break;
@@ -233,11 +233,11 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
         get_view_rect(rect);
         int lines= find_delta(pDoc->m_uAddress,0,*pDoc->m_pMem,m_nCy);
         if (lines == 999999)
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
         else if (lines > 0)
         {
             if (lines >= m_nCy)
-                InvalidateRect(NULL);	// przerysowanie ca³ego okna
+                InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             else
                 ScrollWindow(0,lines*m_nChrH,&rect,&rect);
         }
@@ -250,11 +250,11 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
         get_view_rect(rect);
         int lines= find_delta(pDoc->m_uAddress,0xFFFF,*pDoc->m_pMem,m_nCy);
         if (lines == 999999)
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
         else if (lines < 0)
         {
             if (-lines >= m_nCy)
-                InvalidateRect(NULL);	// przerysowanie ca³ego okna
+                InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             else
                 ScrollWindow(0,lines*m_nChrH,&rect,&rect);
         }
@@ -271,11 +271,11 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
 //      pos -= pos % bytes_in_line();
         int lines= find_delta(pDoc->m_uAddress,pos,*pDoc->m_pMem,m_nCy);
         if (lines == 999999)
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
         else if (lines)
         {
             if (abs(lines) >= m_nCy)
-                InvalidateRect(NULL);	// przerysowanie ca³ego okna
+                InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             else
                 ScrollWindow(0,lines*m_nChrH,&rect,&rect);
         }
@@ -286,10 +286,10 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
         switch (find_next_addr(pDoc->m_uAddress,*pDoc->m_pMem,1,1))
         {
-        case 0:			// ju¿ nie ma przesuniêcia
+        case 0:			// juï¿½ nie ma przesuniï¿½cia
             break;
         default:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         }
         break;
@@ -298,10 +298,10 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
         switch (find_prev_addr(pDoc->m_uAddress,*pDoc->m_pMem,1,1))
         {
-        case 0:			// ju¿ nie ma przesuniêcia
+        case 0:			// juï¿½ nie ma przesuniï¿½cia
             break;
         default:
-            InvalidateRect(NULL);	// przerysowanie ca³ego okna
+            InvalidateRect(NULL);	// przerysowanie caï¿½ego okna
             break;
         }
         break;
@@ -374,7 +374,7 @@ int CZeroPageView::set_scroll_range()
     int scr= m_nCy; // * bytes_in_line();
     if (scr >= 0x100)
     {
-        SetScrollRange(SB_VERT, 0, 0);	// ca³oœæ mieœci siê w oknie
+        SetScrollRange(SB_VERT, 0, 0);	// caï¿½oï¿½ï¿½ mieï¿½ci siï¿½ w oknie
         return -1;
     }
     int rng= 0x100;
@@ -394,7 +394,7 @@ int CZeroPageView::set_scroll_range()
 
 //-----------------------------------------------------------------------------
 
-// odszukanie adresu wiersza pamiêci poprzedzaj¹cego dany wiersz
+// odszukanie adresu wiersza pamiï¿½ci poprzedzajï¿½cego dany wiersz
 int CZeroPageView::find_prev_addr(UINT32 &addr, const COutputMem &mem, int cnt/*= 1*/, int bytes/*= 0*/)
 {
     ASSERT(cnt > 0);
@@ -408,17 +408,17 @@ int CZeroPageView::find_prev_addr(UINT32 &addr, const COutputMem &mem, int cnt/*
     if (pos < 0)
     {
         if (addr % bytes)
-            return addr=0, 999999;	// trzeba przerysowaæ ca³e okno
+            return addr=0, 999999;	// trzeba przerysowaï¿½ caï¿½e okno
         cnt = addr / bytes;
         addr = (UINT16)0;
     }
     else
         addr = (UINT16)pos;
-    return cnt;			// o tyle wierszy mo¿na przesun¹æ
+    return cnt;			// o tyle wierszy moï¿½na przesunï¿½ï¿½
 }
 
 
-// odszukanie adresu wiersza pamiêci nastêpuj¹cego po danym wierszu
+// odszukanie adresu wiersza pamiï¿½ci nastï¿½pujï¿½cego po danym wierszu
 int CZeroPageView::find_next_addr(UINT32 &addr, const COutputMem &mem,
                                   int cnt/*= 1*/, int bytes/*= 0*/)
 {
@@ -427,8 +427,8 @@ int CZeroPageView::find_next_addr(UINT32 &addr, const COutputMem &mem,
         return 0;
 
     if (!bytes)
-        bytes = 1; //bytes_in_line();		// iloœæ bajtów w wierszu
-    int scr= bytes * m_nCy;		// i na ca³ym oknie
+        bytes = 1; //bytes_in_line();		// iloï¿½ï¿½ bajtï¿½w w wierszu
+    int scr= bytes * m_nCy;		// i na caï¿½ym oknie
     int pos= addr + cnt * bytes;
     if (pos+scr > 0x100)
     {
@@ -437,7 +437,7 @@ int CZeroPageView::find_next_addr(UINT32 &addr, const COutputMem &mem,
             pos = 0;
         cnt = pos - addr;
         if (cnt % bytes)
-            cnt = 999999;			// trzeba przerysowaæ ca³e okno
+            cnt = 999999;			// trzeba przerysowaï¿½ caï¿½e okno
         else
             cnt /= bytes;
     }
@@ -446,7 +446,7 @@ int CZeroPageView::find_next_addr(UINT32 &addr, const COutputMem &mem,
 }
 
 
-// spr. o ile wierszy nale¿y przesun¹æ zawartoœæ okna aby dotrzeæ od 'addr' do 'dest'
+// spr. o ile wierszy naleï¿½y przesunï¿½ï¿½ zawartoï¿½ï¿½ okna aby dotrzeï¿½ od 'addr' do 'dest'
 int CZeroPageView::find_delta(UINT32 &addr, UINT16 dest, const COutputMem &mem, int max_lines)
 {
     if (dest == addr)
@@ -549,7 +549,7 @@ void CZeroPageView::OnContextMenu(CWnd* pWnd, CPoint point)
     CMenu *pPopup = menu.GetSubMenu(0);
     ASSERT(pPopup != NULL);
 
-    if (point.x == -1 && point.y == -1)     // menu wywo³ane przy pomocy klawiatury?
+    if (point.x == -1 && point.y == -1)     // menu wywoï¿½ane przy pomocy klawiatury?
     {
         CRect rect;
         GetClientRect(rect);
@@ -557,7 +557,7 @@ void CZeroPageView::OnContextMenu(CWnd* pWnd, CPoint point)
         point = rect.TopLeft();
         CPoint ptTopLeft(0, 0);
         ClientToScreen(&ptTopLeft);
-        point.x = ptTopLeft.x + rect.Width() / 2;   // ustawiamy siê na œrodku okna
+        point.x = ptTopLeft.x + rect.Width() / 2;   // ustawiamy siï¿½ na ï¿½rodku okna
         point.y = ptTopLeft.y + rect.Height() / 2;
     }
 

@@ -32,4 +32,3 @@ list(APPEND SOURCES ${SRCS})
 add_executable(6502 ${SRCS})
 
 target_link_libraries(6502 ${wxWidgets_LIBRARIES})
-

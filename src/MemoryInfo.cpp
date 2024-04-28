@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // MemoryInfo.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "resource.h"
 #include "MemoryInfo.h"
 #include "ZeroPageView.h"
@@ -165,9 +165,9 @@ void CMemoryInfo::OnDestroy()
 afx_msg LRESULT CMemoryInfo::OnChangeCode(WPARAM wParam, LPARAM lParam)
 {
     if (lParam == -1)
-        SendMessage(WM_CLOSE);		// nie ma kodu - zamkniêcie okna
+        SendMessage(WM_CLOSE);		// nie ma kodu - zamkniï¿½cie okna
     else
-        InvalidateRect(NULL);		// przerysowanie ca³ego okna
+        InvalidateRect(NULL);		// przerysowanie caï¿½ego okna
     return 0;
 }
 
@@ -176,7 +176,7 @@ afx_msg LRESULT CMemoryInfo::OnChangeCode(WPARAM wParam, LPARAM lParam)
 afx_msg LRESULT CMemoryInfo::OnStartDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
 
-    if (!m_bHidden)		// okno by³o widoczne?
+    if (!m_bHidden)		// okno byï¿½o widoczne?
         if (m_hWnd)
             ShowWindow(SW_NORMAL);
 //    else
@@ -189,13 +189,13 @@ afx_msg LRESULT CMemoryInfo::OnStartDebug(WPARAM /*wParam*/, LPARAM /* lParam */
 afx_msg LRESULT CMemoryInfo::OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
 
-    if (m_hWnd && (GetStyle() & WS_VISIBLE))	// okno aktualnie wyœwietlone?
+    if (m_hWnd && (GetStyle() & WS_VISIBLE))	// okno aktualnie wyï¿½wietlone?
     {
-        m_bHidden = FALSE;				// info - okno by³o wyœwietlane
+        m_bHidden = FALSE;				// info - okno byï¿½o wyï¿½wietlane
         ShowWindow(SW_HIDE);			// ukrycie okna
     }
     else
-        m_bHidden = TRUE;				// info - okno by³o ukryte
+        m_bHidden = TRUE;				// info - okno byï¿½o ukryte
 
     return 1;
 }

@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // SaveCodeBlockOptions.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "6502.h"
 #include "SaveCodeBlockOptions.h"
 
@@ -174,14 +174,14 @@ void CSaveCodeBlockOptions::CalculateNums(int pos)
 
     if (start > end)
         return;
-    if (pos==3)		// zmieniæ pole d³ugoœæ?
+    if (pos==3)		// zmieniï¿½ pole dï¿½ugoï¿½ï¿½?
     {
         if (end-start+1 != len && end-start+1 <= 0x10000 && !(theApp.m_global.m_bProc6502==2))  // 1.3.3 support for 24-bit addressing
             SetNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_LENGTH),end-start+1,fmt3);
         else if (end-start+1 != len && end-start+1 <= 0x1000000)
             SetNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_LENGTH),end-start+1,fmt3);
     }
-    else if (pos==2)	// zmieniæ pole koniec?
+    else if (pos==2)	// zmieniï¿½ pole koniec?
     {
         if (start+len-1 != end && start+len-1 <= 0xFFFF && len > 0 && !(theApp.m_global.m_bProc6502==2))  // 1.3.3 support for 24-bit addressing
             SetNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_END),start+len-1,fmt2);

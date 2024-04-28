@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Options.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "resource.h"
 #include "Options.h"
 #include "ConfigSettings.h"
@@ -92,7 +92,7 @@ COptions::~COptions()
 int CALLBACK COptions::PropSheetProc(HWND hwndDlg, UINT uMsg, LPARAM lParam)
 {
     if (uMsg == PSCB_INITIALIZED && ::IsWindow(hwndDlg))
-        CWnd::FromHandle(hwndDlg)->ModifyStyleEx(0, WS_EX_CONTEXTHELP);  // w³¹czenie pomocy kontekstowej
+        CWnd::FromHandle(hwndDlg)->ModifyStyleEx(0, WS_EX_CONTEXTHELP);  // wï¿½ï¿½czenie pomocy kontekstowej
 
     return 0;
 }
@@ -168,12 +168,12 @@ void COptionsSymPage::DoDataExchange(CDataExchange* pDX)
         CSpinButtonCtrl *pCols;
         pCols = (CSpinButtonCtrl *) GetDlgItem(IDC_OPT_SYM_W_SPIN);
         ASSERT(pCols != NULL);
-        pCols->SetRange(1, 255);		// iloœæ kolumn terminala
+        pCols->SetRange(1, 255);		// iloï¿½ï¿½ kolumn terminala
 
         CSpinButtonCtrl *pRows;
         pRows = (CSpinButtonCtrl *) GetDlgItem(IDC_OPT_SYM_H_SPIN);
         ASSERT(pRows != NULL);
-        pRows->SetRange(1, 255);		// iloœæ wierszy terminala
+        pRows->SetRange(1, 255);		// iloï¿½ï¿½ wierszy terminala
     }
 
     CPropertyPage::DoDataExchange(pDX);
@@ -543,7 +543,7 @@ void COptionsMarksPage::DoDataExchange(CDataExchange* pDX)
         CSpinButtonCtrl *pTab;
         pTab = (CSpinButtonCtrl *) GetDlgItem(IDC_OPT_BUS_SPIN);
         ASSERT(pTab != NULL);
-        pTab->SetRange(10,24);		// wielkoœæ szyny adresowej
+        pTab->SetRange(10,24);		// wielkoï¿½ï¿½ szyny adresowej
     }
 
     CPropertyPage::DoDataExchange(pDX);

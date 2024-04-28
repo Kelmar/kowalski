@@ -31,7 +31,7 @@
 //	+	FEATURE: changed layout of SUndoRecord. Now takes less memory
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include <malloc.h>
 #include "editcmd.h"
 #include "CCrystalTextBuffer.h"
