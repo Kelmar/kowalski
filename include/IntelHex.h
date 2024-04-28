@@ -26,7 +26,7 @@ class CMarkArea;
 
 class CIntelHex
 {
-    UINT geth(const TCHAR *&ptr, UINT &sum);	// interpretacja dwucyfrowej liczby hex
+    UINT geth(const char *&ptr, UINT &sum); // interpretation of a two-digit hex number
     UINT row;
 
 public:
@@ -41,13 +41,17 @@ public:
     private:
         Err error;
         UINT row;
+
     public:
         CIntelHexException(Err err= E_NONE, UINT row= 0) : error(err), row(row)
-        { }
-        /*virtual*/ ~CIntelHexException()
-        {}
+        {
+        }
 
-        /*virtual*/ bool GetErrorMessage(LPTSTR lpszError, UINT nMaxError, PUINT pnHelpContext = NULL);
+        virtual ~CIntelHexException()
+        {
+        }
+
+        virtual bool GetErrorMessage(char *lpszError, UINT nMaxError, UINT *pnHelpContext = nullptr);
     };
 };
 

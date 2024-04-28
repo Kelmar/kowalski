@@ -26,27 +26,33 @@ class CMarkArea;
 
 class CMotorolaSRecord
 {
-    UINT geth(const TCHAR *&ptr, UINT &sum);	// interpretacja dwucyfrowej liczby hex
+    UINT geth(const char *&ptr, UINT &sum); // Interpretation of a two-digit hex number
     UINT row;
 
 public:
-    void SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start= -1);
+    void SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start = -1);
 
     void LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
 
-    class CMotorolaSRecordException: public CException
+    class CMotorolaSRecordException //: public CException
     {
     public:
         enum Err { E_NONE, E_BAD_FORMAT, E_CHKSUM, E_FORMAT };
+        
     private:
         Err error;
         UINT row;
+
     public:
         CMotorolaSRecordException(Err err= E_NONE, UINT row= 0) : error(err), row(row)
-        { }
+        {
+        }
+
         virtual ~CMotorolaSRecordException()
-        {}
-        virtual BOOL GetErrorMessage(LPTSTR lpszError, UINT nMaxError, PUINT pnHelpContext= NULL);
+        {
+        }
+
+        virtual bool GetErrorMessage(char *lpszError, UINT nMaxError, UINT *pnHelpContext = nullptr);
     };
 };
 

@@ -25,98 +25,105 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "AtariBin.h"
 #include "Code65p.h"
 
-
-CAsm::Breakpoint CGlobal::SetBreakpoint(int line, const std::wstring &doc_title)
+CAsm::Breakpoint CGlobal::SetBreakpoint(int line, const std::string &doc_title)
 {
     FileUID fuid = m_Debug.GetFileUID(doc_title);
-    return m_Debug.ToggleBreakpoint(line,fuid);	// ustawienie/skasowanie przerwania
+    return m_Debug.ToggleBreakpoint(line, fuid); // set/delete breakpoint
 }
 
-CAsm::Breakpoint CGlobal::GetBreakpoint(int line, const std::wstring &doc_title)
+CAsm::Breakpoint CGlobal::GetBreakpoint(int line, const std::string &doc_title)
 {
     FileUID fuid = m_Debug.GetFileUID(doc_title);
-    return m_Debug.GetBreakpoint(line,fuid);	// ustawienie/skasowanie przerwania
+    return m_Debug.GetBreakpoint(line, fuid); // set/delete breakpoint
 }
 
-CAsm::Breakpoint CGlobal::ModifyBreakpoint(int line, const std::wstring &doc_title, Breakpoint bp)
+CAsm::Breakpoint CGlobal::ModifyBreakpoint(int line, const std::string &doc_title, Breakpoint bp)
 {
     FileUID fuid = m_Debug.GetFileUID(doc_title);
-    return m_Debug.ModifyBreakpoint(line,fuid,bp);// ustawienie przerwania
+    return m_Debug.ModifyBreakpoint(line, fuid, bp); // Breakpoint setting
 }
 
-void CGlobal::ClrBreakpoint(int line, const std::wstring & doc_title)
+void CGlobal::ClrBreakpoint(int line, const std::string &doc_title)
 {
     FileUID fuid = m_Debug.GetFileUID(doc_title);
-    m_Debug.ClrBreakpoint(line,fuid);	// skasowanie przerwania
+    m_Debug.ClrBreakpoint(line, fuid); // Clear the breakpoint
 }
 
-CAsm::DbgFlag CGlobal::GetLineDebugFlags(int line, const std::wstring &doc_title)
+CAsm::DbgFlag CGlobal::GetLineDebugFlags(int line, const std::string &doc_title)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title);	// ID pliku
+    FileUID fuid = m_Debug.GetFileUID(doc_title); //File ID
     CDebugLine dl;
-    m_Debug.GetAddress(dl,line,fuid);	// znalezienie adresu odpowiadaj�cego wierszowi
-    return (DbgFlag)dl.flags;		// flagi opisuj�ce wiersz programu
+    m_Debug.GetAddress(dl, line, fuid); // Find the address corresponding to the line
+    return (DbgFlag)dl.flags; // Flags describing the program line
 }
 
-UINT32 CGlobal::GetLineCodeAddr(int line, const std::wstring &doc_title)
+uint32_t CGlobal::GetLineCodeAddr(int line, const std::string &doc_title)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title);	// ID pliku
+    FileUID fuid = m_Debug.GetFileUID(doc_title); // File ID
     CDebugLine dl;
-    m_Debug.GetAddress(dl,line,fuid);	// znalezienie adresu odpowiadaj�cego wierszowi
+    m_Debug.GetAddress(dl, line, fuid); // Find the address corresponding to the line
     return dl.addr;
 }
 
-bool CGlobal::SetTempExecBreakpoint(int line, const std::wstring &doc_title)
+bool CGlobal::SetTempExecBreakpoint(int line, const std::string &doc_title)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title);	// ID pliku
+    FileUID fuid = m_Debug.GetFileUID(doc_title); // File ID
     CDebugLine dl;
-    m_Debug.GetAddress(dl,line,fuid);	// znalezienie adresu odpowiadaj�cego wierszowi
+    m_Debug.GetAddress(dl, line, fuid); // Find the address corresponding to the line
+
     if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
-        return FALSE;		// nie ma kodu w wierszu 'line'
+        return false; // There is no code in line 'line'
+
     m_Debug.SetTemporaryExecBreakpoint(dl.addr);
-    return TRUE;
+
+    return true;
 }
 
 bool CGlobal::CreateDeasm()
 {
-    ASSERT(m_pSym6502 != NULL);
+    ASSERT(m_pSym6502 != nullptr);
 
-    CDeasm6502Doc *pDoc= (CDeasm6502Doc*) theApp.m_pDocDeasmTemplate->OpenDocumentFile(NULL);
-    if (pDoc == NULL)
-        return FALSE;
+#if 0
+
+    CDeasm6502Doc *pDoc= (CDeasm6502Doc*)wxGetApp().m_pDocDeasmTemplate->OpenDocumentFile(nullptr);
+
+    if (pDoc == nullptr)
+        return false;
     /*
-      pDoc->SetContext( m_pSym6502->GetContext() );
-      pDoc->SetStart( m_pSym6502->get_pc() );
+      pDoc->SetContext(m_pSym6502->GetContext());
+      pDoc->SetStart(m_pSym6502->get_pc());
     */
-    pDoc->SetPointer( m_pSym6502->get_pc() );
+    pDoc->SetPointer(m_pSym6502->get_pc());
 
-    return TRUE;
+#endif
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
 
 void CGlobal::StartDebug()
 {
-    if (theApp.m_global.m_bProc6502==2)  // 1.3.3 disable debugger for 65816
+    if (wxGetApp().m_global.m_bProc6502 == 2) // 1.3.3 disable debugger for 65816
         return;
 
     GetMemForSym();
     bool restart;
 
-    if (m_pSym6502 == NULL)
+    if (m_pSym6502 == nullptr)
     {
-        restart = FALSE;
-        m_pSym6502 = new CSym6502(m_Mem,&m_Debug,m_uAddrBusWidth);
+        restart = false;
+        m_pSym6502 = new CSym6502(m_Mem, &m_Debug, m_uAddrBusWidth);
     }
     else
     {
-        restart = TRUE;
+        restart = true;
         m_pSym6502->Restart(m_Mem);
     }
 
     m_pSym6502->finish = m_SymFinish;
     m_pSym6502->SymStart(m_uOrigin);
-    m_pSym6502->Update(CAsm::SYM_OK,TRUE);
+    m_pSym6502->Update(CAsm::SYM_OK, true);
 
     /*
       struct { const std::wstring *pStr, const CContext *pCtx } data;
@@ -125,66 +132,71 @@ void CGlobal::StartDebug()
       data.pCtx = m_pSym6502->GetContext();
     */
 
-    SendMessageToViews(WM_USER_START_DEBUGGER);
-    SendMessageToPopups(WM_USER_START_DEBUGGER,(WPARAM)restart);
+    Broadcast::ToViews(EVT_START_DEBUGGER, 0, 0);
+    Broadcast::ToPopups(EVT_START_DEBUGGER, (WPARAM)restart, 0);
 }
 
 void CGlobal::ExitDebugger()
 {
-    if (m_pSym6502 == NULL)
+    if (m_pSym6502 == nullptr)
         return;
 
     ASSERT(!m_pSym6502->IsRunning());
 
-    SendMessageToViews(WM_USER_EXIT_DEBUGGER);
-    SendMessageToPopups(WM_USER_EXIT_DEBUGGER);
+    Broadcast::ToViews(EVT_EXIT_DEBUGGER, 0, 0);
+    Broadcast::ToPopups(EVT_EXIT_DEBUGGER, 0, 0);
+
     m_pSym6502->ExitSym();
     delete m_pSym6502;
-    m_pSym6502 = NULL;
+
+    m_pSym6502 = nullptr;
 }
 
 //-----------------------------------------------------------------------------
 
 void CGlobal::SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info)
 {
-//  ASSERT(m_bCodePresent);
+    //ASSERT(m_bCodePresent);
+
     switch (info)
     {
-    case 0:		// format Intel-HEX kodu wynikowego (*.65h/*.hex)
+    case 0: // Intel-HEX format of the result code (*.65h/*.hex)
     {
         CIntelHex hex;
         hex.SaveHexFormat(archive, m_Mem, m_MarkArea, m_uOrigin);
         break;
     }
 
-    case 1:		// format s-rekord Motoroli kodu wynikowego (*.65m/*.s9)
+    case 1: // Motorola s-record format of the object code (*.65m/*.s9)
     {
         CMotorolaSRecord srec;
         srec.SaveHexFormat(archive, m_Mem, m_MarkArea, m_uOrigin);
         break;
     }
 
-    case 2:		// binary image of the object code (*.bin/*.65b)
-        m_Mem.Save(archive, start, end);
+    case 2: // binary image of the object code (*.bin/*.65b)
+        //m_Mem.Save(archive, start, end);
         break;
 
-    case 3:		// resulting program (*.65p)
+    case 3: // resulting program (*.65p)
         CCode65p code;
-        if (m_MarkArea.GetSize()==0)
+        if (m_MarkArea.GetSize() == 0)
             code.SaveCode65p(archive, m_Mem, start, end);
         else
             code.SaveCode65p(archive, m_Mem, m_MarkArea, m_uOrigin);
         break;
 
     default:
-        ASSERT(FALSE);
+        ASSERT(false);
+        break;
     }
 }
 
 void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info, int nClear/*= 0*/)
 {
-    COutputMem mem;	// pami�� na �adowany program
-    int prog_start= -1;
+#if 0
+    COutputMem mem;	// Memory for the loaded program
+    int prog_start = -1;
 
     if (nClear != -1)
         mem.ClearMem(nClear);
@@ -193,27 +205,27 @@ void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info
 
     switch (info)
     {
-    case 0:		// format Intel-HEX kodu wynikowego (*.65h/*.hex)
+    case 0: // Intel-HEX format of the result code (*.65h/*.hex)
     {
         CIntelHex hex;
         hex.LoadHexFormat(archive, mem, m_MarkArea, prog_start);
         break;
     }
 
-    case 1:		// format s-record Motoroli kodu wynikowego (*.65m/*.s9)
+    case 1: // Motorola s-record format of the object code (*.65m/*.s9)
     {
         CMotorolaSRecord srec;
         srec.LoadHexFormat(archive, mem, m_MarkArea, prog_start);
         break;
     }
 
-    case 2:		// obraz binarny kodu wynikowego (*.bin/*.65b)
+    case 2: // binary image of the result code (*.bin/*.65b)
         mem.Load(archive, start, end);
         break;
 
-    case 3:		// program wynikowy (*.65p)
+    case 3: // result program (*.65p)
     {
-        WORD wTemp;
+        uint16_t wTemp;
         archive >> wTemp;
 
         if (wTemp != 0xFFFF)
@@ -223,30 +235,30 @@ void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info
 
         do
         {
-            WORD wFrom, wTo;
-            archive >> wFrom;
+            uint16_t from, to;
+            archive >> from;
 
-            if (wFrom == 0xFFFF)
+            if (from == 0xFFFF)
             {
                 nLen -= 2;
-                archive >> wFrom;
+                archive >> from;
             }
 
-            archive >> wTo;
+            archive >> to;
             nLen -= 4;
             
-            if (wTo < wFrom)
+            if (to < from)
                 throw new CFileException(CFileException::invalidFile);
 
-            mem.Load(archive, wFrom, wTo);
-            nLen -= wTo - wFrom + 1;
+            mem.Load(archive, from, to);
+            nLen -= to - from + 1;
         }
         while (nLen > 0);
-        //        while (archive.GetFile()->GetLength() > archive.GetFile()->GetPosition());
+        //while (archive.GetFile()->GetLength() > archive.GetFile()->GetPosition());
     }
-    break;  // 1.3.3 added break - was missing and causing read past end of file error
+    break; // 1.3.3 added break - was missing and causing read past end of file error
 
-    case 4:		// Atari binary program
+    case 4: // Atari binary program
     {
         CAtariBin bin;
         bin.LoadAtaBinFormat(archive, mem, m_MarkArea, prog_start);
@@ -257,10 +269,12 @@ void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info
         ASSERT(false);
     }
 
-    m_ProgMem = mem;	// uda�o si� za�adowa� program
-    SetCodePresence(TRUE);
+    m_ProgMem = mem; // program loaded successfully
+    SetCodePresence(true);
     SetStart(prog_start != -1 ? prog_start : start);
     StartDebug();
-    SendMessageToViews(WM_USER_PROG_MEM_CHANGED,(WPARAM)start);
-    SendMessageToPopups(WM_USER_PROG_MEM_CHANGED,(WPARAM)start);
+
+    Broadcast::ToViews(EVT_PROG_MEM_CHANGED, (WPARAM)start, 0);
+    Broadcast::ToPopups(EVT_PROG_MEM_CHANGED, (WPARAM)start, 0);
+#endif
 }

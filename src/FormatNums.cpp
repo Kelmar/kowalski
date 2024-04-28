@@ -21,82 +21,104 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "stdafx.h"
 #include "FormatNums.h"
 
+using namespace NumberFormats;
 
-void CFormatNums::IncEditField(CWnd *pCtrl, int iDelta, int iMin, int iMax)
+void IncEditField(wxControl *pCtrl, int iDelta, int iMin, int iMax)
 {
-    int num,old;
-    NumFmt fmt;
+    int num, old;
+    NumberFormat fmt;
 
-    old = num = ReadNumber(pCtrl,fmt);
+    old = num = ReadNumber(pCtrl, fmt);
 
     num += iDelta;
+
     if (num > iMax)
         num = iMax;
     else if (num < iMin)
         num = iMin;
+
     if (num != old)
-        SetNumber(pCtrl,num,fmt);
+        SetNumber(pCtrl, num, fmt);
 }
 
-
-int CFormatNums::ReadNumber(CWnd *pCtrl, NumFmt &fmt)
+int ReadNumber(wxControl *pCtrl, NumberFormat &fmt)
 {
-    TCHAR buf[32];
-    int num= 0;
-    if (pCtrl==NULL)
-        return num;
+    if (!pCtrl)
+        return 0;
 
-    pCtrl->GetWindowText(buf,sizeof(buf)/sizeof(buf[0]));
-    if (buf[0]==_T('$'))
+    wxString buf = pCtrl->GetLabel().MakeUpper();
+
+    if (buf.IsEmpty())
+        return 0;
+
+    int radix = 10;
+    int start = 0;
+    
+    if (buf[0] == '$')
     {
-        fmt = NUM_HEX_DOL;
-        if (sscanf(buf+1, _T("%X"),&num) <= 0)
-        {}
+        fmt = NumberFormats::DollarHex;
+        radix = 16;
+        start = 1;
     }
-    else if (buf[0]==_T('0') && (buf[1]==_T('x') || buf[1]==_T('X')))
+    else if (buf.StartsWith("0X"))
     {
-        fmt = NUM_HEX_0X;
-        if (sscanf(buf+2, _T("%X"),&num) <= 0)
-        {}
+        fmt = NumberFormats::IntelHex;
+        radix = 16;
+        start = 2;
     }
-    else if (buf[0]>=_T('0') && buf[0]<=_T('9'))
+    else if (buf[0] >= '0' && buf[0] <= '9')
     {
-        fmt = NUM_DEC;
-        if (sscanf(buf, _T("%d"),&num) <= 0)
-        {}
+        fmt = NumberFormats::Decimal;
     }
     else
-        fmt = NUM_ERR;
+    {
+        fmt = NumberFormats::Error;
+        return 0;
+    }
+
+    int num = 0;
+    for (int i = start; i < buf.Length(); ++i)
+    {
+        char c = buf[i];
+        int val;
+
+        if ((c >= '0') && (c <= '9'))
+            val = c - '0';
+        else
+            val = c - 'A' + 10;
+
+        num = num * radix + val;
+    }
 
     return num;
 }
 
-
-void CFormatNums::SetNumber(CWnd *pCtrl, int num, NumFmt fmt)
+void SetNumber(wxControl *pCtrl, int num, NumberFormat fmt)
 {
-    TCHAR buf[32];
+    if (!pCtrl)
+        return;
 
-    buf[0] = 0;
+    wxString buf;
 
     switch (fmt)
     {
-    case NUM_ERR:
-    case NUM_HEX_0X:
-        wsprintf(buf,_T("0x%04X"),num);
+    case NumberFormats::Error:
+    case NumberFormats::IntelHex:
+        buf.Printf("0x%04X", num);
         break;
-    case NUM_HEX_DOL:
-        wsprintf(buf,_T("$%04X"),num);
+
+    case NumberFormats::DollarHex:
+        buf.Printf("$%04X", num);
         break;
-    case NUM_DEC:
-        wsprintf(buf,_T("%d"),num);
+
+    case NumberFormats::Decimal:
+        buf.Printf("%d", num);
         break;
+
     default:
-        ASSERT(FALSE);
+        ASSERT(false);
+        break;
     }
 
-    if (pCtrl)
-    {
-        pCtrl->SetWindowText(buf);
-        pCtrl->UpdateWindow();
-    }
+    pCtrl->SetLabel(buf);
 }

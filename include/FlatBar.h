@@ -33,7 +33,7 @@ public:
     }
 
 protected:
-    //virtual void OnUpdateCmdUI(CFrameWnd* target, bool disableIfNoHndler);
+    virtual void OnUpdateCmdUI(wxFrame* target, bool disableIfNoHndler);
 
     //afx_msg void OnWindowPosChanging(LPWINDOWPOS lpWndPos);
     //afx_msg void OnWindowPosChanged(LPWINDOWPOS lpWndPos);

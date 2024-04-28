@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _broadcast_
 
 wxDECLARE_EVENT(EVT_EXIT_DEBUGGER, wxCommandEvent);
-wxDECLARE_EVENT(EVT_START_DEBUGER, wxCommandEvent);
+wxDECLARE_EVENT(EVT_START_DEBUGGER, wxCommandEvent);
 wxDECLARE_EVENT(EVT_UPDATE_REG_WND, wxCommandEvent);
 wxDECLARE_EVENT(EVT_PROG_MEM_CHANGED, wxCommandEvent); // All 6502 memory has been changed (after LOAD or assembly)
 wxDECLARE_EVENT(EVT_REMOVE_ERR_MARK, wxCommandEvent);

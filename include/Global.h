@@ -72,13 +72,13 @@ public:
         return &m_Debug;
     }
 
-    COutputMem *GetMemForAsm()	// pami�� na kod wynikowy (asemblacja)
+    COutputMem *GetMemForAsm() // Memory for the object code (assembly)
     {
         m_ProgMem.ClearMem();
         return &m_ProgMem;
     }
 
-    COutputMem *GetMemForSym()	// pami�� z kodem wynikowym (symulator)
+    COutputMem *GetMemForSym() // Memory with object code (simulator)
     {
         if (m_bCodePresent)
         {
@@ -93,12 +93,12 @@ public:
         return &m_MarkArea;
     }
 
-    COutputMem *GetMem()		// pami�� z kodem wynikowym
+    COutputMem *GetMem() // Memory with the result code
     {
         return &m_Mem;
     }
 
-    uint32_t GetStartAddr()		// pocz�tek programu
+    uint32_t GetStartAddr() // Beginning of the program
     {
         return m_uOrigin;
     }
@@ -110,7 +110,7 @@ public:
 
     bool IsDebugInfoPresent()
     {
-        return m_bCodePresent;    // do poprawienia
+        return m_bCodePresent; // to improve
     }
 
     bool IsDebugger()
@@ -197,21 +197,21 @@ public:
         m_bProc6502 = b6502;
     }
 
-    uint8_t GetHelpType()               //^^ Help
+    uint8_t GetHelpType() //^^ Help
     {
         return m_bHelpFile;
     }
 
-    void SetHelpType(uint8_t bHelp)     //^^ Help
+    void SetHelpType(uint8_t bHelp) //^^ Help
     {
         m_bHelpFile = bHelp;
     }
 
     //---------------------------------------------------------------------------
 
-    bool CreateDeasm();			// nowe okno deasemblera
+    bool CreateDeasm(); // New disassembler window
 
-    Breakpoint GetBreakpoint(uint32_t addr)	// pobranie przerwania pod danym adresem
+    Breakpoint GetBreakpoint(uint32_t addr) // Get the interrupt at the given address
     {
         return m_Debug.GetBreakpoint(addr);
     }

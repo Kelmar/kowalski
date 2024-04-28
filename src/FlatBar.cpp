@@ -6,31 +6,18 @@
 #include "StdAfx.h"
 #include "FlatBar.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-////////////////////////////////////////////////////////////////
-// CFlatToolBar--does flat tool bar in MFC.
-//
-IMPLEMENT_DYNAMIC(CFlatToolBar, CToolBar)
-
-BEGIN_MESSAGE_MAP(CFlatToolBar, CToolBar)
-    ON_WM_WINDOWPOSCHANGING()
-    ON_WM_WINDOWPOSCHANGED()
-END_MESSAGE_MAP()
-
 ////////////////
 // Load override modifies the style after loading toolbar.
 //
-BOOL CFlatToolBar::LoadToolBar(LPCTSTR lpszResourceName)
+bool CFlatToolBar::LoadToolBar(const char *resourceName)
 {
+#if 0
     if (!CToolBar::LoadToolBar(lpszResourceName))
         return FALSE;
     ModifyStyle(0, TBSTYLE_FLAT); // make it flat
-    return TRUE;
+#endif
+
+    return true;
 }
 
 //#define ILLUSTRATE_DISPLAY_BUG			 // remove comment to see the bug
@@ -40,6 +27,7 @@ BOOL CFlatToolBar::LoadToolBar(LPCTSTR lpszResourceName)
 // The simplest way to fix it is to repaint the old rectangle and
 // toolbar itself whenever the toolbar moves.
 //
+#if 0
 void CFlatToolBar::OnWindowPosChanging(LPWINDOWPOS lpwp)
 {
     CToolBar::OnWindowPosChanging(lpwp);
@@ -60,14 +48,17 @@ void CFlatToolBar::OnWindowPosChanging(LPWINDOWPOS lpwp)
         pParent->InvalidateRect(&rc);         // paint old rectangle
     }
 #endif
+
 }
+#endif
 
 //////////////////
 // Now toolbar has moved: repaint old area
 //
+#if 0
 void CFlatToolBar::OnWindowPosChanged(LPWINDOWPOS lpwp)
 {
-    CToolBar::OnWindowPosChanged(lpwp);
+    //CToolBar::OnWindowPosChanged(lpwp);
 
 #ifndef ILLUSTRATE_DISPLAY_BUG
     if (!(lpwp->flags & SWP_NOMOVE))        // if moved:
@@ -81,6 +72,8 @@ void CFlatToolBar::OnWindowPosChanged(LPWINDOWPOS lpwp)
 #endif
 }
 
+#endif
+
 ////////////////////////////////////////////////////////////////
 // The following stuff is to make the command update UI mechanism
 // work properly for flat tool bars. The main idea is to convert
@@ -91,19 +84,20 @@ void CFlatToolBar::OnWindowPosChanged(LPWINDOWPOS lpwp)
 // The following class was copied from BARTOOL.CPP in the MFC source.
 // All I changed was SetCheck--PD.
 //
-class CFlatOrCoolBarCmdUI : public CCmdUI // class private to this file !
+class CFlatOrCoolBarCmdUI //: public CCmdUI // class private to this file !
 {
 public: // re-implementations only
-    virtual void Enable(BOOL bOn);
+    virtual void Enable(bool bOn);
     virtual void SetCheck(int nCheck);
-    virtual void SetText(LPCTSTR lpszText);
+    virtual void SetText(const char *text);
 };
 
 
-void CFlatOrCoolBarCmdUI::Enable(BOOL bOn)
+void CFlatOrCoolBarCmdUI::Enable(bool bOn)
 {
+#if 0
     m_bEnableChanged = TRUE;
-    CToolBar* pToolBar = (CToolBar*)m_pOther;
+    wxToolBar* pToolBar = (wxToolBar*)m_pOther;
     ASSERT(pToolBar != NULL);
     ASSERT_KINDOF(CToolBar, pToolBar);
     ASSERT(m_nIndex < m_nIndexMax);
@@ -117,6 +111,7 @@ void CFlatOrCoolBarCmdUI::Enable(BOOL bOn)
         if (!bOn)
             pToolBar->GetToolBarCtrl().Indeterminate(btn.idCommand, false);
     }
+#endif
 }
 
 // Take your pick:
@@ -130,6 +125,7 @@ void CFlatOrCoolBarCmdUI::Enable(BOOL bOn)
 //
 void CFlatOrCoolBarCmdUI::SetCheck(int nCheck)
 {
+#if 0
     ASSERT(nCheck >= 0 && nCheck <= 2); // 0=>off, 1=>on, 2=>indeterminate
     CToolBar* pToolBar = (CToolBar*)m_pOther;
     ASSERT(pToolBar != NULL);
@@ -189,9 +185,10 @@ void CFlatOrCoolBarCmdUI::SetCheck(int nCheck)
         pToolBar->Invalidate();
       }
     */
+#endif
 }
 
-void CFlatOrCoolBarCmdUI::SetText(LPCTSTR)
+void CFlatOrCoolBarCmdUI::SetText(const char *)
 {
     // ignore for now, but you should really set the text
 }
@@ -202,8 +199,9 @@ void CFlatOrCoolBarCmdUI::SetText(LPCTSTR)
 // CToolCmdUI.
 //
 
-void CFlatToolBar::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler)
+void CFlatToolBar::OnUpdateCmdUI(wxFrame* pTarget, bool disableIfNoHndler)
 {
+#if 0
     CFlatOrCoolBarCmdUI state; // <<<< This is the only line that's different--PD
     state.m_pOther = this;
 
@@ -232,4 +230,5 @@ void CFlatToolBar::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler)
 
     // update the dialog controls added to the toolbar
     UpdateDialogControls(pTarget, bDisableIfNoHndler);
+#endif
 }
