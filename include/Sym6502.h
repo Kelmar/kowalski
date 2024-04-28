@@ -179,7 +179,7 @@ struct CmdInfo	// single command info (for logging)
         , cmd(cmd)
         , arg1(arg1)
         , arg2(arg2)
-        , arg3(arg3)
+        , arg3(0)
         , uCycles(0)
         , intFlag(0)
         , argVal(0)
@@ -356,8 +356,8 @@ public:
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
     CSym6502(COutputMem &mem, int addr_bus_width)
         : ctx(mem, addr_bus_width)
-        , pre(ctx)
-        , old(ctx)
+        , pre(mem, addr_bus_width)
+        , old(mem, addr_bus_width)
         //, eventRedraw(true, true)
     {
         init();
@@ -366,8 +366,8 @@ public:
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
     CSym6502(COutputMem &mem, CDebugInfo *debug, int addr_bus_width) 
         : ctx(mem, addr_bus_width)
-        , pre(ctx)
-        , old(ctx)
+        , pre(mem, addr_bus_width)
+        , old(mem, addr_bus_width)
         //, eventRedraw(true)
         , debug(debug)
     {
