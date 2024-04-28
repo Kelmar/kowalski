@@ -21,47 +21,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#if !defined(AFX_INTREQUESTGENERATORDLG_H__1AEFC032_2D6B_4A3D_8DE5_5BB89CB76F80__INCLUDED_)
 //#define AFX_INTREQUESTGENERATORDLG_H__1AEFC032_2D6B_4A3D_8DE5_5BB89CB76F80__INCLUDED_
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
+
+#ifndef GOTO_LINE_H__
+#define GOTO_LINE_H__
+
 // CGotoLineNumber.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
 // CIntRequestGeneratorDlg dialog
 
-class CGotoLineNumber : public CDialog
+class CGotoLineNumber : public wxDialog
 {
-// Construction
 public:
-    CGotoLineNumber(CWnd* pParent = NULL);   // standard constructor
+    /* constructor */ CGotoLineNumber();
+    virtual ~CGotoLineNumber();
 
-// Dialog Data
-    //{{AFX_DATA(CGotoLineNumber)
-    enum { IDD = IDD_GOTO_LINENUMBER };
-    UINT	m_uLineNo;
-    CString	m_sPrompt;
-    //}}AFX_DATA
-
-
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CGotoLineNumber)
-protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
-
-// Implementation
-protected:
-
-    // Generated message map functions
-    //{{AFX_MSG(CIntRequestGeneratorDlg)
-    // NOTE: the ClassWizard will add member functions here
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    UINT m_uLineNo;
+    std::string m_sPrompt;
 };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-//#endif // !defined(AFX_INTREQUESTGENERATORDLG_H__1AEFC032_2D6B_4A3D_8DE5_5BB89CB76F80__INCLUDED_)
+#endif /* GOTO_LINE_H__ */

@@ -39,7 +39,6 @@ public:
 
 protected:
     virtual void OnDraw(wxDC *dc); // overridden to draw this view
-    //virtual bool PreCreateWindow(CREATESTRUCT& cs);
 
     // Implementation
 protected:

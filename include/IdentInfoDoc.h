@@ -53,18 +53,6 @@ public:
     {
         m_debug = debug;
     }
-
-    virtual void Serialize(CArchive& ar);   // overridden for document i/o
-
-protected:
-    virtual bool OnNewDocument();
-
-public:
-    
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
 };
 
 #endif /* IDENT_INFO_DOC_H__ */

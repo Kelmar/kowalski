@@ -25,49 +25,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "GotoLineNumber.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CGotoLineNumber dialog
 
-
-CGotoLineNumber::CGotoLineNumber(CWnd* pParent /*=NULL*/)
-    : CDialog(CGotoLineNumber::IDD, pParent)
+CGotoLineNumber::CGotoLineNumber()
+    : wxDialog()
 {
-    //{{AFX_DATA_INIT(CIntRequestGeneratorDlg)
-    //m_bGenerateIRQ = FALSE;
-    //m_bGenerateNMI = FALSE;
     m_uLineNo = 1;
-    m_sPrompt = _T("test");
-    //m_uNMITimeLapse = 0;
-    //}}AFX_DATA_INIT
+    m_sPrompt = "test";
 }
 
-
-void CGotoLineNumber::DoDataExchange(CDataExchange* pDX)
+CGotoLineNumber::~CGotoLineNumber()
 {
-    CDialog::DoDataExchange(pDX);
-    //{{AFX_DATA_MAP(CIntRequestGeneratorDlg)
-    //DDX_Check(pDX, IDC_GEN_IRQ, m_bGenerateIRQ);
-    //DDX_Check(pDX, IDC_GEN_NMI, m_bGenerateNMI);
-    DDX_Text(pDX, IDC_GOTO_LINENUMBER, m_uLineNo);
-    DDX_Text(pDX, IDC_GOTO_LN_PROMPT, m_sPrompt);
-    //DDV_MinMaxUInt(pDX, m_uIRQTimeLapse, 1, 2147483647);
-    //DDX_Text(pDX, IDC_NMI_LAPSE, m_uNMITimeLapse);
-    //DDV_MinMaxUInt(pDX, m_uNMITimeLapse, 1, 2147483647);
-    //}}AFX_DATA_MAP
 }
-
-
-BEGIN_MESSAGE_MAP(CGotoLineNumber, CDialog)
-    //{{AFX_MSG_MAP(CIntRequestGeneratorDlg)
-    // NOTE: the ClassWizard will add message map macros here
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CIntRequestGeneratorDlg message handlers

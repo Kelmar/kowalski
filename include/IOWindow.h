@@ -55,7 +55,8 @@ public:
     void Paste(const char* pcText);
 
 private:
-    enum { BUF_SIZE = 32 * 1024 };
+    static const size_t BUF_SIZE = 32 * 1024;
+
     char m_vchBuffer[BUF_SIZE];
     char* m_pHead;
     char* m_pTail;
@@ -66,9 +67,6 @@ class CIOWindow : public wxWindow //CMiniFrameWnd
     uint8_t *m_pData;           // Window memory
     int m_nWidth, m_nHeight;    // Window size (columns x rows)
     int m_nCharH, m_nCharW;     // Character size
-    static std::string m_strClass;
-    static bool m_bRegistered;
-    void RegisterWndClass();
     int m_nPosX, m_nPosY;       // Location of the character to print (and cursor)
     int m_nCursorCount;         // Counter hide cursor
     bool m_bCursorOn;           // flag: cursor on/off
@@ -125,8 +123,7 @@ public:
     void SetSize(int w, int h, int resize = 1);
     void GetSize(int &w, int &h);
     void Resize();
-    void SetWndPos(const wxPoint &p);
-    wxPoint GetWndPos();
+
     void Paste();
 
     void SetColors(wxColour text, wxColour backgnd);
@@ -150,7 +147,6 @@ public:
     //virtual bool PreTranslateMessage(MSG* pMsg);
 
 protected:
-    virtual void PostNcDestroy();
 
     // Generated message map functions
     afx_msg void OnPaint();

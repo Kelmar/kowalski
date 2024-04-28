@@ -25,70 +25,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "IdentInfoDoc.h"
 #include "IdentInfoView.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CIdentInfoView
 
-IMPLEMENT_DYNCREATE(CIdentInfoView, CListView)
-
 CIdentInfoView::CIdentInfoView()
+    : m_nSortBy(0)
 {
-    m_nSortBy = 0;
 }
 
 CIdentInfoView::~CIdentInfoView()
 {
 }
 
-
-BEGIN_MESSAGE_MAP(CIdentInfoView, CListView)
-    //{{AFX_MSG_MAP(CIdentInfoView)
-    ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
-    ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
 /////////////////////////////////////////////////////////////////////////////
 // CIdentInfoView drawing
 
-void CIdentInfoView::OnDraw(CDC* pDC)
+void CIdentInfoView::OnDraw(wxDC* pDC)
 {
-    CDocument* pDoc = GetDocument();
+    //CDocument* pDoc = GetDocument();
     // TODO: add draw code here
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CIdentInfoView diagnostics
-
-#ifdef _DEBUG
-void CIdentInfoView::AssertValid() const
-{
-    CListView::AssertValid();
-}
-
-void CIdentInfoView::Dump(CDumpContext& dc) const
-{
-    CListView::Dump(dc);
-}
-#endif //_DEBUG
-
-/////////////////////////////////////////////////////////////////////////////
 // CIdentInfoView message handlers
 
-BOOL CIdentInfoView::PreCreateWindow(CREATESTRUCT& cs)
-{
-    cs.style |= LVS_REPORT | LVS_SINGLESEL | WS_CLIPSIBLINGS;
-    cs.style &= ~(LVS_SORTASCENDING | LVS_SORTDESCENDING);
-
-    return CListView::PreCreateWindow(cs);
-}
-
-
+#if 0
 void CIdentInfoView::OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult)
 {
     LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
@@ -100,7 +61,7 @@ void CIdentInfoView::OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult)
     {
         switch (pDispInfo->item.iSubItem)
         {
-        case 0:	// nazwa
+        case 0: // Name
         {
             ((CIdentInfoDoc *)GetDocument())->GetIdent(pDispInfo->item.lParam,str,inf);
             if (str.GetLength() > 9 && str[8] == CAsm::LOCAL_LABEL_CHAR)	// etykieta lokalna ?
@@ -109,12 +70,11 @@ void CIdentInfoView::OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult)
                 pDispInfo->item.pszText = (TCHAR *) (const TCHAR *)str;
             break;
         }
-        case 1:	// wartoœæ
+        case 1:
         {
             CListCtrl &listv= GetListCtrl();
-            ((CIdentInfoDoc *)GetDocument())->GetIdent(
-                listv.GetItemData(pDispInfo->item.iItem), str, inf );
-            static TCHAR num[16];
+            ((CIdentInfoDoc *)GetDocument())->GetIdent(listv.GetItemData(pDispInfo->item.iItem), str, inf);
+            static char num[16];
             switch (inf.info)
             {
             case CIdent::I_VALUE:
@@ -133,7 +93,7 @@ void CIdentInfoView::OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult)
             pDispInfo->item.pszText = (TCHAR *) (const TCHAR *)num;
             break;
         }
-        case 2:	// zakres
+        case 2: // Range
         {
             CListCtrl &listv= GetListCtrl();
             ((CIdentInfoDoc *)GetDocument())->GetIdent(
@@ -237,25 +197,25 @@ int CALLBACK CIdentInfoView::CompareLVIFunc(LPARAM lParam1, LPARAM lParam2, LPAR
     int neg= 1;
     int ret;
 
-    switch (pView->m_nSortBy)	// sposób sortowania identyfikatorów
+    switch (pView->m_nSortBy)	// sposï¿½b sortowania identyfikatorï¿½w
     {
-    case -1:	// wg. nazwy, malej¹co
+    case -1:	// wg. nazwy, malejï¿½co
         neg = -1;
     case 1:	// wg. nazwy
         if (str1.GetLength()>8 && str1[8] == CAsm::LOCAL_LABEL_CHAR)	// etykieta lokalna?
             if (str2.GetLength()>8 && str2[8] == CAsm::LOCAL_LABEL_CHAR)
                 ret = _tcscmp((LPCSTR)str1+9,(LPCSTR)str2+9);
             else
-                return 1;	// zawsze 1 (bez wzglêdu na 'neg')
+                return 1;	// zawsze 1 (bez wzglï¿½du na 'neg')
         else if (str2.GetLength()>8 && str2[8] == CAsm::LOCAL_LABEL_CHAR)
             return -1;	// zawsze -1
         else
-            ret = str1.Compare(str2);	// porównanie dwóch etykiet globalnych
+            ret = str1.Compare(str2);	// porï¿½wnanie dwï¿½ch etykiet globalnych
         return ret * neg;
 
     case -2:
         neg = -1;
-    case 2:	// wg. wartoœci
+    case 2:	// wg. wartoï¿½ci
         if (inf1.info == CIdent::I_ADDRESS || inf1.info == CIdent::I_VALUE)
             if (inf2.info == CIdent::I_ADDRESS || inf2.info == CIdent::I_VALUE)
                 ret = inf1.val - inf2.val;
@@ -267,16 +227,16 @@ int CALLBACK CIdentInfoView::CompareLVIFunc(LPARAM lParam1, LPARAM lParam2, LPAR
 
     case -3:
         neg = -1;
-    case 3:	// wg. zasiêgu
+    case 3:	// wg. zasiï¿½gu
         if (str1.GetLength()>8 && str1[8] == CAsm::LOCAL_LABEL_CHAR)
             if (str2.GetLength()>8 && str2[8] == CAsm::LOCAL_LABEL_CHAR)	// etykiety lokalne?
-                ret = -str1.Compare(str2);	// porównanie ca³ych etykiet
+                ret = -str1.Compare(str2);	// porï¿½wnanie caï¿½ych etykiet
             else
-                ret = -1;	// pierwsza lokalna, druga globalna (porównywane etykiety)
+                ret = -1;	// pierwsza lokalna, druga globalna (porï¿½wnywane etykiety)
         else if (str2.GetLength()>8 && str2[8] == CAsm::LOCAL_LABEL_CHAR)	// etykiety lokalne?
-            ret = 1;	// pierwsza globalna, druga lokalna (porównywane etykiety)
+            ret = 1;	// pierwsza globalna, druga lokalna (porï¿½wnywane etykiety)
         else
-            return str1.Compare(str2);	// dwie etykiety globalne (zawsze sortuj rosn¹co)
+            return str1.Compare(str2);	// dwie etykiety globalne (zawsze sortuj rosnï¿½co)
         return ret * neg;
 
 //    case 4:	// wg. pliku
@@ -286,7 +246,7 @@ int CALLBACK CIdentInfoView::CompareLVIFunc(LPARAM lParam1, LPARAM lParam2, LPAR
     case 0:	// bez sortowania
         return 0;
     default:
-        ASSERT(FALSE);	// z³a wart. parametr 'lParamSort' dla fn porównuj¹cej
+        ASSERT(FALSE);	// zï¿½a wart. parametr 'lParamSort' dla fn porï¿½wnujï¿½cej
         return 0;
     }
 }
@@ -304,3 +264,4 @@ void CIdentInfoView::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 
     *pResult = 0;
 }
+#endif

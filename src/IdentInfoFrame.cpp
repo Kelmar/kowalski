@@ -25,16 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "6502.h"
 #include "IdentInfoFrame.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CIdentInfoFrame
-
-IMPLEMENT_DYNCREATE(CIdentInfoFrame, CMiniFrameWnd) //CFrameWnd)
 
 CIdentInfoFrame::CIdentInfoFrame()
 {
@@ -43,12 +35,6 @@ CIdentInfoFrame::CIdentInfoFrame()
 CIdentInfoFrame::~CIdentInfoFrame()
 {
 }
-
-
-BEGIN_MESSAGE_MAP(CIdentInfoFrame, CMiniFrameWnd) //CFrameWnd)
-    //{{AFX_MSG_MAP(CIdentInfoFrame)
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CIdentInfoFrame message handlers

@@ -25,70 +25,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "6502.h"
 #include "IdentInfoDoc.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CIdentInfoDoc
-
-IMPLEMENT_DYNCREATE(CIdentInfoDoc, CDocument)
 
 CIdentInfoDoc::CIdentInfoDoc()
 {
 }
 
-
-BOOL CIdentInfoDoc::OnNewDocument()
-{
-    if (!CDocument::OnNewDocument())
-        return false;
-    return true;
-}
-
-
 CIdentInfoDoc::~CIdentInfoDoc()
 {
 }
-
-
-BEGIN_MESSAGE_MAP(CIdentInfoDoc, CDocument)
-    //{{AFX_MSG_MAP(CIdentInfoDoc)
-    // NOTE - the ClassWizard will add and remove mapping macros here.
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CIdentInfoDoc diagnostics
-
-#ifdef _DEBUG
-void CIdentInfoDoc::AssertValid() const
-{
-    CDocument::AssertValid();
-}
-
-void CIdentInfoDoc::Dump(CDumpContext& dc) const
-{
-    CDocument::Dump(dc);
-}
-#endif //_DEBUG
-
-/////////////////////////////////////////////////////////////////////////////
-// CIdentInfoDoc serialization
-
-void CIdentInfoDoc::Serialize(CArchive& ar)
-{
-    if (ar.IsStoring())
-    {
-        // TODO: add storing code here
-    }
-    else
-    {
-        // TODO: add loading code here
-    }
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// CIdentInfoDoc commands
