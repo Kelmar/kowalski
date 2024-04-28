@@ -35,11 +35,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdint.h>
 
 #include <wx/wx.h>
+#include <wx/config.h>
 #include <wx/docmdi.h>
 #include <wx/docview.h>
 #include <wx/filename.h>
 #include <wx/hyperlink.h>
 #include <wx/richtext/richtextctrl.h>
+#include <wx/settings.h>
 
 #include <list>
 #include <string>

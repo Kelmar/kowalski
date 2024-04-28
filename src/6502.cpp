@@ -43,7 +43,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 //const char C6502App::REGISTRY_KEY[]= "MiKSoft";
-//const char C6502App::PROFILE_NAME[]= "6502 Simulator\\1.3";
+const char C6502App::PROFILE_NAME[]= "6502 Simulator\\1.9";
 
 /////////////////////////////////////////////////////////////////////////////
 // C6502App
@@ -67,8 +67,16 @@ END_MESSAGE_MAP()
 C6502App::C6502App()
 {
     m_bDoNotAddToRecentFileList = false;
+
+    m_config = new wxConfig(PROFILE_NAME);
+
     //m_hInstRes = NULL;
     //m_hRichEdit = 0;
+}
+
+C6502App::~C6502App()
+{
+    delete m_config;
 }
 
 wxIMPLEMENT_APP(C6502App);

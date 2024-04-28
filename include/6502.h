@@ -43,13 +43,14 @@ class CMainFrame;
 class C6502App : public wxApp
 {
 private:
-    //static const TCHAR REGISTRY_KEY[];
-    //static const TCHAR PROFILE_NAME[];
+    //static const char REGISTRY_KEY[];
+    static const char PROFILE_NAME[];
 
     //HINSTANCE m_hInstRes;
     //HMODULE m_hRichEdit;
 
     CMainFrame *m_mainFrame;
+    wxConfig *m_config;
 
 public:
     static bool m_bMaximize;    // flag - maximum window dimensions at startup;
@@ -60,9 +61,12 @@ public:
     bool m_bDoNotAddToRecentFileList;
     //CDocTemplate *m_pDocDeasmTemplate;
 
-    C6502App();
+    /* constructor */ C6502App();
+    virtual          ~C6502App();
 
     bool OnInit() override;
+
+    wxConfig &Config() { return *m_config; }
 
     virtual void SetStatusText(int col, const std::string &message);
 

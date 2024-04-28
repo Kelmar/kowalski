@@ -41,6 +41,8 @@ private:
 
     void SizeToolBar(int length, bool vert = false);
 
+    bool IsFloating(void) { return false; }
+
 public:
     /* constructor */ CDynamicHelp();
     virtual          ~CDynamicHelp();
@@ -58,8 +60,6 @@ public:
     virtual wxSize CalcFixedLayout(bool stretch, bool horz);
     virtual wxSize CalcDynamicLayout(int length, uint32_t mode);
 
-    //virtual void OnUpdateCmdUI(CFrameWnd* pTarget, bool bDisableIfNoHndler);
-
     wxSize CalcLayout(uint32_t mode, int length);
 
     virtual void OnBarStyleChange(uint32_t dwOldStyle, uint32_t dwNewStyle);
@@ -74,9 +74,6 @@ protected:
     afx_msg void OnCloseWnd();
     //afx_msg bool OnToolTipGetText(UINT uId, NMHDR* pNmHdr, LRESULT* pResult);
 
-    static std::string s_strWndClass;
-
-    void RegisterWndClass();
     wxSize m_sizeDefault;
     void Resize();
 

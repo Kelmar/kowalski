@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////
-//	File:		CCrystalTextView.inl
+//	File:		CCrystalTextBuffer.inl
 //	Version:	1.0.0.0
 //	Created:	29-Dec-1998
 //
@@ -14,14 +14,14 @@
 //	- LEAVE THIS HEADER INTACT
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef __CCrystalTextView_INL_INCLUDED
-#define __CCrystalTextView_INL_INCLUDED
+#ifndef CCrystalTextBuffer_INL_INCLUDED__
+#define CCrystalTextBuffer_INL_INCLUDED__
 
-#include "CCrystalTextView.h"
+#include "CCrystalTextBuffer.h"
 
-CE_INLINE BOOL CCrystalTextView::IsDraggingText() const
+bool CCrystalTextBuffer::IsModified() const
 {
-	return m_bDraggingText;
+	return m_bModified;
 }
 
 #endif

@@ -14,34 +14,34 @@
 //	- LEAVE THIS HEADER INTACT
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef __CCrystalEditView_INL_INCLUDED
-#define __CCrystalEditView_INL_INCLUDED
+#ifndef CCrystalEditView_INL_INCLUDED__
+#define CCrystalEditView_INL_INCLUDED__
 
 #include "CCrystalEditView.h"
 
-CE_INLINE BOOL CCrystalEditView::GetOverwriteMode() const
+CE_INLINE bool CCrystalEditView::GetOverwriteMode() const
 {
 	return m_bOvrMode;
 }
 
-CE_INLINE void CCrystalEditView::SetOverwriteMode(BOOL bOvrMode /*= TRUE*/)
+CE_INLINE void CCrystalEditView::SetOverwriteMode(bool bOvrMode /*= true */)
 {
 	m_bOvrMode = bOvrMode;
 }
 
-CE_INLINE BOOL CCrystalEditView::GetDisableBSAtSOL() const
+CE_INLINE bool CCrystalEditView::GetDisableBSAtSOL() const
 {
 	return m_bDisableBSAtSOL;
 }
 
-CE_INLINE BOOL CCrystalEditView::GetAutoIndent() const
+CE_INLINE bool CCrystalEditView::GetAutoIndent() const
 {
 	return m_bAutoIndent;
 }
 
-CE_INLINE void CCrystalEditView::SetAutoIndent(BOOL bAutoIndent)
+CE_INLINE void CCrystalEditView::SetAutoIndent(bool bAutoIndent)
 {
 	m_bAutoIndent = bAutoIndent;
 }
 
-#endif
+#endif /* CCrystalEditView_INL_INCLUDED__ */

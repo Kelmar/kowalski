@@ -15,15 +15,10 @@
 //	- LEAVE THIS HEADER INTACT
 ////////////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_CCRYSTALTEXTVIEW_H__AD7F2F41_6CB3_11D2_8C32_0080ADB86836__INCLUDED_)
-#define AFX_CCRYSTALTEXTVIEW_H__AD7F2F41_6CB3_11D2_8C32_0080ADB86836__INCLUDED_
-
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
+#ifndef CCRYSTALTEXTVIEW_H__
+#define CCRYSTALTEXTVIEW_H__
 
 #include "cedefs.h"
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Forward class declarations
@@ -40,7 +35,7 @@ struct TEXTBLOCK
 
 enum
 {
-    //	Base colors
+    // Base colors
     COLORINDEX_WHITESPACE,
     COLORINDEX_BKGND,
     COLORINDEX_NORMALTEXT,
@@ -48,22 +43,22 @@ enum
     COLORINDEX_SELBKGND,
     COLORINDEX_SELTEXT,
     COLORINDEX_ELLIPSIS,
-    //	Syntax colors
+    // Syntax colors
     COLORINDEX_KEYWORD,
     COLORINDEX_COMMENT,
     COLORINDEX_NUMBER,
-    COLORINDEX_OPERATOR,      // [JRT]:
+    COLORINDEX_OPERATOR, // [JRT]:
     COLORINDEX_STRING,
     COLORINDEX_PREPROCESSOR,
-    //	Compiler/debugger colors
+    // Compiler/debugger colors
     COLORINDEX_ERRORBKGND,
     COLORINDEX_ERRORTEXT,
     COLORINDEX_EXECUTIONBKGND,
     COLORINDEX_EXECUTIONTEXT,
     COLORINDEX_BREAKPOINTBKGND,
     COLORINDEX_BREAKPOINTTEXT
-    //	...
-    //	Expandable: custom elements are allowed.
+    // ...
+    // Expandable: custom elements are allowed.
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -89,73 +84,71 @@ enum
     UPDATE_RESET		= 0x1000		//	document was reloaded, update all!
 };
 
-class CRYSEDIT_CLASS_DECL CCrystalTextView : public CView
+class CRYSEDIT_CLASS_DECL CCrystalTextView : public wxView
 {
-    DECLARE_DYNCREATE(CCrystalTextView)
-
 private:
-    //	Search parameters
-    BOOL m_bLastSearch;
-    DWORD m_dwLastSearchFlags;
-    LPTSTR m_pszLastFindWhat;
-    BOOL m_bMultipleSearch;         // More search
+    // Search parameters
+    bool m_bLastSearch;
+    uint32_t m_dwLastSearchFlags;
+    const char *m_pszLastFindWhat;
+    bool m_bMultipleSearch; // More search
 
-    BOOL m_bCursorHidden;
+    bool m_bCursorHidden;
 
-    //	Painting caching bitmap
-    CBitmap *m_pCacheBitmap;
+    // Painting caching bitmap
+    wxBitmap *m_pCacheBitmap;
 
-    //	Line/character dimensions
+    // Line/character dimensions
     int m_nLineHeight, m_nCharWidth;
     void CalcLineCharDim();
 
-    //	Text attributes
+    // Text attributes
     int m_nTabSize;
-    BOOL m_bViewTabs;
-    BOOL m_bSelMargin;
+    bool m_bViewTabs;
+    bool m_bSelMargin;
 
-    //	Amount of lines/characters that completely fits the client area
+    // Amount of lines/characters that completely fits the client area
     int m_nScreenLines, m_nScreenChars;
 
     int m_nMaxLineLength;
     int m_nIdealCharPos;
 
-    BOOL m_bFocused;
-    CPoint m_ptAnchor;
-    LOGFONT m_lfBaseFont;
-    CFont *m_apFonts[4];
+    bool m_bFocused;
+    wxPoint m_ptAnchor;
+    wxFontInfo m_lfBaseFont;
+    wxFont *m_apFonts[4];
 
-    //	Parsing stuff
-    DWORD *m_pdwParseCookies;
+    // Parsing stuff
+    uint32_t *m_pdwParseCookies;
     int m_nParseArraySize;
-    DWORD GetParseCookie(int nLineIndex);
+    uint32_t GetParseCookie(int nLineIndex);
 
-    //	Pre-calculated line lengths (in characters)
+    // Pre-calculated line lengths (in characters)
     int m_nActualLengthArraySize;
     int *m_pnActualLineLength;
 
-    BOOL m_bPreparingToDrag;
-    BOOL m_bDraggingText;
-    BOOL m_bDragSelection, m_bWordSelection, m_bLineSelection;
+    bool m_bPreparingToDrag;
+    bool m_bDraggingText;
+    bool m_bDragSelection, m_bWordSelection, m_bLineSelection;
     UINT m_nDragSelTimer;
-    CPoint WordToRight(CPoint pt);
-    CPoint WordToLeft(CPoint pt);
+    wxPoint WordToRight(wxPoint pt);
+    wxPoint WordToLeft(wxPoint pt);
 
-    CPoint m_ptDrawSelStart, m_ptDrawSelEnd;
-    CPoint m_ptCursorPos;
-    CPoint m_ptSelStart, m_ptSelEnd;
+    wxPoint m_ptDrawSelStart, m_ptDrawSelEnd;
+    wxPoint m_ptCursorPos;
+    wxPoint m_ptSelStart, m_ptSelEnd;
     void PrepareSelBounds();
 
-    //	Helper functions
-    void ExpandChars(LPCTSTR pszChars, int nOffset, int nCount, CString &line);
+    // Helper functions
+    void ExpandChars(const char *pszChars, int nOffset, int nCount, std::string &line);
 
     int ApproxActualOffset(int nLineIndex, int nOffset);
-    void AdjustTextPoint(CPoint &point);
-    void DrawLineHelperImpl(CDC *pdc, CPoint &ptOrigin, const CRect &rcClip,
-                            LPCTSTR pszChars, int nOffset, int nCount);
-    BOOL IsInsideSelBlock(CPoint ptTextPos);
+    void AdjustTextPoint(wxPoint &point);
+    void DrawLineHelperImpl(wxDC *pdc, wxPoint &ptOrigin, const wxRect &rcClip,
+                            const char * pszChars, int nOffset, int nCount);
+    bool IsInsideSelBlock(wxPoint ptTextPos);
 
-    BOOL m_bBookmarkExist;     // More bookmarks
+    bool m_bBookmarkExist; // More bookmarks
 
     // collapsible blocks
     bool IsFirstLineOfCollapsedBlock(int nLine);
@@ -166,121 +159,127 @@ private:
     std::vector<bool> m_vLineInsideBlock;
 
 protected:
-    CImageList *m_pIcons;
+    //CImageList *m_pIcons;
+
     CCrystalTextBuffer *m_pTextBuffer;
-    HACCEL m_hAccel;
-    BOOL m_bVertScrollBarLocked, m_bHorzScrollBarLocked;
-    CPoint m_ptDraggedTextBegin, m_ptDraggedTextEnd;
+    //HACCEL m_hAccel;
+
+    bool m_bVertScrollBarLocked, m_bHorzScrollBarLocked;
+    wxPoint m_ptDraggedTextBegin, m_ptDraggedTextEnd;
     virtual void ResetView();
     void UpdateCaret();
-    void SetAnchor(const CPoint &ptNewAnchor);
+    void SetAnchor(const wxPoint &ptNewAnchor);
     int GetMarginWidth();
 
-    BOOL m_bShowInactiveSelection;
-    //	[JRT]
-    BOOL m_bDisableDragAndDrop;
+    bool m_bShowInactiveSelection;
+    // [JRT]
+    bool m_bDisableDragAndDrop;
 
-    CPoint ClientToText(const CPoint &point);
-    CPoint TextToClient(const CPoint &point);
-    void InvalidateLines(int nLine1, int nLine2, BOOL bInvalidateMargin = FALSE);
+    wxPoint ClientToText(const wxPoint &point);
+    wxPoint TextToClient(const wxPoint &point);
+    void InvalidateLines(int nLine1, int nLine2, bool bInvalidateMargin = false);
     int CalculateActualOffset(int nLineIndex, int nCharIndex);
 
-    //	Printing
+    // Printing
     int m_nPrintPages;
     int *m_pnPages;
-    CFont *m_pPrintFont;
+    wxFont *m_pPrintFont;
     int m_nPrintLineHeight;
-    BOOL m_bPrintHeader, m_bPrintFooter;
-    CRect m_ptPageArea, m_rcPrintArea;
-    int PrintLineHeight(CDC *pdc, int nLine);
-    void RecalcPageLayouts(CDC *pdc, CPrintInfo *pInfo);
-    virtual void PrintHeader(CDC *pdc, int nPageNum);
-    virtual void PrintFooter(CDC *pdc, int nPageNum);
-    virtual void GetPrintHeaderText(int nPageNum, CString &text);
-    virtual void GetPrintFooterText(int nPageNum, CString &text);
+    bool m_bPrintHeader, m_bPrintFooter;
+    wxRect m_ptPageArea, m_rcPrintArea;
+    int PrintLineHeight(wxDC *pdc, int nLine);
+#if 0
+    void RecalcPageLayouts(wxDC *pdc, CPrintInfo *pInfo);
+#endif
+    virtual void PrintHeader(wxDC *pdc, int nPageNum);
+    virtual void PrintFooter(wxDC *pdc, int nPageNum);
+    virtual void GetPrintHeaderText(int nPageNum, std::string &text);
+    virtual void GetPrintFooterText(int nPageNum, std::string &text);
 
-    //	Keyboard handlers
-    void MoveLeft(BOOL bSelect);
-    void MoveRight(BOOL bSelect);
-    void MoveWordLeft(BOOL bSelect);
-    void MoveWordRight(BOOL bSelect);
-    void MoveUp(BOOL bSelect);
-    void MoveDown(BOOL bSelect);
-    void MoveHome(BOOL bSelect);
-    void MoveEnd(BOOL bSelect);
-    void MovePgUp(BOOL bSelect);
-    void MovePgDn(BOOL bSelect);
-    void MoveCtrlHome(BOOL bSelect);
-    void MoveCtrlEnd(BOOL bSelect);
+    // Keyboard handlers
+    void MoveLeft(bool bSelect);
+    void MoveRight(bool bSelect);
+    void MoveWordLeft(bool bSelect);
+    void MoveWordRight(bool bSelect);
+    void MoveUp(bool bSelect);
+    void MoveDown(bool bSelect);
+    void MoveHome(bool bSelect);
+    void MoveEnd(bool bSelect);
+    void MovePgUp(bool bSelect);
+    void MovePgDn(bool bSelect);
+    void MoveCtrlHome(bool bSelect);
+    void MoveCtrlEnd(bool bSelect);
 
     void SelectAll();
     void Copy();
 
-    BOOL IsSelection();
-    BOOL IsInsideSelection(const CPoint &ptTextPos);
-    void GetSelection(CPoint &ptStart, CPoint &ptEnd);
-    void SetSelection(const CPoint &ptStart, const CPoint &ptEnd);
+    bool IsSelection();
+    bool IsInsideSelection(const wxPoint &ptTextPos);
+    void GetSelection(wxPoint &ptStart, wxPoint &ptEnd);
+    void SetSelection(const wxPoint &ptStart, const wxPoint &ptEnd);
 
     int m_nTopLine, m_nOffsetChar;
-    BOOL m_bSmoothScroll;
+    bool m_bSmoothScroll;
 
     int GetLineHeight();
     int GetCharWidth();
     int GetMaxLineLength();
     int GetScreenLines();
     int GetScreenChars();
-    CFont* GetFont(BOOL bItalic = FALSE, BOOL bBold = FALSE);
+    wxFont* GetFont(bool bItalic = false, bool bBold = false);
 
-    void RecalcVertScrollBar(BOOL bPositionOnly = FALSE);
-    void RecalcHorzScrollBar(BOOL bPositionOnly = FALSE);
+    void RecalcVertScrollBar(bool bPositionOnly = false);
+    void RecalcHorzScrollBar(bool bPositionOnly = false);
 
-    //	Scrolling helpers
-    void ScrollToChar(int nNewOffsetChar, BOOL bNoSmoothScroll = FALSE, BOOL bTrackScrollBar = TRUE);
-    void ScrollToLine(int nNewTopLine, BOOL bNoSmoothScroll = FALSE, BOOL bTrackScrollBar = TRUE);
+    // Scrolling helpers
+    void ScrollToChar(int nNewOffsetChar, bool bNoSmoothScroll = false, bool bTrackScrollBar = true);
+    void ScrollToLine(int nNewTopLine, bool bNoSmoothScroll = false, bool bTrackScrollBar = true);
 
-    //	Splitter support
-    virtual void UpdateSiblingScrollPos(BOOL bHorz);
-    virtual void OnUpdateSibling(CCrystalTextView *pUpdateSource, BOOL bHorz);
+    // Splitter support
+    virtual void UpdateSiblingScrollPos(bool bHorz);
+    virtual void OnUpdateSibling(CCrystalTextView *pUpdateSource, bool bHorz);
     CCrystalTextView *GetSiblingView(int nRow, int nCol);
 
     virtual int GetLineCount();
     virtual int GetLineLength(int nLineIndex);
     virtual int GetLineActualLength(int nLineIndex);
-    virtual LPCTSTR GetLineChars(int nLineIndex);
-    virtual DWORD GetLineFlags(int nLineIndex);
-    virtual void GetText(const CPoint &ptStart, const CPoint &ptEnd, CString &text);
-    CString GetCurLine();
+    virtual const char *GetLineChars(int nLineIndex);
+    virtual uint32_t GetLineFlags(int nLineIndex);
+    virtual void GetText(const wxPoint &ptStart, const wxPoint &ptEnd, std::string &text);
+    std::string GetCurLine();
 
-    //	Clipboard overridable
-    virtual BOOL TextInClipboard();
-    virtual BOOL PutToClipboard(LPCTSTR pszText);
-    virtual BOOL GetFromClipboard(CString &text);
+    // Clipboard overridable
+    virtual bool TextInClipboard();
+    virtual bool PutToClipboard(const char *pszText);
+    virtual bool GetFromClipboard(std::string &text);
 
-    //	Drag-n-drop overrideable
+    // Drag-n-drop overrideable
+#if 0
     virtual HGLOBAL PrepareDragData();
     virtual DROPEFFECT GetDropEffect();
     virtual void OnDropSource(DROPEFFECT de);
-    BOOL IsDraggingText() const;
+#endif
+    bool IsDraggingText() const;
 
-    virtual COLORREF GetColor(int nColorIndex);
-    virtual void GetLineColors(int nLineIndex, COLORREF &crBkgnd,
-                               COLORREF &crText, BOOL &bDrawWhitespace);
-    virtual BOOL GetItalic(int nColorIndex);
-    virtual BOOL GetBold(int nColorIndex);
+    virtual wxColour GetColor(int nColorIndex);
+    virtual void GetLineColors(int nLineIndex, wxColour &crBkgnd,
+                               wxColour &crText, bool &bDrawWhitespace);
+    virtual bool GetItalic(int nColorIndex);
+    virtual bool GetBold(int nColorIndex);
 
-    void DrawLineHelper(CDC *pdc, CPoint &ptOrigin, const CRect &rcClip, int nColorIndex,
-                        LPCTSTR pszChars, int nOffset, int nCount, CPoint ptTextPos);
-    virtual void DrawSingleLine(CDC *pdc, const CRect &rect, int nLineIndex);
-    virtual void DrawMargin(CDC *pdc, const CRect &rect, int nLineIndex);
-    void DrawEllipsis(CDC* pDC, const CRect& rcLine);
+    void DrawLineHelper(wxDC *pdc, wxPoint &ptOrigin, const wxRect &rcClip, int nColorIndex,
+                        const char *pszChars, int nOffset, int nCount, wxPoint ptTextPos);
+    virtual void DrawSingleLine(wxDC *pdc, const wxRect &rect, int nLineIndex);
+    virtual void DrawMargin(wxDC *pdc, const wxRect &rect, int nLineIndex);
+    void DrawEllipsis(wxDC* pDC, const wxRect& rcLine);
 
     // margin icon drawing helper fn
-    void DrawMarginIcon(CDC* pDC, const CRect &rect, int nImageIndex);
-    virtual void DrawMarginMarker(int nLine, CDC* pDC, const CRect &rect);
+    void DrawMarginIcon(wxDC* pDC, const wxRect &rect, int nImageIndex);
+    virtual void DrawMarginMarker(int nLine, wxDC* pDC, const wxRect &rect);
 
-    virtual DWORD ParseLine(DWORD dwCookie, int nLineIndex, TEXTBLOCK *pBuf, int &nActualItems);
+    virtual uint32_t ParseLine(uint32_t dwCookie, int nLineIndex, TEXTBLOCK *pBuf, int &nActualItems);
 
-    virtual HINSTANCE GetResourceHandle();
+    //virtual HINSTANCE GetResourceHandle();
 
     // MiK: collapsible block methods
     void MarkCollapsibleBlockLine(int nLineIndex, bool bStart);
@@ -290,7 +289,7 @@ protected:
     bool CollapseBlock(int nLineFrom, int nLineTo);
     void CollapseAllBlocks(bool bCollapse);
     //
-    void GoToLine(int nLineIndex, int nCharOffset= 0);
+    void GoToLine(int nLineIndex, int nCharOffset = 0);
     bool FindCollapsibleBlock(int nLineInsideBlock, int& nLineFrom, int& nLineTo);
     bool IsLineHidden(int nLine);
     bool IsLineCollapsed(int nLine);
@@ -300,108 +299,111 @@ protected:
 
 // Attributes
 public:
-    BOOL GetViewTabs();
-    void SetViewTabs(BOOL bViewTabs);
+    bool GetViewTabs();
+    void SetViewTabs(bool bViewTabs);
     int GetTabSize();
     void SetTabSize(int nTabSize);
-    BOOL GetSelectionMargin();
-    void SetSelectionMargin(BOOL bSelMargin);
-    void GetFont(LOGFONT &lf);
-    void SetFont(const LOGFONT &lf);
-    BOOL GetSmoothScroll() const;
-    void SetSmoothScroll(BOOL bSmoothScroll);
-    //	[JRT]:
-    BOOL GetDisableDragAndDrop() const;
-    void SetDisableDragAndDrop(BOOL bDDAD);
+    bool GetSelectionMargin();
+    void SetSelectionMargin(bool bSelMargin);
+    void GetFont(wxFontInfo &lf);
+    void SetFont(const wxFontInfo &lf);
+    bool GetSmoothScroll() const;
+    void SetSmoothScroll(bool bSmoothScroll);
+    // [JRT]:
+    bool GetDisableDragAndDrop() const;
+    void SetDisableDragAndDrop(bool bDDAD);
 
-    //	Default handle to resources
-    static HINSTANCE s_hResourceInst;
+    // Default handle to resources
+    //static HINSTANCE s_hResourceInst;
 
 // Operations
 public:
-    void AttachToBuffer(CCrystalTextBuffer *pBuf = NULL);
+    void AttachToBuffer(CCrystalTextBuffer *pBuf = nullptr);
     void DetachFromBuffer();
 
-    //	Buffer-view interaction, multiple views
+    // Buffer-view interaction, multiple views
     virtual CCrystalTextBuffer *LocateTextBuffer();
-    virtual void UpdateView(CCrystalTextView *pSource, CUpdateContext *pContext, DWORD dwFlags, int nLineIndex = -1);
+    virtual void UpdateView(CCrystalTextView *pSource, CUpdateContext *pContext, uint32_t dwFlags, int nLineIndex = -1);
     virtual void NotifyTextChanged();
-    virtual void CaretMoved(const CString& strLine, int nWordStart, int nWordEnd);
+    virtual void CaretMoved(const std::string& strLine, int nWordStart, int nWordEnd);
 
-    //	Attributes
-    CPoint GetCursorPos();
-    void SetCursorPos(const CPoint &ptCursorPos);
+    // Attributes
+    wxPoint GetCursorPos();
+    void SetCursorPos(const wxPoint &ptCursorPos);
     void ShowCursor();
     void HideCursor();
 
-    //	Operations
-    void EnsureVisible(CPoint pt);
+    // Operations
+    void EnsureVisible(wxPoint pt);
 
     //	Text search helpers
-    BOOL FindText(LPCTSTR pszText, const CPoint &ptStartPos, DWORD dwFlags, BOOL bWrapSearch, CPoint *pptFoundPos);
-    BOOL FindTextInBlock(LPCTSTR pszText, const CPoint &ptStartPos, const CPoint &ptBlockBegin, const CPoint &ptBlockEnd,
-                         DWORD dwFlags, BOOL bWrapSearch, CPoint *pptFoundPos);
-    BOOL HighlightText(const CPoint &ptStartPos, int nLength);
+    bool FindText(const char *pszText, const wxPoint &ptStartPos, uint32_t dwFlags, bool bWrapSearch, wxPoint *pptFoundPos);
+    bool FindTextInBlock(const char *pszText, const wxPoint &ptStartPos, const wxPoint &ptBlockBegin, const wxPoint &ptBlockEnd,
+                         uint32_t dwFlags, bool bWrapSearch, wxPoint *pptFoundPos);
+    bool HighlightText(const wxPoint &ptStartPos, int nLength);
 
     //	Overridable: an opportunity for Auto-Indent, Smart-Indent etc.
-    virtual void OnEditOperation(int nAction, LPCTSTR pszText);
+    virtual void OnEditOperation(int nAction, const char *pszText);
 
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CCrystalTextView)
 public:
-    virtual void OnDraw(CDC* pDC);  // overridden to draw this view
-    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-    virtual BOOL PreTranslateMessage(MSG* pMsg);
-    virtual void OnPrepareDC(CDC* pDC, CPrintInfo* pInfo = NULL);
+    virtual void OnDraw(wxDC* pDC);  // overridden to draw this view
+
+#if 0
+    virtual bool PreCreateWindow(CREATESTRUCT& cs);
+    virtual bool PreTranslateMessage(MSG* pMsg);
+    virtual void OnPrepareDC(wxDC* pDC, CPrintInfo* pInfo = NULL);
+#endif
+
 protected:
     virtual void OnInitialUpdate(); // called first time after construct
-    virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
-    virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
-    virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
-    virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
-    //}}AFX_VIRTUAL
+
+#if 0
+    virtual bool OnPreparePrinting(CPrintInfo* pInfo);
+    virtual void OnBeginPrinting(wxDC* pDC, CPrintInfo* pInfo);
+    virtual void OnEndPrinting(wxDC* pDC, CPrintInfo* pInfo);
+    virtual void OnPrint(wxDC* pDC, CPrintInfo* pInfo);
+#endif
 
 // Implementation
 public:
-    CCrystalTextView();
-    ~CCrystalTextView();
+    /* constructor */ CCrystalTextView();
+    virtual          ~CCrystalTextView();
 
 protected:
 
 // Generated message map functions
 protected:
 #ifdef _DEBUG
-    void AssertValidTextPos(const CPoint &pt);
+    void AssertValidTextPos(const wxPoint &pt);
 #endif
 
     //{{AFX_MSG(CCrystalTextView)
     afx_msg void OnDestroy();
-    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    afx_msg bool OnEraseBkgnd(wxDC* pDC);
     afx_msg void OnSize(UINT nType, int cx, int cy);
-    afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-    afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-    afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-    afx_msg void OnSetFocus(CWnd* pOldWnd);
-    afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-    afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-    afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+    afx_msg void OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);
+    afx_msg bool OnSetCursor(wxWindow* pWnd, UINT nHitTest, UINT message);
+    afx_msg void OnLButtonDown(UINT nFlags, wxPoint point);
+    afx_msg void OnSetFocus(wxWindow* pOldWnd);
+    afx_msg void OnHScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);
+    afx_msg void OnLButtonUp(UINT nFlags, wxPoint point);
+    afx_msg void OnMouseMove(UINT nFlags, wxPoint point);
     afx_msg void OnTimer(UINT nIDEvent);
-    afx_msg void OnKillFocus(CWnd* pNewWnd);
-    afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+    afx_msg void OnKillFocus(wxWindow* pNewWnd);
+    afx_msg void OnLButtonDblClk(UINT nFlags, wxPoint point);
     afx_msg void OnEditCopy();
     afx_msg void OnUpdateEditCopy(CCmdUI* pCmdUI);
     afx_msg void OnEditSelectAll();
     afx_msg void OnUpdateEditSelectAll(CCmdUI* pCmdUI);
-    afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+    afx_msg void OnRButtonDown(UINT nFlags, wxPoint point);
     afx_msg void OnSysColorChange();
-    afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+    //afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
     afx_msg void OnEditFind();
     afx_msg void OnEditRepeat();
     afx_msg void OnUpdateEditRepeat(CCmdUI* pCmdUI);
     afx_msg void OnEditFindPrevious();                 // More search
     afx_msg void OnUpdateEditFindPrevious(CCmdUI* pCmdUI);
-    afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+    afx_msg bool OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt);
     afx_msg void OnEditViewTabs();
     afx_msg void OnUpdateEditViewTabs(CCmdUI* pCmdUI);
     //}}AFX_MSG
@@ -455,8 +457,6 @@ protected:
     afx_msg void OnCollapseAllBlocks();
     afx_msg void OnExpandAllBlocks();
 
-    DECLARE_MESSAGE_MAP()
-
     void CaretMoved();
 };
 
@@ -470,9 +470,4 @@ protected:
 #include "CCrystalTextView.inl"
 #endif
 
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_CCRYSTALTEXTVIEW_H__AD7F2F41_6CB3_11D2_8C32_0080ADB86836__INCLUDED_)
+#endif /* CCRYSTALTEXTVIEW_H__ */

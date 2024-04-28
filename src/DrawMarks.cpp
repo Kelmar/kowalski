@@ -21,106 +21,86 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "DrawMarks.h"
 
-// Funkcje kreœl¹ce strza³kê, miejsce przerwania i b³êdu
-// Wykorzystane w klasach ...View
+// Arrow, break and error tracing functions
+// Used in ...View classes
 
-
-COLORREF CMarks::m_rgbPointer= RGB(255,255,0);
-COLORREF CMarks::m_rgbBreakpoint= RGB(0,0,255);
-COLORREF CMarks::m_rgbError= RGB(255,0,0);
+wxColour CMarks::s_rgbPointer = wxColour(255, 255, 0);
+wxColour CMarks::s_rgbBreakpoint = wxColour(0, 0, 255);
+wxColour CMarks::s_rgbError = wxColour(255, 0, 0);
 
 //-----------------------------------------------------------------------------
 
-void CMarks::draw_pointer(CDC &dc, int x, int y, int h)
+void CMarks::draw_pointer(wxDC &dc, int x, int y, int h)
 {
-    static const POINT shape[]=
-    { {-4,-3}, {0,-3}, {0,-7}, {7,0}, {0,7}, {0,3}, {-4,3}, {-4,-3} };
-    const int size= sizeof shape / sizeof(POINT);
-    POINT coords[size];
+    static const wxPoint shape[] =
+    { {-4, -3}, {0, -3}, {0, -7}, {7, 0}, {0, 7}, {0, 3}, {-4, 3}, {-4, -3} };
+
+    const int size = sizeof(shape) / sizeof(wxPoint);
+    wxPoint coords[size];
 
     x += (6 * h) / 15;
     y += (7 * h) / 15;
-    for (int i=0; i<size; i++)
+    
+    for (int i = 0; i < size; i++)
     {
-        coords[i].x = x + (shape[i].x * h) / 15;	// przeskalowanie i przesuniêcie
+        coords[i].x = x + (shape[i].x * h) / 15; // Rescale and shift
         coords[i].y = y + (shape[i].y * h) / 15;
     }
 
-    CPen *pOldPen, pen(PS_SOLID,0,::GetSysColor(COLOR_WINDOWTEXT));
-    pOldPen = dc.SelectObject(&pen);
-    if (pOldPen==NULL)
-        return;
-    CBrush brush(m_rgbPointer);
-    CBrush *pOldBrush= dc.SelectObject(&brush);
-    if (pOldBrush==NULL)
-    {
-        dc.SelectObject(pOldPen);
-        return;
-    }
+    wxColour sysText = wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_WINDOWTEXT);
 
-    dc.SetPolyFillMode(ALTERNATE);
-    dc.Polygon(coords,size);
+    wxPen pen(sysText);
+    wxBrush brush(s_rgbPointer);
 
-    dc.SelectObject(pOldPen);
-    dc.SelectObject(pOldBrush);
+    dc.SetPen(pen);
+    dc.SetBrush(brush);
+
+    dc.DrawPolygon(size, coords);
 }
 
 //-----------------------------------------------------------------------------
 
-void CMarks::draw_breakpoint(CDC &dc, int x, int y, int h, bool active)
+void CMarks::draw_breakpoint(wxDC &dc, int x, int y, int h, bool active)
 {
-    CPen *pOldPen, pen(PS_SOLID,0,::GetSysColor(COLOR_WINDOWTEXT));
-    pOldPen = dc.SelectObject(&pen);
-    if (pOldPen==NULL)
-        return;
-    CBrush brush(active ? m_rgbBreakpoint : dc.GetBkColor());
-    CBrush *pOldBrush= dc.SelectObject(&brush);
-    if (pOldBrush==NULL)
-    {
-        dc.SelectObject(pOldPen);
-        return;
-    }
+    wxColour sysText = wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_WINDOWTEXT);
 
-    dc.Ellipse(x,y,x+h,y+h);
+    wxPen pen(sysText);
+    wxBrush brush(s_rgbBreakpoint);
 
-    dc.SelectObject(pOldPen);
-    dc.SelectObject(pOldBrush);
+    dc.SetPen(pen);
+    dc.SetBrush(active ? brush : dc.GetBackground());
+
+    dc.DrawEllipse(x, y, x + h, y + h);
 }
 
 //-----------------------------------------------------------------------------
 
-void CMarks::draw_mark(CDC &dc, int x, int y, int h)
+void CMarks::draw_mark(wxDC &dc, int x, int y, int h)
 {
-    static const POINT shape[]=
-    { {-1,-7}, {0,-7}, {7,0}, {0,7}, {-1,7}, {-1,-7} };
+    static const wxPoint shape[] =
+    { {-1, -7}, {0, -7}, {7, 0}, {0, 7}, {-1, 7}, {-1, -7} };
 //  { {0,0}, {1,0}, {8,7}, {1,14}, {0,14}, {0,0} };
-    const int size= sizeof shape / sizeof(POINT);
-    POINT coords[size];
+    const int size = sizeof shape / sizeof(wxPoint);
+    wxPoint coords[size];
 
     x += (3 * h) / 15;
     y += (7 * h) / 15;
-    for (int i=0; i<size; i++)
+
+    for (int i = 0; i < size; i++)
     {
         coords[i].x = x + (shape[i].x * h) / 15;
         coords[i].y = y + (shape[i].y * h) / 15;
     }
 
-    CPen *pOldPen, pen(PS_SOLID,0,::GetSysColor(COLOR_WINDOWTEXT));
-    pOldPen = dc.SelectObject(&pen);
-    if (pOldPen==NULL)
-        return;
-    CBrush brush(m_rgbError), *pOldBrush= dc.SelectObject(&brush);
-    if (pOldBrush==NULL)
-    {
-        dc.SelectObject(pOldPen);
-        return;
-    }
+    wxColour sysText = wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_WINDOWTEXT);
 
-    dc.SetPolyFillMode(ALTERNATE);
-    dc.Polygon(coords,size);
+    wxPen pen(sysText);
+    wxBrush brush(s_rgbError);
 
-    dc.SelectObject(pOldPen);
-    dc.SelectObject(pOldBrush);
+    dc.SetPen(pen);
+    dc.SetBrush(brush);
+
+    dc.DrawPolygon(size, coords);
 }
 
 //-----------------------------------------------------------------------------

@@ -26,83 +26,60 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "DynamicHelp.h"
 #include "CCrystalTextBuffer.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CDynamicHelp
 
-PCSTR CDynamicHelp::s_pcszWndClass= NULL;
-const int nMinW= 80;
-const int nMinH= 50;
-CString CDynamicHelp::s_strWndClass;
-static const TCHAR* s_REGISTRY_SECTION= _T("DynamicHelp");
-static const TCHAR* s_REGISTRY_WIDTH= _T("Height");
+const int nMinW = 80;
+const int nMinH = 50;
 
+static const char* s_REGISTRY_SECTION = "DynamicHelp";
+static const char* s_REGISTRY_WIDTH = "Height";
+
+std::string GetConfigPath()
+{
+    std::string path = "/";
+
+    path += s_REGISTRY_SECTION;
+    path += '/';
+    path += s_REGISTRY_WIDTH;
+
+    return path;
+}
 
 CDynamicHelp::CDynamicHelp()
 {
-    if (s_strWndClass.IsEmpty())
-        RegisterWndClass();
+    //m_cxLeftBorder = m_cxRightBorder = 0;
+    //m_cyTopBorder = m_cyBottomBorder = 0;
+    //m_nMRUWidth = 300;
 
-    m_cxLeftBorder = m_cxRightBorder = 0;
-    m_cyTopBorder = m_cyBottomBorder = 0;
-    m_nMRUWidth = 300;
-    m_sizeDefault = CSize(m_nMRUWidth, AfxGetApp()->GetProfileInt(s_REGISTRY_SECTION, s_REGISTRY_WIDTH, 500));
+    //m_sizeDefault = wxSize(m_nMRUWidth, wxGetApp().Config().Read(GetConfigPath(), 500));
+
+    m_sizeDefault = wxSize(300, wxGetApp().Config().Read(GetConfigPath(), 500));
     m_nHeaderHeight = 16;
 }
 
-
-void CDynamicHelp::RegisterWndClass()
-{
-    s_strWndClass = AfxRegisterWndClass(0, ::LoadCursor(NULL,IDC_ARROW), 0, 0);
-}
-
-
 CDynamicHelp::~CDynamicHelp()
-{}
-
-
-BEGIN_MESSAGE_MAP(CDynamicHelp, CControlBar)
-    //{{AFX_MSG_MAP(CDynamicHelp)
-    ON_WM_ERASEBKGND()
-    ON_WM_SIZE()
-    ON_WM_NCPAINT()
-    ON_WM_DESTROY()
-    ON_WM_CREATE()
-    ON_COMMAND(IDCLOSE, OnCloseWnd)
-    //}}AFX_MSG_MAP
-    ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipGetText)
-    ON_MESSAGE(WM_USER, OnDelayedResize)
-END_MESSAGE_MAP()
+{
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CDynamicHelp message handlers
 
 //-----------------------------------------------------------------------------
 
-CSize CDynamicHelp::CalcFixedLayout(BOOL bStretch, BOOL bHorz)
+wxSize CDynamicHelp::CalcFixedLayout(bool stretch, bool horz)
 {
-    CSize sizeBar;
+    wxSize sizeBar;
 
-    if (bHorz)
+    if (horz)
     {
-        sizeBar.cx = nMinW;
-        sizeBar.cy = nMinH;
-
-        if (bStretch)
-            sizeBar.cx = 32767;
+        sizeBar.SetWidth(stretch ? 32767 : nMinW);
+        sizeBar.SetHeight(nMinH);
     }
     else
     {
-        sizeBar.cx = nMinW;
-        sizeBar.cy = nMinH;
-
-        if (bStretch)
-            sizeBar.cy = 32767;
+        sizeBar.SetWidth(nMinW);
+        sizeBar.SetHeight(stretch ? 32767 : nMinH);
     }
 
     return sizeBar;
@@ -110,26 +87,25 @@ CSize CDynamicHelp::CalcFixedLayout(BOOL bStretch, BOOL bHorz)
 
 //-----------------------------------------------------------------------------
 
-
-CSize CDynamicHelp::CalcDynamicLayout(int nLength, DWORD dwMode)
+wxSize CDynamicHelp::CalcDynamicLayout(int nLength, uint32_t dwMode)
 {
     return CalcLayout(dwMode, nLength);
 }
 
-
-CSize CDynamicHelp::CalcLayout(DWORD dwMode, int nLength)
+wxSize CDynamicHelp::CalcLayout(uint32_t dwMode, int nLength)
 {
-    CSize sizeResult(50, 50);
+#if 0
+    wxSize sizeResult(50, 50);
     if (dwMode & (LM_HORZDOCK | LM_VERTDOCK))
     {
-        CRect rect;
-        CWnd* pMainWnd= AfxGetMainWnd();
+        wxRect rect;
+        CWnd* pMainWnd = AfxGetMainWnd();
         if (CMDIFrameWnd* pFrameWnd= dynamic_cast<CMDIFrameWnd*>(pMainWnd))
             ::GetClientRect(pFrameWnd->m_hWndMDIClient, rect);
         else
             pMainWnd->GetClientRect(rect);
         sizeResult = rect.Size();
-        sizeResult += CSize(10, 10);
+        sizeResult += wxSize(10, 10);
         if (dwMode & 0x8000)
             m_nMRUWidth = nLength;
         sizeResult.cx = m_nMRUWidth;
@@ -154,39 +130,39 @@ CSize CDynamicHelp::CalcLayout(DWORD dwMode, int nLength)
         m_nMRUWidth = sizeResult.cx;
 
     return sizeResult;
+#endif
+
+    return wxSize(0, 0);
 }
 
-
-void CDynamicHelp::SizeToolBar(int nLength, bool bVert/*= false*/)
+void CDynamicHelp::SizeToolBar(int nLength, bool vert/*= false*/)
 {
-    if (bVert)
-        m_sizeDefault.cy = nLength;
+    if (vert)
+        m_sizeDefault.SetHeight(nLength);
     else
-        m_sizeDefault.cx = nLength;
+        m_sizeDefault.SetWidth(nLength);
 
-    if (m_sizeDefault.cx < nMinW)
-        m_sizeDefault.cx = nMinW;
-    if (m_sizeDefault.cy < nMinH)
-        m_sizeDefault.cy = nMinH;
+    if (m_sizeDefault.GetWidth() < nMinW)
+        m_sizeDefault.SetWidth(nMinW);
+    if (m_sizeDefault.GetHeight() < nMinH)
+        m_sizeDefault.SetHeight(nMinH);
 
-    InvalidateRect(NULL);
+    Refresh();
 }
 
 //-----------------------------------------------------------------------------
+
 void CDynamicHelp::OnNcPaint()
 {
-    EraseNonClient();
+    //EraseNonClient();
 }
 
-
-void CDynamicHelp::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler)
-{}
-
 //-----------------------------------------------------------------------------
-static const TCHAR* s_pcszTitle= _T("Dynamic Help");
+static const char* s_pcszTitle = "Dynamic Help";
 
-bool CDynamicHelp::Create(CWnd* pParentWnd, UINT nID)
+bool CDynamicHelp::Create(wxWindow* pParentWnd, UINT nID)
 {
+#if 0
     CControlBar::Create(s_strWndClass, s_pcszTitle,
                         WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
                         CRect(10, 10, 100, 100), pParentWnd, nID);
@@ -194,7 +170,7 @@ bool CDynamicHelp::Create(CWnd* pParentWnd, UINT nID)
     SetBarStyle(CBRS_ALIGN_RIGHT | CBRS_FLYBY | CBRS_GRIPPER | CBRS_SIZE_DYNAMIC);
 
     m_wndClose.Create(WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | TBSTYLE_TRANSPARENT | CCS_NORESIZE | CCS_NOPARENTALIGN | CCS_NODIVIDER,
-                      CRect(0,0,0,0), this, -1);
+                      CRect(0, 0, 0, 0), this, -1);
     m_wndClose.SetButtonStructSize(sizeof(TBBUTTON));
     m_wndClose.AddBitmap(1, IDB_CLOSE_TB);
     m_wndClose.SetBitmapSize(CSize(8, 8));
@@ -208,57 +184,65 @@ bool CDynamicHelp::Create(CWnd* pParentWnd, UINT nID)
     m_wndClose.AddButtons(1, &btn);
 
     Resize();
+#endif
 
     return true;
 }
 
 //-----------------------------------------------------------------------------
 
-BOOL CDynamicHelp::OnEraseBkgnd(CDC* pDC)
+bool CDynamicHelp::OnEraseBkgnd(wxDC* dc)
 {
     if (!IsFloating())
     {
-        CRect rect;
-        GetClientRect(rect);
-        pDC->FillSolidRect(rect.right - m_nHeaderHeight - 2, rect.top, m_nHeaderHeight, m_nHeaderHeight, ::GetSysColor(COLOR_3DFACE));
+        wxRect rect = GetClientRect();
+        //dc->SetBackground(::GetSysColor(COLOR_3DFACE));
+        dc->DrawRectangle(rect.GetRight() - m_nHeaderHeight - 2, rect.GetTop(), m_nHeaderHeight, m_nHeaderHeight);
     }
 
     return true;
 }
 
 //-----------------------------------------------------------------------------
-static COLORREF s_rgbHelpBkgnd= RGB(255,255,240);
+static wxColour s_rgbHelpBkgnd = wxColour(255, 255, 240);
 
-void CDynamicHelp::DoPaint(CDC* pDC)
+void CDynamicHelp::DoPaint(wxDC* dc)
 {
-    CRect rect;
-    GetClientRect(rect);
+    wxRect rect = GetClientRect();
 
     if (IsFloating())
     {
-        pDC->FillSolidRect(rect, s_rgbHelpBkgnd);
+        //dc->SetBackground(s_rgbHelpBkgnd);
+        dc->DrawRectangle(rect);
     }
     else
     {
-        pDC->FillSolidRect(rect.left, rect.top, rect.Width(), m_nHeaderHeight, ::GetSysColor(COLOR_3DFACE));
+        //dc->SetBackground(::GetSysColor(COLOR_3DFACE));
+        //dc->DrawRectangle(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), m_nHeaderHeight);
 
-        int nW= rect.Width() - 9 - m_nHeaderHeight;
-        int nX= rect.left + 5;
+        int nW = rect.GetWidth() - 9 - m_nHeaderHeight;
+        int nX = rect.GetLeft() + 5;
+
         if (nW > 0)
         {
-            COLORREF rgbLight= RGB(255,255,255);
-            COLORREF rgbDark= ::GetSysColor(COLOR_3DSHADOW);
-            pDC->Draw3dRect(nX, rect.top + 5, nW, 3, rgbLight, rgbDark);
-            pDC->Draw3dRect(nX, rect.top + 9, nW, 3, rgbLight, rgbDark);
+            //wxColour rgbLight = wxColour(255, 255, 255);
+            //wxColour rgbDark = ::GetSysColor(COLOR_3DSHADOW);
+
+            //dc->Draw3dRect(nX, rect.top + 5, nW, 3, rgbLight, rgbDark);
+            //dc->Draw3dRect(nX, rect.top + 9, nW, 3, rgbLight, rgbDark);
         }
-        int nHeight= rect.Height() - m_nHeaderHeight;
+
+        int nHeight = rect.GetHeight() - m_nHeaderHeight;
         if (nHeight > 0)
-            pDC->FillSolidRect(rect.left, rect.top + m_nHeaderHeight, rect.Width(), nHeight, s_rgbHelpBkgnd);
+        {
+            //dc->SetBackground(s_rgbHelpBkgnd);
+            dc->DrawRectangle(rect.GetLeft(), rect.GetTop() + m_nHeaderHeight, rect.GetWidth(), nHeight);
+        }
     }
 }
 
-
-BOOL CDynamicHelp::OnToolTipGetText(UINT uId, NMHDR* pNmHdr, LRESULT* pResult)
+#if 0
+bool CDynamicHelp::OnToolTipGetText(UINT uId, NMHDR* pNmHdr, LRESULT* pResult)
 {
     NMTTDISPINFO* pTTT= (NMTTDISPINFO*)pNmHdr;
 
@@ -269,67 +253,70 @@ BOOL CDynamicHelp::OnToolTipGetText(UINT uId, NMHDR* pNmHdr, LRESULT* pResult)
     *pResult = 0;
     return TRUE;
 }
-
+#endif
 
 void CDynamicHelp::Resize()
 {
-    CRect rect;
-    GetClientRect(rect);
+    wxRect rect = GetClientRect();
 
-    if (m_wndHelp.m_hWnd)
+    if (IsFloating()) // if it's floating it has a title already
     {
-        if (IsFloating())	// if it's floating it has a title already
-        {
-            // correction for afxData.cxBorder2 junk
-            rect.DeflateRect(2, 2, 2, 2);
+        // correction for afxData.cxBorder2 junk
+#if 0
+        rect.DeflateRect(2, 2, 2, 2);
 
-            if (m_wndClose.m_hWnd)
-                m_wndClose.ShowWindow(SW_HIDE);
+        if (m_wndClose.m_hWnd)
+            m_wndClose.Hide();
+#endif
 
-            m_wndHelp.SetWindowPos(0, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else
-        {
-            // it needs it's own title
+        //m_wndHelp.SetWindowPos(0, rect.left, rect.top, rect.GetWidth(), rect.GetHeight(), SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+    else
+    {
+        // it needs it's own title
 
-            // correction for afxData.cxBorder2 junk
-            rect.DeflateRect(2, 0, 2, 8);
-            if (rect.bottom < rect.top)
-                rect.bottom = rect.top;
+        // correction for afxData.cxBorder2 junk
+#if 0
+        rect.DeflateRect(2, 0, 2, 8);
+#endif
 
-            if (m_wndClose.m_hWnd)
-                m_wndClose.SetWindowPos(0, rect.right - 16, rect.top + 2, 15, 14, SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        if (rect.GetBottom() < rect.GetTop())
+            rect.SetBottom(rect.GetTop());
 
-            rect.top += m_nHeaderHeight;
-            m_wndHelp.SetWindowPos(0, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
-        }
+#if 0
+        if (m_wndClose)
+            m_wndClose.SetWindowPos(0, rect.right - 16, rect.top + 2, 15, 14, SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+#endif
+
+        rect.SetTop(rect.GetTop() + m_nHeaderHeight);
+
+        m_wndHelp.SetPosition(rect.GetTopLeft());
+        m_wndHelp.SetSize(rect.GetSize());
     }
 }
 
-
 void CDynamicHelp::OnSize(UINT nType, int cx, int cy)
 {
-    CControlBar::OnSize(nType, cx, cy);
+    //CControlBar::OnSize(nType, cx, cy);
 
     Resize();
 }
 
-
 void CDynamicHelp::OnDestroy()
 {
-    AfxGetApp()->WriteProfileInt(s_REGISTRY_SECTION, s_REGISTRY_WIDTH, m_sizeDefault.cy);
+    wxGetApp().Config().Write(GetConfigPath(), m_sizeDefault.GetHeight());
 
-    CControlBar::OnDestroy();
+    //CControlBar::OnDestroy();
 }
 
-
+#if 0
 int CDynamicHelp::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
     if (CControlBar::OnCreate(lpCreateStruct) == -1)
         return -1;
 
-    DWORD dwStyle= WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL;
-    m_wndHelp.CWnd::Create(_T("RichEdit20A"), NULL, dwStyle, CRect(0,0,0,0), this, IDS_DYNAMIC_HELP);
+    DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL;
+    m_wndHelp.CWnd::Create("RichEdit20A", NULL, dwStyle, CRect(0, 0, 0, 0), this, IDS_DYNAMIC_HELP);
 
     if (m_wndHelp.m_hWnd == 0)
         return -1;
@@ -339,34 +326,35 @@ int CDynamicHelp::OnCreate(LPCREATESTRUCT lpCreateStruct)
     m_wndHelp.SendMessage(EM_SETTEXTMODE, TM_RICHTEXT | TM_SINGLECODEPAGE);
     m_wndHelp.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, 0);
 
-//	SetContextHelp(_T("<b>LDA</b> blah blah<p><u>importante</u> reioioi khjkcxn opoiiso fjoo."));
+    //SetContextHelp("<b>LDA</b> blah blah<p><u>importante</u> reioioi khjkcxn opoiiso fjoo.");
     /*
     CFile file("C:\\LDA2.rtf", CFile::modeRead);
-    CString str;
+    std::string str;
     file.Read(str.GetBuffer(file.GetLength()), file.GetLength());
     str.ReleaseBuffer(file.GetLength());
     SetContextHelp(str);
     */
+
     return 0;
 }
+#endif
 
-
-void CDynamicHelp::SetContextHelp(const TCHAR* pcszText, const TCHAR* pcszHeader/*= 0*/)
+void CDynamicHelp::SetContextHelp(const char* pcszText, const char* pcszHeader/*= 0*/)
 {
-    CString strText= _T(
-                         "{\\rtf1\\ansi\\ansicpg1252\\deff0\\deflang1033"
-                         "{\\fonttbl"
-                         "{\\f0\\fmodern\\fprq1\\fcharset0 Courier New;}"
-                         "{\\f1\\fswiss\\fcharset0 Arial;}"
-                         "}"
-                         "{"
-                         "\\colortbl ;\\red255\\green255\\blue255;\\red192\\green192\\blue192;\\red160\\green160\\blue160;\\red224\\green224\\blue224;"
-                         "}"
-                         "\\viewkind4\\uc1\\pard\\li0");
+    std::string strText = 
+        "{\\rtf1\\ansi\\ansicpg1252\\deff0\\deflang1033"
+        "{\\fonttbl"
+        "{\\f0\\fmodern\\fprq1\\fcharset0 Courier New;}"
+        "{\\f1\\fswiss\\fcharset0 Arial;}"
+        "}"
+        "{"
+        "\\colortbl ;\\red255\\green255\\blue255;\\red192\\green192\\blue192;\\red160\\green160\\blue160;\\red224\\green224\\blue224;"
+        "}"
+        "\\viewkind4\\uc1\\pard\\li0";
 
-    const TCHAR* pcszHeaderBefore= _T("\\f1\\fs20\\sa25\\sb25\\cf1\\cb3\\highlight3\\b\\ql\\~  \\~\\~\\~");
-    const TCHAR* pcszHeaderAfter= _T("\\~\\~\\~  \\~\\highlight0\\par");
-    const TCHAR* pcszFont= _T("\\pard\\cf0\\b0\\f0\\fs20\\ql");
+    const char* pcszHeaderBefore = "\\f1\\fs20\\sa25\\sb25\\cf1\\cb3\\highlight3\\b\\ql\\~  \\~\\~\\~";
+    const char* pcszHeaderAfter = "\\~\\~\\~  \\~\\highlight0\\par";
+    const char* pcszFont = "\\pard\\cf0\\b0\\f0\\fs20\\ql";
 
     if (pcszHeader)
     {
@@ -374,50 +362,52 @@ void CDynamicHelp::SetContextHelp(const TCHAR* pcszText, const TCHAR* pcszHeader
         strText += pcszHeader;
         strText += pcszHeaderAfter;
         strText += pcszFont;
-        strText += _T("\\par\\li60 ");
+        strText += "\\par\\li60 ";
     }
     else
     {
         strText += pcszFont;
     }
 
-#define PLAIN	_T("\\f1\\fs20\\b0 ")
-    CString str= pcszText;
-    str.Replace(_T("{"), _T("\\{"));
-    str.Replace(_T("}"), _T("\\}"));
-    str.Replace(_T("#title#"), _T("\\fi350\\f0\\fs30\\b "));
-    str.Replace(_T("#text#"), _T("\\par\\fi0\\f1\\fs20\\b0 "));
-    str.Replace(_T("#syntax#"), PLAIN _T("\\par\\par\\sa70 Syntax:\\par\\sa0\\f0\\fs20\\b "));
-    str.Replace(_T("#exmpl#"), PLAIN _T("\\par\\sa70 Example:\\par\\sa0\\f0\\fs20\\b0 "));
-    str.Replace(_T("#desc#"), PLAIN _T("\\par\\sa70 Description:\\par\\sa0\\f1\\fs20\\b0 "));
-    str.Replace(_T("#flags#"), PLAIN _T("\\par\\par Affects flags: \\f0\\fs24\\b0 "));
-    str.Replace(_T("#modes#"), PLAIN _T("\\par\\par\\sa70 Addressing Modes:\\par\\sa0\\f0\\fs20\\b0 "));
-    str.Replace(_T("<pre>"), _T("\\f0 "));
-    str.Replace(_T("<small>"), _T("\\f1\\fs16 "));
-    str.Replace(_T("|"), _T("\\f1 "));
-    str.Replace(_T("\n"), _T("\\par "));
+#define PLAIN	"\\f1\\fs20\\b0 "
+
+    wxString str = pcszText;
+
+    str.Replace("{", "\\{");
+    str.Replace("}", "\\}");
+    str.Replace("#title#", "\\fi350\\f0\\fs30\\b ");
+    str.Replace("#text#", "\\par\\fi0\\f1\\fs20\\b0 ");
+    str.Replace("#syntax#", PLAIN "\\par\\par\\sa70 Syntax:\\par\\sa0\\f0\\fs20\\b ");
+    str.Replace("#exmpl#", PLAIN "\\par\\sa70 Example:\\par\\sa0\\f0\\fs20\\b0 ");
+    str.Replace("#desc#", PLAIN "\\par\\sa70 Description:\\par\\sa0\\f1\\fs20\\b0 ");
+    str.Replace("#flags#", PLAIN "\\par\\par Affects flags: \\f0\\fs24\\b0 ");
+    str.Replace("#modes#", PLAIN "\\par\\par\\sa70 Addressing Modes:\\par\\sa0\\f0\\fs20\\b0 ");
+    str.Replace("<pre>", "\\f0 ");
+    str.Replace("<small>", "\\f1\\fs16 ");
+    str.Replace("|", "\\f1 ");
+    str.Replace("\n", "\\par ");
 
     strText += str;
-    strText += _T("}");
+    strText += "}";
 
-    if (m_wndHelp)
-    {
-        CString strOld;
-        m_wndHelp.GetWindowText(strOld);
+#if 0
+    std::string strOld;
+    m_wndHelp.GetWindowText(strOld);
 
-        if (strOld != strText)
-            m_wndHelp.SetWindowText(strText);
+    if (strOld != strText)
+        m_wndHelp.SetWindowText(strText);
 
-        CRect rect(0,0,0,0);
-        m_wndHelp.GetRect(rect);
-    }
+    CRect rect(0, 0, 0, 0);
+    m_wndHelp.GetRect(rect);
+#endif
 }
 
 
-void CDynamicHelp::DisplayHelp(const CString& strLine, int nWordStart, int nWordEnd)
+void CDynamicHelp::DisplayHelp(const std::string& strLine, int nWordStart, int nWordEnd)
 {
-    CString strHelp;
-    const TCHAR* pcszHeader= 0;
+#if 0
+    std::string strHelp;
+    const char* pcszHeader = 0;
 
     if (strLine.IsEmpty() || nWordStart >= nWordEnd)
         ;
@@ -428,24 +418,27 @@ void CDynamicHelp::DisplayHelp(const CString& strLine, int nWordStart, int nWord
     }
     else
     {
-        int nComment= strLine.Find(_T(';'));
+        int nComment = strLine.Find(';');
+
         if (nComment < 0 || nComment > nWordEnd)	// not inside a comment?
         {
-            CString strWord= strLine.Mid(nWordStart, nWordEnd - nWordStart);
+            std::string strWord = strLine.Mid(nWordStart, nWordEnd - nWordStart);
 
-            extern int MatchingDirectives(const CString& strWord, CString& strOut);
-            CString GetDirectiveDesc(const CString& strDirective);
-            extern int MatchingInstructions(const CString& strWord, CString& strResult);
-            CString GetInstructionDesc(const CString& strInstruction);
+            extern int MatchingDirectives(const std::string& strWord, std::string& strOut);
+            std::string GetDirectiveDesc(const std::string& strDirective);
 
-            int nMatching= MatchingInstructions(strWord, strHelp);
+            extern int MatchingInstructions(const std::string& strWord, std::string& strResult);
+            std::string GetInstructionDesc(const std::string& strInstruction);
+
+            int nMatching = MatchingInstructions(strWord, strHelp);
+
             if (nMatching == 1)
-                strHelp = GetInstructionDesc(strHelp), pcszHeader = _T("Instruction");
+                strHelp = GetInstructionDesc(strHelp), pcszHeader = "Instruction";
             else if (nMatching > 1)
-                pcszHeader = _T("Instructions");
+                pcszHeader = "Instructions";
             else
             {
-                int nMatching= MatchingDirectives(strWord, strHelp);
+                int nMatching = MatchingDirectives(strWord, strHelp);
                 if (nMatching == 1)
                     strHelp = GetDirectiveDesc(strHelp), pcszHeader = _T("Directive");
                 else if (nMatching > 1)
@@ -455,12 +448,12 @@ void CDynamicHelp::DisplayHelp(const CString& strLine, int nWordStart, int nWord
     }
 
     SetContextHelp(strHelp, pcszHeader);
+#endif
 }
 
-
-void CDynamicHelp::OnBarStyleChange(DWORD dwOldStyle, DWORD dwNewStyle)
+void CDynamicHelp::OnBarStyleChange(uint32_t dwOldStyle, uint32_t dwNewStyle)
 {
-    PostMessage(WM_USER);
+    //PostMessage(WM_USER);
 }
 
 LRESULT CDynamicHelp::OnDelayedResize(WPARAM, LPARAM)
@@ -469,10 +462,10 @@ LRESULT CDynamicHelp::OnDelayedResize(WPARAM, LPARAM)
     return 0;
 }
 
-
 void CDynamicHelp::OnCloseWnd()
 {
-    if (CFrameWnd* pFrameWnd= GetDockingFrame())
-        pFrameWnd->ShowControlBar(this, false, TRUE);
-
+#if 0
+    if (wxFrame* pFrameWnd = GetDockingFrame())
+        pFrameWnd->ShowControlBar(this, false, true);
+#endif
 }
