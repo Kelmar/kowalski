@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "InputBase.h"
 #include "InputStack.h"
 
+#include "ConditionalAsm.h"
+
 // Leksem == Lex
 
 // This actually looks like a class to hold a token. -- B.Simonds (April 25, 2024)
@@ -333,9 +335,7 @@ public:
 
 typedef std::unordered_map<std::string, CIdent> CIdentTable;
 
-//=============================================================================
-
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
 /**
  * @brief A class to describe an arithmetic/logical/text expression
@@ -365,74 +365,6 @@ struct Expr
     {}
 };
 
-//-----------------------------------------------------------------------------
-
-// Conditional assembly (stack machine)
-class CConditionalAsm //: public CAsm
-{
-public:
-    enum State
-    {
-        BEFORE_ELSE,
-        AFTER_ELSE
-    };
-
-private:
-    std::vector<uint8_t> stack;
-    int level;
-
-    State get_state()
-    {
-        ASSERT(level >= 0);
-        return stack[level] & 1 ? BEFORE_ELSE : AFTER_ELSE;
-    }
-
-    bool get_assemble()
-    {
-        ASSERT(level >= 0);
-        return stack[level] & 2 ? true : false;
-    }
-
-    bool get_prev_assemble()
-    {
-        ASSERT(level > 0);
-        return stack[level - 1] & 2 ? true : false;
-    }
-
-    void set_state(State state, bool assemble)
-    {
-        if (stack.capacity() < level)
-            stack.reserve(level);
-
-        stack[level] = uint8_t((state == BEFORE_ELSE ? 1 : 0) + (assemble ? 2 : 0));
-    }
-
-public:
-    CConditionalAsm()
-        : stack()
-        , level(-1)
-    {
-        stack.reserve(16);
-    }
-
-    CAsm::Stat instr_if_found(CAsm::Stat condition);
-    CAsm::Stat instr_else_found();
-    CAsm::Stat instr_endif_found();
-
-    bool in_cond() const
-    {
-        return level >= 0;
-    }
-
-    int get_level() const
-    {
-        return level;
-    }
-
-    void restore_level(int level);
-};
-
-//-----------------------------------------------------------------------------
 
 // Line reading common elements for .MACRO, .REPEAT and normal reading
 class CSource : /*public CObject,*/ public CAsm
@@ -547,17 +479,6 @@ public:
         return m_nLine;
     }
 };
-
-//............................................................. .............................
-/*
-// Support for an array of local label IDs
-class CLabels : CIdentTable
-{
-
-};
-*/
-
-//-----------------------------------------------------------------------------
 
 class CAsm6502;
 
