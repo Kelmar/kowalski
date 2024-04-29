@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include <ctime>
 #include "StdAfx.h"
 
+#include "M6502.h"
+
 /*************************************************************************/
 
 // Loading the arguments of the macro call
@@ -31,7 +33,7 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
     std::string literal;
     bool get_param = true;
     bool first_param = true;
-    Stat ret;
+    CAsm::Stat ret;
     int count = 0;
 
     int required = m_nParams >= 0 ? m_nParams : -m_nParams - 1; // Number of required args.
@@ -43,7 +45,7 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
     //leks = asmb.next_leks();
 
     if (m_nParams == 0) // Parameterless macro?
-        return OK;
+        return CAsm::OK;
 
     for (;;)
     {
@@ -53,10 +55,13 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
             {
             case CLeksem::L_STR:
                 literal = *leks.GetString();
-                m_strarrArgs.Add(literal);
-                m_narrArgs.Add(literal.size());
-                m_arrArgType.Add(STR);
+
+                m_strarrArgs.push_back(literal);
+                m_narrArgs.push_back(literal.size());
+                m_arrArgType.push_back(STR);
+
                 count++;
+                
                 get_param = false; // Parameter already interpreted
                 first_param = false; // First parameter already loaded
                 leks = asmb.next_leks();
@@ -65,7 +70,7 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
             case CLeksem::L_ERROR:
                 // Added to prevent looping C runtime errors if first param is ''
                 // use this or ERR_PARAM_REQUIRED;
-                return ERR_EMPTY_PARAM;
+                return CAsm::ERR_EMPTY_PARAM;
 
             default:
                 if (asmb.is_expression(leks)) // expression?
@@ -78,24 +83,24 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
 
                     if (expr.inf == Expr::EX_UNDEF) // Uknown value
                     {
-                        m_strarrArgs.Add(_T(""));
-                        m_narrArgs.Add(0);
-                        m_arrArgType.Add(UNDEF_EXPR);
+                        m_strarrArgs.push_back("");
+                        m_narrArgs.push_back(0);
+                        m_arrArgType.push_back(UNDEF_EXPR);
                     }
                     else if (expr.inf == Expr::EX_STRING)
                     {
-                        m_strarrArgs.Add(expr.string);
-                        m_narrArgs.Add(expr.string.size());
-                        m_arrArgType.Add(STR);
+                        m_strarrArgs.push_back(expr.string);
+                        m_narrArgs.push_back(expr.string.size());
+                        m_arrArgType.push_back(STR);
                     }
                     else
                     {
                         wxString num;
                         num.Printf("%ld", expr.value);
 
-                        m_strarrArgs.Add(num);
-                        m_narrArgs.Add(expr.value);
-                        m_arrArgType.Add(NUM);
+                        m_strarrArgs.push_back(num.ToStdString());
+                        m_narrArgs.push_back(expr.value);
+                        m_arrArgType.push_back(NUM);
                     }
                     count++;
                     get_param = false; // parameter already interpreted
@@ -103,13 +108,13 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
                 else
                 {
                     if (count < required)
-                        return ERR_PARAM_REQUIRED; // Too few macro calling parameters
+                        return CAsm::ERR_PARAM_REQUIRED; // Too few macro calling parameters
 
                     if (!first_param)
-                        return ERR_PARAM_REQUIRED; // After the decimal point, you must enter another parameter
+                        return CAsm::ERR_PARAM_REQUIRED; // After the decimal point, you must enter another parameter
 
                     m_nParamCount = count;
-                    return OK;
+                    return CAsm::OK;
                 }
             }
         }
@@ -133,43 +138,43 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
 
             default:
                 if (count < required)
-                    return ERR_PARAM_REQUIRED;	// Too few macro calling parameters
+                    return CAsm::ERR_PARAM_REQUIRED;	// Too few macro calling parameters
 
-                if (count > required && m_nParams>0) // if macro called with ..., then m_nParams will be negative
-                    return ERR_MACRO_PARAM_COUNT;
+                if (count > required && m_nParams > 0) // if macro called with ..., then m_nParams will be negative
+                    return CAsm::ERR_MACRO_PARAM_COUNT;
 
                 m_nParamCount = count;
-                return OK;
+                return CAsm::OK;
             }
         }
     }
 }
 
 // type of macro parameter (to distinguish between numbers and strings)
-CAsm::Stat CMacroDef::ParamType(const CString param_name, bool& found, int& type)
+CAsm::Stat CMacroDef::ParamType(const std::string &param_name, _Out_ bool &found, _Out_ int &type)
 {
     CIdent ident;
 
-    if (!param_names.lookup(param_name, ident)) // Find a parameter with a given name
+    if (!TryLookup(param_names, param_name, ident)) // Find a parameter with a given name
     {
         found = false;
-        return OK;
+        return CAsm::OK;
     }
 
     return ParamType(ident.val, found, type);
 }
 
-CAsm::Stat CMacroDef::ParamType(int param_number, bool& found, int& type)
+CAsm::Stat CMacroDef::ParamType(int param_number, _Out_ bool &found, _Out_ int &type)
 {
     if (param_number >= m_nParamCount || param_number < 0)
     {
         found = false;
-        return ERR_EMPTY_PARAM;
+        return CAsm::ERR_EMPTY_PARAM;
     }
 
     found = true;
 
-    ASSERT(m_arrArgType.GetSize() > param_number);
+    ASSERT(m_arrArgType.size() > param_number);
     switch (m_arrArgType[param_number])
     {
     case NUM:
@@ -185,93 +190,103 @@ CAsm::Stat CMacroDef::ParamType(int param_number, bool& found, int& type)
         break;
     }
 
-    return OK;
+    return CAsm::OK;
 }
 
-// odszukanie parametru 'param_name' aktualnego makra
-CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, const CString& param_name, Expr &expr, bool &found, CAsm6502 &asmb)
+// Finding the 'param_name' parameter of the current macro
+CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, const std::string& param_name, Expr &expr, bool &found, CAsm6502 &asmb)
 {
     CIdent ident;
 
-    if (!param_names.lookup(param_name, ident))	// odszukanie parametru o danej nazwie
+    if (!TryLookup(param_names, param_name, _Out_ ident)) // Find a parameter with a given name
     {
         found = false;
-        return OK;
+        return CAsm::OK;
     }
+
     found = true;
     leks = asmb.next_leks(false);
     return ParamLookup(leks, ident.val, expr, asmb);
 }
 
-// odszukanie warto�ci parametru numer 'param_number' aktualnego makra
+// Finding the value of parameter number 'param number' of the current macro
 CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, int param_number, Expr &expr, CAsm6502 &asmb)
 {
-    bool special= param_number == -1;	// zmienna %0 ? (nie parametr)
-    if (leks.type == CLeksem::L_STR_ARG)	// odwo�anie do warto�ci znakowej parametru?
+    bool special = param_number == -1; // Variable %0 ? (not a parameter)
+    
+    if (leks.type == CLeksem::L_STR_ARG) // Reference to the parameter's character value?
     {
         if (!special && (param_number >= m_nParamCount || param_number < 0))
-            return ERR_EMPTY_PARAM;
-        if (special)			// odwo�anie do %0$ -> co oznacza nazw� makra
+            return CAsm::ERR_EMPTY_PARAM;
+
+        if (special) // Reference to %0$ -> which means the macro name
             expr.string = m_strName;
         else
         {
             ASSERT(m_arrArgType.GetSize() > param_number);
-            if (m_arrArgType[param_number] != STR)	// spr. czy zmienna ma warto�� tekstow�
-                return ERR_NOT_STR_PARAM;
+            
+            if (m_arrArgType[param_number] != STR) // Check whether the variable has a text value
+                return CAsm::ERR_NOT_STR_PARAM;
+
             ASSERT(m_strarrArgs.GetSize() > param_number);
             expr.string = m_strarrArgs[param_number];
         }
+
         expr.inf = Expr::EX_STRING;
         leks = asmb.next_leks();
-        return OK;
+        return CAsm::OK;
     }
     else if (leks.type == CLeksem::L_SPACE)
         leks = asmb.next_leks();
 
-    if (special)	// odwo�anie do %0 -> ilo�� aktualnych parametr�w w wywo�aniu makra
+    if (special) // Reference to %0 -> number of current parameters in the macro call
     {
         expr.inf = Expr::EX_LONG;
         expr.value = m_nParamCount;
     }
-    else		// reference to the current parameter !!
+    else // reference to the current parameter!!
     {
         if (param_number >= m_nParamCount || param_number < 0)
-            return ERR_EMPTY_PARAM;		// parametru o takim numerze nie ma
-        ASSERT(m_arrArgType.GetSize() > param_number);
-        switch (m_arrArgType[param_number])	// aktualny typ parametru
+            return CAsm::ERR_EMPTY_PARAM; // There is no parameter with this number
+            
+        ASSERT(m_arrArgType.size() > param_number);
+
+        switch (m_arrArgType[param_number]) // current parameter type
         {
-        case NUM:		// parametr liczbowy
-        case STR:		// parametr tekstowy (podawana jest jego d�ugo��)
-            ASSERT(m_narrArgs.GetSize() > param_number);
+        case NUM: // Numeric parameter
+        case STR: // Text parameter (its length is given)
+            ASSERT(m_narrArgs.size() > param_number);
             expr.inf = Expr::EX_LONG;
             expr.value = m_narrArgs[param_number];
             break;
-        case UNDEF_EXPR:	// parametr liczbowy, warto�� niezdefiniowana
-            ASSERT(m_narrArgs.GetSize() > param_number);
+
+        case UNDEF_EXPR: // Numeric parameter, undefined value
+            ASSERT(m_narrArgs.size() > param_number);
             expr.inf = Expr::EX_UNDEF;
             expr.value = 0;
             break;
+
         default:
             ASSERT(false);
             break;
         }
     }
 
-    return OK;
+    return CAsm::OK;
 }
 
-// spr. sk�adni odwo�ania do parametru makra (tryb sprawdzania wiersza)
+// Check macro parameter reference syntax (line checking mode)
 CAsm::Stat CMacroDef::AnyParamLookup(CLeksem &leks, CAsm6502 &asmb)
 {
-    if (leks.type == CLeksem::L_STR_ARG)	// odwo�anie do warto�ci znakowej parametru?
+    if (leks.type == CLeksem::L_STR_ARG) // Reference to the parameter's character value?
     {
         leks = asmb.next_leks();
-        return OK;
+        return CAsm::OK;
     }
     else if (leks.type == CLeksem::L_SPACE)
         leks = asmb.next_leks();
 
-    return OK;
+    return CAsm::OK;
 }
 
 bool CMacroDef::GetCurrLine(std::string &str) // Reading the current macro line
@@ -282,7 +297,7 @@ bool CMacroDef::GetCurrLine(std::string &str) // Reading the current macro line
         str = GetLine(m_nLineNo++);
         return true;
     }
-    else				// koniec wierszy?
+    else // End of lines?
     {
         ASSERT(m_nLineNo == GetSize());
         return false;

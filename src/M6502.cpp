@@ -36,38 +36,7 @@ uint8_t CAsm6502::forcelong = 0;
 bool CAsm6502::generateBRKExtraByte = false; // generate extra byte after BRK command?
 uint8_t CAsm6502::BRKExtraByte = 0x0; // value of extra byte generated after BRK command
 
-/*************************************************************************/
-/**
- * @brief Inserts or replaces a value.
- * 
- * @returns true if value was replaced.
- */
-template <typename TKey, typename TItem>
-bool TryReplace(_In_ std::unordered_map<TKey, TItem> &map,
-                _In_ const TKey &key,
-                _In_ const TItem &item)
-{
-    auto itr = map.find(key);
-    map[key] = item;
-    return itr != map.end();
-}
 
-template <typename TKey, typename TItem>
-bool TryLookup(_In_ const std::unordered_map<TKey, TItem> &map, 
-               _In_ const TKey &key,
-               _Out_ TItem &item)
-{
-    auto itr = map.find(key);
-
-    if (itr != map.end())
-    {
-        item = itr->second;
-        return true;
-    }
-
-    item = TItem();
-    return false;
-}
 
 /*************************************************************************/
 

@@ -56,6 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ULONG unsigned long
 
 #include "debug.h"
+#include "Utils.h"
 
 #define __AFXWIN_H__
 

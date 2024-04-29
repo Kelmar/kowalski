@@ -273,9 +273,9 @@ struct Expr
 
 
 // Line reading common elements for .MACRO, .REPEAT and normal reading
-class CSource : /*public CObject,*/ public CAsm
+class CSource //: /*public CObject,*/ public CAsm
 {
-    FileUID m_fuid;
+    CAsm::FileUID m_fuid;
     int cond_level_;
 
 public:
@@ -301,12 +301,12 @@ public:
 
     virtual int GetLineNo() const = 0;
 
-    virtual FileUID GetFileUID() const
+    virtual CAsm::FileUID GetFileUID() const
     {
         return m_fuid;
     }
 
-    void SetFileUID(FileUID fuid)
+    void SetFileUID(CAsm::FileUID fuid)
     {
         m_fuid = fuid;
     }
@@ -332,9 +332,6 @@ private:
 class CRecorder
 {
 private:
-    //CStrLines m_strarrLines;
-    //CDWordArray m_narrLineNums;
-
     std::vector<std::string> m_strarrLines;
     std::vector<uint32_t> m_narrLineNums;
 
@@ -483,7 +480,7 @@ public:
         return input.GetLineNumber();
     }
 
-    FileUID GetFileUID() // read file ID
+    CAsm::FileUID GetFileUID() // read file ID
     {
         return input.GetFileUID();
     }

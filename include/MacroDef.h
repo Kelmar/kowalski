@@ -35,9 +35,9 @@ private:
 
     std::vector<ArgType> m_arrArgType;    // Argument types (NUM -number, STR -string)
 
-    int m_nLineNo;              // Current line number (when reading)
-    int m_nFirstLineNo;         // The line number from which the macro is called
-    FileUID m_nFirstLineFuid;   // The ID of the file from which the macro is called
+    int m_nLineNo;                  // Current line number (when reading)
+    int m_nFirstLineNo;             // The line number from which the macro is called
+    CAsm::FileUID m_nFirstLineFuid; // The ID of the file from which the macro is called
 
 public:
     std::string m_strName; // Macro name
@@ -48,7 +48,7 @@ public:
         , m_nParams(0)
         , m_nLineNo(0)
         , m_nFirstLineNo(-1)
-        , m_nFirstLineFuid(FileUID(-1))
+        , m_nFirstLineFuid(CAsm::FileUID(-1))
         , m_bFirstCodeLine(true)
     {}
 
@@ -57,7 +57,7 @@ public:
 
     int AddParam(const std::string &strParam) // Adding the name of the next parameter
     {
-        if (strParam == MULTIPARAM)
+        if (strParam == CAsm::MULTIPARAM)
         {
             m_nParams = -(m_nParams + 1);
             return 1; // end of parameter list
@@ -89,9 +89,9 @@ public:
 
     int GetFirstLineNo() const { return m_nFirstLineNo; }
 
-    FileUID GetFirstLineFileUID() { return m_nFirstLineFuid; }
+    CAsm::FileUID GetFirstLineFileUID() { return m_nFirstLineFuid; }
 
-    void Start(CConditionalAsm* cond, int line, FileUID file) // prepare for reading
+    void Start(CConditionalAsm* cond, int line, CAsm::FileUID file) // prepare for reading
     {
         CSource::Start(cond);
         m_nLineNo = 0;
@@ -111,8 +111,8 @@ public:
     CAsm::Stat ParamLookup(CLeksem &leks, int param_number, Expr &expr, CAsm6502 &asmb);
     CAsm::Stat AnyParamLookup(CLeksem &leks, CAsm6502 &asmb);
 
-    CAsm::Stat ParamType(const std::string &param_name, bool& found, int& type);
-    CAsm::Stat ParamType(int param_number, bool& found, int& type);
+    CAsm::Stat ParamType(const std::string &param_name, _Out_ bool &found, _Out_ int &type);
+    CAsm::Stat ParamType(int param_number, _Out_ bool &found, _Out_ int &type);
 
     //virtual bool IsMacro() // The data source is the expanded macro
     //{ return true; }
