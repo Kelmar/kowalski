@@ -36,6 +36,39 @@ bool CAsm6502::generateBRKExtraByte = false; // generate extra byte after BRK co
 uint8_t CAsm6502::BRKExtraByte = 0x0; // value of extra byte generated after BRK command
 
 /*************************************************************************/
+/**
+ * @brief Inserts or replaces a value.
+ * 
+ * @returns true if value was replaced.
+ */
+template <typename TKey, typename TItem>
+bool TryReplace(_In_ std::unordered_map<TKey, TItem> &map,
+                _In_ const TKey &key,
+                _In_ const TItem &item)
+{
+    auto itr = map.find(key);
+    map[key] = item;
+    return itr != map.end();
+}
+
+template <typename TKey, typename TItem>
+bool TryLookup(_In_ const std::unordered_map<TKey, TItem> &map, 
+               _In_ const TKey &key,
+               _Out_ TItem &item)
+{
+    auto itr = map.find(key);
+
+    if (itr != map.end())
+    {
+        item = itr->second;
+        return true;
+    }
+
+    item = TItem();
+    return false;
+}
+
+/*************************************************************************/
 
 void CAsm6502::init_members()
 {
@@ -577,275 +610,6 @@ bool CAsm6502::asm_instr(const std::string &str, InstrType &it)
 
 /*************************************************************************/
 
-// Loading the arguments of the macro call
-CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
-{
-    std::string literal;
-    bool get_param = true;
-    bool first_param = true;
-    Stat ret;
-    int count = 0;
-
-    int required = m_nParams >= 0 ? m_nParams : -m_nParams - 1; // Number of required args.
-
-    m_strarrArgs.clear();
-    m_narrArgs.clear();
-    m_arrArgType.clear();
-    m_nParamCount = 0;
-    //leks = asmb.next_leks();
-
-    if (m_nParams == 0) // Parameterless macro?
-        return OK;
-
-    for (;;)
-    {
-        if (get_param) // Possibly another argument
-        {
-            switch (leks.type)
-            {
-            case CLeksem::L_STR:
-                literal = *leks.GetString();
-                m_strarrArgs.Add(literal);
-                m_narrArgs.Add(literal.size());
-                m_arrArgType.Add(STR);
-                count++;
-                get_param = false; // Parameter already interpreted
-                first_param = false; // First parameter already loaded
-                leks = asmb.next_leks();
-                break;
-
-            case CLeksem::L_ERROR:
-                // Added to prevent looping C runtime errors if first param is ''
-                // use this or ERR_PARAM_REQUIRED;
-                return ERR_EMPTY_PARAM;
-
-            default:
-                if (asmb.is_expression(leks))	// expression?
-                {
-                    Expr expr;
-                    ret = asmb.expression(leks, expr);
-
-                    if (ret)
-                        return ret;
-
-                    if (expr.inf == Expr::EX_UNDEF)	// warto�� niezdeterminowana
-                    {
-                        m_strarrArgs.Add(_T(""));
-                        m_narrArgs.Add(0);
-                        m_arrArgType.Add(UNDEF_EXPR);
-                    }
-                    else if (expr.inf == Expr::EX_STRING)
-                    {
-                        m_strarrArgs.Add(expr.string);
-                        m_narrArgs.Add(expr.string.size());
-                        m_arrArgType.Add(STR);
-                    }
-                    else
-                    {
-                        wxString num;
-                        num.Printf("%ld", expr.value);
-
-                        m_strarrArgs.Add(num);
-                        m_narrArgs.Add(expr.value);
-                        m_arrArgType.Add(NUM);
-                    }
-                    count++;
-                    get_param = false; // parameter already interpreted
-                }
-                else
-                {
-                    if (count < required)
-                        return ERR_PARAM_REQUIRED; // Too few macro calling parameters
-
-                    if (!first_param)
-                        return ERR_PARAM_REQUIRED; // After the decimal point, you must enter another parameter
-
-                    m_nParamCount = count;
-                    return OK;
-                }
-            }
-        }
-        else // after an argument, a comma, semicolon, or end
-        {
-            // removed to support parameter mismatch error  v1.3.4.5
-            /*			if (count==required && m_nParams>0)  // this exits even if all params are not evaluated
-            			{											Comment ed out to fix too many parameters
-            				m_nParamCount = count;
-            				return OK;		// all required parameters already loaded
-            			}
-            */
-
-            switch (leks.type)
-            {
-            case CLeksem::L_COMMA:
-                get_param = true; // Next Parameter
-
-                leks = asmb.next_leks();
-                break;
-
-            default:
-                if (count < required)
-                    return ERR_PARAM_REQUIRED;	// Too few macro calling parameters
-
-                if (count > required && m_nParams>0) // if macro called with ..., then m_nParams will be negative
-                    return ERR_MACRO_PARAM_COUNT;
-
-                m_nParamCount = count;
-                return OK;
-            }
-        }
-    }
-}
-
-// type of macro parameter (to distinguish between numbers and strings)
-CAsm::Stat CMacroDef::ParamType(const CString param_name, bool& found, int& type)
-{
-    CIdent ident;
-
-    if (!param_names.lookup(param_name, ident))	// odszukanie parametru o danej nazwie
-    {
-        found = false;
-        return OK;
-    }
-    return ParamType(ident.val, found, type);
-}
-
-
-CAsm::Stat CMacroDef::ParamType(int param_number, bool& found, int& type)
-{
-    if (param_number >= m_nParamCount || param_number < 0)
-    {
-        found = false;
-        return ERR_EMPTY_PARAM;
-    }
-
-    found = true;
-
-    ASSERT(m_arrArgType.GetSize() > param_number);
-    switch (m_arrArgType[param_number])
-    {
-    case NUM:
-        type = 1;
-        break;
-    case STR:
-        type = 2;
-        break;
-    default:
-        type = 0;
-        break;
-    }
-
-    return OK;
-}
-
-
-// odszukanie parametru 'param_name' aktualnego makra
-CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, const CString& param_name, Expr &expr, bool &found, CAsm6502 &asmb)
-{
-    CIdent ident;
-
-    if (!param_names.lookup(param_name, ident))	// odszukanie parametru o danej nazwie
-    {
-        found = false;
-        return OK;
-    }
-    found = true;
-    leks = asmb.next_leks(false);
-    return ParamLookup(leks, ident.val, expr, asmb);
-}
-
-
-// odszukanie warto�ci parametru numer 'param_number' aktualnego makra
-CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, int param_number, Expr &expr, CAsm6502 &asmb)
-{
-    bool special= param_number == -1;	// zmienna %0 ? (nie parametr)
-    if (leks.type == CLeksem::L_STR_ARG)	// odwo�anie do warto�ci znakowej parametru?
-    {
-        if (!special && (param_number >= m_nParamCount || param_number < 0))
-            return ERR_EMPTY_PARAM;
-        if (special)			// odwo�anie do %0$ -> co oznacza nazw� makra
-            expr.string = m_strName;
-        else
-        {
-            ASSERT(m_arrArgType.GetSize() > param_number);
-            if (m_arrArgType[param_number] != STR)	// spr. czy zmienna ma warto�� tekstow�
-                return ERR_NOT_STR_PARAM;
-            ASSERT(m_strarrArgs.GetSize() > param_number);
-            expr.string = m_strarrArgs[param_number];
-        }
-        expr.inf = Expr::EX_STRING;
-        leks = asmb.next_leks();
-        return OK;
-    }
-    else if (leks.type == CLeksem::L_SPACE)
-        leks = asmb.next_leks();
-
-    if (special)	// odwo�anie do %0 -> ilo�� aktualnych parametr�w w wywo�aniu makra
-    {
-        expr.inf = Expr::EX_LONG;
-        expr.value = m_nParamCount;
-    }
-    else		// reference to the current parameter !!
-    {
-        if (param_number >= m_nParamCount || param_number < 0)
-            return ERR_EMPTY_PARAM;		// parametru o takim numerze nie ma
-        ASSERT(m_arrArgType.GetSize() > param_number);
-        switch (m_arrArgType[param_number])	// aktualny typ parametru
-        {
-        case NUM:		// parametr liczbowy
-        case STR:		// parametr tekstowy (podawana jest jego d�ugo��)
-            ASSERT(m_narrArgs.GetSize() > param_number);
-            expr.inf = Expr::EX_LONG;
-            expr.value = m_narrArgs[param_number];
-            break;
-        case UNDEF_EXPR:	// parametr liczbowy, warto�� niezdefiniowana
-            ASSERT(m_narrArgs.GetSize() > param_number);
-            expr.inf = Expr::EX_UNDEF;
-            expr.value = 0;
-            break;
-        default:
-            ASSERT(false);
-            break;
-        }
-    }
-
-    return OK;
-}
-
-
-// spr. sk�adni odwo�ania do parametru makra (tryb sprawdzania wiersza)
-CAsm::Stat CMacroDef::AnyParamLookup(CLeksem &leks, CAsm6502 &asmb)
-{
-    if (leks.type == CLeksem::L_STR_ARG)	// odwo�anie do warto�ci znakowej parametru?
-    {
-        leks = asmb.next_leks();
-        return OK;
-    }
-    else if (leks.type == CLeksem::L_SPACE)
-        leks = asmb.next_leks();
-
-    return OK;
-}
-
-
-const char* CMacroDef::GetCurrLine(CString &str)	// odczyt aktualnego wiersza makra
-{
-    ASSERT(m_nLineNo >= 0);
-    if (m_nLineNo < GetSize())
-    {
-        str = GetLine(m_nLineNo++);
-        return (const char *)str;
-    }
-    else				// koniec wierszy?
-    {
-        ASSERT(m_nLineNo == GetSize());
-        return NULL;
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-
 CAsm6502::Stat CAsm6502::CheckLine(const char *str, int &instr_idx_start, int &instr_idx_fin)
 {
     Stat ret;
@@ -873,12 +637,15 @@ CAsm6502::Stat CAsm6502::CheckLine(const char *str, int &instr_idx_start, int &i
         instr_idx_fin = instr_fin - str;
     }
 
-//  str.ReleaseBuffer();
+    //str.ReleaseBuffer();
+
     if (ret < OK)
         ret = OK;
-//  if (ret == STAT_FIN || ret == STAT_USER_DEF_ERR || ret == STAT_INCLUDE)
-//    ret = OK;
-    switch (ret)	// nie wszystke b��dy s� b��dami w trybie analizowania jednego wiersza
+
+    //if (ret == STAT_FIN || ret == STAT_USER_DEF_ERR || ret == STAT_INCLUDE)
+    //    ret = OK;
+
+    switch (ret) // Not all errors are errors in single-line parsing mode
     {
     case ERR_UNDEF_EXPR:
     case ERR_UNKNOWN_INSTR:
@@ -888,56 +655,59 @@ CAsm6502::Stat CAsm6502::CheckLine(const char *str, int &instr_idx_start, int &i
         ret = OK;
         break;
     }
+    
     ASSERT(ret >= OK);
 
     return ret;
 }
 
 
-CAsm6502::Stat CAsm6502::look_for_endif()		// szukanie .IF, .ENDIF lub .ELSE
+CAsm6502::Stat CAsm6502::look_for_endif() // Search for .IF, .ENDIF or .ELSE
 {
-    CLeksem leks= next_leks(false);	// kolejny leksem, by� mo�e pusty (L_SPACE)
-    bool labelled= false;
+    CLeksem leks = next_leks(false); // Another token, maybe empty (L_SPACE)
+    bool labelled = false;
 
     switch (leks.type)
     {
-    case CLeksem::L_IDENT:	// etykieta
-    case CLeksem::L_IDENT_N:	// etykieta numerowana
+    case CLeksem::L_IDENT:   // Named label
+    case CLeksem::L_IDENT_N: // Numbered label
         leks = next_leks();
         if (leks.type == CLeksem::L_IDENT_N)
         {
             Expr expr(0);
-            Stat ret = factor(leks,expr);
+            Stat ret = factor(leks, expr);
             if (ret)
                 return ret;
         }
         labelled = true;
         switch (leks.type)
         {
-        case CLeksem::L_LABEL:	// znak ':'
+        case CLeksem::L_LABEL: // Symbol ':'
             leks = next_leks();
-            if (leks.type!=CLeksem::L_ASM_INSTR)
+            if (leks.type != CLeksem::L_ASM_INSTR)
                 return OK;
             break;
+
         case CLeksem::L_ASM_INSTR:
             break;
+
         default:
             return OK;
         }
-        //      leks = next_leks();
+        //leks = next_leks();
         break;
 
-    case CLeksem::L_SPACE:	// odst�p
+    case CLeksem::L_SPACE: // Spacing
         leks = next_leks();
-        if (leks.type!=CLeksem::L_ASM_INSTR)	// nie dyrektywa asemblera?
+        if (leks.type!=CLeksem::L_ASM_INSTR) // Not an assembler directive?
             return OK;
         break;
 
-    case CLeksem::L_COMMENT:	// komentarz
-    case CLeksem::L_CR:		// koniec wiersza
+    case CLeksem::L_COMMENT: // Comment
+    case CLeksem::L_CR: // End of line
         return OK;
 
-    case CLeksem::L_FIN:	// koniec tekstu
+    case CLeksem::L_FIN: // End of text
         return STAT_FIN;
         break;
 
@@ -945,25 +715,27 @@ CAsm6502::Stat CAsm6502::look_for_endif()		// szukanie .IF, .ENDIF lub .ELSE
         return ERR_UNEXP_DAT;
     }
 
-    ASSERT(leks.type==CLeksem::L_ASM_INSTR);	// dyrektywa asemblera
+    ASSERT(leks.type == CLeksem::L_ASM_INSTR); // Assembler directive
 
     switch (leks.GetInstr())
     {
     case I_IF:
         return labelled ? ERR_LABEL_NOT_ALLOWED : STAT_IF_UNDETERMINED;
+
     case I_ELSE:
         return labelled ? ERR_LABEL_NOT_ALLOWED : STAT_ELSE;
+
     case I_ENDIF:
         return labelled ? ERR_LABEL_NOT_ALLOWED : STAT_ENDIF;
+
     default:
         return OK;
     }
 }
 
-
-CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
+CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
 {
-    enum			// stany automatu
+    enum // machine states
     {
         START,
         AFTER_LABEL,
@@ -971,99 +743,116 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
         EXPR,
         COMMENT,
         FINISH
-    } state= START;
-    CString label;	// pomocnicza zmienna do zapami�tania identyfikatora
-    bool labelled= false;	// flaga wyst�pienia etykiety
-    Stat ret, ret_stat= OK;
+    } state = START;
+
+    std::string label; // Auxiliary variable to remember the ID
+    bool labelled = false; // Label occurrence flag
+    CAsm::Stat ret, ret_stat = OK;
     instr_start = NULL;
     instr_fin = NULL;
     ident_start = NULL;
     ident_fin = NULL;
 
-    CLeksem leks= next_leks(false);	// kolejny leksem, by� mo�e pusty (L_SPACE)
+    CLeksem leks = next_leks(false); // Another token, maybe empty (L_SPACE)
 
     for (;;)
     {
         switch (state)
         {
-        case START:			// pocz�tek wiersza
+        case START: // Beginning of the line
             switch (leks.type)
             {
-            case CLeksem::L_IDENT:	// etykieta
-                label = *leks.GetString();	// zapami�tanie identyfikatora
+            case CLeksem::L_IDENT: // label
+                label = *leks.GetString(); // Remember the ID
                 state = AFTER_LABEL;
                 leks = next_leks();
                 break;
-            case CLeksem::L_IDENT_N:	// etykieta numerowana
+                
+            case CLeksem::L_IDENT_N: // Numbered label
             {
                 CLeksem ident(leks);
                 Expr expr(0);
                 leks = next_leks();
-                ret = factor(leks,expr);
+                ret = factor(leks, expr);
+
                 if (ret)
                     return ret;
+
                 if (!check_line)
                 {
-                    if (expr.inf==Expr::EX_UNDEF)	// nieokre�lona warto��
+                    if (expr.inf == Expr::EX_UNDEF)	// Undefined value
                         return ERR_UNDEF_EXPR;
-                    ident.Format(expr.value);	// znormalizowanie postaci etykiety
-                    label = *ident.GetString();	// zapami�tanie identyfikatora
+
+                    ident.Format(expr.value); // Normalize the form of the label
+                    label = *ident.GetString(); // Remember the ID
                 }
                 else
-                    label = _T("x");
+                    label = "x";
                 state = AFTER_LABEL;
                 break;
             }
-            case CLeksem::L_SPACE:	// po odst�pie ju� nie mo�e by� etykiety
+            
+            case CLeksem::L_SPACE: // There can be no more labels after the space
                 state = INSTR;
                 leks = next_leks();
                 break;
-            case CLeksem::L_COMMENT:	// komentarz
+
+            case CLeksem::L_COMMENT:
                 state = COMMENT;
                 break;
-            case CLeksem::L_CR:		// koniec wiersza
-            case CLeksem::L_FIN:		// koniec tekstu
+
+            case CLeksem::L_CR: // End of line
+            case CLeksem::L_FIN: // End of text
                 state = FINISH;
                 break;
+                
             default:
-                return ERR_UNEXP_DAT;	// nierozpoznany napis
+                return ERR_UNEXP_DAT; // Unrecognized string
             }
             break;
 
-
-        case AFTER_LABEL:			// wyst�pi�a etykieta
+        case AFTER_LABEL: // A label occurred
             switch (leks.type)
             {
             case CLeksem::L_SPACE:
                 ASSERT(false);
                 break;
-            case CLeksem::L_LABEL:	// znak ':'
+
+            case CLeksem::L_LABEL: // Symbol ':'
                 state = INSTR;
                 leks = next_leks();
                 break;
-            case CLeksem::L_EQUAL:	// znak '='
+
+            case CLeksem::L_EQUAL: // Symbol '='
                 state = EXPR;
                 leks = next_leks();
                 break;
+
             default:
                 state = INSTR;
                 break;
             }
+
             labelled = true;
             break;
 
 
-        case INSTR:			// oczekiwana instrukcja, komentarz lub nic
-            if (labelled &&					// przed instr. by�a etykieta
-                    !(leks.type == CLeksem::L_ASM_INSTR &&	// i za etykiet�
-                      (leks.GetInstr() == I_MACRO ||		// nie wyst�puje dyrektywa .MACRO
-                       leks.GetInstr() == I_SET)))			// ani dyrektywa .SET?
+        case INSTR:
+            // expected instruction, comment or nothing before instruction.
+            // there was a label and there is no .MACRO directive behind the label
+            // nor the .SET directive?
+            if (labelled && !(leks.type == CLeksem::L_ASM_INSTR &&	
+                (leks.GetInstr() == I_MACRO || leks.GetInstr() == I_SET))
+               )
             {
-                if (origin > mem_mask) //65816
-
+                if (origin > mem_mask) // 65816
                     return ERR_UNDEF_ORIGIN;
-                ret = pass == 1 ? def_ident(label, CIdent(CIdent::I_ADDRESS, origin)) :
-                      chk_ident_def(label, CIdent(CIdent::I_ADDRESS, origin));
+
+                CIdent t1(CIdent::I_ADDRESS, origin);
+                CIdent t2(CIdent::I_ADDRESS, origin);
+
+                ret = pass == 1 ? def_ident(label, _Inout_ t1) : chk_ident_def(label, _Inout_ t2);
+                      
                 if (ret)
                     return ret;
             }
@@ -1073,76 +862,93 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
             case CLeksem::L_SPACE:
                 ASSERT(false);
                 break;
-            case CLeksem::L_ASM_INSTR:	// dyrektywa asemblera
+                
+            case CLeksem::L_ASM_INSTR: // Assembler directive
             {
-                InstrType it= leks.GetInstr();
-                instr_start = ident_start;	// po�o�enie instrukcji w wierszu
+                InstrType it = leks.GetInstr();
+                instr_start = ident_start; // Position of the statement on the line
                 instr_fin = ident_fin;
 
                 leks = next_leks();
-                ret_stat = asm_instr_syntax_and_generate(leks,it,labelled ? &label : NULL);
-                if (ret_stat > OK)		// b��d? (ERR_xxx)
+                ret_stat = asm_instr_syntax_and_generate(leks, it, labelled ? &label : nullptr);
+
+                if (ret_stat > OK) // error? (ERR_xxx)
                     return ret_stat;
-                if (pass==2 && out && debug &&
-                        ret_stat!=STAT_MACRO && ret_stat!=STAT_EXITM && it!=I_SET &&
-                        ret_stat!=STAT_REPEAT && ret_stat!=STAT_ENDR)
+
+                if (pass == 2 && out && debug &&
+                    ret_stat != STAT_MACRO && ret_stat != STAT_EXITM && it != I_SET &&
+                    ret_stat !=  STAT_REPEAT && ret_stat != STAT_ENDR)
                 {
-                    ret = generate_debug(it,text->GetLineNo(),text->GetFileUID());
+                    ret = generate_debug(it, text->GetLineNo(), text->GetFileUID());
+
                     if (ret)
                         return ret;
                 }
-                if (pass==2 && ret_stat==STAT_MACRO)
-                    return ret_stat;		// in the second pass we skip .MACRO
+
+                if (pass == 2 && ret_stat == STAT_MACRO)
+                    return ret_stat; // in the second pass we skip .MACRO
+
                 state = COMMENT;
                 break;
             }
 
-            case CLeksem::L_PROC_INSTR:	// processor order (opcode)
+            case CLeksem::L_PROC_INSTR: // processor order (opcode)
             {
-                instr_start = ident_start;	// the location of the instructions on the line
+                instr_start = ident_start; // the location of the instructions on the line
                 instr_fin = ident_fin;
-                OpCode code= leks.GetCode();	// order no
+                OpCode code = leks.GetCode(); // order no
                 CodeAdr mode;
                 Expr expr, expr_bit, expr_zpg;
+
                 leks = next_leks();
-                ret = proc_instr_syntax(leks,mode,expr,expr_bit,expr_zpg);  // for 3 byte operands!
+                ret = proc_instr_syntax(leks, mode, expr, expr_bit, expr_zpg); // for 3 byte operands!
+
                 forcelong = 0;
-                if (ret)			// syntax error
+
+                if (ret) // syntax error
                     return ret;
-                int len;			// the length of the command with the argument
-                ret = chk_instr_code(code,mode,expr,len);
+
+                int len; // the length of the command with the argument
+
+                ret = chk_instr_code(code, mode, expr, len);
 
                 if (ret)
-                    return ret;		// error in the addressing or range mode
-                if (pass==2 && out && debug)
+                    return ret; // error in the addressing or range mode
+
+                if (pass == 2 && out && debug)
                 {
-//						if (origin > 0xFFFF)
+                    //if (origin > 0xFFFF)
                     if (origin > mem_mask)
                         return ERR_UNDEF_ORIGIN;
-                    CMacroDef* pMacro= dynamic_cast<CMacroDef*>(text);
+
+                    CMacroDef* pMacro = dynamic_cast<CMacroDef*>(text);
+
                     if (pMacro && pMacro->m_bFirstCodeLine)
                     {
                         // debug info for the first line of the macro containing the instr. 6502
                         pMacro->m_bFirstCodeLine = false;
-                        generate_debug((uint32_t)origin,pMacro->GetFirstLineNo(),pMacro->GetFirstLineFileUID());
+                        generate_debug((uint32_t)origin, pMacro->GetFirstLineNo(), pMacro->GetFirstLineFileUID());
                     }
                     else
-                        generate_debug((uint32_t)origin,text->GetLineNo(),text->GetFileUID());
-                    generate_code(code,mode,expr,expr_bit,expr_zpg);
+                        generate_debug((uint32_t)origin, text->GetLineNo(), text->GetFileUID());
+                    generate_code(code, mode, expr, expr_bit, expr_zpg);
                 }
+
                 ret = inc_prog_counter(len);
+
                 if (ret)
                     return ret;
-                state = COMMENT;		// dozwolony ju� tylko komentarz
+
+                state = COMMENT; // Only comment allowed
                 break;
             }
 
-            case CLeksem::L_IDENT:	// label - here only as a macro name
-            case CLeksem::L_IDENT_N:	// numbered label - here only as a macro name
+            case CLeksem::L_IDENT: // label - here only as a macro name
+            case CLeksem::L_IDENT_N: // numbered label - here only as a macro name
             {
                 if (leks.type == CLeksem::L_IDENT)
                 {
-                    label = *leks.GetString();	// remembering the identifier
+                    label = *leks.GetString(); // remembering the identifier
                     leks = next_leks();
                 }
                 else
@@ -1150,32 +956,40 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
                     CLeksem ident(leks);
                     Expr expr(0);
                     leks = next_leks();
-                    ret = factor(leks,expr);
+                    ret = factor(leks, expr);
+
                     if (ret)
                         return ret;
-                    if (expr.inf==Expr::EX_UNDEF)	// undefined value
+
+                    if (expr.inf == Expr::EX_UNDEF) // undefined value
                         return ERR_UNDEF_EXPR;
-                    ident.Format(expr.value);		// standardizing the form of the label
+
+                    ident.Format(expr.value); // standardizing the form of the label
                     label = *ident.GetString();	// remembering the identifier
                 }
                 CIdent macro;
-                if (!macro_name.lookup(label, macro))	// if the label is not in the array
+
+                if (!TryLookup(macro_name, label, _Out_ macro)) // if the label is not in the array
                     return ERR_UNKNOWN_INSTR;
+
                 ASSERT(macros.GetSize() > macro.val && macro.val >= 0);
-                CMacroDef* pMacro= &macros[macro.val];
-                ret = pMacro->ParseArguments(leks,*this);	// load macro arguments
+                CMacroDef* pMacro = &macros[macro.val];
+                ret = pMacro->ParseArguments(leks,*this); // load macro arguments
+
                 if (ret)
                     return ret;
+
                 if (label == "proc")
                     proc_area++;
+
                 // remember condition nesting level
                 pMacro->Start(&conditional_asm, text->GetLineNo(), text->GetFileUID());
-                source.Push(text);		// the current row source on the stack
+                source.Push(text); // the current row source on the stack
                 text = expanding_macro = pMacro;
                 //	    text->Start();
-                macro_local_area++;		// new local area for macro labels
-                //	    MacroExpandStart(pMacro);	// switch to macro development mode
-                state = COMMENT;		// only comment allowed
+                macro_local_area++; // new local area for macro labels
+                //MacroExpandStart(pMacro); // switch to macro development mode
+                state = COMMENT; // only comment allowed
                 break;
             }
 
@@ -1183,16 +997,17 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
             case CLeksem::L_FIN:
                 state = FINISH;
                 break;
-            case CLeksem::L_COMMENT:	// komentarz
+
+            case CLeksem::L_COMMENT:
                 state = COMMENT;
                 break;
+
             default:
                 return ERR_INSTR_OR_NULL_EXPECTED;
             }
             break;
 
-
-        case EXPR:			// expected expression - val. labels
+        case EXPR: // expected expression - val. labels
             switch (leks.type)
             {
             case CLeksem::L_SPACE:
@@ -1215,7 +1030,7 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
                         if (expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE)
                         {
                             if (!check_line)
-//							if (pass == 2)		// do it once (avoid first pass; it's called for line checking)
+//							if (pass == 2) // do it once (avoid first pass; it's called for line checking)
                                 CSym6502::io_addr = uint16_t(expr.value);
                         }
                         else if (expr.inf == Expr::EX_LONG)
@@ -1227,25 +1042,29 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
                     }
                     else
                     {
-                        err_ident= label;
+                        err_ident = label;
                         return ERR_CONST_LABEL_REDEF;
                     }
                 }
-                else if (pass==1)		// first pass?
+                else if (pass == 1)		// first pass?
                 {
                     if (expr.inf != Expr::EX_UNDEF)
                         ret = def_ident(label, CIdent(CIdent::I_VALUE, expr.value));
                     else
                         ret = def_ident(label, CIdent(CIdent::I_UNDEF, 0));
                 }
-                else			// second pass
+                else // second pass
                 {
                     if (expr.inf != Expr::EX_UNDEF)
-                        ret = chk_ident_def(label, CIdent(CIdent::I_VALUE, expr.value));
+                    {
+                        CIdent tmpIdent(CIdent::I_VALUE, expr.value);
+                        ret = chk_ident_def(label, _Inout_ tmpIdent);
+                    }                        
                     else
                         return ERR_UNDEF_EXPR;
+
                     if (listing.IsOpen())
-                        listing.AddValue((uint32_t)expr.value); //65816 does this need updating?
+                        listing.AddValue((uint32_t)expr.value); // 65816 does this need updating?
                 }
                 if (ret)
                     return ret;
@@ -1254,7 +1073,7 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
             }
             break;
 
-        case COMMENT:			// just a comment or end of line
+        case COMMENT: // just a comment or end of line
             switch (leks.type)
             {
             case CLeksem::L_SPACE:
@@ -1262,10 +1081,12 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
             //	    break;
             case CLeksem::L_COMMENT:
                 return ret_stat;
+
             case CLeksem::L_CR:
             case CLeksem::L_FIN:
                 state = FINISH;
                 break;
+
             default:
                 return ERR_DAT;
             }
@@ -1277,71 +1098,73 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
             {
             case CLeksem::L_CR:
                 return ret_stat;
+
             case CLeksem::L_FIN:
                 return ret_stat ? ret_stat : STAT_FIN;
+
             default:
                 return ERR_DAT;
             }
             break;
         }
-
     }
-
 }
-
 
 //-----------------------------------------------------------------------------
 
-
-bool CAsm6502::is_expression(const CLeksem &leks)	// pocz�tek wyra�enia?
+/**
+ * @brief Tests if a token is the start of an expression.
+ */ 
+bool CAsm6502::is_expression(const CLeksem &leks)
 {
     switch (leks.type)
     {
-    case CLeksem::L_NUM:			// liczba (dec, hex, bin, lub znak)
-    case CLeksem::L_IDENT:			// identyfikator
-    case CLeksem::L_IDENT_N:		// identyfikator numerowany
-    case CLeksem::L_OPER:			// operator
-    case CLeksem::L_EXPR_BRACKET_L:	// lewy nawias dla wyra�e� '['
-    case CLeksem::L_EXPR_BRACKET_R:	// prawy nawias dla wyra�e� ']'
-        return true;				// to pocz�tek wyra�enia
+    case CLeksem::L_NUM:			// Number (dec, hex, bin, or sign)
+    case CLeksem::L_IDENT:			// Identifier
+    case CLeksem::L_IDENT_N:		// Numeric identifier
+    case CLeksem::L_OPER:			// Operator
+    case CLeksem::L_EXPR_BRACKET_L:	// Left bracket for expressions '['
+    case CLeksem::L_EXPR_BRACKET_R:	// Right bracket for expressions ']'
+        return true;				// This is the beginning of an expression
 
     default:
-        return false;	// to nie pocz�tek wyra�enia
+        return false; // This is not the beginning of an expression
     }
 }
 
-
-int CAsm6502::find_const(const CString& str)
+int CAsm6502::find_const(const std::string& str)
 {
-    static const char cnst1[]= "ORG";		// predefiniowana sta�a
-    static const char cnst2[]= "IO_AREA";	// predefiniowana sta�a
+    static const char cnst1[] = "ORG";     // predefined constant
+    static const char cnst2[] = "IO_AREA"; // predefined constant
 
-    if (str.CompareNoCase(cnst1) == 0)
+    if (strcasecmp(str.c_str(), cnst1) == 0)
         return 0;
-    if (str.CompareNoCase(cnst2) == 0)
+    if (strcasecmp(str.c_str(), cnst2) == 0)
         return 1;
 
     return -1;
 }
 
-
-CAsm6502::Stat CAsm6502::predef_const(const CString& str, Expr& expr, bool& found)
+CAsm6502::Stat CAsm6502::predef_const(const std::string& str, Expr& expr, bool& found)
 {
-    int nConstant= find_const(str);
+    int nConstant = find_const(str);
 
     if (nConstant == 0)
     {
 //		if (origin > 0xFFFF)
         if (origin > mem_mask)
             return ERR_UNDEF_ORIGIN;
-        expr.value = origin;	// warto�� licznika rozkaz�w
+
+        expr.value = origin; // Instruction counter value
         found = true;
+
         return OK;
     }
     else if (nConstant == 1)
     {
-        expr.value = CSym6502::io_addr;		// io simulator area
+        expr.value = CSym6502::io_addr; // io simulator area
         found = true;
+
         return OK;
     }
 
@@ -1349,40 +1172,43 @@ CAsm6502::Stat CAsm6502::predef_const(const CString& str, Expr& expr, bool& foun
     return OK;
 }
 
-
 CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
 {
-    static const char def[]= ".DEF";	// predefiniowana funkcja .DEF
-    static const char ref[]= ".REF";	// predefiniowana funkcja .REF
-    static const char strl[]= ".STRLEN";	// predefiniowana funkcja .STRLEN
-    static const char pdef[]= ".PASSDEF";// predefiniowana funkcja .PASSDEF
-    static const char paramtype[]= ".PARAMTYPE";// predefiniowana funkcja .PARAMTYPE
+    static const char def[]= ".DEF";             // predefined .DEF function
+    static const char ref[]= ".REF";             // predefined .REF function
+    static const char strl[]= ".STRLEN";         // predefined function .STRLEN
+    static const char pdef[]= ".PASSDEF";        // predefined .PASSDEF function
+    static const char paramtype[]= ".PARAMTYPE"; // predefined .PARAMTYPE function
 
-    const CString &str= *leks.GetString();
+    const std::string &str = *leks.GetString();
     bool LocParamNo = false;
 
-    int hit= 0;
-    if (str.CompareNoCase(def) == 0)
+    int hit = 0;
+    if (strcasecmp(str.c_str(), def) == 0)
         hit = 1;
-    else if (str.CompareNoCase(ref) == 0)
+    else if (strcasecmp(str.c_str(), ref) == 0)
         hit = 2;
-    else if (str.CompareNoCase(pdef) == 0)
+    else if (strcasecmp(str.c_str(), pdef) == 0)
         hit = 3;
-    else if (str.CompareNoCase(paramtype) == 0)
+    else if (strcasecmp(str.c_str(), paramtype) == 0)
         hit = 4;
-    else if (str.CompareNoCase(strl) == 0)
+    else if (strcasecmp(str.c_str(), strl) == 0)
         hit = -1;
 
     if (hit > 0)
     {
         leks = next_leks(false);
+        
         if (leks.type != CLeksem::L_BRACKET_L)
-            return ERR_BRACKET_L_EXPECTED;	// wymagany nawias '(' (bez odst�pu)
+            return ERR_BRACKET_L_EXPECTED; // Required bracket '(' (no space)
+
         leks = next_leks();
-        CString Label;
+
+        std::string label;
+
         if (leks.type == CLeksem::L_IDENT)
         {
-            Label = *leks.GetString();
+            label = *leks.GetString();
             leks = next_leks();
         }
         else if (leks.type == CLeksem::L_IDENT_N)
@@ -1390,101 +1216,119 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
             CLeksem ident(leks);
             Expr expr(0);
             leks = next_leks();
-            Stat ret = factor(leks,expr);
+            Stat ret = factor(leks, expr);
+
             if (ret)
                 return ret;
-            if (expr.inf==Expr::EX_UNDEF)	// nieokre�lona warto��
+
+            if (expr.inf == Expr::EX_UNDEF) // Undefined value
                 return ERR_UNDEF_EXPR;
-            ident.Format(expr.value);		// znormalizowanie postaci etykiety
-            Label = *ident.GetString();	// zapami�tanie identyfikatora
+
+            ident.Format(expr.value); // Normalize the form of the label
+            label = *ident.GetString(); // Remember the ID
         }
-        else if (hit== 4 && leks.type == CLeksem::L_OPER && leks.GetOper() == O_MOD) //!! add code for numbered parameters
+        else if (hit == 4 && leks.type == CLeksem::L_OPER && leks.GetOper() == O_MOD) //!! add code for numbered parameters
         {
             leks = next_leks(false);
-            if (leks.type == CLeksem::L_SPACE)	// odst�p niedozwolony
+
+            if (leks.type == CLeksem::L_SPACE) // Space not allowed
                 return ERR_PARAM_NUMBER_EXPECTED;
-            Stat ret= factor(leks,expr,false);	// expected macro parameter number
+
+            Stat ret = factor(leks, expr, false); // expected macro parameter number
+
             if (ret)
                 return ret;
+
             if (!check_line)
+            {
                 if (expr.inf == Expr::EX_UNDEF)
-                    return ERR_UNDEF_PARAM_NUMBER;	// numer parametru musi by� zdefiniowany
+                    return ERR_UNDEF_PARAM_NUMBER; // Parameter number must be defined
+            }
 
             LocParamNo = true;
         }
         else
         {
-            return ERR_LABEL_EXPECTED;	// wymagana etykieta - argument .DEF lub .REF
+            return ERR_LABEL_EXPECTED; // Required label -argument .DEF or .REF
         }
+        
         if (leks.type != CLeksem::L_BRACKET_R)
-            return ERR_BRACKET_R_EXPECTED;	// wymagany nawias ')'
+            return ERR_BRACKET_R_EXPECTED; // Required bracket ')'
 
-        if (Label[0] == LOCAL_LABEL_CHAR)	// etykiety lokalne niedozwolone
+        if (label[0] == LOCAL_LABEL_CHAR) // Local labels not allowed
             return ERR_LOCAL_LABEL_NOT_ALLOWED;
+            
         CIdent ident;
 
-        if (case_insensitive)				// fix case sensitive issue
-            Label.MakeLower();
-
-        if (hit == 1)			// .DEF?
+        if (case_insensitive) // fix case sensitive issue
         {
-            if (global_ident.lookup(Label,ident) && ident.info!=CIdent::I_UNDEF)
+            wxString tmp = label;
+            tmp.MakeLower();
+            label = tmp.ToStdString();
+        }
+
+        if (hit == 1) // .DEF?
+        {
+            if (TryLookup(global_ident, label, _Out_ ident) && ident.info != CIdent::I_UNDEF)
             {
                 ASSERT(ident.info != CIdent::I_INIT);
-                expr.value = 1;			// 1 - etykieta zdefiniowana
+                expr.value = 1; // 1 -label defined
             }
             else
-                expr.value = 0;			// 0 - etykieta niezdefiniowana
+                expr.value = 0; // 0 -undefined label
         }
-        else if (hit == 2)			// .REF?
+        else if (hit == 2) // .REF?
         {
-            expr.value = global_ident.lookup(Label,ident) ? 1 : 0; // 1 - je�li etykieta jest w tablicy
+            expr.value = TryLookup(global_ident, label, _Out_ ident) ? 1 : 0; // 1 -if the label is in the array
         }
-        else if (hit == 3)			// .PASSDEF?
+        else if (hit == 3) // .PASSDEF?
         {
-            if (global_ident.lookup(Label,ident) && ident.info!=CIdent::I_UNDEF)
+            if (TryLookup(global_ident, label, _Out_ ident) && ident.info != CIdent::I_UNDEF)
             {
                 ASSERT(ident.info != CIdent::I_INIT);
-                if (pass==1)
-                    expr.value = 1;		// 1 - etykieta zdefiniowana
-                else		// drugie przej�cie asemblacji
-                    expr.value = ident.checked ? 1 : 0;	// 1 - def. etykiety znaleziona w 2. przej�ciu
+                
+                if (pass == 1)
+                    expr.value = 1; // 1 -label defined
+                else // Second pass of assembly
+                    expr.value = ident.checked ? 1 : 0; // 1 -def. labels found in the 2nd pass
             }
-            else		// etykieta jeszcze nie zdefiniowana
-                expr.value = 0;			// 0 - etykieta niezdefiniowana
+            else // label not defined yet
+                expr.value = 0; // 0 -undefined label
         }
-        else				// .PARAMTYPE
+        else // .PARAMTYPE
         {
             if (expanding_macro)
             {
-                bool found= false;
-                int type= 0;
+                bool found = false;
+                int type = 0;
                 Stat ret;
+
                 if (LocParamNo)
-                    ret = expanding_macro->ParamType(expr.value-1, found, type);
+                    ret = expanding_macro->ParamType(expr.value - 1, found, type);
                 else
-                    ret= expanding_macro->ParamType(Label, found, type);
+                    ret= expanding_macro->ParamType(label, found, type);
 
                 if (ret)
                     return ret;
+
                 if (!found)
                     return ERR_EMPTY_PARAM;
 
-                expr.value = type;			// type of macro parameter (number or string)
+                expr.value = type; // type of macro parameter (number or string)
             }
             else if (check_line)
             {
                 expr.value = 0;
             }
             else
-                return ERR_DAT;	//todo
+                return ERR_DAT; // TODO
         }
 
         leks = next_leks();
         fn = true;
         return OK;
     }
-    else if (hit == -1)		// funkcja .STRLEN?
+    else if (hit == -1) // function .STRLEN?
     {
         leks = next_leks(false);
         if (leks.type != CLeksem::L_BRACKET_L)
@@ -1493,34 +1337,46 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
 
         if (check_line && leks.type == CLeksem::L_OPER && leks.GetOper() == O_MOD)    //!! add code for numbered parameters
         {
-
             leks = next_leks(false);
-            if (leks.type == CLeksem::L_SPACE)	// odst�p niedozwolony
+            
+            if (leks.type == CLeksem::L_SPACE) // Space not allowed
                 return ERR_PARAM_NUMBER_EXPECTED;
-            Stat ret= factor(leks,expr,false);	// expected macro parameter number
+
+            Stat ret = factor(leks, expr, false); // expected macro parameter number
+
             if (ret)
                 return ret;
+
             if (!check_line)
+            {
                 if (expr.inf == Expr::EX_UNDEF)
-                    return ERR_UNDEF_PARAM_NUMBER;	// numer parametru musi by� zdefiniowany
+                    return ERR_UNDEF_PARAM_NUMBER; // Parameter number must be defined
+            }
+
             if (leks.type != CLeksem::L_BRACKET_R)
-                return ERR_BRACKET_R_EXPECTED;	// wymagany nawias ')'
+                return ERR_BRACKET_R_EXPECTED; // Required bracket ')'
+
             expr.value = 0;
             leks = next_leks();
         }
         else
         {
             Expr strexpr;
-            Stat ret= expression(leks,strexpr,true);
+            Stat ret = expression(leks, strexpr, true);
+
             if (ret)
                 return ret;
+
             if (strexpr.inf != Expr::EX_STRING)
-                return ERR_STR_EXPECTED;		// wymagany �a�cuch znak�w jako argument
+                return ERR_STR_EXPECTED; // Required string as argument
+
             if (leks.type != CLeksem::L_BRACKET_R)
-                return ERR_BRACKET_R_EXPECTED;	// wymagany nawias ')'
-            expr.value = strlen(strexpr.string);
+                return ERR_BRACKET_R_EXPECTED; // Required bracket ')'
+
+            expr.value = strexpr.string.size();
             leks = next_leks();
         }
+
         fn = true;
         return OK;
     }
@@ -1528,7 +1384,6 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
     fn = false;
     return OK;
 }
-
 
 // warto�� sta�a - etykieta, parametr, liczba, predef. sta�a lub funkcja
 CAsm6502::Stat CAsm6502::constant_value(CLeksem &leks, Expr &expr, bool nospace)
@@ -2129,8 +1984,8 @@ CAsm6502::Stat CAsm6502::expression(CLeksem &leks, Expr &expr, bool str)
 
 CAsm6502::Stat CAsm6502::look_for_endm()	// szukanie .ENDM lub .MACRO
 {
-    CLeksem leks= next_leks(false);	// kolejny leksem, by� mo�e pusty (L_SPACE)
-    bool labelled= false;
+    CLeksem leks = next_leks(false);	// kolejny leksem, by� mo�e pusty (L_SPACE)
+    bool labelled = false;
 
     switch (leks.type)
     {
@@ -2188,230 +2043,294 @@ CAsm6502::Stat CAsm6502::look_for_endm()	// szukanie .ENDM lub .MACRO
 }
 
 
-CAsm6502::Stat CAsm6502::record_macro()	// wczytanie kolejnego wiersza makrodefinicji
+CAsm6502::Stat CAsm6502::record_macro() // Load the next line of the macro definition
 {
-    CMacroDef *pMacro= get_last_macro_entry();
+    CMacroDef *pMacro = get_last_macro_entry();
 
     Stat ret= look_for_endm();
     if (ret > 0)
         return ret;
 
-    if (ret != STAT_ENDM)			// wiersza z .ENDM ju� nie potrzeba zapami�tywa�
-        pMacro->AddLine(current_line,text->GetLineNo());
+    if (ret != STAT_ENDM) // The line from .ENDM no longer needs to be remembered
+        pMacro->AddLine(current_line, text->GetLineNo());
 
     return ret;
 }
 
 //-----------------------------------------------------------------------------
 
-CString CAsm6502::format_local_label(const CString &ident, int area)
+std::string CAsm6502::format_local_label(const std::string &ident, int area)
 {
-    CString local(' ',ident.GetLength()+8);
-    local.Format("%08X%s",area,(LPCTSTR)ident);
-    return local;
+    wxString local;
+    local.Printf("%08X%s", area, ident);
+    return local.ToStdString();
 }
 
-// spr. czy dana etykieta jest ju� zdefiniowana
-bool CAsm6502::add_ident(const CString &id, CIdent &inf)
+// Check whether a given label is already defined
+bool CAsm6502::add_ident(const std::string &id, CIdent &inf)
 {
-    CString tmp;
-    const CString &ident= case_insensitive ? tmp : id;
+    std::string ident = id;
+
     if (case_insensitive)
-        tmp=id, tmp.MakeLower();
-
-    if (ident[0]==LOCAL_LABEL_CHAR)	// etykieta lokalna?
     {
-        if (expanding_macro)		// etykieta lokalna w makrorozszerzeniu?
-            return macro_ident.insert(format_local_label(ident,macro_local_area),inf);
-        else if (ident[1] == LOCAL_LABEL_CHAR) // file local?
-            return proc_local_ident.insert(format_local_label(ident, proc_area), inf);
-        else
-            return local_ident.insert(format_local_label(ident,local_area),inf);
+        wxString tmp = ident;
+        tmp.MakeLower();
+        ident = tmp.ToStdString();
     }
-    else					// etykieta globalna
-        return global_ident.insert(ident,inf);
+
+    if (ident[0] == LOCAL_LABEL_CHAR) // Local label?
+    {
+        if (expanding_macro) // Local label in macro extension?
+            return !TryReplace(macro_ident, format_local_label(ident, macro_local_area), inf);
+        else if (ident[1] == LOCAL_LABEL_CHAR) // file local?
+            return !TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf);
+        else
+            return !TryReplace(local_ident, format_local_label(ident, local_area), inf);
+    }
+    else // Global label
+        return !TryReplace(global_ident, ident, inf);
 }
 
-
-// wprowadzenie definicji etykiety (1. przebieg asemblacji)
-CAsm6502::Stat CAsm6502::def_ident(const CString &id, CIdent &inf)
+// Entering the label definition (1st assembly run)
+CAsm6502::Stat CAsm6502::def_ident(const std::string &id, const CIdent &inf)
 {
-    ASSERT(pass==1);
+    ASSERT(pass == 1);
 
     if (find_const(id) >= 0)
-        return err_ident=id, ERR_CONST_LABEL_REDEF;
+    {
+        err_ident = id;
+        return ERR_CONST_LABEL_REDEF;
+    }
 
-    CString tmp;
-    const CString &ident= case_insensitive ? tmp : id;
+    std::string ident = id;
+
     if (case_insensitive)
-        tmp=id, tmp.MakeLower();
+    {
+        wxString tmp = ident;
+        tmp.MakeLower();
+        ident = tmp.ToStdString();
+    }
 
-    if (ident[0]==LOCAL_LABEL_CHAR)	// etykieta lokalna?
+    if (ident[0] == LOCAL_LABEL_CHAR) // Local label?
     {
         if (expanding_macro)
         {
-            if (!macro_ident.replace(format_local_label(ident,macro_local_area),inf))
-                return err_ident=ident, ERR_LABEL_REDEF;	// ju� zdefiniowana
+            if (!TryReplace(macro_ident, format_local_label(ident, macro_local_area), inf))
+            {
+                // Already defined
+                err_ident = ident;
+                return ERR_LABEL_REDEF;
+            }
         }
         //% Bug Fix 1.2.13.1 - fix local labels causing duplicate label errors
-        //else if (!proc_local_ident.replace(format_local_label(ident, proc_area), inf))
-        else if ((ident[1]==LOCAL_LABEL_CHAR) & !proc_local_ident.replace(format_local_label(ident, proc_area), inf))
-            return err_ident = ident, ERR_LABEL_REDEF;	// ju� zdefiniowana
-        else if (!local_ident.replace(format_local_label(ident, local_area), inf))
-            return err_ident = ident, ERR_LABEL_REDEF;	// ju� zdefiniowana
+        //else if (!TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf))
+        else if ((ident[1] == LOCAL_LABEL_CHAR) && !TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf))
+        {
+            // Already defined
+            err_ident = ident;
+            return ERR_LABEL_REDEF;
+        }
+        else if (!TryReplace(local_ident, format_local_label(ident, local_area), inf))
+        {
+            // Already defined
+            err_ident = ident;
+            return ERR_LABEL_REDEF;
+        }
     }
-    else					// etykieta globalna
+    else // Global label
     {
-        if (!global_ident.replace(ident,inf))
-            return err_ident=ident, ERR_LABEL_REDEF;	// ju� zdefiniowana
-        //    if (inf.info == CIdent::I_ADDRESS)// etykieta z adresem odgradza etykiety lokalne
-        local_area++;			// nowy obszar lokalny
+        if (!TryReplace(global_ident, ident, inf))
+        {
+            // Already defined
+            err_ident = ident;
+            return ERR_LABEL_REDEF;
+        }
+
+        //if (inf.info == CIdent::I_ADDRESS) // address label separates local labels
+        local_area++; // new local area
     }
     return OK;
 }
 
-
-// sprawdzenie czy etykieta jest zdefiniowana (2. przebieg asemblacji)
-CAsm6502::Stat CAsm6502::chk_ident(const CString &id, CIdent &inf)
+// Checking if the label is defined (2nd assembly pass)
+CAsm6502::Stat CAsm6502::chk_ident(const std::string &id, _Inout_ CIdent &inf)
 {
-    ASSERT(pass==2);
-    CString tmp;
-    const CString& ident= case_insensitive ? tmp : id;
+    ASSERT(pass == 2);
+
+    std::string ident = id;
+
     if (case_insensitive)
-        tmp=id, tmp.MakeLower();
+    {
+        wxString tmp = ident;
+        tmp.MakeLower();
+        ident = tmp.ToStdString();
+    }
 
     CIdent info;
-    bool exist= false;
+    bool exist = false;
 
-    if (ident[0] == LOCAL_LABEL_CHAR)	// etykieta lokalna?
+    if (ident[0] == LOCAL_LABEL_CHAR) // local label?
     {
-        if (expanding_macro)		// etykieta lokalna w makrorozszerzeniu?
-            exist = macro_ident.lookup(format_local_label(ident,macro_local_area),info);
+        if (expanding_macro) // Local label in macro extension?
+            exist = TryLookup(macro_ident, format_local_label(ident, macro_local_area), _Out_ info);
         else if (ident[1] == LOCAL_LABEL_CHAR) // file local?
-            exist = proc_local_ident.lookup(format_local_label(ident, proc_area), info);
+            exist = TryLookup(proc_local_ident, format_local_label(ident, proc_area), _Out_ info);
         else
-            exist = local_ident.lookup(format_local_label(ident,local_area),info);
+            exist = TryLookup(local_ident, format_local_label(ident, local_area), _Out_ info);
     }
-    else					// etykieta globalna
+    else // Global label
     {
-        exist = global_ident.lookup(ident,info);
-        local_area++;	// nowy obszar lokalny
+        exist = TryLookup(global_ident, ident, _Out_ info);
+        local_area++; // New local area
     }
 
-    if (exist)	// sprawdzana etykieta znaleziona w tablicy
+    if (exist) // Checked label found in the array
     {
         if (info.info == CIdent::I_UNDEF)
-            return err_ident=ident, ERR_UNDEF_LABEL;	// etykieta bez definicji
+        {
+            err_ident = ident;
+            return ERR_UNDEF_LABEL; // Label without definition
+        }
+            
         ASSERT(info.variable && inf.variable || !info.variable && !inf.variable);
 
         if (info.val != inf.val && !info.variable)
-            return err_ident=ident, ERR_PHASE;// niezgodne warto�ci mi�dzy przebiegami - b��d fazy
+        {
+            err_ident = ident;
+            return ERR_PHASE; // Inconsistent values ​​between waveforms -phase error
+        }
     }
-    else		// sprawdzanej etykiety nie ma w tablicy
-        return err_ident=ident, ERR_UNDEF_LABEL;
+    else // the label being checked is not in the array
+    {
+        err_ident = ident;
+        return ERR_UNDEF_LABEL;
+    }
 
     inf = info;
     return OK;
 }
 
-
-// sprawdzenie definicji etykiety (2. przebieg asemblacji)
-CAsm6502::Stat CAsm6502::chk_ident_def(const CString &id, CIdent &inf)
+// Check label definition (2nd assembly run)
+CAsm6502::Stat CAsm6502::chk_ident_def(const std::string &id, _Inout_ CIdent &inf)
 {
-    CString tmp;
-    const CString &ident= case_insensitive ? tmp : id;
-    if (case_insensitive)
-        tmp=id, tmp.MakeLower();
+    std::string ident = id;
 
-    SINT32 val= inf.val;		// zapami�tanie warto�ci
-    Stat ret= chk_ident(ident, inf);
+    if (case_insensitive)
+    {
+        wxString tmp = ident;
+        tmp.MakeLower();
+        ident = tmp.ToStdString();
+    }
+
+    int32_t val = inf.val; // Preserve value
+    Stat ret = chk_ident(ident, inf);
+
     if (ret != OK && ret != ERR_UNDEF_LABEL)
         return ret;
-    if (inf.variable)		// etykieta zmiennej?
+        
+    if (inf.variable) // Variable label?
     {
-        inf.val = val;		// nowa warto�� zmiennej
+        inf.val = val; // New variable value
         bool ret;
-        if (ident[0] == LOCAL_LABEL_CHAR)	// etykieta lokalna?
+        
+        if (ident[0] == LOCAL_LABEL_CHAR) // local label?
         {
-            if (expanding_macro)		// etykieta lokalna w makrorozszerzeniu?
-                ret = macro_ident.replace(format_local_label(ident, macro_local_area), inf);
+            if (expanding_macro) // Local label in macro extension?
+                ret = TryReplace(macro_ident, format_local_label(ident, macro_local_area), inf);
             else if (ident[1] == LOCAL_LABEL_CHAR) // file local?
-                ret = proc_local_ident.replace(format_local_label(ident, proc_area), inf);
+                ret = TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf);
             else
-                ret = local_ident.replace(format_local_label(ident, local_area), inf);
+                ret = TryReplace(local_ident, format_local_label(ident, local_area), inf);
         }
         else
-            ret = global_ident.replace(ident, inf);
-        ASSERT(ret);
+            ret = TryReplace(global_ident, ident, inf);
+        ASSERT(ret); // The label must be redefined
     }
-    else if (ident[0] != LOCAL_LABEL_CHAR)	// etykieta globalna sta�ej?
+    else if (ident[0] != LOCAL_LABEL_CHAR) // Global constant label?
     {
         ASSERT(!inf.checked);
-        inf.checked = true;		// potwierdzenie definicji w drugim przej�ciu asemblacji
-        bool ret= global_ident.replace(ident, inf);
-//		ASSERT(!ret && inf.info == I_ADDRESS || ret);		// etykieta musi by� redefiniowana
+        inf.checked = true; // Confirm the definition in the second assembly pass
+        bool ret = TryReplace(global_ident, ident, inf);
+        //ASSERT(!ret && info.info == I_ADDRESS || ret); // The label must be redefined
     }
-    return OK;
-}
-
-
-CAsm6502::Stat CAsm6502::def_macro_name(const CString &id, CIdent &inf)
-{
-    ASSERT(pass==1);
-    CString tmp;
-    const CString &ident= case_insensitive ? tmp : id;
-    if (case_insensitive)
-        tmp=id, tmp.MakeLower();
-
-    if (!macro_name.replace(ident,inf))
-        return err_ident=ident, ERR_LABEL_REDEF;	// nazwa ju� zdefiniowana
 
     return OK;
 }
 
 
-CAsm6502::Stat CAsm6502::chk_macro_name(const CString &id)
+CAsm6502::Stat CAsm6502::def_macro_name(const std::string &id, _Out_ CIdent &inf)
 {
-    ASSERT(pass==2);
-    CString tmp;
-    const CString &ident= case_insensitive ? tmp : id;
+    ASSERT(pass == 1);
+    wxString ident = id;
+
     if (case_insensitive)
-        tmp=id, tmp.MakeLower();
+        ident.MakeLower();
 
-    CIdent info;
+    auto info = macro_name.find(ident.ToStdString());
 
-    if (macro_name.lookup(ident,info))	// sprawdzana etykieta znaleziona w tablicy
+    if (info != macro_name.end())
     {
-        ASSERT(info.info==CIdent::I_MACRONAME);
-        return OK;
-        //    if (info.val != inf.val)
-        //      return err_ident=ident, ERR_PHASE;// niezgodne warto�ci mi�dzy przebiegami - b��d fazy
+        err_ident = ident;
+        return ERR_LABEL_REDEF; // Name already defined
     }
-    else		// sprawdzanej etykiety nie ma w tablicy
-        return err_ident=ident, ERR_UNDEF_LABEL;
+
+    macro_name[ident.ToStdString()] = inf;
+
+    return OK;
+}
+
+CAsm6502::Stat CAsm6502::chk_macro_name(const std::string &id)
+{
+    ASSERT(pass == 2);
+    wxString ident = id;
+
+    if (case_insensitive)
+        ident.MakeLower();
+
+    auto info = macro_name.find(ident.ToStdString());
+
+    if (info != macro_name.end())
+    {
+        // Checked label found in the array
+        ASSERT(info->info == CIdent::I_MACRONAME);
+        return OK;
+        
+        //if (info->val != inf.val)
+        //    return err_ident = ident, ERR_PHASE; //inconsistent values ​​between runs -phase error
+    }
+    else // the label being checked is not in the array
+    {
+        err_ident = ident;
+        return ERR_UNDEF_LABEL;
+    }
 
     return OK;
 }
 
 //-----------------------------------------------------------------------------
 
-const char* CRepeatDef::GetCurrLine(CString &str)	// odczyt aktualnego wiersza do powt�rki
+bool CRepeatDef::GetCurrLine(std::string &str) // Read the current line for repetition
 {
     ASSERT(m_nLineNo >= 0);
-    if (m_nLineNo == GetSize())	// koniec wierszy?
+
+    if (m_nLineNo == GetSize()) // End of lines?
     {
-        if (m_nRepeat == 0)		// koniec powt�rze�?
-            return NULL;
-        if (GetSize() == 0)		// puste powt�rzenie (bez wierszy)?
-            return NULL;
-        m_nRepeat--;		// odliczanie powt�rze�
-        //    m_nRepeatLocalArea++;	// nowy obszar etykiet
+        if (m_nRepeat == 0) // End of repetition?
+            return false;
+
+        if (GetSize() == 0) // Empty repeat (no lines)?
+            return false;
+
+        m_nRepeat--; // Countdown repetitions
+
+        //m_nRepeatLocalArea++; //new label area
         ASSERT(m_nRepeat >= 0);
         m_nLineNo = 0;
     }
+
     ASSERT(m_nLineNo < GetSize());
     str = GetLine(m_nLineNo++);
-    return (const char *)str;
+    return true;
 }
 
 
@@ -2512,7 +2431,7 @@ const char *CAsm6502::get_next_line() // Load the next line into the assembly.
 
 void CAsm6502::asm_start()
 {
-    user_error_text.Empty();
+    user_error_text.clear();
 
     if (markArea)
         markArea->Clear();
@@ -2554,28 +2473,30 @@ void CAsm6502::asm_fin_pass()
 }
 
 //$$asm starts here
-CAsm6502::Stat CAsm6502::assemble()	// translacja programu
+CAsm6502::Stat CAsm6502::assemble() // Program translation
 {
     Stat ret;
-    swapbin=false;
-    bool skip= false;
-    bool skip_macro= false;
-//  CRepeatDef *pRept= NULL;
+    swapbin = false;
+    bool skip = false;
+    bool skip_macro = false;
 
     try
     {
         asm_start();
 
-        for (pass=1; pass<=2; pass++)	// dwa przej�cia asemblacji
+        for (pass = 1; pass <= 2; pass++) // Two assembly passes
         {
             asm_start_pass();
-//      func = read.Peek();
+            //func = read.Peek();
 
-            for (bool fin=false; !fin; )
+            for (bool fin = false; !fin; )
             {
-                while (!(ptr=text->GetCurrLine(current_line)))	// funkcja nie zwraca ju� wierszy?
+                // Hacked in flag for refactoring to work as before. -- B.Simonds (April 28, 2024)
+                bool hack = false;
+
+                while (!text->GetCurrLine(current_line)) // Function no longer returns rows?
                 {
-                    if (source.Peek())		// jest jeszcze jaka� funkcja odczytu wierszy?
+                    if (source.Peek()) // Is there any other function for reading lines?
                     {
                         text->Fin(&conditional_asm);
                         expanding_macro = (CMacroDef *)source.FindMacro();
@@ -2583,9 +2504,15 @@ CAsm6502::Stat CAsm6502::assemble()	// translacja programu
                         text = source.Pop();
                     }
                     else
-                        break;		// nie ma, zwracamy ptr==NULL na oznaczenie ko�ca tekstu programu
+                    {
+                        hack = true;
+                        break; // there is none, we return ptr == NULL to mark the end of the program text
+                    }
                 }
-                if (current_line.GetLength() > 1024)	// spr. max d�ugo�� wiersza
+
+                ptr = hack ? nullptr : current_line.c_str();
+                
+                if (current_line.size() > 1024) // Check max line length
                     return ERR_LINE_TO_LONG;
 
                 if (is_aborted())
@@ -2602,7 +2529,7 @@ CAsm6502::Stat CAsm6502::assemble()	// translacja programu
                 else
                 {
                     ret = assemble_line();	// asemblacja wiersza
-                    if (pass==2 && listing.IsOpen())
+                    if (pass == 2 && listing.IsOpen())
                     {
                         listing.AddSourceLine(current_line);
                         listing.NextLine();
@@ -2631,12 +2558,14 @@ CAsm6502::Stat CAsm6502::assemble()	// translacja programu
                         return ret;		// b��d
                     skip = ret==STAT_SKIP;	// omijanie instrukcji a� do .ELSE lub .ENDIF?
                     break;
+
                 case STAT_ELSE:
                     ret = conditional_asm.instr_else_found();
                     if (ret > OK)
                         return ret;		// b��d
                     skip = ret==STAT_SKIP;	// omijanie instrukcji a� do .ELSE lub .ENDIF?
                     break;
+
                 case STAT_ENDIF:
                     ret = conditional_asm.instr_endif_found();
                     if (ret > OK)
@@ -2650,6 +2579,7 @@ CAsm6502::Stat CAsm6502::assemble()	// translacja programu
                     //if (expanding_macro)
                     //	expanding_macro->StoreConditionLevel(conditional_asm.get_level());
                     break;
+
                 case STAT_ENDM:		// koniec makrodefinicji
                     if (pass == 1)		// pierwsze przej�cie?
                     {
@@ -2662,6 +2592,7 @@ CAsm6502::Stat CAsm6502::assemble()	// translacja programu
                         skip_macro = false;	// omijanie definicji makra zako�czone
                     }
                     break;
+
                 case STAT_EXITM:
                     ASSERT(expanding_macro);
                     while (expanding_macro != text)	// szukanie opuszczanego makra
@@ -2680,6 +2611,7 @@ CAsm6502::Stat CAsm6502::assemble()	// translacja programu
                     if (pass == 2)
                         pRept->SetFileUID(text->GetFileUID());
                     break;
+
                 case STAT_ENDR:		// koniec rejestracji, teraz powtarzanie
                     //	    RepeatStart(pRept);
                     source.Push(text);		// bie��ce �r�d�o wierszy na stos
@@ -2720,12 +2652,10 @@ CAsm6502::Stat CAsm6502::assemble()	// translacja programu
         asm_fin();
 
     }
-    /*
     catch (CMemoryException*)
     {
         return ERR_OUT_OF_MEM;
     }
-    */
     catch (CFileException*)
     {
         return ERR_FILE_READ;
@@ -2950,7 +2880,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
         length = 1 + 2;
         break;
 
-    case A_ZREL:	// zero page / relative (BBS i BBR z 65c02)
+    case A_ZREL: // zero page / relative (BBS i BBR z 65c02)
         if (pass == 2)
         {
             if (origin > 0xFFFF)

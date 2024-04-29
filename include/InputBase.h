@@ -63,7 +63,7 @@ public:
         m_nLine = 0;
     }
 
-    virtual const std::string &read_line(std::string &buffer) = 0;
+    virtual bool read_line(std::string &buffer) = 0;
 
     virtual int get_line_no() const
     {

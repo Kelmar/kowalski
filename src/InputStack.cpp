@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
-const std::string &CInputFile::read_line(std::string &buf)
+bool CInputFile::read_line(std::string &buf)
 {
 #if 0
     LPTSTR ptr = ReadString(buf);
@@ -36,7 +36,7 @@ const std::string &CInputFile::read_line(std::string &buf)
         m_nLine++;
 #endif
 
-    return buf;
+    return false;
 }
 
 /*************************************************************************/

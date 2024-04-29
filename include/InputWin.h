@@ -42,7 +42,7 @@ public:
     CInputWin(wxWindow *window) : m_window(window)
     {}
 
-    virtual const std::string &read_line(std::string &buf);
+    virtual bool read_line(std::string &buf);
     virtual const std::string &get_file_name();
     virtual void seek_to_begin();
 };

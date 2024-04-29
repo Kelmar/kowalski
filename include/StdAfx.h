@@ -26,12 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef STDAFX_H__
 #define STDAFX_H__
 
-#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
-
 #define _SCL_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-
-#define WINVER 0xA00
 
 #define REWRITE_TO_WX_WIDGET 0
 
@@ -59,16 +55,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define UINT unsigned int
 #define ULONG unsigned long
 
-#include <cassert>
-
-#ifdef _DEBUG
-// Just mapping this to the C assert() function for now.
-# define ASSERT(X_) assert(X_)
-#else
-# define ASSERT(X_)
-#endif
-
-#define VERIFY(X_) assert(X_)
+#include "debug.h"
 
 #define __AFXWIN_H__
 
@@ -93,6 +80,14 @@ class CFileException
 public:
     CFileException(int err) { }
     virtual ~CFileException() { }
+};
+
+// Another stub
+class CMemoryException
+{
+public:
+    CMemoryException() {}
+    virtual ~CMemoryException() {}
 };
 
 //#include <afxwin.h>         // MFC core and standard components

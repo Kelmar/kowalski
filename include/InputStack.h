@@ -69,7 +69,7 @@ public:
         m_nLine = 0;
     }
 
-    virtual const std::string &read_line(std::string &buffer);
+    virtual bool read_line(std::string &buffer);
 
 //  virtual int get_line_no()
 
@@ -122,7 +122,7 @@ public:
     void OpenFile(wxWindow* pWin);
     bool CloseFile();
 
-    const std::string &ReadLine(std::string &buffer)
+    bool ReadLine(std::string &buffer)
     {
         return m_current->m_file->read_line(buffer);
     }

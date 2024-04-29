@@ -34,22 +34,58 @@ struct CIdent
         I_MACROADDR     // The identifier contains the address in the macro definition
     } info;
     
-    int32_t val;        // numerical value
-    uint8_t checked;    // identifier definition confirmed in the second pass of assembly
-    uint8_t variable;   // variable identifier
+    int32_t val;   // numerical value
+    bool checked;  // identifier definition confirmed in the second pass of assembly
+    bool variable; // variable identifier
 
     CIdent()
         : info(I_INIT)
-        , checked(FALSE)
-        , variable(FALSE)
+        , checked(false)
+        , variable(false)
     { }
 
-    CIdent(IdentInfo info, int32_t value = 0, bool variable = FALSE)
+    CIdent(IdentInfo info, int32_t value = 0, bool variable = false)
         : info(info)
         , val(value)
-        , checked(FALSE)
+        , checked(false)
         , variable(variable)
     { }
+
+    CIdent(const CIdent &ident)
+        : info(ident.info)
+        , val(ident.val)
+        , checked(ident.checked)
+        , variable(ident.variable)
+    {
+    }
+
+    CIdent(CIdent &&ident)
+        : info(std::move(ident.info))
+        , val(std::move(ident.val))
+        , checked(std::move(ident.checked))
+        , variable(std::move(ident.variable))
+    {
+    }
+
+    const CIdent &operator =(const CIdent &rhs)
+    {
+        info = rhs.info;
+        val = rhs.val;
+        checked = rhs.checked;
+        variable = rhs.variable;
+
+        return *this;
+    }
+
+    const CIdent &operator =(CIdent &&rhs)
+    {
+        info = std::move(rhs.info);
+        val = std::move(rhs.val);
+        checked = std::move(rhs.checked);
+        variable = std::move(rhs.variable);
+
+        return *this;
+    }
 };
 
 #endif

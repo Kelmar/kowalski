@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
-const std::string &CInputWin::read_line(std::string &buf)
+bool CInputWin::read_line(std::string &buf)
 {
 #if 0
     int ret = SendMessage(m_window->GetSafeHwnd(), WM_USER_GET_NEXT_LINE,
@@ -43,7 +43,7 @@ const std::string &CInputWin::read_line(std::string &buf)
     return str;
 #endif
 
-    return buf;
+    return false;
 }
 
 

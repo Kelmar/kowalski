@@ -391,7 +391,7 @@ public:
             cond->restore_level(cond_level_);
     }
 
-    virtual const std::string &GetCurrLine(std::string &str) = 0;
+    virtual bool GetCurrLine(std::string &str) = 0;
 
     virtual int GetLineNo() const = 0;
 
@@ -405,9 +405,7 @@ public:
         m_fuid = fuid;
     }
 
-    virtual const std::string& GetFileName() const = 0;
-
-    static const std::string s_strEmpty;
+    virtual std::string GetFileName() const = 0;
 
 private:
     // remember nesting level of conditional assemblation
@@ -482,113 +480,7 @@ public:
 
 class CAsm6502;
 
-class CMacroDef : public CSource, public CRecorder
-{
-private:
-    CIdentTable param_names;    // Table of macro parameter names
-    
-    int m_nParams;              // Required number of parameters
-    int m_nParamCount;          // Number of parameters in a macro call
-    std::vector<std::string> m_strarrArgs;  // Subsequent call arguments -only strings
-    std::vector<uint32_t> m_narrArgs;     // Subsequent call arguments -only expression values
-
-    enum ArgType { NUM, STR, UNDEF_EXPR };
-
-    std::vector<ArgType> m_arrArgType;    // Argument types (NUM -number, STR -string)
-
-    int m_nLineNo;              // Current line number (when reading)
-    int m_nFirstLineNo;         // The line number from which the macro is called
-    FileUID m_nFirstLineFuid;   // The ID of the file from which the macro is called
-
-public:
-    std::string m_strName; // Macro name
-    bool m_bFirstCodeLine; // Flag for reading the first line of the macro containing the instruction. 6502
-
-    CMacroDef()
-        : param_names(2)
-        , m_nParams(0)
-        , m_nLineNo(0)
-        , m_nFirstLineNo(-1)
-        , m_nFirstLineFuid(FileUID(-1))
-        , m_bFirstCodeLine(true)
-    {}
-
-    ~CMacroDef()
-    {}
-
-    int AddParam(const std::string &strParam) // Adding the name of the next parameter
-    {
-        if (strParam == MULTIPARAM)
-        {
-            m_nParams = -(m_nParams + 1);
-            return 1; // end of parameter list
-        }
-
-        auto intr = param_names.find(strParam);
-
-        if (intr != param_names.end())
-            return -1; // Repeated parameter name!
-
-        param_names[strParam] = CIdent(CIdent::I_VALUE, m_nParams);
-
-        ++m_nParams;
-        return 0;
-    }
-
-    // Number of passed parameters
-    int GetParamsFormat() const
-    {
-        return m_nParams;
-    }
-
-    virtual const std::string &GetCurrLine(std::string &str);
-
-    virtual int GetLineNo() const
-    {
-        return CRecorder::GetLineNo(m_nLineNo - 1);
-    }
-
-    int GetFirstLineNo() const { return m_nFirstLineNo; }
-
-    FileUID GetFirstLineFileUID() { return m_nFirstLineFuid; }
-
-    void Start(CConditionalAsm* cond, int line, FileUID file) // prepare for reading
-    {
-        CSource::Start(cond);
-        m_nLineNo = 0;
-        m_nFirstLineNo = line;
-        m_nFirstLineFuid = file;
-    }
-
-    virtual void Fin(CConditionalAsm* cond)
-    {
-        CSource::Fin(cond); // End expansion of the current macro
-    }
-
-    // Load the arguments of the call
-    CAsm::Stat ParseArguments(CLeksem &leks, CAsm6502 &asmb);
-
-    CAsm::Stat ParamLookup(CLeksem &leks, const std::string& param_name, Expr &expr, bool &found, CAsm6502 &asmb);
-    CAsm::Stat ParamLookup(CLeksem &leks, int param_number, Expr &expr, CAsm6502 &asmb);
-    CAsm::Stat AnyParamLookup(CLeksem &leks, CAsm6502 &asmb);
-
-    CAsm::Stat ParamType(const std::string &param_name, bool& found, int& type);
-    CAsm::Stat ParamType(int param_number, bool& found, int& type);
-
-    //virtual bool IsMacro() // The data source is the expanded macro
-    //{ return true; }
-
-    CMacroDef &operator= (const CMacroDef &src)
-    {
-        ASSERT(false); // objects of type C cannot be assigned to MacroDef
-        return *this;
-    }
-
-    virtual const std::string &GetFileName() const // name of the current file
-    {
-        return s_strEmpty;
-    }
-};
+#include "MacroDef.h"
 
 typedef std::vector<CMacroDef> CMacroDefs;
 
@@ -610,9 +502,9 @@ public:
     ~CRepeatDef()
     {}
 
-    virtual const std::string &GetCurrLine(std::string &str); // Read the current line
+    virtual bool GetCurrLine(std::string &str); // Read the current line
 
-    virtual int GetLineNo()
+    virtual int GetLineNo() const
     {
         return CRecorder::GetLineNo(m_nLineNo - 1);
     }
@@ -638,7 +530,7 @@ public:
         return *this;
     }
 
-    virtual const std::string &GetFileName() const { return s_strEmpty; }
+    virtual std::string GetFileName() const { return ""; }
 };
 
 #if 0
@@ -674,10 +566,9 @@ public:
         input.SeekToBegin();
     }
 
-    virtual const std::string &GetCurrLine(std::string &str) // reading less than an entire line
+    virtual bool GetCurrLine(std::string &str) // reading less than an entire line
     {
         str.reserve(1024 + 4);
-
         return input.ReadLine(str);
     }
 
@@ -715,7 +606,7 @@ public:
     { return input.IsPresent(); }
     */
    
-    virtual const std::string &GetFileName() const
+    virtual std::string GetFileName() const
     {
         return input.GetFileName();
     }
@@ -723,64 +614,70 @@ public:
 
 //-----------------------------------------------------------------------------
 
-#if 0
-class CSourceStack : CTypedPtrArray<CObArray,CSource *> // Stack of objects that are the source of the rows
+// Stack of objects that are the source of the rows
+class CSourceStack 
 {
 private:
+    std::vector<CSource *> m_items;
     int m_nIndex;
+
+    template <typename T>
+    T *ReverseFind()
+    {
+        for (int i = m_items.size(); i >= 0; i--)
+        {
+            T* source = dynamic_cast<T*>(m_items[i]);
+            if (source)
+                return source;
+        }
+
+        return nullptr;
+    }
 
 public:
     CSourceStack()
     {
-        m_nIndex = -1;
     }
 
     ~CSourceStack()
     {
-        for (int i = m_nIndex; i >= 0; i--)
-            GetAt(i)->Fin(0);
+        for (auto item : m_items)
+            item->Fin(0);
     }
 
-    void Push(CSource *pSrc) // Add an item to the top of the stack
+    void Push(CSource *source) // Add an item to the top of the stack
     {
-        ++m_nIndex;
-        SetAtGrow(m_nIndex,pSrc);
+        m_items.push_back(source);
     }
 
     CSource *Peek() // Check the item at the top of the stack
     {
-        return m_nIndex < 0 ? NULL : GetAt(m_nIndex);
+        if (m_items.empty())
+            return nullptr;
+
+        return m_items.back();
     }
 
     CSource *Pop() // Remove an item from the stack
     {
-        return GetAt(m_nIndex--);
-    }
+        if (m_items.empty())
+            return nullptr;
 
-//  void RemoveAll()
-//  { RemoveAll();  m_nIndex = -1; }
+        CSource *rval = m_items.back();
+        m_items.pop_back();
+        return rval;
+    }
 
     CSource* FindMacro() // Find the last macro
     {
-        for (int i=m_nIndex; i>=0; i--)
-            if (CMacroDef* pSrc= dynamic_cast<CMacroDef*>(GetAt(i)))
-                return pSrc;
-        return NULL;
+        return ReverseFind<CMacroDef>();
     }
+
     CSource* FindRepeat() // Find the last repetition
     {
-        for (int i=m_nIndex; i>=0; i--)
-            if (CRepeatDef* pSrc= dynamic_cast<CRepeatDef*>(GetAt(i)))
-                return pSrc;
-//      if (GetAt(i)->IsRepeat())
-//        return GetAt(i);
-        return NULL;
+        return ReverseFind<CRepeatDef>();
     }
 };
-
-#endif
-
-typedef std::vector<CSource*> CSourceStack;
 
 //-----------------------------------------------------------------------------
 class CMarkArea;
@@ -850,11 +747,13 @@ class CAsm6502 : public CAsm /*, public CObject */
     }
 
     bool add_ident(const std::string &ident, CIdent &inf);
-    Stat def_ident(const std::string &ident, CIdent &inf);
-    Stat chk_ident(const std::string &ident, CIdent &inf);
+
+    Stat def_ident(const std::string &ident, const CIdent &inf);
+    Stat chk_ident(const std::string &ident, _Inout_ CIdent &inf);
     Stat chk_ident_def(const std::string &ident, CIdent &inf);
     Stat def_macro_name(const std::string &ident, CIdent &inf);
     Stat chk_macro_name(const std::string &ident);
+
     std::string format_local_label(const std::string &ident, int area);
     // Interpretation of processor instructions
     Stat proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &expr, Expr &expr_bit, Expr &expr_zpg);
@@ -896,11 +795,13 @@ class CAsm6502 : public CAsm /*, public CObject */
     bool is_expression(const CLeksem &leks);
     Stat assemble_line();           // Line interpretation
     Stat assemble();
+
     const char *get_next_line();    // Load the next line into the assembly
     const char *play_macro();       // Reading the next line of the macro
     const char *play_repeat();      // Reading the next replay line
-    //CPtrStack<CSource> source;    // Stack of objects returning source rows
+
     CSourceStack source;            // Stack of objects returning source rows
+
     void asm_start();               // Start assembly
     void asm_fin();                 // Complete assembly
     void asm_start_pass();          // Start taking over assembly
@@ -981,7 +882,7 @@ class CAsm6502 : public CAsm /*, public CObject */
         void AddCodeBytes(uint32_t addr, int code1 = -1, int code2 = -1, int code3 = -1, int code4 = -1);
         void AddValue(uint32_t val);
         void AddBytes(uint32_t addr, uint16_t mask, const uint8_t mem[], int len);
-        void AddSourceLine(const char *line);
+        void AddSourceLine(const std::string &line);
 
         bool IsOpen() const { return m_file != nullptr; }
     } listing;
