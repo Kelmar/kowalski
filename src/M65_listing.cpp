@@ -23,135 +23,144 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include <ctime>
 #include "StdAfx.h"
 
-#include "resource.h"
-#include "MarkArea.h"
-#include "IOWindow.h"	// this is sloppy, but right now there's no mechanism to let framework know about requested new terminal wnd size
+#include "M6502.h"
 
-//=============================================================================
+
+/*************************************************************************/
+
+CAsm6502::CListing::CListing(const char *fname)
+    : CListing()
+{
+    if (fname && *fname)
+    {
+        m_fileName = fname;
+
+        Open(fname);
+
+        //% Bug fix 1.2.14.2 - bad listing file crashes system
+        if (!m_file)
+        {
+#if REWRITE_TO_WX_WIDGET
+            MessageBoxA(
+                nullptr,
+                "Listing file name or file path trouble.  No listing file will be generated.\n\nPlease go to Assembler Options to correct it.",
+                "Warning",
+                MB_OK);
+#endif
+        }
+    }
+}
+
+/*************************************************************************/
 
 void CAsm6502::CListing::Remove()
 {
-    ASSERT(m_nLine != -1);	// plik musi by� otwarty
-    try
-    {
-        m_File.Remove(m_File.GetFilePath());
-    }
-    catch (CFileException *)
-    {
-    }
+    ASSERT(IsOpen()); // The file must be open
+
+    // Probably should warn if we can't remove the file.
+    std::remove(m_fileName.c_str());
 }
 
 void CAsm6502::CListing::NextLine()
 {
-    ASSERT(m_nLine != -1);	// plik musi by� otwarty
-    if (m_nLine != 0)
+    ASSERT(IsOpen()); // The file must be open
+    
+    if (m_lineNumber != 0)
     {
-        if (m_Str.Replace(0xd, '\n') == 0 && m_Str.GetLength() > 0 && m_Str[m_Str.GetLength() - 1] != '\n')
-            m_Str += '\n';
-        m_File.WriteString(m_Str);
+        // Looks like we're trying to play some games with line endings, we should let the OS handle this. -- B.Simonds (April 29, 2024)
+#if 0
+        
+        if (m_str.Replace(0xd, '\n') == 0 && m_str.size() > 0 && m_str[m_str.size() - 1] != '\n')
+            m_str += '\n';
+#endif
+
+        fputs(m_str.c_str(), m_file);
     }
-    m_nLine++;
+
+    m_lineNumber++;
+
     //% Bug Fix 1.2.13.2 - remove extra space from list report
-    //m_Str.Format(_T("%05d    "), m_nLine);
-    m_Str.Format(_T("%05d  "), m_nLine);
+
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%05d  ", m_lineNumber);
+
+    m_str = buf;
 }
 
 void CAsm6502::CListing::AddCodeBytes(uint32_t addr, int code1/*= -1*/, int code2/*= -1*/, int code3/*= -1*/, int code4/*= -1*/)
 {
-    ASSERT(m_nLine != -1);	// plik musi by� otwarty
+    ASSERT(IsOpen()); // The file must be open
     char buf[32];
 
     //% Bug Fix 1.2.13.2 - remove extra space from list report
     if (code4 != -1)
-        //	wsprintf(buf,_T("%04X  %02X %02X %02X     "),(int)addr,(int)code1,code2,code3);
-        wsprintf(buf,_T("%06X  %02X %02X %02X %02X   "),(int)addr,(int)code1,code2,code3,code4);
+        snprintf(buf, sizeof(buf), "%06X  %02X %02X %02X %02X   ", (int)addr, (int)code1, code2, code3, code4);
     else if (code3 != -1)
-        //	wsprintf(buf,_T("%04X  %02X %02X %02X     "),(int)addr,(int)code1,code2,code3);
-        wsprintf(buf,_T("%06X  %02X %02X %02X      "),(int)addr,(int)code1,code2,code3);
+        snprintf(buf, sizeof(buf), "%06X  %02X %02X %02X      ", (int)addr, (int)code1, code2, code3);
     else if (code2 != -1)
-        //	wsprintf(buf,_T("%04X  %02X %02X        "),(int)addr,(int)code1,code2);
-        wsprintf(buf,_T("%06X  %02X %02X         "),(int)addr,(int)code1,code2);
+        snprintf(buf, sizeof(buf), "%06X  %02X %02X         ", (int)addr, (int)code1, code2);
     else if (code1 != -1)
-        //	wsprintf(buf,_T("%04X  %02X           "),(int)addr,(int)code1);
-        wsprintf(buf,_T("%06X  %02X            "),(int)addr,(int)code1);
+        snprintf(buf, sizeof(buf), "%06X  %02X            ", (int)addr, (int)code1);
     else
-        //	wsprintf(buf,_T("%04X               "),(int)addr);
-        wsprintf(buf,_T("%06X                "),(int)addr);
-    m_Str += buf;
+        snprintf(buf, sizeof(buf), "%06X                ", (int)addr);
+
+    m_str += buf;
 }
 
 void CAsm6502::CListing::AddValue(uint32_t val)
 {
-    ASSERT(m_nLine != -1);	// plik musi by� otwarty
+    ASSERT(IsOpen()); // The file must be open
     char buf[32];
+
     //% Bug Fix 1.2.13.2 - remove extra space from list report
-    //wsprintf(buf,_T("  %04X             "),val);
+    
     if (val > 0xFFFFFF)
-        wsprintf(buf,_T("  %08X          "),val);
+        snprintf(buf, sizeof(buf), "  %08X          ", val);
     else if (val > 0xFFFF)
-        wsprintf(buf,_T("  %06X            "),val);
+        snprintf(buf, sizeof(buf), "  %06X            ", val);
     else
-        wsprintf(buf,_T("  %04X              "),val);
-    m_Str += buf;
+        snprintf(buf, sizeof(buf), "  %04X              ", val);
+
+    m_str += buf;
 }
 
 void CAsm6502::CListing::AddBytes(uint32_t addr, uint16_t mask, const uint8_t mem[], int len)
 {
-    ASSERT(m_nLine != -1);	// plik musi by� otwarty
+    ASSERT(IsOpen()); // The file must be open
     ASSERT(len > 0);
     char buf[32];
-    for (int i=0; i<len; i+=4)
+    
+    for (int i = 0; i < len; i +=4)
     {
-        switch ((len-i) % 4)
+        switch ((len - i) % 4)
         {
         //% Bug Fix 1.2.13.2 - remove extra space from list report
         case 1:
-            //	wsprintf(buf,_T("%04X  %02X           "),int(addr),int(mem[addr & mask]));
-            wsprintf(buf,_T("%06X  %02X        "),int(addr),int(mem[addr & mask]));
+            snprintf(buf, sizeof(buf), "%06X  %02X        ", int(addr), int(mem[addr & mask]));
             break;
         case 2:
-            //	wsprintf(buf,_T("%04X  %02X %02X        "),int(addr),int(mem[addr & mask]),
-            wsprintf(buf,_T("%06X  %02X %02X     "),int(addr),int(mem[addr & mask]),
-                     int(mem[addr+1 & mask]));
+            snprintf(buf, sizeof(buf), "%06X  %02X %02X     ", int(addr), int(mem[addr & mask]),
+                     int(mem[addr + 1 & mask]));
             break;
         case 3:
-            //	wsprintf(buf,_T("%04X  %02X %02X %02X     "),int(addr),int(mem[addr & mask]),
-            wsprintf(buf,_T("%06X  %02X %02X %02X  "),int(addr),int(mem[addr & mask]),
-                     int(mem[addr+1 & mask]),int(mem[addr+2 & mask]));
+            snprintf(buf, sizeof(buf), "%06X  %02X %02X %02X  ", int(addr), int(mem[addr & mask]),
+                     int(mem[addr + 1 & mask]),int(mem[addr + 2 & mask]));
             break;
         case 0:
-            wsprintf(buf,_T("%06X  %02X %02X %02X %02X  "),int(addr),int(mem[addr & mask]),
-                     int(mem[addr+1 & mask]),int(mem[addr+2 & mask]),int(mem[addr+3 & mask]));
+            snprintf(buf, sizeof(buf), "%06X  %02X %02X %02X %02X  ", int(addr), int(mem[addr & mask]),
+                     int(mem[addr + 1 & mask]),int(mem[addr + 2 & mask]), int(mem[addr + 3 & mask]));
             break;
         }
-        m_Str += buf;
+        m_str += buf;
         addr = addr+4 & mask;
         NextLine();
     }
 }
 
-void CAsm6502::CListing::AddSourceLine(const char *line)
+void CAsm6502::CListing::AddSourceLine(const std::string &line)
 {
-    ASSERT(m_nLine != -1);	// plik musi by� otwarty
-    m_Str += line;
+    ASSERT(IsOpen()); // The file must be open
+    m_str += line;
 }
 
-CAsm6502::CListing::CListing(const char *fname)
-{
-    if (fname && *fname)
-    {
-        Open(fname);
-        //% Bug fix 1.2.14.2 - bad listing file crashes system
-        if (m_nLine)
-            m_nLine = 0;
-        else
-        {
-            m_nLine = -1;
-            CString cs;
-            cs.Format("Listing file name or file path trouble.  No listing file will be generated.\n\nPlease go to Assembler Options to correct it.");
-            MessageBoxA(NULL, cs, "Warning", MB_OK );
-        }
-    }
-    else
-        m_nLine = -1;
-}
+/*************************************************************************/

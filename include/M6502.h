@@ -239,35 +239,6 @@ public:
 
 //-----------------------------------------------------------------------------
 
-#if 0
-// Associative array of identifiers
-class CIdentTable : public CMap<std::string, LPCTSTR, CIdent, CIdent>
-{
-
-public:
-    CIdentTable(int nSize = 500) : CMap<std::string, LPCTSTR, CIdent, CIdent>(nSize)
-    {
-        InitHashTable(1021);
-    }
-    
-    ~CIdentTable()
-    {}
-
-    bool insert(const std::string &str, CIdent &ident);
-    bool replace(const std::string &str, const CIdent &ident);
-
-    bool lookup(const std::string &str, CIdent &ident) const
-    {
-        return Lookup(str, ident);
-    }
-
-    void clr_table()
-    {
-        RemoveAll();
-    }
-};
-#endif
-
 typedef std::unordered_map<std::string, CIdent> CIdentTable;
 
 /*************************************************************************/
@@ -782,7 +753,9 @@ class CAsm6502 : public CAsm /*, public CObject */
     {
     private:
         std::FILE *m_file;
-        std::string m_Str; // Current listing line
+        std::string m_fileName;
+        std::string m_str; // Current listing line
+        int m_lineNumber;
 
         void Open(const char *fname)
         {
@@ -801,6 +774,9 @@ class CAsm6502 : public CAsm /*, public CObject */
     public:
         CListing()
             : m_file(nullptr)
+            , m_fileName()
+            , m_str()
+            , m_lineNumber(0)
         {
         }
 
