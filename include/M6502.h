@@ -35,29 +35,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // This actually looks like a class to hold a token. -- B.Simonds (April 25, 2024)
 
-class CLeksem : public CAsm
+class CLeksem //: public CAsm
 {
 public:
-    /*
-    enum IdentInfo // Info about the identifier
-    {
-        I_UNDEF,    // Undefined identifier
-        I_ADDRESS,  // The ID contains the address
-        I_VALUE     // The identifier contains a numeric value
-    };
-
-    structIdent
-    {
-        IdentInfo info;
-        int value;
-        std::string *str;
-    };
-    */
-
     struct Code
     {
-        OpCode code;
-        CodeAdr adr;
+        CAsm::OpCode code;
+        CAsm::CodeAdr adr;
     };
 
     enum InstrArg   // Type of directive arguments
@@ -71,7 +55,7 @@ public:
 
     struct Instr
     {
-        InstrType type;
+        CAsm::InstrType type;
         InstrArg arg;
     };
 
@@ -137,64 +121,15 @@ public:
 
     const LeksType type;
 
-#if 0
-
-    class CLString : public CString
-    {
-        static char* s_ptr_1;
-        static char* s_ptr_2;
-        static char s_buf_1[];
-        static char s_buf_2[];
-        static const size_t s_cnMAX;
-
-    public:
-        CLString() : CString()
-        {}
-
-        CLString(const std::string& str) : CString(str)
-        {}
-
-        CLString(const char* ptr, int size) : CString(ptr ,size)
-        {}
-
-#ifdef _DEBUG
-        void* operator new(size_t size, const std::string & /*lpszFileName*/, int /*nLine*/)
-#else
-        void* operator new(size_t size)
-#endif
-        {
-            if (size > s_cnMAX)
-                return CObject::operator new(size);
-            else if (s_ptr_1 == NULL)
-                return s_ptr_1 = s_buf_1;
-            else if (s_ptr_2 == NULL)
-                return  s_ptr_2 = s_buf_2;
-            else
-                return CObject::operator new(size);
-        }
-
-        void operator delete(void* ptr)
-        {
-            if (ptr == s_ptr_1)
-                s_ptr_1 = NULL;
-            else if (ptr == s_ptr_2)
-                s_ptr_2 = NULL;
-            else
-                CObject::operator delete(ptr);
-        }
-    };
-
-#endif
-
 private:
     union
     {
-        //Id id;            // Identifier
-        OperType op;        // Binary or unary operator
-        OpCode code;        // Polynomial
-        InstrType instr;    // Directive
-        Num num;            // Numeric or character constant
-        std::string *str;   // Identifier or string
+        //Id id;               // Identifier
+        CAsm::OperType op;     // Binary or unary operator
+        CAsm::OpCode code;     // Polynomial
+        CAsm::InstrType instr; // Directive
+        Num num;               // Numeric or character constant
+        std::string *str;      // Identifier or string
         Error err;
     };
 
@@ -206,13 +141,13 @@ public:
     CLeksem(LeksType type) : type(type)
     {}
 
-    CLeksem(OperType oper) : type(L_OPER), op(oper)
+    CLeksem(CAsm::OperType oper) : type(L_OPER), op(oper)
     {}
 
-    CLeksem(OpCode code) : type(L_PROC_INSTR), code(code)
+    CLeksem(CAsm::OpCode code) : type(L_PROC_INSTR), code(code)
     {}
 
-    CLeksem(InstrType it) : type(L_ASM_INSTR), instr(it)
+    CLeksem(CAsm::InstrType it) : type(L_ASM_INSTR), instr(it)
     {}
 
     CLeksem(Error err) : type(L_ERROR), err(err)
@@ -244,19 +179,19 @@ public:
         return str;
     }
 
-    OperType GetOper()
+    CAsm::OperType GetOper()
     {
         ASSERT(type == L_OPER);
         return op;
     }
 
-    OpCode GetCode()
+    CAsm::OpCode GetCode()
     {
         ASSERT(type == L_PROC_INSTR);
         return code;
     }
 
-    InstrType GetInstr()
+    CAsm::InstrType GetInstr()
     {
         ASSERT(type == L_ASM_INSTR);
         return instr;

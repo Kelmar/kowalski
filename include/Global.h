@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define GLOBAL_H__
 
 #include "Broadcast.h"
-#include "M6502.h"
+#include "Asm.h"
 #include "Sym6502.h"
 #include "MarkArea.h"
 #include "IntGenerator.h"

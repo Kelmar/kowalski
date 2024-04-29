@@ -23,23 +23,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include <ctime>
 #include "StdAfx.h"
 
-#include "resource.h"
-#include "MarkArea.h"
-#include "IOWindow.h"	// this is sloppy, but right now there's no mechanism to let framework know about requested new terminal wnd size
+#include "M6502.h"
 
 /*************************************************************************/
 
-char* CLeksem::CLString::s_ptr_1 = 0;
-char* CLeksem::CLString::s_ptr_2 = 0;
-char CLeksem::CLString::s_buf_1[1028];
-char CLeksem::CLString::s_buf_2[1028];
-const size_t CLeksem::CLString::s_cnMAX = 1024;
-
-CLeksem::CLeksem(const CLeksem &leks) : type(leks.type)
+CLeksem::CLeksem(const CLeksem &leks)
+    : type(leks.type)
 {
-    memcpy(this, &leks, sizeof(CLeksem));	// copy whole union and type field
-    if (leks.type == L_STR || leks.type == L_IDENT || leks.type == L_IDENT_N)	// contains string?
-        str = new CLString(*leks.str);	// duplicate string
+    memcpy(this, &leks, sizeof(CLeksem)); // copy whole union and type field
+    if (leks.type == L_STR || leks.type == L_IDENT || leks.type == L_IDENT_N) // contains string?
+        str = new std::string(*leks.str); // duplicate string
 }
 
 
@@ -54,7 +47,7 @@ CLeksem & CLeksem::operator = (const CLeksem &leks)
 //  type = leks.type;
     memcpy(this, &leks, sizeof(CLeksem)); // copy the entire union and type field
     if (leks.type == L_STR || leks.type == L_IDENT || leks.type == L_IDENT_N) // the source lexeme contains a string of characters?
-        str = new CLString(*leks.str); // duplicate the string
+        str = new std::string(*leks.str); // duplicate the string
     return *this;
 }
 
@@ -68,8 +61,8 @@ CLeksem::~CLeksem()
         if (str)
         {
 #ifdef _DEBUG
-            if (str->GetLength())
-                str->SetAt(0, 'X'); // change text for possible hanging references
+            if (str->string())
+                str[0] = 'X'; // change text for possible hanging references
 #endif
             delete str;
         }

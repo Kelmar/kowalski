@@ -23,13 +23,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include <ctime>
 #include "StdAfx.h"
 
+#include "M6502.h"
+
+#include "IOWindow.h"	// this is sloppy, but right now there's no mechanism to let framework know about requested new terminal wnd size
+
 /*************************************************************************/
 
 // Interpretation of the directive
-CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType it, const CString *pLabel)
+CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType it, const std::string *pLabel)
 {
     Stat ret;
-    int def= -2;
+    int def = -2;
 
     switch (it)
     {
@@ -148,7 +152,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
                 uint32_t org = origin;
                 //if (origin > 0xFFFF)
                 //    return ERR_UNDEF_ORIGIN;
-                int len= str.GetLength();
+                int len = str.size();
                 cnt += len;
                 ret = inc_prog_counter(len);
 
@@ -162,9 +166,9 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
                 }
                 //leks = next_leks();
             }
-            else if (pass==1)
+            else if (pass == 1)
             {
-                if (def==0 && ((expr.inf == Expr::EX_WORD) || (expr.inf == Expr::EX_LONG)))
+                if (def == 0 && ((expr.inf == Expr::EX_WORD) || (expr.inf == Expr::EX_LONG)))
                     return ERR_NUM_NOT_BYTE; // Too large number, max $FF
 
                 ret = inc_prog_counter(def > 1 ? def : def == 1 ? 2 : 1);
@@ -186,7 +190,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
                 //if (origin > 0xFFFF)
                 //    return ERR_UNDEF_ORIGIN;
 
-                ret = inc_prog_counter(def>1 ? def : def==1 ? 2 : 1);
+                ret = inc_prog_counter(def > 1 ? def : def == 1 ? 2 : 1);
 
                 if (ret)
                     return ret; // The data does not fit in the memory of the 6502 system
@@ -238,8 +242,8 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
                     if (pass == 2 && out)
                         if (it == I_LS)
                         {
-                            (*out)[cnt_org] = UINT(cnt & 0xFF);
-                            (*out)[cnt_org+1] = UINT((cnt>>8) & 0xFF);
+                            (*out)[cnt_org] = (UINT)(cnt & 0xFF);
+                            (*out)[cnt_org+1] = (UINT)((cnt>>8) & 0xFF);
                         }
                         else
                             (*out)[cnt_org] = uint8_t(cnt);
@@ -386,7 +390,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
             user_error_text = expr.string;
         }
         else
-            user_error_text.Empty();
+            user_error_text.clear();
 
         return STAT_USER_DEF_ERR; // User error
 
@@ -405,11 +409,13 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
             if (expr.inf != Expr::EX_STRING)
                 return ERR_STR_EXPECTED;
-
+            
+#if REWRITE_TO_WX_WIDGET
+            // TODO: Fix this to not use Win32 path functions.
             std::string strPath = expr.string;
             strPath.Replace('/', '\\');
 
-            if (::PathIsRelative(strPath))	// if path is relative combine it with current dir
+            if (::PathIsRelative(strPath)) // if path is relative combine it with current dir
             {
                 char szBuf[MAX_PATH]= {0};
                 ::GetCurrentDirectory(MAX_PATH, szBuf);
@@ -423,6 +429,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
             char szPath[MAX_PATH];
             ::PathCanonicalize(szPath, strPath);
             include_fname = szPath;
+#endif
         }
         else
             return ERR_STR_EXPECTED; // Expected string
@@ -471,7 +478,8 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         if (pass == 1)
         {
             pMacro = get_new_macro_entry(); // Space for a new macro definition
-            ret = def_macro_name(*pLabel, CIdent(CIdent::I_MACRONAME, get_last_macro_entry_index()));
+            CIdent tmpIdent(CIdent::I_MACRONAME, get_last_macro_entry_index());
+            ret = def_macro_name(*pLabel, _Inout_ tmpIdent);
 
             if (ret)
                 return ret;
@@ -548,9 +556,11 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
             return ret;
 
         CIdent::IdentInfo info = expr.inf == Expr::EX_UNDEF ? CIdent::I_UNDEF : CIdent::I_VALUE;
+
+        CIdent t1(info, expr.value, true);
+        CIdent t2(info, expr.value, true);
         
-        ret = pass == 1 ? def_ident(*pLabel, CIdent(info, expr.value, true)) :
-              chk_ident_def(*pLabel, CIdent(info, expr.value, true));
+        ret = pass == 1 ? def_ident(*pLabel, _Inout_ t1) : chk_ident_def(*pLabel, _Inout_ t2);
 
         if (ret)
             return ret;
@@ -597,19 +607,21 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         {
             if (leks.type == CLeksem::L_IDENT) // option name?
             {
-                if (leks.GetString()->CompareNoCase(opts[0]) == 0)
+                std::string literal = *leks.GetString();
+
+                if (strcasecmp(literal.c_str(), opts[0]) == 0)
                     bProc6502 = 0;
-                else if (leks.GetString()->CompareNoCase(opts[1]) == 0)
+                else if (strcasecmp(literal.c_str(), opts[1]) == 0)
                     bProc6502 = 1;
-                else if (leks.GetString()->CompareNoCase(opts[2]) == 0)
+                else if (strcasecmp(literal.c_str(), opts[2]) == 0)
                     bProc6502 = 1;
-                else if (leks.GetString()->CompareNoCase(opts[3]) == 0)
+                else if (strcasecmp(literal.c_str(), opts[3]) == 0)
                     bProc6502 = 2;
-                else if (leks.GetString()->CompareNoCase(opts[4]) == 0)
+                else if (strcasecmp(literal.c_str(), opts[4]) == 0)
                     case_insensitive = false;
-                else if (leks.GetString()->CompareNoCase(opts[5]) == 0)
+                else if (strcasecmp(literal.c_str(), opts[5]) == 0)
                     case_insensitive = true;
-                else if (leks.GetString()->CompareNoCase(opts[6]) == 0)
+                else if (strcasecmp(literal.c_str(), opts[6]) == 0)
                     swapbin = true;
                 else
                     return ERR_OPT_NAME_UNKNOWN; // Unrecognized option name
@@ -772,7 +784,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         else
             cs.Printf("%d%c%02d%c%02d", ltm->tm_year + 1900, delim.value, ltm->tm_mon + 1, delim.value, ltm->tm_mday);
             
-        int len = cs.GetLength();
+        int len = cs.size();
         cnt += len;
         ret = inc_prog_counter(len);
 
@@ -790,7 +802,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
     case I_TIME:
     {
         Expr delim;
-        ret = expression(leks,delim); // Expected word
+        ret = expression(leks, delim); // Expected word
 
         if (ret)
         {
@@ -813,7 +825,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
             return ERR_NUM_NOT_BYTE;
 
         uint32_t org = origin;
-        int cnt = 0; // d�ugo�� danych (inf. dla .STR)
+        int cnt = 0; // Data length (info for .STR)
         time_t now = time(0);
         tm *ltm = localtime(&now);
 
@@ -824,7 +836,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         else
             cs.Printf("%02d%c%02d%c%02d", ltm->tm_hour, delim.value, ltm->tm_min, delim.value, ltm->tm_sec);
 
-        int len = cs.GetLength();
+        int len = cs.size();
         cnt += len;
         ret = inc_prog_counter(len);
 

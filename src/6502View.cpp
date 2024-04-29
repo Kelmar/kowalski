@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502Doc.h"
 #include "6502View.h"
 #include "DrawMarks.h"
+#include "M6502.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

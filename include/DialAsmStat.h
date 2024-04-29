@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef DIAL_ASM_STAT_H__
 #define DIAL_ASM_STAT_H__
 
+class CAsm6502;
+
 /////////////////////////////////////////////////////////////////////////////
 // CDialAsmStat dialog
 

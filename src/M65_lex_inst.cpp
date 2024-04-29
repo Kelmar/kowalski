@@ -23,9 +23,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include <ctime>
 #include "StdAfx.h"
 
+#include "M6502.h"
+
 /*************************************************************************/
 
-bool CAsm6502::proc_instr(const std::string &str_, OpCode &code)
+bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
 {
     ASSERT(str_.size() == 3);
 
@@ -41,17 +43,17 @@ bool CAsm6502::proc_instr(const std::string &str_, OpCode &code)
         {
         case 'D':
             if (tmp[2] == 'C')
-                return code = C_ADC, true;
+                return code = CAsm::C_ADC, true;
             break;
             
         case 'N':
             if (tmp[2] == 'D')
-                return code = C_AND, true;
+                return code = CAsm::C_AND, true;
             break;
 
         case 'S':
             if (tmp[2] == 'L')
-                return code=C_ASL, true;
+                return code = CAsm::C_ASL, true;
             break;
         }
         break;
@@ -63,57 +65,57 @@ bool CAsm6502::proc_instr(const std::string &str_, OpCode &code)
             if (bProc6502 != 1)
                 break;
             if (tmp[2] == 'S')
-                return code = C_BBS, true;
+                return code = CAsm::C_BBS, true;
             else if (tmp[2] == 'R')
-                return code = C_BBR, true;
+                return code = CAsm::C_BBR, true;
             break;
 
         case 'C':
             if (tmp[2] == 'C')
-                return code = C_BCC, true;
+                return code = CAsm::C_BCC, true;
             else if (tmp[2] == 'S')
-                return code = C_BCS, true;
+                return code = CAsm::C_BCS, true;
             break;
 
         case 'E':
             if (tmp[2] == 'Q')
-                return code = C_BEQ, true;
+                return code = CAsm::C_BEQ, true;
             break;
 
         case 'I':
             if (tmp[2] == 'T')
-                return code = C_BIT, true;
+                return code = CAsm::C_BIT, true;
             break;
 
         case 'M':
             if (tmp[2] == 'I')
-                return code = C_BMI, true;
+                return code = CAsm::C_BMI, true;
             break;
 
         case 'N':
             if (tmp[2] == 'E')
-                return code = C_BNE, true;
+                return code = CAsm::C_BNE, true;
             break;
 
         case 'P':
             if (tmp[2] == 'L')
-                return code = C_BPL, true;
+                return code = CAsm::C_BPL, true;
             break;
 
         case 'R':
             if (!(bProc6502 == 0) && tmp[2] == 'A')
-                return code = C_BRA, true;
+                return code = CAsm::C_BRA, true;
             else if (tmp[2] == 'K')
-                return code = C_BRK, true;
+                return code = CAsm::C_BRK, true;
             else if ((bProc6502 == 2) && tmp[2] == 'L')  //% 65816
-                return code = C_BRL, true;
+                return code = CAsm::C_BRL, true;
             break;
 
         case 'V':
             if (tmp[2] == 'C')
-                return code = C_BVC, true;
+                return code = CAsm::C_BVC, true;
             else if (tmp[2] == 'S')
-                return code = C_BVS, true;
+                return code = CAsm::C_BVS, true;
             break;
         }
         break;
@@ -123,30 +125,30 @@ bool CAsm6502::proc_instr(const std::string &str_, OpCode &code)
         {
         case 'L':
             if (tmp[2] == 'C')
-                return code = C_CLC, true;
+                return code = CAsm::C_CLC, true;
             else if (tmp[2] == 'D')
-                return code = C_CLD, true;
+                return code = CAsm::C_CLD, true;
             else if (tmp[2] == 'I')
-                return code = C_CLI, true;
+                return code = CAsm::C_CLI, true;
             else if (tmp[2] == 'V')
-                return code = C_CLV, true;
+                return code = CAsm::C_CLV, true;
             break;
 
         case 'M':
             if (tmp[2] == 'P')
-                return code = C_CMP, true;
+                return code = CAsm::C_CMP, true;
             break;
 
         case 'O':
             if ((bProc6502 == 2) && tmp[2] == 'P')  //% 65816
-                return code = C_COP, true;
+                return code = CAsm::C_COP, true;
             break;
 
         case 'P':
             if (tmp[2] == 'X')
-                return code = C_CPX, true;
+                return code = CAsm::C_CPX, true;
             else if (tmp[2] == 'Y')
-                return code = C_CPY, true;
+                return code = CAsm::C_CPY, true;
             break;
         }
         break;
@@ -158,24 +160,24 @@ bool CAsm6502::proc_instr(const std::string &str_, OpCode &code)
             {
             case 'A':
                 if (bProc6502 != 0)
-                    return code = C_DEA, true;
+                    return code = CAsm::C_DEA, true;
                 break;
 
             case 'C':
-                return code = C_DEC, true;
+                return code = CAsm::C_DEC, true;
 
             case 'X':
-                return code = C_DEX, true;
+                return code = CAsm::C_DEX, true;
 
             case 'Y':
-                return code = C_DEY, true;
+                return code = CAsm::C_DEY, true;
             }
         }
         break;
 
     case 'E':
         if (tmp[1] == 'O' && tmp[2] == 'R')
-            return code = C_EOR, true;
+            return code = CAsm::C_EOR, true;
         break;
 
     case 'I':
@@ -184,167 +186,167 @@ bool CAsm6502::proc_instr(const std::string &str_, OpCode &code)
             {
             case 'A':
                 if (bProc6502 != 0)
-                    return code = C_INA, true;
+                    return code = CAsm::C_INA, true;
                 break;
 
             case 'C':
-                return code = C_INC, true;
+                return code = CAsm::C_INC, true;
 
             case 'X':
-                return code = C_INX, true;
+                return code = CAsm::C_INX, true;
 
             case 'Y':
-                return code=C_INY, true;
+                return code = CAsm::C_INY, true;
             }
         break;
 
     case 'J':
         if (tmp[1] =='M' && tmp[2] == 'P')
-            return code = C_JMP, true;
+            return code = CAsm::C_JMP, true;
         else if (tmp[1] == 'S' && tmp[2] == 'R')
-            return code = C_JSR, true;
+            return code = CAsm::C_JSR, true;
         else if ((bProc6502 == 2) && tmp[1] == 'M' && tmp[2] =='L')  //% 65816
-            return code = C_JML, true;
+            return code = CAsm::C_JML, true;
         else if ((bProc6502 == 2) && tmp[1] == 'S' && tmp[2] =='L')  //% 65816
-            return code = C_JSL, true;
+            return code = CAsm::C_JSL, true;
         break;
 
     case 'L':
         if (tmp[1] == 'D')
         {
             if (tmp[2] == 'A')
-                return code = C_LDA, true;
+                return code = CAsm::C_LDA, true;
             else if (tmp[2] == 'X')
-                return code = C_LDX, true;
+                return code = CAsm::C_LDX, true;
             else if (tmp[2] == 'Y')
-                return code = C_LDY, true;
+                return code = CAsm::C_LDY, true;
         }
         else if (tmp[1] =='S' && tmp[2] == 'R')
-            return code = C_LSR, true;
+            return code = CAsm::C_LSR, true;
         break;
 
     case 'M':
         if (tmp[1] == 'V')
         {
             if ((bProc6502 == 2) && tmp[2] =='N')  //% 65816
-                return code = C_MVN, true;
+                return code = CAsm::C_MVN, true;
             else if ((bProc6502 == 2) && tmp[2] == 'P')  //% 65816
-                return code = C_MVP, true;
+                return code = CAsm::C_MVP, true;
         }
         break;
 
     case 'N':
         if (tmp[1] =='O' && tmp[2] == 'P')
-            return code = C_NOP, true;
+            return code = CAsm::C_NOP, true;
         break;
 
     case 'O':
         if (tmp[1] =='R' && tmp[2] == 'A')
-            return code = C_ORA, true;
+            return code = CAsm::C_ORA, true;
         break;
 
     case 'P':
         if (tmp[1] == 'E')
         {
             if ((bProc6502 == 2) && tmp[2] == 'A')  //% 65816
-                return code = C_PEA, true;
+                return code = CAsm::C_PEA, true;
             else if ((bProc6502 == 2) && tmp[2] == 'I')  //% 65816
-                return code = C_PEI, true;
+                return code = CAsm::C_PEI, true;
             else if ((bProc6502 == 2) && tmp[2] == 'R')  //% 65816
-                return code = C_PER, true;
+                return code = CAsm::C_PER, true;
         }
         else if (tmp[1] =='H')
             switch (tmp[2])
             {
             case 'A':
-                return code = C_PHA, true;
+                return code = CAsm::C_PHA, true;
 
             case 'B':
                 if (bProc6502 == 2)
-                    return code = C_PHB, true;  //% 65816
+                    return code = CAsm::C_PHB, true;  //% 65816
                 break;
 
             case 'D':
                 if (bProc6502 == 2)
-                    return code = C_PHD, true;  //% 65816
+                    return code = CAsm::C_PHD, true;  //% 65816
                 break;
 
             case 'K':
                 if (bProc6502 == 2)
-                    return code = C_PHK, true;  //% 65816
+                    return code = CAsm::C_PHK, true;  //% 65816
                 break;
 
             case 'P':
-                return code = C_PHP, true;
+                return code = CAsm::C_PHP, true;
 
             case 'X':
                 if (bProc6502 != 0)
-                    return code = C_PHX, true;
+                    return code = CAsm::C_PHX, true;
                 break;
 
             case 'Y':
                 if (bProc6502 != 0)
-                    return code = C_PHY, true;
+                    return code = CAsm::C_PHY, true;
                 break;
             }
         else if (tmp[1] == 'L')
             switch (tmp[2])
             {
             case 'A':
-                return code = C_PLA, true;
+                return code = CAsm::C_PLA, true;
 
             case 'B':
                 if (bProc6502 == 2) 
-                    return code = C_PLB, true;  //% 65816
+                    return code = CAsm::C_PLB, true;  //% 65816
                 break;
 
             case 'D':
                 if (bProc6502 == 2)
-                    return code = C_PLD, true;  //% 65816
+                    return code = CAsm::C_PLD, true;  //% 65816
                 break;
 
             case 'P':
-                return code = C_PLP, true;
+                return code = CAsm::C_PLP, true;
 
             case 'X':
                 if (bProc6502 != 0)
-                    return code = C_PLX, true;
+                    return code = CAsm::C_PLX, true;
                 break;
                 
             case 'Y':
                 if (bProc6502 != 0)
-                    return code = C_PLY, true;
+                    return code = CAsm::C_PLY, true;
                 break;
             }
         break;
 
     case 'R':
-        switch (tmp[1))
+        switch (tmp[1])
         {
         case 'E':
             if ((bProc6502 == 2) && tmp[2] == 'P')  //% 65816
-                return code = C_REP, true;
+                return code = CAsm::C_REP, true;
             break;
 
         case 'O':
             if (tmp[2] == 'L')
-                return code = C_ROL, true;
+                return code = CAsm::C_ROL, true;
             else if (tmp[2] == 'R')
-                return code = C_ROR, true;
+                return code = CAsm::C_ROR, true;
             break;
 
         case 'M':
             if ((bProc6502 == 1) && tmp[2] == 'B')
-                return code = C_RMB, true;
+                return code = CAsm::C_RMB, true;
             break;
 
         case 'T':
             if (tmp[2] == 'I')
-                return code = C_RTI, true;
+                return code = CAsm::C_RTI, true;
             else if ((bProc6502 == 2) && tmp[2] == 'L')  //% 65816
-                return code = C_RTL, true;
+                return code = CAsm::C_RTL, true;
             else if (tmp[2] == 'S')
-                return code = C_RTS, true;
+                return code = CAsm::C_RTS, true;
             break;
         }
         break;
@@ -354,36 +356,36 @@ bool CAsm6502::proc_instr(const std::string &str_, OpCode &code)
         {
         case 'B':
             if (tmp[2] == 'C')
-                return code = C_SBC, true;
+                return code = CAsm::C_SBC, true;
             break;
 
         case 'E':
             if (tmp[2] == 'C')
-                return code = C_SEC, true;
+                return code = CAsm::C_SEC, true;
             else if (tmp[2] == 'D')
-                return code = C_SED, true;
+                return code = CAsm::C_SED, true;
             else if (tmp[2] == 'I')
-                return code = C_SEI, true;
+                return code = CAsm::C_SEI, true;
             else if ((bProc6502 == 2) && tmp[2] =='P')  //% 65816
-                return code = C_SEP, true;
+                return code = CAsm::C_SEP, true;
             break;
 
         case 'M':
             if ((bProc6502 == 1) && tmp[2] == 'B')
-                return code = C_SMB, true;
+                return code = CAsm::C_SMB, true;
             break;
 
         case 'T':
             if (tmp[2] == 'A')
-                return code = C_STA, true;
+                return code = CAsm::C_STA, true;
             else if ((bProc6502 == 2) && tmp[2] == 'P')  //% 65816
-                return code = C_STP, true;
+                return code = CAsm::C_STP, true;
             else if (tmp[2] == 'X')
-                return code = C_STX, true;
+                return code = CAsm::C_STX, true;
             else if (tmp[2] == 'Y')
-                return code = C_STY, true;
+                return code = CAsm::C_STY, true;
             else if (!(bProc6502 == 0) && tmp[2] == 'Z')
-                return code = C_STZ, true;
+                return code = CAsm::C_STZ, true;
             break;
         }
         break;
@@ -393,67 +395,67 @@ bool CAsm6502::proc_instr(const std::string &str_, OpCode &code)
         {
         case 'A':
             if (tmp[2] == 'X')
-                return code = C_TAX, true;
-            if (str[2] == 'Y')
-                return code = C_TAY, true;
+                return code = CAsm::C_TAX, true;
+            if (tmp[2] == 'Y')
+                return code = CAsm::C_TAY, true;
             break;
 
         case 'C':
             if ((bProc6502 == 2) && tmp[2] == 'D')  //% 65816
-                return code = C_TCD, true;
+                return code = CAsm::C_TCD, true;
             if ((bProc6502 == 2) && tmp[2] == 'S')  //% 65816
-                return code = C_TCS, true;
+                return code = CAsm::C_TCS, true;
             break;
 
         case 'D':
             if ((bProc6502 == 2) && tmp[2] == 'C')  //% 65816
-                return code = C_TDC, true;
+                return code = CAsm::C_TDC, true;
             break;
 
         case 'R':
             if (!(bProc6502 == 0) && tmp[2] == 'B')
-                return code = C_TRB, true;
+                return code = CAsm::C_TRB, true;
             break;
 
         case 'S':
             if (!(bProc6502 == 0) && tmp[2]=='B')
-                return code = C_TSB, true;
+                return code = CAsm::C_TSB, true;
             if ((bProc6502 == 2) && tmp[2] == 'C')  //% 65816
-                return code = C_TSC, true;
+                return code = CAsm::C_TSC, true;
             if (tmp[2] == 'X')
-                return code = C_TSX, true;
+                return code = CAsm::C_TSX, true;
             break;
 
         case 'X':
             if (tmp[2] == 'A')
-                return code = C_TXA, true;
+                return code = CAsm::C_TXA, true;
             if (tmp[2] == 'S')
-                return code = C_TXS, true;
+                return code = CAsm::C_TXS, true;
             if ((bProc6502 == 2) && tmp[2] == 'Y')  //% 65816
-                return code = C_TXY, true;
+                return code = CAsm::C_TXY, true;
             break;
 
         case 'Y':
             if (tmp[2] == 'A')
-                return code = C_TYA, true;
-            if ((bProc6502 == 2) && str[2] == 'X')  //% 65816
-                return code = C_TYX, true;
+                return code = CAsm::C_TYA, true;
+            if ((bProc6502 == 2) && tmp[2] == 'X')  //% 65816
+                return code = CAsm::C_TYX, true;
             break;
         }
         break;
 
     case 'W':
         if ((bProc6502 == 2) && tmp[1] == 'A' && tmp[2] == 'I')  //% 65816
-            return code = C_WAI, true;
+            return code = CAsm::C_WAI, true;
         if ((bProc6502 == 2) && tmp[1] == 'D' && tmp[2] == 'M')  //% 65816
-            return code = C_WDM, true;
+            return code = CAsm::C_WDM, true;
         break;
 
     case 'X':
         if ((bProc6502 == 2) && tmp[1] == 'B' && tmp[2] == 'A')  //% 65816
-            return code = C_XBA, true;
+            return code = CAsm::C_XBA, true;
         if ((bProc6502 == 2) && tmp[1] == 'C' && tmp[2] == 'E')  //% 65816
-            return code = C_XCE, true;
+            return code = CAsm::C_XCE, true;
         break;
     }
 

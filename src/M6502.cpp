@@ -23,9 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include <ctime>
 #include "StdAfx.h"
 
+#include "M6502.h"
+
 #include "resource.h"
 #include "MarkArea.h"
-#include "IOWindow.h"	// this is sloppy, but right now there's no mechanism to let framework know about requested new terminal wnd size
 
 #include "ConditionalAsm.h"
 
