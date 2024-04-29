@@ -42,8 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CSrc6502Doc;
 class CSrc6502View;
 
-class CMainFrame : public wxDocMDIParentFrame //, virtual CBroadcast
-//class CMainFrame : public CMDIFrameWnd, virtual CBroadcast
+class CMainFrame : public wxDocMDIParentFrame
 {
 private:
     wxStatusBar m_statusBar;
@@ -55,8 +54,8 @@ private:
     //static WNDPROC m_pfnOldProc;
     //static LRESULT CALLBACK StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-    //static CBitmap m_bmpCode;
-    //static CBitmap m_bmpDebug;
+    //static wxBitmap m_bmpCode;
+    //static wxBitmap m_bmpDebug;
 
     std::string m_strFormat; // Formatting characters for paragraph. row/column in the status bar
 
@@ -76,7 +75,7 @@ public:
 
 //  virtual HMENU GetWindowMenuPopup(HMENU hMenuBar);
 
-//  void ShowRegisterBar(bool bShow= TRUE);
+//  void ShowRegisterBar(bool bShow = TRUE);
     void SetPositionText(int row, int col);
 //  void SetRowColumn(CEdit &edit);
     CSrc6502View *GetCurrentView();
@@ -132,8 +131,6 @@ protected:  // control bar embedded members
 
 // Generated message map functions
 protected:
-    //{{AFX_MSG(CMainFrame)
-    //afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
     afx_msg void OnClose();
     afx_msg void OnAssemble();
     afx_msg void OnUpdateAssemble(CCmdUI* pCmdUI);
@@ -205,12 +202,11 @@ protected:
     afx_msg void OnUpdateViewLog(CCmdUI* pCmdUI);
     afx_msg void OnHelpDynamic();
     afx_msg void OnUpdateHelpDynamic(CCmdUI* pCmdUI);
-    //}}AFX_MSG
+
     afx_msg void OnSymDebugStop();
     afx_msg LRESULT OnStartDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
-    //DECLARE_MESSAGE_MAP()
 
 private:
     void EnableDockingEx(uint32_t dwDockStyle);
