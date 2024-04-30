@@ -21,155 +21,104 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Odczyt i zapis kodu wynikowego w postaci Intel-HEX
 
 #include "StdAfx.h"
+
 #include "MotorolaSRecord.h"
 #include "resource.h"
-#include <TCHAR.h>
 #include "MarkArea.h"
 #include "Sym6502.h"
 
-
 void CMotorolaSRecord::SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start)
 {
-    TCHAR buf[80], *ptr;
+#if REWRITE_TO_WX_WIDGET
+    char buf[80], *ptr;
 
-    for (UINT part=0; part<area.GetSize(); part++)
+    for (UINT part = 0; part < area.GetSize(); part++)
     {
-        int start,end;
+        int start, end;
 
-        area.GetPartition(part,start,end);
+        area.GetPartition(part, start, end);
         ASSERT(start >= 0 && start <= 0xFFFF);
         ASSERT(end >= 0 && end <= 0xFFFF);
         ASSERT(start <= end);
 
-        const int STEP= 0x10;
-        for (int i=start; i<=end; i+=STEP)
+        const int STEP = 0x10;
+
+        for (int i = start; i <= end; i += STEP)
         {
-            int sum= 0;				// suma kontrolna
-            int lim= min(i+STEP-1, end);
-            // pocz�tek wiersza: ilo�� danych, adres (hi, lo), zero
-            int cnt= i+STEP<=end ? STEP : end-i+1;	// ilo�� bajt�w do wys�ania (w wierszu)
+            int sum = 0; // checksum
+            int lim = min(i + STEP - 1, end);
+            // beginning of line: amount of data, address (hi, lo), zero
+            int cnt = i + STEP <= end ? STEP : end - i + 1; // number of bytes to send (per line)
+
             if (start > 0xFFFF)  // 1.3.3 support for 24-bit addressing
             {
-                ptr = buf + wsprintf(buf,_T("S2%02X%02X%02X%02X"),cnt+4,(i>>16)&0xFF,(i>>8)&0xFF,i&0xFF);
-                sum += cnt+4 + ((i>>16)&0xFF) +((i>>8)&0xFF) + (i&0xFF);
+                ptr = buf + wsprintf(buf, "S2%02X%02X%02X%02X",cnt+4,(i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF);
+                sum += cnt+4 + ((i >> 16) & 0xFF) +((i >> 8) & 0xFF) + (i & 0xFF);
             }
             else
             {
-                ptr = buf + wsprintf(buf,_T("S1%02X%02X%02X"),cnt+3,(i>>8)&0xFF,i&0xFF);
-                sum += cnt+3 + ((i>>8)&0xFF) + (i&0xFF);
+                ptr = buf + wsprintf(buf, "S1%02X%02X%02X", cnt + 3, (i >> 8) & 0xFF, i & 0xFF);
+                sum += cnt+3 + ((i >> 8) & 0xFF) + (i & 0xFF);
             }
 
-            for (int j=i; j<=lim; j++)
+            for (int j = i; j <= lim; j++)
             {
-                ptr += wsprintf(ptr,_T("%02X"),mem[j]);
+                ptr += wsprintf(ptr, _T("%02X"), mem[j]);
                 sum += mem[j];
-            }		// suma wszystkich bajt�w w wierszu musi by� r�wna zeru
-            ptr += wsprintf(ptr,_T("%02X\r\n"),~sum & 0xFF);	// wygenerowanie bajtu kontrolnego
-            archive.Write(buf,sizeof(TCHAR)*(ptr-buf));
+            } // the sum of all bytes in a line must equal zero
+
+            ptr += wsprintf(ptr, "%02X\r\n", ~sum & 0xFF); // Write checksum
+            archive.Write(buf, sizeof(char) * (ptr - buf));
         }
     }
+
     if (prog_start == -1)
         prog_start = 0;
+
     {
         ASSERT(prog_start >= 0 && prog_start <= 0xFFFF);
+
         if (prog_start > 0xFFFF)  // 1.3.3 support for 24-bit addressing for prog_start
         {
-            int sum = ~( ((prog_start>>16)&0xFF) + ((prog_start>>8)&0xFF) + (prog_start&0xFF) + 4 ) & 0xFF;
-            ptr = buf + wsprintf(buf,_T("S8%02X%02X%02X%02X%02X\r\n"),4,
-                                 (prog_start>>16)&0xFF,(prog_start>>8)&0xFF, prog_start&0xFF, sum);
+            int sum = ~( ((prog_start >> 16) & 0xFF) + ((prog_start >> 8) & 0xFF) + (prog_start & 0xFF) + 4 ) & 0xFF;
+            ptr = buf + wsprintf(buf, "S8%02X%02X%02X%02X%02X\r\n", 4,
+                                 (prog_start>>16) & 0xFF, (prog_start >> 8) & 0xFF, prog_start & 0xFF, sum);
         }
         else
         {
-            int sum= ~( ((prog_start>>8)&0xFF) + (prog_start&0xFF) + 3 ) & 0xFF;
-            ptr = buf + wsprintf(buf,_T("S9%02X%02X%02X%02X\r\n"),3,
-                                 (prog_start>>8)&0xFF, prog_start&0xFF, sum);
+            int sum= ~(((prog_start >> 8) & 0xFF) + (prog_start & 0xFF) + 3) & 0xFF;
+            ptr = buf + wsprintf(buf, "S9%02X%02X%02X%02X\r\n", 3,
+                                 (prog_start >> 8) & 0xFF, prog_start & 0xFF, sum);
         }
     }
 
-    archive.Write(buf,sizeof(TCHAR)*(ptr-buf));
+    archive.Write(buf, sizeof(char) * (ptr - buf));
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
-UINT CMotorolaSRecord::geth(const TCHAR *&ptr, UINT &sum)	// interpretacja dwucyfrowej liczby hex
+UINT CMotorolaSRecord::geth(const char *&ptr, UINT &sum)
 {
-    UINT res= 0;
-    for (int i=0; i<2; i++)
+    UINT res = 0;
+    
+    for (int i = 0; i < 2; ++i, ++ptr)
     {
         res <<= 4;
-        switch (*ptr++)
-        {
-        case _T('0'):
-            break;
-        case _T('1'):
-            res++;
-            break;
-        case _T('2'):
-            res += 2;
-            break;
-        case _T('3'):
-            res += 3;
-            break;
-        case _T('4'):
-            res += 4;
-            break;
-        case _T('5'):
-            res += 5;
-            break;
-        case _T('6'):
-            res += 6;
-            break;
-        case _T('7'):
-            res += 7;
-            break;
-        case _T('8'):
-            res += 8;
-            break;
-        case _T('9'):
-            res += 9;
-            break;
-        case _T('A'):
-            res += 10;
-            break;
-        case _T('B'):
-            res += 11;
-            break;
-        case _T('C'):
-            res += 12;
-            break;
-        case _T('D'):
-            res += 13;
-            break;
-        case _T('E'):
-            res += 14;
-            break;
-        case _T('F'):
-            res += 15;
-            break;
-        case _T('a'):
-            res += 10;
-            break;
-        case _T('b'):
-            res += 11;
-            break;
-        case _T('c'):
-            res += 12;
-            break;
-        case _T('d'):
-            res += 13;
-            break;
-        case _T('e'):
-            res += 14;
-            break;
-        case _T('f'):
-            res += 15;
-            break;
-        default:
-            throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
-        }
+
+        if (*ptr >= '0' && *ptr <= '9')
+            res += *ptr - '0';
+        else if (*ptr >= 'A' && *ptr <= 'F')
+            res += *ptr - 'A' + 10;
+        else if (*ptr >= 'a' && *ptr <= 'f')
+            res += *ptr - 'a' + 10;
+        else
+            throw CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT, row);
     }
-    sum += res;		// do liczenia sumy kontrolnej
+
+    sum += res; // Calculate the checksum
     sum &= 0xFF;
+
     return res;
 }
 
@@ -177,122 +126,151 @@ UINT CMotorolaSRecord::geth(const TCHAR *&ptr, UINT &sum)	// interpretacja dwucy
 
 void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start)
 {
-    TCHAR buf[256];
+#if REWRITE_TO_WX_WIDGET
+    char buf[256];
 
-    for (row=1; ; row++)
+    for (row = 1; ; row++)
     {
-        if (!archive.ReadString(buf,sizeof buf))
+        if (!archive.ReadString(buf, sizeof(buf)))
             break;
 
-        if (_tcsclen(buf) == sizeof(buf)-1)		// za d�ugi wiersz?
+        if (strlen(buf) == sizeof(buf) - 1) // Line too long
             CMotorolaSRecordException(CMotorolaSRecordException::E_BAD_FORMAT,row);
 
-        const TCHAR *ptr= buf;
-        if (*ptr++ != _T('S'))	// nierozpoznany format?
-            throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_BAD_FORMAT,row));
-        UINT info= *ptr++;		// bajt informacyjny
-        UINT sum= 0;		// zmienna do liczenia sumy kontrolnej
-        UINT cnt= geth(ptr,sum);	// ilo�� bajt�w danych
-        if (cnt < 3)		// nierozpoznany format?
-            throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
+        const char *ptr = buf;
+        if (*ptr++ != 'S') // Unrecognized format?
+            throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_BAD_FORMAT, row));
+
+        UINT info = *ptr++; // information byte
+        UINT sum = 0; // variable for calculating the checksum
+        UINT cnt = geth(ptr, sum); // number of data bytes
+
+        if (cnt < 3) // Unrecognized format?
+            throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT, row));
+
         cnt -= 3;
-        UINT addr= geth(ptr,sum);
+        UINT addr = geth(ptr, sum);
         addr <<= 8;
-        addr += geth(ptr,sum);	// adres danych
+        addr += geth(ptr, sum);	// data address
+
         switch (info)
         {
-        case '1':		// kod programu (S1)
+        case '1': // program code (S1)
         {
             if (cnt)
                 area.SetStart(addr);
-            for (UINT i=0; i<cnt; i++)
+
+            for (UINT i = 0; i < cnt; i++)
             {
                 if (addr > 0xFFFF)	// za du�y adres?
-                    throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
-                mem[addr++] = (UINT8)geth(ptr,sum);
+                    throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT, row));
+
+                mem[addr++] = (UINT8)geth(ptr, sum);
             }
-            geth(ptr,sum);		// bajt sumy kontrolnej
-            if (sum != 0xFF)	// b��d sumy kontrolnej
-                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM,row));
+
+            geth(ptr, sum); // checksum byte
+            if (sum != 0xFF) // checksum error
+                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM, row));
+
             if (cnt)
-                area.SetEnd(addr-1);
+                area.SetEnd(addr - 1);
+
             break;
         }
 
-        case '2':  // 1.3.3 support for 24-bit addressing
+        case '2': // 1.3.3 support for 24-bit addressing
         {
-            if (theApp.m_global.m_bProc6502!=2)
-                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
+            if (wxGetApp().m_global.m_bProc6502 != 2)
+                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT, row));
+
             addr <<= 8;
-            addr += geth(ptr,sum);	// adres danych
+            addr += geth(ptr, sum); // data address
             cnt -= 1;
+
             if (cnt)
                 area.SetStart(addr);
-            for (UINT i=0; i<cnt; i++)
-                mem[addr++] = (UINT8)geth(ptr,sum);
 
-            geth(ptr,sum);		// bajt sumy kontrolnej
-            if (sum != 0xFF)	// b��d sumy kontrolnej
-                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM,row));
+            for (UINT i = 0; i < cnt; i++)
+                mem[addr++] = (UINT8)geth(ptr, sum);
+
+            geth(ptr, sum); // checksum byte
+            if (sum != 0xFF) // checksum error
+                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM, row));
+
             if (cnt)
-                area.SetEnd(addr-1);
+                area.SetEnd(addr - 1);
             break;
         }
-        case '8':  // 1.3.3 support for 24-bit addressing for prog_start
+        case '8': // 1.3.3 support for 24-bit addressing for prog_start
             cnt -=1;
             addr <<= 8;
-            addr += geth(ptr,sum);	// adres danych
+            addr += geth(ptr, sum); // data address
 
-            if (cnt)	// nieoczekiwane dane?
-                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
-            geth(ptr,sum);		// bajt sumy kontrolnej
-            if (sum != 0xFF)	// b��d sumy kontrolnej?
-                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM,row));
+            if (cnt) // Unexpected data?
+                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT, row));
+
+            geth(ptr, sum); // checksum byte
+            if (sum != 0xFF) // checksum error
+                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM, row));
+
             prog_start = (int)addr;
             break;
 
-        case '9':		// koniec, ew. adres uruchomienia (S9)
-            if (cnt)	// nieoczekiwane dane?
-                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
-            geth(ptr,sum);		// bajt sumy kontrolnej
-            if (sum != 0xFF)	// b��d sumy kontrolnej?
-                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM,row));
-            if (addr > 0xFFFF)	// za du�y adres?
-                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
+        case '9': // end, possibly startup address (S9)
+            if (cnt) // Unexpected data?
+                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT, row));
+
+            geth(ptr, sum); // checksum byte
+            if (sum != 0xFF) // checksum error
+                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_CHKSUM, row));
+
+            if (addr > 0xFFFF) // address too big?
+                throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT, row));
+
             prog_start = (int)addr;
             break;
 
-        default:		// nieznana warto��
-            throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT,row));
+        default: // unknown value
+            throw (new CMotorolaSRecordException(CMotorolaSRecordException::E_FORMAT, row));
         }
     }
-
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
-/*virtual*/ BOOL CMotorolaSRecord::CMotorolaSRecordException::GetErrorMessage(LPTSTR lpszError,
-        UINT nMaxError, PUINT pnHelpContext/*= NULL*/)
+/*virtual*/bool CMotorolaSRecord::CMotorolaSRecordException::GetErrorMessage(char *lpszError,
+        UINT nMaxError, UINT *pnHelpContext/*= NULL*/)
 {
-    CString msg;
-    TCHAR num[16];
-    if (pnHelpContext != NULL)
+#if REWRITE_TO_WX_WIDGET
+    std::string msg;
+    char num[16];
+
+    if (pnHelpContext != nullptr)
         *pnHelpContext = 0;
-    wsprintf(num,_T("%u"),row);
+
+    snprintf(num, sizeof(num), "%u", row);
+
     switch (error)
     {
     case E_BAD_FORMAT:		// b��dny format pliku
         msg.LoadString(IDS_INTEL_HEX_ERR_2);
         break;
+
     case E_CHKSUM:		// b��d sumy kontrolnej
-        AfxFormatString1(msg,IDS_INTEL_HEX_ERR_1,num);
+        AfxFormatString1(msg, IDS_INTEL_HEX_ERR_1, num);
         break;
+
     case E_FORMAT:		// b��dny format danych
-        AfxFormatString1(msg,IDS_INTEL_HEX_ERR_3,num);
+        AfxFormatString1(msg, IDS_INTEL_HEX_ERR_3, num);
         break;
+
     default:
         return FALSE;
     }
-    _tcsnccpy(lpszError,msg,nMaxError);
-    return TRUE;
+
+    strncpy(lpszError, msg.c_str(), nMaxError);
+#endif
+
+    return true;
 }

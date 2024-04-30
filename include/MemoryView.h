@@ -59,6 +59,14 @@ private:
     int find_next_addr(uint32_t &addr, const COutputMem &mem, int cnt = 1, int bytes = 0);
     int find_delta(uint32_t &addr, uint32_t dest, const COutputMem &mem, int max_lines);
 
+    void Refresh()
+    {
+        wxWindow *frame = GetFrame();
+        
+        if (frame)
+            frame->Refresh();
+    }
+
     enum Dump { FULL, HEX, TEXT } m_eDump;
 protected:
     /* constructor */ CMemoryView();           // protected constructor used by dynamic creation
