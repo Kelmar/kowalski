@@ -45,7 +45,7 @@ using namespace std;
 // Windows MainFrame, RegisterBar, IOWindow, MemoryView, ZeroPageView, IdentInfo
 //const HWND * /*const*/ CMainFrame::m_hWindows[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-WNDPROC CMainFrame::m_pfnOldProc;
+//WNDPROC CMainFrame::m_pfnOldProc;
 
 //wxBitmap CMainFrame::m_bmpCode; // pictures in StatusBar
 //wxBitmap CMainFrame::m_bmpDebug;
@@ -181,7 +181,8 @@ void CMainFrame::ConfigSettings(bool load)
     static const char * const syntax_font[] =
     { "FontInstruction", "FontDirective", "FontComment", "FontNumber", "FontString", 0 };
 
-    CWinApp *pApp = AfxGetApp();
+#if REWRITE_TO_WX_WIDGET
+    CWinApp *pApp = &wxGetApp();
 
     if (load)		// reading?
     {
@@ -390,6 +391,7 @@ void CMainFrame::ConfigSettings(bool load)
         for (int style= 0; syntax_font[style]; ++style)
             pApp->WriteProfileInt(ENTRY_VIEW, syntax_font[style], *syntax_font_style[style]);
     }
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -479,6 +481,7 @@ END_MESSAGE_MAP()
 
 #endif
 
+#if REWRITE_FOR_WX_WIDGET
 static UINT indicators[] =
 {
     ID_SEPARATOR,           // status line indicator
@@ -492,6 +495,7 @@ static UINT indicators[] =
     ID_INDICATOR_NUM,
 //	ID_INDICATOR_SCRL,
 };
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
@@ -525,6 +529,7 @@ CMainFrame::~CMainFrame()
 
 //-----------------------------------------------------------------------------
 
+#if REWRITE_TO_WX_WIDGET
 const uint32_t CMainFrame::dwDockBarMapEx[4][2] =
 {
     { AFX_IDW_DOCKBAR_TOP,      CBRS_TOP    },
@@ -532,11 +537,13 @@ const uint32_t CMainFrame::dwDockBarMapEx[4][2] =
     { AFX_IDW_DOCKBAR_LEFT,     CBRS_LEFT   },
     { AFX_IDW_DOCKBAR_RIGHT,    CBRS_RIGHT  },
 };
+#endif
 
-void CMainFrame::EnableDockingEx(DWORD dwDockStyle)
+void CMainFrame::EnableDockingEx(uint32_t dwDockStyle)
 {
+#if REWRITE_TO_WX_WIDGET
     // must be CBRS_ALIGN_XXX or CBRS_FLOAT_MULTI only
-    ASSERT((dwDockStyle & ~(CBRS_ALIGN_ANY|CBRS_FLOAT_MULTI)) == 0);
+    ASSERT((dwDockStyle & ~(CBRS_ALIGN_ANY | CBRS_FLOAT_MULTI)) == 0);
 
     m_pFloatingFrameClass = RUNTIME_CLASS(CMiniDockFrameWnd);
     for (int i = 0; i < 4; i++)
@@ -556,9 +563,10 @@ void CMainFrame::EnableDockingEx(DWORD dwDockStyle)
             }
         }
     }
+#endif
 }
 
-
+#if REWRITE_TO_WX_WIDGET
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
     if (CMDIFrameWnd::OnCreate(lpCreateStruct) == -1)
@@ -575,7 +583,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
     strName.LoadString(IDS_TOOLBAR);
     m_wndToolBar.SetWindowText(strName);
 
-    if (!m_wndStatusBar.Create(this) || !m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT)))
+    if (!m_statusBar.Create(this) || !m_statusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT)))
     {
         TRACE0("Failed to create status bar\n");
         return -1; // fail to create
@@ -592,24 +600,24 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
         {
             std::string str;
             str.Format(m_strFormat,99999,999);
-            m_wndStatusBar.GetPaneInfo(1, uID, uStyle, nWidth);
+            m_statusBar.GetPaneInfo(1, uID, uStyle, nWidth);
 #ifdef USE_CRYSTAL_EDIT
-            m_wndStatusBar.SetPaneInfo(1, uID, SBPS_NOBORDERS | SBPS_DISABLED, 1);
+            m_statusBar.SetPaneInfo(1, uID, SBPS_NOBORDERS | SBPS_DISABLED, 1);
 #else
-            CClientDC dc(&m_wndStatusBar);
-            dc.SelectObject(m_wndStatusBar.GetFont());
+            CClientDC dc(&m_statusBar);
+            dc.SelectObject(m_statusBar.GetFont());
             dc.DrawText(str, -1, rectArea, DT_SINGLELINE | DT_CALCRECT);
-            m_wndStatusBar.SetPaneInfo(1, uID, uStyle, rectArea.Width());
+            m_statusBar.SetPaneInfo(1, uID, uStyle, rectArea.Width());
 #endif
         }
 
-        m_wndStatusBar.GetPaneInfo(2, uID, uStyle, nWidth);
-        m_wndStatusBar.SetPaneInfo(2, uID, uStyle, 16);	// szeroko�� obrazka
+        m_statusBar.GetPaneInfo(2, uID, uStyle, nWidth);
+        m_statusBar.SetPaneInfo(2, uID, uStyle, 16);	// szeroko�� obrazka
 
         m_bmpCode.LoadMappedBitmap(IDB_CODE);
         m_bmpDebug.LoadMappedBitmap(IDB_DEBUG);
 
-        m_pfnOldProc = (WNDPROC)::SetWindowLong(m_wndStatusBar.m_hWnd,GWL_WNDPROC,(LONG)StatusBarWndProc);
+        m_pfnOldProc = (WNDPROC)::SetWindowLong(m_statusBar.m_hWnd,GWL_WNDPROC,(LONG)StatusBarWndProc);
     }
 
     // TODO: Remove this if you don't want tool tips or a resizeable toolbar
@@ -712,83 +720,100 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
     return 0;
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
+#if REWRITE_TO_WX_WIDGET
 LRESULT CALLBACK CMainFrame::StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    CWnd *pWnd= FromHandlePermanent(hWnd);
+    wxWindow *pWnd = FromHandlePermanent(hWnd);
 //  ASSERT (pWnd->IsKindOf(RUNTIME_CLASS(CStatusBar)));
 
     switch (msg)
     {
     case WM_PAINT:
     {
-        LRESULT ret= (*CMainFrame::m_pfnOldProc)(hWnd,msg,wParam,lParam);
+        LRESULT ret = (*CMainFrame::m_pfnOldProc)(hWnd, msg, wParam, lParam);
         if (ret == 0)
         {
             bool bCode;
-            if (theApp.m_global.IsDebugger())		// jest dzia�aj�cy debugger ?
+
+            if (wxGetApp().m_global.IsDebugger()) // is there a working debugger?
                 bCode = false;
-            else if (theApp.m_global.IsCodePresent())	// jest kod programu?
+            else if (wxGetApp().m_global.IsCodePresent()) // is there the program code?
                 bCode = true;
             else
-                return ret;				// ani kodu programu, ani debuggera
+                return ret; // no program code, no debugger
+
             wxRect rect;
-            (*m_pfnOldProc)(hWnd,SB_GETRECT,2,(LPARAM)(RECT *)rect);	// miejsce na obrazek - wymiary
+
+            (*m_pfnOldProc)(hWnd, SB_GETRECT, 2, (LPARAM)(RECT *)rect); // space for the image -dimensions
             int borders[3];
-            (*m_pfnOldProc)(hWnd,SB_GETBORDERS,0,(LPARAM)borders);		// grubo�� obw�dki
-            rect.DeflateRect(borders[0]+1,borders[1]-1);
-            CClientDC dc(pWnd);
+            (*m_pfnOldProc)(hWnd, SB_GETBORDERS, 0, (LPARAM)borders); // Get the border thickness
+            rect.DeflateRect(borders[0] + 1, borders[1] - 1);
+            wxClientDC dc(pWnd);
+
             if (dc)
             {
-                CDC memDC;
+                wxDC memDC;
                 memDC.CreateCompatibleDC(&dc);
+
                 if (memDC)
                 {
-                    CBitmap *pOldBmp= memDC.SelectObject(bCode ? &m_bmpCode : &m_bmpDebug);
+                    wxBitmap *pOldBmp= memDC.SelectObject(bCode ? &m_bmpCode : &m_bmpDebug);
                     dc.BitBlt(rect.left+2, rect.top, rect.Width(), rect.Height(), &memDC, 0, 0, SRCCOPY);
                     memDC.SelectObject(pOldBmp);
                 }
             }
         }
+
         return ret;
     }
 
     default:
-        return (*CMainFrame::m_pfnOldProc)(hWnd,msg,wParam,lParam);
+        return (*CMainFrame::m_pfnOldProc)(hWnd, msg, wParam, lParam);
     }
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
 afx_msg LRESULT CMainFrame::OnStartDebugger(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-    RECT rect;
-    m_wndStatusBar.SendMessage(SB_GETRECT,2,(LPARAM)&rect);	// miejsce na obrazek - wymiary
-    m_wndStatusBar.InvalidateRect(&rect);		// obrazek pch�y do przerysowania
+#if REWRITE_TO_WX_WIDGET
+    wxRect rect;
+    m_statusBar.SendMessage(SB_GETRECT, 2, (LPARAM)&rect); // space for the image -dimensions
+    m_statusBar.RefreshRect(&rect); // flea image to be redrawn
+#endif
     return 0;
 }
 
 
 afx_msg LRESULT CMainFrame::OnExitDebugger(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-    RECT rect;
-    m_wndStatusBar.SendMessage(SB_GETRECT,2,(LPARAM)&rect);	// miejsce na obrazek - wymiary
-    m_wndStatusBar.InvalidateRect(&rect);		// obrazek pch�y do przerysowania
+#if REWRITE_TO_WX_WIDGET
+    wxRect rect;
+    m_statusBar.SendMessage(SB_GETRECT, 2, (LPARAM)&rect); // space for the image -dimensions
+    m_statusBar.RefreshRect(&rect); // flea image to be redrawn
+#endif
     return 0;
 }
 
 
 afx_msg LRESULT CMainFrame::OnChangeCode(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-    RECT rect;
-    m_wndStatusBar.SendMessage(SB_GETRECT,2,(LPARAM)&rect);	// miejsce na obrazek - wymiary
-    m_wndStatusBar.InvalidateRect(&rect);		// obrazek pch�y do przerysowania
+#if REWRITE_TO_WX_WIDGET
+    wxRect rect;
+    m_statusBar.SendMessage(SB_GETRECT, 2, (LPARAM)&rect); // space for the image -dimensions
+    m_statusBar.RefreshRect(&rect); // flea image to be redrawn
+#endif
     return 0;
 }
 
 //-----------------------------------------------------------------------------
+
+#if REWRITE_TO_WX_WIDGET
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
@@ -819,6 +844,8 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 
     return CMDIFrameWnd::PreCreateWindow(cs);
 }
+
+#endif
 
 //-----------------------------------------------------------------------------
 /*
@@ -864,27 +891,12 @@ HMENU CMainFrame::GetWindowMenuPopup(HMENU hMenuBar)
 */
 
 /////////////////////////////////////////////////////////////////////////////
-// CMainFrame diagnostics
-
-#ifdef _DEBUG
-void CMainFrame::AssertValid() const
-{
-    CMDIFrameWnd::AssertValid();
-}
-
-void CMainFrame::Dump(CDumpContext& dc) const
-{
-    CMDIFrameWnd::Dump(dc);
-}
-
-#endif //_DEBUG
-
-/////////////////////////////////////////////////////////////////////////////
 // CMainFrame message handlers
 
 void CMainFrame::OnClose()
 {
-    if (theApp.m_global.IsDebugger() && theApp.m_global.IsProgramRunning())
+#if REWRITE_TO_WX_WIDGET
+    if (wxGetApp().m_global.IsDebugger() && theApp.m_global.IsProgramRunning())
     {
         if (m_IOWindow.IsWaiting())
         {
@@ -893,52 +905,55 @@ void CMainFrame::OnClose()
         }
         if (AfxMessageBox(IDS_MAINFRM_PROG_RUNNING,MB_YESNO) == IDYES)
         {
-            theApp.m_global.AbortProg();
-            if (m_IOWindow.m_hWnd != 0)
-                m_IOWindow.SendMessage(CBroadcast::WM_USER_EXIT_DEBUGGER,0,0);
-            if (m_wndRegisterBar.m_hWnd != 0)
-                m_wndRegisterBar.SendMessage(CBroadcast::WM_USER_EXIT_DEBUGGER,0,0);
-            if (m_Idents.m_hWnd != 0)
-                m_Idents.SendMessage(CBroadcast::WM_USER_EXIT_DEBUGGER,0,0);
+            wxGetApp().m_global.AbortProg();
+
+            m_IOWindow.SendMessage(CBroadcast::WM_USER_EXIT_DEBUGGER, 0, 0);
+            m_wndRegisterBar.SendMessage(CBroadcast::WM_USER_EXIT_DEBUGGER, 0, 0);
+            m_Idents.SendMessage(CBroadcast::WM_USER_EXIT_DEBUGGER, 0, 0);
         }
         else
             return;
     }
 
-    CWinApp* pApp = AfxGetApp();
+    CWinApp* pApp = &wxGetApp();
 
-    SaveBarState(REG_ENTRY_LAYOUT);		   // zapisanie po�o�enia pask�w narz�dzi
+    SaveBarState(REG_ENTRY_LAYOUT); // Save the location of the toolbars
 
     WINDOWPLACEMENT wp;
     if (GetWindowPlacement(&wp))
     {
-        // zapisanie po�o�enia okna g��wnego
+        // Save the location of the main window
         wxRect wnd(wp.rcNormalPosition);
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_POSX,wnd.left);
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_POSY,wnd.top);
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_SIZX,wnd.Width());
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_SIZY,wnd.Height());
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_STATE,wp.showCmd==SW_SHOWMAXIMIZED ? 1 : 0);
+        
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_POSX, wnd.left);
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_POSY, wnd.top);
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_SIZX, wnd.Width());
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_SIZY, wnd.Height());
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_STATE, wp.showCmd == SW_SHOWMAXIMIZED ? 1 : 0);
     }
 
     CMDIFrameWnd::OnClose();
+#endif
 }
-
 
 void CMainFrame::OnDestroy()
 {
+#if REWRITE_TO_WX_WIDGET
     if (m_uTimer)
         KillTimer(m_uTimer);
-    ConfigSettings(false);		// zapis ustawie�
-    CMDIFrameWnd::OnDestroy();
+#endif
+
+    ConfigSettings::Save(false);
 }
 
 //-----------------------------------------------------------------------------
 
 void CMainFrame::OnAssemble()
 {
-    CSrc6502View *pView= GetCurrentView();
-    if (pView==NULL)
+#if REWRITE_TO_WX_WIDGET
+    CSrc6502View *pView = GetCurrentView();
+    
+    if (pView == nullptr)
         return;
 
     if (m_IOWindow.IsWaiting())
@@ -949,83 +964,98 @@ void CMainFrame::OnAssemble()
 
     SendMessageToViews(WM_USER_REMOVE_ERR_MARK);
 
-    if (theApp.m_global.IsDebugger())	// dzia�a debugger?
+    if (wxGetApp().m_global.IsDebugger()) // Is the debugger running?
     {
-        if (AfxMessageBox(IDS_STOP_DEBUG,MB_OKCANCEL) != IDOK)
+        if (AfxMessageBox(IDS_STOP_DEBUG, MB_OKCANCEL) != IDOK)
             return;
-        ExitDebugMode();			// wyj�cie z trybu debuggera
+
+        ExitDebugMode();
     }
 
-    if (CDocument* pDocument= pView->GetDocument())
+    if (CDocument* pDocument = pView->GetDocument())
     {
         // before assembly start set current dir to the document directory,
         // so include directive will find included files
         //
-        const std::string& strPath= pDocument->GetPathName();
+        const std::string& strPath = pDocument->GetPathName();
         if (!strPath.IsEmpty())
         {
-            std::string strDir= strPath.Left(strPath.ReverseFind('\\'));
+            std::string strDir = strPath.Left(strPath.ReverseFind('\\'));
             ::SetCurrentDirectory(strDir);
         }
     }
 
     CDialAsmStat dial(pView);
 
-    dial.DoModal();
+    dial.ShowModal();
 
 //  dial.Create();
 
 //  for (int i=0; i<1000; i++)
 //    dial.SetValues(i,1);
-
+#endif
 }
-
 
 void CMainFrame::OnUpdateAssemble(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable(GetCurrentDocument() != NULL &&	// jest aktywny dokument?
+#if REWRITE_TO_WX_WIDGET
+    pCmdUI->Enable(GetCurrentDocument() != nullptr && // Is the document active?
                    !m_IOWindow.IsWaiting());
+#endif
 }
-
 
 CSrc6502Doc *CMainFrame::GetCurrentDocument()
 {
-    CMDIChildWnd *pWnd= MDIGetActive();
-    if (pWnd==NULL)
-        return NULL;
+#if REWRITE_TO_WX_WIDGET
+    CMDIChildWnd *pWnd = MDIGetActive();
 
-    CDocument *pDoc= pWnd->GetActiveDocument();	// aktywny dokument
-    if (pDoc==NULL || !pDoc->IsKindOf( RUNTIME_CLASS(CSrc6502Doc) ))
-        return NULL;
+    if (pWnd == nullptr)
+        return nullptr;
+
+    CDocument *pDoc = pWnd->GetActiveDocument(); // Active document
+    
+    if (pDoc == nullptr || !pDoc->IsKindOf(RUNTIME_CLASS(CSrc6502Doc)))
+        return nullptr;
 
     return static_cast<CSrc6502Doc*>(pDoc);
-}
+#endif
 
+    return nullptr;
+}
 
 CSrc6502View *CMainFrame::GetCurrentView()
 {
-    CMDIChildWnd *pWnd= MDIGetActive();
-    if (pWnd==NULL)
-        return NULL;
+#if REWRITE_TO_WX_WIDGET
+    CMDIChildWnd *pWnd = MDIGetActive();
 
-    CView *pView= pWnd->GetActiveView();	// aktywne okno 'view'
-    if (pView==NULL || !pView->IsKindOf( RUNTIME_CLASS(CSrc6502View) ))
-        return NULL;
+    if (pWnd == nullptr)
+        return nullptr;
+
+    CView *pView = pWnd->GetActiveView(); // Active window 'view'
+
+    if (pView == nullptr || !pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)))
+        return nullptr;
 
     return static_cast<CSrc6502View*>(pView);
+#endif
+
+    return nullptr;
 }
 
 //-----------------------------------------------------------------------------
 
 void CMainFrame::OnUpdateSymDebug(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable(theApp.m_global.IsCodePresent());	// jest zasemblowany program?
-    pCmdUI->SetCheck(theApp.m_global.IsDebugger());	// debugger uruchomiony
+#if REWRITE_TO_WX_WIDGET
+    pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is the program assembled?
+    pCmdUI->SetCheck(wxGetApp().m_global.IsDebugger());  // Debugger started
+#endif
 }
 
-void CMainFrame::OnSymDebug()		// uruchomienie debuggera
+void CMainFrame::OnSymDebug() // Start the debugger
 {
-    if (theApp.m_global.IsDebugger())   // ju� uruchomiony?
+#if REWRITE_TO_WX_WIDGET
+    if (wxGetApp().m_global.IsDebugger()) // Already started?
     {
         OnSymDebugStop();
     }
@@ -1034,22 +1064,22 @@ void CMainFrame::OnSymDebug()		// uruchomienie debuggera
         if (!theApp.m_global.IsCodePresent())
             return;
 
-        if (theApp.m_global.m_bProc6502==2) //1.3 65816 mode - disable simulator mode
+        if (wxGetApp().m_global.m_bProc6502 == 2) // 1.3 65816 mode - disable simulator mode
         {
             std::string cs;
             cs.Format("The debugger does not currently support the 65816 processor.  Please go to the program options and selected a different processor to use the debugger.");
-            MessageBoxA( cs, "Reminder", MB_OK );
+            MessageBoxA(cs, "Reminder", MB_OK );
             return;
         }
-        theApp.m_global.StartDebug();
+        wxGetApp().m_global.StartDebug();
 //		m_wndToolBar.OnInitialUpdate();
         DelayedUpdateAll();
         StartIntGenerator();
     }
     /*
-      if (theApp.m_global.GetSimulator() == NULL)
+      if (wxGetApp().m_global.GetSimulator() == NULL)
         return;
-      m_wndRegisterBar.Update( theApp.m_global.GetSimulator()->GetContext(), theApp.m_global.GetStatMsg() );
+      m_wndRegisterBar.Update(wxGetApp().m_global.GetSimulator()->GetContext(), wxGetApp().m_global.GetStatMsg());
 
       if (m_IOWindow.m_hWnd != 0)
       {
@@ -1061,22 +1091,24 @@ void CMainFrame::OnSymDebug()		// uruchomienie debuggera
       if (m_Idents.m_hWnd != 0)
         m_Idents.PostMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
     */
+#endif
 }
 
 //-----------------------------------------------------------------------------
 /*
 void CMainFrame::ClearPositionText()
 {
-  m_wndStatusBar.SetPaneText(1,NULL);
+  m_statusBar.SetPaneText(1,NULL);
 }
 */
 
 void CMainFrame::SetPositionText(int row, int col)
 {
-    std::string strPosition;
-    strPosition.Format(m_strFormat,row,col);
-    m_wndStatusBar.SetPaneText(1,strPosition);
-    m_wndStatusBar.UpdateWindow();
+    char buf[128];
+
+    snprintf(buf, sizeof(buf), m_strFormat.c_str(), row, col);
+
+    m_statusBar.SetStatusText(buf, 1);
 }
 
 /*
@@ -1095,17 +1127,19 @@ void CMainFrame::SetRowColumn(CEdit &edit)
 
 void CMainFrame::OnSymBreakpoint()
 {
-    CSrc6502View *pView= (CSrc6502View *)( GetActiveFrame()->GetActiveView() );
+#if REWRITE_TO_WX_WIDGET
+    CSrc6502View *pView = (CSrc6502View *)(GetActiveFrame()->GetActiveView());
 //  ASSERT(pView==NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
 
-    if (!theApp.m_global.IsDebugger() || pView==NULL)
+    if (!wxGetApp().m_global.IsDebugger() || pView == NULL)
         return;
 
     if (pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)))
     {
-        int line= pView->GetCurrLineNo();	// bie��cy wiersz
+        int line = pView->GetCurrLineNo();	// bie��cy wiersz
         // ustawienie miejsca przerwania w kodzie wynikowym odpowiadaj�cym bie��cemu wierszowi
-        CAsm::Breakpoint bp= theApp.m_global.SetBreakpoint( line, pView->GetDocument()->GetPathName() );
+        CAsm::Breakpoint bp = theApp.m_global.SetBreakpoint(line, pView->GetDocument()->GetPathName());
+
         if (bp != CAsm::BPT_NO_CODE)
         {
             if (bp != CAsm::BPT_NONE)
@@ -1118,206 +1152,267 @@ void CMainFrame::OnSymBreakpoint()
     }
     else if (pView->IsKindOf(RUNTIME_CLASS(CDeasm6502View)))
     {
-        ;
     }
     else
     {
-        ASSERT(false);	// aktywne okno nierozpoznane
+        ASSERT(false); // Active window unrecognized
         return;
     }
+#endif
 }
 
 void CMainFrame::OnUpdateSymBreakpoint(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia�aj�cy debugger
-                    GetActiveFrame()->GetActiveView() );		// i aktywny dokument?
+#if REWRITE_TO_WX_WIDGET
+    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // is there a working debugger
+                   GetActiveFrame()->GetActiveView()); // and an active document?
+#endif
 }
-
 
 void CMainFrame::AddBreakpoint(CSrc6502View* pView, int nLine, CAsm::Breakpoint bp)
 {
+#if REWRITE_TO_WX_WIDGET
     if (pView == 0)
         return;
 
-    CDocument* pDoc= pView->GetDocument();
-    POSITION pos= pDoc->GetFirstViewPosition();
+    CDocument* pDoc = pView->GetDocument();
+    POSITION pos = pDoc->GetFirstViewPosition();
+
     while (pos != NULL)
-        if (CSrc6502View* pSrcView= dynamic_cast<CSrc6502View*>(pDoc->GetNextView(pos)))
+    {
+        CSrc6502View* pSrcView= dynamic_cast<CSrc6502View*>(pDoc->GetNextView(pos));
+
+        if (pSrcView)
             pSrcView->AddBreakpoint(nLine, bp);
+    }
+#endif
 }
 
 void CMainFrame::RemoveBreakpoint(CSrc6502View* pView, int nLine)
 {
+#if REWRITE_TO_WX_WIDGET
     if (pView == 0)
         return;
 
-    CDocument* pDoc= pView->GetDocument();
-    POSITION pos= pDoc->GetFirstViewPosition();
-    while (pos != NULL)
-        if (CSrc6502View* pSrcView= dynamic_cast<CSrc6502View*>(pDoc->GetNextView(pos)))
-            pSrcView->RemoveBreakpoint(nLine);
-}
+    CDocument* pDoc = pView->GetDocument();
+    POSITION pos = pDoc->GetFirstViewPosition();
 
+    while (pos != NULL)
+    {
+        CSrc6502View* pSrcView = dynamic_cast<CSrc6502View*>(pDoc->GetNextView(pos));
+
+        if (pSrcView)
+            pSrcView->RemoveBreakpoint(nLine);
+    }
+#endif
+}
 
 void CMainFrame::OnSymEditBreakpoint()
 {
-    CSrc6502View *pView= (CSrc6502View *)( GetActiveFrame()->GetActiveView() );
-    ASSERT(pView==NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
+#if REWRITE_TO_WX_WIDGET
+    CSrc6502View *pView = (CSrc6502View *)(GetActiveFrame()->GetActiveView());
+    ASSERT(pView == NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
 
-    if (!theApp.m_global.IsDebugger() || pView==NULL)
+    if (!theApp.m_global.IsDebugger() || pView == NULL)
         return;
-    int line= pView->GetCurrLineNo();	// bie��cy wiersz
 
-    // pobranie parametr�w przerwania w kodzie wynikowym odpowiadaj�cym bie��cemu wierszowi
-    CAsm::Breakpoint bp= theApp.m_global.GetBreakpoint( line, pView->GetDocument()->GetPathName() );
+    int line = pView->GetCurrLineNo();
+
+    // Get interrupt parameters in the output code corresponding to a non-line
+    uint8_t bp = wxGetApp().m_global.GetBreakpoint(line, pView->GetDocument()->GetPathName());
+
     if (bp != CAsm::BPT_NO_CODE)
     {
-        CDialEditBreakpoint edit_bp(bp,this);
-        if (edit_bp.DoModal() != IDOK)
+        CDialEditBreakpoint edit_bp(bp, this);
+
+        if (edit_bp.ShowModal() != wxID_OK)
             return;
+
         bp = edit_bp.GetBreakpoint();
+
         if ((bp & CAsm::BPT_MASK) == CAsm::BPT_NONE)
         {
-            theApp.m_global.ClrBreakpoint( line, pView->GetDocument()->GetPathName() );
+            wxGetApp().m_global.ClrBreakpoint(line, pView->GetDocument()->GetPathName());
             pView->RemoveBreakpoint(line);
         }
         else
         {
-            theApp.m_global.ModifyBreakpoint( line, pView->GetDocument()->GetPathName(), bp );
-            AddBreakpoint(pView, line,bp);
+            wxGetApp().m_global.ModifyBreakpoint(line, pView->GetDocument()->GetPathName(), bp);
+            AddBreakpoint(pView, line, bp);
         }
     }
     else
         AfxMessageBox(IDS_SRC_NO_CODE);
+#endif
 }
 
 void CMainFrame::OnUpdateSymEditBreakpoint(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia�aj�cy debugger
-                    GetActiveFrame()->GetActiveView() );		// i aktywny dokument?
+#if REWRITE_TO_WX_WIDGET
+    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // is there a working debugger
+                   GetActiveFrame()->GetActiveView()); // and an active document?
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void CMainFrame::OnSymBreak()
 {
-    if (!theApp.m_global.IsProgramRunning())
+    if (!wxGetApp().m_global.IsProgramRunning())
         return;
-    theApp.m_global.GetSimulator()->Break();		// przerwanie dzia�aj�cego programu
+
+    wxGetApp().m_global.GetSimulator()->Break(); // Break the running program
     DelayedUpdateAll();
 
-    AfxGetMainWnd()->SetFocus();		// restore focus (so it's not in i/o window)
+#if REWRITE_TO_WX_WIDGET
+    // This should be for the main window.  (That's what this is, right?) -- B.Simonds (April 29, 2024)
+    SetFocus(); // restore focus (so it's not in i/o window)
+#endif
 }
 
 void CMainFrame::OnUpdateSymBreak(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable(theApp.m_global.IsProgramRunning());	// jest dzia�aj�cy program i debugger?
+#if REWRITE_TO_WX_WIDGET
+    pCmdUI->Enable(wxGetApp().m_global.IsProgramRunning()); // Is there a working program and debugger?
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnSymSkipInstr()	// omini�cie bie��cej instrukcji
+void CMainFrame::OnSymSkipInstr()	// Skip the current statement
 {
-    if (!theApp.m_global.IsDebugger() || theApp.m_global.IsProgramRunning() ||
-            theApp.m_global.IsProgramFinished() )
+    if (!wxGetApp().m_global.IsDebugger() ||
+        wxGetApp().m_global.IsProgramRunning() ||
+        wxGetApp().m_global.IsProgramFinished())
+    {
         return;
-    theApp.m_global.GetSimulator()->SkipInstr();
+    }
+
+    wxGetApp().m_global.GetSimulator()->SkipInstr();
 }
 
 void CMainFrame::OnUpdateSymSkipInstr(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia�aj�cy debugger
-                    !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() );		// i niezako�czony program?
+#if REWRITE_TO_WX_WIDGET
+    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&        // is there a running debugger
+                   !wxGetApp().m_global.IsProgramRunning() && // and a stopped
+                   !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void CMainFrame::OnSymGo()		// uruchomienie programu
 {
-    if (!theApp.m_global.IsDebugger() || theApp.m_global.IsProgramRunning() ||
-            theApp.m_global.IsProgramFinished() )
+    if (!wxGetApp().m_global.IsDebugger() ||
+        wxGetApp().m_global.IsProgramRunning() ||
+        wxGetApp().m_global.IsProgramFinished())
+    {
         return;
-    theApp.m_global.GetSimulator()->Run();
+    }
+
+    wxGetApp().m_global.GetSimulator()->Run();
 }
 
 void CMainFrame::OnUpdateSymGo(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia�aj�cy debugger
-                    !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() );		// i niezako�czony program?
+#if REWRITE_TO_WX_WIDGET
+    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&        // is there a running debugger
+                   !wxGetApp().m_global.IsProgramRunning() && // and a stopped
+                   !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnSymGoToLine()	// uruchomienie do wiersza
+void CMainFrame::OnSymGoToLine() // Run to line
 {
-    CSrc6502View *pView= (CSrc6502View *)( GetActiveFrame()->GetActiveView() );
-    ASSERT(pView==NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
+#if REWRITE_TO_WX_WIDGET
+    CSrc6502View *pView = (CSrc6502View *)(GetActiveFrame()->GetActiveView());
+    ASSERT(pView == NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
 
-    if (pView==NULL || !theApp.m_global.IsDebugger() || theApp.m_global.IsProgramRunning() ||
-            theApp.m_global.IsProgramFinished() )
+    if (pView == NULL ||
+        !wxGetApp().m_global.IsDebugger() ||
+        wxGetApp().m_global.IsProgramRunning() ||
+        wxGetApp().m_global.IsProgramFinished())
+    {
         return;
+    }
 
-    int line= pView->GetCurrLineNo();
-    CAsm::DbgFlag flg= theApp.m_global.GetLineDebugFlags(line,pView->GetDocument()->GetPathName());
-    if (flg == CAsm::DBG_EMPTY || (flg & CAsm::DBG_MACRO))	// wiersz bez kodu wynikowego?
+    int line = pView->GetCurrLineNo();
+    CAsm::DbgFlag flg = wxGetApp().m_global.GetLineDebugFlags(line,pView->GetDocument()->GetPathName());
+
+    if (flg == CAsm::DBG_EMPTY || (flg & CAsm::DBG_MACRO)) // Line without result code?
     {
         AfxMessageBox(IDS_SRC_NO_CODE2);
         return;
     }
-    else if (flg & CAsm::DBG_DATA)			// wiersz z danymi zamiast rozkaz�w?
+    else if (flg & CAsm::DBG_DATA) // Line with data instead of commands?
     {
         if (AfxMessageBox(IDS_SRC_DATA,MB_YESNO) != IDYES)
             return;
     }
 
-    theApp.m_global.SetTempExecBreakpoint(line,pView->GetDocument()->GetPathName());
-    theApp.m_global.GetSimulator()->Run();	// uruchomienie po ustawieniu tymczasowego przerwania
+    wxGetApp().m_global.SetTempExecBreakpoint(line, pView->GetDocument()->GetPathName());
+    wxGetApp().m_global.GetSimulator()->Run(); // Run after setting a temporary interrupt
+#endif
 }
 
 void CMainFrame::OnUpdateSymGoToLine(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia�aj�cy debugger
-                    !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() &&		// niezako�czony program
-                    GetActiveFrame()->GetActiveView() &&		// i aktywny dokument?
-                    GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)) );
+#if REWRITE_TO_WX_WIDGET
+    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&          // Is there a running debugger 
+                   !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
+                   !wxGetApp().m_global.IsProgramFinished() &&  // unfinished program
+                   GetActiveFrame()->GetActiveView() &&         // and an active document?
+                   GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bie��cy wiersz
 {
-    CSrc6502View *pView= (CSrc6502View *)( GetActiveFrame()->GetActiveView() );
-    ASSERT(pView==NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
+#if REWRITE_TO_WX_WIDGET
+    CSrc6502View *pView = (CSrc6502View *)(GetActiveFrame()->GetActiveView());
+    ASSERT(pView == NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
 
-    if (pView==NULL || !theApp.m_global.IsDebugger() || theApp.m_global.IsProgramRunning() ||
-            theApp.m_global.IsProgramFinished() )
+    if (pView == NULL ||
+        !wxGetApp().m_global.IsDebugger() ||
+        wxGetApp().m_global.IsProgramRunning() ||
+        wxGetApp().m_global.IsProgramFinished())
+    {
         return;
-    int line= pView->GetCurrLineNo();
-    CAsm::DbgFlag flg= theApp.m_global.GetLineDebugFlags(line,pView->GetDocument()->GetPathName());
-    if (flg == CAsm::DBG_EMPTY || (flg & CAsm::DBG_MACRO))	// wiersz bez kodu wynikowego?
+    }
+
+    int line = pView->GetCurrLineNo();
+    CAsm::DbgFlag flg = wxGetApp().m_global.GetLineDebugFlags(line,pView->GetDocument()->GetPathName());
+
+    if (flg == CAsm::DBG_EMPTY || (flg & CAsm::DBG_MACRO)) // Line without result code?
     {
         AfxMessageBox(IDS_SRC_NO_CODE3);
         return;
     }
-    else if (flg & CAsm::DBG_DATA)			// wiersz z danymi zamiast rozkaz�w?
+    else if (flg & CAsm::DBG_DATA) // Line with data instead of commands?
     {
         if (AfxMessageBox(IDS_SRC_DATA,MB_YESNO) != IDYES)
             return;
     }
-    UINT32 addr= theApp.m_global.GetLineCodeAddr(line,pView->GetDocument()->GetPathName());
-    theApp.m_global.GetSimulator()->SkipToAddr(addr);
+
+    uint32_t addr = wxGetApp().m_global.GetLineCodeAddr(line, pView->GetDocument()->GetPathName());
+    wxGetApp().m_global.GetSimulator()->SkipToAddr(addr);
+#endif
 }
 
 void CMainFrame::OnUpdateSymSkipToLine(CCmdUI* pCmdUI)
 {
-    pCmdUI->Enable( theApp.m_global.IsDebugger() &&	// jest dzia�aj�cy debugger
-                    !theApp.m_global.IsProgramRunning() &&		// oraz zatrzymany
-                    !theApp.m_global.IsProgramFinished() &&		// niezako�czony program
-                    GetActiveFrame()->GetActiveView() &&		// i aktywny dokument?
-                    GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)) );
+#if REWRITE_TO_WX_WIDGET
+    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&          // Is there a running debugger 
+                   !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
+                   !wxGetApp().m_global.IsProgramFinished() &&  // unfinished program
+                   GetActiveFrame()->GetActiveView() &&         // and an active document?
+                   GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1330,7 +1425,7 @@ void CMainFrame::OnSymGoToRts() // Run to return from the subroutine
         return;
     }
 
-    theApp.m_global.GetSimulator()->RunTillRet();
+    wxGetApp().m_global.GetSimulator()->RunTillRet();
 }
 
 void CMainFrame::OnUpdateSymGoToRts(CCmdUI* pCmdUI)
@@ -1394,7 +1489,7 @@ void CMainFrame::OnSymRestart()
     if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramRunning())
         return;
 
-    wxGetApp.m_global.RestartProgram();
+    wxGetApp().m_global.RestartProgram();
     DelayedUpdateAll();
 }
 
@@ -1434,7 +1529,9 @@ void CMainFrame::OnSymDebugStop()
 {
     if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramRunning())
     {
+#if REWRITE_TO_WX_WIDGET
         MessageBeep(-2);
+#endif
         return;
     }
     wxGetApp().m_global.ExitDebugger();
@@ -1457,6 +1554,7 @@ void CMainFrame::OnSymDebugStop()
 
 //=============================================================================
 
+#if 0
 afx_msg LRESULT CMainFrame::OnUpdateState(WPARAM wParam, LPARAM lParam)
 {
     if (wxGetApp().m_global.IsDebugger())
@@ -1467,13 +1565,17 @@ afx_msg LRESULT CMainFrame::OnUpdateState(WPARAM wParam, LPARAM lParam)
 
     return 0;
 }
+#endif
 
 //---------------------------- Opcje programu ---------------------------------
 
 int CMainFrame::Options(int page)
 {
-    COptions dial(this, page);
+    COptions dial(page);
 
+    int i;
+
+#if REWRITE_TO_WX_WIDGET
     dial.m_EditPage.m_bAutoIndent		= CSrc6502View::m_bAutoIndent;
     dial.m_EditPage.m_nTabStep			= CSrc6502View::m_nTabStep;
     dial.m_EditPage.m_bAutoSyntax		= CSrc6502View::m_bAutoSyntax;
@@ -1512,7 +1614,6 @@ int CMainFrame::Options(int page)
     dial.m_AsmPage.m_bGenerateBRKExtraByte = CAsm6502::generateBRKExtraByte;
     dial.m_AsmPage.m_uBrkExtraByte = CAsm6502::BRKExtraByte;
 
-    int i;
     for (i = 0; text_color[i]; i++) // Read colors
     {
         dial.m_ViewPage.m_Text[i].text = *text_color[i];
@@ -1580,7 +1681,7 @@ int CMainFrame::Options(int page)
         CSrc6502View::m_bAutoIndent = dial.m_EditPage.m_bAutoIndent;
         RedrawAllViews();
     }
-    
+#endif
     /*
       if (dial.m_EditPage.m_bFontChanged || dial.m_EditPage.m_nTabStep != CSrc6502View::m_nTabStep ||
         dial.m_DeasmPage.m_bColorChanged || dial.m_MarksPage.m_bColorChanged)

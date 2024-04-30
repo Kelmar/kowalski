@@ -29,6 +29,9 @@ namespace ConfigSettings
     extern wxColour *bkgnd_color[];
     extern wxColour *color_syntax[];
     extern uint8_t *syntax_font_style[];
+
+    void Load();
+    void Save(bool);
 };
 
 #endif /* CONFIG_SETTINGS_H__ */

@@ -26,288 +26,193 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 // COptionsSymPage dialog
 
-class COptionsSymPage : public CPropertyPage
+class COptionsSymPage : public wxPanel
 {
-    DECLARE_DYNCREATE(COptionsSymPage)
-
 // Construction
 public:
-    COptionsSymPage();
-    ~COptionsSymPage();
+    /* constructor */ COptionsSymPage();
+    virtual ~COptionsSymPage();
 
-// Dialog Data
-    //{{AFX_DATA(COptionsSymPage)
-    enum { IDD = IDD_PROPPAGE_SYMULATOR };
-    UINT	m_nIOAddress;
-    BOOL	m_bIOEnable;
-    int	m_nFinish;
-    int	m_nWndWidth;
-    int	m_nWndHeight;
-    BOOL	m_bProtectMemory;
-    UINT	m_nProtFromAddr;
-    UINT	m_nProtToAddr;
-    //}}AFX_DATA
+    UINT m_nIOAddress;
+    bool m_bIOEnable;
+    int m_nFinish;
+    int m_nWndWidth;
+    int m_nWndHeight;
+    bool m_bProtectMemory;
+    UINT m_nProtFromAddr;
+    UINT m_nProtToAddr;
 
-// Overrides
-    // ClassWizard generate virtual function overrides
-    //{{AFX_VIRTUAL(COptionsSymPage)
 protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
+    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-// Implementation
-protected:
-    // Generated message map functions
-    //{{AFX_MSG(COptionsSymPage)
-    afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-    afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
+    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsEditPage dialog
 
-class COptionsEditPage : public CPropertyPage
+class COptionsEditPage : public wxPanel
 {
-    DECLARE_DYNCREATE(COptionsEditPage)
-
 public:
-//  void OnChangeFont();
+    /* constructor */ COptionsEditPage();
+    virtual ~COptionsEditPage();
 
-    // Construction
-public:
-    COptionsEditPage();
-    ~COptionsEditPage();
-
-    // Dialog Data
-    //{{AFX_DATA(COptionsEditPage)
     enum { IDD = IDD_PROPPAGE_EDITOR };
-    CButton	m_btnBold;
+    wxButton m_btnBold;
     CColorButton m_btnColor;
-    CComboBox	m_wndElement;
+    wxComboBox m_wndElement;
     CSyntaxExample m_wndExample;
-    BOOL	m_bAutoIndent;
+    bool m_bAutoIndent;
     int	m_nTabStep;
-    BOOL	m_bAutoSyntax;
-    BOOL	m_bAutoUppercase;
-    BOOL	m_bFileNew;
-    int		m_nElement;
-    //}}AFX_DATA
+    bool m_bAutoSyntax;
+    bool m_bAutoUppercase;
+    bool m_bFileNew;
+    int  m_nElement;
     bool m_bColorChanged;
 
-    COLORREF* GetColorElement(int nIndex);
+    wxColour* GetColorElement(int nIndex);
     bool* GetFontStyle(int nIndex);
 
-    // Overrides
-    // ClassWizard generate virtual function overrides
-    //{{AFX_VIRTUAL(COptionsEditPage)
 public:
-    virtual BOOL OnSetActive();
-protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
+    virtual bool OnSetActive();
 
-    // Implementation
 protected:
-    // Generated message map functions
-    //{{AFX_MSG(COptionsEditPage)
-    afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-    afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-    virtual BOOL OnInitDialog();
+    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+    //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
+    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
+    virtual bool OnInitDialog();
     afx_msg void OnChangeTabStep();
     afx_msg void OnColorSyntax();
     afx_msg void OnSelChangeElement();
     afx_msg void OnEditColor();
     afx_msg void OnBoldFont();
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 
-    COLORREF* GetColorElement();
+    wxColour* GetColorElement();
     bool* GetFontStyle();
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsAsmPage dialog
 
-class COptionsAsmPage : public CPropertyPage
+class COptionsAsmPage : public wxPanel
 {
-    DECLARE_DYNCREATE(COptionsAsmPage)
-
-    // Construction
 public:
-    COptionsAsmPage();
-    ~COptionsAsmPage();
+    /* constructor */ COptionsAsmPage();
+    virtual ~COptionsAsmPage();
 
-    // Dialog Data
-    //{{AFX_DATA(COptionsAsmPage)
-    enum { IDD = IDD_PROPPAGE_ASSEMBLY };
     int	m_nCaseSensitive;
     int	m_nAsmInstrWithDot;
-    BOOL	m_bGenerateListing;
-    CString m_strListingFile;
-    BOOL	m_bGenerateBRKExtraByte;
-    UINT	m_uBrkExtraByte;
-    //}}AFX_DATA
+    bool m_bGenerateListing;
+    std::string m_strListingFile;
+    bool m_bGenerateBRKExtraByte;
+    UINT m_uBrkExtraByte;
 
-
-    // Overrides
-    // ClassWizard generate virtual function overrides
-    //{{AFX_VIRTUAL(COptionsAsmPage)
 protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
+    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-    // Implementation
-protected:
-    // Generated message map functions
-    //{{AFX_MSG(COptionsAsmPage)
-    afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-    afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+    //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
+    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
     afx_msg void OnOptAsmChooseFile();
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
-
 };
-
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsDeasmPage dialog
 
-class COptionsDeasmPage : public CPropertyPage
+class COptionsDeasmPage : public wxPanel
 {
+private:
     CColorButton m_ColorButtonAddress;
     CColorButton m_ColorButtonCode;
 //  CColorButton m_ColorButtonInstr;
     bool m_bSubclassed;
 
-    DECLARE_DYNCREATE(COptionsDeasmPage)
-
 public:
-    COLORREF m_rgbAddress;
-    COLORREF m_rgbCode;
-//  COLORREF m_rgbInstr;
+    wxColour m_rgbAddress;
+    wxColour m_rgbCode;
+    //wxColour m_rgbInstr;
     bool m_bColorChanged;
 
     // Construction
 public:
-    COptionsDeasmPage();
-    ~COptionsDeasmPage();
+    /* constructor */ COptionsDeasmPage();
+    virtual ~COptionsDeasmPage();
 
-    // Dialog Data
-    //{{AFX_DATA(COptionsDeasmPage)
-    enum { IDD = IDD_PROPPAGE_DEASM };
-    BOOL	m_ShowCode;
-    //}}AFX_DATA
+    bool m_ShowCode;
 
-
-    // Overrides
-    // ClassWizard generate virtual function overrides
-    //{{AFX_VIRTUAL(COptionsDeasmPage)
 public:
-    virtual BOOL OnSetActive();
-protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
+    virtual bool OnSetActive();
 
-    // Implementation
 protected:
-    // Generated message map functions
-    //{{AFX_MSG(COptionsDeasmPage)
+    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
     afx_msg void OnAddrColButton();
     afx_msg void OnCodeColButton();
-    afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-    afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
-
+    //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
+    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
 };
 
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsMarksPage dialog
 
-class COptionsMarksPage : public CPropertyPage
+class COptionsMarksPage : public wxPanel
 {
+private:
     CColorButton m_ColorButtonPointer;
     CColorButton m_ColorButtonBreakpoint;
     CColorButton m_ColorButtonError;
+
     bool m_bSubclassed;
 
-    DECLARE_DYNCREATE(COptionsMarksPage)
-
 public:
-    COLORREF m_rgbPointer;
-    COLORREF m_rgbBreakpoint;
-    COLORREF m_rgbError;
+    wxColour m_rgbPointer;
+    wxColour m_rgbBreakpoint;
+    wxColour m_rgbError;
     bool m_bColorChanged;
     bool m_bFontChanged;
-    LOGFONT m_LogFont;
+    wxFontInfo m_LogFont;
 
     // Construction
 public:
-    COptionsMarksPage();
-    ~COptionsMarksPage();
+    /* constructor */ COptionsMarksPage();
+    virtual ~COptionsMarksPage();
 
-    // Dialog Data
-    //{{AFX_DATA(COptionsMarksPage)
-    enum { IDD = IDD_PROPPAGE_GENERAL };
     int m_nProc6502;
-    UINT	m_uBusWidth;
+    UINT m_uBusWidth;
     int m_nHelpFile; //^^help
-    //}}AFX_DATA
 
-
-    // Overrides
-    // ClassWizard generate virtual function overrides
-    //{{AFX_VIRTUAL(COptionsMarksPage)
 public:
-    virtual BOOL OnSetActive();
-protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
+    virtual bool OnSetActive();
 
-    // Implementation
 protected:
-    // Generated message map functions
-    //{{AFX_MSG(COptionsMarksPage)
+    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
     afx_msg void OnBrkpColButton();
     afx_msg void OnErrColButton();
     afx_msg void OnPtrColButton();
-    afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-    afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+    //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
+    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
     afx_msg void OnOptFontBtn();
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
-
 };
-
 
 /////////////////////////////////////////////////////////////////////////////
 // COptions
 
-class COptions : public CPropertySheet
+class COptions : public wxNotebook
 {
     int m_nLastActivePageIndex;
 
-    static int CALLBACK PropSheetProc(HWND hwndDlg, UINT uMsg, LPARAM lParam);
-//  static LRESULT CALLBACK EditDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-//  static LRESULT (CALLBACK *m_pfnOldProc)(HWND,UINT,WPARAM,LPARAM);
-//  static LRESULT CALLBACK ClassDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-//  static LRESULT (CALLBACK *m_pfnOldClassProc)(HWND,UINT,WPARAM,LPARAM);
+    //static int CALLBACK PropSheetProc(HWND hwndDlg, UINT uMsg, LPARAM lParam);
 
-    DECLARE_DYNAMIC(COptions)
-
-    enum { ID = IDS_OPTIONS };
-    // Construction
 public:
-    COptions(CWnd* pParentWnd, UINT iSelectPage= 0);
-//  COptions(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
-//  COptions(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
+    /* constructor */ COptions(UINT iSelectPage = 0);
+    virtual          ~COptions();
 
     // Attributes
 public:
-    static DWORD m_arrIds[];
+    static uint32_t m_arrIds[];
     COptionsAsmPage m_AsmPage;
     COptionsEditPage m_EditPage;
     COptionsSymPage m_SymPage;
@@ -319,24 +224,11 @@ public:
 public:
     int GetLastActivePage();
 
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(COptions)
 protected:
-    virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-    //}}AFX_VIRTUAL
+    virtual bool OnCommand(WPARAM wParam, LPARAM lParam);
 
-    // Implementation
-public:
-    virtual ~COptions();
-
-    // Generated message map functions
-protected:
-    //{{AFX_MSG(COptions)
-    afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-    afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
+    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
 };
 
 /////////////////////////////////////////////////////////////////////////////

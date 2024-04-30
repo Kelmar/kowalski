@@ -105,18 +105,9 @@ public:
 
     void ShowDynamicHelp(const std::string& strLine, int nWordStart, int nWordEnd);
 
-public:
 #if 0
     virtual bool PreCreateWindow(CREATESTRUCT& cs);
     virtual bool OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
-#endif
-
-// Implementation
-public:
-    
-#ifdef _DEBUG
-    //virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
 #endif
 
 protected:  // control bar embedded members

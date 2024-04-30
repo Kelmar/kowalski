@@ -18,43 +18,30 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef DIAL_EDIT_BRK_H__
+#define DIAL_EDIT_BRK_H__
+
 // DialEditBrkp.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
 // CDialEditBreakpoint dialog
 
-class CDialEditBreakpoint : public CDialog, CAsm
+class CDialEditBreakpoint : public wxDialog
 {
-    // Construction
 public:
-    Breakpoint GetBreakpoint();
-    CDialEditBreakpoint(Breakpoint bp, CWnd* pParent = NULL);   // standard constructor
+    /* constructor */ CDialEditBreakpoint(uint8_t bp);
 
-    // Dialog Data
-    //{{AFX_DATA(CDialEditBreakpoint)
-    enum { IDD = IDD_EDIT_BREAKPOINT };
-    BOOL	m_Disabled;
-    BOOL	m_Execute;
-    BOOL	m_Read;
-    BOOL	m_Write;
-    UINT	m_uAddr;
-    //}}AFX_DATA
-
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CDialEditBreakpoint)
+    uint8_t GetBreakpoint();
+    
+    bool m_Disabled;
+    bool m_Execute;
+    bool m_Read;
+    bool m_Write;
+    UINT m_uAddr;
+    
 protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
-
-    // Implementation
-protected:
-
-    // Generated message map functions
-    //{{AFX_MSG(CDialEditBreakpoint)
-    // NOTE: the ClassWizard will add member functions here
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 };
+
+#endif /* DIAL_EDIT_BRK_H__ */

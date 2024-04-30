@@ -1,7 +1,5 @@
-// CG: This file was added by the Splash Screen component.
-
-#ifndef _SPLASH_SCRN_
-#define _SPLASH_SCRN_
+#ifndef SPLASH_WND_H__
+#define SPLASH_WND_H__
 
 // Splash.h : header file
 //
@@ -9,48 +7,37 @@
 /////////////////////////////////////////////////////////////////////////////
 //   Splash Screen class
 
-class CSplashWnd : public CWnd
+class CSplashWnd : public wxWindow
 {
-    // Construction
 protected:
-    CSplashWnd();
+    /* constructor */ CSplashWnd();
 
     // Attributes:
 public:
-    CBitmap m_bitmap;
-    HANDLE m_hdib;
+    wxBitmap m_bitmap;
+    //HANDLE m_hdib;
 
     // Operations
 public:
-    static void EnableSplashScreen(bool bEnable= true);
-    static void ShowSplashScreen(CWnd* pParentWnd = NULL);
-    static void PreTranslateAppMessage(MSG* pMsg);
+    static void EnableSplashScreen(bool bEnable = true);
+    static void ShowSplashScreen(wxWindow* pParentWnd = nullptr);
+    //static void PreTranslateAppMessage(MSG* pMsg);
 
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CSplashWnd)
-    //}}AFX_VIRTUAL
-
-    // Implementation
 public:
-    ~CSplashWnd();
+    virtual ~CSplashWnd();
     virtual void PostNcDestroy();
 
 protected:
-    bool Create(CWnd* pParentWnd = NULL);
+    bool Create(wxWindow* pParentWnd = nullptr);
     void HideSplashScreen();
+
     static bool c_bShowSplashWnd;
     static CSplashWnd* c_pSplashWnd;
 
-    // Generated message map functions
 protected:
-    //{{AFX_MSG(CSplashWnd)
-    afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+    //afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
     afx_msg void OnPaint();
     afx_msg void OnTimer(UINT nIDEvent);
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 };
 
-
-#endif
+#endif /* SPLASH_WND_H__ */

@@ -18,63 +18,37 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#if !defined(AFX_SYNTAXEXAMPLE_H__95642D27_FE87_4AD4_8404_9EB9599F46FA__INCLUDED_)
-#define AFX_SYNTAXEXAMPLE_H__95642D27_FE87_4AD4_8404_9EB9599F46FA__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-// SyntaxExample.h : header file
-//
+#ifndef SYNTAX_EXAMPLE_H__
+#define SYNTAX_EXAMPLE_H__
 
 /////////////////////////////////////////////////////////////////////////////
 // CSyntaxExample window
 
-class CSyntaxExample : public CButton
+class CSyntaxExample : public wxPanel
 {
-// Construction
 public:
-    CSyntaxExample();
+    /* constructor */ CSyntaxExample();
 
-// Attributes
-public:
     int m_nTabStop;
-    HFONT m_hEditorFont;
-    COLORREF m_rgbBackground;
-    COLORREF m_rgbText;
-    COLORREF m_rgbInstruction;
-    COLORREF m_rgbDirective;
-    COLORREF m_rgbComment;
-    COLORREF m_rgbNumber;
-    COLORREF m_rgbString;
-    COLORREF m_rgbSelection;
+    wxFont m_hEditorFont;
+    wxColour m_rgbBackground;
+    wxColour m_rgbText;
+    wxColour m_rgbInstruction;
+    wxColour m_rgbDirective;
+    wxColour m_rgbComment;
+    wxColour m_rgbNumber;
+    wxColour m_rgbString;
+    wxColour m_rgbSelection;
     bool m_vbBold[5];
 
-// Operations
 public:
     virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CSyntaxExample)
-    //}}AFX_VIRTUAL
-
-// Implementation
 public:
     virtual ~CSyntaxExample();
 
-    // Generated message map functions
 protected:
-    //{{AFX_MSG(CSyntaxExample)
-    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-    //}}AFX_MSG
-
-    DECLARE_MESSAGE_MAP()
+    afx_msg bool OnEraseBkgnd(wxDC* pDC);
 };
 
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_SYNTAXEXAMPLE_H__95642D27_FE87_4AD4_8404_9EB9599F46FA__INCLUDED_)
+#endif /* SYNTAX_EXAMPLE_H__ */

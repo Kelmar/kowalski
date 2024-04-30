@@ -18,38 +18,37 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef SAVE_CODE_DLG_H__
+#define SAVE_CODE_DLG_H__
+
 // SaveCode.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
 // CSaveCode dialog
 
-class CSaveCode : public CFileDialog
+class CSaveCode : public wxDialog
 {
     static UINT m_uStart;
     static UINT m_uEnd;
-    CString m_strTitle;
     int m_nPos;
     static int m_nInitPos;
 
-    void EnableOptions(bool bRedraw= TRUE);
-
-    DECLARE_DYNAMIC(CSaveCode)
+    void EnableOptions(bool bRedraw = true);
 
 public:
-    CSaveCode(LPCTSTR lpszFileName = NULL,
-              LPCTSTR lpszFilter = NULL,
-              CWnd* pParentWnd = NULL);
+    CSaveCode(const char *fileName = nullptr,
+              const char *fileter = nullptr,
+              wxWindow* pParentWnd = nullptr);
+
     void SaveCode();
 
 protected:
-    //{{AFX_MSG(CSaveCode)
-    virtual BOOL OnInitDialog();
-    //}}AFX_MSG
-//  afx_msg LRESULT OnNotify(WPARAM wParam, LPARAM lParam);
+    virtual bool OnInitDialog();
+
     void OnOptions();
 
     virtual void OnTypeChange();
-
-    DECLARE_MESSAGE_MAP()
 };
+
+#endif /* SAVE_CODE_DLG_H__ */
