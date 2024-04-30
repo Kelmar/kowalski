@@ -42,7 +42,7 @@ public:
     bool m_vbBold[5];
 
 public:
-    virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+    //virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 public:
     virtual ~CSyntaxExample();

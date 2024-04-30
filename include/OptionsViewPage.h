@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef OPT_VIEW_PAGE_H__
+#define OPT_VIEW_PAGE_H__
+
 // OptionsViewPage.h : header file
 //
 
@@ -26,59 +29,44 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 // COptionsViewPage dialog
 
-class COptionsViewPage : public CPropertyPage
+class COptionsViewPage : public wxPanel
 {
+private:
     CColorButton m_ColorButtonText;
     CColorButton m_ColorButtonBkgnd;
-    BOOL m_bSubclassed;
+    bool m_bSubclassed;
     int m_nSelection;
-    COLORREF m_rgbBkgndCol;
-    COLORREF m_rgbTextCol;
+    wxColour m_rgbBkgndCol;
+    wxColour m_rgbTextCol;
 
     void repaint_example();
-
-    DECLARE_DYNCREATE(COptionsViewPage)
-    // Construction
+    
 public:
     struct TextDef
     {
-        COLORREF text, bkgnd;
-        CFont font;
+        wxColour text, bkgnd;
+        wxFont font;
         int changed;
-        CBrush brush;
+        int brush;
     };
     static TextDef m_Text[];
 
-    COptionsViewPage();
-    ~COptionsViewPage();
+    /* constructor */ COptionsViewPage();
+    virtual ~COptionsViewPage();
 
-    // Dialog Data
-    //{{AFX_DATA(COptionsViewPage)
-    enum { IDD = IDD_PROPPAGE_VIEW };
-    // NOTE - ClassWizard will add data members here.
-    //    DO NOT EDIT what you see in these blocks of generated code !
-    //}}AFX_DATA
-
-
-    // Overrides
-    // ClassWizard generate virtual function overrides
-    //{{AFX_VIRTUAL(COptionsViewPage)
 public:
-    virtual BOOL OnSetActive();
-protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
+    virtual bool OnSetActive();
 
-    // Implementation
 protected:
-    // Generated message map functions
-    //{{AFX_MSG(COptionsViewPage)
-    afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    
+    afx_msg int OnCtlColor(wxDC* pDC, wxWindow* pWnd, UINT nCtlColor);
+
     afx_msg void OnSelchangeViewWnd();
     afx_msg void OnViewTxtCol();
     afx_msg void OnViewBkgndCol();
     afx_msg void OnViewFontBtn();
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
 
 };
+
+#endif /* OPT_VIEW_PAGE_H__ */

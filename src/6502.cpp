@@ -34,14 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "CXMultiDocTemplate.h"
 //#include "About.h"
 
-//#include "winver.h"
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 //const char C6502App::REGISTRY_KEY[]= "MiKSoft";
 const char C6502App::PROFILE_NAME[]= "6502 Simulator\\1.9";
 

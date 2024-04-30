@@ -23,15 +23,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Asm.h"
 
-class CMapFile : std::vector<std::string>
+class CMapFile
 {
     std::unordered_map<std::string, CAsm::FileUID> m_pathToFuid;
+    std::unordered_map<CAsm::FileUID, std::string> m_fuidToPath;
 
-    int m_nLastUID;
+    int m_lastUID;
 
 public:
     CMapFile()
-        : m_nLastUID(0)
+        : m_lastUID(0)
     {
     }
 
@@ -41,9 +42,9 @@ public:
 
     void Reset()
     {
-        m_nLastUID = 0;
+        m_lastUID = 0;
+        m_fuidToPath.clear();
         m_pathToFuid.clear();
-        clear();
     }
 
     std::string GetPath(CAsm::FileUID fuid);

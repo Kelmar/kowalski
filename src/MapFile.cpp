@@ -22,26 +22,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "MapFile.h"
 
 
-LPCTSTR CMapFile::GetPath(FileUID fuid)
+std::string CMapFile::GetPath(CAsm::FileUID fuid)
 {
-    if (fuid == 0 || fuid > m_nLastUID)
+    if (fuid == 0 || fuid > m_lastUID)
     {
-        ASSERT(FALSE);		// b��dna warto�� FUID
+        ASSERT(false); // invalid FUID value
         return NULL;
     }
-    return GetAt((int)fuid - 1);
+
+    return m_fuidToPath[fuid];
 }
 
-
-CAsm::FileUID CMapFile::GetFileUID(LPCTSTR path)
+CAsm::FileUID CMapFile::GetFileUID(const std::string &path)
 {
-    FileUID fuid;
-    if (m_PathToFuid.Lookup(path,fuid))
-        return fuid;
+    CAsm::FileUID fuid;
 
-    SetAtGrow(m_nLastUID,path);
-    m_nLastUID++;
-    m_PathToFuid[path] = (FileUID)m_nLastUID;
+    auto itr = m_pathToFuid.find(path);
 
-    return (FileUID)m_nLastUID;
+    if (itr == m_pathToFuid.end())
+    {
+        // Not found, add a new mapping.
+        ++m_lastUID;
+        m_fuidToPath[m_lastUID] = path;
+        m_pathToFuid[path] = (CAsm::FileUID)m_lastUID;
+
+        return (CAsm::FileUID)m_lastUID;
+    }
+
+    return itr->second;
 }
