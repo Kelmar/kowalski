@@ -59,7 +59,7 @@ public:
     virtual ~COptionsEditPage();
 
     enum { IDD = IDD_PROPPAGE_EDITOR };
-    wxButton m_btnBold;
+    wxCheckBox m_btnBold;
     CColorButton m_btnColor;
     wxComboBox m_wndElement;
     CSyntaxExample m_wndExample;
@@ -170,7 +170,7 @@ public:
     wxColour m_rgbPointer;
     wxColour m_rgbBreakpoint;
     wxColour m_rgbError;
-    bool m_bColorChanged;
+    bool m_colorChanged;
     bool m_bFontChanged;
     wxFontInfo m_LogFont;
 

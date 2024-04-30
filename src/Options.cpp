@@ -22,26 +22,38 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
 #include "StdAfx.h"
+
+#include <wx/colordlg.h>
+
 #include "resource.h"
 #include "Options.h"
 #include "ConfigSettings.h"
 
-//static const char *HELP_FILE_6502= "6502.txt";
+//static HH_POPUP hPop;
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+bool SelectColor(wxPanel *parent, wxColour *baseColor, CColorButton *colorBtn)
+{
+    ASSERT(parent);
+    ASSERT(baseColor);
+    ASSERT(cldBtn);
 
-extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num, bool bWord= true);
+    wxColourData data;
+    data.SetColour(*baseColor);
 
-static HH_POPUP hPop;
+    wxColourDialog dlg(parent, &data);
+
+    if (dlg.ShowModal() == wxID_OK)
+    {
+        *baseColor = data.GetColour();
+        return true;
+        colorBtn->Refresh();
+    }
+
+    return false;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // COptions
-
-IMPLEMENT_DYNAMIC(COptions, CPropertySheet)
 
 /*
 COptions::COptions(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
@@ -55,32 +67,37 @@ COptions::COptions(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 }
 */
 
-COptions::COptions(CWnd* pParentWnd, UINT iSelectPage)
-    : CPropertySheet(ID, pParentWnd, iSelectPage)
+COptions::COptions(UINT iSelectPage)
+    : wxNotebook()
 {
-    m_psh.dwFlags |= PSH_NOAPPLYNOW | PSH_HASHELP | PSH_USECALLBACK;
-    m_psh.pfnCallback = &PropSheetProc;
-    AddPage(&m_SymPage);
-    AddPage(&m_AsmPage);
-    AddPage(&m_EditPage);
-    AddPage(&m_DeasmPage);
-    AddPage(&m_MarksPage);
-    AddPage(&m_ViewPage);
-    m_nLastActivePageIndex = iSelectPage;
+    //m_psh.dwFlags |= PSH_NOAPPLYNOW | PSH_HASHELP | PSH_USECALLBACK;
+    //m_psh.pfnCallback = &PropSheetProc;
 
+    // TODO: i18n for titles
+
+    InsertPage(0, &m_SymPage, "Symbols", iSelectPage == 0);
+    InsertPage(1, &m_AsmPage, "Assembly", iSelectPage == 1);
+    InsertPage(2, &m_EditPage, "Editor", iSelectPage == 2);
+    InsertPage(3, &m_DeasmPage, "Disassembler", iSelectPage == 3);
+    InsertPage(4, &m_MarksPage, "Marks", iSelectPage == 4);
+    InsertPage(5, &m_ViewPage, "Views", iSelectPage == 5);
+
+    m_nLastActivePageIndex = iSelectPage;
 
     // set up HH_POPUP defaults for all context sensitive help
     // Initialize structure to NULLs
+#if REWRITE_TO_WX_WIDGET
     memset(&hPop, 0, sizeof(hPop));
     // Set size of structure
-    hPop.cbStruct         = sizeof(hPop);
-    hPop.clrBackground    = RGB(255, 255, 208);    // Yellow background color
-    hPop.clrForeground    = -1; // Font color             //  black font
-    hPop.rcMargins.top   = -1;
-    hPop.rcMargins.left   = -1;
+    hPop.cbStruct = sizeof(hPop);
+    hPop.clrBackground = RGB(255, 255, 208); // Yellow background color
+    hPop.clrForeground = -1; // Font color //  black font
+    hPop.rcMargins.top = -1;
+    hPop.rcMargins.left = -1;
     hPop.rcMargins.bottom = -1;
-    hPop.rcMargins.right  = -1;
-    hPop.pszFont          = NULL; 		           // Font
+    hPop.rcMargins.right = -1;
+    hPop.pszFont = NULL; // Font
+#endif
 
 }
 
@@ -88,6 +105,7 @@ COptions::~COptions()
 {
 }
 
+#if REWRITE_TO_WX_WIDGET
 
 int CALLBACK COptions::PropSheetProc(HWND hwndDlg, UINT uMsg, LPARAM lParam)
 {
@@ -97,34 +115,40 @@ int CALLBACK COptions::PropSheetProc(HWND hwndDlg, UINT uMsg, LPARAM lParam)
     return 0;
 }
 
+#endif
 
 int COptions::GetLastActivePage()
 {
     return m_nLastActivePageIndex;
 }
 
-BEGIN_MESSAGE_MAP(COptions, CPropertySheet)
+#if REWRITE_TO_WX_WIDGET
 
+BEGIN_MESSAGE_MAP(COptions, CPropertySheet)
     ON_WM_HELPINFO()
     ON_WM_CONTEXTMENU()
-
 END_MESSAGE_MAP()
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // COptions message handlers
 
-BOOL COptions::OnCommand(WPARAM wParam, LPARAM lParam)
+bool COptions::OnCommand(WPARAM wParam, LPARAM lParam)
 {
+#if REWRITE_TO_WX_WIDGET
     m_nLastActivePageIndex = GetActiveIndex();
     return CPropertySheet::OnCommand(wParam, lParam);
+#endif
+
+    return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsSymPage property page
 
-IMPLEMENT_DYNCREATE(COptionsSymPage, CPropertyPage)
-
-COptionsSymPage::COptionsSymPage() : CPropertyPage(COptionsSymPage::IDD)
+COptionsSymPage::COptionsSymPage()
+    : wxPanel()
 {
     m_nIOAddress = 0;
     m_bIOEnable = FALSE;
@@ -139,27 +163,8 @@ COptionsSymPage::COptionsSymPage() : CPropertyPage(COptionsSymPage::IDD)
 COptionsSymPage::~COptionsSymPage()
 {
 }
-/*
-static void AFX_CDECL DDX_Hex(CDataExchange* pDX, int nIDC, unsigned int &hex)
-{
-  HWND hWndCtrl = pDX->PrepareEditCtrl(nIDC);
-  TCHAR szT[32];
-  if (pDX->m_bSaveAndValidate)
-  {
-    ::GetWindowText(hWndCtrl, szT, sizeof(szT)/sizeof(szT[0]));
-    if (sscanf(szT, _T("%X"),&hex) <= 0)
-    {
-      AfxMessageBox(IDS_MSG_HEX_STR);
-      pDX->Fail();        // throws exception
-    }
-  }
-  else
-  {
-    wsprintf(szT,_T("%04X"),hex);
-    ::SetWindowText(hWndCtrl, szT);
-  }
-}
-*/
+
+#if REWRITE_TO_WX_WIDGET
 
 void COptionsSymPage::DoDataExchange(CDataExchange* pDX)
 {
@@ -192,25 +197,18 @@ void COptionsSymPage::DoDataExchange(CDataExchange* pDX)
     DDV_MinMaxUInt(pDX, m_nProtToAddr, 0, 0xffff);
 }
 
-
 BEGIN_MESSAGE_MAP(COptionsSymPage, CPropertyPage)
-
     ON_WM_HELPINFO()
     ON_WM_CONTEXTMENU()
-
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// COptionsSymPage message handlers
-
-
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsEditPage property page
 
-IMPLEMENT_DYNCREATE(COptionsEditPage, CPropertyPage)
-
-COptionsEditPage::COptionsEditPage() : CPropertyPage(COptionsEditPage::IDD)
+COptionsEditPage::COptionsEditPage()
+    : wxPanel()
 {
 
     m_bAutoIndent = FALSE;
@@ -226,6 +224,8 @@ COptionsEditPage::COptionsEditPage() : CPropertyPage(COptionsEditPage::IDD)
 COptionsEditPage::~COptionsEditPage()
 {
 }
+
+#if REWRITE_TO_WX_WIDGET
 
 void COptionsEditPage::DoDataExchange(CDataExchange* pDX)
 {
@@ -249,12 +249,9 @@ void COptionsEditPage::DoDataExchange(CDataExchange* pDX)
     DDX_Check(pDX, IDC_OPT_ED_AUTO_UPPER_CASE, m_bAutoUppercase);
     DDX_Check(pDX, IDC_OPT_ED_NEW_FILE, m_bFileNew);
     DDX_CBIndex(pDX, IDC_OPT_ED_ELEMENT, m_nElement);
-
 }
 
-
 BEGIN_MESSAGE_MAP(COptionsEditPage, CPropertyPage)
-
     ON_WM_HELPINFO()
     ON_WM_CONTEXTMENU()
     ON_EN_CHANGE(IDC_OPT_ED_TAB_STEP, OnChangeTabStep)
@@ -262,45 +259,48 @@ BEGIN_MESSAGE_MAP(COptionsEditPage, CPropertyPage)
     ON_CBN_SELCHANGE(IDC_OPT_ED_ELEMENT, OnSelChangeElement)
     ON_BN_CLICKED(IDC_OPT_ED_COLOR, OnEditColor)
     ON_BN_CLICKED(IDC_OPT_ED_BOLD_FONT, OnBoldFont)
-
 END_MESSAGE_MAP()
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsEditPage message handlers
 
-BOOL COptionsEditPage::OnInitDialog()
+bool COptionsEditPage::OnInitDialog()
 {
-    CPropertyPage::OnInitDialog();
+    //CPropertyPage::OnInitDialog();
 
     // copy color settings
-    m_wndExample.m_rgbInstruction	= *CConfigSettings::color_syntax[0];
-    m_wndExample.m_rgbDirective		= *CConfigSettings::color_syntax[1];
-    m_wndExample.m_rgbComment		= *CConfigSettings::color_syntax[2];
-    m_wndExample.m_rgbNumber		= *CConfigSettings::color_syntax[3];
-    m_wndExample.m_rgbString		= *CConfigSettings::color_syntax[4];
-    m_wndExample.m_rgbSelection		= *CConfigSettings::color_syntax[5];
+    m_wndExample.m_rgbInstruction = *ConfigSettings::color_syntax[0];
+    m_wndExample.m_rgbDirective   = *ConfigSettings::color_syntax[1];
+    m_wndExample.m_rgbComment     = *ConfigSettings::color_syntax[2];
+    m_wndExample.m_rgbNumber      = *ConfigSettings::color_syntax[3];
+    m_wndExample.m_rgbString      = *ConfigSettings::color_syntax[4];
+    m_wndExample.m_rgbSelection   = *ConfigSettings::color_syntax[5];
 
-    m_wndExample.m_vbBold[0]		= *CConfigSettings::syntax_font_style[0];
-    m_wndExample.m_vbBold[1]		= *CConfigSettings::syntax_font_style[1];
-    m_wndExample.m_vbBold[2]		= *CConfigSettings::syntax_font_style[2];
-    m_wndExample.m_vbBold[3]		= *CConfigSettings::syntax_font_style[3];
-    m_wndExample.m_vbBold[4]		= *CConfigSettings::syntax_font_style[4];
+    m_wndExample.m_vbBold[0]      = *ConfigSettings::syntax_font_style[0];
+    m_wndExample.m_vbBold[1]      = *ConfigSettings::syntax_font_style[1];
+    m_wndExample.m_vbBold[2]      = *ConfigSettings::syntax_font_style[2];
+    m_wndExample.m_vbBold[3]      = *ConfigSettings::syntax_font_style[3];
+    m_wndExample.m_vbBold[4]      = *ConfigSettings::syntax_font_style[4];
 
     OnSelChangeElement();
 
-    return TRUE;  // return TRUE unless you set the focus to a control
-    // EXCEPTION: OCX Property Pages should return FALSE
+    return true;
 }
 
-
-BOOL COptionsEditPage::OnSetActive()
+bool COptionsEditPage::OnSetActive()
 {
+#if REWRITE_TO_WX_WIDGET
     // copy font settings
-    m_wndExample.m_hEditorFont		= COptionsViewPage::m_Text[0].font;
-    m_wndExample.m_rgbBackground	= COptionsViewPage::m_Text[0].bkgnd;
-    m_wndExample.m_rgbText			= COptionsViewPage::m_Text[0].text;
+    m_wndExample.m_hEditorFont   = COptionsViewPage::m_Text[0].font;
+    m_wndExample.m_rgbBackground = COptionsViewPage::m_Text[0].bkgnd;
+    m_wndExample.m_rgbText       = COptionsViewPage::m_Text[0].text;
 
     return CPropertyPage::OnSetActive();
+#endif
+
+    return false;
 }
 
 
@@ -314,14 +314,13 @@ void COptionsEditPage::OnColorSyntax()
 
 void COptionsEditPage::OnBoldFont()
 {
-    if (bool* pBold= GetFontStyle())
+    if (bool* pBold = GetFontStyle())
     {
-        *pBold = m_btnBold.GetCheck() > 0;
-        m_wndExample.Invalidate();
+        *pBold = m_btnBold.GetValue() > 0;
+        m_wndExample.Refresh();
         m_bColorChanged = true;
     }
 }
-
 
 bool* COptionsEditPage::GetFontStyle(int nIndex)
 {
@@ -333,32 +332,40 @@ bool* COptionsEditPage::GetFontStyle(int nIndex)
 
 bool* COptionsEditPage::GetFontStyle()
 {
-    return GetFontStyle(m_wndElement.GetCurSel());
+    return GetFontStyle(m_wndElement.GetSelection());
 }
-
 
 void COptionsEditPage::OnEditColor()
 {
-    if (COLORREF* pColor= COptionsEditPage::GetColorElement())
-    {
-        CColorDialog dlg(*pColor, CC_FULLOPEN);
+    wxColour* pColor = GetColorElement();
 
-        if (dlg.DoModal() == IDOK && *pColor != dlg.GetColor())
+    if (pColor)
+    {
+        wxColourData data;
+        data.SetColour(*pColor);
+
+        wxColourDialog dlg(this, &data);
+        
+        if (dlg.ShowModal() == wxID_OK)
         {
-            *pColor = dlg.GetColor();
-            m_btnColor.Invalidate();
-            m_wndExample.Invalidate();
+            *pColor = data.GetColour();
+            m_btnColor.Refresh();
+            m_wndExample.Refresh();
             m_bColorChanged = true;
         }
     }
 }
 
-
 void COptionsEditPage::OnSelChangeElement()
 {
-    if (COLORREF* p= GetColorElement())
+#if REWRITE_TO_WX_WIDGET
+    wxColour* p = GetColorElement();
+
+    if (p)
         m_btnColor.SetColorRef(p);
-    if (bool* pBold= GetFontStyle())
+
+    bool *pBold = GetFontStyle();
+    if (pBold)
     {
         m_btnBold.EnableWindow();
         m_btnBold.SetCheck(*pBold ? 1 : 0);
@@ -368,56 +375,60 @@ void COptionsEditPage::OnSelChangeElement()
         m_btnBold.EnableWindow(false);
         m_btnBold.SetCheck(0);
     }
+#endif
 }
 
-
-COLORREF* COptionsEditPage::GetColorElement(int nIndex)
+wxColour* COptionsEditPage::GetColorElement(int nIndex)
 {
     switch (nIndex)
     {
     case 0:
         return &m_wndExample.m_rgbInstruction;
+
     case 1:
         return &m_wndExample.m_rgbDirective;
+
     case 2:
         return &m_wndExample.m_rgbComment;
+
     case 3:
         return &m_wndExample.m_rgbNumber;
+
     case 4:
         return &m_wndExample.m_rgbString;
+
     case 5:
         return &m_wndExample.m_rgbSelection;
+
     default:
         return 0;
     }
 }
 
-COLORREF* COptionsEditPage::GetColorElement()
+wxColour* COptionsEditPage::GetColorElement()
 {
-    return GetColorElement(m_wndElement.GetCurSel());
+    return GetColorElement(m_wndElement.GetSelection());
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsAsmPage property page
 
-IMPLEMENT_DYNCREATE(COptionsAsmPage, CPropertyPage)
-
-COptionsAsmPage::COptionsAsmPage() : CPropertyPage(COptionsAsmPage::IDD)
+COptionsAsmPage::COptionsAsmPage()
+    : wxPanel()
 {
-
     m_nCaseSensitive = -1;
     m_nAsmInstrWithDot = -1;
-    m_bGenerateListing = FALSE;
-    m_strListingFile = _T("");
-    m_bGenerateBRKExtraByte = FALSE;
+    m_bGenerateListing = false;
+    m_strListingFile = "";
+    m_bGenerateBRKExtraByte = false;
     m_uBrkExtraByte = 0;
-
 }
 
 COptionsAsmPage::~COptionsAsmPage()
 {
 }
+
+#if REWRITE_TO_WX_WIDGET
 
 void COptionsAsmPage::DoDataExchange(CDataExchange* pDX)
 {
@@ -432,14 +443,13 @@ void COptionsAsmPage::DoDataExchange(CDataExchange* pDX)
     DDV_MinMaxUInt(pDX,m_uBrkExtraByte,0,0xFF);
 }
 
-
 BEGIN_MESSAGE_MAP(COptionsAsmPage, CPropertyPage)
-
     ON_WM_HELPINFO()
     ON_WM_CONTEXTMENU()
     ON_BN_CLICKED(IDC_OPT_ASM_CHOOSE_FILE, OnOptAsmChooseFile)
-
 END_MESSAGE_MAP()
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsAsmPage message handlers
@@ -448,18 +458,19 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // COptionsDeasmPage property page
 
-IMPLEMENT_DYNCREATE(COptionsDeasmPage, CPropertyPage)
-
-COptionsDeasmPage::COptionsDeasmPage() : CPropertyPage(COptionsDeasmPage::IDD)
+COptionsDeasmPage::COptionsDeasmPage() 
+    : wxPanel()
 {
-    m_ShowCode = FALSE;
-    m_bSubclassed = FALSE;
-    m_bColorChanged = FALSE;
+    m_ShowCode = false;
+    m_bSubclassed = false;
+    m_bColorChanged = false;
 }
 
 COptionsDeasmPage::~COptionsDeasmPage()
 {
 }
+
+#if REWRITE_TO_WX_WIDGET
 
 void COptionsDeasmPage::DoDataExchange(CDataExchange* pDX)
 {
@@ -467,74 +478,66 @@ void COptionsDeasmPage::DoDataExchange(CDataExchange* pDX)
     DDX_Check(pDX, IDC_OPT_DA_CODE, m_ShowCode);
 }
 
-
 BEGIN_MESSAGE_MAP(COptionsDeasmPage, CPropertyPage)
-
     ON_BN_CLICKED(IDC_OPT_DA_ADDR_COL, OnAddrColButton)
     ON_BN_CLICKED(IDC_OPT_DA_CODE_COL, OnCodeColButton)
     ON_WM_HELPINFO()
     ON_WM_CONTEXTMENU()
-
 END_MESSAGE_MAP()
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsDeasmPage message handlers
 
 void COptionsDeasmPage::OnAddrColButton()
 {
-    CColorDialog dlg(m_rgbAddress,CC_FULLOPEN);
-    if (dlg.DoModal() == IDOK && m_rgbAddress != dlg.GetColor())
-    {
-        m_rgbAddress = dlg.GetColor();
-        m_bColorChanged = TRUE;
-        m_ColorButtonAddress.InvalidateRect(NULL);
-    }
+    m_bColorChanged |= SelectColor(this, &m_rgbAddress, &m_ColorButtonAddress);
 }
-
 
 void COptionsDeasmPage::OnCodeColButton()
 {
-    CColorDialog dlg(m_rgbCode,CC_FULLOPEN);
-    if (dlg.DoModal() == IDOK && m_rgbCode != dlg.GetColor())
-    {
-        m_rgbCode = dlg.GetColor();
-        m_bColorChanged = TRUE;
-        m_ColorButtonCode.InvalidateRect(NULL);
-    }
+    m_bColorChanged |= SelectColor(this, &m_rgbCode, &m_ColorButtonCode);
 }
 
-
-BOOL COptionsDeasmPage::OnSetActive()
+bool COptionsDeasmPage::OnSetActive()
 {
+#if REWRITE_TO_WX_WIDGET
     if (!m_bSubclassed)
     {
         m_ColorButtonAddress.SubclassDlgItem(IDC_OPT_DA_ADDR_COL,this);
         m_ColorButtonAddress.SetColorRef(&m_rgbAddress);
         m_ColorButtonCode.SubclassDlgItem(IDC_OPT_DA_CODE_COL,this);
         m_ColorButtonCode.SetColorRef(&m_rgbCode);
-        m_bSubclassed = TRUE;
+
+        m_bSubclassed = true;
     }
+
     return CPropertyPage::OnSetActive();
+#endif
+
+    return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsMarksPage property page
 
-IMPLEMENT_DYNCREATE(COptionsMarksPage, CPropertyPage)
-
-COptionsMarksPage::COptionsMarksPage() : CPropertyPage(COptionsMarksPage::IDD)
+COptionsMarksPage::COptionsMarksPage()
+    : wxPanel()
 {
     m_nProc6502 = -1;
     m_uBusWidth = 16;
     m_nHelpFile = 0;  //^^help
-    m_bSubclassed = FALSE;
-    m_bColorChanged = FALSE;
-    m_bFontChanged = FALSE;
+    m_bSubclassed = false;
+    m_colorChanged = false;
+    m_bFontChanged = false;
 }
 
 COptionsMarksPage::~COptionsMarksPage()
 {
 }
+
+#if REWRITE_TO_WX_WIDGET
 
 void COptionsMarksPage::DoDataExchange(CDataExchange* pDX)
 {
@@ -558,190 +561,195 @@ void COptionsMarksPage::DoDataExchange(CDataExchange* pDX)
 
 }
 
-
 BEGIN_MESSAGE_MAP(COptionsMarksPage, CPropertyPage)
-
     ON_BN_CLICKED(IDC_OPT_MARK_BRKP_COL, OnBrkpColButton)
     ON_BN_CLICKED(IDC_OPT_MARK_ERR_COL, OnErrColButton)
     ON_BN_CLICKED(IDC_OPT_MARK_PTR_COL, OnPtrColButton)
     ON_WM_HELPINFO()
     ON_WM_CONTEXTMENU()
     ON_BN_CLICKED(IDC_OPT_FONT_BTN, OnOptFontBtn)
-
 END_MESSAGE_MAP()
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsMarksPage message handlers
 
 void COptionsMarksPage::OnBrkpColButton()
 {
-    CColorDialog dlg(m_rgbBreakpoint,CC_FULLOPEN);
-    if (dlg.DoModal() == IDOK && m_rgbBreakpoint != dlg.GetColor())
-    {
-        m_rgbBreakpoint = dlg.GetColor();
-        m_bColorChanged = TRUE;
-        m_ColorButtonBreakpoint.InvalidateRect(NULL);
-    }
+    m_colorChanged |= SelectColor(this, &m_rgbBreakpoint, &m_ColorButtonBreakpoint);
 }
 
 void COptionsMarksPage::OnErrColButton()
 {
-    CColorDialog dlg(m_rgbError,CC_FULLOPEN);
-    if (dlg.DoModal() == IDOK && m_rgbError != dlg.GetColor())
-    {
-        m_rgbError = dlg.GetColor();
-        m_bColorChanged = TRUE;
-        m_ColorButtonBreakpoint.InvalidateRect(NULL);
-    }
+    m_colorChanged |= SelectColor(this, &m_rgbError, &m_ColorButtonError);
 }
 
 void COptionsMarksPage::OnPtrColButton()
 {
-    CColorDialog dlg(m_rgbPointer,CC_FULLOPEN);
-    if (dlg.DoModal() == IDOK && m_rgbPointer != dlg.GetColor())
-    {
-        m_rgbPointer = dlg.GetColor();
-        m_bColorChanged = TRUE;
-        m_ColorButtonBreakpoint.InvalidateRect(NULL);
-    }
+    m_colorChanged |= SelectColor(this, &m_rgbPointer, &m_ColorButtonPointer);
 }
 
-BOOL COptionsMarksPage::OnSetActive()
+bool COptionsMarksPage::OnSetActive()
 {
+#if REWRITE_TO_WX_WIDGET
     if (!m_bSubclassed)
     {
-        m_ColorButtonPointer.SubclassDlgItem(IDC_OPT_MARK_PTR_COL,this);
+        m_ColorButtonPointer.SubclassDlgItem(IDC_OPT_MARK_PTR_COL, this);
         m_ColorButtonPointer.SetColorRef(&m_rgbPointer);
-        m_ColorButtonBreakpoint.SubclassDlgItem(IDC_OPT_MARK_BRKP_COL,this);
+        m_ColorButtonBreakpoint.SubclassDlgItem(IDC_OPT_MARK_BRKP_COL, this);
         m_ColorButtonBreakpoint.SetColorRef(&m_rgbBreakpoint);
-        m_ColorButtonError.SubclassDlgItem(IDC_OPT_MARK_ERR_COL,this);
+        m_ColorButtonError.SubclassDlgItem(IDC_OPT_MARK_ERR_COL, this);
         m_ColorButtonError.SetColorRef(&m_rgbError);
-        m_bSubclassed = TRUE;
+
+        m_bSubclassed = true;
     }
+
     return CPropertyPage::OnSetActive();
+#endif
+
+    return false;
 }
 
 void COptionsMarksPage::OnOptFontBtn()
 {
-    CFontDialog fnt(&m_LogFont,CF_SCREENFONTS | CF_FIXEDPITCHONLY |
+#if REWRITE_TO_WX_WIDGET
+    CFontDialog fnt(&m_LogFont, CF_SCREENFONTS | CF_FIXEDPITCHONLY |
                     CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_SCRIPTSONLY);
 
-    if (fnt.DoModal() == IDOK)
+    if (fnt.ShowModal() == wxID_OK)
     {
-        m_bFontChanged = TRUE;
+        m_bFontChanged = true;
         m_LogFont = fnt.m_lf;
-        SetDlgItemText(IDC_OPT_FONT_NAME,m_LogFont.lfFaceName);
+        SetDlgItemText(IDC_OPT_FONT_NAME, m_LogFont.lfFaceName);
     }
+#endif
 }
 
 // Context Sensitive Help starts here
 //% Bug fix 1.2.14.1 - convert to HTML help ------------------------------------------
-BOOL COptionsSymPage::OnHelpInfo(HELPINFO *pHelpInfo)
+
+#if REWRITE_TO_WX_WIDGET
+
+bool COptionsSymPage::OnHelpInfo(HELPINFO *pHelpInfo)
+{
+    if (pHelpInfo->iCtrlId > 0)
+    {
+        hPop.pt = pHelpInfo->MousePos;
+        hPop.idString = pHelpInfo->iCtrlId;
+        HtmlHelpA((uint32_t)(void*)&hPop, HH_DISPLAY_TEXT_POPUP);
+    }
+
+    return true;
+}
+
+bool COptionsDeasmPage::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+    if (pHelpInfo->iCtrlId > 0)
+    {
+        hPop.pt = pHelpInfo->MousePos;
+        hPop.idString = pHelpInfo->iCtrlId;
+        HtmlHelpA((uint32_t)(void*)&hPop, HH_DISPLAY_TEXT_POPUP);
+    }
+
+    return true;
+}
+
+bool COptionsEditPage::OnHelpInfo(HELPINFO* pHelpInfo)
 {
     if (pHelpInfo->iCtrlId > 0 )
     {
-        hPop.pt               = pHelpInfo->MousePos;
-        hPop.idString         = pHelpInfo->iCtrlId;
-        HtmlHelpA((DWORD)(void*)&hPop, HH_DISPLAY_TEXT_POPUP) ;
+        hPop.pt = pHelpInfo->MousePos;
+        hPop.idString = pHelpInfo->iCtrlId;
+        HtmlHelpA((uint32_t)(void*)&hPop, HH_DISPLAY_TEXT_POPUP);
     }
-    return TRUE;
+
+    return true;
 }
 
-BOOL COptionsDeasmPage::OnHelpInfo(HELPINFO* pHelpInfo)
+bool COptionsMarksPage::OnHelpInfo(HELPINFO* pHelpInfo)
 {
-    if (pHelpInfo->iCtrlId > 0 )
+    if (pHelpInfo->iCtrlId > 0)
     {
-        hPop.pt               = pHelpInfo->MousePos;
-        hPop.idString         = pHelpInfo->iCtrlId;
-        HtmlHelpA((DWORD)(void*)&hPop, HH_DISPLAY_TEXT_POPUP) ;
+        hPop.pt = pHelpInfo->MousePos;
+        hPop.idString = pHelpInfo->iCtrlId;
+        HtmlHelpA((uint32_t)(void*)&hPop, HH_DISPLAY_TEXT_POPUP);
     }
-    return TRUE;
+
+    return true;
 }
 
-BOOL COptionsEditPage::OnHelpInfo(HELPINFO* pHelpInfo)
+bool COptionsAsmPage::OnHelpInfo(HELPINFO* pHelpInfo)
 {
-    if (pHelpInfo->iCtrlId > 0 )
+    if (pHelpInfo->iCtrlId > 0)
     {
-        hPop.pt               = pHelpInfo->MousePos;
-        hPop.idString         = pHelpInfo->iCtrlId;
-        HtmlHelpA((DWORD)(void*)&hPop, HH_DISPLAY_TEXT_POPUP) ;
+        hPop.pt = pHelpInfo->MousePos;
+        hPop.idString = pHelpInfo->iCtrlId;
+        HtmlHelpA((uint32_t)(void*)&hPop, HH_DISPLAY_TEXT_POPUP);
     }
-    return TRUE;
+
+    return true;
 }
 
-BOOL COptionsMarksPage::OnHelpInfo(HELPINFO* pHelpInfo)
+bool COptions::OnHelpInfo(HELPINFO* pHelpInfo)
 {
-    if (pHelpInfo->iCtrlId > 0 )
+    if (pHelpInfo->iCtrlId > 1000 && pHelpInfo->iCtrlId < 2999)
     {
-        hPop.pt               = pHelpInfo->MousePos;
-        hPop.idString         = pHelpInfo->iCtrlId;
-        HtmlHelpA((DWORD)(void*)&hPop, HH_DISPLAY_TEXT_POPUP) ;
-    }
-    return TRUE;
-}
-
-BOOL COptionsAsmPage::OnHelpInfo(HELPINFO* pHelpInfo)
-{
-    if (pHelpInfo->iCtrlId > 0 )
-    {
-        hPop.pt               = pHelpInfo->MousePos;
-        hPop.idString         = pHelpInfo->iCtrlId;
-        HtmlHelpA((DWORD)(void*)&hPop, HH_DISPLAY_TEXT_POPUP) ;
+        hPop.pt = pHelpInfo->MousePos;
+        hPop.idString = pHelpInfo->iCtrlId;
+        HtmlHelpA((uint32_t)(void*)&hPop, HH_DISPLAY_TEXT_POPUP);
     }
 
-    return TRUE;
+    return true;
 }
 
-BOOL COptions::OnHelpInfo(HELPINFO* pHelpInfo)
+#endif
+
+void COptionsSymPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
-    if ( pHelpInfo->iCtrlId > 1000 && pHelpInfo->iCtrlId < 2999 )
-    {
-        hPop.pt               = pHelpInfo->MousePos;
-        hPop.idString         = pHelpInfo->iCtrlId;
-        HtmlHelpA((DWORD)(void*)&hPop, HH_DISPLAY_TEXT_POPUP) ;
-    }
-    return TRUE;
+    //HtmlHelpA(59991, HH_HELP_CONTEXT);
 }
 
-void COptionsSymPage::OnContextMenu(CWnd* pWnd, CPoint point)
+void COptions::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
-    HtmlHelpA(59991, HH_HELP_CONTEXT);
+    //HtmlHelpA(NULL, HH_DISPLAY_TOPIC);
 }
 
-void COptions::OnContextMenu(CWnd* pWnd, CPoint point)
+void COptionsAsmPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
-    HtmlHelpA(NULL, HH_DISPLAY_TOPIC);
+    //HtmlHelpA(59992, HH_HELP_CONTEXT);
 }
 
-void COptionsAsmPage::OnContextMenu(CWnd* pWnd, CPoint point)
+void COptionsDeasmPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
-    HtmlHelpA(59992, HH_HELP_CONTEXT);
-
+    //HtmlHelpA(59993, HH_HELP_CONTEXT);
 }
 
-void COptionsDeasmPage::OnContextMenu(CWnd* pWnd, CPoint point)
+void COptionsEditPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
-    HtmlHelpA(59993, HH_HELP_CONTEXT);
+    //HtmlHelpA(59994, HH_HELP_CONTEXT);
 }
 
-void COptionsEditPage::OnContextMenu(CWnd* pWnd, CPoint point)
+void COptionsMarksPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
-    HtmlHelpA(59994, HH_HELP_CONTEXT);
+    //HtmlHelpA(59995, HH_HELP_CONTEXT);
 }
 
-void COptionsMarksPage::OnContextMenu(CWnd* pWnd, CPoint point)
-{
-    HtmlHelpA(59995, HH_HELP_CONTEXT);
-}
 //--------------------------------------------------------------------------------------
-
 
 void COptionsAsmPage::OnOptAsmChooseFile()
 {
-    CString filter;
+#if REWRITE_FOR_WX_WIDGET
+    sd::string filter;
     filter.LoadString(IDS_ASM_OPT_LIST_FILES);
-    CFileDialog dlg(TRUE,_T("lst"),NULL,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,filter);
-    if (dlg.DoModal() != IDOK)
+
+    // TODO: i18l title string
+
+    wxFileDialog dlg(this, "Save Assembly Listing", "", "", filter, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (dlg.ShowModal() != wxID_OK)
         return;
-    SetDlgItemText(IDC_OPT_ASM_FILE_LISTING,dlg.GetPathName());
+
+    SetDlgItemText(IDC_OPT_ASM_FILE_LISTING, dlg.GetPath());
+#endif
 }
