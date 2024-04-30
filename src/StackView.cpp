@@ -25,24 +25,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "StackView.h"
 #include "MemoryGoto.h"
-#include "MemoryDC.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
-CFont CStackView::m_Font;
-LOGFONT CStackView::m_LogFont;
-COLORREF CStackView::m_rgbTextColor;
-COLORREF CStackView::m_rgbBkgndColor;
+wxFont CStackView::m_Font;
+wxFontInfo CStackView::m_LogFont;
+wxColour CStackView::m_rgbTextColor;
+wxColour CStackView::m_rgbBkgndColor;
 
 /////////////////////////////////////////////////////////////////////////////
 // CStackView
-
-IMPLEMENT_DYNCREATE(CStackView, CView)
 
 CStackView::CStackView()
 {}
@@ -50,7 +40,7 @@ CStackView::CStackView()
 CStackView::~CStackView()
 {}
 
-
+#if REWRITE_TO_WX_WIDGET
 BEGIN_MESSAGE_MAP(CStackView, CView)
     //{{AFX_MSG_MAP(CStackView)
     ON_WM_VSCROLL()
@@ -65,16 +55,18 @@ BEGIN_MESSAGE_MAP(CStackView, CView)
     ON_COMMAND(ID_MEMORY_CHG, OnMemoryChg)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CStackView drawing
 
-void CStackView::OnDraw(CDC* pDC)
+void CStackView::OnDraw(wxDC* pDC)
 {
+#if REWRITE_TO_WX_WIDGET
     CMemoryDoc* pDoc= (CMemoryDoc *)GetDocument();
     ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CMemoryDoc)));
     CString line(_T(' '), 1 + max(m_nCx, 8));
-    UINT16 addr= 0x1ff - pDoc->m_uAddress;
+    uint16_t addr = 0x1ff - pDoc->m_uAddress;
     TCHAR hex[8];
     int lim= bytes_in_line();	// ilo�� wy�wietlanych w jednym wierszu bajt�w
     COutputMem& mem= *pDoc->m_pMem;
@@ -107,31 +99,16 @@ void CStackView::OnDraw(CDC* pDC)
     }
 
     dcMem.BitBlt();
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CStackView diagnostics
+// auxiliary calculations
 
-#ifdef _DEBUG
-void CStackView::AssertValid() const
+void CStackView::calc(wxDC *pDC)
 {
-    CView::AssertValid();
-}
-
-void CStackView::Dump(CDumpContext& dc) const
-{
-    CView::Dump(dc);
-}
-#endif //_DEBUG
-
-
-/////////////////////////////////////////////////////////////////////////////
-// obliczenia pomocnicze
-
-void CStackView::calc(CDC *pDC)
-{
-    RECT rect;
-    GetClientRect(&rect);
+#if REWRITE_TO_WX_WIDGET
+    wxRect rect = GetClientRect());
 
     pDC->SelectObject(&m_Font);
     TEXTMETRIC tm;
@@ -139,17 +116,19 @@ void CStackView::calc(CDC *pDC)
     m_nChrH = (int)tm.tmHeight + (int)tm.tmExternalLeading;
     m_nChrW = tm.tmAveCharWidth;
 
-    m_nCx = (rect.right-1) / m_nChrW;	// ilo�� kolumn
-    m_nCy = rect.bottom / m_nChrH;	// ilo�� wierszy
-//  if (rect.bottom % m_nCharH)	// na dole wystaje kawa�ek wiersza?
+    m_nCx = (rect.right-1) / m_nChrW; // number of columns
+    m_nCy = rect.bottom / m_nChrH; // number of lines
+    //if (rect.bottom % m_nCharH) // Is there part sticking out below?
     if (m_nCy == 0)
         m_nCy++;
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
 {
+#if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc = (CMemoryDoc *)GetDocument();
     if (pDoc == NULL)
         return;
@@ -159,7 +138,7 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
         break;
 
     case SB_LINEDOWN:	// Scroll one line down
-        switch (find_next_addr((UINT16 &)pDoc->m_uAddress,*pDoc->m_pMem))
+        switch (find_next_addr((uint16_t &)pDoc->m_uAddress,*pDoc->m_pMem))
         {
         case 0:
             break;	// dalej ju� si� nie da
@@ -177,7 +156,7 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
         break;
 
     case SB_LINEUP:	// Scroll one line up
-        switch (find_prev_addr((UINT16 &)pDoc->m_uAddress,*pDoc->m_pMem))
+        switch (find_prev_addr((uint16_t &)pDoc->m_uAddress,*pDoc->m_pMem))
         {
         case 0:
             break;	// jeste�my ju� na pocz�tku
@@ -201,7 +180,7 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
         RECT rect;
         get_view_rect(rect);
-        switch (find_next_addr((UINT16 &)pDoc->m_uAddress,*pDoc->m_pMem,m_nCy))
+        switch (find_next_addr((uint16_t &)pDoc->m_uAddress,*pDoc->m_pMem,m_nCy))
         {
         case 0:
             break;	// dalej ju� si� nie da
@@ -216,7 +195,7 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
         RECT rect;
         get_view_rect(rect);
-        switch (find_prev_addr((UINT16 &)pDoc->m_uAddress,*pDoc->m_pMem,m_nCy))
+        switch (find_prev_addr((uint16_t &)pDoc->m_uAddress,*pDoc->m_pMem,m_nCy))
         {
         case 0:
             break;	// jeste�my ju� na pocz�tku
@@ -231,7 +210,7 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
         RECT rect;
         get_view_rect(rect);
-        int lines= find_delta((UINT16 &)pDoc->m_uAddress,0,*pDoc->m_pMem,m_nCy);
+        int lines= find_delta((uint16_t &)pDoc->m_uAddress,0,*pDoc->m_pMem,m_nCy);
         if (lines == 999999)
             InvalidateRect(NULL);	// przerysowanie ca�ego okna
         else if (lines > 0)
@@ -248,7 +227,7 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
         RECT rect;
         get_view_rect(rect);
-        int lines= find_delta((UINT16 &)pDoc->m_uAddress,0xFFFF,*pDoc->m_pMem,m_nCy);
+        int lines= find_delta((uint16_t &)pDoc->m_uAddress,0xFFFF,*pDoc->m_pMem,m_nCy);
         if (lines == 999999)
             InvalidateRect(NULL);	// przerysowanie ca�ego okna
         else if (lines < 0)
@@ -267,9 +246,9 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
         RECT rect;
         get_view_rect(rect);
-        UINT16 pos= (nPos); //+0x8000);
+        uint16_t pos= (nPos); //+0x8000);
 //      pos -= pos % bytes_in_line();
-        int lines= find_delta((UINT16 &)pDoc->m_uAddress,pos,*pDoc->m_pMem,m_nCy);
+        int lines= find_delta((uint16_t &)pDoc->m_uAddress,pos,*pDoc->m_pMem,m_nCy);
         if (lines == 999999)
             InvalidateRect(NULL);	// przerysowanie ca�ego okna
         else if (lines)
@@ -284,7 +263,7 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
 
     case 0x100+SB_LINERIGHT:
     {
-        switch (find_next_addr((UINT16 &)pDoc->m_uAddress,*pDoc->m_pMem,1,1))
+        switch (find_next_addr((uint16_t &)pDoc->m_uAddress,*pDoc->m_pMem,1,1))
         {
         case 0:			// ju� nie ma przesuni�cia
             break;
@@ -296,7 +275,7 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
     }
     case 0x100+SB_LINELEFT:
     {
-        switch (find_prev_addr((UINT16 &)pDoc->m_uAddress,*pDoc->m_pMem,1,1))
+        switch (find_prev_addr((uint16_t &)pDoc->m_uAddress,*pDoc->m_pMem,1,1))
         {
         case 0:			// ju� nie ma przesuni�cia
             break;
@@ -312,12 +291,14 @@ void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
 //  set_scroll_range();
     if (nSBCode != SB_ENDSCROLL)
         SetScrollPos(SB_VERT,((int)pDoc->m_uAddress /*- 0x8000*/) /* / bytes_in_line() */ );
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // CStackView message handlers
 
-void CStackView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
+#if REWRITE_TO_WX_WIDGET
+void CStackView::OnPrepareDC(wxDC* pDC, CPrintInfo* pInfo)
 {
     if (pInfo)
         return;
@@ -328,33 +309,36 @@ void CStackView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
     CView::OnPrepareDC(pDC, pInfo);
 }
 
-
 BOOL CStackView::PreCreateWindow(CREATESTRUCT& cs)
 {
     cs.style |= /*WS_CLIPSIBLINGS |*/ WS_VSCROLL;
 
     return CView::PreCreateWindow(cs);
 }
+#endif
 
-
-void CStackView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+void CStackView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 {
-    scroll(nSBCode,nPos);
-
-    // CView::OnVScroll(nSBCode, nPos, pScrollBar);
+#if REWRITE_TO_WX_WIDGET
+    scroll(nSBCode, nPos);
+#endif
+    //CView::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
-BOOL CStackView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) // 1.3.2 added mouse scroll wheel support
+bool CStackView::OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt) // 1.3.2 added mouse scroll wheel support
 {
+#if REWRITE_TO_WX_WIDGET
     if (zDelta > 0)
-        scroll(SB_LINEUP,0,0);
+        scroll(SB_LINEUP, 0, 0);
     else
-        scroll(SB_LINEDOWN,0,0);
+        scroll(SB_LINEDOWN, 0, 0);
+#endif
     return true;
 }
 
 void CStackView::OnInitialUpdate()
 {
+#if REWRITE_TO_WX_WIDGET
     CView::OnInitialUpdate();
 
     CMemoryDoc* pDoc= (CMemoryDoc *)GetDocument();
@@ -363,23 +347,28 @@ void CStackView::OnInitialUpdate()
     CClientDC dc(this);
     calc(&dc);
     set_scroll_range();
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 int CStackView::set_scroll_range()
 {
+#if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc = (CMemoryDoc *)GetDocument();
     if (!pDoc)
         return -1;
 
     int ret= 0;
     int scr= m_nCy; // * bytes_in_line();
+
     if (scr >= 0x100)
     {
-        SetScrollRange(SB_VERT, 0, 0);	// ca�o�� mie�ci si� w oknie
+        // the whole thing fits in the window
+        SetScrollRange(SB_VERT, 0, 0);
         return -1;
     }
+
     int rng= 0x100;
     SCROLLINFO si;
     si.cbSize = sizeof si;
@@ -393,13 +382,19 @@ int CStackView::set_scroll_range()
         nPos = rng - scr;
     scroll(SB_THUMBTRACK, nPos);
     return ret;
+#endif
+
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
 
 // odszukanie adresu wiersza pami�ci poprzedzaj�cego dany wiersz
-int CStackView::find_prev_addr(UINT16 &addr, const COutputMem &mem, int cnt/*= 1*/, int bytes/*= 0*/)
+int CStackView::find_prev_addr(uint16_t &addr, const COutputMem &mem, int cnt/*= 1*/, int bytes/*= 0*/)
 {
+    return 0;
+
+#if REWRITE_TO_WX_WIDGET
     ASSERT(cnt > 0);
     if (cnt < 0)
         return 0;
@@ -413,18 +408,22 @@ int CStackView::find_prev_addr(UINT16 &addr, const COutputMem &mem, int cnt/*= 1
         if (addr % bytes)
             return addr=0, 999999;	// trzeba przerysowa� ca�e okno
         cnt = addr / bytes;
-        addr = (UINT16)0;
+        addr = (uint16_t)0;
     }
     else
-        addr = (UINT16)pos;
+        addr = (uint16_t)pos;
     return cnt;			// o tyle wierszy mo�na przesun��
+#endif
 }
 
 
 // odszukanie adresu wiersza pami�ci nast�puj�cego po danym wierszu
-int CStackView::find_next_addr(UINT16 &addr, const COutputMem &mem,
+int CStackView::find_next_addr(uint16_t &addr, const COutputMem &mem,
                                int cnt/*= 1*/, int bytes/*= 0*/)
 {
+    return 0;
+
+#if REWRITE_TO_WX_WIDGET
     ASSERT(cnt > 0);
     if (cnt < 0)
         return 0;
@@ -444,14 +443,18 @@ int CStackView::find_next_addr(UINT16 &addr, const COutputMem &mem,
         else
             cnt /= bytes;
     }
-    addr = (UINT16)pos;
+    addr = (uint16_t)pos;
     return cnt;
+#endif
 }
 
 
 // spr. o ile wierszy nale�y przesun�� zawarto�� okna aby dotrze� od 'addr' do 'dest'
-int CStackView::find_delta(UINT16 &addr, UINT16 dest, const COutputMem &mem, int max_lines)
+int CStackView::find_delta(uint16_t &addr, uint16_t dest, const COutputMem &mem, int max_lines)
 {
+    return 0;
+
+#if REWRITE_TO_WX_WIDGET
     if (dest == addr)
         return 0;
 
@@ -485,12 +488,14 @@ int CStackView::find_delta(UINT16 &addr, UINT16 dest, const COutputMem &mem, int
             return 999999;
         return -(lines / bytes);
     }
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void CStackView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+#if REWRITE_TO_WX_WIDGET
     switch (nChar)
     {
     case VK_DOWN:
@@ -521,30 +526,31 @@ void CStackView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
         break;
 //      CView::OnKeyDown(nChar, nRepCnt, nFlags);
     }
+#endif
 }
-
 
 void CStackView::OnSize(UINT nType, int cx, int cy)
 {
+#if REWRITE_TO_WX_WIDGET
     CView::OnSize(nType, cx, cy);
 
     CClientDC dc(this);
     calc(&dc);
     set_scroll_range();
+#endif
 }
 
-
-BOOL CStackView::OnEraseBkgnd(CDC* pDC)
+bool CStackView::OnEraseBkgnd(wxDC* pDC)
 {
 //	CRect rect;
 //	GetClientRect(rect);
 //	pDC->FillSolidRect(rect, m_rgbBkgndColor);
-    return TRUE;
+    return true;
 }
 
-
-void CStackView::OnContextMenu(CWnd* pWnd, CPoint point)
+void CStackView::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+#if REWRITE_TO_WX_WIDGET
     CMenu menu;
     if (!menu.LoadMenu(IDR_POPUP_ZPMEMORY))
         return;
@@ -564,17 +570,21 @@ void CStackView::OnContextMenu(CWnd* pWnd, CPoint point)
     }
 
     pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void CStackView::OnUpdateMemoryGoto(CCmdUI* pCmdUI)
 {
+#if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
+#endif
 }
 
 void CStackView::OnMemoryGoto()
 {
+#if REWRITE_TO_WX_WIDGET
     static UINT addr= 0;
     CMemoryGoto dlg;
     dlg.m_uAddr = addr;
@@ -584,29 +594,33 @@ void CStackView::OnMemoryGoto()
         addr = dlg.m_uAddr;
         scroll(SB_THUMBTRACK, 0x1ff - dlg.m_uAddr, 1);
     }
+#endif
 }
-
 
 void CStackView::OnUpdateMemoryChg(CCmdUI* pCmdUI)
 {
+#if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
+#endif
 }
 
 #include "MemoryChg.h"
 
 void CStackView::OnMemoryChg()
 {
+#if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc= (CMemoryDoc *)GetDocument();
     ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CMemoryDoc)));
 
     CMemoryChg dlg(*pDoc->m_pMem, this);
     dlg.DoModal();
     InvalidateRect(NULL);
+#endif
 }
 
-
-void CStackView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
+void CStackView::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
 {
+#if REWRITE_TO_WX_WIDGET
     switch (lHint)
     {
     case 'show':
@@ -621,4 +635,5 @@ void CStackView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
         Invalidate(false);
         break;
     }
+#endif
 }

@@ -27,33 +27,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Splash.h"  // e.g. splash.h
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char BASED_CODE THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 //   Splash Screen class
 
-bool CSplashWnd::c_bShowSplashWnd;
-CSplashWnd* CSplashWnd::c_pSplashWnd;
 CSplashWnd::CSplashWnd()
+    : m_bitmap()
 {
-    m_hdib = NULL;
 }
-
 
 CSplashWnd::~CSplashWnd()
 {
-    // Clear the static window pointer.
-    ASSERT(c_pSplashWnd == this);
-    c_pSplashWnd = NULL;
-    if (m_hdib)
-        DeleteObject(m_hdib);
 }
 
-
+#if REWRITE_TO_WX_WIDGET
 BEGIN_MESSAGE_MAP(CSplashWnd, CWnd)
 //{{AFX_MSG_MAP(CSplashWnd)
     ON_WM_CREATE()
@@ -61,16 +47,16 @@ BEGIN_MESSAGE_MAP(CSplashWnd, CWnd)
     ON_WM_TIMER()
 //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-
+#endif
 
 void CSplashWnd::EnableSplashScreen(bool bEnable /*= TRUE*/)
 {
     c_bShowSplashWnd = bEnable;
 }
 
-
-void CSplashWnd::ShowSplashScreen(CWnd* pParentWnd /*= NULL*/)
+void CSplashWnd::ShowSplashScreen(wxWindow* pParentWnd /*= NULL*/)
 {
+#if REWRITE_TO_WX_WIDGET
     if (!c_bShowSplashWnd || c_pSplashWnd != NULL)
         return;
 
@@ -80,9 +66,10 @@ void CSplashWnd::ShowSplashScreen(CWnd* pParentWnd /*= NULL*/)
         delete c_pSplashWnd;
     else
         c_pSplashWnd->UpdateWindow();
+#endif
 }
 
-
+#if REWRITE_TO_WX_WIDGET
 void CSplashWnd::PreTranslateAppMessage(MSG* pMsg)
 {
     if (c_pSplashWnd == NULL)
@@ -90,21 +77,23 @@ void CSplashWnd::PreTranslateAppMessage(MSG* pMsg)
 
     // If we get a keyboard or mouse message, hide the splash screen.
     if (pMsg->message == WM_KEYDOWN ||
-            pMsg->message == WM_SYSKEYDOWN ||
-            pMsg->message == WM_LBUTTONDOWN ||
-            pMsg->message == WM_RBUTTONDOWN ||
-            pMsg->message == WM_MBUTTONDOWN ||
-            pMsg->message == WM_NCLBUTTONDOWN ||
-            pMsg->message == WM_NCRBUTTONDOWN ||
-            pMsg->message == WM_NCMBUTTONDOWN)
+        pMsg->message == WM_SYSKEYDOWN ||
+        pMsg->message == WM_LBUTTONDOWN ||
+        pMsg->message == WM_RBUTTONDOWN ||
+        pMsg->message == WM_MBUTTONDOWN ||
+        pMsg->message == WM_NCLBUTTONDOWN ||
+        pMsg->message == WM_NCRBUTTONDOWN ||
+        pMsg->message == WM_NCMBUTTONDOWN)
     {
         c_pSplashWnd->HideSplashScreen();
     }
 }
+#endif
 
-
-bool CSplashWnd::Create(CWnd* pParentWnd /*= NULL*/)
+bool CSplashWnd::Create(wxWindow* pParentWnd /*= NULL*/)
 {
+#if REWRITE_TO_WX_WIDGET
+
 #ifdef _DEBUG
     return false;
 #endif
@@ -134,25 +123,29 @@ bool CSplashWnd::Create(CWnd* pParentWnd /*= NULL*/)
                     AfxRegisterWndClass(0, AfxGetApp()->LoadStandardCursor(IDC_ARROW)),
                     NULL, WS_POPUP | WS_VISIBLE, 0, 0, bm.bmWidth, bm.bmHeight,
                     pParentWnd ? pParentWnd->GetSafeHwnd() : HWND_DESKTOP, NULL);
-}
+#endif
 
+    return false;
+}
 
 void CSplashWnd::HideSplashScreen()
 {
+#if REWRITE_TO_WX_WIDGET
     // Destroy the window, and update the mainframe.
     DestroyWindow();
-    CWnd *pWnd= AfxGetMainWnd();
+    CWnd *pWnd = AfxGetMainWnd();
     if (pWnd)
         pWnd->UpdateWindow();
+#endif
 }
 
+#if REWRITE_TO_WX_WIDGET
 
 void CSplashWnd::PostNcDestroy()
 {
     // Free the C++ class.
     delete this;
 }
-
 
 int CSplashWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
@@ -167,10 +160,11 @@ int CSplashWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
     return 0;
 }
-
+#endif
 
 void CSplashWnd::OnPaint()
 {
+#if REWRITE_TO_WX_WIDGET
     CPaintDC dc(this);
 
     CDC dcImage;
@@ -183,11 +177,11 @@ void CSplashWnd::OnPaint()
     // Paint the image.
     HGDIOBJ hOldBitmap = SelectObject(dcImage.GetSafeHdc(),(HGDIOBJ)m_hdib);
 
-    int nColors= dc.GetDeviceCaps(NUMCOLORS);	// ilo�� wpis�w w palecie kolor�w
+    int nColors = dc.GetDeviceCaps(NUMCOLORS); // number of entries in the color palette
     if (nColors != -1)
     {
         RGBQUAD rgbColors[16];
-        BYTE buf[sizeof(LOGPALETTE)+16*sizeof(PALETTEENTRY)];
+        BYTE buf[sizeof(LOGPALETTE) + 16 * sizeof(PALETTEENTRY)];
         LOGPALETTE *pLogPalette= (LOGPALETTE *)buf;
         pLogPalette->palVersion = 0x300;
         pLogPalette->palNumEntries = 16;
@@ -211,8 +205,8 @@ void CSplashWnd::OnPaint()
 
     dc.BitBlt(0, 0, bm.bmWidth, bm.bmHeight, &dcImage, 0, 0, SRCCOPY);
     SelectObject(dcImage.GetSafeHdc(),hOldBitmap);
+#endif
 }
-
 
 void CSplashWnd::OnTimer(UINT nIDEvent)
 {
