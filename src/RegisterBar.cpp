@@ -27,28 +27,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Sym6502.h"
 #include "Deasm.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
-bool CRegisterBar::m_bHidden= FALSE;
+bool CRegisterBar::m_bHidden = false;
 
 /////////////////////////////////////////////////////////////////////////////
 // CRegisterBar dialog
 
 CRegisterBar::CRegisterBar()
 {
-    m_bInUpdate = FALSE;
+    m_bInUpdate = false;
 //  m_bHidden = FALSE;
     //{{AFX_DATA_INIT(CRegisterBar)
     // NOTE: the ClassWizard will add member initialization here
     //}}AFX_DATA_INIT
 }
 
-
+#if REWRITE_FOR_WX_WIDGETS
 
 BEGIN_MESSAGE_MAP(CRegisterBar, CDialogBar)
     //{{AFX_MSG_MAP(CRegisterBar)
@@ -74,44 +67,52 @@ BEGIN_MESSAGE_MAP(CRegisterBar, CDialogBar)
 //  ON_MESSAGE(WM_IDLEUPDATECMDUI, OnIdleUpdateCmdUI)
 END_MESSAGE_MAP()
 
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CRegisterBar message handlers
 
-
-bool CRegisterBar::Create(CWnd* pParentWnd, UINT nStyle, UINT nID)
+bool CRegisterBar::Create(wxWindow *parent, UINT nStyle, UINT nID)
 {
-    bool ret= CDialogBar::Create(pParentWnd,IDD,nStyle,nID);
+#if REWRITE_TO_WX_WIDGET
+    bool ret = CDialogBar::Create(pParentWnd, IDD, nStyle, nID);
     if (!ret)
         return FALSE;
 
     ShowWindow(SW_HIDE);
 
-    CString title;
+    std::string title;
     if (title.LoadString(IDD))
         SetWindowText(title);
 
-    UINT vTabs[]= { 16, 12 };
+    UINT vTabs[] = { 16, 12 };
+
     SendDlgItemMessage(IDC_REGS_A_MEM, EM_SETTABSTOPS, 2, reinterpret_cast<LPARAM>(vTabs));
     SendDlgItemMessage(IDC_REGS_X_MEM, EM_SETTABSTOPS, 2, reinterpret_cast<LPARAM>(vTabs));
     SendDlgItemMessage(IDC_REGS_Y_MEM, EM_SETTABSTOPS, 2, reinterpret_cast<LPARAM>(vTabs));
 
-    return TRUE;
+    return true;
+#endif
+
+    return false;
 }
 
 
-bool CRegisterBar::UpdateItem(int itemID)	// od�wie�enie obiektu okna dialogowego
+bool CRegisterBar::UpdateItem(int itemID)
 {
-    HWND hWnd= ::GetDlgItem(m_hWnd,itemID);
+#if REWRITE_TO_WX_WIDGET
+    HWND hWnd = ::GetDlgItem(m_hWnd, itemID);
     if (hWnd)
         return ::UpdateWindow(hWnd);
-    return FALSE;
+#endif
+    return false;
 }
 
-
-void CRegisterBar::Update(const CContext *pCtx, const CString &stat, const CContext *pOld /*= NULL*/, bool bDraw /*= TRUE*/)
+void CRegisterBar::Update(const CContext *pCtx, const std::string &stat, const CContext *pOld /*= NULL*/, bool bDraw /*= TRUE*/)
 {
-    ASSERT(pCtx != NULL);
+#if REWRITE_TO_WX_WIDGETS
+    ASSERT(pCtx);
+
     if (m_bInUpdate)
         return;
 
@@ -164,69 +165,74 @@ void CRegisterBar::Update(const CContext *pCtx, const CString &stat, const CCont
     UpdateItem(IDC_REGS_STAT);
 
     UpdateCycles(pCtx->uCycles);
-
-    if (pOld == NULL)
-        return;
-
+#endif
 }
 
-
-void CRegisterBar::SetDlgItemByteHex(int nID, UINT8 val)
+void CRegisterBar::SetDlgItemByteHex(int nID, uint8_t val)
 {
-    TCHAR buf[32];
-    wsprintf(buf,_T("$%02X"),val & 0xFF);
-    SetDlgItemText(nID,buf);
+    char buf[32];
+    snprintf(buf, sizeof(buf), "$%02X", val & 0xFF);
+
+#if REWRITE_TO_WX_WIDGET
+    SetDlgItemText(nID, buf);
     UpdateItem(nID);
+#endif
 }
 
-
-void CRegisterBar::SetDlgItemWordHex(int nID, UINT16 val)
+void CRegisterBar::SetDlgItemWordHex(int nID, uint16_t val)
 {
-    TCHAR buf[32];
-    wsprintf(buf,_T("$%04X"),val & 0xFFFF);
-    SetDlgItemText(nID,buf);
+    char buf[32];
+    snprintf(buf, sizeof(buf), "$%04X", val & 0xFFFF);
+
+#if REWRITE_TO_WX_WIDGET
+    SetDlgItemText(nID, buf);
     UpdateItem(nID);
+#endif
 }
 
-
-void CRegisterBar::SetDlgItemMem(int nID, int nBytes, UINT16 ptr, const CContext *pCtx)
+void CRegisterBar::SetDlgItemMem(int nID, int nBytes, uint16_t ptr, const CContext *pCtx)
 {
-    CString str(_T(' '),128),num;
-    str.Empty();
+    std::string str;
+    char num[16];
 
-    for (int i=0; i<nBytes; i++)
+    for (int i = 0; i < nBytes; i++)
     {
-        num.Format(i==nBytes ? _T("%02X") : _T("%02X "), pCtx->mem[(ptr+i)&pCtx->mem_mask] & 0xFF);
+        snprintf(num, sizeof(num), i == nBytes ? "%02X" : "%02X ", pCtx->mem[(ptr + i) & pCtx->mem_mask] & 0xFF);
         str += num;
     }
 
-    SetDlgItemText(nID,str);
+#if REWRITE_TO_WX_WIDGET
+    SetDlgItemText(nID, str);
     UpdateItem(nID);
+#endif
 }
 
-
-void CRegisterBar::SetDlgItemInf(int nID, UINT8 val)
+void CRegisterBar::SetDlgItemInf(int nID, uint8_t val)
 {
-    CString str;
+    wxString str;
+
     if (val != ~0)
-        str.Format(_T("%d,\t'%c',\t%s"), val & 0xFF, val >= ' ' ? TCHAR(val) : _T('?'), (const TCHAR *)Binary(val));
-    SetDlgItemText(nID,str);
+        str.Printf("%d,\t'%c',\t%s", val & 0xFF, val >= ' ' ? char(val) : '?', Binary(val).c_str());
+
+#if REWRITE_TO_WX_WIDGET
+    SetDlgItemText(nID, str);
     UpdateItem(nID);
+#endif
 }
 
-
-CString CRegisterBar::Binary(UINT8 val)
+std::string CRegisterBar::Binary(uint8_t val)
 {
-    CString bin(_T(' '),8);
+    char bin[9];
 
-    bin.SetAt(0, val & 0x80 ? _T('1') : _T('0') );
-    bin.SetAt(1, val & 0x40 ? _T('1') : _T('0') );
-    bin.SetAt(2, val & 0x20 ? _T('1') : _T('0') );
-    bin.SetAt(3, val & 0x10 ? _T('1') : _T('0') );
-    bin.SetAt(4, val & 0x08 ? _T('1') : _T('0') );
-    bin.SetAt(5, val & 0x04 ? _T('1') : _T('0') );
-    bin.SetAt(6, val & 0x02 ? _T('1') : _T('0') );
-    bin.SetAt(7, val & 0x01 ? _T('1') : _T('0') );
+    bin[0] = val & 0x80 ? '1' : '0';
+    bin[1] = val & 0x40 ? '1' : '0';
+    bin[2] = val & 0x20 ? '1' : '0';
+    bin[3] = val & 0x10 ? '1' : '0';
+    bin[4] = val & 0x08 ? '1' : '0';
+    bin[5] = val & 0x04 ? '1' : '0';
+    bin[6] = val & 0x02 ? '1' : '0';
+    bin[7] = val & 0x01 ? '1' : '0';
+    bin[8] = '\0';
 
     return bin;
 }
@@ -235,7 +241,9 @@ CString CRegisterBar::Binary(UINT8 val)
 
 afx_msg LRESULT CRegisterBar::OnUpdate(WPARAM wParam, LPARAM lParam)
 {
-    Update((const CContext*)lParam, *(const CString*)wParam);
+#if REWRITE_TO_WX_WIDGET
+    Update((const CContext*)lParam, *(const std::string*)wParam);
+#endif
     return 1;
 }
 
@@ -243,28 +251,37 @@ afx_msg LRESULT CRegisterBar::OnUpdate(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CRegisterBar::OnStartDebug(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-    CFrameWnd *pWnd= GetDockingFrame();
-    if (!m_bHidden)		// okno by�o widoczne?
-        if (pWnd)
-            pWnd->ShowControlBar(this,TRUE,TRUE);
-//    ShowWindow(SW_SHOW);
+#if REWRITE_TO_WX_WIDGET
+    wxWindow *pWnd = GetDockingFrame();
+
+    if (!m_bHidden && pWnd) // Was the window visible?
+    {
+        pWnd->ShowControlBar(this, true, true);
+    }
+
+    //Show();
+#endif
+
     return 1;
 }
 
-
 afx_msg LRESULT CRegisterBar::OnExitDebug(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-    CFrameWnd *pWnd= GetDockingFrame();
+#if REWRITE_TO_WX_WIDGET
+    wxWindow *pWnd = GetDockingFrame();
 
-    if (m_hWnd && IsVisible() /*(GetStyle() & WS_VISIBLE)*/)// okno aktualnie wy�wietlone?
+    if (m_hWnd && IsShown()) // window currently displayed?
     {
-        m_bHidden = FALSE;				// info - okno by�o wy�wietlane
+        m_bHidden = false; // info - the window was displayed
+
         if (pWnd)
-            pWnd->ShowControlBar(this,FALSE,TRUE);
-//    ShowWindow(SW_HIDE);			// ukrycie okna
+            pWnd->ShowControlBar(this, false, true);
+        //Hide();
     }
     else
-        m_bHidden = TRUE;				// info - okno by�o ukryte
+        m_bHidden = true; // info - the window was hidden
+#endif
+
     return 1;
 }
 
@@ -272,161 +289,182 @@ afx_msg LRESULT CRegisterBar::OnExitDebug(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 void CRegisterBar::UpdateRegA(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
-//  SetDlgItemByteHex(IDC_REGS_A,pCtx->a);
-    SetDlgItemInf(IDC_REGS_A_MEM, pCtx->a);
+    //SetDlgItemInf(IDC_REGS_A_MEM, pCtx->a);
 }
 
 void CRegisterBar::UpdateRegX(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
-//  SetDlgItemByteHex(IDC_REGS_X,pCtx->x);
-    SetDlgItemInf(IDC_REGS_X_MEM, pCtx->x);
+    //SetDlgItemInf(IDC_REGS_X_MEM, pCtx->x);
 }
 
 void CRegisterBar::UpdateRegY(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
-//  SetDlgItemByteHex(IDC_REGS_Y,pCtx->y);
-    SetDlgItemInf(IDC_REGS_Y_MEM, pCtx->y);
+    //SetDlgItemInf(IDC_REGS_Y_MEM, pCtx->y);
 }
 
 void CRegisterBar::UpdateRegP(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
-//  SetDlgItemByteHex(IDC_REGS_P,pCtx->get_status_reg());
-    CheckDlgButton(IDC_REGS_NEG,pCtx->negative);
-    CheckDlgButton(IDC_REGS_ZERO,pCtx->zero);
-    CheckDlgButton(IDC_REGS_OVER,pCtx->overflow);
-    CheckDlgButton(IDC_REGS_CARRY,pCtx->carry);
-    CheckDlgButton(IDC_REGS_INT,pCtx->interrupt);
-    CheckDlgButton(IDC_REGS_BRK,pCtx->break_bit);
-    CheckDlgButton(IDC_REGS_DEC,pCtx->decimal);
+#if REWRITE_TO_WX_WIDGETS
+    CheckDlgButton(IDC_REGS_NEG, pCtx->negative);
+    CheckDlgButton(IDC_REGS_ZERO, pCtx->zero);
+    CheckDlgButton(IDC_REGS_OVER, pCtx->overflow);
+    CheckDlgButton(IDC_REGS_CARRY, pCtx->carry);
+    CheckDlgButton(IDC_REGS_INT, pCtx->interrupt);
+    CheckDlgButton(IDC_REGS_BRK, pCtx->break_bit);
+    CheckDlgButton(IDC_REGS_DEC, pCtx->decimal);
+#endif
 }
 
 void CRegisterBar::UpdateRegPC(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
-//  SetDlgItemWordHex(IDC_REGS_PC,pCtx->pc);
+#if REWRITE_TO_WX_WIDGETS
     CDeasm deasm;
     int ptr= -1;
-    SetDlgItemText(IDC_REGS_INSTR,deasm.DeasmInstr(*pCtx,CAsm::DF_BRANCH_INFO,ptr));
+    SetDlgItemText(IDC_REGS_INSTR, deasm.DeasmInstr(*pCtx, CAsm::DF_BRANCH_INFO, ptr));
     UpdateItem(IDC_REGS_INSTR);
-    SetDlgItemText(IDC_REGS_INSTR_ARG,deasm.ArgumentValue(*pCtx));
+    SetDlgItemText(IDC_REGS_INSTR_ARG, deasm.ArgumentValue(*pCtx));
     UpdateItem(IDC_REGS_INSTR_ARG);
+#endif
 }
 
 void CRegisterBar::UpdateRegS(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
-//  SetDlgItemByteHex(IDC_REGS_S,pCtx->s);
-    if (pCtx->s != 0xFF)		// jest co� na stosie?
+#if REWRITE_TO_WX_WIDGETS
+    if (pCtx->s != 0xFF) // is there anything on the stack?
         SetDlgItemMem(IDC_REGS_S_MEM, 0xFF - pCtx->s, pCtx->s + 0x0100 + 1, pCtx);
-    else				// wypisujemy, �e nic
+    else // We write that nothing
     {
-        CString str;
+        std::string str;
         str.LoadString(IDS_REGS_S_EMPTY);
-        SetDlgItemText(IDC_REGS_S_MEM,str);
+        SetDlgItemText(IDC_REGS_S_MEM, str);
     }
+#endif
 }
 
 void CRegisterBar::UpdateCycles(ULONG uCycles)
 {
+#if REWRITE_TO_WX_WIDGETS
     SetDlgItemInt(IDC_REGS_CYCLES, uCycles, false);
     UpdateItem(IDC_REGS_CYCLES);
+#endif
 }
-
 
 //=============================================================================
 
 void CRegisterBar::ChangeRegister(int ID, int reg_no)
 {
-    if (m_bInUpdate || theApp.m_global.IsProgramRunning())  // update lub dzia�a program?
-        return;					// zignorowanie zmian
-    CString buf;
-    if (GetDlgItemText(ID,buf) == 0)
+#if REWRITE_TO_WX_WIDGET
+    if (m_bInUpdate || wxGetApp().m_global.IsProgramRunning()) // Update or is the program running?
+        return; // Ignoring changes
+
+    std::string buf;
+
+    if (GetDlgItemText(ID, buf) == 0)
         return;
-    const TCHAR *str= buf;
+
+    const char *str = buf.c_str();
     int num;
-    if (str[0]==_T('$'))
+
+    if (str[0]== '$')
     {
-        if (sscanf(LPCTSTR(str)+1, _T("%X"),&num) <= 0)
+        if (sscanf(str + 1, "%X", &num) <= 0)
             num = 0;
     }
-    else if (str[0]==_T('0') && (str[1]==_T('x') || str[1]==_T('X')))
+    else if (str[0] == '0' && str[1] == 'x' || str[1]=='X')
     {
-        if (sscanf(str+2, _T("%X"),&num) <= 0)
+        if (sscanf(str + 2, "%X", &num) <= 0)
             num = 0;
     }
-    else if (sscanf(str, _T("%u"),&num) <= 0)
+    else if (sscanf(str, "%u", &num) <= 0)
         num = 0;
 
-    CSym6502 *pSym= theApp.m_global.GetSimulator();	// symulator
-    if (pSym == NULL)
+    CSym6502 *pSym = wxGetApp().m_global.GetSimulator();
+    if (pSym == nullptr)
     {
-        ASSERT(FALSE);
+        ASSERT(false);
         return;
     }
 
-    m_bInUpdate = TRUE;
+    m_bInUpdate = true;
 
-    CContext ctx( *(pSym->GetContext()) );	// kontekst programu
+    CContext ctx(*(pSym->GetContext())); // program context
 
-    switch (reg_no)			// wprowadzenie zmiany
+    switch (reg_no) // Update register that was changed
     {
     case 0:
-        ctx.a = UINT8(num);
+        ctx.a = uint8_t(num);
         UpdateRegA(&ctx);
         break;
+
     case 1:
-        ctx.x = UINT8(num);
+        ctx.x = uint8_t(num);
         UpdateRegX(&ctx);
         break;
+
     case 2:
-        ctx.y = UINT8(num);
+        ctx.y = uint8_t(num);
         UpdateRegY(&ctx);
         break;
+
     case 3:
-        ctx.s = UINT8(num);
+        ctx.s = uint8_t(num);
         UpdateRegS(&ctx);
         break;
+
     case 4:
-        ctx.set_status_reg_bits(UINT8(num));
-        if (!theApp.m_global.GetProcType())	// 65c02?
-            ctx.reserved = TRUE;			// bit 'reserved' zawsze ustawiony
+        ctx.set_status_reg_bits(uint8_t(num));
+
+        if (!wxGetApp().m_global.GetProcType()) // 65c02?
+            ctx.reserved = true;                // 'reserved' bit always set
+        
         UpdateRegP(&ctx);
         break;
+
     case 5:
-        ctx.pc = UINT16(num) & ctx.mem_mask;
+        ctx.pc = uint16_t(num) & ctx.mem_mask;
         UpdateRegPC(&ctx);
         break;
-    default:
-        ASSERT(FALSE);
-    }
-    pSym->SetContext(ctx);			// zmiana kontekstu
 
-    if (reg_no == 5 && !theApp.m_global.IsProgramFinished())	// zmiana PC?
+    default:
+        ASSERT(false);
+        break;
+    }
+
+    pSym->SetContext(ctx); // context change
+
+    if (reg_no == 5 && !wxGetApp().m_global.IsProgramFinished()) // PC change?
         pSym->SkipToAddr(ctx.pc);
 
-    m_bInUpdate = FALSE;
+    m_bInUpdate = false;
+#endif
 }
 
-
-void CRegisterBar::ChangeFlags(int flag_bit, bool set)	// zmiana bitu rej. flagowego
+void CRegisterBar::ChangeFlags(int flag_bit, bool set) // changing the flag register bit
 {
-    CSym6502 *pSym= theApp.m_global.GetSimulator();	// symulator
-    if (pSym == NULL)
+    CSym6502 *pSym = wxGetApp().m_global.GetSimulator();
+
+    if (pSym == nullptr)
     {
-        ASSERT(FALSE);
+        ASSERT(false);
         return;
     }
-    CContext ctx( *(pSym->GetContext()) );	// kontekst programu
-    UINT8 flags= ctx.get_status_reg();
+
+    CContext ctx(*(pSym->GetContext())); // program context
+    uint8_t flags = ctx.get_status_reg();
+
     if (set)
-        flags |= UINT8(1 << flag_bit);
+        flags |= uint8_t(1 << flag_bit);
     else
-        flags &= ~UINT8(1 << flag_bit);
+        flags &= ~uint8_t(1 << flag_bit);
+
     ctx.set_status_reg_bits(flags);
-    if (!theApp.m_global.GetProcType())	// 65c02?
-        ctx.reserved = TRUE;			// bit 'reserved' zawsze ustawiony
 
-    SetDlgItemByteHex(IDC_REGS_P,ctx.get_status_reg());
+    if (!wxGetApp().m_global.GetProcType()) // 65c02?
+        ctx.reserved = true;			    // 'reserved' bit always set
 
-    pSym->SetContext(ctx);		// zmiana kontekstu
+    SetDlgItemByteHex(IDC_REGS_P, ctx.get_status_reg());
+
+    pSym->SetContext(ctx); // context change
 }
 
 //-----------------------------------------------------------------------------
@@ -461,114 +499,69 @@ void CRegisterBar::OnChangeRegPC()
     ChangeRegister(IDC_REGS_PC,5);
 }
 
+void CRegisterBar::UpdateFlag(int checkId, int statusBit)
+{
+    wxCheckBox *btn = dynamic_cast<wxCheckBox*>(FindWindow(checkId));
+
+    if (!btn)
+        return;
+
+    ChangeFlags(statusBit, btn->IsChecked());
+}
 
 void CRegisterBar::OnRegFlagNeg()
 {
-    CButton *pBtn= (CButton *)GetDlgItem(IDC_REGS_NEG);
-    if (pBtn == NULL)
-    {
-        ASSERT(FALSE);
-        return;
-    }
-    ChangeFlags(CContext::N_NEGATIVE,pBtn->GetCheck());
+    UpdateFlag(IDC_REGS_NEG, CContext::N_NEGATIVE);
 }
 
 void CRegisterBar::OnRegFlagCarry()
 {
-    CButton *pBtn= (CButton *)GetDlgItem(IDC_REGS_CARRY);
-    if (pBtn == NULL)
-    {
-        ASSERT(FALSE);
-        return;
-    }
-    ChangeFlags(CContext::N_CARRY,pBtn->GetCheck());
+    UpdateFlag(IDC_REGS_CARRY, CContext::N_CARRY);
 }
 
 void CRegisterBar::OnRegFlagDec()
 {
-    CButton *pBtn= (CButton *)GetDlgItem(IDC_REGS_DEC);
-    if (pBtn == NULL)
-    {
-        ASSERT(FALSE);
-        return;
-    }
-    ChangeFlags(CContext::N_DECIMAL,pBtn->GetCheck());
+    UpdateFlag(IDC_REGS_DEC, CContext::N_DECIMAL);
 }
 
 void CRegisterBar::OnRegFlagInt()
 {
-    CButton *pBtn= (CButton *)GetDlgItem(IDC_REGS_INT);
-    if (pBtn == NULL)
-    {
-        ASSERT(FALSE);
-        return;
-    }
-    ChangeFlags(CContext::N_INTERRUPT,pBtn->GetCheck());
+    UpdateFlag(IDC_REGS_INT, CContext::N_INTERRUPT);
 }
 
 void CRegisterBar::OnRegFlagOver()
 {
-    CButton *pBtn= (CButton *)GetDlgItem(IDC_REGS_OVER);
-    if (pBtn == NULL)
-    {
-        ASSERT(FALSE);
-        return;
-    }
-    ChangeFlags(CContext::N_OVERFLOW,pBtn->GetCheck());
+    UpdateFlag(IDC_REGS_OVER, CContext::N_OVERFLOW);
 }
 
 void CRegisterBar::OnRegFlagZero()
 {
-    CButton *pBtn= (CButton *)GetDlgItem(IDC_REGS_ZERO);
-    if (pBtn == NULL)
-    {
-        ASSERT(FALSE);
-        return;
-    }
-    ChangeFlags(CContext::N_ZERO,pBtn->GetCheck());
+    UpdateFlag(IDC_REGS_ZERO, CContext::N_ZERO);
 }
 
 void CRegisterBar::OnRegFlagBrk()
 {
-    CButton *pBtn= (CButton *)GetDlgItem(IDC_REGS_BRK);
-    if (pBtn == NULL)
-    {
-        ASSERT(FALSE);
-        return;
-    }
-    ChangeFlags(CContext::N_BREAK,pBtn->GetCheck());
+    UpdateFlag(IDC_REGS_BRK, CContext::N_BREAK);
 }
-
-
-void CRegisterBar::OnWindowPosChanging(WINDOWPOS FAR* lpwndpos)
-{
-//  CWnd *pWnd= GetParent();
-//  if (pWnd && (pWnd=pWnd->GetParent()))
-//    pWnd->ModifyStyle(WS_THICKFRAME,0);
-
-    CDialogBar::OnWindowPosChanging(lpwndpos);
-}
-
 
 void CRegisterBar::OnRegsCyclesClr()
 {
-    if (theApp.m_global.IsProgramRunning())  // dzia�a program?
+    if (wxGetApp().m_global.IsProgramRunning())
     {
+#if REWRITE_TO_WX_WIDGETS
         MessageBeep(-2);
+#endif
         return;
     }
 
-    CSym6502 *pSym= theApp.m_global.GetSimulator();	// symulator
-    if (pSym == NULL)
+    CSym6502 *pSym = wxGetApp().m_global.GetSimulator();
+    
+    if (pSym == nullptr)
     {
-        ASSERT(FALSE);
+        ASSERT(false);
         return;
     }
 
     pSym->ClearCyclesCounter();
     UpdateCycles(0);
 }
-
-
-void CRegisterBar::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler)
-{}

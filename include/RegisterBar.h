@@ -53,8 +53,6 @@ private:
     afx_msg LRESULT OnStartDebug(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);
 
-    //virtual void OnUpdateCmdUI(CFrameWnd* pTarget, bool disableIfNoHndler);
-
 public:
     static bool m_bHidden;
 
@@ -73,6 +71,9 @@ protected:
     afx_msg void OnChangeRegS();
     afx_msg void OnChangeRegP();
     afx_msg void OnChangeRegPC();
+
+    void UpdateFlag(int checkId, int statusBit);
+
     afx_msg void OnRegFlagNeg();
     afx_msg void OnRegFlagCarry();
     afx_msg void OnRegFlagDec();
@@ -81,8 +82,6 @@ protected:
     afx_msg void OnRegFlagZero();
     afx_msg void OnRegFlagBrk();
     afx_msg void OnRegsCyclesClr();
-
-    //afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
 
 private:
     std::string Binary(uint8_t val);

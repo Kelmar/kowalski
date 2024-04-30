@@ -26,28 +26,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "OptionsViewPage.h"
 #include "ConfigSettings.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
 COptionsViewPage::TextDef COptionsViewPage::m_Text[6];
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsViewPage property page
 
-IMPLEMENT_DYNCREATE(COptionsViewPage, CPropertyPage)
-
-COptionsViewPage::COptionsViewPage() : CPropertyPage(COptionsViewPage::IDD)
+COptionsViewPage::COptionsViewPage()
+    : wxPanel()
 {
-    //{{AFX_DATA_INIT(COptionsViewPage)
-    // NOTE: the ClassWizard will add member initialization here
-    //}}AFX_DATA_INIT
-    m_bSubclassed = FALSE;
+    m_bSubclassed = false;
     m_nSelection = 0;
 
+#if REWRITE_TO_WX_WIDGETS
     for (int i= 0; i < sizeof(m_Text) / sizeof(m_Text[0]); i++)
     {
         m_Text[i].font.CreateFontIndirect(CConfigSettings::fonts[i]);
@@ -55,18 +45,21 @@ COptionsViewPage::COptionsViewPage() : CPropertyPage(COptionsViewPage::IDD)
         m_Text[i].bkgnd = *CConfigSettings::bkgnd_color[i];
         m_Text[i].changed = 0;
     }
+#endif
 }
-
 
 COptionsViewPage::~COptionsViewPage()
 {
-    for (int i= 0; i < sizeof(m_Text) / sizeof(m_Text[0]); i++)
+#if REWRITE_TO_WX_WIDGETS
+    for (int i = 0; i < sizeof(m_Text) / sizeof(m_Text[0]); i++)
     {
         m_Text[i].font.DeleteObject();
         m_Text[i].brush.DeleteObject();
     }
+#endif
 }
 
+#if REWRITE_TO_WX_WIDGETS
 
 void COptionsViewPage::DoDataExchange(CDataExchange* pDX)
 {
@@ -75,7 +68,6 @@ void COptionsViewPage::DoDataExchange(CDataExchange* pDX)
     // NOTE: the ClassWizard will add DDX and DDV calls here
     //}}AFX_DATA_MAP
 }
-
 
 BEGIN_MESSAGE_MAP(COptionsViewPage, CPropertyPage)
     //{{AFX_MSG_MAP(COptionsViewPage)
@@ -87,13 +79,16 @@ BEGIN_MESSAGE_MAP(COptionsViewPage, CPropertyPage)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // COptionsViewPage message handlers
 
 //#include "6502View.h"
 
-HBRUSH COptionsViewPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+int COptionsViewPage::OnCtlColor(wxDC* pDC, wxWindow* pWnd, UINT nCtlColor)
 {
+#if REWRITE_TO_WX_WIDGETS
     if (nCtlColor == CTLCOLOR_STATIC && pWnd->GetDlgCtrlID() == IDC_OPT_VIEW_EXAMPLE)
     {
         m_Text[m_nSelection].brush.DeleteObject();
@@ -107,12 +102,15 @@ HBRUSH COptionsViewPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
     }
 
     return CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
+#endif
+
+    return 0;
 }
 
-
-BOOL COptionsViewPage::OnSetActive()
+bool COptionsViewPage::OnSetActive()
 {
-    CListBox *pList= (CListBox *)GetDlgItem(IDC_OPT_VIEW_WND);
+#if REWRITE_TO_WX_WIDGETS
+    CListBox *pList = (CListBox *)GetDlgItem(IDC_OPT_VIEW_WND);
 
     if (!m_bSubclassed)
     {
@@ -144,17 +142,24 @@ BOOL COptionsViewPage::OnSetActive()
     }
 
     return CPropertyPage::OnSetActive();
-}
+#endif
 
+    return false;
+}
 
 void COptionsViewPage::OnSelchangeViewWnd()
 {
-    CListBox *pList= (CListBox *)GetDlgItem(IDC_OPT_VIEW_WND);
+#if REWRITE_TO_WX_WIDGETS
+    CListBox *pList = (CListBox *)GetDlgItem(IDC_OPT_VIEW_WND);
+
     if (pList == NULL)
         return;
-    int sel= pList->GetCurSel();
+
+    int sel = pList->GetCurSel();
+
     if (sel < 0)
         return;
+
     m_nSelection = sel;
     CString text;
     text.LoadString(IDS_OPT_VIEW_EXAMPLE_1 + sel);
@@ -166,11 +171,12 @@ void COptionsViewPage::OnSelchangeViewWnd()
     LOGFONT lf;
     m_Text[m_nSelection].font.GetLogFont(&lf);
     SetDlgItemText(IDC_OPT_VIEW_FONT_NAME,lf.lfFaceName);
+#endif
 }
-
 
 void COptionsViewPage::OnViewTxtCol()
 {
+#if REWRITE_TO_WX_WIDGETS
     CColorDialog dlg(m_rgbTextCol,CC_FULLOPEN);
     if (dlg.DoModal() == IDOK && m_rgbTextCol != dlg.GetColor())
     {
@@ -180,11 +186,12 @@ void COptionsViewPage::OnViewTxtCol()
         m_ColorButtonText.Invalidate();
         repaint_example();
     }
+#endif
 }
-
 
 void COptionsViewPage::OnViewBkgndCol()
 {
+#if REWRITE_TO_WX_WIDGETS
     CColorDialog dlg(m_rgbBkgndCol,CC_FULLOPEN);
     if (dlg.DoModal() == IDOK && m_rgbBkgndCol != dlg.GetColor())
     {
@@ -194,19 +201,22 @@ void COptionsViewPage::OnViewBkgndCol()
         m_ColorButtonText.Invalidate();
         repaint_example();
     }
+#endif
 }
-
 
 void COptionsViewPage::repaint_example()
 {
+#if REWRITE_TO_WX_WIDGETS
     HWND hWnd;
-    GetDlgItem(IDC_OPT_VIEW_EXAMPLE,&hWnd);
-    ::InvalidateRect(hWnd,NULL,TRUE);
+    GetDlgItem(IDC_OPT_VIEW_EXAMPLE, &hWnd);
+    ::InvalidateRect(hWnd, NULL, TRUE);
+#endif
 }
-
 
 void COptionsViewPage::OnViewFontBtn()
 {
+#if REWRITE_TO_WX_WIDGETS
+
     LOGFONT lf;
     m_Text[m_nSelection].font.GetLogFont(&lf);
     CFontDialog fnt(&lf, CF_SCREENFONTS | CF_FIXEDPITCHONLY |
@@ -220,4 +230,5 @@ void COptionsViewPage::OnViewFontBtn()
         m_Text[m_nSelection].changed |= 2;		// zmieniony font
         repaint_example();
     }
+#endif
 }
