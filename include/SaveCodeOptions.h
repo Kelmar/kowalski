@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef SAVE_CODE_OPTS_H__
+#define SAVE_CODE_OPTS_H__
+
 // SaveCodeOptions.h : header file
 //
 #include "FormatNums.h"
@@ -25,42 +28,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 // CSaveCodeOptions dialog
 
-class CSaveCodeOptions : public CDialog, CFormatNums
+class CSaveCodeOptions : public wxDialog //, CFormatNums
 {
+private:
     bool m_bModify;
     void CalculateNums(int pos);
-    // Construction
+
 public:
-    CSaveCodeOptions(CWnd* pParent = NULL);   // standard constructor
+    /* constructor */ CSaveCodeOptions();
 
-    // Dialog Data
-    //{{AFX_DATA(CSaveCodeOptions)
-    enum { IDD = IDD_SAVE_CODE_OPT_1 };
-    UINT	m_uEnd;
-    UINT	m_uLength;
-    UINT	m_uStart;
-    //}}AFX_DATA
+    UINT m_uEnd;
+    UINT m_uLength;
+    UINT m_uStart;
 
-
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CSaveCodeOptions)
 protected:
-    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //}}AFX_VIRTUAL
+    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-    // Implementation
-protected:
-
-    // Generated message map functions
-    //{{AFX_MSG(CSaveCodeOptions)
-    afx_msg void OnDeltaposSpinStart(NMHDR* pNMHDR, LRESULT* pResult);
-    afx_msg void OnDeltaposSpinEnd(NMHDR* pNMHDR, LRESULT* pResult);
-    afx_msg void OnDeltaposSpinLength(NMHDR* pNMHDR, LRESULT* pResult);
-    virtual BOOL OnInitDialog();
+    //afx_msg void OnDeltaposSpinStart(NMHDR* pNMHDR, LRESULT* pResult);
+    //afx_msg void OnDeltaposSpinEnd(NMHDR* pNMHDR, LRESULT* pResult);
+    //afx_msg void OnDeltaposSpinLength(NMHDR* pNMHDR, LRESULT* pResult);
+    virtual bool OnInitDialog();
     afx_msg void OnChangeFieldStart();
     afx_msg void OnChangeFieldEnd();
     afx_msg void OnChangeFieldLength();
-    //}}AFX_MSG
-    DECLARE_MESSAGE_MAP()
+
 };
+
+#endif /* SAVE_CODE_OPTS_H__ */

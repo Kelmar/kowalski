@@ -21,16 +21,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef FORMAT_NUMS_H__
 #define FORMAT_NUMS_H__
 
+enum class NumberFormat
+{
+    Error,
+    Decimal,
+    IntelHex,
+    DollarHex
+};
+
 namespace NumberFormats
 {
-    enum NumberFormat
-    {
-        Error,
-        Decimal,
-        IntelHex,
-        DollarHex
-    };
-
     int ReadNumber(wxControl *pCtrl, NumberFormat &fmt);
     void SetNumber(wxControl *pCtrl, int num, NumberFormat fmt);
     void IncEditField(wxControl *pCtrl, int iDelta, int iMin, int iMax);

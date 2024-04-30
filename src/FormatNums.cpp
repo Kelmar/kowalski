@@ -56,23 +56,23 @@ int ReadNumber(wxControl *pCtrl, NumberFormat &fmt)
     
     if (buf[0] == '$')
     {
-        fmt = NumberFormats::DollarHex;
+        fmt = NumberFormat::DollarHex;
         radix = 16;
         start = 1;
     }
     else if (buf.StartsWith("0X"))
     {
-        fmt = NumberFormats::IntelHex;
+        fmt = NumberFormat::IntelHex;
         radix = 16;
         start = 2;
     }
     else if (buf[0] >= '0' && buf[0] <= '9')
     {
-        fmt = NumberFormats::Decimal;
+        fmt = NumberFormat::Decimal;
     }
     else
     {
-        fmt = NumberFormats::Error;
+        fmt = NumberFormat::Error;
         return 0;
     }
 
@@ -102,16 +102,16 @@ void SetNumber(wxControl *pCtrl, int num, NumberFormat fmt)
 
     switch (fmt)
     {
-    case NumberFormats::Error:
-    case NumberFormats::IntelHex:
+    case NumberFormat::Error:
+    case NumberFormat::IntelHex:
         buf.Printf("0x%04X", num);
         break;
 
-    case NumberFormats::DollarHex:
+    case NumberFormat::DollarHex:
         buf.Printf("$%04X", num);
         break;
 
-    case NumberFormats::Decimal:
+    case NumberFormat::Decimal:
         buf.Printf("%d", num);
         break;
 

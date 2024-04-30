@@ -25,29 +25,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "6502.h"
 #include "SaveCodeOptions.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
-extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num, bool bWord= true);
-
 /////////////////////////////////////////////////////////////////////////////
 // CSaveCodeOptions dialog
 
-
-CSaveCodeOptions::CSaveCodeOptions(CWnd* pParent /*=NULL*/)
-    : CDialog(CSaveCodeOptions::IDD, pParent)
+CSaveCodeOptions::CSaveCodeOptions()
+    : wxDialog()
 {
-    //{{AFX_DATA_INIT(CSaveCodeOptions)
     m_uEnd = 0;
     m_uLength = 0;
     m_uStart = 0;
-    //}}AFX_DATA_INIT
 }
 
+#if REWRITE_TO_WX_WIDGET
 
 void CSaveCodeOptions::DoDataExchange(CDataExchange* pDX)
 {
@@ -84,8 +73,12 @@ BEGIN_MESSAGE_MAP(CSaveCodeOptions, CDialog)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CSaveCodeOptions message handlers
+
+#if REWRITE_TO_WX_WIDGET
 
 void CSaveCodeOptions::OnDeltaposSpinStart(NMHDR* pNMHDR, LRESULT* pResult)
 {
@@ -126,10 +119,13 @@ void CSaveCodeOptions::OnDeltaposSpinLength(NMHDR* pNMHDR, LRESULT* pResult)
     *pResult = 0;
 }
 
+#endif
+
 //-----------------------------------------------------------------------------
 
-BOOL CSaveCodeOptions::OnInitDialog()
+bool CSaveCodeOptions::OnInitDialog()
 {
+#if REWRITE_TO_WX_WIDGET
     CDialog::OnInitDialog();
 
     static UDACCEL accel[]= {0,1, 2,0x10, 5,0x100, 10,0x400};
@@ -160,12 +156,16 @@ BOOL CSaveCodeOptions::OnInitDialog()
 
     return TRUE;  // return TRUE unless you set the focus to a control
     // EXCEPTION: OCX Property Pages should return FALSE
+#endif
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
 
 void CSaveCodeOptions::CalculateNums(int pos)
 {
+#if REWRITE_TO_WX_WIDGET
     NumFmt fmt1;
     int start= ReadNumber(GetDlgItem(IDC_SAVE_CODE_OPT_1_START),fmt1);
     NumFmt fmt2;
@@ -189,6 +189,7 @@ void CSaveCodeOptions::CalculateNums(int pos)
         else if (start+len-1 != end && start+len-1 <= 0xFFFFFF && len > 0)
             SetNumber(GetDlgItem(IDC_SAVE_CODE_OPT_1_END),start+len-1,fmt2);
     }
+#endif
 }
 
 

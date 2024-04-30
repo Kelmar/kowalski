@@ -23,30 +23,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 //#include "6502.h"
+#include "FormatNums.h"
 #include "SaveCodeBlockOptions.h"
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num, bool bWord= true);
 
 /////////////////////////////////////////////////////////////////////////////
 // CSaveCodeBlockOptions dialog
 
-
-CSaveCodeBlockOptions::CSaveCodeBlockOptions(CWnd* pParent /*=NULL*/)
-    : CDialog(CSaveCodeBlockOptions::IDD, pParent)
+CSaveCodeBlockOptions::CSaveCodeBlockOptions()
+    : wxDialog()
 {
-    //{{AFX_DATA_INIT(CSaveCodeBlockOptions)
     m_uEnd = 0;
     m_uLength = 0;
     m_uStart = 0;
-    //}}AFX_DATA_INIT
 }
 
+#if REWRITE_TO_WX_WIDGET
 
 void CSaveCodeBlockOptions::DoDataExchange(CDataExchange* pDX)
 {
@@ -70,7 +61,6 @@ void CSaveCodeBlockOptions::DoDataExchange(CDataExchange* pDX)
     //}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CSaveCodeBlockOptions, CDialog)
     //{{AFX_MSG_MAP(CSaveCodeBlockOptions)
     ON_NOTIFY(UDN_DELTAPOS, IDC_SAVE_CODE_OPT_2_SPIN_START, OnDeltaposSpinStart)
@@ -82,11 +72,14 @@ BEGIN_MESSAGE_MAP(CSaveCodeBlockOptions, CDialog)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CSaveCodeBlockOptions message handlers
 
-BOOL CSaveCodeBlockOptions::OnInitDialog()
+bool CSaveCodeBlockOptions::OnInitDialog()
 {
+#if REWRITE_TO_WX_WIDGET
     CDialog::OnInitDialog();
     static UDACCEL accel[]= {0,1, 2,0x10, 5,0x100, 10,0x400};
 
@@ -116,9 +109,14 @@ BOOL CSaveCodeBlockOptions::OnInitDialog()
 
     return TRUE;  // return TRUE unless you set the focus to a control
     // EXCEPTION: OCX Property Pages should return FALSE
+#endif
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
+
+#if REWRITE_TO_WX_WIDGET
 
 void CSaveCodeBlockOptions::OnDeltaposSpinStart(NMHDR* pNMHDR, LRESULT* pResult)
 {
@@ -126,10 +124,13 @@ void CSaveCodeBlockOptions::OnDeltaposSpinStart(NMHDR* pNMHDR, LRESULT* pResult)
 
     pNMUpDown->iPos = 3000;
     if (pNMUpDown->iDelta)
+    {
         if (theApp.m_global.m_bProc6502==2)  // 1.3.3 support for 24-bit addressing
-            IncEditField(GetDlgItem(IDC_SAVE_CODE_OPT_2_START), pNMUpDown->iDelta,0,0xFFFFFF);
+            IncEditField(GetControlById(IDC_SAVE_CODE_OPT_2_START), pNMUpDown->iDelta, 0, 0xFFFFFF);
         else
-            IncEditField(GetDlgItem(IDC_SAVE_CODE_OPT_2_START), pNMUpDown->iDelta,0,0xFFFF);
+            IncEditField(GetControlById(IDC_SAVE_CODE_OPT_2_START), pNMUpDown->iDelta, 0, 0xFFFF);
+    }
+
     *pResult = 0;
 }
 
@@ -140,10 +141,13 @@ void CSaveCodeBlockOptions::OnDeltaposSpinEnd(NMHDR* pNMHDR, LRESULT* pResult)
 
     pNMUpDown->iPos = 3000;
     if (pNMUpDown->iDelta)
+    {
         if (theApp.m_global.m_bProc6502==2)  // 1.3.3 support for 24-bit addressing
-            IncEditField(GetDlgItem(IDC_SAVE_CODE_OPT_2_END), pNMUpDown->iDelta,0,0xFFFFFF);
+            IncEditField(GetControlById(IDC_SAVE_CODE_OPT_2_END), pNMUpDown->iDelta, 0, 0xFFFFFF);
         else
-            IncEditField(GetDlgItem(IDC_SAVE_CODE_OPT_2_END), pNMUpDown->iDelta,0,0xFFFF);
+            IncEditField(GetControlById(IDC_SAVE_CODE_OPT_2_END), pNMUpDown->iDelta, 0, 0xFFFF);
+    }
+
     *pResult = 0;
 }
 
@@ -153,43 +157,52 @@ void CSaveCodeBlockOptions::OnDeltaposSpinLength(NMHDR* pNMHDR, LRESULT* pResult
     NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
 
     pNMUpDown->iPos = 3000;
+
     if (pNMUpDown->iDelta)
+    {
         if (theApp.m_global.m_bProc6502==2)  // 1.3.3 support for 24-bit addressing
-            IncEditField(GetDlgItem(IDC_SAVE_CODE_OPT_2_LENGTH), pNMUpDown->iDelta,1,0x1000000);
+            IncEditField(GetControlById(IDC_SAVE_CODE_OPT_2_LENGTH), pNMUpDown->iDelta, 1, 0x1000000);
         else
-            IncEditField(GetDlgItem(IDC_SAVE_CODE_OPT_2_LENGTH), pNMUpDown->iDelta,1,0x10000);
+            IncEditField(GetControlById(IDC_SAVE_CODE_OPT_2_LENGTH), pNMUpDown->iDelta, 1, 0x10000);
+    }
     *pResult = 0;
 }
+
+#endif
 
 //-----------------------------------------------------------------------------
 
 void CSaveCodeBlockOptions::CalculateNums(int pos)
 {
-    NumFmt fmt1;
-    int start= ReadNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_START),fmt1);
-    NumFmt fmt2;
-    int end= ReadNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_END),fmt2);
-    NumFmt fmt3;
-    int len= ReadNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_LENGTH),fmt3);
+    NumberFormat fmt1;
+    int start = NumberFormats::ReadNumber(GetControlById(IDC_SAVE_CODE_OPT_2_START), fmt1);
+
+    NumberFormat fmt2;
+    int end = NumberFormats::ReadNumber(GetControlById(IDC_SAVE_CODE_OPT_2_END), fmt2);
+
+    NumberFormat fmt3;
+    int len = NumberFormats::ReadNumber(GetControlById(IDC_SAVE_CODE_OPT_2_LENGTH), fmt3);
 
     if (start > end)
         return;
-    if (pos==3)		// zmieni� pole d�ugo��?
+
+    bool is65816 = wxGetApp().m_global.m_bProc6502 == 2;
+
+    if (pos == 3) // change the length field?
     {
-        if (end-start+1 != len && end-start+1 <= 0x10000 && !(theApp.m_global.m_bProc6502==2))  // 1.3.3 support for 24-bit addressing
-            SetNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_LENGTH),end-start+1,fmt3);
-        else if (end-start+1 != len && end-start+1 <= 0x1000000)
-            SetNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_LENGTH),end-start+1,fmt3);
+        if (end - start + 1 != len && end - start + 1 <= 0x10000 && !is65816) // 1.3.3 support for 24-bit addressing
+            NumberFormats::SetNumber(GetControlById(IDC_SAVE_CODE_OPT_2_LENGTH), end - start + 1, fmt3);
+        else if (end - start + 1 != len && end - start + 1 <= 0x1000000)
+            NumberFormats::SetNumber(GetControlById(IDC_SAVE_CODE_OPT_2_LENGTH), end - start + 1, fmt3);
     }
-    else if (pos==2)	// zmieni� pole koniec?
+    else if (pos == 2) // change the end field?
     {
-        if (start+len-1 != end && start+len-1 <= 0xFFFF && len > 0 && !(theApp.m_global.m_bProc6502==2))  // 1.3.3 support for 24-bit addressing
-            SetNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_END),start+len-1,fmt2);
+        if (start + len - 1 != end && start + len - 1 <= 0xFFFF && len > 0 && !is65816) // 1.3.3 support for 24-bit addressing
+            NumberFormats::SetNumber(GetControlById(IDC_SAVE_CODE_OPT_2_END), start + len - 1, fmt2);
         else if (start+len-1 != end && start+len-1 <= 0xFFFFFF && len > 0)
-            SetNumber(GetDlgItem(IDC_SAVE_CODE_OPT_2_END),start+len-1,fmt2);
+            NumberFormats::SetNumber(GetControlById(IDC_SAVE_CODE_OPT_2_END), start + len - 1, fmt2);
     }
 }
-
 
 void CSaveCodeBlockOptions::OnChangeFieldStart()
 {
