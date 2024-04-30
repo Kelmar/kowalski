@@ -25,26 +25,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "6502.h"
 #include "MemoryGoto.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num, bool bWord= true);
-
 /////////////////////////////////////////////////////////////////////////////
 // CMemoryGoto dialog
 
-
-CMemoryGoto::CMemoryGoto(CWnd* pParent /*=NULL*/)
-    : CDialog(CMemoryGoto::IDD, pParent)
+CMemoryGoto::CMemoryGoto()
+    : wxDialog()
+    , m_uAddr(0)
 {
-    //{{AFX_DATA_INIT(CMemoryGoto)
-    m_uAddr = 0;
-    //}}AFX_DATA_INIT
 }
 
+#if REWRITE_TO_WX_WIDGET
 
 void CMemoryGoto::DoDataExchange(CDataExchange* pDX)
 {
@@ -59,12 +49,7 @@ void CMemoryGoto::DoDataExchange(CDataExchange* pDX)
     //}}AFX_DATA_MAP
 }
 
-
-BEGIN_MESSAGE_MAP(CMemoryGoto, CDialog)
-    //{{AFX_MSG_MAP(CMemoryGoto)
-    // NOTE: the ClassWizard will add message map macros here
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CMemoryGoto message handlers

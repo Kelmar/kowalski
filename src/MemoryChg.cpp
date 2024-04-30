@@ -24,30 +24,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "MemoryChg.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num, bool bWord= true);
-
 /////////////////////////////////////////////////////////////////////////////
 // CMemoryChg dialog
 
 
-CMemoryChg::CMemoryChg(COutputMem& mem, CWnd* pParent /*=NULL*/)
-    : m_Mem(mem), CDialog(CMemoryChg::IDD, pParent)
+CMemoryChg::CMemoryChg(COutputMem& mem)
+    : wxDialog()
+    , m_Mem(mem)
 {
-    //{{AFX_DATA_INIT(CMemoryChg)
     m_uAddr = 0;
     m_nData = 0;
     m_nByte = 0;
-    m_bSigned = FALSE;
-    //}}AFX_DATA_INIT
+    m_bSigned = false;
 }
 
-
+#if REWRITE_FOR_WX_WIDGET
 void CMemoryChg::DoDataExchange(CDataExchange* pDX)
 {
     CDialog::DoDataExchange(pDX);
@@ -64,7 +55,9 @@ void CMemoryChg::DoDataExchange(CDataExchange* pDX)
     DDX_Check(pDX, IDC_MEMORY_SIGNED, m_bSigned);
     //}}AFX_DATA_MAP
 }
+#endif
 
+#if REWRITE_TO_WX_WIDGET
 
 BEGIN_MESSAGE_MAP(CMemoryChg, CDialog)
     //{{AFX_MSG_MAP(CMemoryChg)
@@ -76,23 +69,26 @@ BEGIN_MESSAGE_MAP(CMemoryChg, CDialog)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CMemoryChg message handlers
 
 void CMemoryChg::OnChangeMemoryAddr()
 {
-    CString strText;
+#if REWRITE_TO_WX_WIDGET
+    wxString strText;
     GetDlgItemText(IDC_MEMORY_ADDR, strText);
-    const TCHAR *pText= strText;
+    const char *pText = strText;
 
     bool bErr= false;
     int num;
-    if (pText[0] == _T('$') && sscanf(pText + 1, _T("%X"), &num) <= 0)
+
+    if (pText[0] == '$' && sscanf(pText + 1, "%X", &num) <= 0)
         bErr = true;
-    else if (pText[0] == _T('0') && (pText[1]==_T('x') || pText[1]==_T('X')) &&
-             sscanf(pText + 2, _T("%X"), &num) <= 0)
+    else if (pText[0] == '0' && (pText[1] == 'x' || pText[1] == 'X') && sscanf(pText + 2, "%X", &num) <= 0)
         bErr = true;
-    else if (sscanf(pText, _T("%u"), &num) <= 0)
+    else if (sscanf(pText, "%u", &num) <= 0)
         bErr = true;
 
     if (bErr)
@@ -102,71 +98,73 @@ void CMemoryChg::OnChangeMemoryAddr()
     }
 
     int nData;
-    bool bWord= GetCheckedRadioButton(IDC_MEMORY_BYTE,IDC_MEMORY_WORD) == IDC_MEMORY_WORD;
+    bool bWord = GetCheckedRadioButton(IDC_MEMORY_BYTE,IDC_MEMORY_WORD) == IDC_MEMORY_WORD;
+
     if (!bWord)
         nData = m_Mem[num];
     else
-        nData = m_Mem[num] + (m_Mem[num+1] << 8);
+        nData = m_Mem[num] + (m_Mem[num + 1] << 8);
 
-    if (IsDlgButtonChecked(IDC_MEMORY_SIGNED))	// liczba ze znakiem?
-        strText.Format(_T("%d"), nData);
-    else					// liczba bez znaku
-        strText.Format(bWord ? _T("0x%04X") : _T("0x%02X"), nData);
+    if (IsDlgButtonChecked(IDC_MEMORY_SIGNED)) // Signed number?
+        strText.Printf("%d", nData);
+    else // Unsigned number
+        strText.Printf(bWord ? "0x%04X" : "0x%02X", nData);
 
     SetDlgItemText(IDC_MEMORY_DATA, strText);
+#endif
 }
-
 
 void CMemoryChg::OnMemorySigned()
 {
     OnChangeMemoryAddr();
 }
 
-
 void CMemoryChg::OnMemoryByte()
 {
     OnChangeMemoryAddr();
 }
-
 
 void CMemoryChg::OnMemoryWord()
 {
     OnChangeMemoryAddr();
 }
 
-
 void CMemoryChg::OnOK()
 {
-    if (!UpdateData(TRUE))
+#if REWRITE_TO_WX_WIDGET
+    if (!UpdateData(true))
     {
         TRACE0("UpdateData failed during dialog termination.\n");
         // the UpdateData routine will set focus to correct item
         return;
     }
+#endif
 
     Modify();
 
-    EndDialog(IDOK);
+    EndDialog(wxID_OK);
 //  CDialog::OnOK();
 }
 
-
 void CMemoryChg::Modify()
 {
-    if (GetCheckedRadioButton(IDC_MEMORY_BYTE,IDC_MEMORY_WORD) == IDC_MEMORY_BYTE)
+#if REWRITE_TO_WX_WIDGET
+    if (GetCheckedRadioButton(IDC_MEMORY_BYTE, IDC_MEMORY_WORD) == IDC_MEMORY_BYTE)
         m_Mem[m_uAddr] = m_nData;
     else
     {
-        m_Mem[m_uAddr] = BYTE(m_nData & 0xFF);
-        m_Mem[m_uAddr + 1] = BYTE((m_nData >> 8) & 0xFF);
+        m_Mem[m_uAddr] = uint8_t(m_nData & 0xFF);
+        m_Mem[m_uAddr + 1] = uint8_t((m_nData >> 8) & 0xFF);
     }
+#endif
 }
-
 
 void CMemoryChg::OnMemoryChg()
 {
-    if (!UpdateData(TRUE))
+#if REWRITE_TO_WX_WIDGET
+    if (!UpdateData(true))
         return;
+#endif
 
     Modify();
 }

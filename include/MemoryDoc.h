@@ -32,40 +32,20 @@ class COutputMem;
 // CMemoryDoc document
 class CMemoryDoc : public wxDocument
 {
-protected:
-    virtual bool DoSave(const char *pathName, bool replace = true);
-
-    // Attributes
 public:
     uint32_t m_address;
     uint16_t m_stackPtr;
 
-    COutputMem *m_pMem;
+    COutputMem *m_memView;
 
+    /* constructor */ CMemoryDoc();
     virtual ~CMemoryDoc();
 
-    // Operations
-public:
-    CMemoryDoc();
-
-    void SetData(COutputMem* pMem, uint32_t address)
+    void SetData(COutputMem* memView, uint32_t address)
     {
         m_address = address;
-        m_pMem = pMem;
+        m_memView = memView;
     }
-
-public:
-    virtual void Serialize(CArchive &ar);   // overridden for document i/o
-
-protected:
-    virtual bool OnNewDocument();
-
-public:
-
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
 };
 
 #endif /* MEMORY_DOC_H__ */

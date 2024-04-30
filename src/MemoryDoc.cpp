@@ -25,76 +25,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "6502.h"
 #include "MemoryDoc.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CMemoryDoc
 
-IMPLEMENT_DYNCREATE(CMemoryDoc, CDocument)
-
 CMemoryDoc::CMemoryDoc()
 {
-    m_uStackPtr = 0x1ff;
-    m_uAddress = 0;
-    m_pMem = 0;
-}
-
-BOOL CMemoryDoc::OnNewDocument()
-{
-    if (!CDocument::OnNewDocument())
-        return FALSE;
-    return TRUE;
+    m_stackPtr = 0x1ff;
+    m_address = 0;
+    m_memView = nullptr;
 }
 
 CMemoryDoc::~CMemoryDoc()
 {
 }
 
-
-BEGIN_MESSAGE_MAP(CMemoryDoc, CDocument)
-    //{{AFX_MSG_MAP(CMemoryDoc)
-    //}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CMemoryDoc diagnostics
-
-#ifdef _DEBUG
-void CMemoryDoc::AssertValid() const
-{
-    CDocument::AssertValid();
-}
-
-void CMemoryDoc::Dump(CDumpContext& dc) const
-{
-    CDocument::Dump(dc);
-}
-#endif //_DEBUG
-
-/////////////////////////////////////////////////////////////////////////////
-// CMemoryDoc serialization
-
-void CMemoryDoc::Serialize(CArchive& ar)
-{
-    if (ar.IsStoring())
-    {
-        // TODO: add storing code here
-    }
-    else
-    {
-        // TODO: add loading code here
-    }
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// CMemoryDoc commands
-
-BOOL CMemoryDoc::DoSave(LPCTSTR lpszPathName, BOOL bReplace/*= TRUE*/)
-{
-    // nop
-    return false;
-}

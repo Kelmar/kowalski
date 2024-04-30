@@ -38,11 +38,6 @@ private:
     uint32_t m_uAddr;
     CMemoryDoc m_Doc;
 
-    static std::string m_strClass;
-    static bool m_bRegistered;
-    void RegisterWndClass();
-    void init();
-
 public:
     /* constructor */ CMemoryInfo();
     virtual          ~CMemoryInfo();
@@ -56,7 +51,6 @@ public:
     bool Create(COutputMem *mem, uint32_t addr, ViewType view);
 
     void InvalidateView(uint16_t stackPtr = 0);
-    void Invalidate();
 
 protected:
     virtual void PostNcDestroy();
