@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "About.h"
 
 //const char C6502App::REGISTRY_KEY[]= "MiKSoft";
-const char C6502App::PROFILE_NAME[]= "6502 Simulator\\1.9";
+const char C6502App::PROFILE_NAME[]= "6502 Simulator\\1.80";
 
 /////////////////////////////////////////////////////////////////////////////
 // C6502App

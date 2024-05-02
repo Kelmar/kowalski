@@ -33,22 +33,12 @@ class CToolBox : public wxDialog
 {
 private:
     int rsc_id;
-    bool created;
 
 public:
-    /* constructor */ CToolBox(wxWindow* parent = nullptr);
+    /* constructor */ CToolBox();
     virtual          ~CToolBox();
     
     bool Create(int rsc_id, wxWindow* parent);
-
-    enum { IDD = IDD_ZEROPAGEBAR };
-
-public:
-    //virtual bool Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
-
-protected:
-    //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    //virtual bool OnCommand(WPARAM wParam, LPARAM lParam);
 };
 
 #endif /* TOOLBOX_H__ */

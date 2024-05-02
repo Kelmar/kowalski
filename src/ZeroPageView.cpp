@@ -25,24 +25,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "ZeroPageView.h"
 #include "MemoryGoto.h"
-#include "MemoryDC.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
-CFont CZeroPageView::m_Font;
-LOGFONT CZeroPageView::m_LogFont;
-COLORREF CZeroPageView::m_rgbTextColor;
-COLORREF CZeroPageView::m_rgbBkgndColor;
+wxFont CZeroPageView::m_Font;
+wxFontInfo CZeroPageView::m_LogFont;
+wxColour CZeroPageView::m_rgbTextColor;
+wxColour CZeroPageView::m_rgbBkgndColor;
 
 /////////////////////////////////////////////////////////////////////////////
 // CZeroPageView
-
-IMPLEMENT_DYNCREATE(CZeroPageView, CView)
 
 CZeroPageView::CZeroPageView()
 {}
@@ -50,6 +40,7 @@ CZeroPageView::CZeroPageView()
 CZeroPageView::~CZeroPageView()
 {}
 
+#if REWRITE_TO_WX_WIDGET
 
 BEGIN_MESSAGE_MAP(CZeroPageView, CView)
     //{{AFX_MSG_MAP(CZeroPageView)
@@ -66,11 +57,14 @@ BEGIN_MESSAGE_MAP(CZeroPageView, CView)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CZeroPageView drawing
 
-void CZeroPageView::OnDraw(CDC* pDC)
+void CZeroPageView::OnDraw(wxDC* pDC)
 {
+#if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc= (CMemoryDoc *)GetDocument();
     ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CMemoryDoc)));
     CString line(_T(' '), 1 + max(m_nCx, 8));
@@ -107,29 +101,15 @@ void CZeroPageView::OnDraw(CDC* pDC)
     }
 
     dcMem.BitBlt();
+#endif
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// CZeroPageView diagnostics
-
-#ifdef _DEBUG
-void CZeroPageView::AssertValid() const
-{
-    CView::AssertValid();
-}
-
-void CZeroPageView::Dump(CDumpContext& dc) const
-{
-    CView::Dump(dc);
-}
-#endif //_DEBUG
-
 
 /////////////////////////////////////////////////////////////////////////////
 // obliczenia pomocnicze
 
-void CZeroPageView::calc(CDC *pDC)
+void CZeroPageView::calc(wxDC *pDC)
 {
+#if REWRITE_TO_WX_WIDGET
     RECT rect;
     GetClientRect(&rect);
 
@@ -144,12 +124,14 @@ void CZeroPageView::calc(CDC *pDC)
 //  if (rect.bottom % m_nCharH)	// na dole wystaje kawa�ek wiersza?
     if (m_nCy == 0)
         m_nCy++;
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
 {
+#if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc = (CMemoryDoc *)GetDocument();
     if (pDoc == NULL)
         return;
@@ -312,10 +294,13 @@ void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
 //  set_scroll_range();
     if (nSBCode != SB_ENDSCROLL)
         SetScrollPos(SB_VERT,((int)pDoc->m_uAddress /*- 0x8000*/) /* / bytes_in_line() */ );
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // CZeroPageView message handlers
+
+#if REWRITE_TO_WX_WIDGET
 
 void CZeroPageView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 {
@@ -336,36 +321,46 @@ BOOL CZeroPageView::PreCreateWindow(CREATESTRUCT& cs)
     return CView::PreCreateWindow(cs);
 }
 
+#endif
 
-void CZeroPageView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+
+void CZeroPageView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 {
+#if REWRITE_TO_WX_WIDGET
     scroll(nSBCode,nPos);
 
     // CView::OnVScroll(nSBCode, nPos, pScrollBar);
+#endif
 }
 
-BOOL CZeroPageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) // 1.3.2 added mouse scroll wheel support
+bool CZeroPageView::OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt) // 1.3.2 added mouse scroll wheel support
 {
+#if REWRITE_TO_WX_WIDGET
     if (zDelta > 0)
         scroll(SB_LINEUP,0,0);
     else
         scroll(SB_LINEDOWN,0,0);
+#endif
+
     return true;
 }
 
 void CZeroPageView::OnInitialUpdate()
 {
+#if REWRITE_TO_WX_WIDGET
     CView::OnInitialUpdate();
 
     CClientDC dc(this);
     calc(&dc);
     set_scroll_range();
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 int CZeroPageView::set_scroll_range()
 {
+#if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc = (CMemoryDoc *)GetDocument();
     if (!pDoc)
         return -1;
@@ -390,13 +385,16 @@ int CZeroPageView::set_scroll_range()
         nPos = rng - scr;
     scroll(SB_THUMBTRACK, nPos);
     return ret;
+#endif
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
 
 // odszukanie adresu wiersza pami�ci poprzedzaj�cego dany wiersz
-int CZeroPageView::find_prev_addr(UINT32 &addr, const COutputMem &mem, int cnt/*= 1*/, int bytes/*= 0*/)
+int CZeroPageView::find_prev_addr(uint32_t &addr, const COutputMem &mem, int cnt/*= 1*/, int bytes/*= 0*/)
 {
+#if REWRITE_TO_WX_WIDGET
     ASSERT(cnt > 0);
     if (cnt < 0)
         return 0;
@@ -415,13 +413,16 @@ int CZeroPageView::find_prev_addr(UINT32 &addr, const COutputMem &mem, int cnt/*
     else
         addr = (UINT16)pos;
     return cnt;			// o tyle wierszy mo�na przesun��
+#endif
+    return 0;
 }
 
 
 // odszukanie adresu wiersza pami�ci nast�puj�cego po danym wierszu
-int CZeroPageView::find_next_addr(UINT32 &addr, const COutputMem &mem,
+int CZeroPageView::find_next_addr(uint32_t &addr, const COutputMem &mem,
                                   int cnt/*= 1*/, int bytes/*= 0*/)
 {
+#if REWRITE_TO_WX_WIDGET
     ASSERT(cnt > 0);
     if (cnt < 0)
         return 0;
@@ -443,12 +444,15 @@ int CZeroPageView::find_next_addr(UINT32 &addr, const COutputMem &mem,
     }
     addr = (UINT16)pos;
     return cnt;
+#endif
+    return 0;
 }
 
 
 // spr. o ile wierszy nale�y przesun�� zawarto�� okna aby dotrze� od 'addr' do 'dest'
-int CZeroPageView::find_delta(UINT32 &addr, UINT16 dest, const COutputMem &mem, int max_lines)
+int CZeroPageView::find_delta(uint32_t &addr, uint16_t dest, const COutputMem &mem, int max_lines)
 {
+#if REWRITE_TO_WX_WIDGET
     if (dest == addr)
         return 0;
 
@@ -482,12 +486,15 @@ int CZeroPageView::find_delta(UINT32 &addr, UINT16 dest, const COutputMem &mem, 
             return 999999;
         return -(lines / bytes);
     }
+#endif
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
 
 void CZeroPageView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+#if REWRITE_TO_WX_WIDGET
     switch (nChar)
     {
     case VK_DOWN:
@@ -518,31 +525,35 @@ void CZeroPageView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
         break;
 //      CView::OnKeyDown(nChar, nRepCnt, nFlags);
     }
+#endif
 }
 
 
 void CZeroPageView::OnSize(UINT nType, int cx, int cy)
 {
+#if REWRITE_TO_WX_WIDGET
     CView::OnSize(nType, cx, cy);
 
     CClientDC dc(this);
     calc(&dc);
     set_scroll_range();
+#endif
 }
 
 
-BOOL CZeroPageView::OnEraseBkgnd(CDC* pDC)
+bool CZeroPageView::OnEraseBkgnd(wxDC* pDC)
 {
 //  CRect rect;
 //  GetClientRect(rect);
 //  pDC->FillSolidRect(rect, m_rgbBkgndColor);
-    return TRUE;
+    return true;
 //  return CView::OnEraseBkgnd(pDC);
 }
 
 
-void CZeroPageView::OnContextMenu(CWnd* pWnd, CPoint point)
+void CZeroPageView::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+#if REWRITE_TO_WX_WIDGET
     CMenu menu;
     if (!menu.LoadMenu(IDR_POPUP_ZPMEMORY))
         return;
@@ -562,17 +573,21 @@ void CZeroPageView::OnContextMenu(CWnd* pWnd, CPoint point)
     }
 
     pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void CZeroPageView::OnUpdateMemoryGoto(CCmdUI* pCmdUI)
 {
+#if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
+#endif
 }
 
 void CZeroPageView::OnMemoryGoto()
 {
+#if REWRITE_TO_WX_WIDGET
     static UINT addr= 0;
     CMemoryGoto dlg;
     dlg.m_uAddr = addr;
@@ -582,33 +597,39 @@ void CZeroPageView::OnMemoryGoto()
         addr = dlg.m_uAddr;
         scroll(SB_THUMBTRACK, dlg.m_uAddr/*-0x8000*/, 1);
     }
+#endif
 }
 
 
 void CZeroPageView::OnUpdateMemoryChg(CCmdUI* pCmdUI)
 {
+#if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
+#endif
 }
 
 #include "MemoryChg.h"
 
 void CZeroPageView::OnMemoryChg()
 {
+#if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc= (CMemoryDoc *)GetDocument();
     ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CMemoryDoc)));
 
     CMemoryChg dlg(*pDoc->m_pMem, this);
     dlg.DoModal();
     InvalidateRect(NULL);
+#endif
 }
 
-
-void CZeroPageView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
+void CZeroPageView::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
 {
+#if REWRITE_TO_WX_WIDGET
     if (lHint == 'show')
     {
         CClientDC dc(this);
         calc(&dc);
         set_scroll_range();
     }
+#endif
 }

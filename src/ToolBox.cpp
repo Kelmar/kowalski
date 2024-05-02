@@ -25,52 +25,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "6502.h"
 #include "ToolBox.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CToolBox dialog
 
 
-CToolBox::CToolBox(CWnd* pParent /*=NULL*/)
-    : CDialog(CToolBox::IDD, pParent), created(FALSE)
+CToolBox::CToolBox()
+    : wxDialog()
 {
-    //{{AFX_DATA_INIT(CToolBox)
-    // NOTE: the ClassWizard will add member initialization here
-    //}}AFX_DATA_INIT
 }
 
-
-void CToolBox::DoDataExchange(CDataExchange* pDX)
+CToolBox::~CToolBox()
 {
-    CDialog::DoDataExchange(pDX);
-    //{{AFX_DATA_MAP(CToolBox)
-    // NOTE: the ClassWizard will add DDX and DDV calls here
-    //}}AFX_DATA_MAP
 }
-
-
-BEGIN_MESSAGE_MAP(CToolBox, CDialog)
-//{{AFX_MSG_MAP(CToolBox)
-    // NOTE: the ClassWizard will add message map macros here
-//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CToolBox message handlers
 
-BOOL CToolBox::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
+bool CToolBox::Create(int rsc_id, wxWindow* pParentWnd)
 {
-
-    return CDialog::Create(IDD, pParentWnd);
-}
-
-
-BOOL CToolBox::Create(int rsc_id, CWnd* pParentWnd)
-{
+#if REWRITE_TO_WX_WIDGET
     this->rsc_id = rsc_id;
 
     int ret= CDialog::Create(IDD, pParentWnd);
@@ -82,25 +55,7 @@ BOOL CToolBox::Create(int rsc_id, CWnd* pParentWnd)
         SetWindowText(regs);	// nazwa (tytu�) okna
 
     created = true;
+#endif
 
     return true;
-}
-
-
-BOOL CToolBox::OnCommand(WPARAM wParam, LPARAM lParam)
-{
-    if (LOWORD(wParam) == rsc_id)
-    {
-
-
-        return true;
-    }
-    else
-        return CDialog::OnCommand(wParam, lParam);
-}
-
-CToolBox::~CToolBox()
-{
-    if (created)
-        DestroyWindow();
 }

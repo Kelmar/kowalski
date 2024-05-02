@@ -24,23 +24,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "SyntaxExample.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // CSyntaxExample
 
 CSyntaxExample::CSyntaxExample()
 {
     m_nTabStop = 8;
-    m_hEditorFont = 0;
+    //m_hEditorFont = 0;
 
-    m_rgbBackground = RGB(255,255,255);
-    m_rgbText = m_rgbInstruction = m_rgbDirective =
-                                       m_rgbComment = m_rgbNumber = m_rgbString = m_rgbSelection = RGB(0,0,0);
+    m_rgbBackground = wxColour(255, 255, 255);;
+    m_rgbText = m_rgbInstruction = m_rgbDirective = m_rgbComment = wxColour(0, 0, 0);
+    m_rgbNumber = m_rgbString = m_rgbSelection = wxColour(0, 0, 0);
 
     m_vbBold[0] = m_vbBold[1] = m_vbBold[2] = m_vbBold[3] = m_vbBold[4] = false;
 }
@@ -49,6 +43,7 @@ CSyntaxExample::~CSyntaxExample()
 {
 }
 
+#if REWRITE_TO_WX_WIDGET
 
 BEGIN_MESSAGE_MAP(CSyntaxExample, CButton)
     //{{AFX_MSG_MAP(CSyntaxExample)
@@ -56,9 +51,12 @@ BEGIN_MESSAGE_MAP(CSyntaxExample, CButton)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CSyntaxExample message handlers
 
+#if REWRITE_TO_WX_WIDGET
 void CSyntaxExample::DrawItem(LPDRAWITEMSTRUCT pDrawItemStruct)
 {
     if (pDrawItemStruct->itemAction != ODA_DRAWENTIRE)
@@ -204,9 +202,9 @@ void CSyntaxExample::DrawItem(LPDRAWITEMSTRUCT pDrawItemStruct)
     rect.InflateRect(1, 1);
     pDC->Draw3dRect(rect, rgbFrame, rgbFrame);
 }
+#endif
 
-
-BOOL CSyntaxExample::OnEraseBkgnd(CDC* pDC)
+bool CSyntaxExample::OnEraseBkgnd(wxDC* pDC)
 {
     return true;
 }

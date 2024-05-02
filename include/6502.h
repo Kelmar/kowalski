@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "resource.h"       // main symbols
 
 class CMainFrame;
+class CIOWindow;
 
 /////////////////////////////////////////////////////////////////////////////
 // C6502App:
@@ -67,6 +68,8 @@ public:
     bool OnInit() override;
 
     wxConfig &Config() { return *m_config; }
+
+    CIOWindow *ioWindow() { return nullptr; }// m_ioWindow; }
 
     virtual void SetStatusText(int col, const std::string &message);
 
