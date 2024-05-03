@@ -42,7 +42,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
     switch (leks.type)
     {
     case CLeksem::L_LBRACKET_L: // 65816 '[' long indirect
-        if (bProc6502 != 2)
+        if (m_procType != ProcessorType::WDC65816)
             return ERR_MODE_NOT_ALLOWED; // [ only allowed for 65816
 
         leks = next_leks(); // another non-empty lexeme
@@ -128,7 +128,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
         case CLeksem::L_COMMA:
             reg_x = false;
-            if ((bProc6502 == 0) && expr.inf != Expr::EX_BYTE && expr.inf != Expr::EX_UNDEF)
+            if ((m_procType == ProcessorType::M6502) && expr.inf != Expr::EX_BYTE && expr.inf != Expr::EX_UNDEF)
                 return ERR_NUM_NOT_BYTE; // Too large number, max $FF
 
             leks = next_leks(); // Another non-empty lexeme
@@ -235,7 +235,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
 
     case CLeksem::L_LHASH: // Immediate argument '#'
-        if (bProc6502 == 2)
+        if (m_procType == ProcessorType::WDC65816)
             longImm = true;
 
     case CLeksem::L_HASH: // Immediate argument '#'
@@ -246,14 +246,14 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
             return ret;
 
         //if ((bProc6502 == 2) && ((expr.inf == Expr::EX_WORD) || (expr.inf == Expr::EX_UNDEF) || longImm))
-        if ((bProc6502 == 2) && ((expr.inf == Expr::EX_WORD) || longImm))
+        if ((m_procType == ProcessorType::WDC65816) && ((expr.inf == Expr::EX_WORD) || longImm))
             mode = A_IMM2;
         else if (expr.inf != Expr::EX_BYTE && expr.inf != Expr::EX_UNDEF)
             return ERR_NUM_NOT_BYTE; // Too large number, max $FF
         else
             mode = A_IMM;
 
-        if (!(bProc6502 == 0) && leks.type == CLeksem::L_COMMA) // only for 65C02?
+        if (!(m_procType == ProcessorType::M6502) && leks.type == CLeksem::L_COMMA) // only for M6502
         {
             leks = next_leks(); // Another non-empty lexeme
 

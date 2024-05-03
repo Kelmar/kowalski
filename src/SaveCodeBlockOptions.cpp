@@ -186,7 +186,7 @@ void CSaveCodeBlockOptions::CalculateNums(int pos)
     if (start > end)
         return;
 
-    bool is65816 = wxGetApp().m_global.m_bProc6502 == 2;
+    bool is65816 = wxGetApp().m_global.m_procType == ProcessorType::WDC65816;
 
     if (pos == 3) // change the length field?
     {

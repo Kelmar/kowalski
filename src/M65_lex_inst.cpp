@@ -62,7 +62,7 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
         switch (tmp[1])
         {
         case 'B':
-            if (bProc6502 != 1)
+            if (m_procType != ProcessorType::WDC65C02)
                 break;
             if (tmp[2] == 'S')
                 return code = CAsm::C_BBS, true;
@@ -103,11 +103,11 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
             break;
 
         case 'R':
-            if (!(bProc6502 == 0) && tmp[2] == 'A')
+            if (!(m_procType == ProcessorType::M6502) && tmp[2] == 'A')
                 return code = CAsm::C_BRA, true;
             else if (tmp[2] == 'K')
                 return code = CAsm::C_BRK, true;
-            else if ((bProc6502 == 2) && tmp[2] == 'L')  //% 65816
+            else if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'L')  //% 65816
                 return code = CAsm::C_BRL, true;
             break;
 
@@ -140,7 +140,7 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
             break;
 
         case 'O':
-            if ((bProc6502 == 2) && tmp[2] == 'P')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'P')  //% 65816
                 return code = CAsm::C_COP, true;
             break;
 
@@ -159,7 +159,7 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
             switch (tmp[2])
             {
             case 'A':
-                if (bProc6502 != 0)
+                if (m_procType != ProcessorType::M6502)
                     return code = CAsm::C_DEA, true;
                 break;
 
@@ -185,7 +185,7 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
             switch (tmp[2])
             {
             case 'A':
-                if (bProc6502 != 0)
+                if (m_procType != ProcessorType::M6502)
                     return code = CAsm::C_INA, true;
                 break;
 
@@ -205,9 +205,9 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
             return code = CAsm::C_JMP, true;
         else if (tmp[1] == 'S' && tmp[2] == 'R')
             return code = CAsm::C_JSR, true;
-        else if ((bProc6502 == 2) && tmp[1] == 'M' && tmp[2] =='L')  //% 65816
+        else if ((m_procType == ProcessorType::WDC65816) && tmp[1] == 'M' && tmp[2] =='L')  //% 65816
             return code = CAsm::C_JML, true;
-        else if ((bProc6502 == 2) && tmp[1] == 'S' && tmp[2] =='L')  //% 65816
+        else if ((m_procType == ProcessorType::WDC65816) && tmp[1] == 'S' && tmp[2] =='L')  //% 65816
             return code = CAsm::C_JSL, true;
         break;
 
@@ -228,9 +228,9 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
     case 'M':
         if (tmp[1] == 'V')
         {
-            if ((bProc6502 == 2) && tmp[2] =='N')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] =='N')  //% 65816
                 return code = CAsm::C_MVN, true;
-            else if ((bProc6502 == 2) && tmp[2] == 'P')  //% 65816
+            else if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'P')  //% 65816
                 return code = CAsm::C_MVP, true;
         }
         break;
@@ -248,11 +248,11 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
     case 'P':
         if (tmp[1] == 'E')
         {
-            if ((bProc6502 == 2) && tmp[2] == 'A')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'A')  //% 65816
                 return code = CAsm::C_PEA, true;
-            else if ((bProc6502 == 2) && tmp[2] == 'I')  //% 65816
+            else if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'I')  //% 65816
                 return code = CAsm::C_PEI, true;
-            else if ((bProc6502 == 2) && tmp[2] == 'R')  //% 65816
+            else if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'R')  //% 65816
                 return code = CAsm::C_PER, true;
         }
         else if (tmp[1] =='H')
@@ -262,17 +262,17 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
                 return code = CAsm::C_PHA, true;
 
             case 'B':
-                if (bProc6502 == 2)
+                if (m_procType == ProcessorType::WDC65816)
                     return code = CAsm::C_PHB, true;  //% 65816
                 break;
 
             case 'D':
-                if (bProc6502 == 2)
+                if (m_procType == ProcessorType::WDC65816)
                     return code = CAsm::C_PHD, true;  //% 65816
                 break;
 
             case 'K':
-                if (bProc6502 == 2)
+                if (m_procType == ProcessorType::WDC65816)
                     return code = CAsm::C_PHK, true;  //% 65816
                 break;
 
@@ -280,12 +280,12 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
                 return code = CAsm::C_PHP, true;
 
             case 'X':
-                if (bProc6502 != 0)
+                if (m_procType != ProcessorType::M6502)
                     return code = CAsm::C_PHX, true;
                 break;
 
             case 'Y':
-                if (bProc6502 != 0)
+                if (m_procType != ProcessorType::M6502)
                     return code = CAsm::C_PHY, true;
                 break;
             }
@@ -296,12 +296,12 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
                 return code = CAsm::C_PLA, true;
 
             case 'B':
-                if (bProc6502 == 2) 
+                if (m_procType == ProcessorType::WDC65816) 
                     return code = CAsm::C_PLB, true;  //% 65816
                 break;
 
             case 'D':
-                if (bProc6502 == 2)
+                if (m_procType == ProcessorType::WDC65816)
                     return code = CAsm::C_PLD, true;  //% 65816
                 break;
 
@@ -309,12 +309,12 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
                 return code = CAsm::C_PLP, true;
 
             case 'X':
-                if (bProc6502 != 0)
+                if (m_procType != ProcessorType::M6502)
                     return code = CAsm::C_PLX, true;
                 break;
                 
             case 'Y':
-                if (bProc6502 != 0)
+                if (m_procType != ProcessorType::M6502)
                     return code = CAsm::C_PLY, true;
                 break;
             }
@@ -324,7 +324,7 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
         switch (tmp[1])
         {
         case 'E':
-            if ((bProc6502 == 2) && tmp[2] == 'P')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'P')  //% 65816
                 return code = CAsm::C_REP, true;
             break;
 
@@ -336,14 +336,14 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
             break;
 
         case 'M':
-            if ((bProc6502 == 1) && tmp[2] == 'B')
+            if ((m_procType == ProcessorType::WDC65C02) && tmp[2] == 'B')
                 return code = CAsm::C_RMB, true;
             break;
 
         case 'T':
             if (tmp[2] == 'I')
                 return code = CAsm::C_RTI, true;
-            else if ((bProc6502 == 2) && tmp[2] == 'L')  //% 65816
+            else if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'L')  //% 65816
                 return code = CAsm::C_RTL, true;
             else if (tmp[2] == 'S')
                 return code = CAsm::C_RTS, true;
@@ -366,25 +366,25 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
                 return code = CAsm::C_SED, true;
             else if (tmp[2] == 'I')
                 return code = CAsm::C_SEI, true;
-            else if ((bProc6502 == 2) && tmp[2] =='P')  //% 65816
+            else if ((m_procType == ProcessorType::WDC65816) && tmp[2] =='P')  //% 65816
                 return code = CAsm::C_SEP, true;
             break;
 
         case 'M':
-            if ((bProc6502 == 1) && tmp[2] == 'B')
+            if ((m_procType == ProcessorType::WDC65C02) && tmp[2] == 'B')
                 return code = CAsm::C_SMB, true;
             break;
 
         case 'T':
             if (tmp[2] == 'A')
                 return code = CAsm::C_STA, true;
-            else if ((bProc6502 == 2) && tmp[2] == 'P')  //% 65816
+            else if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'P')  //% 65816
                 return code = CAsm::C_STP, true;
             else if (tmp[2] == 'X')
                 return code = CAsm::C_STX, true;
             else if (tmp[2] == 'Y')
                 return code = CAsm::C_STY, true;
-            else if (!(bProc6502 == 0) && tmp[2] == 'Z')
+            else if (!(m_procType == ProcessorType::M6502) && tmp[2] == 'Z')
                 return code = CAsm::C_STZ, true;
             break;
         }
@@ -401,26 +401,26 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
             break;
 
         case 'C':
-            if ((bProc6502 == 2) && tmp[2] == 'D')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'D')  //% 65816
                 return code = CAsm::C_TCD, true;
-            if ((bProc6502 == 2) && tmp[2] == 'S')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'S')  //% 65816
                 return code = CAsm::C_TCS, true;
             break;
 
         case 'D':
-            if ((bProc6502 == 2) && tmp[2] == 'C')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'C')  //% 65816
                 return code = CAsm::C_TDC, true;
             break;
 
         case 'R':
-            if (!(bProc6502 == 0) && tmp[2] == 'B')
+            if (!(m_procType == ProcessorType::M6502) && tmp[2] == 'B')
                 return code = CAsm::C_TRB, true;
             break;
 
         case 'S':
-            if (!(bProc6502 == 0) && tmp[2]=='B')
+            if (!(m_procType == ProcessorType::M6502) && tmp[2]=='B')
                 return code = CAsm::C_TSB, true;
-            if ((bProc6502 == 2) && tmp[2] == 'C')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'C')  //% 65816
                 return code = CAsm::C_TSC, true;
             if (tmp[2] == 'X')
                 return code = CAsm::C_TSX, true;
@@ -431,30 +431,30 @@ bool CAsm6502::proc_instr(const std::string &str_, CAsm::OpCode &code)
                 return code = CAsm::C_TXA, true;
             if (tmp[2] == 'S')
                 return code = CAsm::C_TXS, true;
-            if ((bProc6502 == 2) && tmp[2] == 'Y')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'Y')  //% 65816
                 return code = CAsm::C_TXY, true;
             break;
 
         case 'Y':
             if (tmp[2] == 'A')
                 return code = CAsm::C_TYA, true;
-            if ((bProc6502 == 2) && tmp[2] == 'X')  //% 65816
+            if ((m_procType == ProcessorType::WDC65816) && tmp[2] == 'X')  //% 65816
                 return code = CAsm::C_TYX, true;
             break;
         }
         break;
 
     case 'W':
-        if ((bProc6502 == 2) && tmp[1] == 'A' && tmp[2] == 'I')  //% 65816
+        if ((m_procType == ProcessorType::WDC65816) && tmp[1] == 'A' && tmp[2] == 'I')  //% 65816
             return code = CAsm::C_WAI, true;
-        if ((bProc6502 == 2) && tmp[1] == 'D' && tmp[2] == 'M')  //% 65816
+        if ((m_procType == ProcessorType::WDC65816) && tmp[1] == 'D' && tmp[2] == 'M')  //% 65816
             return code = CAsm::C_WDM, true;
         break;
 
     case 'X':
-        if ((bProc6502 == 2) && tmp[1] == 'B' && tmp[2] == 'A')  //% 65816
+        if ((m_procType == ProcessorType::WDC65816) && tmp[1] == 'B' && tmp[2] == 'A')  //% 65816
             return code = CAsm::C_XBA, true;
-        if ((bProc6502 == 2) && tmp[1] == 'C' && tmp[2] == 'E')  //% 65816
+        if ((m_procType == ProcessorType::WDC65816) && tmp[1] == 'C' && tmp[2] == 'E')  //% 65816
             return code = CAsm::C_XCE, true;
         break;
     }

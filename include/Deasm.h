@@ -37,7 +37,7 @@ public:
     std::string DeasmInstr(const CmdInfo& ci, DeasmFmt flags);
     std::string ArgumentValue(const CContext &ctx, int ptr= -1);
 
-    std::string Mnemonic(uint8_t code, uint8_t bUse6502, bool bUseBrk = false);
+    std::string Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk = false);
     std::string Argument(uint8_t cmd, CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel = false, bool bHelp = false);
     std::string Binary(uint8_t val);
 

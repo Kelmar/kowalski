@@ -64,10 +64,10 @@ std::string CDeasm::DeasmInstr(const CmdInfo& ci, DeasmFmt flags)
         str += fmt.ToStdString();
     }
 
-    uint8_t b6502 = wxGetApp().m_global.m_bProc6502;
-    str += Mnemonic(cmd, b6502, !!(flags & DF_USE_BRK));
+    ProcessorType procType = wxGetApp().m_global.m_procType;
+    str += Mnemonic(cmd, procType, !!(flags & DF_USE_BRK));
 
-    str += Argument(cmd, (CodeAdr)CodeToMode(b6502)[cmd], addr, ci.arg1, ci.arg2, ci.arg3, flags & DF_LABELS, flags & DF_HELP);
+    str += Argument(cmd, (CodeAdr)CodeToMode(procType)[cmd], addr, ci.arg1, ci.arg2, ci.arg3, flags & DF_LABELS, flags & DF_HELP);
 
     return str;
 }
@@ -117,10 +117,10 @@ std::string CDeasm::DeasmInstr(const CContext& ctx, DeasmFmt flags, int& ptr)
         str += fmt.ToStdString();
     }
 
-    uint8_t b6502 = wxGetApp().m_global.m_bProc6502;
-    str += Mnemonic(cmd, b6502, 1); //% Bug fix 1.2.12.2 - allow BRK vs. .DB in disassembly listings
+    ProcessorType procType = wxGetApp().m_global.m_procType;
+    str += Mnemonic(cmd, procType, 1); //% Bug fix 1.2.12.2 - allow BRK vs. .DB in disassembly listings
 
-    str += Argument(cmd, (CodeAdr)CodeToMode(b6502)[cmd], addr, ctx.mem[addr+1], ctx.mem[addr+2], ctx.mem[addr+3], flags & DF_LABELS);
+    str += Argument(cmd, (CodeAdr)CodeToMode(procType)[cmd], addr, ctx.mem[addr+1], ctx.mem[addr+2], ctx.mem[addr+3], flags & DF_LABELS);
 
     if (flags & DF_BRANCH_INFO)
     {
@@ -200,12 +200,12 @@ std::string CDeasm::DeasmInstr(const CContext& ctx, DeasmFmt flags, int& ptr)
     return str;
 }
 
-std::string CDeasm::Mnemonic(uint8_t code, uint8_t bUse6502, bool bUseBrk/*= false*/)
+std::string CDeasm::Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk/*= false*/)
 {
-    ASSERT(CodeToCommand(bUse6502)[code] <= C_ILL && CodeToCommand(bUse6502)[code] >= 0);
+    ASSERT(CodeToCommand(procType)[code] <= C_ILL && CodeToCommand(procType)[code] >= 0);
     char buf[16];
 
-    uint8_t cmd = CodeToCommand(bUse6502)[code];
+    uint8_t cmd = CodeToCommand(procType)[code];
 
     if (cmd == C_ILL || (cmd == C_BRK && !bUseBrk)) // Illegal command code or BRK
         snprintf(buf, sizeof(buf), ".DB $%02X", int(code));
@@ -482,8 +482,12 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, int cmd_addr /*= -1*/)
 
     case A_ABSI_X:
         addr = ctx.mem[cmd_addr] + ctx.x;	// Low byte of address + X offset
-        if (wxGetApp().m_global.GetProcType() && (cmd_addr & 0xFF) == 0xFF) // low byte == 0xFF?
-            addr += uint16_t(ctx.mem[cmd_addr - 0xFF]) << 8; // 6502 addressing bug
+
+        if (wxGetApp().m_global.GetProcType() != ProcessorType::M6502 && 
+            (cmd_addr & 0xFF) == 0xFF) // low byte == 0xFF?
+        {
+            addr += uint16_t(ctx.mem[cmd_addr - 0xFF]) << 8; // 65C02 addressing bug
+        }
         else
             addr += uint16_t(ctx.mem[cmd_addr + 1]) << 8;
         //      addr &= ctx.mem_mask;

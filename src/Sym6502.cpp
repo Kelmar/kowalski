@@ -137,9 +137,9 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
         inc_prog_counter();
         break;
 
-    case A_ABSI:						// only JMP(xxxx) supports this addr mode
+    case A_ABSI: // only JMP(xxxx) supports this addr mode
         addr = ctx.mem.GetWord(ctx.pc);
-        if (wxGetApp().m_global.GetProcType() && (addr & 0xFF) == 0xFF)	// LSB == 0xFF?
+        if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && (addr & 0xFF) == 0xFF) // LSB == 0xFF?
             addr = ctx.mem.GetWord(addr, addr - 0xFF);	// erroneously just as 6502 would do
         else
             addr = ctx.mem.GetWord(addr);
@@ -180,7 +180,10 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
     case A_ZPIL_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = ctx.mem.GetWordInd(arg) + ctx.y;
-        if ((addr>>8) != (ctx.mem.GetWordInd(arg)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+
+        if ((addr >> 8) != (ctx.mem.GetWordInd(arg) >> 8))
+            extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+
         inc_prog_counter();
         break;
 
@@ -255,7 +258,7 @@ uint8_t CSym6502::get_argument_value()
         return arg;
 
     case A_ZPG_Y:
-        arg = ctx.mem[ (ctx.mem[ctx.pc] + ctx.y) & 0xFF ]; // number at address
+        arg = ctx.mem[(ctx.mem[ctx.pc] + ctx.y) & 0xFF]; // number at address
         inc_prog_counter();
         return arg;
 
@@ -390,6 +393,22 @@ CAsm::SymStat CSym6502::perform_command()
         carry = ctx.carry;
         if (ctx.decimal)
         {
+            /*
+             * This is what it appears the simulator is currently doing:
+             * (Carry initially cleared in all cases)
+             * #$55 + #$55 = #$10 (Carry set, neg clear, over clear)
+             * #$50 + #$40 = #$90 (Carry clear, neg set, over set)
+             * #$37 + #$25 = #$62 (Carry clear, neg clear, over clear)
+             * 
+             * Carry is always result of high bit with 6502 (dec or bin mode)
+             * 
+             * V flag has kind of random meaning in BCD mode, but there is
+             * predictable behavior  we should probably emulate.
+             * 
+             * Z flag is same in both modes (zero result)
+             */
+
+
 #if REWRITE_ASM
             __asm // BCD add
             {
@@ -408,13 +427,14 @@ CAsm::SymStat CSym6502::perform_command()
                 setz zeroc
             }
 #endif
+            bool isM6502 = wxGetApp().m_global.m_procType == ProcessorType::M6502;
 
-            ctx.zero = ((wxGetApp().m_global.m_bProc6502 == 0) ? !!zero : !!zeroc);
+            ctx.zero = (isM6502 ? !!zero : !!zeroc);
             ctx.carry = !!carry;
             ctx.negative = !!negative;
             ctx.overflow = !!overflow;
 
-            if (!(wxGetApp().m_global.m_bProc6502 == 0)) //% bug Fix 1.2.12.1 - fix cycle timing
+            if (!isM6502) //% bug Fix 1.2.12.1 - fix cycle timing
                 ctx.uCycles++; // Add a cycle in BCD mode
         }
         else
@@ -470,12 +490,14 @@ CAsm::SymStat CSym6502::perform_command()
             }
 #endif
 
+            bool isM6502 = wxGetApp().m_global.m_procType == ProcessorType::M6502;
+
             ctx.carry = !carry; // Carray negation in accordance with convention 6502
             ctx.overflow = !!overflow;
-            ctx.negative = ((wxGetApp().m_global.m_bProc6502 == 0) ? !!negative : !!negativec);
-            ctx.zero = ((wxGetApp().m_global.m_bProc6502 == 0) ? !!zero : !!zeroc);
+            ctx.negative = (isM6502 ? !!negative : !!negativec);
+            ctx.zero = (isM6502 ? !!zero : !!zeroc);
 
-            if (!(wxGetApp().m_global.m_bProc6502 == 0)) //% bug Fix 1.2.12.1 - fix cycle timing
+            if (!isM6502) //% bug Fix 1.2.12.1 - fix cycle timing
                 ctx.uCycles++; // Add a cycle in BCD mode
         }
         else
@@ -592,7 +614,7 @@ CAsm::SymStat CSym6502::perform_command()
             }
 #endif
             ctx.mem[addr] = acc;
-            if (!(wxGetApp().m_global.m_bProc6502 == 0) && extracycle)
+            if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
                 ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         }
         ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -633,7 +655,7 @@ CAsm::SymStat CSym6502::perform_command()
             }
 #endif
             ctx.mem[addr] = acc;
-            if (!(wxGetApp().m_global.m_bProc6502 == 0) && extracycle)
+            if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
                 ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         }
         ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -685,7 +707,7 @@ CAsm::SymStat CSym6502::perform_command()
             }
 #endif
             ctx.mem[addr] = acc;
-            if (!(wxGetApp().m_global.m_bProc6502 == 0) && extracycle)
+            if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
                 ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         }
         ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -737,7 +759,7 @@ CAsm::SymStat CSym6502::perform_command()
             }
 #endif
             ctx.mem[addr] = acc;
-            if (!(wxGetApp().m_global.m_bProc6502 == 0) && extracycle)
+            if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
                 ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         }
         ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -880,19 +902,19 @@ CAsm::SymStat CSym6502::perform_command()
         break;
 
     case C_LDA:
-        ctx.set_status_reg( ctx.a = get_argument_value() );
+        ctx.set_status_reg(ctx.a = get_argument_value());
         if (extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
     case C_LDX:
-        ctx.set_status_reg( ctx.x = get_argument_value() );
+        ctx.set_status_reg(ctx.x = get_argument_value());
         if (extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
     case C_LDY:
-        ctx.set_status_reg( ctx.y = get_argument_value() );
+        ctx.set_status_reg(ctx.y = get_argument_value());
         if (extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
@@ -924,14 +946,15 @@ CAsm::SymStat CSym6502::perform_command()
     case C_PHP:
         inc_prog_counter();
         //% Bug Fix 1.2.12.10 - PHP not pushing flags correctly
-        push_on_stack( ctx.get_status_reg() | CContext::BREAK | CContext::RESERVED );
+        push_on_stack(ctx.get_status_reg() | CContext::BREAK | CContext::RESERVED);
         break;
 
     case C_PLP:
         inc_prog_counter();
         ctx.set_status_reg_bits(pull_from_stack());
-        if (!wxGetApp().m_global.GetProcType()) // 65c02?
+        if (wxGetApp().m_global.GetProcType() != ProcessorType::M6502)
         {
+            // 65C02 mode
             ctx.reserved = true; // 'reserved' bit always set
             ctx.break_bit = true;
         }
@@ -1096,8 +1119,9 @@ CAsm::SymStat CSym6502::perform_command()
         break;
 
     case C_BRK:
-        if (finish == FIN_BY_BRK)// instrukcja BRK ko�czy dzia�anie programu?
+        if (finish == FIN_BY_BRK) // BRK instruction terminates the program?
             return SYM_FIN;
+
         inc_prog_counter(2);
         //% Bug Fix 1.2.12.8 - BRK not executing when IRQ bit set
         //if (ctx.interrupt)
@@ -1107,8 +1131,10 @@ CAsm::SymStat CSym6502::perform_command()
         push_on_stack(ctx.get_status_reg() | CContext::RESERVED); //% Bug fix 1.2.12.3 - BRK status bits not correct
         //ctx.break_bit = false; // there's really no break bit in the flags register!
         ctx.interrupt = true;
-        if (!(wxGetApp().m_global.m_bProc6502 == 0))
+
+        if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
             ctx.decimal = false; //% Bug fix 1.2.12.9 - 65C02 clears D Flag in BRK
+
         ctx.pc = get_irq_addr();
         break;
 
@@ -1148,13 +1174,13 @@ CAsm::SymStat CSym6502::perform_command()
     case C_INA:
         inc_prog_counter();
         ctx.a++;
-        ctx.set_status_reg( ctx.a );
+        ctx.set_status_reg(ctx.a);
         break;
 
     case C_DEA:
         inc_prog_counter();
         ctx.a--;
-        ctx.set_status_reg( ctx.a );
+        ctx.set_status_reg(ctx.a);
         break;
 
     case C_STZ:
@@ -1253,8 +1279,9 @@ CAsm::SymStat CSym6502::perform_command()
             return SYM_FIN;
 
         //% Bug Fix 1.2.12.2 - allow unused opcode to execute NOP's on 65C02
-        if (!(wxGetApp().m_global.m_bProc6502 == 0)) //65C02 mode
+        if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
         {
+            // 65C02 mode
             arg = get_argument_value();
             extracycle = false;
             break;
@@ -1373,7 +1400,7 @@ UINT CSym6502::start_step_over_thread(void *ptr)
     CSym6502 *pSym = (CSym6502 *)ptr;
     pSym->fin_stat = pSym->step_over();
     pSym->running = false;
-    wxGetApp()->GetMainWnd()->PostMessage(WM_USER+9998, pSym->fin_stat, 0); // Notify stopped
+    wxGetApp()->GetMainWnd()->PostMessage(WM_USER + 9998, pSym->fin_stat, 0); // Notify stopped
 #endif
 
     return 0;
@@ -1396,7 +1423,7 @@ CAsm::SymStat CSym6502::step_over() // wykonanie instrukcji bez wchodzenia do po
         
     case C_BRK:
         if (debug && !jsr)
-            debug->SetTemporaryExecBreakpoint((addr+2) & ctx.mem_mask); // Break after instruction
+            debug->SetTemporaryExecBreakpoint((addr + 2) & ctx.mem_mask); // Break after instruction
 
         for (;;)
         {
@@ -1577,8 +1604,10 @@ void CSym6502::interrupt(int& nInterrupt) // interrupt requested: load pc ***
     if (nInterrupt & RST)
     {
         ctx.interrupt = true;
-        if (!(wxGetApp().m_global.m_bProc6502==0))
+
+        if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
             ctx.decimal = false; //% bug Fix 1.2.12.9 - 65C02 clears this bit
+
         ctx.pc = get_rst_addr();
         nInterrupt = NONE;
         ctx.uCycles += 7; //% bug Fix 1.2.12.1 - cycle counting not correct
@@ -1589,8 +1618,10 @@ void CSym6502::interrupt(int& nInterrupt) // interrupt requested: load pc ***
         ctx.break_bit = false;
         push_on_stack(ctx.get_status_reg());
         //ctx.interrupt = ???; // TODO: not sure...
-        if (!(wxGetApp().m_global.m_bProc6502 == 0))
+
+        if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
             ctx.decimal = false; //% bug Fix 1.2.12.9 - 65C02 clears this bit
+
         ctx.break_bit = true; //% bug Fix 1.2.12.4 - status bits not right
         ctx.pc = get_nmi_addr();
         nInterrupt &= ~NMI;
@@ -1606,8 +1637,10 @@ void CSym6502::interrupt(int& nInterrupt) // interrupt requested: load pc ***
         push_on_stack(ctx.get_status_reg());
         ctx.break_bit = true; //% bug Fix 1.2.12.4 - status bits not right
         ctx.interrupt = true;
-        if (!(wxGetApp().m_global.m_bProc6502==0))
+
+        if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
             ctx.decimal = false; //% bug Fix 1.2.12.9 - 65C02 clears this bit
+
         ctx.pc = get_irq_addr();
 
         ctx.uCycles += 7; //% bug Fix 1.2.12.1 - cycle counting not correct

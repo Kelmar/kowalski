@@ -583,62 +583,94 @@ const uint8_t CAsm::code_cycles_8[256] =
     2, 5, 5, 1, 4, 4, 6, 5, 2, 4, 4, 1, 4, 4, 7, 5	// fx
 };
 
-const uint8_t (&CAsm::TransformTable(const uint8_t bProc6502))[C_ILL][A_NO_OF_MODES]
+const uint8_t (&CAsm::TransformTable(const ProcessorType procType))[C_ILL][A_NO_OF_MODES]
 {
-    if (bProc6502 == 0)
+    switch (procType)
+    {
+    case ProcessorType::M6502:
         return trans_table;
-    else if (bProc6502 == 1)
+
+    case ProcessorType::WDC65C02:
         return trans_table_c;
-    else
+
+    case ProcessorType::WDC65816:
         return trans_table_8;
+
+    default:
+        throw 0; // TODO: Throw real exception later.
+    }
 }
 
 const uint8_t (&CAsm::CodeToCommand())[0x100]
 {
-    return CodeToCommand(wxGetApp().m_global.m_bProc6502);
+    return CodeToCommand(wxGetApp().m_global.m_procType);
 }
 
-const uint8_t (&CAsm::CodeToCommand(const uint8_t bProc6502))[0x100]
+const uint8_t (&CAsm::CodeToCommand(const ProcessorType procType))[0x100]
 {
-    if (bProc6502 == 0)
+    switch (procType)
+    {
+    case ProcessorType::M6502:
         return code_to_command;
-    else if (bProc6502 == 1)
+    
+    case ProcessorType::WDC65C02:
         return code_to_command_c;
-    else
+
+    case ProcessorType::WDC65816:
         return code_to_command_8;
+
+    default:
+        throw 0; // TODO: Throw real exception later.
+    }
 }
 
 const uint8_t (&CAsm::CodeToMode())[0x100]
 {
-    return CodeToMode(wxGetApp().m_global.m_bProc6502);
+    return CodeToMode(wxGetApp().m_global.m_procType);
 }
 
-const uint8_t (&CAsm::CodeToMode(const uint8_t bProc6502))[0x100]
+const uint8_t (&CAsm::CodeToMode(const ProcessorType procType))[0x100]
 {
-    if (bProc6502 == 0)
+    switch (procType)
+    {
+    case ProcessorType::M6502:
         return code_to_mode;
-    else if (bProc6502 == 1)
+
+    case ProcessorType::WDC65C02:
         return code_to_mode_c;
-    else
+
+    case ProcessorType::WDC65816:
         return code_to_mode_8;
+
+    default:
+        throw 0; // TODO: Throw real exception later.
+    }
 }
 
-inline uint8_t CAsm::ProcType()
+inline ProcessorType CAsm::ProcType()
 {
-    return wxGetApp().m_global.m_bProc6502;
+    return wxGetApp().m_global.m_procType;
 }
 
 const uint8_t (&CAsm::CodeToCycles())[0x100]
 {
-    return CodeToCycles(wxGetApp().m_global.m_bProc6502);
+    return CodeToCycles(wxGetApp().m_global.m_procType);
 }
 
-const uint8_t (&CAsm::CodeToCycles(const uint8_t bProc6502))[0x100]
+const uint8_t (&CAsm::CodeToCycles(const ProcessorType procType))[0x100]
 {
-    if (bProc6502 == 0)
+    switch (procType)
+    {
+    case ProcessorType::M6502:
         return code_cycles;
-    else if (bProc6502 == 1)
+
+    case ProcessorType::WDC65C02:
         return code_cycles_c;
-    else
+
+    case ProcessorType::WDC65816:
         return code_cycles_8;
+
+    default:
+        throw 0; // TODO: Throw real exception later.
+    }
 }

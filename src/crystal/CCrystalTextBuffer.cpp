@@ -37,17 +37,6 @@
 #include "CCrystalTextBuffer.h"
 #include "CCrystalTextView.h"
 
-#ifndef __AFXPRIV_H__
-#pragma message("Include <afxpriv.h> in your stdafx.h to avoid this message")
-#include <afxpriv.h>
-#endif
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 //	Line allocation granularity
 #define		CHAR_ALIGN					16
 #define		ALIGN_BUF_SIZE(size)		((size) / CHAR_ALIGN) * CHAR_ALIGN + CHAR_ALIGN;

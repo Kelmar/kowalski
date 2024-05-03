@@ -799,7 +799,7 @@ class CAsm6502 : public CAsm /*, public CObject */
     void init_members();
 
 public:
-    uint8_t bProc6502;  // 0=6502, 1=65C02 or 6501, 2=65816
+    ProcessorType m_procType;
 
     static bool case_insensitive; //true -> lowercase and uppercase letters in labels are not distinguished
     static bool swapbin;
@@ -811,13 +811,13 @@ public:
              COutputMem *out = NULL,
              CDebugInfo *debug = NULL,
              CMarkArea *area = NULL,
-             uint8_t proc6502 = 0,
+             ProcessorType procType = ProcessorType::M6502,
              const char *listing_file = NULL)
         : entire_text(file_in_name)
         , out(out)
         , debug(debug)
         , markArea(area)
-        , bProc6502(proc6502)
+        , m_procType(procType)
         , listing(listing_file)
     {
         init();
@@ -827,13 +827,13 @@ public:
              COutputMem *out = NULL,
              CDebugInfo *debug = NULL,
              CMarkArea *area = NULL,
-             uint8_t proc6502 = 0,
+             ProcessorType procType = ProcessorType::M6502,
              const char *listing_file = NULL)
         : entire_text(pWnd)
         , out(out)
         , debug(debug)
         , markArea(area)
-        , bProc6502(proc6502)
+        , m_procType(procType)
         , listing(listing_file)
     {
         init();
@@ -841,7 +841,7 @@ public:
 
     CAsm6502()
     {
-        bProc6502 = 0;
+        m_procType = ProcessorType::M6502;
         swapbin = false;
         forcelong = 0;
         init_members();

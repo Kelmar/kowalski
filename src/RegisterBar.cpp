@@ -459,8 +459,8 @@ void CRegisterBar::ChangeFlags(int flag_bit, bool set) // changing the flag regi
 
     ctx.set_status_reg_bits(flags);
 
-    if (!wxGetApp().m_global.GetProcType()) // 65c02?
-        ctx.reserved = true;			    // 'reserved' bit always set
+    if (wxGetApp().m_global.GetProcType() != ProcessorType::M6502)
+        ctx.reserved = true; // 'reserved' bit always set
 
     SetDlgItemByteHex(IDC_REGS_P, ctx.get_status_reg());
 

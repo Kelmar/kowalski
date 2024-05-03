@@ -51,10 +51,10 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         if (expr.value < 0)
             return ERR_NUM_NEGATIVE; // Expected non-negative value
 
-        if (!(bProc6502 == 2) && expr.inf == Expr::EX_LONG) // Value too large
+        if (!(m_procType == ProcessorType::WDC65816) && expr.inf == Expr::EX_LONG) // Value too large
             return ERR_NUM_LONG;
 
-        if (bProc6502 == 2)
+        if (m_procType == ProcessorType::WDC65816)
             originWrapped = false;
 
         if (program_start == ~0u) // Beginning of program not defined yet?
@@ -331,7 +331,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         if (expr.value < 0)
             return ERR_NUM_NEGATIVE; // Expected non-negative value
 
-        if (!(bProc6502 == 2) && expr.inf == Expr::EX_LONG)	// Value too large
+        if (!(m_procType == ProcessorType::WDC65816) && expr.inf == Expr::EX_LONG) // Value too large
             return ERR_NUM_LONG;
 
         //if (origin > 0xFFFF)
@@ -610,13 +610,13 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
                 std::string literal = *leks.GetString();
 
                 if (strcasecmp(literal.c_str(), opts[0]) == 0)
-                    bProc6502 = 0;
+                    m_procType = ProcessorType::M6502;
                 else if (strcasecmp(literal.c_str(), opts[1]) == 0)
-                    bProc6502 = 1;
+                    m_procType = ProcessorType::WDC65C02;
                 else if (strcasecmp(literal.c_str(), opts[2]) == 0)
-                    bProc6502 = 1;
+                    m_procType = ProcessorType::WDC65C02;
                 else if (strcasecmp(literal.c_str(), opts[3]) == 0)
-                    bProc6502 = 2;
+                    m_procType = ProcessorType::WDC65816;
                 else if (strcasecmp(literal.c_str(), opts[4]) == 0)
                     case_insensitive = false;
                 else if (strcasecmp(literal.c_str(), opts[5]) == 0)

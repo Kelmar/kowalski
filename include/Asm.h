@@ -21,6 +21,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _asm_h_
 #define _asm_h_
 
+/**
+ * @brief Type of CPU we're emulating.
+ * @remark This is temporary until we refactor the simulator into a more generic
+ * system where the CPU type is more flexable.
+ */
+enum class ProcessorType
+{
+    M6502 = 0,    // Basic 6502
+    WDC65C02 = 1, // 65C02, 6501
+    WDC65816 = 2  // 65816
+};
+
 // Being used more like a namespace than a class? -- B.Simonds (April 25, 2024)
 
 class CAsm	  // base class - type definitions
@@ -342,32 +354,32 @@ public:
 protected:
     static const uint8_t code_to_mode[];                 // Converting the command code to the addressing mode
     static const uint8_t code_to_mode_c[];               // As above for 65c02
-    static const uint8_t code_to_mode_8[];               // As above for 65c02
+    static const uint8_t code_to_mode_8[];               // As above for 65816
     static const uint8_t code_to_command[];              // Replacing the command code with its number (OpCode type)
     static const uint8_t code_to_command_c[];            // As above for 65c02
-    static const uint8_t code_to_command_8[];            // As above for 65c02
+    static const uint8_t code_to_command_8[];            // As above for 65816
     static const uint8_t trans_table[][A_NO_OF_MODES];   // Converting an instruction in a given addressing mode into a code (65XX)
     static const uint8_t trans_table_c[][A_NO_OF_MODES]; // Converting an instruction in a given addressing mode into a code (65C02)
-    static const uint8_t trans_table_8[][A_NO_OF_MODES]; // Converting an instruction in a given addressing mode into a code (65C02)
+    static const uint8_t trans_table_8[][A_NO_OF_MODES]; // Converting an instruction in a given addressing mode into a code (65816)
     static const uint8_t code_cycles[];                  // How many cycles for instruction
     static const uint8_t code_cycles_c[];                // As above for 65c02
-    static const uint8_t code_cycles_8[];                // As above for 65c02
+    static const uint8_t code_cycles_8[];                // As above for 65816
 
 public:
     static const uint8_t mode_to_len[]; // Changing the addressing mode to the length of the instruction and arguments
 
-    const uint8_t (&TransformTable(const uint8_t bProc6502))[C_ILL][A_NO_OF_MODES];
+    const uint8_t (&TransformTable(const ProcessorType procType))[C_ILL][A_NO_OF_MODES];
 
-    const uint8_t (&CodeToCommand(const uint8_t bProc6502))[0x100];
+    const uint8_t (&CodeToCommand(const ProcessorType procType))[0x100];
     const uint8_t (&CodeToCommand())[0x100];
 
-    const uint8_t (&CodeToMode(const uint8_t bProc6502))[0x100];
+    const uint8_t (&CodeToMode(const ProcessorType procType))[0x100];
     const uint8_t (&CodeToMode())[0x100];
 
-    const uint8_t (&CodeToCycles(const uint8_t bProc6502))[0x100];
+    const uint8_t (&CodeToCycles(const ProcessorType procType))[0x100];
     const uint8_t (&CodeToCycles())[0x100];
 
-    uint8_t ProcType();
+    ProcessorType ProcType();
 };
 
 CAsm::DeasmFmt inline operator | (CAsm::DeasmFmt f1, CAsm::DeasmFmt f2)

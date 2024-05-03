@@ -56,12 +56,6 @@
 #include "resource.h"
 #include "GotoLineNumber.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 #define TAB_CHARACTER				_T('\xBB')
 #define SPACE_CHARACTER				_T('\xB7')
 #define DEFAULT_PRINT_MARGIN		1000				//	10 millimeters

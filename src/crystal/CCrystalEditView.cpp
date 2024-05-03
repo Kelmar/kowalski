@@ -34,24 +34,8 @@
 #include "CCrystalTextBuffer.h"
 #include "CEditReplaceDlg.h"
 
-#ifndef __AFXPRIV_H__
-#pragma message("Include <afxpriv.h> in your stdafx.h to avoid this message")
-#include <afxpriv.h>
-#endif
-#ifndef __AFXOLE_H__
-#pragma message("Include <afxole.h> in your stdafx.h to avoid this message")
-#include <afxole.h>
-#endif
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 #define DRAG_BORDER_X		5
 #define DRAG_BORDER_Y		5
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CEditDropTargetImpl class declaration
@@ -66,11 +50,11 @@ public:
         m_pOwner = pOwner;
     };
 
-    virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-    virtual void OnDragLeave(CWnd* pWnd);
-    virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-    virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
-    virtual DROPEFFECT OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
+    virtual DROPEFFECT OnDragEnter(wxWindow* pWnd, COleDataObject* pDataObject, uint32_t dwKeyState, wxPoint point);
+    virtual void OnDragLeave(wxWindow* pWnd);
+    virtual DROPEFFECT OnDragOver(wxWindow* pWnd, COleDataObject* pDataObject, uint32_t dwKeyState, wxPoint point);
+    virtual BOOL OnDrop(wxWindow* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, wxPoint point);
+    virtual DROPEFFECT OnDragScroll(wxWindow* pWnd, uint32_t dwKeyState, wxPoint point);
 };
 
 
@@ -161,10 +145,10 @@ BOOL CCrystalEditView::DeleteCurrentSelection()
 {
     if (IsSelection())
     {
-        CPoint ptSelStart, ptSelEnd;
+        wxPoint ptSelStart, ptSelEnd;
         GetSelection(ptSelStart, ptSelEnd);
 
-        CPoint ptCursorPos = ptSelStart;
+        wxPoint ptCursorPos = ptSelStart;
         ASSERT_VALIDTEXTPOS(ptCursorPos);
         SetAnchor(ptCursorPos);
         SetSelection(ptCursorPos, ptCursorPos);
@@ -189,10 +173,10 @@ void CCrystalEditView::Paste()
 
     DeleteCurrentSelection();
 
-    CString text;
+    std::string text;
     if (GetFromClipboard(text))
     {
-        CPoint ptCursorPos = GetCursorPos();
+        wxPoint ptCursorPos = GetCursorPos();
         ASSERT_VALIDTEXTPOS(ptCursorPos);
         int x= 0, y= 0;
         m_pTextBuffer->InsertText(this, ptCursorPos.y, ptCursorPos.x, text, y, x, CE_ACTION_PASTE); //	[JRT]
@@ -217,13 +201,13 @@ void CCrystalEditView::Cut()
     if (! IsSelection())
         return;
 
-    CPoint ptSelStart, ptSelEnd;
+    wxPoint ptSelStart, ptSelEnd;
     GetSelection(ptSelStart, ptSelEnd);
-    CString text;
+    std::string text;
     GetText(ptSelStart, ptSelEnd, text);
     PutToClipboard(text);
 
-    CPoint ptCursorPos = ptSelStart;
+    wxPoint ptCursorPos = ptSelStart;
     ASSERT_VALIDTEXTPOS(ptCursorPos);
     SetAnchor(ptCursorPos);
     SetSelection(ptCursorPos, ptCursorPos);
@@ -240,7 +224,7 @@ void CCrystalEditView::OnEditDelete()
 
     ExpandCurrentLine();	// MiK: expand line before editing it
 
-    CPoint ptSelStart, ptSelEnd;
+    wxPoint ptSelStart, ptSelEnd;
     GetSelection(ptSelStart, ptSelEnd);
     if (ptSelStart == ptSelEnd)
     {
@@ -256,7 +240,7 @@ void CCrystalEditView::OnEditDelete()
             ptSelEnd.x ++;
     }
 
-    CPoint ptCursorPos = ptSelStart;
+    wxPoint ptCursorPos = ptSelStart;
     ASSERT_VALIDTEXTPOS(ptCursorPos);
     SetAnchor(ptCursorPos);
     SetSelection(ptCursorPos, ptCursorPos);
@@ -281,7 +265,7 @@ void CCrystalEditView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
     {
         if (m_bOvrMode)
         {
-            CPoint ptCursorPos = GetCursorPos();
+            wxPoint ptCursorPos = GetCursorPos();
             ASSERT_VALIDTEXTPOS(ptCursorPos);
             if (ptCursorPos.y < GetLineCount() - 1)
             {
@@ -310,7 +294,7 @@ void CCrystalEditView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
         {
             DeleteCurrentSelection();
 
-            CPoint ptCursorPos = GetCursorPos();
+            wxPoint ptCursorPos = GetCursorPos();
             ASSERT_VALIDTEXTPOS(ptCursorPos);
             const static TCHAR pszText[3] = _T("\r\n");
 
@@ -338,9 +322,9 @@ void CCrystalEditView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
         {
             m_pTextBuffer->BeginUndoGroup(nChar != _T(' '));
 
-            CPoint ptSelStart, ptSelEnd;
+            wxPoint ptSelStart, ptSelEnd;
             GetSelection(ptSelStart, ptSelEnd);
-            CPoint ptCursorPos;
+            wxPoint ptCursorPos;
             if (ptSelStart != ptSelEnd)
             {
                 ptCursorPos = ptSelStart;
@@ -390,8 +374,8 @@ void CCrystalEditView::OnEditDeleteBack()
     if (! QueryEditable() || m_pTextBuffer == NULL)
         return;
 
-    CPoint ptCursorPos = GetCursorPos();
-    CPoint ptCurrentCursorPos = ptCursorPos;
+    wxPoint ptCursorPos = GetCursorPos();
+    wxPoint ptCurrentCursorPos = ptCursorPos;
 
     if (ptCursorPos.x == 0)
     {
@@ -445,7 +429,7 @@ void CCrystalEditView::OnEditTab()
         return;
 
     BOOL bTabify = FALSE;
-    CPoint ptSelStart, ptSelEnd;
+    wxPoint ptSelStart, ptSelEnd;
     if (IsSelection())
     {
         GetSelection(ptSelStart, ptSelEnd);
@@ -496,7 +480,7 @@ void CCrystalEditView::OnEditTab()
 
     if (m_bOvrMode)
     {
-        CPoint ptCursorPos = GetCursorPos();
+        wxPoint ptCursorPos = GetCursorPos();
         ASSERT_VALIDTEXTPOS(ptCursorPos);
 
         int nLineLength = GetLineLength(ptCursorPos.y);
@@ -534,7 +518,7 @@ void CCrystalEditView::OnEditTab()
 
     DeleteCurrentSelection();
 
-    CPoint ptCursorPos = GetCursorPos();
+    wxPoint ptCursorPos = GetCursorPos();
     ASSERT_VALIDTEXTPOS(ptCursorPos);
 
     static const TCHAR pszText[] = _T("\t");
@@ -557,7 +541,7 @@ void CCrystalEditView::OnEditUntab()
         return;
 
     BOOL bTabify = FALSE;
-    CPoint ptSelStart, ptSelEnd;
+    wxPoint ptSelStart, ptSelEnd;
     if (IsSelection())
     {
         GetSelection(ptSelStart, ptSelEnd);
@@ -568,7 +552,7 @@ void CCrystalEditView::OnEditUntab()
     {
         m_pTextBuffer->BeginUndoGroup();
 
-        CPoint ptSelStart, ptSelEnd;
+        wxPoint ptSelStart, ptSelEnd;
         GetSelection(ptSelStart, ptSelEnd);
         int nStartLine = ptSelStart.y;
         int nEndLine = ptSelEnd.y;
@@ -629,7 +613,7 @@ void CCrystalEditView::OnEditUntab()
     {
         ExpandCurrentLine();			// MiK: expand line before editing it
 
-        CPoint ptCursorPos = GetCursorPos();
+        wxPoint ptCursorPos = GetCursorPos();
         ASSERT_VALIDTEXTPOS(ptCursorPos);
         if (ptCursorPos.x > 0)
         {
@@ -692,7 +676,7 @@ void CCrystalEditView::OnUpdateEditSwitchOvrmode(CCmdUI* pCmdUI)
     pCmdUI->SetCheck(m_bOvrMode ? 1 : 0);
 }
 
-DROPEFFECT CEditDropTargetImpl::OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
+DROPEFFECT CEditDropTargetImpl::OnDragEnter(wxWindow* pWnd, COleDataObject* pDataObject, uint32_t dwKeyState, wxPoint point)
 {
     if (! pDataObject->IsDataAvailable(CF_TEXT))
     {
@@ -705,12 +689,12 @@ DROPEFFECT CEditDropTargetImpl::OnDragEnter(CWnd* pWnd, COleDataObject* pDataObj
     return DROPEFFECT_MOVE;
 }
 
-void CEditDropTargetImpl::OnDragLeave(CWnd* pWnd)
+void CEditDropTargetImpl::OnDragLeave(wxWindow* pWnd)
 {
     m_pOwner->HideDropIndicator();
 }
 
-DROPEFFECT CEditDropTargetImpl::OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
+DROPEFFECT CEditDropTargetImpl::OnDragOver(wxWindow* pWnd, COleDataObject* pDataObject, uint32_t dwKeyState, wxPoint point)
 {
     /*
     	if (! pDataObject->IsDataAvailable(CF_TEXT))
@@ -749,7 +733,7 @@ DROPEFFECT CEditDropTargetImpl::OnDragOver(CWnd* pWnd, COleDataObject* pDataObje
     return DROPEFFECT_MOVE;
 }
 
-BOOL CEditDropTargetImpl::OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point)
+BOOL CEditDropTargetImpl::OnDrop(wxWindow* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, wxPoint point)
 {
     //
     // [JRT] 			( m_pOwner -> GetDisableDragAndDrop() ) )		// Or Drag And Drop Disabled
@@ -777,7 +761,7 @@ BOOL CEditDropTargetImpl::OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEF
     return (m_pOwner->DoDropText(pDataObject, point));	    // Return Result Of Drop
 }
 
-DROPEFFECT CEditDropTargetImpl::OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point)
+DROPEFFECT CEditDropTargetImpl::OnDragScroll(wxWindow* pWnd, uint32_t dwKeyState, wxPoint point)
 {
     ASSERT(m_pOwner == pWnd);
     m_pOwner->DoDragScroll(point);
@@ -787,9 +771,9 @@ DROPEFFECT CEditDropTargetImpl::OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoin
     return DROPEFFECT_MOVE;
 }
 
-void CCrystalEditView::DoDragScroll(const CPoint &point)
+void CCrystalEditView::DoDragScroll(const wxPoint &point)
 {
-    CRect rcClientRect;
+    wxRect rcClientRect;
     GetClientRect(rcClientRect);
     if (point.y < rcClientRect.top + DRAG_BORDER_Y)
     {
@@ -825,13 +809,13 @@ void CCrystalEditView::DoDragScroll(const CPoint &point)
     }
 }
 
-BOOL CCrystalEditView::DoDropText(COleDataObject *pDataObject, const CPoint &ptClient)
+BOOL CCrystalEditView::DoDropText(COleDataObject *pDataObject, const wxPoint &ptClient)
 {
     HGLOBAL hData = pDataObject->GetGlobalData(CF_TEXT);
     if (hData == NULL)
         return FALSE;
 
-    CPoint ptDropPos = ClientToText(ptClient);
+    wxPoint ptDropPos = ClientToText(ptClient);
     if (IsDraggingText() && IsInsideSelection(ptDropPos))
     {
         SetAnchor(ptDropPos);
@@ -848,7 +832,7 @@ BOOL CCrystalEditView::DoDropText(COleDataObject *pDataObject, const CPoint &ptC
     int x, y;
     USES_CONVERSION;
     m_pTextBuffer->InsertText(this, ptDropPos.y, ptDropPos.x, A2T(pszText), y, x, CE_ACTION_DRAGDROP); //	[JRT]
-    CPoint ptCurPos(x, y);
+    wxPoint ptCurPos(x, y);
     ASSERT_VALIDTEXTPOS(ptCurPos);
     SetAnchor(ptDropPos);
     SetSelection(ptDropPos, ptCurPos);
@@ -888,7 +872,7 @@ void CCrystalEditView::OnDestroy()
     CCrystalTextView::OnDestroy();
 }
 
-void CCrystalEditView::ShowDropIndicator(const CPoint &point)
+void CCrystalEditView::ShowDropIndicator(const wxPoint &point)
 {
     if (! m_bDropPosVisible)
     {
@@ -939,7 +923,7 @@ void CCrystalEditView::OnDropSource(DROPEFFECT de)
     }
 }
 
-void CCrystalEditView::UpdateView(CCrystalTextView *pSource, CUpdateContext *pContext, DWORD dwFlags, int nLineIndex /*= -1*/)
+void CCrystalEditView::UpdateView(CCrystalTextView *pSource, CUpdateContext *pContext, uint32_t dwFlags, int nLineIndex /*= -1*/)
 {
     CCrystalTextView::UpdateView(pSource, pContext, dwFlags, nLineIndex);
 
@@ -1013,11 +997,11 @@ BOOL CCrystalEditView::ReplaceSelection(LPCTSTR pszNewText)
 
     DeleteCurrentSelection();
 
-    CPoint ptCursorPos = GetCursorPos();
+    wxPoint ptCursorPos = GetCursorPos();
     ASSERT_VALIDTEXTPOS(ptCursorPos);
     int x, y;
     m_pTextBuffer->InsertText(this, ptCursorPos.y, ptCursorPos.x, pszNewText, y, x, CE_ACTION_REPLACE); //	[JRT]
-    CPoint ptEndOfBlock = CPoint(x, y);
+    wxPoint ptEndOfBlock = wxPoint(x, y);
     ASSERT_VALIDTEXTPOS(ptCursorPos);
     ASSERT_VALIDTEXTPOS(ptEndOfBlock);
     SetAnchor(ptEndOfBlock);
@@ -1039,11 +1023,11 @@ void CCrystalEditView::OnUpdateEditUndo(CCmdUI* pCmdUI)
         HINSTANCE hOldResHandle = AfxGetResourceHandle();
         AfxSetResourceHandle(GetResourceHandle());
 
-        CString menu;
+        std::string menu;
         if (bCanUndo)
         {
             //	Format menu item text using the provided item description
-            CString desc;
+            std::string desc;
             m_pTextBuffer->GetUndoDescription(desc);
             menu.Format(IDS_MENU_UNDO_FORMAT, desc);
         }
@@ -1065,7 +1049,7 @@ void CCrystalEditView::OnEditUndo()
 {
     if (m_pTextBuffer != NULL && m_pTextBuffer->CanUndo())
     {
-        CPoint ptCursorPos;
+        wxPoint ptCursorPos;
         if (m_pTextBuffer->Undo(ptCursorPos))
         {
             GoToLine(ptCursorPos.y, ptCursorPos.x);
@@ -1083,7 +1067,7 @@ void CCrystalEditView::OnEditRedo()
 {
     if (m_pTextBuffer != NULL && m_pTextBuffer->CanRedo())
     {
-        CPoint ptCursorPos;
+        wxPoint ptCursorPos;
         if (m_pTextBuffer->Redo(ptCursorPos))
         {
             GoToLine(ptCursorPos.y, ptCursorPos.x);
@@ -1103,11 +1087,11 @@ void CCrystalEditView::OnUpdateEditRedo(CCmdUI* pCmdUI)
         HINSTANCE hOldResHandle = AfxGetResourceHandle();
         AfxSetResourceHandle(GetResourceHandle());
 
-        CString menu;
+        std::string menu;
         if (bCanRedo)
         {
             //	Format menu item text using the provided item description
-            CString desc;
+            std::string desc;
             m_pTextBuffer->GetRedoDescription(desc);
             menu.Format(IDS_MENU_REDO_FORMAT, desc);
         }
@@ -1133,7 +1117,7 @@ void CCrystalEditView::OnEditOperation(int nAction, LPCTSTR pszText)
         if (nAction == CE_ACTION_TYPING && _tcscmp(pszText, _T("\r\n")) == 0 && ! m_bOvrMode)
         {
             //	Enter stroke!
-            CPoint ptCursorPos = GetCursorPos();
+            wxPoint ptCursorPos = GetCursorPos();
             ASSERT(ptCursorPos.y > 0);
 
             //	Take indentation from the previos line
@@ -1153,7 +1137,7 @@ void CCrystalEditView::OnEditOperation(int nAction, LPCTSTR pszText)
                 int x, y;
                 m_pTextBuffer->InsertText(NULL, ptCursorPos.y, ptCursorPos.x,
                                           pszInsertStr, y, x, CE_ACTION_AUTOINDENT);
-                CPoint pt(x, y);
+                wxPoint pt(x, y);
                 SetCursorPos(pt);
                 SetSelection(pt, pt);
                 SetAnchor(pt);
@@ -1164,22 +1148,22 @@ void CCrystalEditView::OnEditOperation(int nAction, LPCTSTR pszText)
 }
 
 
-CCrystalEditView::LineChange CCrystalEditView::NotifyEnterPressed(CPoint ptCursor, CString& strLine)
+CCrystalEditView::LineChange CCrystalEditView::NotifyEnterPressed(wxPoint ptCursor, std::string& strLine)
 {
     return NOTIF_NO_CHANGES;
 }
 
 bool CCrystalEditView::NotifyEnterPressed()
 {
-    CPoint ptCursorPos= GetCursorPos();
-    CString strLine= GetCurLine();
+    wxPoint ptCursorPos= GetCursorPos();
+    std::string strLine= GetCurLine();
     LineChange eChange= NotifyEnterPressed(ptCursorPos, strLine);
 
     if (eChange == NOTIF_LINE_MODIFIED)
     {
         int nLine= ptCursorPos.y;
         // modify current line
-        SetSelection(CPoint(0, nLine), CPoint(GetLineLength(nLine), nLine));
+        SetSelection(wxPoint(0, nLine), wxPoint(GetLineLength(nLine), nLine));
         ReplaceSelection(strLine);
     }
 
@@ -1192,9 +1176,9 @@ void CCrystalEditView::OnEditDeleteToEOL()
     if (!QueryEditable() || m_pTextBuffer == NULL)
         return;
 
-    CPoint ptCursorPos = GetCursorPos();
+    wxPoint ptCursorPos = GetCursorPos();
     ASSERT_VALIDTEXTPOS(ptCursorPos);
-    CPoint ptEnd= CPoint(GetLineLength(ptCursorPos.y), ptCursorPos.y);
+    wxPoint ptEnd= wxPoint(GetLineLength(ptCursorPos.y), ptCursorPos.y);
     ASSERT_VALIDTEXTPOS(ptEnd);
     // if no text in the buffer, just leave
     if (ptEnd == ptCursorPos)

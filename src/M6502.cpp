@@ -42,10 +42,10 @@ uint8_t CAsm6502::BRKExtraByte = 0x0; // value of extra byte generated after BRK
 
 void CAsm6502::init_members()
 {
-    if (bProc6502 == 2)
-        mem_mask = 0xFFFFFF; // memory limit mask  $65816
+    if (m_procType == ProcessorType::WDC65816)
+        mem_mask = 0xFFFFFF; // memory limit mask 65816
     else
-        mem_mask = 0xFFFF; // memory limit mask  $6502
+        mem_mask = 0xFFFF; // memory limit mask 6502
 
     abort_asm = false;
     program_start = ~0u;
@@ -2640,7 +2640,7 @@ static const uint8_t NA = 0x42;   // WDM on 65816
 CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, int &length)
 {
     uint8_t byte;
-    const uint8_t (&trans)[C_ILL][A_NO_OF_MODES] = TransformTable(bProc6502);
+    const uint8_t (&trans)[C_ILL][A_NO_OF_MODES] = TransformTable(m_procType);
 
     if (mode >= A_NO_OF_MODES) // Undetermined addressing modes
     {
@@ -2692,8 +2692,9 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
     else
         byte = trans[code][mode];
 
-    if (bProc6502 == 2 && code == C_WDM && mode == A_IMM) // allow WDM in 65816 mode
+    if (m_procType == ProcessorType::WDC65816 && code == C_WDM && mode == A_IMM)
     {
+        // Allow WDM in 65816 mode
         length = 1 + 1;
         return OK;
     }
@@ -2706,7 +2707,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
             break;
 
         case A_ZPG: // zero page
-            if (bProc6502 == 2)
+            if (m_procType == ProcessorType::WDC65816)
                 mode = A_ABSL;
 
             if (trans[code][mode]==NA)
@@ -2720,7 +2721,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
             break;
 
         case A_ZPG_X: // zero page indexed X
-            if (bProc6502 == 2)
+            if (m_procType == ProcessorType::WDC65816)
                 mode = A_ABSL_X;
 
             if (trans[code][mode]==NA)
@@ -2915,13 +2916,13 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
 // Code generation
 void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit, Expr expr_zpg)
 {
-    ASSERT(TransformTable(bProc6502)[code][mode] != NA || mode == A_IMP2 && code = =C_BRK);
+    ASSERT(TransformTable(m_procType)[code][mode] != NA || mode == A_IMP2 && code = =C_BRK);
     ASSERT(origin <= 0xFFFF);
 
     if (mode == A_IMP2 && code == C_BRK)
         (*out)[origin] = 0;
     else
-        (*out)[origin] = TransformTable(bProc6502)[code][mode]; // command
+        (*out)[origin] = TransformTable(m_procType)[code][mode]; // command
 
     switch (mode) // Command argument
     {
@@ -2985,7 +2986,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
 
     case A_ZPG2: // zeropage for SMB and RMB
     {
-        (*out)[origin] = TransformTable(bProc6502)[code][mode];  // SMB or RMB command
+        (*out)[origin] = TransformTable(m_procType)[code][mode]; // SMB or RMB command
         ASSERT(expr_bit.inf == Expr::EX_BYTE && abs(expr_bit.value) < 8);
         (*out)[origin] += uint8_t(expr_bit.value << 4); // Response bit number for the SMBn or RMBn instruction
         ASSERT(origin + 1 <= mem_mask);
@@ -3000,7 +3001,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
 
     case A_ZREL: // zeropage / relative
     {
-        (*out)[origin] = TransformTable(bProc6502)[code][mode]; // BBS or BBR command
+        (*out)[origin] = TransformTable(m_procType)[code][mode]; // BBS or BBR command
         ASSERT(expr_bit.inf == Expr::EX_BYTE && abs(expr_bit.value) < 8);
         (*out)[origin] += uint8_t(expr_bit.value << 4); // Response bit number for the BBSn or BBRn instruction
         ASSERT(origin + 2 <= mem_mask);

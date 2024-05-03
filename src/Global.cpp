@@ -104,7 +104,7 @@ bool CGlobal::CreateDeasm()
 
 void CGlobal::StartDebug()
 {
-    if (wxGetApp().m_global.m_bProc6502 == 2) // 1.3.3 disable debugger for 65816
+    if (wxGetApp().m_global.m_procType == ProcessorType::WDC65816) // 1.3.3 disable debugger for 65816
         return;
 
     GetMemForSym();

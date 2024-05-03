@@ -43,11 +43,14 @@ private:
     CMarkArea m_MarkArea;           // designation of fragments of memory containing the object code
 
 public:
-    uint8_t m_bProc6502;            // processor type
+
+    /// Selected processor type
+    ProcessorType m_procType;
+    
     uint8_t m_bHelpFile;            // ^^ help file type
     COutputMem m_Mem;               // memory for the object code and the simulator
     bool m_bGenerateListing;        // generate listing during assembly?
-    std::string m_strListingFile;       // listing file
+    std::string m_strListingFile;   // listing file
     CIntGenerator m_IntGenerator;   // interrupt request generator data
 
     CGlobal() : m_pSym6502(NULL), m_bCodePresent(false)
@@ -187,14 +190,14 @@ public:
 
     //---------------------------------------------------------------------------
 
-    uint8_t GetProcType()
+    ProcessorType GetProcType()
     {
-        return m_bProc6502;
+        return m_procType;
     }
 
-    void SetProcType(uint8_t b6502)
+    void SetProcType(ProcessorType newType)
     {
-        m_bProc6502 = b6502;
+        m_procType = newType;
     }
 
     uint8_t GetHelpType() //^^ Help

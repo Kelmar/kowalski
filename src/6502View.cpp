@@ -223,7 +223,7 @@ void CSrc6502View::check_line(const char* buf, CAsm::Stat &stat, int &start, int
 {
     CAsm6502 xasm;
 
-    xasm.bProc6502 = wxGetApp().m_global.GetProcType();
+    xasm.m_procType = wxGetApp().m_global.GetProcType();
     stat = xasm.CheckLine(buf, start, fin);
 
     if (stat)

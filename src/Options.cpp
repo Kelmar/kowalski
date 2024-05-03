@@ -75,12 +75,12 @@ COptions::COptions(UINT iSelectPage)
 
     // TODO: i18n for titles
 
-    InsertPage(0, &m_SymPage, "Symbols", iSelectPage == 0);
-    InsertPage(1, &m_AsmPage, "Assembly", iSelectPage == 1);
+    InsertPage(0, &m_SymPage, "Simulator", iSelectPage == 0);
+    InsertPage(1, &m_AsmPage, "Assembler", iSelectPage == 1);
     InsertPage(2, &m_EditPage, "Editor", iSelectPage == 2);
     InsertPage(3, &m_DeasmPage, "Disassembler", iSelectPage == 3);
-    InsertPage(4, &m_MarksPage, "Marks", iSelectPage == 4);
-    InsertPage(5, &m_ViewPage, "Views", iSelectPage == 5);
+    InsertPage(4, &m_MarksPage, "General", iSelectPage == 4);
+    InsertPage(5, &m_ViewPage, "Appearance", iSelectPage == 5);
 
     m_nLastActivePageIndex = iSelectPage;
 
