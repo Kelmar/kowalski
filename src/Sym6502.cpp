@@ -362,6 +362,7 @@ CAsm::SymStat CSym6502::perform_command()
     uint32_t addr;
     uint8_t zero, overflow, carry, negative;
     uint8_t zeroc, negativec;
+    int tmp;
 
 //% Bug Fix 1.2.12.18 - Command Log assembly not lined up witgh registers
 #define TOBCD(a) (((((a) / 10) % 10) << 4) | ((a) % 10))
@@ -390,105 +391,99 @@ CAsm::SymStat CSym6502::perform_command()
     case C_ADC:
         arg = get_argument_value();
         acc = ctx.a;
-        carry = ctx.carry;
+
         if (ctx.decimal)
         {
-            /*
-             * This is what it appears the simulator is currently doing:
-             * (Carry initially cleared in all cases)
-             * #$55 + #$55 = #$10 (Carry set, neg clear, over clear)
-             * #$50 + #$40 = #$90 (Carry clear, neg set, over set)
-             * #$37 + #$25 = #$62 (Carry clear, neg clear, over clear)
-             * 
-             * Carry is always result of high bit with 6502 (dec or bin mode)
-             * 
-             * V flag has kind of random meaning in BCD mode, but there is
-             * predictable behavior  we should probably emulate.
-             * 
-             * Z flag is same in both modes (zero result)
-             */
+            // Decimal addition
+            tmp = acc + arg + (ctx.carry ? 1 : 0);
+            zero = (tmp & 0xFF) == 0;
 
+            bool af = ((acc ^ arg) & 0x80) == 0;
+            bool at = ((acc ^ tmp) & 0x80) != 0;
 
-#if REWRITE_ASM
-            __asm // BCD add
-            {
-                clc
-                test carry, 0xFF
-                jz $+7
-                stc
-                mov al, acc
-                adc al, arg
-                seto overflow
-                setz zero
-                daa
-                mov acc, al
-                setc carry
-                sets negative
-                setz zeroc
-            }
-#endif
+            ctx.overflow = af && at;
+
+            int test = (acc & 0x0F) + (arg & 0x0F) + (ctx.carry ? 1 : 0);
+
+            if (test > 9)
+                tmp += 6;
+
+            if (tmp > 0x99)
+                tmp += 96;
+
+            acc = (uint8_t)(tmp & 0xFF);
+            zeroc = acc == 0;
+
             bool isM6502 = wxGetApp().m_global.m_procType == ProcessorType::M6502;
 
-            ctx.zero = (isM6502 ? !!zero : !!zeroc);
-            ctx.carry = !!carry;
-            ctx.negative = !!negative;
-            ctx.overflow = !!overflow;
+            ctx.zero = isM6502 ? !!zero : !!zeroc;
+            ctx.carry = tmp > 0x99;
+            ctx.negative = (acc & 0x80) != 0;
 
             if (!isM6502) //% bug Fix 1.2.12.1 - fix cycle timing
                 ctx.uCycles++; // Add a cycle in BCD mode
         }
         else
         {
-#if REWRITE_ASM
-            __asm // Binary addition
-            {
-                clc
-                test carry, 0xFF
-                jz $+7
-                stc
-                mov al, acc
-                adc al, arg
-                mov acc, al
-                seto overflow
-                setz zero
-                sets negative
-                setc carry
-            }
-#endif
+            // Binary addition
+            tmp = acc + arg + (ctx.carry ? 1 : 0);
+
+            bool af = ((acc ^ arg) & 0x80) == 0;
+            bool at = ((acc ^ tmp) & 0x80) != 0;
+
+            acc = (uint8_t)(tmp & 0xFF);
+
+            ctx.overflow = af && at;
+            ctx.zero = acc == 0;
+            ctx.negative = (acc & 0x80) != 0;
+            ctx.carry = tmp > 0xFF;
 
             ctx.set_status_reg_VZNC(overflow, zero, negative, carry);
         }
+
         ctx.a = acc;
+
         if (extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
-        break;
 
+        break;
 
     case C_SBC:
         arg = get_argument_value();
         acc = ctx.a;
         carry = ctx.carry;
+
         if (ctx.decimal)
         {
-#if REWRITE_ASM
-            __asm // BCD subtraction
+            // Decimal subtraction
+            int lo = (acc & 0x0F) - (arg & 0x0F) - (carry ? 0 : 1);
+            int hi = (acc & 0xF0) - (arg & 0xF0);
+
+            zero = lo == 0 && hi == 0;
+
+            bool af = lo & 0x10; // Half carry flag
+
+            if ((lo & 0x0F) > 9 || af)
             {
-                clc
-                test carry, 0xFF
-                jnz $+7
-                stc
-                mov al, acc
-                sbb al, arg
-                seto overflow
-                setc carry
-                setz zero
-                sets negative
-                das
-                mov acc, al
-                sets negativec
-                setz zeroc
+                lo -= 6;
+                --hi;
             }
-#endif
+
+            negative = hi & 0x80;
+            overflow = ((acc ^ hi) & 0x80) && ((acc ^ arg) & 0x80);
+
+            if (hi > 0x99 || (hi & 0x100))
+            {
+                hi -= 0x60;
+                carry = true;
+            }
+            else
+                carry = false;
+
+            acc = (uint8_t)(((hi & 0xF0) | (lo & 0x0F)) & 0xFF);
+
+            negativec = (acc & 0x80) != 0;
+            zeroc = acc == 0;
 
             bool isM6502 = wxGetApp().m_global.m_procType == ProcessorType::M6502;
 
@@ -502,118 +497,92 @@ CAsm::SymStat CSym6502::perform_command()
         }
         else
         {
-#if REWRITE_ASM
-            __asm // Binary subtraction
-            {
-                clc
-                test carry, 0xFF
-                jnz $+7
-                stc
-                mov al, acc
-                sbb al, arg
-                mov acc, al
-                seto overflow
-                setz zero
-                sets negative
-                setc carry
-            }
-#endif
+            tmp = acc - arg - (carry ? 0 : 1);
+
+            overflow = ((acc ^ tmp) & 0x80) && ((acc ^ arg) & 0x80);
+            carry = tmp < 0;
+            acc = (uint8_t)(tmp & 0xFF);
+            zero = acc == 0;
+            negative = acc & 0x80;
 
             ctx.set_status_reg_VZNC(overflow, zero, negative, !carry);
         }
+
         ctx.a = acc;
+
         if (extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
-
 
     case C_CMP:
         arg = get_argument_value();
         acc = ctx.a;
-#if REWRITE_ASM
-        __asm // Comparison (always binary, no BCD)
-        {
-            mov al, acc
-            cmp al, arg
-            setz zero
-            sets negative
-            setc carry
-        }
-#endif
+
+        // Compare always in binary, don't set acc
+        tmp = acc - arg - (carry ? 0 : 1);
+
+        carry = tmp < 0;
+        zero = (tmp & 0xFF) == 0;
+        negative = tmp & 0x80;
+
         ctx.set_status_reg_ZNC(zero, negative, !carry);
         if (extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
-
     case C_CPX:
         arg = get_argument_value();
         acc = ctx.x;
-#if REWRITE_ASM
-        __asm // Comparison (always binary, no BCD)
-        {
-            mov al,acc
-            cmp al,arg
-            setz zero
-            sets negative
-            setc carry
-        }
-#endif
+
+        // Compare always in binary, don't set acc
+        tmp = acc - arg - (carry ? 0 : 1);
+
+        carry = tmp < 0;
+        zero = (tmp & 0xFF) == 0;
+        negative = tmp & 0x80;
+        
         ctx.set_status_reg_ZNC(zero, negative, !carry);
         break;
-
 
     case C_CPY:
         arg = get_argument_value();
         acc = ctx.y;
-#if REWRITE_ASM
-        __asm // Comparison (always binary, no BCD)
-        {
-            mov al,acc
-            cmp al,arg
-            setz zero
-            sets negative
-            setc carry
-        }
-#endif
+
+        // Compare always in binary, don't set acc
+        tmp = acc - arg - (carry ? 0 : 1);
+
+        carry = tmp < 0;
+        zero = (tmp & 0xFF) == 0;
+        negative = tmp & 0x80;
+
         ctx.set_status_reg_ZNC(zero, negative, !carry);
         break;
-
 
     case C_ASL:
         if (m_vCodeToMode[cmd] == A_ACC) // Accumulator operation
         {
             inc_prog_counter(); // bypass the command
             acc = ctx.a;
-#if REWRITE_ASM
-            __asm
-            {
-                mov al, acc
-                shl al, 1
-                mov acc, al
-                setz zero
-                sets negative
-                setc carry
-            }
-#endif
+
+            carry = acc & 0x80;
+            acc <<= 1;
+            zero = acc == 0;
+            negative = acc & 0x80;
+
             ctx.a = acc;
         }
         else
         {
             addr = get_argument_address(s_bWriteProtectArea);
             arg = ctx.mem[addr];
-#if REWRITE_ASM
-            __asm
-            {
-                mov al, arg
-                shl al, 1
-                mov acc, al
-                setz zero
-                sets negative
-                setc carry
-            }
-#endif
+
+            carry = acc & 0x80;
+            acc <<= 1;
+            zero = acc == 0;
+            negative = acc & 0x80;
+
             ctx.mem[addr] = acc;
+
             if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
                 ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         }
@@ -626,34 +595,24 @@ CAsm::SymStat CSym6502::perform_command()
         {
             inc_prog_counter(); // bypass the command
             acc = ctx.a;
-#if REWRITE_ASM
-            __asm
-            {
-                mov al, acc
-                shr al, 1
-                mov acc, al
-                setz zero
-                sets negative
-                setc carry
-            }
-#endif
+
+            carry = acc & 0x01;
+            acc >>= 1;
+            zero = acc == 0;
+            negative = acc & 0x80;
+
             ctx.a = acc;
         }
         else
         {
             addr = get_argument_address(s_bWriteProtectArea);
             arg = ctx.mem[addr];
-#if REWRITE_ASM
-            __asm
-            {
-                mov al, arg
-                shr al, 1
-                mov acc, al
-                setz zero
-                sets negative
-                setc carry
-            }
-#endif
+
+            carry = acc & 0x01;
+            acc >>= 1;
+            zero = acc == 0;
+            negative = acc & 0x80;
+
             ctx.mem[addr] = acc;
             if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
                 ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
@@ -668,44 +627,38 @@ CAsm::SymStat CSym6502::perform_command()
         {
             inc_prog_counter(); // bypass the command
             acc = ctx.a;
-#if REWRITE_ASM
-            __asm
-            {
-                clc
-                test carry, 0xFF
-                jz $+7
-                stc
-                mov al, acc
-                rcl al, 1
-                mov acc, al
-                setc carry
-                test al, al
-                setz zero
-                sets negative
-            }
-#endif
+            
+            carry = acc & 0x80;
+            acc <<= 1;
+
+            if (ctx.carry)
+                acc |= 1;
+            else
+                acc &= ~1;
+
+            carry = acc > 0xFF;
+            zero = acc == 0;
+            negative = acc & 0x80;
+
             ctx.a = acc;
         }
         else
         {
             addr = get_argument_address(s_bWriteProtectArea);
-            arg = ctx.mem[addr];
-#if REWRITE_ASM
-            __asm
-            {
-                clc
-                test carry, 0xFF
-                jz $+7
-                stc
-                mov al, arg
-                rcl al, 1
-                mov acc, al
-                setc carry
-                test al, al
-                setz zero
-                sets negative
-            }
-#endif
+            acc = ctx.mem[addr];
+
+            carry = acc & 0x80;
+            acc <<= 1;
+
+            if (ctx.carry)
+                acc |= 1;
+            else
+                acc &= ~1;
+
+            carry = acc > 0xFF;
+            zero = acc == 0;
+            negative = acc & 0x80;
+
             ctx.mem[addr] = acc;
             if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
                 ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
@@ -720,44 +673,44 @@ CAsm::SymStat CSym6502::perform_command()
         {
             inc_prog_counter(); // bypass the command
             acc = ctx.a;
-#if REWRITE_ASM
-            __asm
+
+            carry = acc & 0x01;
+            acc >>= 1;
+            
+            if (ctx.carry)
             {
-                clc
-                test carry, 0xFF
-                jz $+7
-                stc
-                mov al, acc
-                rcr al, 1
-                mov acc, al
-                setc carry
-                test al, al
-                setz zero
-                sets negative
+                acc |= 0x80;
+                negative = true;
             }
-#endif
+            else
+            {
+                acc &= ~0x80;
+                negative = false;
+            }
+
+            zero = acc == 0;
+
             ctx.a = acc;
         }
         else
         {
             addr = get_argument_address(s_bWriteProtectArea);
-            arg = ctx.mem[addr];
-#if REWRITE_ASM
-            __asm
+            acc = ctx.mem[addr];
+
+            carry = acc & 0x01;
+            acc >>= 1;
+            
+            if (ctx.carry)
             {
-                clc
-                test carry, 0xFF
-                jz $+7
-                stc
-                mov al, arg
-                rcr al, 1
-                mov acc, al
-                setc carry
-                test al, al
-                setz zero
-                sets negative
+                acc |= 0x80;
+                negative = true;
             }
-#endif
+            else
+            {
+                acc &= ~0x80;
+                negative = false;
+            }
+
             ctx.mem[addr] = acc;
             if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
                 ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
