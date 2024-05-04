@@ -2340,7 +2340,7 @@ void CCrystalTextView::SetAnchor(const CPoint &ptNewAnchor)
     m_ptAnchor = ptNewAnchor;
 }
 
-void CCrystalTextView::OnEditOperation(int nAction, LPCTSTR pszText)
+void CCrystalTextView::OnEditOperation(int action, const std::string &text)
 {
 }
 

@@ -112,10 +112,16 @@ protected:
     struct SUndoRecord
     {
     private:
-        uint32_t m_flags;
-
-        wxPoint m_ptStartPos, m_ptEndPos; // Block of text participating
-        int     m_nAction;                // For information only: action type
+        /*
+         * TODO: Rewrite this
+         * A) Needs to be a proper reusable string class, we have a couple
+         * of places where we're using this.
+         * 
+         * B) We're relying on a quark of the Win32 behavior; that won't fly
+         * with other OSes like Linux or Mac OS X.
+         * 
+         *              -- B.Simonds (May 4, 2024)
+         */ 
 
         //	char	*m_pcText;
         //	Since in most cases we have 1 character here,
@@ -133,6 +139,12 @@ protected:
         };
 
     public:
+        uint32_t m_flags;
+
+        wxPoint m_ptStartPos, m_ptEndPos; // Block of text participating
+
+        int m_action; // For information only: action type
+
         //	constructor/destructor for this struct
         SUndoRecord()
         {
@@ -205,7 +217,7 @@ public:
     // Basic functions
     bool InitNew(int nCrlfStyle = CRLF_STYLE_DOS);
     bool LoadFromFile(const std::string &fileName, int nCrlfStyle = CRLF_STYLE_AUTOMATIC);
-    bool SaveToFile(const std::string *fileName, int nCrlfStyle = CRLF_STYLE_AUTOMATIC, bool bClearModifiedFlag = true);
+    bool SaveToFile(const std::string &fileName, int nCrlfStyle = CRLF_STYLE_AUTOMATIC, bool bClearModifiedFlag = true);
     void FreeAll();
 
     // 'Dirty' flag
@@ -217,14 +229,14 @@ public:
     void RemoveView(CCrystalTextView *pView);
 
     // Text access functions
-    int GetLineCount();
-    int GetLineLength(int nLine);
-    const char *GetLineChars(int nLine);
-    uint32_t GetLineFlags(int nLine);
-    int GetLineWithFlag(uint32_t dwFlag);
-    void SetLineFlag(int nLine, uint32_t dwFlag, bool bSet, bool bRemoveFromPreviousLine = true);
+    size_t GetLineCount();
+    int GetLineLength(int line);
+    const char *GetLineChars(int line);
+    uint32_t GetLineFlags(int line);
+    int GetLineWithFlag(uint32_t flag);
+    void SetLineFlag(int nLine, uint32_t flag, bool set, bool bRemoveFromPreviousLine = true);
     void GetText(int nStartLine, int nStartChar, int nEndLine, int nEndChar, std::string &text, const char *pszCRLF = nullptr);
-    void SetLinesFlags(int nLineFrom, int nLineTo, uint32_t dwAddFlags, uint32_t dwRemoveFlags);
+    void SetLinesFlags(int nLineFrom, int nLineTo, uint32_t addFlags, uint32_t removeFlags);
     void GetText(std::string &text, const char *pszCRLF = nullptr);
 
     // Attributes

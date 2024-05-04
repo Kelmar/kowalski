@@ -343,7 +343,7 @@ public:
     bool HighlightText(const wxPoint &ptStartPos, int nLength);
 
     //	Overridable: an opportunity for Auto-Indent, Smart-Indent etc.
-    virtual void OnEditOperation(int nAction, const char *pszText);
+    virtual void OnEditOperation(int action, const std::string &text);
 
 public:
     virtual void OnDraw(wxDC* pDC);  // overridden to draw this view
