@@ -15,12 +15,8 @@
 //	- LEAVE THIS HEADER INTACT
 ////////////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_CCRYSTALEDITVIEW_H__8F3F8B63_6F66_11D2_8C34_0080ADB86836__INCLUDED_)
-#define AFX_CCRYSTALEDITVIEW_H__8F3F8B63_6F66_11D2_8C34_0080ADB86836__INCLUDED_
-
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
+#ifndef CRYSTAL_EDIT_VIEW_H__
+#define CRYSTAL_EDIT_VIEW_H__
 
 #include "cedefs.h"
 #include "CCrystalTextView.h"
@@ -30,85 +26,72 @@
 
 class CEditDropTargetImpl;
 
-
 /////////////////////////////////////////////////////////////////////////////
 //	CCrystalEditView view
 
 class CRYSEDIT_CLASS_DECL CCrystalEditView : public CCrystalTextView
 {
-    DECLARE_DYNCREATE(CCrystalEditView)
-
 private:
-    BOOL	m_bOvrMode;
-    BOOL	m_bDropPosVisible;
-    CPoint	m_ptSavedCaretPos;
-    CPoint	m_ptDropPos;
-    BOOL	m_bSelectionPushed;
-    CPoint	m_ptSavedSelStart, m_ptSavedSelEnd;
-    bool	m_bAutoIndent;
+    bool    m_bOvrMode;
+    bool    m_bDropPosVisible;
+    wxPoint m_ptSavedCaretPos;
+    wxPoint m_ptDropPos;
+    bool    m_bSelectionPushed;
+    wxPoint m_ptSavedSelStart, m_ptSavedSelEnd;
+    bool    m_bAutoIndent;
 
-    //	[JRT]
-    BOOL m_bDisableBSAtSOL;								// Disable BS At Start Of Line
+    // [JRT]
+    bool m_bDisableBSAtSOL; // Disable BS At Start Of Line
 
-    BOOL   DeleteCurrentSelection();
+    bool DeleteCurrentSelection();
 
 protected:
     CEditDropTargetImpl *m_pDropTarget;
+
+#if REWRITE_TO_WX_WIDGET
     virtual DROPEFFECT GetDropEffect();
     virtual void OnDropSource(DROPEFFECT de);
+#endif
+
     void Paste();
     void Cut();
     virtual void ResetView();
 
 // Attributes
 public:
-    BOOL GetAutoIndent() const;
-    void SetAutoIndent(BOOL bAutoIndent);
+    /* constructor */ CCrystalEditView();
+    virtual          ~CCrystalEditView();
 
-    //	[JRT]
-    void SetDisableBSAtSOL(BOOL bDisableBSAtSOL);
-    BOOL GetDisableBSAtSOL() const;
-
+    bool GetAutoIndent() const;
     void SetAutoIndent(bool bEnable)
     {
         m_bAutoIndent = bEnable;
     }
 
-// Operations
-public:
-    CCrystalEditView();
-    ~CCrystalEditView();
+    // [JRT]
+    void SetDisableBSAtSOL(bool bDisableBSAtSOL);
+    bool GetDisableBSAtSOL() const;
 
-    BOOL GetOverwriteMode() const;
-    void SetOverwriteMode(BOOL bOvrMode = TRUE);
+    bool GetOverwriteMode() const;
+    void SetOverwriteMode(bool bOvrMode = TRUE);
 
-    void ShowDropIndicator(const CPoint &point);
+    void ShowDropIndicator(const wxPoint &point);
     void HideDropIndicator();
 
-    BOOL DoDropText(COleDataObject *pDataObject, const CPoint &ptClient);
-    void DoDragScroll(const CPoint &point);
+    //bool DoDropText(COleDataObject *pDataObject, const wxPoint &ptClient);
+    void DoDragScroll(const wxPoint &point);
 
-    virtual BOOL QueryEditable();
-    virtual void UpdateView(CCrystalTextView *pSource, CUpdateContext *pContext, DWORD dwFlags, int nLineIndex = -1);
+    virtual bool QueryEditable();
+    virtual void UpdateView(CCrystalTextView *pSource, CUpdateContext *pContext, uint32_t dwFlags, int nLineIndex = -1);
 
-    BOOL ReplaceSelection(LPCTSTR pszNewText);
+    bool ReplaceSelection(const char *newText);
 
-    virtual void OnEditOperation(int nAction, LPCTSTR pszText);
+    virtual void OnEditOperation(int nAction, const char *text);
 
     enum LineChange { NOTIF_NO_CHANGES, NOTIF_LINE_MODIFIED, NOTIF_LINE_ERROR };
-    virtual LineChange NotifyEnterPressed(CPoint ptCursor, CString& strLine);
+    virtual LineChange NotifyEnterPressed(wxPoint ptCursor, std::string& strLine);
 
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CCrystalEditView)
-    //}}AFX_VIRTUAL
-
-// Implementation
 protected:
-
-    // Generated message map functions
-protected:
-    //{{AFX_MSG(CCrystalEditView)
     afx_msg void OnEditPaste();
     afx_msg void OnUpdateEditCut(CCmdUI* pCmdUI);
     afx_msg void OnEditCut();
@@ -120,7 +103,7 @@ protected:
     afx_msg void OnEditTab();
     afx_msg void OnEditSwitchOvrmode();
     afx_msg void OnUpdateEditSwitchOvrmode(CCmdUI* pCmdUI);
-    afx_msg int  OnCreate(LPCREATESTRUCT lpCreateStruct);
+    //afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
     afx_msg void OnDestroy();
     afx_msg void OnEditReplace();
     afx_msg void OnUpdateEditUndo(CCmdUI* pCmdUI);
@@ -129,22 +112,33 @@ protected:
     afx_msg void OnEditRedo();
     afx_msg void OnEditDeleteToEOL();
     afx_msg void OnUpdateEditDeleteToEol(CCmdUI* pCmdUI);
-    //}}AFX_MSG
     afx_msg void OnUpdateIndicatorCol(CCmdUI* pCmdUI);
     afx_msg void OnUpdateIndicatorOvr(CCmdUI* pCmdUI);
     afx_msg void OnUpdateIndicatorRead(CCmdUI* pCmdUI);
-    DECLARE_MESSAGE_MAP()
-
+    
     bool NotifyEnterPressed();
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-#if ! (defined(CE_FROM_DLL) || defined(CE_DLL_BUILD))
-#include "CCrystalEditView.inl"
-#endif
+CE_INLINE bool CCrystalEditView::GetOverwriteMode() const
+{
+	return m_bOvrMode;
+}
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+CE_INLINE void CCrystalEditView::SetOverwriteMode(bool bOvrMode /*= true */)
+{
+	m_bOvrMode = bOvrMode;
+}
 
-#endif // !defined(AFX_CCRYSTALEDITVIEW_H__8F3F8B63_6F66_11D2_8C34_0080ADB86836__INCLUDED_)
+CE_INLINE bool CCrystalEditView::GetDisableBSAtSOL() const
+{
+	return m_bDisableBSAtSOL;
+}
+
+CE_INLINE bool CCrystalEditView::GetAutoIndent() const
+{
+	return m_bAutoIndent;
+}
+
+#endif /* CRYSTAL_EDIT_VIEW_H__ */

@@ -3920,7 +3920,7 @@ BOOL CCrystalTextView::TextInClipboard()
     return IsClipboardFormatAvailable(CF_TEXT);
 }
 
-BOOL CCrystalTextView::PutToClipboard(LPCTSTR pszText)
+bool CCrystalTextView::PutToClipboard(const std::string &text)
 {
     if (pszText == NULL || lstrlen(pszText) == 0)
         return FALSE;
@@ -3944,7 +3944,7 @@ BOOL CCrystalTextView::PutToClipboard(LPCTSTR pszText)
     return bOK;
 }
 
-BOOL CCrystalTextView::GetFromClipboard(CString &text)
+bool CCrystalTextView::GetFromClipboard(std::string &text)
 {
     BOOL bSuccess = FALSE;
     if (OpenClipboard())

@@ -589,7 +589,6 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
-
     case C_LSR:
         if (m_vCodeToMode[cmd] == A_ACC) // Accumulator operation
         {
@@ -619,7 +618,6 @@ CAsm::SymStat CSym6502::perform_command()
         }
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
-
 
     case C_ROL:
         carry = ctx.carry;
@@ -665,7 +663,6 @@ CAsm::SymStat CSym6502::perform_command()
         }
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
-
 
     case C_ROR:
         carry = ctx.carry;
@@ -717,7 +714,6 @@ CAsm::SymStat CSym6502::perform_command()
         }
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
-
 
     case C_AND:
         arg = get_argument_value();

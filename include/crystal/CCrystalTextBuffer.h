@@ -186,7 +186,7 @@ protected:
     void AppendLine(int nLineIndex, const std::string &chars, int nLength = -1);
 
     // Implementation
-    bool InternalInsertText(CCrystalTextView *pSource, int nLine, int nPos, const std::string &texe, int &nEndLine, int &nEndChar);
+    bool InternalInsertText(CCrystalTextView *pSource, int nLine, int nPos, const std::string &text, int &nEndLine, int &nEndChar);
     bool InternalDeleteText(CCrystalTextView *pSource, int nStartLine, int nStartPos, int nEndLine, int nEndPos);
 
     // [JRT] Support For Descriptions On Undo/Redo Actions
@@ -234,7 +234,7 @@ public:
     void SetReadOnly(bool bReadOnly = true);
 
     // Text modification functions
-    bool InsertText(CCrystalTextView *pSource, int nLine, int nPos, const char *pszText, int &nEndLine, int &nEndChar, int nAction = CE_ACTION_UNKNOWN);
+    bool InsertText(CCrystalTextView *pSource, int nLine, int nPos, const std::string &text, int &nEndLine, int &nEndChar, int nAction = CE_ACTION_UNKNOWN);
     bool DeleteText(CCrystalTextView *pSource, int nStartLine, int nStartPos, int nEndLine, int nEndPos, int nAction = CE_ACTION_UNKNOWN);
 
     // Undo/Redo

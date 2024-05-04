@@ -250,7 +250,7 @@ protected:
 
     // Clipboard overridable
     virtual bool TextInClipboard();
-    virtual bool PutToClipboard(const char *pszText);
+    virtual bool PutToClipboard(const std::string &text);
     virtual bool GetFromClipboard(std::string &text);
 
     // Drag-n-drop overrideable
