@@ -34,8 +34,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "CXMultiDocTemplate.h"
 //#include "About.h"
 
-//const char C6502App::REGISTRY_KEY[]= "MiKSoft";
-const char C6502App::PROFILE_NAME[]= "6502 Simulator\\1.80";
+const char VENDOR_NAME[] = "MikSoft";
+const char APP_NAME[] = "6502_simulator";
+const char APP_DISPLAY[] = "6502 Simulator";
 
 /////////////////////////////////////////////////////////////////////////////
 // C6502App
@@ -57,10 +58,12 @@ END_MESSAGE_MAP()
 // C6502App construction
 
 C6502App::C6502App()
+    : m_mainFrame(nullptr)
+    , m_menuBar(nullptr)
+    , m_statusBar(nullptr)
+    , m_config(nullptr)
 {
     m_bDoNotAddToRecentFileList = false;
-
-    m_config = new wxConfig(PROFILE_NAME);
 
     //m_hInstRes = NULL;
     //m_hRichEdit = 0;
@@ -81,9 +84,68 @@ bool C6502App::m_bFileNew = true; // flag - opening a blank document at startup
 
 bool C6502App::OnInit()
 {
-    // Create main MDI Frame window
-    m_mainFrame = new CMainFrame();
+    if (!wxApp::OnInit())
+        return false;
+
+    SetVendorName(VENDOR_NAME);
+    SetAppName(APP_NAME);
+
+    // TODO: Look this up from i18n strings.
+
+    SetAppDisplayName(APP_DISPLAY);
+
+    m_config = new wxConfig();
+
+    wxDocManager* docManager = new wxDocManager();
+
+#if 0
+    new wxDocTemplate(docManager, "*.s;*.asm", "", "s;asm",
+        "Assembly Source", "Assembly View",
+        CLASSINFO(CSrc6502Doc), CLASSINFO(CSrc6502View));
+#endif
+
+    if (!InitFrame())
+        return false;
+
+    m_mainFrame->Center();
     m_mainFrame->Show();
+
+    SetStatusText(0, "Application loaded!");
+
+    return true;
+}
+
+bool C6502App::InitFrame()
+{
+    m_mainFrame = new wxFrame(nullptr, wxID_ANY, GetAppDisplayName());
+
+    if (!InitAppMenu())
+        return false;
+
+    m_statusBar = new wxStatusBar(m_mainFrame);
+
+    m_mainFrame->SetStatusBar(m_statusBar);
+
+    // Bind events after everything was created okay.
+    m_mainFrame->Bind(wxEVT_MENU, &C6502App::OnAppExit, this, wxID_EXIT);
+    m_mainFrame->Bind(wxEVT_MENU, &C6502App::OnAppAbout, this, wxID_ABOUT);
+
+    return true;
+}
+
+bool C6502App::InitAppMenu()
+{
+    wxMenu* file = new wxMenu();
+    file->Append(wxID_EXIT);
+
+    wxMenu* help = new wxMenu();
+    help->Append(wxID_ABOUT);
+
+    m_menuBar = new wxMenuBar();
+    m_menuBar->Append(file, wxGetStockLabel(wxID_FILE));
+    m_menuBar->Append(help, wxGetStockLabel(wxID_HELP));
+
+    m_mainFrame->SetMenuBar(m_menuBar);
 
     return true;
 }
@@ -220,13 +282,20 @@ void C6502App::AddToRecentFileList(const std::string &pathName)
 
  void C6502App::SetStatusText(int col, const std::string &message)
  {
-    if (m_mainFrame)
-        m_mainFrame->SetStatusText(col, message);
+    if (m_statusBar)
+        m_statusBar->SetStatusText(message, col);
+ }
+
+ void C6502App::OnAppExit(wxCommandEvent&)
+ {
+     Exit();
  }
 
 // App command to run the dialog
-void C6502App::OnAppAbout()
+void C6502App::OnAppAbout(wxCommandEvent&)
 {
+    wxMessageBox("Testing");
+
 #if 0
     CAboutDlg aboutDlg;
     aboutDlg.DoModal();

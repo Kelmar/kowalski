@@ -50,8 +50,14 @@ private:
     //HINSTANCE m_hInstRes;
     //HMODULE m_hRichEdit;
 
-    CMainFrame *m_mainFrame;
+    wxFrame *m_mainFrame;
+    wxStatusBar *m_statusBar;
+    wxMenuBar *m_menuBar;
+
     wxConfig *m_config;
+
+    bool InitFrame();
+    bool InitAppMenu();
 
 public:
     static bool m_bMaximize;    // flag - maximum window dimensions at startup;
@@ -76,8 +82,9 @@ public:
     virtual void AddToRecentFileList(const std::string &pathName);
     //virtual int ExitInstance();
 
-    void OnAppAbout();
-    //DECLARE_MESSAGE_MAP()
+protected:
+    void OnAppExit(wxCommandEvent&);
+    void OnAppAbout(wxCommandEvent&);
 };
 
 wxDECLARE_APP(C6502App);
