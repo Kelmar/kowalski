@@ -67,30 +67,30 @@ enum
 //	CCrystalTextView::FindText() flags
 enum
 {
-    FIND_MATCH_CASE		= 0x0001,
-    FIND_WHOLE_WORD		= 0x0002,
-    FIND_DIRECTION_UP	= 0x0010,
-    REPLACE_SELECTION	= 0x0100
+    FIND_MATCH_CASE   = 0x0001,
+    FIND_WHOLE_WORD   = 0x0002,
+    FIND_DIRECTION_UP = 0x0010,
+    REPLACE_SELECTION = 0x0100
 };
 
 //	CCrystalTextView::UpdateView() flags
 enum
 {
-    UPDATE_HORZRANGE	= 0x0001,		//	update horz scrollbar
-    UPDATE_VERTRANGE	= 0x0002,		//	update vert scrollbar
-    UPDATE_SINGLELINE	= 0x0100,		//	single line has changed
-    UPDATE_FLAGSONLY	= 0x0200,		//	only line-flags were changed
+    UPDATE_HORZRANGE  = 0x0001, // update horz scrollbar
+    UPDATE_VERTRANGE  = 0x0002, // update vert scrollbar
+    UPDATE_SINGLELINE = 0x0100, // single line has changed
+    UPDATE_FLAGSONLY  = 0x0200, // only line-flags were changed
 
-    UPDATE_RESET		= 0x1000		//	document was reloaded, update all!
+    UPDATE_RESET      = 0x1000  // document was reloaded, update all!
 };
 
-class CRYSEDIT_CLASS_DECL CCrystalTextView : public wxView
+class CCrystalTextView : public wxView
 {
 private:
     // Search parameters
     bool m_bLastSearch;
     uint32_t m_dwLastSearchFlags;
-    const char *m_pszLastFindWhat;
+    char *m_pszLastFindWhat;
     bool m_bMultipleSearch; // More search
 
     bool m_bCursorHidden;
@@ -140,12 +140,12 @@ private:
     void PrepareSelBounds();
 
     // Helper functions
-    void ExpandChars(const char *pszChars, int nOffset, int nCount, std::string &line);
+    void ExpandChars(const std::string &chars, int nOffset, int nCount, std::string &line);
 
     int ApproxActualOffset(int nLineIndex, int nOffset);
     void AdjustTextPoint(wxPoint &point);
     void DrawLineHelperImpl(wxDC *pdc, wxPoint &ptOrigin, const wxRect &rcClip,
-                            const char * pszChars, int nOffset, int nCount);
+                            const std::string &chars, int nOffset, int nCount);
     bool IsInsideSelBlock(wxPoint ptTextPos);
 
     bool m_bBookmarkExist; // More bookmarks
@@ -243,7 +243,7 @@ protected:
     virtual int GetLineCount();
     virtual int GetLineLength(int nLineIndex);
     virtual int GetLineActualLength(int nLineIndex);
-    virtual const char *GetLineChars(int nLineIndex);
+    virtual std::string GetLineChars(int nLineIndex);
     virtual uint32_t GetLineFlags(int nLineIndex);
     virtual void GetText(const wxPoint &ptStart, const wxPoint &ptEnd, std::string &text);
     std::string GetCurLine();
@@ -268,7 +268,7 @@ protected:
     virtual bool GetBold(int nColorIndex);
 
     void DrawLineHelper(wxDC *pdc, wxPoint &ptOrigin, const wxRect &rcClip, int nColorIndex,
-                        const char *pszChars, int nOffset, int nCount, wxPoint ptTextPos);
+                        const std::string &chars, int nOffset, int nCount, wxPoint ptTextPos);
     virtual void DrawSingleLine(wxDC *pdc, const wxRect &rect, int nLineIndex);
     virtual void DrawMargin(wxDC *pdc, const wxRect &rect, int nLineIndex);
     void DrawEllipsis(wxDC* pDC, const wxRect& rcLine);
@@ -337,16 +337,16 @@ public:
     void EnsureVisible(wxPoint pt);
 
     //	Text search helpers
-    bool FindText(const char *pszText, const wxPoint &ptStartPos, uint32_t dwFlags, bool bWrapSearch, wxPoint *pptFoundPos);
-    bool FindTextInBlock(const char *pszText, const wxPoint &ptStartPos, const wxPoint &ptBlockBegin, const wxPoint &ptBlockEnd,
-                         uint32_t dwFlags, bool bWrapSearch, wxPoint *pptFoundPos);
+    bool FindText(const std::string &text, const wxPoint &ptStartPos, uint32_t flags, bool bWrapSearch, wxPoint *pptFoundPos);
+    bool FindTextInBlock(const std::string &, const wxPoint &ptStartPos, const wxPoint &ptBlockBegin, const wxPoint &ptBlockEnd,
+                         uint32_t flags, bool bWrapSearch, wxPoint *pptFoundPos);
     bool HighlightText(const wxPoint &ptStartPos, int nLength);
 
     //	Overridable: an opportunity for Auto-Indent, Smart-Indent etc.
     virtual void OnEditOperation(int action, const std::string &text);
 
 public:
-    virtual void OnDraw(wxDC* pDC);  // overridden to draw this view
+    virtual void OnDraw(wxDC* pDC); // overridden to draw this view
 
 #if 0
     virtual bool PreCreateWindow(CREATESTRUCT& cs);
@@ -377,7 +377,6 @@ protected:
     void AssertValidTextPos(const wxPoint &pt);
 #endif
 
-    //{{AFX_MSG(CCrystalTextView)
     afx_msg void OnDestroy();
     afx_msg bool OnEraseBkgnd(wxDC* pDC);
     afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -401,12 +400,11 @@ protected:
     afx_msg void OnEditFind();
     afx_msg void OnEditRepeat();
     afx_msg void OnUpdateEditRepeat(CCmdUI* pCmdUI);
-    afx_msg void OnEditFindPrevious();                 // More search
+    afx_msg void OnEditFindPrevious(); // More search
     afx_msg void OnUpdateEditFindPrevious(CCmdUI* pCmdUI);
     afx_msg bool OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt);
     afx_msg void OnEditViewTabs();
     afx_msg void OnUpdateEditViewTabs(CCmdUI* pCmdUI);
-    //}}AFX_MSG
     afx_msg void OnFilePageSetup();
 
     afx_msg void OnCharLeft();
@@ -466,8 +464,9 @@ protected:
 #define ASSERT_VALIDTEXTPOS(pt)
 #endif
 
-#if ! (defined(CE_FROM_DLL) || defined(CE_DLL_BUILD))
-#include "CCrystalTextView.inl"
-#endif
+CE_INLINE bool CCrystalTextView::IsDraggingText() const
+{
+	return m_bDraggingText;
+}
 
 #endif /* CCRYSTALTEXTVIEW_H__ */

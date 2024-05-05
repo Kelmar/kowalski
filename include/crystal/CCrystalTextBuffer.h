@@ -272,8 +272,9 @@ public:
     int FindPrevBookmarkLine(int nCurrentLine = 0);
 };
 
-#if ! (defined(CE_FROM_DLL) || defined(CE_DLL_BUILD))
-#include "CCrystalTextBuffer.inl"
-#endif
+bool CCrystalTextBuffer::IsModified() const
+{
+	return m_bModified;
+}
 
 #endif /* CRYSTAL_TEXT_BUFFER_H__ */
