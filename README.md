@@ -10,7 +10,9 @@ This branch is currently being ported to wxWidgets and CMake so it can be built 
 
 Build works now for Linux and Windows, but do not expect the code to work:
 
+```base
 mkdir build
 cd build
 cmake ../kowalski/CMakeFiles.txt
 make
+```
