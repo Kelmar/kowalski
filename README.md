@@ -8,7 +8,7 @@ This branch is currently being ported to wxWidgets and CMake so it can be built 
 
 ~~NOTE: THAT THIS BRANCH IS NOT CURRENTLY IN A BUILDABLE STATE!~~
 
-Build works now, but do not expect the code to work:
+Build works now for Linux and Windows, but do not expect the code to work:
 
 mkdir build
 cd build
