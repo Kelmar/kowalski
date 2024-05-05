@@ -29,19 +29,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "DrawMarks.h"
 #include "M6502.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 bool CSrc6502View::m_bAutoIndent = true; // static component -automatic indentation
 int CSrc6502View::m_nTabStep = 8;
 bool CSrc6502View::m_bAutoSyntax = true;
 bool CSrc6502View::m_bAutoUppercase = true;
 
-//wxFont CSrc6502View::s_Font;
-//wxFontInfo CSrc6502View::s_LogFont;
+wxFont CSrc6502View::s_font;
+wxFontInfo CSrc6502View::s_logFont;
 
 wxColour CSrc6502View::s_rgbTextColor;
 wxColour CSrc6502View::s_rgbBkgndColor;
@@ -790,6 +784,11 @@ uint8_t CSrc6502View::GetBreakpoint(int nLine) const
         return search->second;
 
     return 0;
+}
+
+CSrc6502Doc* CSrc6502View::GetDocument(void)
+{
+    return dynamic_cast<CSrc6502Doc*>(wxView::GetDocument());
 }
 
 void CSrc6502View::GetText(std::string& strText)

@@ -1111,6 +1111,11 @@ void CMainFrame::SetPositionText(int row, int col)
     m_statusBar.SetStatusText(buf, 1);
 }
 
+void CMainFrame::SetStatusText(int row, const std::string& message)
+{
+    m_statusBar.SetStatusText(message, row);
+}
+
 /*
 void CMainFrame::SetRowColumn(CEdit &edit)
 {

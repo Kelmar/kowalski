@@ -25,14 +25,14 @@ public:
 
 public:
     virtual ~CSplashWnd();
-    virtual void PostNcDestroy();
+    //virtual void PostNcDestroy();
 
 protected:
     bool Create(wxWindow* pParentWnd = nullptr);
     void HideSplashScreen();
 
-    static bool c_bShowSplashWnd;
-    static CSplashWnd* c_pSplashWnd;
+    static bool s_showSplash;
+    static CSplashWnd* s_splashWnd;
 
 protected:
     //afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

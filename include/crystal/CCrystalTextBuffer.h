@@ -272,9 +272,9 @@ public:
     int FindPrevBookmarkLine(int nCurrentLine = 0);
 };
 
-bool CCrystalTextBuffer::IsModified() const
+inline bool CCrystalTextBuffer::IsModified() const
 {
-	return m_bModified;
+    return m_bModified;
 }
 
 #endif /* CRYSTAL_TEXT_BUFFER_H__ */

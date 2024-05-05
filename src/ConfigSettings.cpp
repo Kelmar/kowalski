@@ -30,9 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502View.h"
 #include "StackView.h"
 
-using namespace ConfigSettings;
-
-wxFontInfo* const fonts[] =
+wxFontInfo* const ConfigSettings::fonts[] =
 {
     &CSrc6502View::s_logFont,
     &CIOWindow::m_LogFont,
@@ -43,7 +41,7 @@ wxFontInfo* const fonts[] =
     NULL
 };
 
-wxFont* const cfonts[] = // CFont structures throughout the program
+wxFont* const ConfigSettings::cfonts[] = // CFont structures throughout the program
 {
     &CSrc6502View::s_font,
     &CIOWindow::m_Font,
@@ -54,7 +52,7 @@ wxFont* const cfonts[] = // CFont structures throughout the program
     NULL
 };
 
-wxColour* text_color[] =
+wxColour* ConfigSettings::text_color[] =
 {
     &CSrc6502View::s_rgbTextColor,
     &CIOWindow::m_rgbTextColor,
@@ -65,7 +63,7 @@ wxColour* text_color[] =
     NULL
 };
 
-wxColour* bkgnd_color[] =
+wxColour* ConfigSettings::bkgnd_color[] =
 {
     &CSrc6502View::s_rgbBkgndColor,
     &CIOWindow::m_rgbBackgndColor,
@@ -76,7 +74,7 @@ wxColour* bkgnd_color[] =
     NULL
 };
 
-wxColour* color_syntax[] =
+wxColour* ConfigSettings::color_syntax[] =
 {
     &CSrc6502View::s_vrgbColorSyntax[0],
     &CSrc6502View::s_vrgbColorSyntax[1],
@@ -88,7 +86,7 @@ wxColour* color_syntax[] =
     0
 };
 
-uint8_t* syntax_font_style[] =
+uint8_t* ConfigSettings::syntax_font_style[] =
 {
     &CSrc6502View::m_vbyFontStyle[0],
     &CSrc6502View::m_vbyFontStyle[1],
@@ -98,3 +96,7 @@ uint8_t* syntax_font_style[] =
     &CSrc6502View::m_vbyFontStyle[5],
     0
 };
+
+void ConfigSettings::Save(bool)
+{
+}

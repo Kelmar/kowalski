@@ -187,14 +187,14 @@ protected:
     int m_nPrintLineHeight;
     bool m_bPrintHeader, m_bPrintFooter;
     wxRect m_ptPageArea, m_rcPrintArea;
+#if REWRITE_TO_WX_WIDGET
     int PrintLineHeight(wxDC *pdc, int nLine);
-#if 0
     void RecalcPageLayouts(wxDC *pdc, CPrintInfo *pInfo);
-#endif
     virtual void PrintHeader(wxDC *pdc, int nPageNum);
     virtual void PrintFooter(wxDC *pdc, int nPageNum);
     virtual void GetPrintHeaderText(int nPageNum, std::string &text);
     virtual void GetPrintFooterText(int nPageNum, std::string &text);
+#endif
 
     // Keyboard handlers
     void MoveLeft(bool bSelect);
@@ -464,9 +464,9 @@ protected:
 #define ASSERT_VALIDTEXTPOS(pt)
 #endif
 
-CE_INLINE bool CCrystalTextView::IsDraggingText() const
+inline bool CCrystalTextView::IsDraggingText() const
 {
-	return m_bDraggingText;
+    return m_bDraggingText;
 }
 
 #endif /* CCRYSTALTEXTVIEW_H__ */

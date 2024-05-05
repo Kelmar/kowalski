@@ -27,6 +27,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Splash.h"  // e.g. splash.h
 
+/*************************************************************************/
+
+bool CSplashWnd::s_showSplash = false;
+CSplashWnd *CSplashWnd::s_splashWnd = nullptr;
+
 /////////////////////////////////////////////////////////////////////////////
 //   Splash Screen class
 
@@ -51,13 +56,13 @@ END_MESSAGE_MAP()
 
 void CSplashWnd::EnableSplashScreen(bool bEnable /*= TRUE*/)
 {
-    c_bShowSplashWnd = bEnable;
+    s_showSplash = bEnable;
 }
 
 void CSplashWnd::ShowSplashScreen(wxWindow* pParentWnd /*= NULL*/)
 {
 #if REWRITE_TO_WX_WIDGET
-    if (!c_bShowSplashWnd || c_pSplashWnd != NULL)
+    if (!s_showSplash || s_splashWnd != NULL)
         return;
 
     // Allocate a new splash screen, and create the window.

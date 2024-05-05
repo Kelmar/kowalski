@@ -31,7 +31,7 @@ class CDeasmGoto : public wxDialog
 {
 public:
     ///* constructor */ CDeasmGoto(wxWindow* parent = NULL); // standard constructor
-    virtual          ~CDeasmGoto();
+    virtual          ~CDeasmGoto() { }
 
     uint32_t m_uAddress;
 };

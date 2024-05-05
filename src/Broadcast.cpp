@@ -22,10 +22,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "MainFrm.h"
 
 wxDEFINE_EVENT(EVT_EXIT_DEBUGGER, wxCommandEvent);
-wxDEFINE_EVENT(EVT_START_DEBUGER, wxCommandEvent);
+wxDEFINE_EVENT(EVT_START_DEBUGGER, wxCommandEvent);
 wxDEFINE_EVENT(EVT_UPDATE_REG_WND, wxCommandEvent);
 wxDEFINE_EVENT(EVT_PROG_MEM_CHANGED, wxCommandEvent); // All 6502 memory has been changed (after LOAD or assembly)
 wxDEFINE_EVENT(EVT_REMOVE_ERR_MARK, wxCommandEvent);
+
+void Broadcast::ToViews(UINT, WPARAM, LPARAM)
+{
+}
+
+void Broadcast::ToPopups(UINT, WPARAM, LPARAM)
+{
+}
 
 #if REWRITE_TO_WX_WIDGET
 

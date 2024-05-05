@@ -121,24 +121,24 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-CE_INLINE bool CCrystalEditView::GetOverwriteMode() const
+inline bool CCrystalEditView::GetOverwriteMode() const
 {
-	return m_bOvrMode;
+    return m_bOvrMode;
 }
 
-CE_INLINE void CCrystalEditView::SetOverwriteMode(bool bOvrMode /*= true */)
+inline void CCrystalEditView::SetOverwriteMode(bool bOvrMode /*= true */)
 {
-	m_bOvrMode = bOvrMode;
+    m_bOvrMode = bOvrMode;
 }
 
-CE_INLINE bool CCrystalEditView::GetDisableBSAtSOL() const
+inline bool CCrystalEditView::GetDisableBSAtSOL() const
 {
-	return m_bDisableBSAtSOL;
+    return m_bDisableBSAtSOL;
 }
 
-CE_INLINE bool CCrystalEditView::GetAutoIndent() const
+inline bool CCrystalEditView::GetAutoIndent() const
 {
-	return m_bAutoIndent;
+    return m_bAutoIndent;
 }
 
 #endif /* CRYSTAL_EDIT_VIEW_H__ */

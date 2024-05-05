@@ -53,7 +53,7 @@ public:
     void InvalidateView(uint16_t stackPtr = 0);
 
 protected:
-    virtual void PostNcDestroy();
+    //virtual void PostNcDestroy();
 
     afx_msg LRESULT OnStartDebug(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);

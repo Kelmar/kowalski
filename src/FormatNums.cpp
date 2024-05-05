@@ -21,14 +21,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "FormatNums.h"
 
-using namespace NumberFormats;
-
-void IncEditField(wxControl *pCtrl, int iDelta, int iMin, int iMax)
+void NumberFormats::IncEditField(wxControl *pCtrl, int iDelta, int iMin, int iMax)
 {
     int num, old;
     NumberFormat fmt;
 
-    old = num = ReadNumber(pCtrl, fmt);
+    old = num = NumberFormats::ReadNumber(pCtrl, fmt);
 
     num += iDelta;
 
@@ -38,10 +36,10 @@ void IncEditField(wxControl *pCtrl, int iDelta, int iMin, int iMax)
         num = iMin;
 
     if (num != old)
-        SetNumber(pCtrl, num, fmt);
+        NumberFormats::SetNumber(pCtrl, num, fmt);
 }
 
-int ReadNumber(wxControl *pCtrl, NumberFormat &fmt)
+int NumberFormats::ReadNumber(wxControl *pCtrl, NumberFormat &fmt)
 {
     if (!pCtrl)
         return 0;
@@ -93,7 +91,7 @@ int ReadNumber(wxControl *pCtrl, NumberFormat &fmt)
     return num;
 }
 
-void SetNumber(wxControl *pCtrl, int num, NumberFormat fmt)
+void NumberFormats::SetNumber(wxControl *pCtrl, int num, NumberFormat fmt)
 {
     if (!pCtrl)
         return;

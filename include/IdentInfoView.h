@@ -35,7 +35,7 @@ protected:
 public:
     virtual ~CIdentInfoView();
 
-    virtual void OnInitialUpdate();
+    //virtual void OnInitialUpdate();
 
 protected:
     virtual void OnDraw(wxDC *dc); // overridden to draw this view
