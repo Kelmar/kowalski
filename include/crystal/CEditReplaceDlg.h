@@ -29,13 +29,13 @@ class CCrystalEditView;
 class CEditReplaceDlg : public wxDialog
 {
 private:
-    CCrystalEditView *m_pBuddy;
+    CCrystalEditView *m_buddy;
     bool m_bFound;
     wxPoint m_ptFoundAt;
     bool DoHighlightText();
 
 public:
-    /* constructor */ CEditReplaceDlg(CCrystalEditView *pBuddy);
+    /* constructor */ CEditReplaceDlg(CCrystalEditView *buddy);
 
     bool m_bEnableScopeSelection;
     wxPoint m_ptCurrentPos;
@@ -44,8 +44,8 @@ public:
     enum { IDD = IDD_EDIT_REPLACE };
     bool m_bMatchCase;
     bool m_bWholeWord;
-    std::string m_sText;
-    std::string m_sNewText;
+    std::string m_text;
+    std::string m_newText;
     int m_nScope;
 
 protected:

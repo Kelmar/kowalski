@@ -23,20 +23,21 @@
 // CEditReplaceDlg dialog
 
 
-CEditReplaceDlg::CEditReplaceDlg(CCrystalEditView *pBuddy) : CDialog(CEditReplaceDlg::IDD, NULL)
+CEditReplaceDlg::CEditReplaceDlg(CCrystalEditView *buddy)
+    : wxDialog()
+    , m_buddy(buddy)
 {
-    ASSERT(pBuddy != NULL);
-    m_pBuddy = pBuddy;
-    //{{AFX_DATA_INIT(CEditReplaceDlg)
+    ASSERT(buddy != NULL);
+
     m_bMatchCase = FALSE;
     m_bWholeWord = FALSE;
-    m_sText = _T("");
-    m_sNewText = _T("");
+    m_text = "";
+    m_newText = "";
     m_nScope = -1;
-    //}}AFX_DATA_INIT
     m_bEnableScopeSelection = TRUE;
 }
 
+#if REWRITE_TO_WX_WIDGET
 
 void CEditReplaceDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -50,7 +51,6 @@ void CEditReplaceDlg::DoDataExchange(CDataExchange* pDX)
     //}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CEditReplaceDlg, CDialog)
     //{{AFX_MSG_MAP(CEditReplaceDlg)
     ON_EN_CHANGE(IDC_EDIT_TEXT, OnChangeEditText)
@@ -60,25 +60,32 @@ BEGIN_MESSAGE_MAP(CEditReplaceDlg, CDialog)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CEditReplaceDlg message handlers
 
 void CEditReplaceDlg::OnChangeEditText()
 {
-    CString text;
+#if REWRITE_TO_WX_WIDGET
+    std::string text;
     GetDlgItem(IDC_EDIT_TEXT)->GetWindowText(text);
-    GetDlgItem(IDC_EDIT_SKIP)->EnableWindow(text != _T(""));
+    GetDlgItem(IDC_EDIT_SKIP)->EnableWindow(!text.empty());
+#endif
 }
 
 void CEditReplaceDlg::OnCancel()
 {
+#if REWRITE_TO_WX_WIDGET
     VERIFY(UpdateData());
 
     CDialog::OnCancel();
+#endif
 }
 
-BOOL CEditReplaceDlg::OnInitDialog()
+bool CEditReplaceDlg::OnInitDialog()
 {
+#if REWRITE_TO_WX_WIDGET
     CDialog::OnInitDialog();
 
     GetDlgItem(IDC_EDIT_SKIP)->EnableWindow(m_sText != _T(""));
@@ -86,18 +93,23 @@ BOOL CEditReplaceDlg::OnInitDialog()
     m_bFound = FALSE;
 
     return TRUE;
+#endif
+    return false;
 }
 
-BOOL CEditReplaceDlg::DoHighlightText()
+bool CEditReplaceDlg::DoHighlightText()
 {
-    ASSERT(m_pBuddy != NULL);
-    DWORD dwSearchFlags = 0;
-    if (m_bMatchCase)
-        dwSearchFlags |= FIND_MATCH_CASE;
-    if (m_bWholeWord)
-        dwSearchFlags |= FIND_WHOLE_WORD;
+#if REWRITE_TO_WX_WIDGET
+    ASSERT(m_buddy != NULL);
+    uint32_t searchFlags = 0;
 
-    BOOL bFound;
+    if (m_bMatchCase)
+        searchFlags |= FIND_MATCH_CASE;
+
+    if (m_bWholeWord)
+        searchFlags |= FIND_WHOLE_WORD;
+
+    bool bFound;
     if (m_nScope == 0)
     {
         //	Searching selection only
@@ -110,25 +122,29 @@ BOOL CEditReplaceDlg::DoHighlightText()
         bFound = m_pBuddy->FindText(m_sText, m_ptFoundAt, dwSearchFlags, FALSE, &m_ptFoundAt);
     }
 
-    if (! bFound)
+    if (!bFound)
     {
-        CString prompt;
-        prompt.Format(IDS_EDIT_TEXT_NOT_FOUND, m_sText);
+        std::string prompt;
+        prompt.Printf(IDS_EDIT_TEXT_NOT_FOUND, m_sText);
         AfxMessageBox(prompt);
-        m_ptCurrentPos = m_nScope == 0 ? m_ptBlockBegin : CPoint(0, 0);
-        return FALSE;
+        m_ptCurrentPos = m_nScope == 0 ? m_ptBlockBegin : wxPoint(0, 0);
+        return false;
     }
 
-    m_pBuddy->HighlightText(m_ptFoundAt, lstrlen(m_sText));
-    return TRUE;
+    m_buddy->HighlightText(m_ptFoundAt, lstrlen(m_sText));
+    return true;
+#endif
+
+    return false;
 }
 
 void CEditReplaceDlg::OnEditSkip()
 {
-    if (! UpdateData())
+#if REWRITE_TO_WX_WIDGET
+    if (!UpdateData())
         return;
 
-    if (! m_bFound)
+    if (!m_bFound)
     {
         m_ptFoundAt = m_ptCurrentPos;
         m_bFound = DoHighlightText();
@@ -137,14 +153,16 @@ void CEditReplaceDlg::OnEditSkip()
 
     m_ptFoundAt.x += 1;
     m_bFound = DoHighlightText();
+#endif
 }
 
 void CEditReplaceDlg::OnEditReplace()
 {
-    if (! UpdateData())
+#if REWRITE_TO_WX_WIDGET
+    if (!UpdateData())
         return;
 
-    if (! m_bFound)
+    if (!m_bFound)
     {
         m_ptFoundAt = m_ptCurrentPos;
         m_bFound = DoHighlightText();
@@ -152,32 +170,35 @@ void CEditReplaceDlg::OnEditReplace()
     }
 
     //	We have highlighted text
-    VERIFY(m_pBuddy->ReplaceSelection(m_sNewText));
+    VERIFY(m_buddy->ReplaceSelection(m_newText));
 
     //	Manually recalculate points
     if (m_bEnableScopeSelection)
     {
         if (m_ptBlockBegin.y == m_ptFoundAt.y && m_ptBlockBegin.x > m_ptFoundAt.x)
         {
-            m_ptBlockBegin.x -= lstrlen(m_sText);
-            m_ptBlockBegin.x += lstrlen(m_sNewText);
+            m_ptBlockBegin.x -= m_text.size();lstrlen(m_sText);
+            m_ptBlockBegin.x += m_newText.size();
         }
         if (m_ptBlockEnd.y == m_ptFoundAt.y && m_ptBlockEnd.x > m_ptFoundAt.x)
         {
-            m_ptBlockEnd.x -= lstrlen(m_sText);
-            m_ptBlockEnd.x += lstrlen(m_sNewText);
+            m_ptBlockEnd.x -= m_text.size();
+            m_ptBlockEnd.x += m_newText.size();
         }
     }
-    m_ptFoundAt.x += lstrlen(m_sNewText);
+
+    m_ptFoundAt.x += m_newText.size();
     m_bFound = DoHighlightText();
+#endif
 }
 
 void CEditReplaceDlg::OnEditReplaceAll()
 {
-    if (! UpdateData())
+#if REWRITE_TO_WX_WIDGET
+    if (!UpdateData())
         return;
 
-    if (! m_bFound)
+    if (!m_bFound)
     {
         m_ptFoundAt = m_ptCurrentPos;
         m_bFound = DoHighlightText();
@@ -186,23 +207,26 @@ void CEditReplaceDlg::OnEditReplaceAll()
     while (m_bFound)
     {
         //	We have highlighted text
-        VERIFY(m_pBuddy->ReplaceSelection(m_sNewText));
+        VERIFY(m_buddy->ReplaceSelection(m_newText));
 
         //	Manually recalculate points
         if (m_bEnableScopeSelection)
         {
             if (m_ptBlockBegin.y == m_ptFoundAt.y && m_ptBlockBegin.x > m_ptFoundAt.x)
             {
-                m_ptBlockBegin.x -= lstrlen(m_sText);
-                m_ptBlockBegin.x += lstrlen(m_sNewText);
+                m_ptBlockBegin.x -= m_text.size();
+                m_ptBlockBegin.x += m_newText.size();
             }
+
             if (m_ptBlockEnd.y == m_ptFoundAt.y && m_ptBlockEnd.x > m_ptFoundAt.x)
             {
-                m_ptBlockEnd.x -= lstrlen(m_sText);
-                m_ptBlockEnd.x += lstrlen(m_sNewText);
+                m_ptBlockEnd.x -= m_text.size();
+                m_ptBlockEnd.x += m_newText.size();
             }
         }
-        m_ptFoundAt.x += lstrlen(m_sNewText);
+
+        m_ptFoundAt.x += m_newText.size();
         m_bFound = DoHighlightText();
     }
+#endif
 }

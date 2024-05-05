@@ -22,19 +22,20 @@
 /////////////////////////////////////////////////////////////////////////////
 // CFindTextDlg dialog
 
-CFindTextDlg::CFindTextDlg(CCrystalTextView *pBuddy) : CDialog(CFindTextDlg::IDD, NULL)
+CFindTextDlg::CFindTextDlg(CCrystalTextView *buddy)
+    : wxDialog()
+    , m_buddy(buddy)
 {
-    m_pBuddy = pBuddy;
-    //{{AFX_DATA_INIT(CFindTextDlg)
+    ASSERT(m_buddy != NULL);
+
     m_nDirection = 1;
     m_bMatchCase = FALSE;
     m_bWholeWord = FALSE;
-    m_sText = _T("");
-    //}}AFX_DATA_INIT
-    m_ptCurrentPos = CPoint(0, 0);
+    m_text = "";
+    m_ptCurrentPos = wxPoint(0, 0);
 }
 
-
+#if REWRITE_TO_WX_WIDGET
 void CFindTextDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialog::DoDataExchange(pDX);
@@ -46,64 +47,78 @@ void CFindTextDlg::DoDataExchange(CDataExchange* pDX)
     //}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CFindTextDlg, CDialog)
     //{{AFX_MSG_MAP(CFindTextDlg)
     ON_EN_CHANGE(IDC_EDIT_TEXT, OnChangeEditText)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CFindTextDlg message handlers
 
 void CFindTextDlg::OnOK()
 {
+#if REWRITE_TO_WX_WIDGET
+    ASSERT(m_buddy != NULL);
+
     if (UpdateData())
     {
-        ASSERT(m_pBuddy != NULL);
-        DWORD dwSearchFlags = 0;
-        if (m_bMatchCase)
-            dwSearchFlags |= FIND_MATCH_CASE;
-        if (m_bWholeWord)
-            dwSearchFlags |= FIND_WHOLE_WORD;
-        if (m_nDirection == 0)
-            dwSearchFlags |= FIND_DIRECTION_UP;
+        uint32_t searchFlags = 0;
 
-        CPoint ptTextPos;
-        if (! m_pBuddy->FindText(m_sText, m_ptCurrentPos, dwSearchFlags, TRUE, &ptTextPos))
+        if (m_bMatchCase)
+            searchFlags |= FIND_MATCH_CASE;
+
+        if (m_bWholeWord)
+            searchFlags |= FIND_WHOLE_WORD;
+
+        if (m_nDirection == 0)
+            searchFlags |= FIND_DIRECTION_UP;
+
+        wxPoint ptTextPos;
+        if (! m_pBuddy->FindText(m_sText, m_ptCurrentPos, searchFlags, TRUE, &ptTextPos))
         {
-            CString prompt;
-            prompt.Format(IDS_EDIT_TEXT_NOT_FOUND, m_sText);
+            wxString prompt;
+            prompt.Printf(IDS_EDIT_TEXT_NOT_FOUND, m_text);
             AfxMessageBox(prompt);
             m_ptCurrentPos = CPoint(0, 0);
             return;
         }
 
-        m_pBuddy->HighlightText(ptTextPos, lstrlen(m_sText));
+        m_buddy->HighlightText(ptTextPos, lstrlen(m_sText));
 
         CDialog::OnOK();
     }
+#endif
 }
 
 void CFindTextDlg::OnChangeEditText()
 {
-    CString text;
+#if REWRITE_TO_WX_WIDGET
+    std::string text;
     GetDlgItem(IDC_EDIT_TEXT)->GetWindowText(text);
-    GetDlgItem(IDOK)->EnableWindow(text != _T(""));
+    GetDlgItem(IDOK)->EnableWindow(!text.empty());
+#endif
 }
 
-BOOL CFindTextDlg::OnInitDialog()
+bool CFindTextDlg::OnInitDialog()
 {
+#if REWRITE_TO_WX_WIDGET
     CDialog::OnInitDialog();
 
-    GetDlgItem(IDOK)->EnableWindow(m_sText != _T(""));
+    GetDlgItem(IDOK)->EnableWindow(m_sText != "");
 
-    return TRUE;
+    return true;
+#endif
+    return false;
 }
 
 void CFindTextDlg::OnCancel()
 {
+#if REWRITE_TO_WX_WIDGET
     VERIFY(UpdateData());
 
     CDialog::OnCancel();
+#endif
 }

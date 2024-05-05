@@ -29,7 +29,7 @@ class CCrystalTextView;
 class CFindTextDlg : public wxDialog
 {
 private:
-    CCrystalTextView *m_pBuddy;
+    CCrystalTextView *m_buddy;
 
 // Construction
 public:
@@ -37,10 +37,9 @@ public:
 
     wxPoint m_ptCurrentPos;
 
-    enum { IDD = IDD_EDIT_FIND };
     int m_nDirection;
     bool m_bMatchCase;
-    std::string m_sText;
+    std::string m_text;
     bool m_bWholeWord;
 
 protected:
