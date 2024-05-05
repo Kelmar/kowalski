@@ -25,7 +25,7 @@ else ()
   find_package(wxWidgets COMPONENTS base core REQUIRED)
   include("${wxWidgets_USE_FILE}")
 
-  set (wxLibs wxWidgets)
+  set (wxLibs ${wxWidgets_LIBRARIES})
 endif ()
 
 file (GLOB_RECURSE SRCS src/*.cpp)

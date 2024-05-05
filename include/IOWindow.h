@@ -55,7 +55,7 @@ public:
     void Paste(const char* pcText);
 
 private:
-    static const size_t BUF_SIZE = 32 * 1024;
+    static constexpr size_t BUF_SIZE = 32 * 1024;
 
     char m_vchBuffer[BUF_SIZE];
     char* m_pHead;
