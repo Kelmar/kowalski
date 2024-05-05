@@ -1,11 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
 
+SET (CMAKE_CXX_STANDARD 17)
+SET (CMAKE_CXX_STANDARD_REQUIRED ON)
+SET (CMAKE_CXX_EXTENSIONS OFF)
+
+
 project (6502 C CXX)
 
 if (WIN32)
   include(FetchContent)
 
   Set (FETCHCONTENT_QUIET FALSE)
+  SET (wxBUILD_SHARED OFF)
 
   FetchContent_Declare(wxWidgets
       GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
@@ -42,3 +48,8 @@ target_include_directories(6502
 )
 
 target_link_libraries(6502 PRIVATE ${wxLibs})
+
+if (MSVC)
+  target_precompile_headers(6502 PRIVATE include/StdAfx.h)
+endif ()
+
