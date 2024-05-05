@@ -61,7 +61,7 @@ CLeksem::~CLeksem()
         if (str)
         {
 #ifdef _DEBUG
-            if (str->string())
+            if (!str->empty())
                 str[0] = 'X'; // change text for possible hanging references
 #endif
             delete str;

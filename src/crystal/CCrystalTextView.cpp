@@ -232,7 +232,7 @@ CCrystalTextView::CCrystalTextView()
 
 CCrystalTextView::~CCrystalTextView()
 {
-    ASSERT(m_hAccel == NULL);
+    //ASSERT(m_hAccel == NULL);
     ASSERT(m_pCacheBitmap == NULL);
     ASSERT(m_pTextBuffer == NULL); // Must be correctly detached
 

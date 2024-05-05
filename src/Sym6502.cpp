@@ -433,10 +433,10 @@ CAsm::SymStat CSym6502::perform_command()
 
             acc = (uint8_t)(tmp & 0xFF);
 
-            ctx.overflow = af && at;
-            ctx.zero = acc == 0;
-            ctx.negative = (acc & 0x80) != 0;
-            ctx.carry = tmp > 0xFF;
+            overflow = af && at;
+            zero = acc == 0;
+            negative = (acc & 0x80) != 0;
+            carry = tmp > 0xFF;
 
             ctx.set_status_reg_VZNC(overflow, zero, negative, carry);
         }
@@ -519,7 +519,7 @@ CAsm::SymStat CSym6502::perform_command()
         acc = ctx.a;
 
         // Compare always in binary, don't set acc
-        tmp = acc - arg - (carry ? 0 : 1);
+        tmp = acc - arg - (ctx.carry ? 0 : 1);
 
         carry = tmp < 0;
         zero = (tmp & 0xFF) == 0;
@@ -535,7 +535,7 @@ CAsm::SymStat CSym6502::perform_command()
         acc = ctx.x;
 
         // Compare always in binary, don't set acc
-        tmp = acc - arg - (carry ? 0 : 1);
+        tmp = acc - arg - (ctx.carry ? 0 : 1);
 
         carry = tmp < 0;
         zero = (tmp & 0xFF) == 0;
@@ -549,7 +549,7 @@ CAsm::SymStat CSym6502::perform_command()
         acc = ctx.y;
 
         // Compare always in binary, don't set acc
-        tmp = acc - arg - (carry ? 0 : 1);
+        tmp = acc - arg - (ctx.carry ? 0 : 1);
 
         carry = tmp < 0;
         zero = (tmp & 0xFF) == 0;
@@ -574,7 +574,7 @@ CAsm::SymStat CSym6502::perform_command()
         else
         {
             addr = get_argument_address(s_bWriteProtectArea);
-            arg = ctx.mem[addr];
+            acc = ctx.mem[addr];
 
             carry = acc & 0x80;
             acc <<= 1;
@@ -605,7 +605,7 @@ CAsm::SymStat CSym6502::perform_command()
         else
         {
             addr = get_argument_address(s_bWriteProtectArea);
-            arg = ctx.mem[addr];
+            acc = ctx.mem[addr];
 
             carry = acc & 0x01;
             acc >>= 1;

@@ -35,7 +35,7 @@ bool SelectColor(wxPanel *parent, wxColour *baseColor, CColorButton *colorBtn)
 {
     ASSERT(parent);
     ASSERT(baseColor);
-    ASSERT(cldBtn);
+    ASSERT(colorBtn);
 
     wxColourData data;
     data.SetColour(*baseColor);
@@ -316,7 +316,7 @@ void COptionsEditPage::OnBoldFont()
 {
     if (bool* pBold = GetFontStyle())
     {
-        *pBold = m_btnBold.GetValue() > 0;
+        *pBold = m_btnBold.GetValue();
         m_wndExample.Refresh();
         m_bColorChanged = true;
     }

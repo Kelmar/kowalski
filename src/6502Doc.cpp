@@ -91,21 +91,6 @@ void CSrc6502Doc::Serialize(CArchive &ar)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CSrc6502Doc diagnostics
-
-#ifdef _DEBUG
-void CSrc6502Doc::AssertValid() const
-{
-    //CDocument::AssertValid();
-}
-
-void CSrc6502Doc::Dump(CDumpContext& dc) const
-{
-    //CDocument::Dump(dc);
-}
-#endif //_DEBUG
-
-/////////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_CRYSTAL_EDIT
 

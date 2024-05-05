@@ -65,7 +65,6 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CDialEditBreakpoint message handlers
 
-
 CAsm::Breakpoint CDialEditBreakpoint::GetBreakpoint()
 {
     int bp = CAsm::BPT_NONE;

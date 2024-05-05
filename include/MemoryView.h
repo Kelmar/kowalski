@@ -69,7 +69,7 @@ private:
 
     enum Dump { FULL, HEX, TEXT } m_eDump;
 protected:
-    /* constructor */ CMemoryView();           // protected constructor used by dynamic creation
+    /* constructor */ CMemoryView(); // protected constructor used by dynamic creation
 
 public:
     virtual ~CMemoryView();
@@ -86,17 +86,10 @@ public:
     virtual void OnInitialUpdate();
 
 protected:
-    virtual void OnDraw(wxDC *dc);      // overridden to draw this view
+    virtual void OnDraw(wxDC *dc); // overridden to draw this view
     //virtual bool PreCreateWindow(CREATESTRUCT& cs);
     virtual void OnUpdate(wxView *sender, LPARAM lHint, wxObject *hint);
-    
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
 
-    // Generated message map functions
-protected:
     afx_msg void OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);
     afx_msg bool OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt);
     afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);

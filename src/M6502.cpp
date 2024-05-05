@@ -942,7 +942,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                 if (!TryLookup(macro_name, label, _Out_ macro)) // if the label is not in the array
                     return ERR_UNKNOWN_INSTR;
 
-                ASSERT(macros.GetSize() > macro.val && macro.val >= 0);
+                ASSERT(macros.size() > macro.val && macro.val >= 0);
                 CMacroDef* pMacro = &macros[macro.val];
                 ret = pMacro->ParseArguments(leks,*this); // load macro arguments
 
@@ -2262,7 +2262,7 @@ CAsm6502::Stat CAsm6502::chk_macro_name(const std::string &id)
     if (info != macro_name.end())
     {
         // Checked label found in the array
-        ASSERT(info->info == CIdent::I_MACRONAME);
+        ASSERT(info->second.info == CIdent::I_MACRONAME);
         return OK;
         
         //if (info->val != inf.val)
@@ -2916,7 +2916,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
 // Code generation
 void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit, Expr expr_zpg)
 {
-    ASSERT(TransformTable(m_procType)[code][mode] != NA || mode == A_IMP2 && code = =C_BRK);
+    ASSERT(TransformTable(m_procType)[code][mode] != NA || mode == A_IMP2 && code == CAsm::C_BRK);
     ASSERT(origin <= 0xFFFF);
 
     if (mode == A_IMP2 && code == C_BRK)

@@ -131,7 +131,7 @@ public:
 
     void AddLine(CDebugLine &dl)
     {
-        ASSERT(dl.flags != DBG_EMPTY); // Unfilled line description
+        ASSERT(dl.flags != CAsm::DBG_EMPTY); // Unfilled line description
 
         int idx = size();
         push_back(dl); // Adding information about the line, remembering the index

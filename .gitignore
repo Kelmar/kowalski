@@ -8,6 +8,7 @@
 *.obj
 out/
 build/
+winbuild/
 
 # CMake files to ignore
 CMakeLists.txt.user

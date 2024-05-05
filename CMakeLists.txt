@@ -1,34 +1,42 @@
 cmake_minimum_required(VERSION 3.20)
 
+project (6502 C CXX)
+
 if (WIN32)
   include(FetchContent)
 
-  FetchContent_Declare(
-      wxWidgets
+  Set (FETCHCONTENT_QUIET FALSE)
+
+  FetchContent_Declare(wxWidgets
       GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
+      GIT_TAG v3.2.4
+      OVERRIDE_FIND_PACKAGE
   )
 
-  FetchContent_MakeAvailable(wxWidgets)
+  FetchContent_GetProperties(wxWidgets)
+
+  if (NOT wxwidgets_POPULATED)
+    FetchContent_Populate(wxwidgets)
+    add_subdirectory(${wxwidgets_SOURCE_DIR} ${wxwidgets_BUILD_DIR})
+  endif ()
+
+  set (wxLibs wx::base wx::core)
 else ()
-  find_package(wxWidgets COMPONENTS core base REQUIRED)
-endif (WIN32)
-
-project (6502 C CXX)
-
-include_directories(
-    include/
-    include/crystal
-)
-
-if (WIN32)
-else ()
+  find_package(wxWidgets COMPONENTS base core REQUIRED)
   include("${wxWidgets_USE_FILE}")
-endif (WIN32)
+
+  set (wxLibs wxWidgets)
+endif ()
 
 file (GLOB_RECURSE SRCS src/*.cpp)
+file (GLOB_RECURSE HDRS include/*.h)
 
-list(APPEND SOURCES ${SRCS})
+add_executable(6502 ${SRCS} ${HDRS})
 
-add_executable(6502 ${SRCS})
+target_include_directories(6502
+    PRIVATE include/
+    PRIVATE include/crystal
+    PRIVATE ${wxWidgets_SOURCE_DIR}/include
+)
 
-target_link_libraries(6502 ${wxWidgets_LIBRARIES})
+target_link_libraries(6502 PRIVATE ${wxLibs})

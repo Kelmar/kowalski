@@ -40,15 +40,6 @@ public:
 protected:
     virtual void OnDraw(wxDC *dc); // overridden to draw this view
 
-    // Implementation
-protected:
-    
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
-
-protected:
     //afx_msg void OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
     //afx_msg void OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult);
 };

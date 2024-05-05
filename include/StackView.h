@@ -80,11 +80,6 @@ protected:
     //virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
     virtual void OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint);
 
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
-
     afx_msg void OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);
     afx_msg bool OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt);
     afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);

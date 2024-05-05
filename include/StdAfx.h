@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define REWRITE_TO_WX_WIDGET 0
 
 #include <stdint.h>
+#include <string.h>
 
 #include <wx/wx.h>
 #include <wx/config.h>
@@ -61,6 +62,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "debug.h"
 #include "Utils.h"
 
+#ifdef _MSC_VER
+# define strcasecmp stricmp
+#endif
+
 #define __AFXWIN_H__
 
 // Some Win32/MFC temp place holders
@@ -71,7 +76,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define WPARAM uint32_t
 #define LPARAM uint32_t
 
-// No idication as to what this POSITION type actually is, we're stubbing in an int for now. -- B.Simonds (April 25, 2024)
+// No indication as to what this POSITION type actually is, we're stubbing in an int for now. -- B.Simonds (April 25, 2024)
 typedef int POSITION;
 
 // Couple of class stubs from MFC that we need to convert.
@@ -93,23 +98,6 @@ public:
     CMemoryException() {}
     virtual ~CMemoryException() {}
 };
-
-//#include <afxwin.h>         // MFC core and standard components
-//#include <afxext.h>         // MFC extensions
-//#include <afxtempl.h>
-//#include <AFXCVIEW.H>
-//#ifndef _AFX_NO_AFXCMN_SUPPORT
-//#include <afxcmn.h>			// MFC support for Windows 95 Common Controls
-//#endif // _AFX_NO_AFXCMN_SUPPORT
-
-//#include <afxpriv.h>
-//#include <afxole.h>
-
-//#include <AFXMT.H>
-
-//#pragma warning(disable : 4800)
-
-//#include "Shlwapi.h"
 
 #include "6502.h"
 

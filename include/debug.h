@@ -27,7 +27,7 @@
 #ifndef DEBUG_H__
 #define DEBUG_H__
 
-#ifdef __MSVC__
+#ifdef _MSC_VER
 // Microsoft provides some handy static analysis keywords, pull those in.
 # include <sal.h>
 #else

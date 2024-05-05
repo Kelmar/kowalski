@@ -179,10 +179,12 @@ void CCrystalTextBuffer::InsertLine(const std::string &line, int length /*= -1*/
     }
 
 #ifdef _DEBUG
+#if REWRITE_TO_WX_WIDGETS
     size_t nLines = m_aLines.size();
 
     if (nLines % 5000 == 0)
         TRACE1("%d lines loaded!\n", nLines);
+# endif
 #endif
 }
 
@@ -1060,7 +1062,7 @@ POSITION CCrystalTextBuffer::GetRedoDescription(std::string &desc, POSITION pos 
     {
         position = (int)pos;
         ASSERT(position > m_nUndoPosition);
-        ASSERT((m_aUndoBuf[position].m_dwFlags & UNDO_BEGINGROUP) != 0);
+        ASSERT((m_aUndoBuf[position].m_flags & UNDO_BEGINGROUP) != 0);
     }
 
     //	Read description
@@ -1096,7 +1098,7 @@ bool CCrystalTextBuffer::Undo(wxPoint &ptCursorPos)
             // Just compare the text as it was before Undo operation
             std::string text;
             GetText(ur.m_ptStartPos.y, ur.m_ptStartPos.x, ur.m_ptEndPos.y, ur.m_ptEndPos.x, text);
-            ASSERT(lstrcmp(text, ur.GetText()) == 0);
+            ASSERT(text == ur.GetText());
 #endif
             VERIFY(InternalDeleteText(NULL, ur.m_ptStartPos.y, ur.m_ptStartPos.x, ur.m_ptEndPos.y, ur.m_ptEndPos.x));
             ptCursorPos = ur.m_ptStartPos;
@@ -1151,7 +1153,7 @@ bool CCrystalTextBuffer::Redo(wxPoint &ptCursorPos)
 #ifdef _ADVANCED_BUGCHECK
             std::string text;
             GetText(ur.m_ptStartPos.y, ur.m_ptStartPos.x, ur.m_ptEndPos.y, ur.m_ptEndPos.x, text);
-            ASSERT(lstrcmp(text, ur.GetText()) == 0);
+            ASSERT(text == ur.GetText());
 #endif
             VERIFY(InternalDeleteText(NULL, ur.m_ptStartPos.y, ur.m_ptStartPos.x, ur.m_ptEndPos.y, ur.m_ptEndPos.x));
             ptCursorPos = ur.m_ptStartPos;
@@ -1378,7 +1380,7 @@ void CCrystalTextBuffer::FlushUndoGroup(CCrystalTextView *pSource)
 
     if (pSource != NULL)
     {
-        ASSERT(m_nUndoPosition == m_aUndoBuf.GetSize());
+        ASSERT(m_nUndoPosition == m_aUndoBuf.size());
 
         if (m_nUndoPosition > 0)
         {

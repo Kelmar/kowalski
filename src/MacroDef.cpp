@@ -223,12 +223,12 @@ CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, int param_number, Expr &expr, C
             expr.string = m_strName;
         else
         {
-            ASSERT(m_arrArgType.GetSize() > param_number);
+            ASSERT(m_arrArgType.size() > param_number);
             
             if (m_arrArgType[param_number] != STR) // Check whether the variable has a text value
                 return CAsm::ERR_NOT_STR_PARAM;
 
-            ASSERT(m_strarrArgs.GetSize() > param_number);
+            ASSERT(m_strarrArgs.size() > param_number);
             expr.string = m_strarrArgs[param_number];
         }
 

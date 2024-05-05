@@ -161,27 +161,6 @@ void CSrc6502View::OnEndPrinting(CDC* pDC, CPrintInfo* pInfo)
 #endif /* REWRITE_TO_WX_WIDGET */
 
 /////////////////////////////////////////////////////////////////////////////
-// CSrc6502View diagnostics
-
-#ifdef _DEBUG
-void CSrc6502View::AssertValid() const
-{
-    //CBaseView::AssertValid();
-}
-
-void CSrc6502View::Dump(CDumpContext& dc) const
-{
-    //CBaseView::Dump(dc);
-}
-
-CSrc6502Doc* CSrc6502View::GetDocument() // non-debug version is inline
-{
-    //ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CSrc6502Doc)));
-    return (CSrc6502Doc*)m_pDocument;
-}
-#endif //_DEBUG
-
-/////////////////////////////////////////////////////////////////////////////
 // CSrc6502View message handlers
 
 void CSrc6502View::OnInitialUpdate()

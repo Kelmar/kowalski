@@ -28,9 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CSrc6502Doc : public wxDocument
 {
 protected: // create from serialization only
-    CSrc6502Doc();
-
-    //DECLARE_DYNCREATE(CSrc6502Doc)
+    /* constructor */ CSrc6502Doc();
+    virtual          ~CSrc6502Doc();
 
 // Attributes
 public:
@@ -76,36 +75,13 @@ public:
     }
 #endif
 
-// Operations
-public:
-// Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CSrc6502Doc)
 public:
     virtual bool OnNewDocument();
     virtual void Serialize(CArchive &ar);
     virtual bool DeleteContents();
     virtual bool OnOpenDocument(const char *pathName);
     virtual bool OnSaveDocument(const char *pathName);
-    //}}AFX_VIRTUAL
 
-// Implementation
-public:
-    virtual ~CSrc6502Doc();
-#ifdef _DEBUG
-    virtual void AssertValid() const;
-    virtual void Dump(CDumpContext& dc) const;
-#endif
-
-protected:
-
-// Generated message map functions
-protected:
-    //{{AFX_MSG(CSrc6502Doc)
-    // NOTE - the ClassWizard will add and remove member functions here.
-    //    DO NOT EDIT what you see in these blocks of generated code !
-    //}}AFX_MSG
-    //DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

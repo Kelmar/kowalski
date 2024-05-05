@@ -147,7 +147,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
                 
             if (expr.inf == Expr::EX_STRING) // Text?
             {
-                ASSERT(def v <= 0); // Text only in .DB and .STR
+                ASSERT(def <= 0); // Text only in .DB and .STR
                 const std::string &str = expr.string;
                 uint32_t org = origin;
                 //if (origin > 0xFFFF)
