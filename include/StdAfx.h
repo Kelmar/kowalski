@@ -43,6 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <wx/richtext/richtextctrl.h>
 #include <wx/settings.h>
 
+#include <algorithm>
 #include <list>
 #include <string>
 #include <unordered_map>
@@ -50,6 +51,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <vector>
 
 #include <cstdio>
+#include <cctype>
 
 #define UCHAR unsigned char
 #define USHORT unsigned short

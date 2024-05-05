@@ -30,9 +30,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CDialEditBreakpoint : public wxDialog
 {
 public:
-    /* constructor */ CDialEditBreakpoint(uint8_t bp);
+    /* constructor */ CDialEditBreakpoint(CAsm::Breakpoint bp);
 
-    uint8_t GetBreakpoint();
+    CAsm::Breakpoint GetBreakpoint();
     
     bool m_Disabled;
     bool m_Execute;

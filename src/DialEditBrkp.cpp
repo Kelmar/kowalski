@@ -25,30 +25,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "DialEditBrkp.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-extern void AFX_CDECL DDX_HexDec(CDataExchange* pDX, int nIDC, unsigned int &num, bool bWord= true);
-
 /////////////////////////////////////////////////////////////////////////////
 // CDialEditBreakpoint dialog
 
 
-CDialEditBreakpoint::CDialEditBreakpoint(Breakpoint bp, CWnd* pParent /*=NULL*/)
-    : CDialog(CDialEditBreakpoint::IDD, pParent)
+CDialEditBreakpoint::CDialEditBreakpoint(CAsm::Breakpoint bp)
+    : wxDialog()
 {
-    //{{AFX_DATA_INIT(CDialEditBreakpoint)
     m_uAddr = 0;
-    //}}AFX_DATA_INIT
-    m_Execute = (bp & BPT_EXECUTE) != 0;
-    m_Read = (bp & BPT_READ) != 0;
-    m_Write = (bp & BPT_WRITE) != 0;
-    m_Disabled = (bp & BPT_DISABLED) != 0;
+    m_Execute = (bp & CAsm::BPT_EXECUTE) != 0;
+    m_Read = (bp & CAsm::BPT_READ) != 0;
+    m_Write = (bp & CAsm::BPT_WRITE) != 0;
+    m_Disabled = (bp & CAsm::BPT_DISABLED) != 0;
 }
 
+#if REWRITE_TO_WX_WIDGET
 
 void CDialEditBreakpoint::DoDataExchange(CDataExchange* pDX)
 {
@@ -64,12 +55,12 @@ void CDialEditBreakpoint::DoDataExchange(CDataExchange* pDX)
     //}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CDialEditBreakpoint, CDialog)
 //{{AFX_MSG_MAP(CDialEditBreakpoint)
 // NOTE: the ClassWizard will add message map macros here
 //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CDialEditBreakpoint message handlers
@@ -77,14 +68,19 @@ END_MESSAGE_MAP()
 
 CAsm::Breakpoint CDialEditBreakpoint::GetBreakpoint()
 {
-    int bp= BPT_NONE;
+    int bp = CAsm::BPT_NONE;
+
     if (m_Execute)
-        bp |= BPT_EXECUTE;
+        bp |= CAsm::BPT_EXECUTE;
+
     if (m_Read)
-        bp |= BPT_READ;
+        bp |= CAsm::BPT_READ;
+
     if (m_Write)
-        bp |= BPT_WRITE;
+        bp |= CAsm::BPT_WRITE;
+
     if (m_Disabled)
-        bp |= BPT_DISABLED;
-    return (Breakpoint)bp;
+        bp |= CAsm::BPT_DISABLED;
+
+    return (CAsm::Breakpoint)bp;
 }
