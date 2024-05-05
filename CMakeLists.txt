@@ -20,18 +20,20 @@ if (WIN32)
     add_subdirectory(${wxwidgets_SOURCE_DIR} ${wxwidgets_BUILD_DIR})
   endif ()
 
-  set (wxLibs wx::base wx::core)
+  set (wxLibs wx::base wx::core wx::richtext wx::adv)
+  set (execType WIN32)
 else ()
-  find_package(wxWidgets COMPONENTS base core REQUIRED)
+  find_package(wxWidgets COMPONENTS base core richtext adv REQUIRED)
   include("${wxWidgets_USE_FILE}")
 
   set (wxLibs ${wxWidgets_LIBRARIES})
+  set (execType )
 endif ()
 
 file (GLOB_RECURSE SRCS src/*.cpp)
 file (GLOB_RECURSE HDRS include/*.h)
 
-add_executable(6502 ${SRCS} ${HDRS})
+add_executable(6502 ${execType} ${SRCS} ${HDRS})
 
 target_include_directories(6502
     PRIVATE include/
