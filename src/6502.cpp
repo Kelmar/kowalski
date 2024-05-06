@@ -26,7 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502Doc.h"
 #include "6502View.h"
 
-#include "MainFrm.h"
 //#include "ChildFrm.h"
 //#include "ChildFrmDeAsm.h"
 //#include "Deasm6502Doc.h"
@@ -39,24 +38,11 @@ const char VENDOR_NAME[] = "MikSoft";
 const char APP_NAME[] = "6502_simulator";
 const char APP_DISPLAY[] = "6502 Simulator";
 
-/////////////////////////////////////////////////////////////////////////////
+bool C6502App::m_bMaximize = false; // flag - maximum window dimensions at startup;
+bool C6502App::m_bFileNew = true; // flag - opening a blank document at startup
+
+/*************************************************************************/
 // C6502App
-
-#if 0
-
-BEGIN_MESSAGE_MAP(C6502App, CWinApp)
-    ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
-    // Standard file based document commands
-    ON_COMMAND(ID_FILE_NEW, CWinApp::OnFileNew)
-    ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
-    // Standard print setup command
-    ON_COMMAND(ID_FILE_PRINT_SETUP, CWinApp::OnFilePrintSetup)
-END_MESSAGE_MAP()
-
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-// C6502App construction
 
 C6502App::C6502App()
     : m_mainFrame(nullptr)
@@ -74,11 +60,8 @@ C6502App::~C6502App()
 
 wxIMPLEMENT_APP(C6502App);
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
 // C6502App initialization
-
-bool C6502App::m_bMaximize = false; // flag - maximum window dimensions at startup;
-bool C6502App::m_bFileNew = true; // flag - opening a blank document at startup
 
 bool C6502App::OnInit()
 {
@@ -99,7 +82,6 @@ bool C6502App::OnInit()
     SetAppName(APP_NAME);
 
     // TODO: Look this up from i18n strings.
-
     SetAppDisplayName(APP_DISPLAY);
 
     m_config = new wxConfig();
@@ -114,7 +96,9 @@ bool C6502App::OnInit()
     if (!InitFrame())
         return false;
 
-    //m_mainFrame->Center();
+    // File history has to be loaded after the frame is created.
+    docManager->FileHistoryLoad(*m_config);
+
     m_mainFrame->Show();
 
     SetStatusText(0, "Application loaded!");
@@ -127,14 +111,19 @@ bool C6502App::InitFrame()
 {
     wxDocManager *docManager = wxDocManager::GetDocumentManager();
 
+    //wxPoint pos = m_config->ReadObject<wxPoint>("main_pos", wxDefaultPosition);
+    //wxSize size = m_config->ReadObject<wxSize>("main_size", wxSize(500, 400));
+    wxPoint pos = wxDefaultPosition;
+    wxSize size = wxSize(500, 400);
+
 #if wxUSE_MDI_ARCHITECTURE
     m_mainFrame = new wxDocMDIParentFrame(
         docManager,
         nullptr,
         wxID_ANY,
         GetAppDisplayName(),
-        wxDefaultPosition,
-        wxSize(500, 500)
+        pos,
+        size
     );
 #else
     m_mainFrame = new wxDocParentFrameAny<wxAuiMDIParentFrame>(
@@ -142,8 +131,8 @@ bool C6502App::InitFrame()
         nullptr,
         wxID_ANY,
         GetAppDisplayName(),
-        wxDefaultPosition,
-        wxSize(500, 500)
+        pos,
+        size
     );
 #endif
 
@@ -165,19 +154,50 @@ bool C6502App::InitAppMenu()
 {
     wxDocManager* docManager = wxDocManager::GetDocumentManager();
 
+    // File Menu
     wxMenu* file = new wxMenu();
     file->Append(wxID_NEW);
     file->Append(wxID_OPEN);
+    file->Append(wxID_CLOSE);
+    file->Append(wxID_SAVE);
+    file->Append(wxID_SAVEAS);
+    file->Append(wxID_REVERT, _("Re&vert..."));
+
+    file->AppendSeparator();
+    file->Append(wxID_PRINT);
+    file->Append(wxID_PRINT_SETUP, _("Print &Setup..."));
+    file->Append(wxID_PREVIEW);
+
+    if (!m_bDoNotAddToRecentFileList)
+    {
+        wxMenu *recentFiles = new wxMenu();
+
+        file->AppendSeparator();
+        file->AppendSubMenu(recentFiles, _("Recent &Files"));
+
+        docManager->FileHistoryUseMenu(recentFiles);
+    }
+
     file->AppendSeparator();
     file->Append(wxID_EXIT);
 
-    docManager->FileHistoryUseMenu(file);
+    // Edit Menu
+    wxMenu *edit = new wxMenu();
+    edit->Append(wxID_UNDO);
+    edit->Append(wxID_REDO);
 
+    edit->AppendSeparator();
+    edit->Append(wxID_CUT);
+    edit->Append(wxID_COPY);
+    edit->Append(wxID_PASTE);
+
+    // Help Menu
     wxMenu* help = new wxMenu();
     help->Append(wxID_ABOUT);
 
     m_menuBar = new wxMenuBar();
     m_menuBar->Append(file, wxGetStockLabel(wxID_FILE));
+    m_menuBar->Append(edit, wxGetStockLabel(wxID_EDIT));
     m_menuBar->Append(help, wxGetStockLabel(wxID_HELP));
 
     m_mainFrame->SetMenuBar(m_menuBar);
@@ -297,7 +317,7 @@ BOOL C6502App::InitInstance()
     // The main window has been initialized, so show and update it.
     pMainFrame->ShowWindow(m_nCmdShow);
     pMainFrame->UpdateWindow();
-    pMainFrame->SetFocus();	// przywracamy fokus - zamiast na DialBar, do g��wnego okna
+    pMainFrame->SetFocus(); // we restore the focus - instead of the DialBar, to the main window
 
     return true;
 }
@@ -352,8 +372,15 @@ int C6502App::OnExit()
 {
     wxDocManager* const docManager = wxDocManager::GetDocumentManager();
 
-    if (!m_bDoNotAddToRecentFileList && docManager)
-        docManager->FileHistorySave(*m_config);
+    docManager->FileHistorySave(*m_config);
+
+    //wxPoint pos = m_mainFrame->GetPosition();
+    //wxSize size = m_mainFrame->GetSize();
+
+    //m_config->Write("main_pos", pos);
+    //m_config->Write("main_size", size);
+
+    m_config->Flush();
 
     return wxApp::OnExit();
 }
