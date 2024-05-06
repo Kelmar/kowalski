@@ -18,122 +18,89 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// 6502Doc.cpp : implementation of the CSrc6502Doc class
-//
-
 #include "StdAfx.h"
+
 #include "6502Doc.h"
+#include "6502View.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-// CSrc6502Doc
-
-//IMPLEMENT_DYNCREATE(CSrc6502Doc, CDocument)
-
-//BEGIN_MESSAGE_MAP(CSrc6502Doc, CDocument)
-    //{{AFX_MSG_MAP(CSrc6502Doc)
-    // NOTE - the ClassWizard will add and remove mapping macros here.
-    //    DO NOT EDIT what you see in these blocks of generated code!
-    //}}AFX_MSG_MAP
-//END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CSrc6502Doc construction/destruction
+/*************************************************************************/
+// Construction/Destruction
 
 CSrc6502Doc::CSrc6502Doc()
+    : wxDocument()
 {
-#ifdef USE_CRYSTAL_EDIT
-    m_TextBuffer.m_pOwnerDoc = this;
-#endif
 }
 
 CSrc6502Doc::~CSrc6502Doc()
 {
-#ifdef USE_CRYSTAL_EDIT
-//	m_TextBuffer.FreeAll();
-#endif
 }
 
-bool CSrc6502Doc::OnNewDocument()
+wxIMPLEMENT_DYNAMIC_CLASS(CSrc6502Doc, wxDocument);
+
+/*************************************************************************/
+
+CSrc6502View *CSrc6502Doc::GetSourceView()
 {
-    //if (!CDocument::OnNewDocument())
-    //    return false;
+    return dynamic_cast<CSrc6502View *>(GetFirstView());
+}
 
-#ifdef USE_CRYSTAL_EDIT
-    m_TextBuffer.InitNew();
-#endif
+/*************************************************************************/
+// Document Create/Load/Save
 
-    static UINT no = 1;
-    char name[32];
-    snprintf(name, sizeof(name), "NewFile%u", no++);
+bool CSrc6502Doc::OnCreate(const wxString& path, long flags)
+{
+    if (!wxDocument::OnCreate(path, flags))
+	return false;
 
-    //SetPathName(name, false);
+    BindViews();
 
     return true;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// CSrc6502Doc serialization
-
-void CSrc6502Doc::Serialize(CArchive &ar)
+bool CSrc6502Doc::DoOpenDocument(const wxString &filename)
 {
-#ifdef USE_CRYSTAL_EDIT
-    //no-op
-#else
-    // CEditView contains an edit control which handles all serialization
-    //((CEditView*)m_viewList.GetHead())->SerializeRaw(ar);
-#endif
-}
+    CSrc6502View *sourceView = GetSourceView();
 
-/////////////////////////////////////////////////////////////////////////////
+    if (!sourceView->m_text->LoadFile(filename))
+	return false;
 
-#ifdef USE_CRYSTAL_EDIT
+    Modify(false);
 
-void CSrc6502Doc::DeleteContents()
-{
-    //CDocument::DeleteContents();
-    m_TextBuffer.FreeAll();
-}
-
-
-bool CSrc6502Doc::OnOpenDocument(const char *pathName)
-{
-    //if (!CDocument::OnOpenDocument(pathName))
-    //    return false;
-
-    return m_TextBuffer.LoadFromFile(pathName);
-}
-
-
-bool CSrc6502Doc::OnSaveDocument(const char *pathName)
-{
-    m_TextBuffer.SaveToFile(pathName);
     return true;
 }
 
-#else
-
-bool CSrc6502Doc::DeleteContents()
+bool CSrc6502Doc::DoSaveDocument(const wxString &filename)
 {
-    //CDocument::DeleteContents();
-    return false;
+    CSrc6502View *sourceView = GetSourceView();
+
+    if (!sourceView->m_text->SaveFile(filename))
+	return false;
+
+    Modify(false);
+
+    wxString str;
+    str.Printf("Saved: %s", filename);
+
+    wxGetApp().SetStatusText(0, str.ToStdString());
+
+    return true;
 }
 
-bool CSrc6502Doc::OnOpenDocument(const char *pathName)
+/*************************************************************************/
+
+void CSrc6502Doc::BindViews()
 {
-    //return CDocument::OnOpenDocument(pathName);
-    return false;
+    CSrc6502View *sourceView = GetSourceView();
+
+    sourceView->m_text->Bind(wxEVT_STC_MODIFIED, &CSrc6502Doc::OnTextChange, this);
 }
 
-bool CSrc6502Doc::OnSaveDocument(const char *pathName)
+/*************************************************************************/
+
+void CSrc6502Doc::OnTextChange(wxCommandEvent& event)
 {
-    //return CDocument::OnSaveDocument(pathName);
-    return false;
+    Modify(true);
+    event.Skip();
 }
 
-#endif
+/*************************************************************************/

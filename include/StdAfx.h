@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string.h>
 
 #include <wx/wx.h>
+#include <wx/aui/aui.h>
 #include <wx/config.h>
 #include <wx/docmdi.h>
 #include <wx/docview.h>
@@ -43,6 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <wx/notebook.h>
 #include <wx/richtext/richtextctrl.h>
 #include <wx/settings.h>
+#include <wx/stc/stc.h>
 
 #include <algorithm>
 #include <list>
@@ -58,6 +60,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define USHORT unsigned short
 #define UINT unsigned int
 #define ULONG unsigned long
+
+#if wxUSE_STD_IOSTREAM
+typedef std::istream DocIStream;
+typedef std::ostream DocOStream;
+#else
+typedef wxInputStream DocIStream;
+typedef wxOutputStream DocOStream;
+#endif
 
 #include "debug.h"
 #include "Utils.h"

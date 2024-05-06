@@ -18,70 +18,46 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// 6502Doc.h : interface of the CSrc6502Doc class
-//
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
+
 #ifdef USE_CRYSTAL_EDIT
 #include "crystal/CCrystalTextBuffer.h"
 #endif
 
+/*************************************************************************/
+
 class CSrc6502Doc : public wxDocument
 {
-protected: // create from serialization only
-    /* constructor */ CSrc6502Doc();
-    virtual          ~CSrc6502Doc();
+private:
+    wxString m_text;
+
+    void BindViews();
+
+    CSrc6502View *GetSourceView();
+
+    void OnTextChange(wxCommandEvent& event);
+
+protected:
+    wxDECLARE_DYNAMIC_CLASS(CSrc6502Doc);
+    wxDECLARE_NO_COPY_CLASS(CSrc6502Doc);
 
 // Attributes
 public:
-#ifdef USE_CRYSTAL_EDIT
-    class CTextBuffer : public CCrystalTextBuffer
-    {
-    public:
-        CDocument* m_pOwnerDoc;
+    /* constructor */ CSrc6502Doc();
+    virtual          ~CSrc6502Doc();
 
-        CTextBuffer()
-        {
-            m_pOwnerDoc = 0;
-        };
+    bool OnCreate(const wxString& path, long flags) override;
 
-        virtual void SetModified(bool bModified = true) // Fix 1.3.4.4 - corrected dirty file flag *
-        {
-            m_pOwnerDoc->SetModifiedFlag(bModified);
+    bool DoOpenDocument(const wxString &filename) override;
+    bool DoSaveDocument(const wxString &filename) override;
 
-            if(bModified)
-            {
-                CString title;
-                title = m_pOwnerDoc->GetTitle();
-                if (title.Right(1) != "*")
-                {
-                    title += " *";
-                    m_pOwnerDoc->SetTitle(title);
-                }
-            }
-        };
-    };
-
-    CTextBuffer m_TextBuffer;
-    LOGFONT m_lfNormal;
-
-    void GetText(CString& strText)
-    {
-        m_TextBuffer.GetText(strText);
-    }
-
-    CCrystalTextBuffer* GetBuffer()
-    {
-        return &m_TextBuffer;
-    }
-#endif
-
-public:
+#if 0
     virtual bool OnNewDocument();
     virtual void Serialize(CArchive &ar);
     virtual bool DeleteContents();
     virtual bool OnOpenDocument(const char *pathName);
     virtual bool OnSaveDocument(const char *pathName);
-
+#endif
 };
 
 /////////////////////////////////////////////////////////////////////////////

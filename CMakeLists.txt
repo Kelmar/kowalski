@@ -26,10 +26,10 @@ if (WIN32)
     add_subdirectory(${wxwidgets_SOURCE_DIR} ${wxwidgets_BUILD_DIR})
   endif ()
 
-  set (wxLibs wx::base wx::core wx::richtext wx::adv)
+  set (wxLibs wx::base wx::core wx::richtext wx::adv wx::stc wx::aui)
   set (execType WIN32)
 else ()
-  find_package(wxWidgets COMPONENTS base core richtext adv REQUIRED)
+  find_package(wxWidgets COMPONENTS base core richtext adv stc aui REQUIRED)
   include("${wxWidgets_USE_FILE}")
 
   set (wxLibs ${wxWidgets_LIBRARIES})

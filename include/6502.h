@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -44,12 +44,6 @@ class CIOWindow;
 class C6502App : public wxApp
 {
 private:
-    //static const char REGISTRY_KEY[];
-    static const char PROFILE_NAME[];
-
-    //HINSTANCE m_hInstRes;
-    //HMODULE m_hRichEdit;
-
     wxFrame *m_mainFrame;
     wxStatusBar *m_statusBar;
     wxMenuBar *m_menuBar;
@@ -60,10 +54,10 @@ private:
     bool InitAppMenu();
 
 public:
-    static bool m_bMaximize;    // flag - maximum window dimensions at startup;
-    static bool m_bFileNew;     // flag - opening a blank document at startup
+    static bool m_bMaximize; // flag - maximum window dimensions at startup;
+    static bool m_bFileNew;  // flag - opening a blank document at startup
 
-    CGlobal m_global;           // application global variables
+    CGlobal m_global;        // application global variables
 
     bool m_bDoNotAddToRecentFileList;
     //CDocTemplate *m_pDocDeasmTemplate;
@@ -80,11 +74,17 @@ public:
     virtual void SetStatusText(int col, const std::string &message);
 
     virtual void AddToRecentFileList(const std::string &pathName);
-    //virtual int ExitInstance();
+
+    wxFrame *CreateChildFrame(wxView *view);
 
 protected:
-    void OnAppExit(wxCommandEvent&);
-    void OnAppAbout(wxCommandEvent&);
+    int OnExit() override;
+
+protected:
+    // Application commands
+
+    void OnAppExit(wxCommandEvent &);
+    void OnAppAbout(wxCommandEvent &);
 };
 
 wxDECLARE_APP(C6502App);

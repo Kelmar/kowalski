@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -41,6 +41,14 @@ class CMainFrame;
 class CSrc6502View : public wxView
 {
 private:
+    wxDECLARE_DYNAMIC_CLASS(CSrc6502View);
+
+    friend class CSrc6502Doc;
+
+    wxFrame *m_frame;
+    wxStyledTextCtrl *m_text;
+    wxStatusBar *m_editStatus;
+
     //void set_position_info(HWND hWnd);
 
     std::unordered_map<int, uint8_t> m_mapBreakpoints; // TODO: move to the doc
@@ -65,6 +73,8 @@ private:
     void disp_warning(int line, const std::string &msg);
     void OnRemoveErrMark();
 
+    void UpdatePositionInfo();
+
 public:
     //static wxFont s_Font;
     //static wxFontInfo s_LogFont;
@@ -86,29 +96,29 @@ public:
 
     void SelectEditFont();
 
-protected: // create from serialization only
-    CSrc6502View();
-    //DECLARE_DYNCREATE(CSrc6502View)
+    /* constructor */ CSrc6502View();
+    virtual          ~CSrc6502View();
 
-// Attributes
-public:
     void RemoveBreakpoint(int line, bool draw = true);
     void AddBreakpoint(int line, CAsm::Breakpoint bp, bool draw = true);
     int GetCurrLineNo();
     void SetErrMark(int line); // draw/erase the pointer arrow error
     void SetPointer(int line, bool scroll = false);
-    CSrc6502Doc* GetDocument();
+
+    CSrc6502Doc *GetDocument();
+
+    bool OnCreate(wxDocument *doc, long flags) override;
 
     //LRESULT OnPaintPointer(WPARAM /* wParam */, LPARAM /* lParam */);
 
     // edit view info
-    void GetDispInfo(int& nTopLine, int& nLineCount, int& nLineHeight);
+    void GetDispInfo(int &nTopLine, int &nLineCount, int &nLineHeight);
 
     int GetPointerLine() const
     {
         return m_nActualPointerLine;
     }
-    
+
     int GetErrorMarkLine() const
     {
         return m_nActualErrMarkLine;
@@ -126,42 +136,42 @@ public:
         return 0;
     }
 #endif
-    void GetText(std::string& strText);
+    void GetText(std::string &strText);
 
 public:
-    virtual void OnDraw(wxDC* pDC);  // overridden to draw this view
+    void OnDraw(wxDC *dc) override;
+
     //virtual bool PreCreateWindow(CREATESTRUCT& cs);
     virtual void OnInitialUpdate();
 protected:
 #if REWRITE_TO_WX_WIDGET
-    virtual bool OnPreparePrinting(CPrintInfo* pInfo);
-    virtual void OnBeginPrinting(wxDC* pDC, CPrintInfo* pInfo);
-    virtual void OnEndPrinting(wxDC* pDC, CPrintInfo* pInfo);
+    virtual bool OnPreparePrinting(CPrintInfo *pInfo);
+    virtual void OnBeginPrinting(wxDC *pDC, CPrintInfo *pInfo);
+    virtual void OnEndPrinting(wxDC *pDC, CPrintInfo *pInfo);
 #endif
 
-public:
-    virtual ~CSrc6502View();
-
 protected:
+    void OnTextUpdate(wxCommandEvent &);
+
     void OnEnUpdate();
-    void OnContextMenu(wxWindow* pWnd, const wxPoint &point);
+    void OnContextMenu(wxWindow *pWnd, const wxPoint &point);
 
     // TODO: Remove this?  Not doing anything?
-    void *CtlColor(wxDC* pDC, UINT nCtlColor);
+    void *CtlColor(wxDC *pDC, UINT nCtlColor);
 
 private:
     CLeftBar m_wndLeftBar;
-    CMainFrame* m_pMainFrame;
+    CMainFrame *m_pMainFrame;
 
 #ifdef USE_CRYSTAL_EDIT
-    virtual CCrystalTextBuffer* LocateTextBuffer();
-    virtual uint32_t ParseLine(uint32_t dwCookie, int nLineIndex, TEXTBLOCK* pBuf, int& nActualItems);
-    virtual void DrawMarginMarker(int nLine, wxDC* pDC, const CRect &rect);
-    virtual LineChange NotifyEnterPressed(CPoint ptCursor, std::string& strLine);
+    virtual CCrystalTextBuffer *LocateTextBuffer();
+    virtual uint32_t ParseLine(uint32_t dwCookie, int nLineIndex, TEXTBLOCK *pBuf, int &nActualItems);
+    virtual void DrawMarginMarker(int nLine, wxDC *pDC, const CRect &rect);
+    virtual LineChange NotifyEnterPressed(CPoint ptCursor, std::string &strLine);
     virtual void NotifyTextChanged();
     virtual wxColour GetColor(int nColorIndex);
     virtual bool GetBold(int nColorIndex);
-    virtual void CaretMoved(const std::string& strLine, int nWordStart, int nWordEnd);
+    virtual void CaretMoved(const std::string &strLine, int nWordStart, int nWordEnd);
 #endif
 };
 

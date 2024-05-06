@@ -23,11 +23,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 
+#include "6502Doc.h"
+#include "6502View.h"
+
 #include "MainFrm.h"
 //#include "ChildFrm.h"
 //#include "ChildFrmDeAsm.h"
-//#include "6502Doc.h"
-//#include "6502View.h"
 //#include "Deasm6502Doc.h"
 //#include "Deasm6502View.h"
 //#include "Splash.h"
@@ -62,11 +63,8 @@ C6502App::C6502App()
     , m_menuBar(nullptr)
     , m_statusBar(nullptr)
     , m_config(nullptr)
+    , m_bDoNotAddToRecentFileList(false)
 {
-    m_bDoNotAddToRecentFileList = false;
-
-    //m_hInstRes = NULL;
-    //m_hRichEdit = 0;
 }
 
 C6502App::~C6502App()
@@ -84,6 +82,16 @@ bool C6502App::m_bFileNew = true; // flag - opening a blank document at startup
 
 bool C6502App::OnInit()
 {
+#ifdef _DEBUG
+    wxLog::EnableLogging();
+
+    wxLogStderr *logOutput = new wxLogStderr();
+    logOutput->SetLogLevel(wxLogLevelValues::wxLOG_Debug);
+    wxLog::SetActiveTarget(logOutput);
+#endif
+
+    wxLogStatus("Application initializing");
+
     if (!wxApp::OnInit())
         return false;
 
@@ -98,26 +106,46 @@ bool C6502App::OnInit()
 
     wxDocManager* docManager = new wxDocManager();
 
-#if 0
-    new wxDocTemplate(docManager, "*.s;*.asm", "", "s;asm",
+    new wxDocTemplate(docManager,
+        "Assembly", "*.s;*.asm", "", "s;asm",
         "Assembly Source", "Assembly View",
         CLASSINFO(CSrc6502Doc), CLASSINFO(CSrc6502View));
-#endif
 
     if (!InitFrame())
         return false;
 
-    m_mainFrame->Center();
+    //m_mainFrame->Center();
     m_mainFrame->Show();
 
     SetStatusText(0, "Application loaded!");
+    wxLogStatus("Application loaded!");
 
     return true;
 }
 
 bool C6502App::InitFrame()
 {
-    m_mainFrame = new wxFrame(nullptr, wxID_ANY, GetAppDisplayName());
+    wxDocManager *docManager = wxDocManager::GetDocumentManager();
+
+#if wxUSE_MDI_ARCHITECTURE
+    m_mainFrame = new wxDocMDIParentFrame(
+        docManager,
+        nullptr,
+        wxID_ANY,
+        GetAppDisplayName(),
+        wxDefaultPosition,
+        wxSize(500, 500)
+    );
+#else
+    m_mainFrame = new wxDocParentFrameAny<wxAuiMDIParentFrame>(
+        docManager,
+        nullptr,
+        wxID_ANY,
+        GetAppDisplayName(),
+        wxDefaultPosition,
+        wxSize(500, 500)
+    );
+#endif
 
     if (!InitAppMenu())
         return false;
@@ -135,8 +163,15 @@ bool C6502App::InitFrame()
 
 bool C6502App::InitAppMenu()
 {
+    wxDocManager* docManager = wxDocManager::GetDocumentManager();
+
     wxMenu* file = new wxMenu();
+    file->Append(wxID_NEW);
+    file->Append(wxID_OPEN);
+    file->AppendSeparator();
     file->Append(wxID_EXIT);
+
+    docManager->FileHistoryUseMenu(file);
 
     wxMenu* help = new wxMenu();
     help->Append(wxID_ABOUT);
@@ -269,27 +304,67 @@ BOOL C6502App::InitInstance()
 
 #endif /* 0 */
 
-/////////////////////////////////////////////////////////////////////////////
-// C6502App commands
-
-void C6502App::AddToRecentFileList(const std::string &pathName)
+void C6502App::AddToRecentFileList(const std::string& pathName)
 {
-    if (m_bDoNotAddToRecentFileList)
+    if (!m_bDoNotAddToRecentFileList)
         return;
 
     //CWinApp::AddToRecentFileList(lpszPathName);
 }
 
- void C6502App::SetStatusText(int col, const std::string &message)
- {
+void C6502App::SetStatusText(int col, const std::string& message)
+{
     if (m_statusBar)
         m_statusBar->SetStatusText(message, col);
- }
+}
 
- void C6502App::OnAppExit(wxCommandEvent&)
- {
-     Exit();
- }
+wxFrame *C6502App::CreateChildFrame(wxView *view)
+{
+    auto doc = view->GetDocument();
+
+#if wxUSE_MDI_ARCHITECTURE
+    return new wxDocMDIChildFrame(
+        doc,
+        view,
+        static_cast<wxDocMDIParentFrame *>(wxGetApp().GetTopWindow()),
+        wxID_ANY,
+        "Child Frame",
+        wxDefaultPosition,
+        wxSize(300, 300)
+    );
+#else
+    return new wxDocChildFrameAny<wxAuiMDIChildFrame, wxAuiMDIParentFrame>(
+        doc,
+        view,
+        static_cast<wxAuiMDIParentFrame *>(wxGetApp().GetTopWindow()),
+        wxID_ANY,
+        "Child Frame",
+        wxDefaultPosition,
+        wxSize(300, 300)
+    );
+
+#endif
+}
+
+/*************************************************************************/
+
+int C6502App::OnExit()
+{
+    wxDocManager* const docManager = wxDocManager::GetDocumentManager();
+
+    if (!m_bDoNotAddToRecentFileList && docManager)
+        docManager->FileHistorySave(*m_config);
+
+    return wxApp::OnExit();
+}
+
+/*************************************************************************/
+// C6502App commands
+
+void C6502App::OnAppExit(wxCommandEvent&)
+{
+    Exit();
+}
 
 // App command to run the dialog
 void C6502App::OnAppAbout(wxCommandEvent&)
@@ -302,15 +377,4 @@ void C6502App::OnAppAbout(wxCommandEvent&)
 #endif
 }
 
-#if 0
-int C6502App::ExitInstance()
-{
-    if (m_hInstRes != NULL)
-        ::FreeLibrary(m_hInstRes);
-
-    if (m_hRichEdit)
-        ::FreeLibrary(m_hRichEdit);
-
-    return CWinApp::ExitInstance();
-}
-#endif
+/*************************************************************************/

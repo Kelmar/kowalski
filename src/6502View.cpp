@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -83,34 +83,37 @@ uint8_t CSrc6502View::m_vbyFontStyle[6] =
 // CSrc6502View construction/destruction
 
 CSrc6502View::CSrc6502View()
+    : wxView()
 {
     // TODO: add construction code here
     m_nActualPointerLine = -1;
     m_nActualErrMarkLine = -1;
     m_pMainFrame = 0;
-//  m_nBrkIndex = 0;
-    /*
-      memset(&m_logfont, 0, sizeof(m_logfont));
-      m_logfont.lfHeight = 9;
-      m_logfont.lfPitchAndFamily = FIXED_PITCH;
-      strcpy(m_logfont.lfFaceName, "Fixedsys");
-    */
-//  m_Font.CreateFontIndirect(&m_LogFont);
+    //  m_nBrkIndex = 0;
+        /*
+          memset(&m_logfont, 0, sizeof(m_logfont));
+          m_logfont.lfHeight = 9;
+          m_logfont.lfPitchAndFamily = FIXED_PITCH;
+          strcpy(m_logfont.lfFaceName, "Fixedsys");
+        */
+        //  m_Font.CreateFontIndirect(&m_LogFont);
 }
 
 CSrc6502View::~CSrc6502View()
 {
 }
 
+wxIMPLEMENT_DYNAMIC_CLASS(CSrc6502View, wxView);
+
 #if REWRITE_TO_WX_WIDGET
 
-BOOL CSrc6502View::PreCreateWindow(CREATESTRUCT& cs)
+BOOL CSrc6502View::PreCreateWindow(CREATESTRUCT &cs)
 {
     // TODO: Modify the Window class or styles here by modifying
     //  the CREATESTRUCT cs
 
     bool bPreCreated = CBaseView::PreCreateWindow(cs);
-//  cs.style &= ~(ES_AUTOHSCROLL|WS_HSCROLL);	// Enable word-wrapping
+    //  cs.style &= ~(ES_AUTOHSCROLL|WS_HSCROLL); // Enable word-wrapping
 
     cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 
@@ -119,34 +122,79 @@ BOOL CSrc6502View::PreCreateWindow(CREATESTRUCT& cs)
 
 #endif
 
-/////////////////////////////////////////////////////////////////////////////
-// CSrc6502View drawing
+/*************************************************************************/
 
-void CSrc6502View::OnDraw(wxDC* pDC)  // overridden to draw this view
+bool CSrc6502View::OnCreate(wxDocument *doc, long flags)
 {
-#ifdef USE_CRYSTAL_EDIT
-    CBaseView::OnDraw(pDC);
-#endif
+    if (!wxView::OnCreate(doc, flags))
+        return false;
+
+    m_frame = wxGetApp().CreateChildFrame(this);
+
+    ASSERT(m_frame == GetFrame());
+
+    m_text = new wxStyledTextCtrl(m_frame, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+
+    m_editStatus = new wxStatusBar(m_frame);
+    m_frame->SetStatusBar(m_editStatus);
+
+    int widths[2] = { -1, 200 };
+
+    m_editStatus->SetFieldsCount(2, widths);
+
+    UpdatePositionInfo();
+
+    m_text->Bind(wxEVT_STC_UPDATEUI, &CSrc6502View::OnTextUpdate, this);
+
+    m_frame->Show();
+
+    return true;
 }
 
-/////////////////////////////////////////////////////////////////////////////
+void CSrc6502View::OnDraw(wxDC *)
+{
+    // Dummy method, the sub controls handle all the actual painting.
+}
+
+/*************************************************************************/
+
+void CSrc6502View::UpdatePositionInfo()
+{
+    wxString str;
+
+    int line = m_text->GetCurrentLine() + 1;
+    int pos = m_text->GetCurrentPos() + 1;
+
+    str.Printf("Ln: %d\tCh: %d", line, pos);
+    m_editStatus->SetStatusText(str, 1);
+}
+
+/*************************************************************************/
+// Event processing
+
+void CSrc6502View::OnTextUpdate(wxCommandEvent &)
+{
+    UpdatePositionInfo();
+}
+
+/*************************************************************************/
 // CSrc6502View printing
 
 #if REWRITE_TO_WX_WIDGET
 
-bool CSrc6502View::OnPreparePrinting(CPrintInfo* pInfo)
+bool CSrc6502View::OnPreparePrinting(CPrintInfo *pInfo)
 {
     // default CBaseView preparation
     return CBaseView::OnPreparePrinting(pInfo);
 }
 
-void CSrc6502View::OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo)
+void CSrc6502View::OnBeginPrinting(CDC *pDC, CPrintInfo *pInfo)
 {
     // Default CBaseView begin printing.
     CBaseView::OnBeginPrinting(pDC, pInfo);
 }
 
-void CSrc6502View::OnEndPrinting(CDC* pDC, CPrintInfo* pInfo)
+void CSrc6502View::OnEndPrinting(CDC *pDC, CPrintInfo *pInfo)
 {
     // Default CBaseView end printing
     CBaseView::OnEndPrinting(pDC, pInfo);
@@ -180,11 +228,11 @@ int CSrc6502View::OnCreate(LPCREATESTRUCT lpCreateStruct)
         return -1;
 
 #ifndef USE_CRYSTAL_EDIT
-    m_pfnOldProc = (LRESULT (CALLBACK *)(HWND, UINT, WPARAM, LPARAM)) ::SetWindowLong(m_hWnd, GWL_WNDPROC, (LONG)EditWndProc);
+    m_pfnOldProc = (LRESULT(CALLBACK *)(HWND, UINT, WPARAM, LPARAM)) ::SetWindowLong(m_hWnd, GWL_WNDPROC, (LONG)EditWndProc);
 
     m_wndLeftBar.Create(CWnd::FromHandlePermanent(lpCreateStruct->hwndParent), this);
 #endif
-    VERIFY(m_pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd()));
+    VERIFY(m_pMainFrame = dynamic_cast<CMainFrame *>(AfxGetMainWnd()));
 
     return 0;
 }
@@ -192,7 +240,7 @@ int CSrc6502View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 //LRESULT (CALLBACK *CSrc6502View::m_pfnOldProc)(HWND, UINT, WPARAM, LPARAM) = NULL;
 
-void CSrc6502View::check_line(const char* buf, CAsm::Stat &stat, int &start, int &fin,  std::string &msg)
+void CSrc6502View::check_line(const char *buf, CAsm::Stat &stat, int &start, int &fin, std::string &msg)
 {
     CAsm6502 xasm;
 
@@ -208,7 +256,7 @@ void CSrc6502View::check_line(const char* buf, CAsm::Stat &stat, int &start, int
 void CSrc6502View::disp_warning(int line, const std::string &msg) // debugging message use?
 {
     // TODO: Use logging. -- B.Simonds (April 27, 2024)
-    
+
     SetErrMark(line); // Select the line containing the error
     wxGetApp().SetStatusText(0, msg);
 }
@@ -222,17 +270,17 @@ void CSrc6502View::set_position_info(HWND hWnd)
 
     (*m_pfnOldProc)(hWnd, EM_GETSEL, WPARAM(&nStart), LPARAM(NULL));
 
-    int nLine = (*m_pfnOldProc)(hWnd,EM_LINEFROMCHAR, WPARAM(nStart), LPARAM(0));
+    int nLine = (*m_pfnOldProc)(hWnd, EM_LINEFROMCHAR, WPARAM(nStart), LPARAM(0));
     nStart -= (*m_pfnOldProc)(hWnd, EM_LINEINDEX, WPARAM(nLine), LPARAM(0));
 
     if (nLine < 0 || nStart < 0)
         return;
 
-    char *pBuf = strLine.GetBuffer(1024+2);
+    char *pBuf = strLine.GetBuffer(1024 + 2);
     *((WORD *)pBuf) = 1024;
     int nChars = (*m_pfnOldProc)(hWnd, EM_GETLINE, WPARAM(nLine), LPARAM(pBuf));
     pBuf[nChars] = 0;
-    int nColumn= 0;
+    int nColumn = 0;
 
     for (int i = 0; i < nChars && i < nStart; i++) // calc. column number
     {
@@ -244,8 +292,8 @@ void CSrc6502View::set_position_info(HWND hWnd)
 
     strLine.ReleaseBuffer(0);
 
-    CMainFrame* pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;
-    pMain->SetPositionText(nLine+1,nColumn+1);
+    CMainFrame *pMain = (CMainFrame *)AfxGetApp()->m_pMainWnd;
+    pMain->SetPositionText(nLine + 1, nColumn + 1);
 }
 #endif
 
@@ -255,7 +303,7 @@ void CSrc6502View::set_position_info(HWND hWnd)
 LRESULT CALLBACK CSrc6502View::EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     CWnd *pWnd = FromHandlePermanent(hWnd);
-    ASSERT (pWnd->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
+    ASSERT(pWnd->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
     CSrc6502View *pView = (CSrc6502View *)pWnd;
     bool cr = false;
 
@@ -280,55 +328,55 @@ LRESULT CALLBACK CSrc6502View::EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, L
             int line_len = (*m_pfnOldProc)(hWnd, EM_LINELENGTH, line_idx, 0);
             line = (*m_pfnOldProc)(hWnd, EM_LINEFROMCHAR, line_idx, 0);
             TCHAR buf[260];
-            const int size= sizeof(buf) / sizeof(TCHAR) - 2;
-            *(WORD *)(buf+2) = (WORD)size;
+            const int size = sizeof(buf) / sizeof(TCHAR) - 2;
+            *(WORD *)(buf + 2) = (WORD)size;
             (*m_pfnOldProc)(hWnd, EM_GETLINE, line, (LPARAM)(buf + 2));
             buf[2 + min(size - 1, line_len)] = 0;
 
             /*
-            	int line_idx = (*m_pfnOldProc)(hWnd, EM_LINEINDEX, WPARAM(-1), 0);
-            	int line_len = (*m_pfnOldProc)(hWnd, EM_LINELENGTH, line_idx, 0);
-            	int line = (*m_pfnOldProc)(hWnd, EM_LINEFROMCHAR, line_idx, 0);	// nr aktualnego wiersza
-            	TCHAR buf[260];
-            	const int size = sizeof(buf) / sizeof(TCHAR) - 2;
-            	*(WORD *)(buf + 2) = (WORD)size;
-            	(*m_pfnOldProc)(hWnd, EM_GETLINE, line, (LPARAM)(buf + 2));
-            	buf[2 + min(size - 1, line_len)] = 0;
+                int line_idx = (*m_pfnOldProc)(hWnd, EM_LINEINDEX, WPARAM(-1), 0);
+                int line_len = (*m_pfnOldProc)(hWnd, EM_LINELENGTH, line_idx, 0);
+                int line = (*m_pfnOldProc)(hWnd, EM_LINEFROMCHAR, line_idx, 0);	// nr aktualnego wiersza
+                TCHAR buf[260];
+                const int size = sizeof(buf) / sizeof(TCHAR) - 2;
+                *(WORD *)(buf + 2) = (WORD)size;
+                (*m_pfnOldProc)(hWnd, EM_GETLINE, line, (LPARAM)(buf + 2));
+                buf[2 + min(size - 1, line_len)] = 0;
             */
-            int start,fin;
+            int start, fin;
             CAsm::Stat stat = CAsm::OK;
             std::string strmsg;
 
             if (m_bAutoSyntax || m_bAutoUppercase)
                 check_line(buf + 2, stat, start, fin, strmsg);
 
-            if (m_bAutoUppercase && start>0 && fin>0)	// jest instrukcja do zamiany na du�e litery?
+            if (m_bAutoUppercase && start > 0 && fin > 0)	// jest instrukcja do zamiany na du�e litery?
             {
                 TCHAR instr[32];
                 ASSERT(fin - start < 32);
                 _tcsncpy(instr, buf + 2 + start, fin - start);
-                instr[fin-start] = 0;
+                instr[fin - start] = 0;
                 _tcsupr(instr);
                 int c_start, c_end;
                 (*m_pfnOldProc)(hWnd, EM_GETSEL, WPARAM(&c_start), LPARAM(&c_end));
                 (*m_pfnOldProc)(hWnd, EM_SETSEL, line_idx + start, line_idx + fin);
                 (*m_pfnOldProc)(hWnd, EM_REPLACESEL, 0, (LPARAM)instr);
                 (*m_pfnOldProc)(hWnd, EM_SETSEL, c_start, c_start);
-//	  (*m_pfnOldProc)(hWnd, EM_SETSEL, line_idx + line_len, line_idx + line_len);
+                //	  (*m_pfnOldProc)(hWnd, EM_SETSEL, line_idx + line_len, line_idx + line_len);
             }
-            int len= _tcsspn(buf + 2, _T(" \t"));	// ilo�� spacji i tabulator�w na pocz�tku wiersza
+            int len = _tcsspn(buf + 2, _T(" \t"));	// ilo�� spacji i tabulator�w na pocz�tku wiersza
             if (!(m_bAutoSyntax && stat))		// je�li nie ma b��du (je�li spr. b��d�w), to  wci�cie
             {
                 if (len)		// je�li jest wci�cie w wierszu powy�ej, to kopiujemy je
                 {
-                    buf[len+2] = 0;
+                    buf[len + 2] = 0;
                     buf[0] = 0xD;
                     buf[1] = 0xA;
                     ret = (*m_pfnOldProc)(hWnd, EM_REPLACESEL, TRUE, (LPARAM)(buf + 2));	  // wci�cie tekstu
                 }
                 else
                     ;
-//	    ret = (*m_pfnOldProc)(hWnd, msg, wParam, lParam);	  // CR i rozsuni�cie wierszy
+                //	    ret = (*m_pfnOldProc)(hWnd, msg, wParam, lParam);	  // CR i rozsuni�cie wierszy
             }
             if (m_bAutoSyntax && stat)
                 pView->disp_warning(line, strmsg);
@@ -353,14 +401,14 @@ LRESULT CALLBACK CSrc6502View::EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, L
     case WM_MOUSEMOVE:
     case WM_KEYDOWN:
     {
-        LRESULT ret= (*m_pfnOldProc)(hWnd,msg,wParam,lParam);
+        LRESULT ret = (*m_pfnOldProc)(hWnd, msg, wParam, lParam);
         pView->set_position_info(hWnd);
         return ret;
     }
 
     case WM_PAINT:
     {
-        LRESULT ret= (*m_pfnOldProc)(hWnd,msg,wParam,lParam);
+        LRESULT ret = (*m_pfnOldProc)(hWnd, msg, wParam, lParam);
         if (ret == 0)
             pView->RedrawMarks();
         /*      {
@@ -374,7 +422,7 @@ LRESULT CALLBACK CSrc6502View::EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, L
     }
 
     default:
-        return (*m_pfnOldProc)(hWnd,msg,wParam,lParam);
+        return (*m_pfnOldProc)(hWnd, msg, wParam, lParam);
     }
 
 }
@@ -418,7 +466,7 @@ void CSrc6502View::drawMark(CDC &dc, int line, MarkType type, bool scroll)
 int CSrc6502View::ScrollToLine(int line, int &height, bool scroll)
 {
     ASSERT(line >= 0);
-    
+
 #ifdef USE_CRYSTAL_EDIT
     GoToLine(line);
     return 0;
@@ -439,14 +487,14 @@ int CSrc6502View::ScrollToLine(int line, int &height, bool scroll)
         if (!scroll)
             return -2;
 
-        edit.LineScroll(line-top_line); // The line is not visible -window content shift
+        edit.LineScroll(line - top_line); // The line is not visible -window content shift
         top_line = edit.GetFirstVisibleLine();
         int top_char = edit.LineIndex(top_line);
         edit.SendMessage(EM_SETSEL, top_char, top_char); // carriage to line 'top_line'
     }
 
     CClientDC dc(&edit);
-    CFont* pOld = dc.SelectObject(&s_Font);
+    CFont *pOld = dc.SelectObject(&s_Font);
     TEXTMETRIC tm;
     dc.GetTextMetrics(&tm);
     dc.SelectObject(pOld);
@@ -484,19 +532,19 @@ int CSrc6502View::ScrollToLine(int line, int &height, bool scroll)
 
 // edit view info
 //
-void CSrc6502View::GetDispInfo(int& nTopLine, int& nLineCount, int& nLineHeight)
+void CSrc6502View::GetDispInfo(int &nTopLine, int &nLineCount, int &nLineHeight)
 {
 #ifdef USE_CRYSTAL_EDIT
     nLineHeight = GetLineHeight();
     return;
 #else
 # if REWRITE_TO_WX_WIDGET
-    CEdit& edit = GetEditCtrl();
+    CEdit &edit = GetEditCtrl();
     nLineCount = edit.GetLineCount();
     nTopLine = edit.GetFirstVisibleLine();
 
     CClientDC dc(&edit);
-    CFont* pOld = dc.SelectObject(&s_Font);
+    CFont *pOld = dc.SelectObject(&s_Font);
     TEXTMETRIC tm;
     dc.GetTextMetrics(&tm);
     nLineHeight = (int)tm.tmHeight + (int)tm.tmExternalLeading;
@@ -558,7 +606,7 @@ void CSrc6502View::SetPointer(int line, bool scroll) // draw/erase an arrow in t
     if (line != -1)
     {
         int h;
-        ScrollToLine(line,h,TRUE);
+        ScrollToLine(line, h, TRUE);
         RedrawMarks(line);
     }
 }
@@ -598,11 +646,11 @@ void CSrc6502View::OnEnUpdate() // After changing the text
         SetErrMark(-1); // Erase the pointer, wrong line
 
 #if REWRITE_TO_WX_WIDGET
-        CMainFrame *pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;
+        CMainFrame *pMain = (CMainFrame *)AfxGetApp()->m_pMainWnd;
         pMain->m_wndStatusBar.SetPaneText(0, NULL); // and error message
 #endif
-    }
 }
+    }
 
 void CSrc6502View::SelectEditFont()
 {
@@ -610,7 +658,7 @@ void CSrc6502View::SelectEditFont()
 
 #ifdef USE_CRYSTAL_EDIT
     SetFont(m_LogFont);
-//	m_wndLeftBar.SetWidth(0);
+    //	m_wndLeftBar.SetWidth(0);
     SetTabSize(m_nTabStep);
 #else
     SetFont(&s_Font);
@@ -623,7 +671,7 @@ void CSrc6502View::SelectEditFont()
     //DWORD margins = edit.GetMargins();
     //edit.SetMargins(h + 1, UINT(HIWORD(margins))); // set the left margin
     m_wndLeftBar.SetWidth(h + 1);
-    dynamic_cast<CFrameWnd*>(GetParent())->RecalcLayout();
+    dynamic_cast<CFrameWnd *>(GetParent())->RecalcLayout();
 #endif
 
 #endif
@@ -695,17 +743,17 @@ void CSrc6502View::RedrawMarks(int line/*= -1*/)
               DrawMark(m_nActualErrMarkLine, MT_ERROR); */
     }
 #endif
-}
+    }
 
 
 void CSrc6502View::EraseMark(int line)
 {
-//  ASSERT(line >= 0);
-//  DrawMark(line, MT_ERASE);
+    //  ASSERT(line >= 0);
+    //  DrawMark(line, MT_ERASE);
     RedrawMarks(line);
 }
 
-void CSrc6502View::OnContextMenu(wxWindow* pWnd, const wxPoint &point)
+void CSrc6502View::OnContextMenu(wxWindow *pWnd, const wxPoint &point)
 {
 #if 0
     CMenu menu;
@@ -739,17 +787,17 @@ void CSrc6502View::OnRemoveErrMark()
 }
 
 // TODO: Remove this?  Not doing anything? -- B.Simonds (April 26, 2024)
-void *CSrc6502View::CtlColor(wxDC* pDC, UINT nCtlColor)
+void *CSrc6502View::CtlColor(wxDC *pDC, UINT nCtlColor)
 {
     /*  pDC->SetTextColor(m_rgbTextColor);
       pDC->SetBkColor(m_rgbBkgndColor); */
-    //this is wrong: return (HBRUSH)CreateSolidBrush(m_rgbBkgndColor);
+      //this is wrong: return (HBRUSH)CreateSolidBrush(m_rgbBkgndColor);
 
-    // TODO: Change any attributes of the DC here
+      // TODO: Change any attributes of the DC here
 
-    // TODO: Return a non-NULL brush if the parent's handler should not be called
+      // TODO: Return a non-NULL brush if the parent's handler should not be called
     return NULL;
-}
+    }
 
 #if 0
 
@@ -768,9 +816,9 @@ void CSrc6502View::CalcWindowRect(LPRECT lpClientRect, UINT nAdjustType)
       }
     */
     ::AdjustWindowRectEx(lpClientRect, GetStyle() /*| WS_BORDER*/, FALSE,
-                         GetExStyle() & ~(WS_EX_CLIENTEDGE));
+        GetExStyle() & ~(WS_EX_CLIENTEDGE));
 
-//	CBaseView::CalcWindowRect(lpClientRect, nAdjustType);
+    //	CBaseView::CalcWindowRect(lpClientRect, nAdjustType);
 }
 #endif
 
@@ -786,12 +834,12 @@ uint8_t CSrc6502View::GetBreakpoint(int nLine) const
     return 0;
 }
 
-CSrc6502Doc* CSrc6502View::GetDocument(void)
+CSrc6502Doc *CSrc6502View::GetDocument(void)
 {
-    return dynamic_cast<CSrc6502Doc*>(wxView::GetDocument());
+    return dynamic_cast<CSrc6502Doc *>(wxView::GetDocument());
 }
 
-void CSrc6502View::GetText(std::string& strText)
+void CSrc6502View::GetText(std::string &strText)
 {
 #ifdef USE_CRYSTAL_EDIT
     //GetDocument()->GetText(strText);
@@ -801,12 +849,12 @@ void CSrc6502View::GetText(std::string& strText)
 }
 
 #ifdef USE_CRYSTAL_EDIT
-CCrystalTextBuffer* CSrc6502View::LocateTextBuffer()
+CCrystalTextBuffer *CSrc6502View::LocateTextBuffer()
 {
     return GetDocument()->GetBuffer();
 }
 
-void CSrc6502View::DrawMarginMarker(int nLine, CDC* pDC, const CRect &rect)
+void CSrc6502View::DrawMarginMarker(int nLine, CDC *pDC, const CRect &rect)
 {
     // Really this shouldn't be here, we should just use the LeftBar. -- B.Simonds (April 26, 2024)
 
@@ -823,7 +871,7 @@ void CSrc6502View::DrawMarginMarker(int nLine, CDC* pDC, const CRect &rect)
 }
 
 
-CCrystalEditView::LineChange CSrc6502View::NotifyEnterPressed(CPoint ptCursor, std::string& strLine)
+CCrystalEditView::LineChange CSrc6502View::NotifyEnterPressed(CPoint ptCursor, std::string &strLine)
 {
     LineChange eChange = CCrystalEditView::NOTIF_NO_CHANGES;
 
@@ -837,7 +885,7 @@ CCrystalEditView::LineChange CSrc6502View::NotifyEnterPressed(CPoint ptCursor, s
 
         if (m_bAutoUppercase && start > 0 && fin > 0)	// jest instrukcja do zamiany na du�e litery?
         {
-            for (int nIndex= start; nIndex < fin; ++nIndex)
+            for (int nIndex = start; nIndex < fin; ++nIndex)
             {
                 char c = strLine[nIndex];
                 char u = toupper(c);
@@ -915,7 +963,7 @@ BOOL CSrc6502View::GetBold(int nColorIndex)
     }
 }
 
-void CSrc6502View::CaretMoved(const std::string& strLine, int nWordStart, int nWordEnd)
+void CSrc6502View::CaretMoved(const std::string &strLine, int nWordStart, int nWordEnd)
 {
     if (m_pMainFrame)
         m_pMainFrame->ShowDynamicHelp(strLine, nWordStart, nWordEnd);
