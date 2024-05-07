@@ -39,7 +39,7 @@ endif ()
 file (GLOB_RECURSE SRCS src/*.cpp)
 file (GLOB_RECURSE HDRS include/*.h)
 
-add_executable(6502 ${execType} README.md ${SRCS} ${HDRS})
+add_executable(6502 ${execType} README.md ${SRCS} ${HDRS} "include/Events.h")
 
 target_include_directories(6502
     PRIVATE include/

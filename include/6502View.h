@@ -23,17 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 
 #include "DrawMarks.h"
-#include "LeftBar.h"
 
 class CSrc6502Doc;
-class CMainFrame;
-
-#ifdef USE_CRYSTAL_EDIT
-//#include "CCrystalEditView.h"
-//typedef CCrystalEditView CBaseView;
-#else
-//typedef CEditView CBaseView;
-#endif
 
 /**
  * View for assembly source code.
@@ -47,13 +38,11 @@ private:
 
     wxFrame *m_frame;
     wxStyledTextCtrl *m_text;
-    wxStatusBar *m_editStatus;
-
-    //void set_position_info(HWND hWnd);
 
     std::unordered_map<int, uint8_t> m_mapBreakpoints; // TODO: move to the doc
 
-    //static LRESULT (CALLBACK *m_pfnOldProc)(HWND, UINT, WPARAM, LPARAM);
+    int m_nActualPointerLine;	// TODO: move to the doc
+    int m_nActualErrMarkLine;	// TODO: move to the doc
 
     //static LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -63,11 +52,7 @@ private:
 
     //void DrawMark(int line, MarkType type, bool scroll = false, HDC hDC = NULL);
 
-    void RedrawMarks(int line = -1);
     void EraseMark(int line);
-
-    int m_nActualPointerLine;	// TODO: move to the doc
-    int m_nActualErrMarkLine;	// TODO: move to the doc
 
     static void check_line(const char *buf, CAsm::Stat &stat, int &start, int &fin, std::string &msg);
     void disp_warning(int line, const std::string &msg);
@@ -93,9 +78,8 @@ public:
     static wxColour s_vrgbColorSyntax[];
 
     static uint8_t m_vbyFontStyle[];
-
-    void SelectEditFont();
-
+        
+public:
     /* constructor */ CSrc6502View();
     virtual          ~CSrc6502View();
 
@@ -104,6 +88,8 @@ public:
     int GetCurrLineNo();
     void SetErrMark(int line); // draw/erase the pointer arrow error
     void SetPointer(int line, bool scroll = false);
+
+    void SelectEditFont();
 
     CSrc6502Doc *GetDocument();
 
@@ -127,16 +113,8 @@ public:
     // return breakpoint info for line 'nLine'
     uint8_t GetBreakpoint(int nLine) const;
 
-#ifdef USE_CRYSTAL_EDIT
-    using CBaseView::GetLineCount;
-#else
-    int GetLineCount()
-    {
-        //return GetEditCtrl().GetLineCount();
-        return 0;
-    }
-#endif
-    void GetText(std::string &strText);
+    int GetLineCount() const { return m_text ? m_text->GetLineCount() : 0; }
+    wxString GetText() const { return m_text ? m_text->GetText() : ""; }
 
 public:
     void OnDraw(wxDC *dc) override;
@@ -156,12 +134,7 @@ protected:
     void OnEnUpdate();
     void OnContextMenu(wxWindow *pWnd, const wxPoint &point);
 
-    // TODO: Remove this?  Not doing anything?
-    void *CtlColor(wxDC *pDC, UINT nCtlColor);
-
 private:
-    CLeftBar m_wndLeftBar;
-    CMainFrame *m_pMainFrame;
 
 #ifdef USE_CRYSTAL_EDIT
     virtual CCrystalTextBuffer *LocateTextBuffer();

@@ -174,6 +174,7 @@ void CSaveCodeBlockOptions::OnDeltaposSpinLength(NMHDR* pNMHDR, LRESULT* pResult
 
 void CSaveCodeBlockOptions::CalculateNums(int pos)
 {
+#if 0
     NumberFormat fmt1;
     int start = NumberFormats::ReadNumber(GetControlById(IDC_SAVE_CODE_OPT_2_START), fmt1);
 
@@ -202,6 +203,7 @@ void CSaveCodeBlockOptions::CalculateNums(int pos)
         else if (start+len-1 != end && start+len-1 <= 0xFFFFFF && len > 0)
             NumberFormats::SetNumber(GetControlById(IDC_SAVE_CODE_OPT_2_END), start + len - 1, fmt2);
     }
+#endif
 }
 
 void CSaveCodeBlockOptions::OnChangeFieldStart()

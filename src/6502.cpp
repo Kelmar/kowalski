@@ -191,6 +191,25 @@ bool C6502App::InitAppMenu()
     edit->Append(wxID_COPY);
     edit->Append(wxID_PASTE);
 
+    wxMenu *view = new wxMenu();
+    view->Append(evID_SHOW_DISASM, _("Disassembler\tAlt+0"));
+    view->AppendSeparator();
+    view->Append(evID_SHOW_REGS, _("Registers\tAlt+1"));
+
+    wxMenu *sim = new wxMenu();
+    sim->Append(evID_ASSEMBLE, _("Assemble\tF7"));
+    sim->AppendSeparator();
+    sim->Append(evID_DEBUG, _("Debug\tF6"));
+    sim->AppendSeparator();
+    sim->Append(evID_RUN, _("Run\tF5"));
+    sim->Append(evID_RESET, _("Reset\tCtrl+Shift+F5"));
+    sim->Append(evID_BREAK, _("Break\tCtrl+Break"));
+    sim->AppendSeparator();
+    sim->Append(evID_STEP_INTO, _("Step Info"));
+    sim->Append(evID_STEP_OVER, _("Step Over"));
+    sim->Append(evID_STEP_OUT, _("Run Till Return"));
+    sim->Append(evID_RUN_TO, _("Run to Cursor"));
+
     // Help Menu
     wxMenu* help = new wxMenu();
     help->Append(wxID_ABOUT);
@@ -198,6 +217,8 @@ bool C6502App::InitAppMenu()
     m_menuBar = new wxMenuBar();
     m_menuBar->Append(file, wxGetStockLabel(wxID_FILE));
     m_menuBar->Append(edit, wxGetStockLabel(wxID_EDIT));
+    m_menuBar->Append(view, _("View"));
+    m_menuBar->Append(sim , _("Simulator"));
     m_menuBar->Append(help, wxGetStockLabel(wxID_HELP));
 
     m_mainFrame->SetMenuBar(m_menuBar);
@@ -348,7 +369,7 @@ wxFrame *C6502App::CreateChildFrame(wxView *view)
         view,
         static_cast<wxDocMDIParentFrame *>(wxGetApp().GetTopWindow()),
         wxID_ANY,
-        "Child Frame",
+        doc->GetFilename(),
         wxDefaultPosition,
         wxSize(300, 300)
     );
@@ -358,11 +379,10 @@ wxFrame *C6502App::CreateChildFrame(wxView *view)
         view,
         static_cast<wxAuiMDIParentFrame *>(wxGetApp().GetTopWindow()),
         wxID_ANY,
-        "Child Frame",
+        doc->GetFilename(),
         wxDefaultPosition,
         wxSize(300, 300)
     );
-
 #endif
 }
 

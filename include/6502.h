@@ -18,25 +18,22 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+/*************************************************************************/
+
 #ifndef APP_6502_H__
 #define APP_6502_H__
+
+/*************************************************************************/
 
 // 6502.h : main header file for the 6502 application
 //
 
-#include "resource.h"
 #include "Global.h"
+#include "Events.h"
 
-#ifndef __AFXWIN_H__
-#error include 'stdafx.h' before including this file for PCH
-#endif
-
-//#include "resource.h"       // main symbols
-
-class CMainFrame;
 class CIOWindow;
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
 // C6502App:
 // See 6502.cpp for the implementation of this class
 //

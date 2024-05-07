@@ -23,10 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 
-#include "MainFrm.h"
 #include "6502Doc.h"
 #include "6502View.h"
-#include "DrawMarks.h"
 #include "M6502.h"
 
 bool CSrc6502View::m_bAutoIndent = true; // static component -automatic indentation
@@ -57,29 +55,6 @@ uint8_t CSrc6502View::m_vbyFontStyle[6] =
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CSrc6502View
-
-#ifdef USE_CRYSTAL_EDIT
-//IMPLEMENT_DYNCREATE(CSrc6502View, CCrystalEditView)
-#else
-//IMPLEMENT_DYNCREATE(CSrc6502View, CEditView)
-#endif
-
-//BEGIN_MESSAGE_MAP(CSrc6502View, CBaseView)
-    //{{AFX_MSG_MAP(CSrc6502View)
-//    ON_WM_CREATE()
-//    ON_CONTROL_REFLECT(EN_UPDATE, OnEnUpdate)
-//    ON_WM_CONTEXTMENU()
-//    ON_WM_CTLCOLOR_REFLECT()
-    //}}AFX_MSG_MAP
-    // Standard printing commands
-//    ON_COMMAND(ID_FILE_PRINT, CBaseView::OnFilePrint)
-//    ON_COMMAND(ID_FILE_PRINT_DIRECT, CBaseView::OnFilePrint)
-//    ON_COMMAND(ID_FILE_PRINT_PREVIEW, CBaseView::OnFilePrintPreview)
-//    ON_MESSAGE(CBroadcast::WM_USER_REMOVE_ERR_MARK, OnRemoveErrMark)
-//END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
 // CSrc6502View construction/destruction
 
 CSrc6502View::CSrc6502View()
@@ -88,7 +63,7 @@ CSrc6502View::CSrc6502View()
     // TODO: add construction code here
     m_nActualPointerLine = -1;
     m_nActualErrMarkLine = -1;
-    m_pMainFrame = 0;
+
     //  m_nBrkIndex = 0;
         /*
           memset(&m_logfont, 0, sizeof(m_logfont));
@@ -135,18 +110,12 @@ bool CSrc6502View::OnCreate(wxDocument *doc, long flags)
 
     m_text = new wxStyledTextCtrl(m_frame, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
-    m_editStatus = new wxStatusBar(m_frame);
-    m_frame->SetStatusBar(m_editStatus);
-
-    int widths[2] = { -1, 200 };
-
-    m_editStatus->SetFieldsCount(2, widths);
-
     UpdatePositionInfo();
 
     m_text->Bind(wxEVT_STC_UPDATEUI, &CSrc6502View::OnTextUpdate, this);
 
     m_frame->Show();
+    m_frame->Layout();
 
     return true;
 }
@@ -166,7 +135,6 @@ void CSrc6502View::UpdatePositionInfo()
     int pos = m_text->GetCurrentPos() + 1;
 
     str.Printf("Ln: %d\tCh: %d", line, pos);
-    m_editStatus->SetStatusText(str, 1);
 }
 
 /*************************************************************************/
@@ -260,42 +228,6 @@ void CSrc6502View::disp_warning(int line, const std::string &msg) // debugging m
     SetErrMark(line); // Select the line containing the error
     wxGetApp().SetStatusText(0, msg);
 }
-
-//-----------------------------------------------------------------------------
-#if REWRITE_TO_WX_WIDGET
-void CSrc6502View::set_position_info(HWND hWnd)
-{
-    static std::string strLine;
-    int nStart;
-
-    (*m_pfnOldProc)(hWnd, EM_GETSEL, WPARAM(&nStart), LPARAM(NULL));
-
-    int nLine = (*m_pfnOldProc)(hWnd, EM_LINEFROMCHAR, WPARAM(nStart), LPARAM(0));
-    nStart -= (*m_pfnOldProc)(hWnd, EM_LINEINDEX, WPARAM(nLine), LPARAM(0));
-
-    if (nLine < 0 || nStart < 0)
-        return;
-
-    char *pBuf = strLine.GetBuffer(1024 + 2);
-    *((WORD *)pBuf) = 1024;
-    int nChars = (*m_pfnOldProc)(hWnd, EM_GETLINE, WPARAM(nLine), LPARAM(pBuf));
-    pBuf[nChars] = 0;
-    int nColumn = 0;
-
-    for (int i = 0; i < nChars && i < nStart; i++) // calc. column number
-    {
-        if (pBuf[i] == _T('\t')) // tabulator?
-            nColumn += m_nTabStep - nColumn % m_nTabStep;
-        else
-            nColumn++;
-    }
-
-    strLine.ReleaseBuffer(0);
-
-    CMainFrame *pMain = (CMainFrame *)AfxGetApp()->m_pMainWnd;
-    pMain->SetPositionText(nLine + 1, nColumn + 1);
-}
-#endif
 
 //-----------------------------------------------------------------------------
 
@@ -607,7 +539,7 @@ void CSrc6502View::SetPointer(int line, bool scroll) // draw/erase an arrow in t
     {
         int h;
         ScrollToLine(line, h, TRUE);
-        RedrawMarks(line);
+        //RedrawMarks(line);
     }
 }
 
@@ -625,7 +557,7 @@ void CSrc6502View::SetErrMark(int line) // draw/erase the pointer arrow error
     {
         int h;
         ScrollToLine(line, h, TRUE);
-        RedrawMarks(line);
+        //RedrawMarks(line);
 
 #ifdef USE_CRYSTAL_EDIT
         GoToLine(line);
@@ -700,7 +632,9 @@ void CSrc6502View::AddBreakpoint(int line, CAsm::Breakpoint bp, bool draw)
     m_mapBreakpoints[line] = (uint8_t)bp;
 
     if (draw)
-        RedrawMarks(line);
+    {
+        //RedrawMarks(line);
+    }
 }
 
 void CSrc6502View::RemoveBreakpoint(int line, bool draw)
@@ -708,49 +642,16 @@ void CSrc6502View::RemoveBreakpoint(int line, bool draw)
     m_mapBreakpoints.erase(line);
 
     if (draw)
-        RedrawMarks(line);
+    {
+        //RedrawMarks(line);
+    }
 }
-
-void CSrc6502View::RedrawMarks(int line/*= -1*/)
-{
-#ifdef USE_CRYSTAL_EDIT
-    if (line >= 0)
-        InvalidateLines(line, line, true);
-#else
-    if (line == -1) // Redraw tags on all lines?
-    {
-        m_wndLeftBar.Refresh();
-
-        /*    draw_breakpoints();
-            if (m_nActualPointerLine != -1)
-              DrawMark(m_nActualPointerLine,MT_POINTER);
-            if (m_nActualErrMarkLine != -1)
-              DrawMark(m_nActualErrMarkLine,MT_ERROR); */
-    }
-    else  // redraw only given line
-    {
-        ASSERT(line >= 0);
-        m_wndLeftBar.RedrawLine(line); // Really the same as Refresh() right now. -- B.Simonds (April 26, 2024)
-        /*
-            uint8_t bp;
-            if (m_mapBreakpoints.Lookup(line, bp))
-              DrawMark(line, bp & CAsm::BPT_DISABLED ? MT_DISBRKP : MT_BREAKPOINT); // break point stamp
-            else
-              DrawMark(line, MT_ERASE); // Erase the break character
-            if (m_nActualPointerLine == line)
-              DrawMark(m_nActualPointerLine, MT_POINTER);
-            if (m_nActualErrMarkLine == line)
-              DrawMark(m_nActualErrMarkLine, MT_ERROR); */
-    }
-#endif
-    }
-
 
 void CSrc6502View::EraseMark(int line)
 {
-    //  ASSERT(line >= 0);
-    //  DrawMark(line, MT_ERASE);
-    RedrawMarks(line);
+    //ASSERT(line >= 0);
+    //DrawMark(line, MT_ERASE);
+    //RedrawMarks(line);
 }
 
 void CSrc6502View::OnContextMenu(wxWindow *pWnd, const wxPoint &point)
@@ -786,42 +687,6 @@ void CSrc6502View::OnRemoveErrMark()
     SetErrMark(-1); // erase the pointer, wrong line
 }
 
-// TODO: Remove this?  Not doing anything? -- B.Simonds (April 26, 2024)
-void *CSrc6502View::CtlColor(wxDC *pDC, UINT nCtlColor)
-{
-    /*  pDC->SetTextColor(m_rgbTextColor);
-      pDC->SetBkColor(m_rgbBkgndColor); */
-      //this is wrong: return (HBRUSH)CreateSolidBrush(m_rgbBkgndColor);
-
-      // TODO: Change any attributes of the DC here
-
-      // TODO: Return a non-NULL brush if the parent's handler should not be called
-    return NULL;
-    }
-
-#if 0
-
-void CSrc6502View::CalcWindowRect(LPRECT lpClientRect, UINT nAdjustType)
-{
-    /*
-      if (nAdjustType != 0)
-      {
-        // default behavior for in-place editing handles scrollbars
-        DWORD dwStyle = GetStyle();
-        if (dwStyle & WS_VSCROLL)
-          lpClientRect->right += afxData.cxVScroll - CX_BORDER;
-        if (dwStyle & WS_HSCROLL)
-          lpClientRect->bottom += afxData.cyHScroll - CY_BORDER;
-        return;
-      }
-    */
-    ::AdjustWindowRectEx(lpClientRect, GetStyle() /*| WS_BORDER*/, FALSE,
-        GetExStyle() & ~(WS_EX_CLIENTEDGE));
-
-    //	CBaseView::CalcWindowRect(lpClientRect, nAdjustType);
-}
-#endif
-
 // return breakpoint info for line 'nLine'
 //
 uint8_t CSrc6502View::GetBreakpoint(int nLine) const
@@ -837,15 +702,6 @@ uint8_t CSrc6502View::GetBreakpoint(int nLine) const
 CSrc6502Doc *CSrc6502View::GetDocument(void)
 {
     return dynamic_cast<CSrc6502Doc *>(wxView::GetDocument());
-}
-
-void CSrc6502View::GetText(std::string &strText)
-{
-#ifdef USE_CRYSTAL_EDIT
-    //GetDocument()->GetText(strText);
-#else
-    //GetEditCtrl().GetWindowText(strText);
-#endif
 }
 
 #ifdef USE_CRYSTAL_EDIT
