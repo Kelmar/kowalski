@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 
+#include "6502.h"
+#include "Events.h"
+
 #include "MainFrm.h"
 #include "DialAsmStat.h"
 #include "Options.h"
@@ -37,28 +40,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "editcmd.h"
 #include "DockBarEx.h"
 
-#include <iostream>
+/*************************************************************************/
 
-using namespace std;
-
-//-----------------------------------------------------------------------------
 // Windows MainFrame, RegisterBar, IOWindow, MemoryView, ZeroPageView, IdentInfo
-//const HWND * /*const*/ CMainFrame::m_hWindows[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-//WNDPROC CMainFrame::m_pfnOldProc;
 
 //wxBitmap CMainFrame::m_bmpCode; // pictures in StatusBar
 //wxBitmap CMainFrame::m_bmpDebug;
 
-//-----------------------------------------------------------------------------
-
-const char CMainFrame::REG_ENTRY_LAYOUT[] = "Bars\\Layout";
-const char CMainFrame::REG_ENTRY_MAINFRM[] = "MainFrame";
-const char CMainFrame::REG_POSX[] = "XPos";
-const char CMainFrame::REG_POSY[] = "YPos";
-const char CMainFrame::REG_SIZX[] = "Width";
-const char CMainFrame::REG_SIZY[] =  "Height";
-const char CMainFrame::REG_STATE[] = "Maximize";
+/*************************************************************************/
 
 std::string CMainFrame::ProjName = "";
 
@@ -394,7 +383,7 @@ void CMainFrame::ConfigSettings(bool load)
 #endif
 }
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
 // CMainFrame
 
 #if 0
@@ -500,10 +489,24 @@ static UINT indicators[] =
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
 
-CMainFrame::CMainFrame()
+CMainFrame::CMainFrame(wxDocManager *docManager)
+    : wxDocMDIParentFrame(docManager, nullptr, wxID_ANY, _(""), wxDefaultPosition, wxDefaultSize)
+    , m_docManager(docManager)
 {
-    // TODO: add member initialization code here
-    m_nLastPage = 0;	// the last page called up (tab) in the options box
+    SetName(REG_ENTRY_MAINFRM);
+    SetTitle(wxGetApp().GetAppDisplayName());
+
+    // TODO: Move this to the options dialog class, not here.
+    m_nLastPage = 0; // the last page called up (tab) in the options box
+
+    InitMenu();
+
+    CreateStatusBar();
+
+    if (!wxPersistentRegisterAndRestore(this, REG_ENTRY_MAINFRM))
+        SetClientSize(FromDIP(wxSize(800, 600)));
+
+    BindEvents();
 
 #if 0
     int i = 0;
@@ -527,7 +530,34 @@ CMainFrame::~CMainFrame()
 //    delete m_Idents;
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
+
+void CMainFrame::BindEvents()
+{
+    // Bind events after everything was created okay.
+    Bind(wxEVT_MENU, &CMainFrame::OnLoadCode, this, evID_LOAD_CODE);
+    Bind(wxEVT_MENU, &CMainFrame::OnAbout, this, wxID_ABOUT);
+}
+
+/*************************************************************************/
+/*************************************************************************/
+// Main Frame Events
+
+void CMainFrame::OnLoadCode(wxCommandEvent &)
+{
+    auto dlg = new wxFileDialog(this);
+
+    dlg->ShowModal();
+}
+
+/*************************************************************************/
+
+void CMainFrame::OnAbout(wxCommandEvent &)
+{
+    wxMessageBox("Testing");
+}
+
+/*************************************************************************/
 
 #if REWRITE_TO_WX_WIDGET
 const uint32_t CMainFrame::dwDockBarMapEx[4][2] =
@@ -565,6 +595,90 @@ void CMainFrame::EnableDockingEx(uint32_t dwDockStyle)
     }
 #endif
 }
+
+/*************************************************************************/
+
+void CMainFrame::InitMenu()
+{
+    wxDocManager *docManager = wxDocManager::GetDocumentManager();
+
+    // File Menu
+    wxMenu *file = new wxMenu();
+    file->Append(wxID_NEW);
+    file->Append(wxID_OPEN);
+    file->Append(wxID_CLOSE);
+    file->Append(wxID_SAVE);
+    file->Append(wxID_SAVEAS);
+    file->Append(wxID_REVERT, _("Re&vert..."));
+
+    file->AppendSeparator();
+    file->Append(evID_LOAD_CODE, _("Load Code..."));
+    file->Append(evID_SAVE_CODE, _("Save Code..."));
+
+    file->AppendSeparator();
+    file->Append(wxID_PRINT);
+    file->Append(wxID_PRINT_SETUP, _("Print &Setup..."));
+    file->Append(wxID_PREVIEW);
+
+#if 0
+    if (!m_bDoNotAddToRecentFileList)
+    {
+        wxMenu *recentFiles = new wxMenu();
+
+        file->AppendSeparator();
+        file->AppendSubMenu(recentFiles, _("Recent &Files"));
+
+        docManager->FileHistoryUseMenu(recentFiles);
+    }
+#endif
+
+    file->AppendSeparator();
+    file->Append(wxID_EXIT);
+
+    // Edit Menu
+    wxMenu *edit = new wxMenu();
+    edit->Append(wxID_UNDO);
+    edit->Append(wxID_REDO);
+
+    edit->AppendSeparator();
+    edit->Append(wxID_CUT);
+    edit->Append(wxID_COPY);
+    edit->Append(wxID_PASTE);
+
+    wxMenu *view = new wxMenu();
+    view->Append(evID_SHOW_DISASM, _("Disassembler\tAlt+0"));
+    view->AppendSeparator();
+    view->Append(evID_SHOW_REGS, _("Registers\tAlt+1"));
+
+    wxMenu *sim = new wxMenu();
+    sim->Append(evID_ASSEMBLE, _("Assemble\tF7"));
+    sim->AppendSeparator();
+    sim->Append(evID_DEBUG, _("Debug\tF6"));
+    sim->AppendSeparator();
+    sim->Append(evID_RUN, _("Run\tF5"));
+    sim->Append(evID_RESET, _("Reset\tCtrl+Shift+F5"));
+    sim->Append(evID_BREAK, _("Break\tCtrl+Break"));
+    sim->AppendSeparator();
+    sim->Append(evID_STEP_INTO, _("Step Info"));
+    sim->Append(evID_STEP_OVER, _("Step Over"));
+    sim->Append(evID_STEP_OUT, _("Run Till Return"));
+    sim->Append(evID_RUN_TO, _("Run to Cursor"));
+
+    // Help Menu
+    wxMenu *help = new wxMenu();
+    help->Append(wxID_ABOUT);
+
+    wxMenuBar *menuBar = new wxMenuBar();
+    menuBar->Append(file, wxGetStockLabel(wxID_FILE));
+    menuBar->Append(edit, wxGetStockLabel(wxID_EDIT));
+    menuBar->Append(view, _("View"));
+    menuBar->Append(sim, _("Simulator"));
+    menuBar->Append(help, wxGetStockLabel(wxID_HELP));
+
+    SetMenuBar(menuBar);
+}
+
+/*************************************************************************/
 
 #if REWRITE_TO_WX_WIDGET
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -1108,12 +1222,12 @@ void CMainFrame::SetPositionText(int row, int col)
 
     snprintf(buf, sizeof(buf), m_strFormat.c_str(), row, col);
 
-    m_statusBar.SetStatusText(buf, 1);
+    //m_statusBar.SetStatusText(buf, 1);
 }
 
 void CMainFrame::SetStatusText(int row, const std::string& message)
 {
-    m_statusBar.SetStatusText(message, row);
+    //m_statusBar.SetStatusText(message, row);
 }
 
 /*

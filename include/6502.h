@@ -29,7 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
 #include "Global.h"
-#include "Events.h"
 
 class CIOWindow;
 
@@ -42,13 +41,10 @@ class C6502App : public wxApp
 {
 private:
     wxFrame *m_mainFrame;
-    wxStatusBar *m_statusBar;
-    wxMenuBar *m_menuBar;
 
     wxConfig *m_config;
 
     bool InitFrame();
-    bool InitAppMenu();
 
 public:
     static bool m_bMaximize; // flag - maximum window dimensions at startup;
@@ -78,10 +74,9 @@ protected:
     int OnExit() override;
 
 protected:
-    // Application commands
+    // Application Events
 
     void OnAppExit(wxCommandEvent &);
-    void OnAppAbout(wxCommandEvent &);
 };
 
 wxDECLARE_APP(C6502App);

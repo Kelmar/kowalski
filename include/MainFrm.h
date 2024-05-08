@@ -45,19 +45,20 @@ class CSrc6502View;
 class CMainFrame : public wxDocMDIParentFrame
 {
 private:
-    wxStatusBar m_statusBar;
+    static constexpr char REG_ENTRY_MAINFRM[] = "MainFrame";
 
-    static const char REG_ENTRY_LAYOUT[];
-    static const char REG_ENTRY_MAINFRM[];
-    static const char REG_POSX[], REG_POSY[], REG_SIZX[], REG_SIZY[], REG_STATE[];
+    wxDocManager *m_docManager;
 
-    //static WNDPROC m_pfnOldProc;
+    // TODO: Move into a project document
+    static std::string ProjName;
+    
     //static LRESULT CALLBACK StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     //static wxBitmap m_bmpCode;
     //static wxBitmap m_bmpDebug;
 
     std::string m_strFormat; // Formatting characters for paragraph. row/column in the status bar
+    UINT m_uTimer;
 
     //afx_msg LRESULT OnUpdateState(WPARAM wParam, LPARAM lParam);
 
@@ -67,10 +68,12 @@ private:
     void ConfigSettings(bool load);
     void ExitDebugMode();
 
-    UINT m_uTimer;
+    // Control setup
+    void InitMenu();
+    void BindEvents();
 
 public:
-    /* constructor */ CMainFrame();
+    /* constructor */ CMainFrame(wxDocManager *docManager);
     virtual          ~CMainFrame();
 
 //  virtual HMENU GetWindowMenuPopup(HMENU hMenuBar);
@@ -83,9 +86,6 @@ public:
 
     void SetStatusText(int col, const std::string &text);
 
-    static std::string ProjName;
-
-// Attributes
 public:
     CRegisterBar m_wndRegisterBar;
     CIOWindow m_IOWindow;
@@ -95,10 +95,6 @@ public:
     CIdentInfo m_Idents;
     CLogWindow m_wndLog;
     CDynamicHelp m_wndHelpBar;
-
-// Operations
-public:
-    //static const HWND * m_hWindows[];
 
     void UpdateAll();
     void DelayedUpdateAll();
@@ -110,9 +106,9 @@ public:
     virtual bool OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 #endif
 
-protected:  // control bar embedded members
-//  CDialBar m_wndZeroPageBar;
-//  CToolBar m_wndToolBar;
+protected: // control bar embedded members
+    //CDialBar m_wndZeroPageBar;
+    //CToolBar m_wndToolBar;
     CFlatToolBar m_wndToolBar;
 
     void SymGenInterrupt(CSym6502::IntType eInt);
@@ -198,6 +194,10 @@ protected:
     afx_msg LRESULT OnStartDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
+
+private: // Event handlers
+    void OnLoadCode(wxCommandEvent &);
+    void OnAbout(wxCommandEvent &);
 
 private:
     void EnableDockingEx(uint32_t dwDockStyle);

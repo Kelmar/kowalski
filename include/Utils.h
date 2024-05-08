@@ -61,6 +61,52 @@ bool TryLookup(_In_ const std::unordered_map<TKey, TItem> &map,
 }
 
 /*************************************************************************/
+/**
+ * @brief Ensures run of code on function exit.
+ */
+template <typename CallableType>
+class finally
+{
+private:
+    CallableType m_block;
+
+public:
+    explicit finally(CallableType &&block) noexcept
+        : m_block(block)
+    {
+    }
+
+    ~finally() noexcept
+    {
+        m_block();
+    }
+};
+
+/*************************************************************************/
+/**
+ * @brief Utility class to preserve the current configuration path and 
+ * restore on function exit.
+ */
+class PushConfigPath
+{
+private:
+    wxConfig &m_config;
+    wxString m_old;
+
+public:
+    PushConfigPath(wxConfig &config)
+        : m_config(config)
+    {
+        m_old = m_config.GetPath();
+    }
+
+    ~PushConfigPath()
+    {
+        m_config.SetPath(m_old);
+    }
+};
+
+/*************************************************************************/
 
 #endif /* UTILS_H__ */
 

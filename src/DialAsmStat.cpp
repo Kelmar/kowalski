@@ -412,8 +412,10 @@ UINT CDialAsmStat::StartAsm()
     CSrc6502Doc* pDoc = dynamic_cast<CSrc6502Doc*>(m_pView->GetDocument());
     wxFileName path(pDoc ? pDoc->GetTitle() : "");
     
+#if 0
     if (path.HasName())
         CMainFrame::ProjName = path.GetName();
+#endif
     
     m_stAsmRetCode = (CAsm::Stat)(m_pAsm6502->Assemble());
     //PostMessage(WM_USER_FIN, WPARAM(m_stAsmRetCode));

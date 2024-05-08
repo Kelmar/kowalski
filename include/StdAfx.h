@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define REWRITE_TO_WX_WIDGET 0
 
+#include <functional>
 #include <stdint.h>
 #include <string.h>
 
@@ -43,6 +44,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <wx/filename.h>
 #include <wx/hyperlink.h>
 #include <wx/notebook.h>
+#include <wx/persist.h>
+#include <wx/persist/toplevel.h>
 #include <wx/richtext/richtextctrl.h>
 #include <wx/settings.h>
 #include <wx/stc/stc.h>

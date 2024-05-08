@@ -8,6 +8,8 @@
 #include "StdAfx.h"
 
 // List of application defined events.
+wxDEFINE_EVENT(evID_LOAD_CODE, wxCommandEvent);
+wxDEFINE_EVENT(evID_SAVE_CODE, wxCommandEvent);
 
 wxDEFINE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_REGS, wxCommandEvent);

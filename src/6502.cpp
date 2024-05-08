@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 
+#include "MainFrm.h"
+
 #include "6502Doc.h"
 #include "6502View.h"
 
@@ -36,7 +38,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 const char VENDOR_NAME[] = "MikSoft";
 const char APP_NAME[] = "6502_simulator";
-const char APP_DISPLAY[] = "6502 Simulator";
 
 bool C6502App::m_bMaximize = false; // flag - maximum window dimensions at startup;
 bool C6502App::m_bFileNew = true; // flag - opening a blank document at startup
@@ -46,8 +47,6 @@ bool C6502App::m_bFileNew = true; // flag - opening a blank document at startup
 
 C6502App::C6502App()
     : m_mainFrame(nullptr)
-    , m_menuBar(nullptr)
-    , m_statusBar(nullptr)
     , m_config(nullptr)
     , m_bDoNotAddToRecentFileList(false)
 {
@@ -82,11 +81,11 @@ bool C6502App::OnInit()
     SetAppName(APP_NAME);
 
     // TODO: Look this up from i18n strings.
-    SetAppDisplayName(APP_DISPLAY);
+    SetAppDisplayName(_("6502 Simulator"));
 
     m_config = new wxConfig();
 
-    wxDocManager* docManager = new wxDocManager();
+    wxDocManager *docManager = new wxDocManager();
 
     new wxDocTemplate(docManager,
         "Assembly", "*.s;*.asm", "", "s;asm",
@@ -111,118 +110,7 @@ bool C6502App::InitFrame()
 {
     wxDocManager *docManager = wxDocManager::GetDocumentManager();
 
-    //wxPoint pos = m_config->ReadObject<wxPoint>("main_pos", wxDefaultPosition);
-    //wxSize size = m_config->ReadObject<wxSize>("main_size", wxSize(500, 400));
-    wxPoint pos = wxDefaultPosition;
-    wxSize size = wxSize(500, 400);
-
-#if wxUSE_MDI_ARCHITECTURE
-    m_mainFrame = new wxDocMDIParentFrame(
-        docManager,
-        nullptr,
-        wxID_ANY,
-        GetAppDisplayName(),
-        pos,
-        size
-    );
-#else
-    m_mainFrame = new wxDocParentFrameAny<wxAuiMDIParentFrame>(
-        docManager,
-        nullptr,
-        wxID_ANY,
-        GetAppDisplayName(),
-        pos,
-        size
-    );
-#endif
-
-    if (!InitAppMenu())
-        return false;
-
-    m_statusBar = new wxStatusBar(m_mainFrame);
-
-    m_mainFrame->SetStatusBar(m_statusBar);
-
-    // Bind events after everything was created okay.
-    m_mainFrame->Bind(wxEVT_MENU, &C6502App::OnAppExit, this, wxID_EXIT);
-    m_mainFrame->Bind(wxEVT_MENU, &C6502App::OnAppAbout, this, wxID_ABOUT);
-
-    return true;
-}
-
-bool C6502App::InitAppMenu()
-{
-    wxDocManager* docManager = wxDocManager::GetDocumentManager();
-
-    // File Menu
-    wxMenu* file = new wxMenu();
-    file->Append(wxID_NEW);
-    file->Append(wxID_OPEN);
-    file->Append(wxID_CLOSE);
-    file->Append(wxID_SAVE);
-    file->Append(wxID_SAVEAS);
-    file->Append(wxID_REVERT, _("Re&vert..."));
-
-    file->AppendSeparator();
-    file->Append(wxID_PRINT);
-    file->Append(wxID_PRINT_SETUP, _("Print &Setup..."));
-    file->Append(wxID_PREVIEW);
-
-    if (!m_bDoNotAddToRecentFileList)
-    {
-        wxMenu *recentFiles = new wxMenu();
-
-        file->AppendSeparator();
-        file->AppendSubMenu(recentFiles, _("Recent &Files"));
-
-        docManager->FileHistoryUseMenu(recentFiles);
-    }
-
-    file->AppendSeparator();
-    file->Append(wxID_EXIT);
-
-    // Edit Menu
-    wxMenu *edit = new wxMenu();
-    edit->Append(wxID_UNDO);
-    edit->Append(wxID_REDO);
-
-    edit->AppendSeparator();
-    edit->Append(wxID_CUT);
-    edit->Append(wxID_COPY);
-    edit->Append(wxID_PASTE);
-
-    wxMenu *view = new wxMenu();
-    view->Append(evID_SHOW_DISASM, _("Disassembler\tAlt+0"));
-    view->AppendSeparator();
-    view->Append(evID_SHOW_REGS, _("Registers\tAlt+1"));
-
-    wxMenu *sim = new wxMenu();
-    sim->Append(evID_ASSEMBLE, _("Assemble\tF7"));
-    sim->AppendSeparator();
-    sim->Append(evID_DEBUG, _("Debug\tF6"));
-    sim->AppendSeparator();
-    sim->Append(evID_RUN, _("Run\tF5"));
-    sim->Append(evID_RESET, _("Reset\tCtrl+Shift+F5"));
-    sim->Append(evID_BREAK, _("Break\tCtrl+Break"));
-    sim->AppendSeparator();
-    sim->Append(evID_STEP_INTO, _("Step Info"));
-    sim->Append(evID_STEP_OVER, _("Step Over"));
-    sim->Append(evID_STEP_OUT, _("Run Till Return"));
-    sim->Append(evID_RUN_TO, _("Run to Cursor"));
-
-    // Help Menu
-    wxMenu* help = new wxMenu();
-    help->Append(wxID_ABOUT);
-
-    m_menuBar = new wxMenuBar();
-    m_menuBar->Append(file, wxGetStockLabel(wxID_FILE));
-    m_menuBar->Append(edit, wxGetStockLabel(wxID_EDIT));
-    m_menuBar->Append(view, _("View"));
-    m_menuBar->Append(sim , _("Simulator"));
-    m_menuBar->Append(help, wxGetStockLabel(wxID_HELP));
-
-    m_mainFrame->SetMenuBar(m_menuBar);
-
+    m_mainFrame = new CMainFrame(docManager);
     return true;
 }
 
@@ -231,12 +119,12 @@ bool C6502App::InitAppMenu()
 BOOL C6502App::InitInstance()
 {
     std::string strHelpFile = m_pszHelpFilePath;
-    strHelpFile = strHelpFile.Left(strHelpFile.GetLength()-4) + ".chm";
+    strHelpFile = strHelpFile.Left(strHelpFile.GetLength() - 4) + ".chm";
 
     //First free the string allocated by MFC at CWinApp startup.
     //The string is allocated before InitInstance is called.
 
-    free((void*)m_pszHelpFilePath);
+    free((void *)m_pszHelpFilePath);
 
     // set new help file path
     m_pszHelpFilePath = _tcsdup(strHelpFile);
@@ -274,23 +162,23 @@ BOOL C6502App::InitInstance()
 #ifdef _AFXDLL
     Enable3dControls();			// Call this when using MFC in a shared DLL
 #else
-//  Enable3dControlsStatic();	// Call this when linking to MFC statically
+    //  Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
 
     SetRegistryKey(REGISTRY_KEY);
     //First free the string allocated by MFC at CWinApp startup.
     //The string is allocated before InitInstance is called.
-    free((void*)m_pszProfileName);
+    free((void *)m_pszProfileName);
     //Change the name of the .INI file.
     //The CWinApp destructor will free the memory.
-    m_pszProfileName=_tcsdup(PROFILE_NAME);
+    m_pszProfileName = _tcsdup(PROFILE_NAME);
 
     LoadStdProfileSettings(_AFX_MRU_MAX_COUNT);  // Load standard INI file options (including MRU)
 
     // Register the application's document templates.  Document templates
     //  serve as the connection between documents, frame windows and views.
 
-    CXMultiDocTemplate* pDocTemplate;
+    CXMultiDocTemplate *pDocTemplate;
     pDocTemplate = new CXMultiDocTemplate(
         IDR_SRC65TYPE,
         RUNTIME_CLASS(CSrc6502Doc),
@@ -310,7 +198,7 @@ BOOL C6502App::InitInstance()
     m_pDocDeasmTemplate = pDocTemplate;
 
     // create main MDI Frame window
-    CMainFrame* pMainFrame = new CMainFrame;
+    CMainFrame *pMainFrame = new CMainFrame;
     if (!pMainFrame->LoadFrame(IDR_MAINFRAME))
         return false;
     m_pMainWnd = pMainFrame;
@@ -332,7 +220,7 @@ BOOL C6502App::InitInstance()
     if (!ProcessShellCommand(cmdInfo))
         return false;
 
-    if (m_bMaximize && m_nCmdShow==SW_SHOWNORMAL)
+    if (m_bMaximize && m_nCmdShow == SW_SHOWNORMAL)
         m_nCmdShow = SW_MAXIMIZE;
 
     // The main window has been initialized, so show and update it.
@@ -345,7 +233,7 @@ BOOL C6502App::InitInstance()
 
 #endif /* 0 */
 
-void C6502App::AddToRecentFileList(const std::string& pathName)
+void C6502App::AddToRecentFileList(const std::string &pathName)
 {
     if (!m_bDoNotAddToRecentFileList)
         return;
@@ -353,10 +241,10 @@ void C6502App::AddToRecentFileList(const std::string& pathName)
     //CWinApp::AddToRecentFileList(lpszPathName);
 }
 
-void C6502App::SetStatusText(int col, const std::string& message)
+void C6502App::SetStatusText(int col, const std::string &message)
 {
-    if (m_statusBar)
-        m_statusBar->SetStatusText(message, col);
+    if (m_mainFrame)
+        m_mainFrame->SetStatusText(message, col);
 }
 
 wxFrame *C6502App::CreateChildFrame(wxView *view)
@@ -390,7 +278,7 @@ wxFrame *C6502App::CreateChildFrame(wxView *view)
 
 int C6502App::OnExit()
 {
-    wxDocManager* const docManager = wxDocManager::GetDocumentManager();
+    wxDocManager *const docManager = wxDocManager::GetDocumentManager();
 
     docManager->FileHistorySave(*m_config);
 
@@ -406,22 +294,11 @@ int C6502App::OnExit()
 }
 
 /*************************************************************************/
-// C6502App commands
+// C6502App Events
 
-void C6502App::OnAppExit(wxCommandEvent&)
+void C6502App::OnAppExit(wxCommandEvent &)
 {
     Exit();
-}
-
-// App command to run the dialog
-void C6502App::OnAppAbout(wxCommandEvent&)
-{
-    wxMessageBox("Testing");
-
-#if 0
-    CAboutDlg aboutDlg;
-    aboutDlg.DoModal();
-#endif
 }
 
 /*************************************************************************/
