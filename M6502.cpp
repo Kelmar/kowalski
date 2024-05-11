@@ -2834,7 +2834,7 @@ bool CAsm6502::is_expression(const CLeksem &leks)	// pocz¹tek wyra¿enia?
 	case CLeksem::L_IDENT:			// identyfikator
 	case CLeksem::L_IDENT_N:		// identyfikator numerowany
 	case CLeksem::L_OPER:			// operator
-	case CLeksem::L_EXPR_BRACKET_L:	// lewy nawias dla wyra¿eñ '['
+	case CLeksem::L_EXPR_BRACKET_L:	// left bracket for '[' expressions
 	case CLeksem::L_EXPR_BRACKET_R:	// prawy nawias dla wyra¿eñ ']'
 		return true;				// to pocz¹tek wyra¿enia
 

@@ -397,6 +397,8 @@ UINT CDialAsmStat::StartAsm()
   if (title.GetLength()) {
       int x = 0;  
 	  for (x=0; x < title.GetLength(); x++){
+		  if (title.Mid(x,2) == " *")
+			  break;
           if (title.Mid(x,1) == ".")
 			  break; 
 	  }

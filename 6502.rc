@@ -2636,7 +2636,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,5,1                 // res.dll file version                          
+ FILEVERSION 1,3,5,2                 // res.dll file version                          
 // PRODUCTVERSION 2,3,4,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -2662,7 +2662,7 @@ BEGIN
             VALUE "OriginalFilename", "res.dll\0"               // res.dll file
 //            VALUE "PrivateBuild", "\0"                        // res.dll file 
             VALUE "ProductName", "res\0"
-            VALUE "ProductVersion", "1.3.5.1\0"                  // res.dll file version
+            VALUE "ProductVersion", "1.3.5.2\0"                  // res.dll file version
 //            VALUE "SpecialBuild", "\0"
         END
     END
