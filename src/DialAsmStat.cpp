@@ -410,7 +410,28 @@ UINT CDialAsmStat::StartAsm()
     // Get the file name
 
     CSrc6502Doc* pDoc = dynamic_cast<CSrc6502Doc*>(m_pView->GetDocument());
-    wxFileName path(pDoc ? pDoc->GetTitle() : "");
+    wxFileName path(pDoc ? pDoc->GetFilename() : wxString(""));
+
+#if 0
+    const CString &title = pDoc ? pDoc->GetTitle() : CString(_T(""));
+
+    if (title.GetLength())
+    {
+        int x = 0;
+
+        for (x = 0; x < title.GetLength(); x++)
+        {
+            // Not sure this fix will be needed with wxWidgets. -- B.Simonds (May 11, 2024)
+            if (title.Mid(x, 2) == " *")
+                break;
+
+            if (title.Mid(x, 1) == ".")
+                break;
+}       }
+
+        CMainFrame::ProjName = title.Left(x); // save project name for saving code
+    }
+#endif
     
 #if 0
     if (path.HasName())
