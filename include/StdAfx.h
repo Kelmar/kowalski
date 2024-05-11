@@ -60,6 +60,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <cstdio>
 #include <cctype>
 
+#ifndef wxHAVE_DPI_INDEPENDENT_PIXELS
+// Hack for wxWidgets 3.0 on Ubuntu
+# define FromDIP(X_) (X_)
+#endif
+
 #define UCHAR unsigned char
 #define USHORT unsigned short
 #define UINT unsigned int
@@ -75,6 +80,7 @@ typedef wxOutputStream DocOStream;
 
 #include "debug.h"
 #include "Utils.h"
+#include "StrUtils.h"
 
 #ifdef _MSC_VER
 # define strcasecmp stricmp

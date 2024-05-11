@@ -22,32 +22,38 @@
  */
 /*************************************************************************/
 
-#ifndef EVENT_6502_H__
-#define EVENT_6502_H__
+#ifndef PROJECT_MANAGER_H__
+#define PROJECT_MANAGER_H__
 
 /*************************************************************************/
 
-#include "StdAfx.h"
+class ProjectManager : public wxEvtHandler
+{
+private:
+    static ProjectManager *s_self;
 
-// List of application defined events.
-wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
-wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
+public:
+    /* constructor */ ProjectManager();
+    virtual          ~ProjectManager();
 
-wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_REGS, wxCommandEvent);
+    static ProjectManager &Get()
+    {
+        ASSERT(s_self);
+        return *s_self;
+    }
 
-wxDECLARE_EVENT(evID_ASSEMBLE, wxCommandEvent);
-wxDECLARE_EVENT(evID_DEBUG, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN, wxCommandEvent);
-wxDECLARE_EVENT(evID_RESET, wxCommandEvent);
-wxDECLARE_EVENT(evID_BREAK, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_INTO, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
+    static ProjectManager *Ptr() { return s_self; }
+
+public:
+    // Event handlers
+    void OnLoadCode(wxCommandEvent &);
+
+private:
+    wxDECLARE_EVENT_TABLE();
+};
 
 /*************************************************************************/
 
-#endif /* EVENT_6502_H__ */
+#endif /* PROJECT_MANAGER_H__ */
 
 /*************************************************************************/

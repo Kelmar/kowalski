@@ -1,9 +1,9 @@
-/*************************************************************************/
+ï»¿/*************************************************************************/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the “Software”),
+ * copy of this software and associated documentation files (the â€œSoftwareâ€),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
@@ -12,7 +12,7 @@
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * THE SOFTWARE IS PROVIDED â€œAS ISâ€, WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
  * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -22,32 +22,47 @@
  */
 /*************************************************************************/
 
-#ifndef EVENT_6502_H__
-#define EVENT_6502_H__
-
-/*************************************************************************/
-
 #include "StdAfx.h"
 
-// List of application defined events.
-wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
-wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_REGS, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_ASSEMBLE, wxCommandEvent);
-wxDECLARE_EVENT(evID_DEBUG, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN, wxCommandEvent);
-wxDECLARE_EVENT(evID_RESET, wxCommandEvent);
-wxDECLARE_EVENT(evID_BREAK, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_INTO, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
+#include "Events.h"
+#include "MainFrm.h"
+#include "ProjectManager.h"
 
 /*************************************************************************/
 
-#endif /* EVENT_6502_H__ */
+ProjectManager *ProjectManager::s_self = nullptr;
+
+/*************************************************************************/
+
+ProjectManager::ProjectManager()
+{
+    ASSERT(s_self == nullptr);
+
+    s_self = this;
+}
+
+ProjectManager::~ProjectManager()
+{
+    s_self = nullptr;
+}
+
+/*************************************************************************/
+
+wxBEGIN_EVENT_TABLE(ProjectManager, wxEvtHandler)
+  EVT_MENU(evID_LOAD_CODE, ProjectManager::OnLoadCode)
+wxEND_EVENT_TABLE()
+
+/*************************************************************************/
+
+void ProjectManager::OnLoadCode(wxCommandEvent &event)
+{
+    wxMessageBox(_("Test"));
+
+    //auto dlg = new wxFileDialog(this);
+
+    //dlg->ShowModal();
+
+    event.Skip();
+}
 
 /*************************************************************************/

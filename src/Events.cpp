@@ -22,32 +22,27 @@
  */
 /*************************************************************************/
 
-#ifndef EVENT_6502_H__
-#define EVENT_6502_H__
-
-/*************************************************************************/
-
 #include "StdAfx.h"
 
-// List of application defined events.
-wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
-wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_REGS, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_ASSEMBLE, wxCommandEvent);
-wxDECLARE_EVENT(evID_DEBUG, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN, wxCommandEvent);
-wxDECLARE_EVENT(evID_RESET, wxCommandEvent);
-wxDECLARE_EVENT(evID_BREAK, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_INTO, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
+#include "Events.h"
 
 /*************************************************************************/
 
-#endif /* EVENT_6502_H__ */
+// List of application defined events.
+wxDEFINE_EVENT(evID_LOAD_CODE, wxCommandEvent);
+wxDEFINE_EVENT(evID_SAVE_CODE, wxCommandEvent);
+
+wxDEFINE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
+wxDEFINE_EVENT(evID_SHOW_REGS, wxCommandEvent);
+
+wxDEFINE_EVENT(evID_ASSEMBLE, wxCommandEvent);
+wxDEFINE_EVENT(evID_DEBUG, wxCommandEvent);
+wxDEFINE_EVENT(evID_RUN, wxCommandEvent);
+wxDEFINE_EVENT(evID_RESET, wxCommandEvent);
+wxDEFINE_EVENT(evID_BREAK, wxCommandEvent);
+wxDEFINE_EVENT(evID_STEP_INTO, wxCommandEvent);
+wxDEFINE_EVENT(evID_STEP_OVER, wxCommandEvent);
+wxDEFINE_EVENT(evID_STEP_OUT, wxCommandEvent);
+wxDEFINE_EVENT(evID_RUN_TO, wxCommandEvent);
 
 /*************************************************************************/

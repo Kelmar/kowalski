@@ -25,8 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "6502.h"
 #include "Events.h"
-
 #include "MainFrm.h"
+#include "ProjectManager.h"
+
 #include "DialAsmStat.h"
 #include "Options.h"
 #include "DialEditBrkp.h"
@@ -508,6 +509,8 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
 
     BindEvents();
 
+    PushEventHandler(ProjectManager::Ptr());
+
 #if 0
     int i = 0;
     m_hWindows[i++] = &m_hWnd;
@@ -526,6 +529,8 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
 
 CMainFrame::~CMainFrame()
 {
+    PopEventHandler(ProjectManager::Ptr());
+
 //  if (m_Idents)
 //    delete m_Idents;
 }
@@ -535,20 +540,12 @@ CMainFrame::~CMainFrame()
 void CMainFrame::BindEvents()
 {
     // Bind events after everything was created okay.
-    Bind(wxEVT_MENU, &CMainFrame::OnLoadCode, this, evID_LOAD_CODE);
     Bind(wxEVT_MENU, &CMainFrame::OnAbout, this, wxID_ABOUT);
 }
 
 /*************************************************************************/
 /*************************************************************************/
 // Main Frame Events
-
-void CMainFrame::OnLoadCode(wxCommandEvent &)
-{
-    auto dlg = new wxFileDialog(this);
-
-    dlg->ShowModal();
-}
 
 /*************************************************************************/
 

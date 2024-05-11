@@ -1,8 +1,6 @@
 /*************************************************************************/
 /*
  * Copyright (c) 2024 - Bryce Simonds
- *
- * Several useful debugging functions/annotations for code.
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the “Software”), 
@@ -65,18 +63,18 @@ bool TryLookup(_In_ const std::unordered_map<TKey, TItem> &map,
  * @brief Ensures run of code on function exit.
  */
 template <typename CallableType>
-class finally
+class defer
 {
 private:
     CallableType m_block;
 
 public:
-    explicit finally(CallableType &&block) noexcept
+    explicit defer(CallableType &&block) noexcept
         : m_block(block)
     {
     }
 
-    ~finally() noexcept
+    ~defer() noexcept
     {
         m_block();
     }

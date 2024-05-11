@@ -4,20 +4,21 @@ SET (CMAKE_CXX_STANDARD 17)
 SET (CMAKE_CXX_STANDARD_REQUIRED ON)
 SET (CMAKE_CXX_EXTENSIONS OFF)
 
-
 project (6502 C CXX)
 
 if (WIN32)
   include(FetchContent)
 
-  Set (FETCHCONTENT_QUIET FALSE)
-  SET (wxBUILD_SHARED OFF)
+  SET (FETCHCONTENT_QUIET FALSE)
+  SET (wxBUILD_SHARED OFF  CACHE BOOL "Build wx libraries as shared libs")
 
   FetchContent_Declare(wxWidgets
       GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
       GIT_TAG v3.2.4
+      GIT_SHALLOW ON
       OVERRIDE_FIND_PACKAGE
   )
+
 
   FetchContent_GetProperties(wxWidgets)
 
@@ -26,20 +27,22 @@ if (WIN32)
     add_subdirectory(${wxwidgets_SOURCE_DIR} ${wxwidgets_BUILD_DIR})
   endif ()
 
-  set (wxLibs wx::base wx::core wx::richtext wx::adv wx::stc wx::aui)
-  set (execType WIN32)
+  SET (wxLibs wx::base wx::core wx::richtext wx::adv wx::stc wx::aui wx::html wx::xml)
 else ()
-  find_package(wxWidgets COMPONENTS base core richtext adv stc aui REQUIRED)
+  find_package(wxWidgets 3.0 COMPONENTS base core richtext adv stc aui html xml REQUIRED)
   include("${wxWidgets_USE_FILE}")
 
-  set (wxLibs ${wxWidgets_LIBRARIES})
-  set (execType )
+  SET (wxLibs ${wxWidgets_LIBRARIES})
 endif ()
+
+if (WIN32)
+  SET (execType WIN32)
+endif()
 
 file (GLOB_RECURSE SRCS src/*.cpp)
 file (GLOB_RECURSE HDRS include/*.h)
 
-add_executable(6502 ${execType} README.md ${SRCS} ${HDRS} "include/Events.h")
+add_executable(6502 ${execType} README.md ${SRCS} ${HDRS})
 
 target_include_directories(6502
     PRIVATE include/

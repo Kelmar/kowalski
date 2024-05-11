@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 
 #include "MainFrm.h"
+#include "ProjectManager.h"
 
 #include "6502Doc.h"
 #include "6502View.h"
@@ -91,6 +92,8 @@ bool C6502App::OnInit()
         "Assembly", "*.s;*.asm", "", "s;asm",
         "Assembly Source", "Assembly View",
         CLASSINFO(CSrc6502Doc), CLASSINFO(CSrc6502View));
+
+    new ProjectManager();
 
     if (!InitFrame())
         return false;
@@ -238,7 +241,7 @@ void C6502App::AddToRecentFileList(const std::string &pathName)
     if (!m_bDoNotAddToRecentFileList)
         return;
 
-    //CWinApp::AddToRecentFileList(lpszPathName);
+    //CWinApp::AddToRecentFileList(pathName);
 }
 
 void C6502App::SetStatusText(int col, const std::string &message)
