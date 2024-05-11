@@ -1,12 +1,16 @@
 # Prerequisites
 *.d
 
+# Visual Studio user files
+*.user
+*.suo
+.vs/*
+
 # Compiled Object files
 *.slo
 *.lo
 *.o
 *.obj
-*.user
 
 # Precompiled Headers
 *.gch
