@@ -114,7 +114,7 @@ public:
     uint8_t GetBreakpoint(int nLine) const;
 
     int GetLineCount() const { return m_text ? m_text->GetLineCount() : 0; }
-    wxString GetText() const { return m_text ? m_text->GetText() : ""; }
+    wxString GetText() const { return m_text ? m_text->GetText() : wxString(""); }
 
 public:
     void OnDraw(wxDC *dc) override;

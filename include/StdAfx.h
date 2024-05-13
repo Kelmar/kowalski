@@ -31,7 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define REWRITE_TO_WX_WIDGET 0
 
-#include <functional>
 #include <stdint.h>
 #include <string.h>
 
@@ -51,8 +50,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <wx/stc/stc.h>
 
 #include <algorithm>
+#include <array>
+//#include <format> // Not on GNU yet....
+#include <functional>
 #include <list>
+#include <memory>
+#include <ranges>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>

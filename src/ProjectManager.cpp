@@ -28,6 +28,34 @@
 #include "MainFrm.h"
 #include "ProjectManager.h"
 
+#include "MotorolaSRecord.h"
+
+/*************************************************************************/
+
+bool CodeTemplate::SupportsExt(const std::string &ext) const
+{
+    auto e = GetExtensions()
+        | std::views::transform(str::getLower);
+
+    return std::ranges::find(e, str::getLower(ext)) != e.end();
+}
+
+std::string CodeTemplate::ToString() const
+{
+    auto exts = GetExtensions()
+        | std::views::transform(str::getLower)
+        | std::views::transform([](auto s) -> std::string { return "*." + s; });
+
+    // Using wsString::Format() until we can get std::format() from GNU... >_<
+
+    std::string desc = GetDescription();
+    std::string allExts = str::join(";", exts);
+        
+    return wxString::Format("%s (%s)", desc.c_str(), allExts.c_str()).ToStdString();
+    //return std::format("{} ({})", GetDescription(), str::join(";", exts));
+}
+
+/*************************************************************************/
 /*************************************************************************/
 
 ProjectManager *ProjectManager::s_self = nullptr;
@@ -35,10 +63,13 @@ ProjectManager *ProjectManager::s_self = nullptr;
 /*************************************************************************/
 
 ProjectManager::ProjectManager()
+    : m_templates()
 {
     ASSERT(s_self == nullptr);
 
     s_self = this;
+
+    InitCodeTemplates();
 }
 
 ProjectManager::~ProjectManager()
@@ -48,21 +79,57 @@ ProjectManager::~ProjectManager()
 
 /*************************************************************************/
 
+void ProjectManager::InitCodeTemplates()
+{
+    // Hard coded for now.
+
+    //AddTemplate<CMotorolaSRecord>();
+}
+
+/*************************************************************************/
+
+void ProjectManager::AddTemplate(const std::shared_ptr<CodeTemplate> &codeTemplate)
+{
+    ASSERT(codeTemplate);
+
+    m_templates.push_back(codeTemplate);
+}
+
+/*************************************************************************/
+
+wxString ProjectManager::GetSupportedFileTypes(
+    std::function<bool(const std::shared_ptr<CodeTemplate> &)> predicate)
+{
+    return str::join("|", m_templates | std::views::filter(predicate));
+}
+
+/*************************************************************************/
+
 wxBEGIN_EVENT_TABLE(ProjectManager, wxEvtHandler)
   EVT_MENU(evID_LOAD_CODE, ProjectManager::OnLoadCode)
+  EVT_MENU(evID_SAVE_CODE, ProjectManager::OnSaveCode)
 wxEND_EVENT_TABLE()
 
 /*************************************************************************/
 
 void ProjectManager::OnLoadCode(wxCommandEvent &event)
 {
-    wxMessageBox(_("Test"));
+    event.Skip();
+
+    wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->CanRead(); });
 
     //auto dlg = new wxFileDialog(this);
 
     //dlg->ShowModal();
+}
 
+/*************************************************************************/
+
+void ProjectManager::OnSaveCode(wxCommandEvent &event)
+{
     event.Skip();
+
+    wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->CanWrite(); });
 }
 
 /*************************************************************************/

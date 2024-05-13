@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-SET (CMAKE_CXX_STANDARD 17)
+SET (CMAKE_CXX_STANDARD 20)
 SET (CMAKE_CXX_STANDARD_REQUIRED ON)
 SET (CMAKE_CXX_EXTENSIONS OFF)
 
@@ -18,7 +18,6 @@ if (WIN32)
       GIT_SHALLOW ON
       OVERRIDE_FIND_PACKAGE
   )
-
 
   FetchContent_GetProperties(wxWidgets)
 
@@ -43,6 +42,8 @@ file (GLOB_RECURSE SRCS src/*.cpp)
 file (GLOB_RECURSE HDRS include/*.h)
 
 add_executable(6502 ${execType} README.md ${SRCS} ${HDRS})
+
+set_property (TARGET 6502 PROPERTY CXX_STANDARD 20)
 
 target_include_directories(6502
     PRIVATE include/

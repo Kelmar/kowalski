@@ -75,7 +75,7 @@ public:
 
     COutputMem &mem;
 
-    uint32_t mem_mask;		// memory mask - depends on the width of the address bus,
+    uint32_t mem_mask; // memory mask - depends on the width of the address bus,
     // contains ones in place of valid address bits
     bool io;
     uint16_t io_from, io_to;
@@ -120,7 +120,6 @@ public:
     void set_addr_bus_width(uint32_t w)
     {
         mem_mask = uint32_t((1 << w) - 1);
-        mem.SetMask(mem_mask);
         ASSERT(w >= 10 && w <= 16);
     }
 
@@ -268,6 +267,21 @@ private:
 
     uint16_t get_argument_address(bool bWrite); // get current cmd argument address
     uint8_t get_argument_value();               // get current cmd argument value
+
+    uint16_t get_word_indirect(uint32_t zp)
+    {
+        ASSERT(zp < 0xFF);
+
+        uint16_t lo = ctx.mem[zp];
+        uint16_t hi = ctx.mem[zp + 1];
+
+        return lo | (hi << 8);
+    }
+
+    uint16_t get_word(uint32_t addr)
+    {
+        return ctx.mem.GetWord(addr);
+    }
 
     void push_on_stack(uint8_t arg)
     {

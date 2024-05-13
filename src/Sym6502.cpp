@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -52,8 +52,8 @@ uint8_t CContext::get_status_reg() const
     ASSERT(decimal == false || decimal == true);
     ASSERT(interrupt == false || interrupt == true);
 
-    return negative<<N_NEGATIVE | overflow<<N_OVERFLOW | zero<<N_ZERO | carry<<N_CARRY |
-           true<<N_RESERVED | break_bit<<N_BREAK | decimal<<N_DECIMAL | interrupt<<N_INTERRUPT; //% Bug fix 1.2.12.3&10 - S reg status bits wrong
+    return negative << N_NEGATIVE | overflow << N_OVERFLOW | zero << N_ZERO | carry << N_CARRY |
+        true << N_RESERVED | break_bit << N_BREAK | decimal << N_DECIMAL | interrupt << N_INTERRUPT; //% Bug fix 1.2.12.3&10 - S reg status bits wrong
 }
 
 void CContext::set_status_reg_bits(uint8_t reg)
@@ -73,12 +73,12 @@ void CContext::set_status_reg_bits(uint8_t reg)
 uint16_t CSym6502::get_argument_address(bool bWrite)
 {
     uint8_t arg;
-//	uint16_t addr;
+    //	uint16_t addr;
     uint32_t addr;
 
-    uint8_t mode= m_vCodeToMode[ctx.mem[ctx.pc]];
-//	uint16_t pc= ctx.pc;
-    uint32_t pc= ctx.pc;
+    uint8_t mode = m_vCodeToMode[ctx.mem[ctx.pc]];
+    //	uint16_t pc= ctx.pc;
+    uint32_t pc = ctx.pc;
     inc_prog_counter(); // Bypass the command
 
     extracycle = false; //% bug Fix 1.2.12.1 - fix cycle timing
@@ -103,85 +103,92 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
 
     case A_ZPGI:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg);
+        addr = get_word_indirect(arg);
         inc_prog_counter();
         break;
 
     case A_ABS:
-        addr = ctx.mem.GetWord(ctx.pc);
+        addr = get_word(ctx.pc);
         inc_prog_counter(2);
         break;
 
     case A_ABS_X:
-        addr = ctx.mem.GetWord(ctx.pc) + ctx.x;
-        if ((addr>>8) != (ctx.mem.GetWord(ctx.pc)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        addr = get_word(ctx.pc) + ctx.x;
+        if ((addr >> 8) != (get_word(ctx.pc) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         break;
 
     case A_ABS_Y:
-        addr = ctx.mem.GetWord(ctx.pc) + ctx.y;
-        if ((addr>>8) != (ctx.mem.GetWord(ctx.pc)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        addr = get_word(ctx.pc) + ctx.y;
+        if ((addr >> 8) != (get_word(ctx.pc) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         break;
 
     case A_ZPGI_X:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg + ctx.x);
+        addr = get_word_indirect(arg + ctx.x);
         inc_prog_counter();
         break;
 
     case A_ZPGI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg) + ctx.y;
-        if ((addr>>8) != (ctx.mem.GetWordInd(arg)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        addr = get_word_indirect(arg) + ctx.y;
+        if ((addr >> 8) != (get_word_indirect(arg) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter();
         break;
 
     case A_ABSI: // only JMP(xxxx) supports this addr mode
-        addr = ctx.mem.GetWord(ctx.pc);
+        addr = get_word(ctx.pc);
         if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && (addr & 0xFF) == 0xFF) // LSB == 0xFF?
-            addr = ctx.mem.GetWord(addr, addr - 0xFF);	// erroneously just as 6502 would do
+        {
+            // Recreate 6502 bug
+            uint16_t hAddr = addr - 0xFF;
+            uint16_t lo = ctx.mem[addr];
+            uint16_t hi = ctx.mem[hAddr];
+
+            addr = lo | (hi << 8); // erroneously just as 6502 would do
+        }
         else
-            addr = ctx.mem.GetWord(addr);
+            addr = get_word(addr);
         inc_prog_counter(2);
         break;
 
     case A_ABSI_X:
-        addr = ctx.mem.GetWord(ctx.pc) + ctx.x;
-        addr = ctx.mem.GetWord(addr);
+        addr = get_word(ctx.pc) + ctx.x;
+        addr = get_word(addr);
         inc_prog_counter(2);
         break;
 
     case A_ZREL: // exceptionally here: addr = zpg (lo) + relative (hi)
         //the cell number from page zero is returned in the lower byte
         //in the top byte the relative offset
-        addr = ctx.mem.GetWord(ctx.pc);
+        addr = get_word(ctx.pc);
         //addr = ctx.mem[ctx.pc]; // cell address on zero page
         //addr += uint16_t( ctx.mem[ctx.pc + 1] ) << 8; // offset
         inc_prog_counter(2);
         break;
 
     case A_ABSL:
-        addr = ctx.mem.GetWord(ctx.pc);
+        addr = get_word(ctx.pc);
         inc_prog_counter(3);
         break;
 
     case A_ABSL_X:
-        addr = ctx.mem.GetWord(ctx.pc) + ctx.x;
+        addr = get_word(ctx.pc) + ctx.x;
         inc_prog_counter(3);
         break;
 
     case A_ZPIL:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg);
+        addr = get_word_indirect(arg);
         inc_prog_counter();
         break;
 
     case A_ZPIL_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg) + ctx.y;
+        addr = get_word_indirect(arg) + ctx.y;
 
-        if ((addr >> 8) != (ctx.mem.GetWordInd(arg) >> 8))
+        if ((addr >> 8) != (get_word_indirect(arg) >> 8))
             extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
 
         inc_prog_counter();
@@ -194,7 +201,7 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
 
     case A_SRI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg) + ctx.y;
+        addr = get_word_indirect(arg) + ctx.y;
         inc_prog_counter();
         break;
 
@@ -219,10 +226,10 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
 uint8_t CSym6502::get_argument_value()
 {
     uint8_t arg;
-//	uint16_t addr;
+    //	uint16_t addr;
     uint32_t addr;
 
-    uint8_t mode= m_vCodeToMode[ctx.mem[ctx.pc]];
+    uint8_t mode = m_vCodeToMode[ctx.mem[ctx.pc]];
     inc_prog_counter(); // bypass the command
 
     extracycle = false; //% bug Fix 1.2.12.1 - fix cycle timing
@@ -242,7 +249,7 @@ uint8_t CSym6502::get_argument_value()
 
     case A_ZPGI:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg);
+        addr = get_word_indirect(arg);
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
@@ -263,56 +270,56 @@ uint8_t CSym6502::get_argument_value()
         return arg;
 
     case A_ABS:
-        addr = ctx.mem.GetWord(ctx.pc);
+        addr = get_word(ctx.pc);
         inc_prog_counter(2);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-//	case A_ABSI:
+        //	case A_ABSI:
 
     case A_ABS_X:
-        addr = ctx.mem.GetWord(ctx.pc) + ctx.x;
-        if ((addr>>8) != (ctx.mem.GetWord(ctx.pc)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        addr = get_word(ctx.pc) + ctx.x;
+        if ((addr >> 8) != (get_word(ctx.pc) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
     case A_ABS_Y:
-        addr = ctx.mem.GetWord(ctx.pc) + ctx.y;
-        if ((addr>>8) != (ctx.mem.GetWord(ctx.pc)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        addr = get_word(ctx.pc) + ctx.y;
+        if ((addr >> 8) != (get_word(ctx.pc) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
     case A_ZPGI_X:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg + ctx.x);
+        addr = get_word_indirect(arg + ctx.x);
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
     case A_ZPGI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg) + ctx.y;
-        if ((addr>>8) != (ctx.mem.GetWordInd(arg)>>8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        addr = get_word_indirect(arg) + ctx.y;
+        if ((addr >> 8) != (get_word_indirect(arg) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
     case A_ABSL:
-        addr = ctx.mem.GetWord(ctx.pc);
+        addr = get_word(ctx.pc);
         inc_prog_counter(3);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
     case A_ABSL_X:
-        addr = ctx.mem.GetWord(ctx.pc)+ ctx.x;
+        addr = get_word(ctx.pc) + ctx.x;
         inc_prog_counter(3);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
     case A_ZPIL:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg);
+        addr = get_word_indirect(arg);
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
     case A_ZPIL_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg) + ctx.y;
+        addr = get_word_indirect(arg) + ctx.y;
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
@@ -323,7 +330,7 @@ uint8_t CSym6502::get_argument_value()
 
     case A_SRI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
-        addr = ctx.mem.GetWordInd(arg) + ctx.y;
+        addr = get_word_indirect(arg) + ctx.y;
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
@@ -364,7 +371,7 @@ CAsm::SymStat CSym6502::perform_command()
     uint8_t zeroc, negativec;
     int tmp;
 
-//% Bug Fix 1.2.12.18 - Command Log assembly not lined up witgh registers
+    //% Bug Fix 1.2.12.18 - Command Log assembly not lined up witgh registers
 #define TOBCD(a) (((((a) / 10) % 10) << 4) | ((a) % 10))
 #define TOBIN(a) (((a) >> 4) * 10 + ((a) & 0x0F))
 
@@ -378,13 +385,13 @@ CAsm::SymStat CSym6502::perform_command()
     }
 
     pre = ctx;
-    pre.intFlag =false;
+    pre.intFlag = false;
 
     if (pre.uCycles > saveCycles)
         pre.intFlag = true;
 
     pre.uCycles = saveCycles;
-//% End Bug Fixs
+    //% End Bug Fixs
 
     switch (m_vCodeToCommand[cmd])
     {
@@ -540,7 +547,7 @@ CAsm::SymStat CSym6502::perform_command()
         carry = tmp < 0;
         zero = (tmp & 0xFF) == 0;
         negative = tmp & 0x80;
-        
+
         ctx.set_status_reg_ZNC(zero, negative, !carry);
         break;
 
@@ -625,7 +632,7 @@ CAsm::SymStat CSym6502::perform_command()
         {
             inc_prog_counter(); // bypass the command
             acc = ctx.a;
-            
+
             carry = acc & 0x80;
             acc <<= 1;
 
@@ -673,7 +680,7 @@ CAsm::SymStat CSym6502::perform_command()
 
             carry = acc & 0x01;
             acc >>= 1;
-            
+
             if (ctx.carry)
             {
                 acc |= 0x80;
@@ -696,7 +703,7 @@ CAsm::SymStat CSym6502::perform_command()
 
             carry = acc & 0x01;
             acc >>= 1;
-            
+
             if (ctx.carry)
             {
                 acc |= 0x80;
@@ -1087,7 +1094,7 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.pc = get_irq_addr();
         break;
 
-    //---------- 65c02 --------------------------------------------------------
+        //---------- 65c02 --------------------------------------------------------
 
     case C_PLY:
         inc_prog_counter();
@@ -1165,7 +1172,7 @@ CAsm::SymStat CSym6502::perform_command()
 
     case C_BBR:
         addr = get_argument_address(false); // zpg (lo), rel (hi)
-        if (!( ctx.mem[addr & 0xFF] & uint8_t(1 << ((cmd >> 4) & 0x07)) ))
+        if (!(ctx.mem[addr & 0xFF] & uint8_t(1 << ((cmd >> 4) & 0x07))))
         {
             arg = addr >> 8;
             if (arg & 0x80) // jump back
@@ -1177,7 +1184,7 @@ CAsm::SymStat CSym6502::perform_command()
 
     case C_BBS:
         addr = get_argument_address(false); // zpg (lo), rel (hi)
-        if ( ctx.mem[addr & 0xFF] & uint8_t(1 << ((cmd >> 4) & 0x07)) )
+        if (ctx.mem[addr & 0xFF] & uint8_t(1 << ((cmd >> 4) & 0x07)))
         {
             arg = addr >> 8;
             if (arg & 0x80) // jump back
@@ -1196,7 +1203,7 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.mem[addr] |= uint8_t(1 << ((cmd >> 4) & 0x07));
         break;
 
-    //------------65816--------------------------------------------------------
+        //------------65816--------------------------------------------------------
     case C_TXY:
         inc_prog_counter();
         ctx.y = ctx.x;
@@ -1213,7 +1220,7 @@ CAsm::SymStat CSym6502::perform_command()
         return SYM_FIN;
 
     case C_BRL:
-        addr = ctx.mem.GetWord(ctx.pc);
+        addr = get_word(ctx.pc);
         inc_prog_counter(2);
         if (addr & 0x8000) // jump back
             ctx.pc -= 0x10000 - addr;
@@ -1221,7 +1228,7 @@ CAsm::SymStat CSym6502::perform_command()
             ctx.pc += addr;
         break;
 
-    //-------------------------------------------------------------------------
+        //-------------------------------------------------------------------------
 
     case C_ILL:
         if (finish == FIN_BY_DB && cmd == 0xDB) // DB is invalid for 6502, 65C02 - STP for 65816
@@ -1265,7 +1272,7 @@ CAsm::SymStat CSym6502::perform_command()
 
 CAsm::SymStat CSym6502::skip_cmd() // Skip the current statement
 {
-    inc_prog_counter( mode_to_len[m_vCodeToMode[ctx.mem[ctx.pc]]] );
+    inc_prog_counter(mode_to_len[m_vCodeToMode[ctx.mem[ctx.pc]]]);
     return SYM_OK;
 }
 
@@ -1369,7 +1376,7 @@ CAsm::SymStat CSym6502::step_over() // wykonanie instrukcji bez wchodzenia do po
     case C_JSR:
         stack = ctx.s;
         jsr = true;
-        
+
     case C_BRK:
         if (debug && !jsr)
             debug->SetTemporaryExecBreakpoint((addr + 2) & ctx.mem_mask); // Break after instruction
@@ -1509,12 +1516,12 @@ CAsm::SymStat CSym6502::perform_step(bool animate)
     if (m_nInterruptTrigger != NONE) // interrupt requested?
         interrupt(m_nInterruptTrigger);
 
-    SymStat stat= perform_cmd();
+    SymStat stat = perform_cmd();
     if (stat != SYM_OK)
         return stat;
 
     Breakpoint bp;
-    if (debug && (bp=debug->GetBreakpoint(ctx.pc)) != BPT_NONE)
+    if (debug && (bp = debug->GetBreakpoint(ctx.pc)) != BPT_NONE)
     {
         if (bp & BPT_EXECUTE)
             return SYM_BPT_EXECUTE;
@@ -1546,7 +1553,7 @@ CAsm::SymStat CSym6502::run(bool animate /*= false*/)
     }
 }
 
-void CSym6502::interrupt(int& nInterrupt) // interrupt requested: load pc ***
+void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
 {
     ASSERT(running);
 
@@ -1684,9 +1691,9 @@ void CSym6502::AbortProg()
      * Not sure about this, it looks like they were attempting to override
      * the main application loop with one that runs async (like for games)
      * but ::GetMessage() blocks until it receives a message.  If they
-     * had intended for it to run as an animation they probably wanted 
+     * had intended for it to run as an animation they probably wanted
      * ::PeekMessage() instead.
-     * 
+     *
      *                  -- B.Simonds (May 1, 2024)
      */
 
@@ -1863,30 +1870,30 @@ void CSym6502::SetPointer(const CLine &line, uint32_t addr) // position the arro
     {
         CDocument *pDoc = wxGetApp().m_pDocDeasmTemplate->GetNextDoc(posDoc);
         ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CDeasm6502Doc)));
-        ((CDeasm6502Doc*)pDoc)->SetPointer(addr, true);
+        ((CDeasm6502Doc *)pDoc)->SetPointer(addr, true);
     }
 
-    CSrc6502View* pView = FindDocView(line.file); // Get the document window
+    CSrc6502View *pView = FindDocView(line.file); // Get the document window
     if (m_fuidLastView != line.file && ::IsWindow(m_hwndLastView)) // Window changed?
     {
-        if (CSrc6502View* pView = dynamic_cast<CSrc6502View*>(CWnd::FromHandlePermanent(m_hwndLastView)))
+        if (CSrc6502View *pView = dynamic_cast<CSrc6502View *>(CWnd::FromHandlePermanent(m_hwndLastView)))
             SetPointer(pView, -1, false); // Hide arrow
         m_hwndLastView = 0;
     }
     if (!pView && debug)
     {
-        if (const char* path = debug->GetFilePath(line.file))
+        if (const char *path = debug->GetFilePath(line.file))
         {
             // Try to open a document....
-            C6502App* pApp = static_cast<C6502App*>(wxGetApp());
+            C6502App *pApp = static_cast<C6502App *>(wxGetApp());
             pApp->m_bDoNotAddToRecentFileList = true;
-            CDocument* pDoc = pApp->OpenDocumentFile(path);
+            CDocument *pDoc = pApp->OpenDocumentFile(path);
             pApp->m_bDoNotAddToRecentFileList = false;
-            if (CSrc6502Doc* pSrcDoc = dynamic_cast<CSrc6502Doc*>(pDoc))
+            if (CSrc6502Doc *pSrcDoc = dynamic_cast<CSrc6502Doc *>(pDoc))
             {
                 POSITION pos = pSrcDoc->GetFirstViewPosition();
                 if (pos != NULL)
-                    pView = dynamic_cast<CSrc6502View*>(pSrcDoc->GetNextView(pos));
+                    pView = dynamic_cast<CSrc6502View *>(pSrcDoc->GetNextView(pos));
             }
         }
     }
@@ -1902,18 +1909,18 @@ void CSym6502::SetPointer(const CLine &line, uint32_t addr) // position the arro
 #endif
 }
 
-void CSym6502::SetPointer(CSrc6502View* pView, int nLine, bool bScroll)
+void CSym6502::SetPointer(CSrc6502View *pView, int nLine, bool bScroll)
 {
     if (!pView)
         return;
 
 #if REWRITE_TO_WX_WIDGET
-    CDocument* pDoc = pView->GetDocument();
+    CDocument *pDoc = pView->GetDocument();
     POSITION pos = pDoc->GetFirstViewPosition();
 
     while (pos != NULL)
     {
-        if (CSrc6502View* pSrcView = dynamic_cast<CSrc6502View*>(pDoc->GetNextView(pos)))
+        if (CSrc6502View *pSrcView = dynamic_cast<CSrc6502View *>(pDoc->GetNextView(pos)))
             pSrcView->SetPointer(nLine, bScroll && pSrcView == pView);
     }
 #endif
@@ -1926,13 +1933,13 @@ void CSym6502::ResetPointer() // hide the arrow
 
     while (posDoc != NULL) // Are there disassembler windows?
     {
-        if (CDeasm6502Doc* pDoc = dynamic_cast<CDeasm6502Doc*>(wxGetApp().m_pDocDeasmTemplate->GetNextDoc(posDoc)))
+        if (CDeasm6502Doc *pDoc = dynamic_cast<CDeasm6502Doc *>(wxGetApp().m_pDocDeasmTemplate->GetNextDoc(posDoc)))
             pDoc->SetPointer(-1, true);
     }
 
     if (m_fuidLastView)
     {
-        if (CSrc6502View* pView = FindDocView(m_fuidLastView))
+        if (CSrc6502View *pView = FindDocView(m_fuidLastView))
             SetPointer(pView, -1, false); // blurring of the arrow
     }
 #endif
@@ -1946,11 +1953,11 @@ CSrc6502View *CSym6502::FindDocView(FileUID fuid)
     if (debug == NULL)
         return NULL;
 
-    if (CFrameWnd* pFrame = dynamic_cast<CFrameWnd*>(AfxGetMainWnd()))
+    if (CFrameWnd *pFrame = dynamic_cast<CFrameWnd *>(AfxGetMainWnd()))
     {
-        if (CFrameWnd* pActive = pFrame->GetActiveFrame())
+        if (CFrameWnd *pActive = pFrame->GetActiveFrame())
         {
-            if (CSrc6502View* pView = dynamic_cast<CSrc6502View*>(pActive->GetActiveView()))
+            if (CSrc6502View *pView = dynamic_cast<CSrc6502View *>(pActive->GetActiveView()))
             {
                 if (debug->GetFileUID(pView->GetDocument()->GetPathName()) == fuid)
                     return pView;

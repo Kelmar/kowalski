@@ -26,13 +26,11 @@ class COutputMem
 private:
     uint8_t *m_data;
     size_t m_size;
-    UINT m_uMask;
 
 public:
     COutputMem()
         : m_data(nullptr)
         , m_size(0x1000000)
-        , m_uMask(0xFFFFFF)
     {
         m_data = new uint8_t[m_size];
         memset(m_data, 0, m_size);
@@ -43,77 +41,46 @@ public:
         delete[] m_data;
     }
 
-    void ClearMem()	// wyzerowanie pami�ci
+    size_t size() const { return m_size; }
+
+    void Clear()
     {
         memset(m_data, 0, m_size);
     }
 
-    void ClearMem(int nByte)
-    {
-        memset(m_data, nByte, m_size);
-    }
-
+    // TODO: Deprecate this, don't want to be copying huge chunks of memory around.
     COutputMem &operator= (const COutputMem &src)
     {
         ASSERT(m_size == src.m_size); // Dimensions must be identical
         memcpy(m_data, src.m_data, m_size);
-        m_uMask = src.m_uMask;
         return *this;
     }
 
-#if 0
-    void Save(CArchive &archive, uint32_t start, uint32_t end)
-    {
-        ASSERT(end >= start);
-        archive.Write(m_data + start, int(end) - start + 1);
-    }
-
-    void Load(CArchive &archive, uint32_t start, uint32_t end)
-    {
-        ASSERT(end >= start);
-        archive.Read(m_data + start, int(end) - start + 1);
-    }
-#endif
-
     const uint8_t *Mem() const { return m_data; }
 
-    void SetMask(uint32_t uMask)
+    uint8_t operator[] (size_t addr) const
     {
-        m_uMask = uMask;
+        ASSERT(addr < m_size);
+        return m_data[addr];
     }
 
-    uint8_t& operator[] (uint32_t uAddr)
+    uint8_t &operator[] (size_t addr)
     {
-        ASSERT(m_uMask > 0);
-        return m_data[uAddr & m_uMask];
-    } // ElementAt(uAddr & m_uMask); }
-
-    uint8_t operator[] (uint32_t uAddr) const
-    {
-        ASSERT(m_uMask > 0);
-        return m_data[uAddr & m_uMask];
-    } // GetAt(uAddr & m_uMask); }
-
-    uint16_t GetWord(uint16_t uLo, uint16_t uHi) const
-    {
-        ASSERT(m_uMask > 0);
-        return m_data[uLo & m_uMask] + uint32_t(m_data[uHi & m_uMask] << 8);
-        //return GetAt(uLo & m_uMask) + (uint32_t(GetAt(uHi & m_uMask)) << 8);
+        ASSERT(addr < m_size);
+        return m_data[addr];
     }
 
-    uint16_t GetWord(uint32_t uAddr) const
+    uint16_t GetWord(size_t addr) const
     {
-        ASSERT(m_uMask > 0);
-        return m_data[uAddr & m_uMask] + uint32_t(m_data[(uAddr + 1) & m_uMask] << 8);
-        //return GetAt(uAddr & m_uMask) + (uint32_t(GetAt((uAddr + 1) & m_uMask)) << 8);
-    }
+        ASSERT(addr < (m_size - 1));
 
-    uint16_t GetWordInd(uint8_t uZpAddr) const
-    {
-        ASSERT(m_uMask > 0);
-        return m_data[uZpAddr] + (m_data[uZpAddr + uint8_t(1)] << 8);
-        //return GetAt(uZpAddr) + (GetAt(uZpAddr + uint8_t(1)) << 8);
+        uint16_t lo = m_data[addr];
+        uint16_t hi = m_data[addr + 1];
+
+        return lo | (hi << 8);
     }
 };
+
+typedef std::shared_ptr<COutputMem> CMemoryPtr;
 
 #endif

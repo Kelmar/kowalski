@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Temporary place holder for now
 class CArchive;
 
-class CGlobal : public /*CObject,*/ CAsm //, virtual CBroadcast
+class CGlobal : public CAsm
 {
 private:
     UINT m_uAddrBusWidth;           // width of the address bus
@@ -77,7 +77,7 @@ public:
 
     COutputMem *GetMemForAsm() // Memory for the object code (assembly)
     {
-        m_ProgMem.ClearMem();
+        m_ProgMem.Clear();
         return &m_ProgMem;
     }
 

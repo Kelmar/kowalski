@@ -29,11 +29,12 @@
 
 #include <algorithm>
 #include <string>
+#include <sstream>
 #include <cctype>
 
 namespace str
 {
-    namespace impl__
+    namespace 
     {
         // C defines tolower() and toupper() as int types, C++ doesn't like this.
         inline char c_tolower(char c) { return std::tolower(c); }
@@ -65,7 +66,7 @@ namespace str
      */
     inline std::string getLower(const std::string &s)
     {
-        return transform(s, str::impl__::c_tolower);
+        return transform(s, c_tolower);
     }
 
     /**
@@ -73,24 +74,69 @@ namespace str
      */
     inline std::string getUpper(const std::string &s)
     {
-        return transform(s, str::impl__::c_toupper);
+        return transform(s, c_toupper);
     }
 
     /**
      * @brief Converts a string to all lower in place.
      */
-    inline std::string &tolower(std::string &s)
+    inline std::string &toLower(std::string &s)
     {
-        return mutate(s, str::impl__::c_tolower);
+        return mutate(s, c_tolower);
     }
 
     /**
      * @brief Converts a string to all upper in place.
      */
-    inline std::string &toupper(std::string &s)
+    inline std::string &toUpper(std::string &s)
     {
-        return mutate(s, str::impl__::c_toupper);
+        return mutate(s, c_toupper);
     }
+
+    /**
+     * @brief Convert a container of items into a single string separated by separator.
+     */
+    inline std::string join(const std::string &separator, auto &&container)
+    {
+        std::stringstream rval;
+        bool first = true;
+
+        for (auto i : container)
+        {
+            if (first)
+                first = false;
+            else
+                rval << separator;
+
+            rval << i;
+        }
+
+        return rval.str();
+    }
+
+    /**
+     * Constraint that requires class to define a ToString() method that 
+     * returns a string of the object.
+     */
+    template <typename T>
+    concept str_convertable = requires(T a)
+    {
+        { a.ToString() } -> std::convertible_to<std::string>;
+    };
+}
+
+/**
+ * @brief Serialize object to stream
+ * 
+ * Operator that will convert and object to a string and send it to the stream.
+ * 
+ * This function requires that the object's class define a ToString() method.
+ */
+template <str::str_convertable T>
+std::ostream &operator <<(std::ostream &stream, const T &item)
+{
+    stream << item.ToString();
+    return stream;
 }
 
 /*************************************************************************/
