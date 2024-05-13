@@ -105,11 +105,11 @@ public:
     }
 
     // Load the arguments of the call
-    CAsm::Stat ParseArguments(CLeksem &leks, CAsm6502 &asmb);
+    CAsm::Stat ParseArguments(CToken &leks, CAsm6502 &asmb);
 
-    CAsm::Stat ParamLookup(CLeksem &leks, const std::string& param_name, Expr &expr, bool &found, CAsm6502 &asmb);
-    CAsm::Stat ParamLookup(CLeksem &leks, int param_number, Expr &expr, CAsm6502 &asmb);
-    CAsm::Stat AnyParamLookup(CLeksem &leks, CAsm6502 &asmb);
+    CAsm::Stat ParamLookup(CToken &leks, const std::string& param_name, Expr &expr, bool &found, CAsm6502 &asmb);
+    CAsm::Stat ParamLookup(CToken &leks, int param_number, Expr &expr, CAsm6502 &asmb);
+    CAsm::Stat AnyParamLookup(CToken &leks, CAsm6502 &asmb);
 
     CAsm::Stat ParamType(const std::string &param_name, _Out_ bool &found, _Out_ int &type);
     CAsm::Stat ParamType(int param_number, _Out_ bool &found, _Out_ int &type);
@@ -117,7 +117,7 @@ public:
     //virtual bool IsMacro() // The data source is the expanded macro
     //{ return true; }
 
-    CMacroDef &operator= (const CMacroDef &src)
+    CMacroDef &operator= (const CMacroDef &)
     {
         ASSERT(false); // objects of type C cannot be assigned to MacroDef
         return *this;

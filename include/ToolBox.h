@@ -38,7 +38,7 @@ public:
     /* constructor */ CToolBox();
     virtual          ~CToolBox();
     
-    bool Create(int rsc_id, wxWindow* parent);
+    bool Create(int rscId, wxWindow* parent);
 };
 
 #endif /* TOOLBOX_H__ */

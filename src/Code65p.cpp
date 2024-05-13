@@ -30,6 +30,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, uint32_t start, uint32_t end)
 {
+    UNUSED(archive);
+    UNUSED(mem);
+    UNUSED(start);
+    UNUSED(end);
+
     if (start > 0xFFFF)  // 1.3.3 support for 24-bit addressing
     {
 #if 0
@@ -56,6 +61,11 @@ bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, uint32_t start, u
 
 bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start)
 {
+    UNUSED(archive);
+    UNUSED(mem);
+    UNUSED(area);
+    UNUSED(prog_start);
+
 #if 0
     int header = 0xFFFF;
     archive.Write(&header, 2);

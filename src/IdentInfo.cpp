@@ -35,10 +35,12 @@ CIdentInfo::~CIdentInfo()
 }
 
 //-----------------------------------------------------------------------------
-// Nowe okno
+// New window
 
 bool CIdentInfo::Create(CDebugInfo *pDebugInfo/*= NULL*/)
 {
+    UNUSED(pDebugInfo);
+
 #if 0
     if (pDebugInfo)
         m_pDebugInfo = pDebugInfo;

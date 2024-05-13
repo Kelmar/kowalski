@@ -61,6 +61,8 @@ void CSplashWnd::EnableSplashScreen(bool bEnable /*= TRUE*/)
 
 void CSplashWnd::ShowSplashScreen(wxWindow* pParentWnd /*= NULL*/)
 {
+    UNUSED(pParentWnd);
+
 #if REWRITE_TO_WX_WIDGET
     if (!s_showSplash || s_splashWnd != NULL)
         return;
@@ -97,6 +99,8 @@ void CSplashWnd::PreTranslateAppMessage(MSG* pMsg)
 
 bool CSplashWnd::Create(wxWindow* pParentWnd /*= NULL*/)
 {
+    UNUSED(pParentWnd);
+
 #if REWRITE_TO_WX_WIDGET
 
 #ifdef _DEBUG
@@ -215,6 +219,8 @@ void CSplashWnd::OnPaint()
 
 void CSplashWnd::OnTimer(UINT nIDEvent)
 {
+    UNUSED(nIDEvent);
+
     // Destroy the splash screen window.
     HideSplashScreen();
 }

@@ -47,6 +47,8 @@ CColorButton::CColorButton()
 
 void CColorButton::PaintIt(int offset)
 {
+    UNUSED(offset);
+
 #if 0
     wxRECT rect = GetClientRect();
 

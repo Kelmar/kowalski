@@ -28,6 +28,7 @@ public:
 
     bool LoadToolBar(UINT resourceId)
     {
+        UNUSED(resourceId);
         //return LoadToolBar(MAKEINTRESOURCE(resourceId));
         return false;
     }

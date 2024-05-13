@@ -35,8 +35,6 @@ std::string CMapFile::GetPath(CAsm::FileUID fuid)
 
 CAsm::FileUID CMapFile::GetFileUID(const std::string &path)
 {
-    CAsm::FileUID fuid;
-
     auto itr = m_pathToFuid.find(path);
 
     if (itr == m_pathToFuid.end())

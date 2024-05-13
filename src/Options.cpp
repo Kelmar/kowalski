@@ -45,8 +45,8 @@ bool SelectColor(wxPanel *parent, wxColour *baseColor, CColorButton *colorBtn)
     if (dlg.ShowModal() == wxID_OK)
     {
         *baseColor = data.GetColour();
-        return true;
         colorBtn->Refresh();
+        return true;
     }
 
     return false;
@@ -136,6 +136,9 @@ END_MESSAGE_MAP()
 
 bool COptions::OnCommand(WPARAM wParam, LPARAM lParam)
 {
+    UNUSED(wParam);
+    UNUSED(lParam);
+
 #if REWRITE_TO_WX_WIDGET
     m_nLastActivePageIndex = GetActiveIndex();
     return CPropertySheet::OnCommand(wParam, lParam);
@@ -707,31 +710,49 @@ bool COptions::OnHelpInfo(HELPINFO* pHelpInfo)
 
 void COptionsSymPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
     //HtmlHelpA(59991, HH_HELP_CONTEXT);
 }
 
 void COptions::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
     //HtmlHelpA(NULL, HH_DISPLAY_TOPIC);
 }
 
 void COptionsAsmPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
     //HtmlHelpA(59992, HH_HELP_CONTEXT);
 }
 
 void COptionsDeasmPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
     //HtmlHelpA(59993, HH_HELP_CONTEXT);
 }
 
 void COptionsEditPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
     //HtmlHelpA(59994, HH_HELP_CONTEXT);
 }
 
 void COptionsMarksPage::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
     //HtmlHelpA(59995, HH_HELP_CONTEXT);
 }
 

@@ -59,7 +59,7 @@ private:
 
     void set_state(State state, bool assemble)
     {
-        if (stack.capacity() < level)
+        if (stack.capacity() < static_cast<std::size_t>(level))
             stack.reserve(level);
 
         stack[level] = uint8_t((state == BEFORE_ELSE ? 1 : 0) + (assemble ? 2 : 0));

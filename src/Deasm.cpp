@@ -74,7 +74,7 @@ std::string CDeasm::DeasmInstr(const CmdInfo& ci, DeasmFmt flags)
 
 std::string CDeasm::DeasmInstr(const CContext& ctx, DeasmFmt flags, int& ptr)
 {
-    ASSERT(ptr == -1 || ptr >= 0 && ptr <= 0xFFFF);
+    ASSERT((ptr == -1) || ((ptr >= 0) && (ptr <= 0xFFFF)));
 
     std::string str;
     wxString fmt;
@@ -418,7 +418,7 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, int cmd_addr /*= -1*/)
     uint32_t addr, tmp;
     uint32_t laddr;
 
-    ASSERT(cmd_addr == -1 || cmd_addr >= 0 && cmd_addr <= 0xFFFF); // Invalid address
+    ASSERT((cmd_addr == -1) || ((cmd_addr >= 0) && (cmd_addr <= 0xFFFF))); // Invalid address
 
     if (cmd_addr == -1)
         cmd_addr = ctx.pc;
@@ -525,13 +525,13 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, int cmd_addr /*= -1*/)
 
     case A_ZREL:
     {
-        std::string tmp = SetMemZPGInfo((uint8_t)cmd_addr, ctx.mem[cmd_addr]);
+        std::string tmpStr = SetMemZPGInfo((uint8_t)cmd_addr, ctx.mem[cmd_addr]);
         arg = ctx.mem[cmd_addr + 1];
         if (arg & 0x80) // Jump back
             str.Printf("; PC-$%02X", int(0x100 - arg));
         else // Jump forward
             str.Printf("; PC+$%02X", int(arg));
-        return tmp + str.ToStdString();
+        return tmpStr + str.ToStdString();
     }
 
     case A_ABSL:
@@ -713,7 +713,7 @@ int CDeasm::FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt/*= 1*/)
         */
         if (prev == addr)
             ret = 0; // We are at the beginning -there is no offset
-        else if ((prev + (cmd == 0 ? 1 : mode_to_len[CodeToMode()[cmd]])) == addr)
+        else if (static_cast<uint32_t>(prev + (cmd == 0 ? 1 : mode_to_len[CodeToMode()[cmd]])) == addr)
             ret = 1; // is moved by one line
         else
             ret = -1; // there is a shift, but it affected the change of subsequent orders

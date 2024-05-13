@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -72,10 +72,10 @@ void CAsm6502::init()
 
 /*************************************************************************/
 
-CLeksem CAsm6502::next_leks(bool nospace) // Get the next symbol
+CToken CAsm6502::next_leks(bool nospace) // Get the next symbol
 {
     if (!ptr)
-        return CLeksem(CLeksem::L_FIN);
+        return CToken(CTokenType::L_FIN);
 
     char c = *ptr++;
 
@@ -89,37 +89,37 @@ CLeksem CAsm6502::next_leks(bool nospace) // Get the next symbol
         else if (*ptr == '3')
             forcelong = 3;
         else
-            return CLeksem(CLeksem::L_ERROR);
+            return CToken(CTokenType::L_ERROR);
 
         ptr++;
         return next_leks();
 
     case '\n':
     case '\r':
-        return CLeksem(CLeksem::L_CR);
+        return CToken(CTokenType::L_CR);
 
     case '\0':
         ptr--;
-        return CLeksem(CLeksem::L_FIN);
+        return CToken(CTokenType::L_FIN);
 
     case '$':
         if (!isxdigit(*ptr)) // the '$' character at the end of a macro parameter?
-            return CLeksem(CLeksem::L_STR_ARG);
+            return CToken(CTokenType::L_STR_ARG);
         break;
 
     case ';':
-        return CLeksem(CLeksem::L_COMMENT);
+        return CToken(CTokenType::L_COMMENT);
 
     case ':':
-        return CLeksem(CLeksem::L_LABEL);
+        return CToken(CTokenType::L_LABEL);
 
     case '=':
         if (*ptr == '=') // operator '==' equal?
         {
             ptr++;
-            return CLeksem(O_EQ);
+            return CToken(O_EQ);
         }
-        return CLeksem(CLeksem::L_EQUAL);
+        return CToken(CTokenType::L_EQUAL);
 
     case '\'':
         return get_char_num();
@@ -128,125 +128,125 @@ CLeksem CAsm6502::next_leks(bool nospace) // Get the next symbol
         return get_string('"');
 
     case ',':
-        return CLeksem(CLeksem::L_COMMA);
+        return CToken(CTokenType::L_COMMA);
 
     case '(':
-        return CLeksem(CLeksem::L_BRACKET_L);
+        return CToken(CTokenType::L_BRACKET_L);
 
     case ')':
-        return CLeksem(CLeksem::L_BRACKET_R);
+        return CToken(CTokenType::L_BRACKET_R);
 
     case '[':
-        return CLeksem(CLeksem::L_LBRACKET_L); // 65816
+        return CToken(CTokenType::L_LBRACKET_L); // 65816
 
     case ']':
-        return CLeksem(CLeksem::L_LBRACKET_R); // 65816
+        return CToken(CTokenType::L_LBRACKET_R); // 65816
 
     case '{':
-        return CLeksem(CLeksem::L_EXPR_BRACKET_L); // 65816
+        return CToken(CTokenType::L_EXPR_BRACKET_L); // 65816
 
     case '}':
-        return CLeksem(CLeksem::L_EXPR_BRACKET_R); // 65816
+        return CToken(CTokenType::L_EXPR_BRACKET_R); // 65816
 
     case '>':
         if (*ptr == '>') // operator '>>'
         {
             ptr++;
-            return CLeksem(O_SHR);
+            return CToken(O_SHR);
         }
         else if (*ptr == '=') // operator '>='
         {
             ptr++;
-            return CLeksem(O_GTE);
+            return CToken(O_GTE);
         }
-        return CLeksem(O_GT);
+        return CToken(O_GT);
 
     case '<':
         if (*ptr == '<') // operator '<<'
         {
             ptr++;
-            return CLeksem(O_SHL);
+            return CToken(O_SHL);
         }
         else if (*ptr == '=') // operator '<='
         {
             ptr++;
-            return CLeksem(O_LTE);
+            return CToken(O_LTE);
         }
-        return CLeksem(O_LT);
+        return CToken(O_LT);
 
     case '&':
         if (*ptr == '&') // operator '&&' ?
         {
             ptr++;
-            return CLeksem(O_AND);
+            return CToken(O_AND);
         }
-        return CLeksem(O_B_AND);
+        return CToken(O_B_AND);
 
     case '|':
         if (*ptr == '|') // operator '||' ?
         {
             ptr++;
-            return CLeksem(O_OR);
+            return CToken(O_OR);
         }
-        return CLeksem(O_B_OR);
+        return CToken(O_B_OR);
 
     case '^':
-        return CLeksem(O_B_XOR);
+        return CToken(O_B_XOR);
 
     case '+':
-        return CLeksem(O_PLUS);
+        return CToken(O_PLUS);
 
     case '-':
-        return CLeksem(O_MINUS);
+        return CToken(O_MINUS);
 
     case '*':
-        if (*ptr=='=')	// operator '*=' .ORG?
+        if (*ptr == '=')	// operator '*=' .ORG?
         {
             ptr++;
-            return CLeksem(I_ORG);
+            return CToken(I_ORG);
         }
-        return CLeksem(O_MUL);
+        return CToken(O_MUL);
 
     case '/':
-        return CLeksem(O_DIV);
+        return CToken(O_DIV);
 
     case '%':
-        if (!swapbin) return CLeksem(O_MOD);
+        if (!swapbin) return CToken(O_MOD);
         break;
 
     case '@':
-        if (swapbin) return CLeksem(O_MOD);
+        if (swapbin) return CToken(O_MOD);
         break;
 
     case '~':
-        return CLeksem(O_B_NOT);
+        return CToken(O_B_NOT);
 
     case '!':
-        if (*ptr=='=')	// operator '!='?
+        if (*ptr == '=')	// operator '!='?
         {
             ptr++;
-            return CLeksem(O_NE);
+            return CToken(O_NE);
         }
-        else if (*ptr=='#')	// operator '!#' ?
+        else if (*ptr == '#')	// operator '!#' ?
         {
             ptr++;
-            return CLeksem(CLeksem::L_LHASH);
+            return CToken(CTokenType::L_LHASH);
         }
-        return CLeksem(O_NOT);
+        return CToken(O_NOT);
 
     case '#':
-        return CLeksem(CLeksem::L_HASH);
+        return CToken(CTokenType::L_HASH);
 
     case '.':
         if (*ptr == '=') // operator '.='?
         {
             ptr++;
-            return CLeksem(I_SET);
+            return CToken(I_SET);
         }
         else if (ptr[0] == '.' && ptr[1] == '.') // Ellipsis '...' ?
         {
             ptr += 2;
-            return CLeksem(CLeksem::L_MULTI);
+            return CToken(CTokenType::L_MULTI);
         }
         break;
     };
@@ -273,9 +273,9 @@ CLeksem CAsm6502::next_leks(bool nospace) // Get the next symbol
     {
         ptr--;
         //const CLeksem &leks=
-        std::string* pStr = get_ident();
+        std::string *pStr = get_ident();
         if (pStr == nullptr)
-            return CLeksem(CLeksem::ERR_BAD_CHR);
+            return CToken(CToken::ERR_BAD_CHR);
 
         //% Bug Fix 1.2.12.18 - .commands commented out
         OpCode code;
@@ -288,12 +288,12 @@ CLeksem CAsm6502::next_leks(bool nospace) // Get the next symbol
                 if (it == CAsm::I_DB) //***
                 {
                     delete pStr;
-                    return CLeksem(it);
+                    return CToken(it);
                 }
                 else
                 {
                     delete pStr;
-                    return CLeksem(it);
+                    return CToken(it);
                 }
             }
         }
@@ -301,33 +301,33 @@ CLeksem CAsm6502::next_leks(bool nospace) // Get the next symbol
         if (pStr->size() == 3 && proc_instr(*pStr, code)) // This could be a statement
         {
             delete pStr;
-            return CLeksem(code);
+            return CToken(code);
         }
         else if (*pStr == "high")
         {
             delete pStr;
-            return CLeksem(O_GT);
+            return CToken(O_GT);
         }
         else if (*pStr == "low")
         {
             delete pStr;
-            return CLeksem(O_LT);
+            return CToken(O_LT);
         }
 
         if (*ptr == '#') // '#' character at the end of the label?
         {
             ptr++;
-            return CLeksem(pStr, 1L); // Numbered identifier (expected number after '#')
+            return CToken(pStr, 1L); // Numbered identifier (expected number after '#')
         }
-        return CLeksem(pStr, 1);	// L_IDENT
+        return CToken(pStr, 1);	// L_IDENT
     }
 
-    return CLeksem(CLeksem::L_UNKNOWN); // Unknown character -error
+    return CToken(CTokenType::L_UNKNOWN); // Unknown character -error
 }
 
 /*************************************************************************/
 
-CLeksem CAsm6502::get_hex_num() // Interpretation of a hexadecimal number
+CToken CAsm6502::get_hex_num() // Interpretation of a hexadecimal number
 {
     uint32_t val = 0;
     const char *tmp = ptr;
@@ -335,7 +335,7 @@ CLeksem CAsm6502::get_hex_num() // Interpretation of a hexadecimal number
     if (!isxdigit(*ptr))
     {
         err_start = tmp;
-        return CLeksem(CLeksem::ERR_NUM_HEX); // Expected hexadecimal digit
+        return CToken(CToken::ERR_NUM_HEX); // Expected hexadecimal digit
     }
 
     do
@@ -343,10 +343,10 @@ CLeksem CAsm6502::get_hex_num() // Interpretation of a hexadecimal number
         if (val & 0xF0000000)
         {
             err_start = tmp;
-            return CLeksem(CLeksem::ERR_NUM_BIG); // Exceeding the range of 32-bit numbers
+            return CToken(CToken::ERR_NUM_BIG); // Exceeding the range of 32-bit numbers
         }
 
-        char c= *ptr++;
+        char c = *ptr++;
         val <<= 4;
 
         if (c >= 'a')
@@ -355,15 +355,14 @@ CLeksem CAsm6502::get_hex_num() // Interpretation of a hexadecimal number
             val += c - 'A' + 10;
         else
             val += c - '0';
-    }
-    while (isxdigit(*ptr));
+    } while (isxdigit(*ptr));
 
-    return CLeksem(CLeksem::N_HEX, int32_t(val));
+    return CToken(CToken::N_HEX, int32_t(val));
 }
 
 /*************************************************************************/
 
-CLeksem CAsm6502::get_dec_num() // Interpretation of a decimal number
+CToken CAsm6502::get_dec_num() // Interpretation of a decimal number
 {
     uint32_t val = 0;
     const char *tmp = ptr;
@@ -371,7 +370,7 @@ CLeksem CAsm6502::get_dec_num() // Interpretation of a decimal number
     if (!isdigit(*ptr))
     {
         err_start = tmp;
-        return CLeksem(CLeksem::ERR_NUM_DEC); // Expected digit
+        return CToken(CToken::ERR_NUM_DEC); // Expected digit
     }
 
     do
@@ -379,20 +378,19 @@ CLeksem CAsm6502::get_dec_num() // Interpretation of a decimal number
         if (val > ~0u / 10)
         {
             err_start = tmp;
-            return CLeksem(CLeksem::ERR_NUM_BIG); // Exceeding the range of 32-bit numbers
+            return CToken(CToken::ERR_NUM_BIG); // Exceeding the range of 32-bit numbers
         }
 
         val *= 10;
         val += *ptr++ - '0';
-    }
-    while (isdigit(*ptr));
+    } while (isdigit(*ptr));
 
-    return CLeksem(CLeksem::N_DEC, int32_t(val));
+    return CToken(CToken::N_DEC, int32_t(val));
 }
 
 /*************************************************************************/
 
-CLeksem CAsm6502::get_bin_num() // Interpretation of binary number
+CToken CAsm6502::get_bin_num() // Interpretation of binary number
 {
     uint32_t val = 0;
     const char *tmp = ptr;
@@ -400,7 +398,7 @@ CLeksem CAsm6502::get_bin_num() // Interpretation of binary number
     if (*ptr != '0' && *ptr != '1')
     {
         err_start = tmp;
-        return CLeksem(CLeksem::ERR_NUM_HEX); // Expected hexadecimal digit
+        return CToken(CToken::ERR_NUM_HEX); // Expected hexadecimal digit
     }
 
     do
@@ -408,50 +406,49 @@ CLeksem CAsm6502::get_bin_num() // Interpretation of binary number
         if (val & 0x80000000u)
         {
             err_start = tmp;
-            return CLeksem(CLeksem::ERR_NUM_BIG); // Exceeding the range of 32-bit numbers
+            return CToken(CToken::ERR_NUM_BIG); // Exceeding the range of 32-bit numbers
         }
 
         val <<= 1;
         if (*ptr++ == '1')
             val++;
 
-    }
-    while (*ptr == '0' || *ptr == '1');
+    } while (*ptr == '0' || *ptr == '1');
 
-    return CLeksem(CLeksem::N_BIN, int32_t(val));
+    return CToken(CToken::N_BIN, int32_t(val));
 }
 
 /*************************************************************************/
 
-CLeksem CAsm6502::get_char_num() // interpretation of the character constant
+CToken CAsm6502::get_char_num() // interpretation of the character constant
 {
     char c1 = *ptr++; // first character in apostrophe
 
     if (*ptr != '\'')
     {
         if (*ptr == '\t' || *ptr == ' ' || *ptr == '\0' || *ptr == '\n')	// end of line?
-            return CLeksem(CLeksem::N_CHR2, c1 & 0xFF);
+            return CToken(CToken::N_CHR2, c1 & 0xFF);
 
         char c2 = *ptr++;
         if (*ptr != '\'')
         {
             err_start = ptr - 2;
-            return CLeksem(CLeksem::ERR_NUM_CHR);
+            return CToken(CToken::ERR_NUM_CHR);
         }
         ptr++; // omitting the closing apostrophe
-        return CLeksem(CLeksem::N_CHR2, ((c2 & 0xFF) << 8) + (c1 & 0xFF));
+        return CToken(CToken::N_CHR2, ((c2 & 0xFF) << 8) + (c1 & 0xFF));
     }
     else
     {
         ptr++; // omitting the closing apostrophe
-        return CLeksem(CLeksem::N_CHR, c1 & 0xFF);
+        return CToken(CToken::N_CHR, c1 & 0xFF);
     }
 }
 
 /*************************************************************************/
 
 //CLeksem
-std::string* CAsm6502::get_ident()
+std::string *CAsm6502::get_ident()
 {
     const char *start = ptr;
     char c = *ptr++;
@@ -469,39 +466,39 @@ std::string* CAsm6502::get_ident()
     ident_start = start; // Remembering the position of the identifier on the line
     ident_fin = ptr;
 
-//  return CLeksem(pstr,0);
+    //  return CLeksem(pstr,0);
     return pstr;
 }
 
 /*************************************************************************/
 
-CLeksem CAsm6502::get_string(char lim) // extracting a string of characters
+CToken CAsm6502::get_string(char lim) // extracting a string of characters
 {
     const char *fin = strchr(ptr, lim);
 
     if (fin == nullptr)
     {
         err_start = ptr;
-        return CLeksem(CLeksem::ERR_STR_UNLIM);
+        return CToken(CToken::ERR_STR_UNLIM);
     }
 
     std::string *pstr = new std::string(ptr, fin - ptr);
 
     ptr += *(fin + 1);
 
-    return CLeksem(pstr);
+    return CToken(pstr);
 }
 
 /*************************************************************************/
 
-CLeksem CAsm6502::eat_space()
+CToken CAsm6502::eat_space()
 {
     ptr--;
     while (isspace(*++ptr) && *ptr != '\n' && *ptr != '\r')
         ;
 
     // Whitespace characters (but not CR)
-    return CLeksem(CLeksem::L_SPACE);
+    return CToken(CTokenType::L_SPACE);
 }
 
 int CAsm6502::asm_str_key_cmp(const void *elem1, const void *elem2)
@@ -567,7 +564,7 @@ bool CAsm6502::asm_instr(const std::string &str, InstrType &it)
     // end bug fix
 
     void *ret = bsearch(&find, instr, sizeof(instr) / sizeof(ASM_STR_KEY),
-                       sizeof(ASM_STR_KEY), asm_str_key_cmp);
+        sizeof(ASM_STR_KEY), asm_str_key_cmp);
 
     if (ret)
     {
@@ -624,8 +621,11 @@ CAsm6502::Stat CAsm6502::CheckLine(const char *str, int &instr_idx_start, int &i
     case ERR_SPURIOUS_ENDR:
         ret = OK;
         break;
+
+    default:
+        break;
     }
-    
+
     ASSERT(ret >= OK);
 
     return ret;
@@ -634,15 +634,15 @@ CAsm6502::Stat CAsm6502::CheckLine(const char *str, int &instr_idx_start, int &i
 
 CAsm6502::Stat CAsm6502::look_for_endif() // Search for .IF, .ENDIF or .ELSE
 {
-    CLeksem leks = next_leks(false); // Another token, maybe empty (L_SPACE)
+    CToken leks = next_leks(false); // Another token, maybe empty (L_SPACE)
     bool labelled = false;
 
     switch (leks.type)
     {
-    case CLeksem::L_IDENT:   // Named label
-    case CLeksem::L_IDENT_N: // Numbered label
+    case CTokenType::L_IDENT:   // Named label
+    case CTokenType::L_IDENT_N: // Numbered label
         leks = next_leks();
-        if (leks.type == CLeksem::L_IDENT_N)
+        if (leks.type == CTokenType::L_IDENT_N)
         {
             Expr expr(0);
             Stat ret = factor(leks, expr);
@@ -652,13 +652,13 @@ CAsm6502::Stat CAsm6502::look_for_endif() // Search for .IF, .ENDIF or .ELSE
         labelled = true;
         switch (leks.type)
         {
-        case CLeksem::L_LABEL: // Symbol ':'
+        case CTokenType::L_LABEL: // Symbol ':'
             leks = next_leks();
-            if (leks.type != CLeksem::L_ASM_INSTR)
+            if (leks.type != CTokenType::L_ASM_INSTR)
                 return OK;
             break;
 
-        case CLeksem::L_ASM_INSTR:
+        case CTokenType::L_ASM_INSTR:
             break;
 
         default:
@@ -667,17 +667,17 @@ CAsm6502::Stat CAsm6502::look_for_endif() // Search for .IF, .ENDIF or .ELSE
         //leks = next_leks();
         break;
 
-    case CLeksem::L_SPACE: // Spacing
+    case CTokenType::L_SPACE: // Spacing
         leks = next_leks();
-        if (leks.type!=CLeksem::L_ASM_INSTR) // Not an assembler directive?
+        if (leks.type != CTokenType::L_ASM_INSTR) // Not an assembler directive?
             return OK;
         break;
 
-    case CLeksem::L_COMMENT: // Comment
-    case CLeksem::L_CR: // End of line
+    case CTokenType::L_COMMENT: // Comment
+    case CTokenType::L_CR: // End of line
         return OK;
 
-    case CLeksem::L_FIN: // End of text
+    case CTokenType::L_FIN: // End of text
         return STAT_FIN;
         break;
 
@@ -685,7 +685,7 @@ CAsm6502::Stat CAsm6502::look_for_endif() // Search for .IF, .ENDIF or .ELSE
         return ERR_UNEXP_DAT;
     }
 
-    ASSERT(leks.type == CLeksem::L_ASM_INSTR); // Assembler directive
+    ASSERT(leks.type == CTokenType::L_ASM_INSTR); // Assembler directive
 
     switch (leks.GetInstr())
     {
@@ -723,7 +723,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
     ident_start = NULL;
     ident_fin = NULL;
 
-    CLeksem leks = next_leks(false); // Another token, maybe empty (L_SPACE)
+    CToken leks = next_leks(false); // Another token, maybe empty (L_SPACE)
 
     for (;;)
     {
@@ -732,15 +732,15 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
         case START: // Beginning of the line
             switch (leks.type)
             {
-            case CLeksem::L_IDENT: // label
+            case CTokenType::L_IDENT: // label
                 label = *leks.GetString(); // Remember the ID
                 state = AFTER_LABEL;
                 leks = next_leks();
                 break;
-                
-            case CLeksem::L_IDENT_N: // Numbered label
+
+            case CTokenType::L_IDENT_N: // Numbered label
             {
-                CLeksem ident(leks);
+                CToken ident(leks);
                 Expr expr(0);
                 leks = next_leks();
                 ret = factor(leks, expr);
@@ -761,21 +761,21 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                 state = AFTER_LABEL;
                 break;
             }
-            
-            case CLeksem::L_SPACE: // There can be no more labels after the space
+
+            case CTokenType::L_SPACE: // There can be no more labels after the space
                 state = INSTR;
                 leks = next_leks();
                 break;
 
-            case CLeksem::L_COMMENT:
+            case CTokenType::L_COMMENT:
                 state = COMMENT;
                 break;
 
-            case CLeksem::L_CR: // End of line
-            case CLeksem::L_FIN: // End of text
+            case CTokenType::L_CR: // End of line
+            case CTokenType::L_FIN: // End of text
                 state = FINISH;
                 break;
-                
+
             default:
                 return ERR_UNEXP_DAT; // Unrecognized string
             }
@@ -784,16 +784,16 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
         case AFTER_LABEL: // A label occurred
             switch (leks.type)
             {
-            case CLeksem::L_SPACE:
+            case CTokenType::L_SPACE:
                 ASSERT(false);
                 break;
 
-            case CLeksem::L_LABEL: // Symbol ':'
+            case CTokenType::L_LABEL: // Symbol ':'
                 state = INSTR;
                 leks = next_leks();
                 break;
 
-            case CLeksem::L_EQUAL: // Symbol '='
+            case CTokenType::L_EQUAL: // Symbol '='
                 state = EXPR;
                 leks = next_leks();
                 break;
@@ -811,9 +811,9 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
             // expected instruction, comment or nothing before instruction.
             // there was a label and there is no .MACRO directive behind the label
             // nor the .SET directive?
-            if (labelled && !(leks.type == CLeksem::L_ASM_INSTR &&	
+            if (labelled && !(leks.type == CTokenType::L_ASM_INSTR &&
                 (leks.GetInstr() == I_MACRO || leks.GetInstr() == I_SET))
-               )
+                )
             {
                 if (origin > mem_mask) // 65816
                     return ERR_UNDEF_ORIGIN;
@@ -822,18 +822,18 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                 CIdent t2(CIdent::I_ADDRESS, origin);
 
                 ret = pass == 1 ? def_ident(label, _Inout_ t1) : chk_ident_def(label, _Inout_ t2);
-                      
+
                 if (ret)
                     return ret;
             }
 
             switch (leks.type)
             {
-            case CLeksem::L_SPACE:
+            case CTokenType::L_SPACE:
                 ASSERT(false);
                 break;
-                
-            case CLeksem::L_ASM_INSTR: // Assembler directive
+
+            case CTokenType::L_ASM_INSTR: // Assembler directive
             {
                 InstrType it = leks.GetInstr();
                 instr_start = ident_start; // Position of the statement on the line
@@ -847,7 +847,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
 
                 if (pass == 2 && out && debug &&
                     ret_stat != STAT_MACRO && ret_stat != STAT_EXITM && it != I_SET &&
-                    ret_stat !=  STAT_REPEAT && ret_stat != STAT_ENDR)
+                    ret_stat != STAT_REPEAT && ret_stat != STAT_ENDR)
                 {
                     ret = generate_debug(it, text->GetLineNo(), text->GetFileUID());
 
@@ -862,7 +862,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                 break;
             }
 
-            case CLeksem::L_PROC_INSTR: // processor order (opcode)
+            case CTokenType::L_PROC_INSTR: // processor order (opcode)
             {
                 instr_start = ident_start; // the location of the instructions on the line
                 instr_fin = ident_fin;
@@ -891,7 +891,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                     if (origin > mem_mask)
                         return ERR_UNDEF_ORIGIN;
 
-                    CMacroDef* pMacro = dynamic_cast<CMacroDef*>(text);
+                    CMacroDef *pMacro = dynamic_cast<CMacroDef *>(text);
 
                     if (pMacro && pMacro->m_bFirstCodeLine)
                     {
@@ -913,17 +913,17 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                 break;
             }
 
-            case CLeksem::L_IDENT: // label - here only as a macro name
-            case CLeksem::L_IDENT_N: // numbered label - here only as a macro name
+            case CTokenType::L_IDENT: // label - here only as a macro name
+            case CTokenType::L_IDENT_N: // numbered label - here only as a macro name
             {
-                if (leks.type == CLeksem::L_IDENT)
+                if (leks.type == CTokenType::L_IDENT)
                 {
                     label = *leks.GetString(); // remembering the identifier
                     leks = next_leks();
                 }
                 else
                 {
-                    CLeksem ident(leks);
+                    CToken ident(leks);
                     Expr expr(0);
                     leks = next_leks();
                     ret = factor(leks, expr);
@@ -942,9 +942,9 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                 if (!TryLookup(macro_name, label, _Out_ macro)) // if the label is not in the array
                     return ERR_UNKNOWN_INSTR;
 
-                ASSERT(macros.size() > macro.val && macro.val >= 0);
-                CMacroDef* pMacro = &macros[macro.val];
-                ret = pMacro->ParseArguments(leks,*this); // load macro arguments
+                ASSERT((macros.size() > static_cast<std::size_t>(macro.val)) && (macro.val >= 0));
+                CMacroDef *pMacro = &macros[macro.val];
+                ret = pMacro->ParseArguments(leks, *this); // load macro arguments
 
                 if (ret)
                     return ret;
@@ -963,12 +963,12 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                 break;
             }
 
-            case CLeksem::L_CR:
-            case CLeksem::L_FIN:
+            case CTokenType::L_CR:
+            case CTokenType::L_FIN:
                 state = FINISH;
                 break;
 
-            case CLeksem::L_COMMENT:
+            case CTokenType::L_COMMENT:
                 state = COMMENT;
                 break;
 
@@ -980,7 +980,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
         case EXPR: // expected expression - val. labels
             switch (leks.type)
             {
-            case CLeksem::L_SPACE:
+            case CTokenType::L_SPACE:
                 ASSERT(false);
                 break;
 
@@ -991,7 +991,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                     return ret;
 
                 // is it predefined label?
-                int nConstant= find_const(label);
+                int nConstant = find_const(label);
                 if (nConstant >= 0)
                 {
                     // assignment to io_area is fine
@@ -1000,7 +1000,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                         if (expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE)
                         {
                             if (!check_line)
-//							if (pass == 2) // do it once (avoid first pass; it's called for line checking)
+                                //							if (pass == 2) // do it once (avoid first pass; it's called for line checking)
                                 CSym6502::io_addr = uint16_t(expr.value);
                         }
                         else if (expr.inf == Expr::EX_LONG)
@@ -1029,7 +1029,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                     {
                         CIdent tmpIdent(CIdent::I_VALUE, expr.value);
                         ret = chk_ident_def(label, _Inout_ tmpIdent);
-                    }                        
+                    }
                     else
                         return ERR_UNDEF_EXPR;
 
@@ -1046,14 +1046,14 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
         case COMMENT: // just a comment or end of line
             switch (leks.type)
             {
-            case CLeksem::L_SPACE:
+            case CTokenType::L_SPACE:
                 ASSERT(false);
-            //	    break;
-            case CLeksem::L_COMMENT:
+                //	    break;
+            case CTokenType::L_COMMENT:
                 return ret_stat;
 
-            case CLeksem::L_CR:
-            case CLeksem::L_FIN:
+            case CTokenType::L_CR:
+            case CTokenType::L_FIN:
                 state = FINISH;
                 break;
 
@@ -1066,10 +1066,10 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
         case FINISH:
             switch (leks.type)
             {
-            case CLeksem::L_CR:
+            case CTokenType::L_CR:
                 return ret_stat;
 
-            case CLeksem::L_FIN:
+            case CTokenType::L_FIN:
                 return ret_stat ? ret_stat : STAT_FIN;
 
             default:
@@ -1084,17 +1084,17 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
 
 /**
  * @brief Tests if a token is the start of an expression.
- */ 
-bool CAsm6502::is_expression(const CLeksem &leks)
+ */
+bool CAsm6502::is_expression(const CToken &leks)
 {
     switch (leks.type)
     {
-    case CLeksem::L_NUM:			// Number (dec, hex, bin, or sign)
-    case CLeksem::L_IDENT:			// Identifier
-    case CLeksem::L_IDENT_N:		// Numeric identifier
-    case CLeksem::L_OPER:			// Operator
-    case CLeksem::L_EXPR_BRACKET_L:	// Left bracket for expressions '['
-    case CLeksem::L_EXPR_BRACKET_R:	// Right bracket for expressions ']'
+    case CTokenType::L_NUM:			// Number (dec, hex, bin, or sign)
+    case CTokenType::L_IDENT:			// Identifier
+    case CTokenType::L_IDENT_N:		// Numeric identifier
+    case CTokenType::L_OPER:			// Operator
+    case CTokenType::L_EXPR_BRACKET_L:	// Left bracket for expressions '['
+    case CTokenType::L_EXPR_BRACKET_R:	// Right bracket for expressions ']'
         return true;				// This is the beginning of an expression
 
     default:
@@ -1102,7 +1102,7 @@ bool CAsm6502::is_expression(const CLeksem &leks)
     }
 }
 
-int CAsm6502::find_const(const std::string& str)
+int CAsm6502::find_const(const std::string &str)
 {
     static const char cnst1[] = "ORG";     // predefined constant
     static const char cnst2[] = "IO_AREA"; // predefined constant
@@ -1115,13 +1115,13 @@ int CAsm6502::find_const(const std::string& str)
     return -1;
 }
 
-CAsm6502::Stat CAsm6502::predef_const(const std::string& str, Expr& expr, bool& found)
+CAsm6502::Stat CAsm6502::predef_const(const std::string &str, Expr &expr, bool &found)
 {
     int nConstant = find_const(str);
 
     if (nConstant == 0)
     {
-//		if (origin > 0xFFFF)
+        //		if (origin > 0xFFFF)
         if (origin > mem_mask)
             return ERR_UNDEF_ORIGIN;
 
@@ -1142,13 +1142,13 @@ CAsm6502::Stat CAsm6502::predef_const(const std::string& str, Expr& expr, bool& 
     return OK;
 }
 
-CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
+CAsm6502::Stat CAsm6502::predef_function(CToken &leks, Expr &expr, bool &fn)
 {
-    static const char def[]= ".DEF";             // predefined .DEF function
-    static const char ref[]= ".REF";             // predefined .REF function
-    static const char strl[]= ".STRLEN";         // predefined function .STRLEN
-    static const char pdef[]= ".PASSDEF";        // predefined .PASSDEF function
-    static const char paramtype[]= ".PARAMTYPE"; // predefined .PARAMTYPE function
+    static const char def[] = ".DEF";             // predefined .DEF function
+    static const char ref[] = ".REF";             // predefined .REF function
+    static const char strl[] = ".STRLEN";         // predefined function .STRLEN
+    static const char pdef[] = ".PASSDEF";        // predefined .PASSDEF function
+    static const char paramtype[] = ".PARAMTYPE"; // predefined .PARAMTYPE function
 
     const std::string &str = *leks.GetString();
     bool LocParamNo = false;
@@ -1168,23 +1168,23 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
     if (hit > 0)
     {
         leks = next_leks(false);
-        
-        if (leks.type != CLeksem::L_BRACKET_L)
+
+        if (leks.type != CTokenType::L_BRACKET_L)
             return ERR_BRACKET_L_EXPECTED; // Required bracket '(' (no space)
 
         leks = next_leks();
 
         std::string label;
 
-        if (leks.type == CLeksem::L_IDENT)
+        if (leks.type == CTokenType::L_IDENT)
         {
             label = *leks.GetString();
             leks = next_leks();
         }
-        else if (leks.type == CLeksem::L_IDENT_N)
+        else if (leks.type == CTokenType::L_IDENT_N)
         {
-            CLeksem ident(leks);
-            Expr expr(0);
+            CToken ident(leks);
+            expr = 0;
             leks = next_leks();
             Stat ret = factor(leks, expr);
 
@@ -1197,11 +1197,11 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
             ident.Format(expr.value); // Normalize the form of the label
             label = *ident.GetString(); // Remember the ID
         }
-        else if (hit == 4 && leks.type == CLeksem::L_OPER && leks.GetOper() == O_MOD) //!! add code for numbered parameters
+        else if (hit == 4 && leks.type == CTokenType::L_OPER && leks.GetOper() == O_MOD) //!! add code for numbered parameters
         {
             leks = next_leks(false);
 
-            if (leks.type == CLeksem::L_SPACE) // Space not allowed
+            if (leks.type == CTokenType::L_SPACE) // Space not allowed
                 return ERR_PARAM_NUMBER_EXPECTED;
 
             Stat ret = factor(leks, expr, false); // expected macro parameter number
@@ -1221,13 +1221,13 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
         {
             return ERR_LABEL_EXPECTED; // Required label -argument .DEF or .REF
         }
-        
-        if (leks.type != CLeksem::L_BRACKET_R)
+
+        if (leks.type != CTokenType::L_BRACKET_R)
             return ERR_BRACKET_R_EXPECTED; // Required bracket ')'
 
         if (label[0] == LOCAL_LABEL_CHAR) // Local labels not allowed
             return ERR_LOCAL_LABEL_NOT_ALLOWED;
-            
+
         CIdent ident;
 
         if (case_insensitive) // fix case sensitive issue
@@ -1256,7 +1256,7 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
             if (TryLookup(global_ident, label, _Out_ ident) && ident.info != CIdent::I_UNDEF)
             {
                 ASSERT(ident.info != CIdent::I_INIT);
-                
+
                 if (pass == 1)
                     expr.value = 1; // 1 -label defined
                 else // Second pass of assembly
@@ -1276,7 +1276,7 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
                 if (LocParamNo)
                     ret = expanding_macro->ParamType(expr.value - 1, found, type);
                 else
-                    ret= expanding_macro->ParamType(label, found, type);
+                    ret = expanding_macro->ParamType(label, found, type);
 
                 if (ret)
                     return ret;
@@ -1301,15 +1301,15 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
     else if (hit == -1) // function .STRLEN?
     {
         leks = next_leks(false);
-        if (leks.type != CLeksem::L_BRACKET_L)
+        if (leks.type != CTokenType::L_BRACKET_L)
             return ERR_BRACKET_L_EXPECTED;	// wymagany nawias '(' (bez odst�pu)
         leks = next_leks();
 
-        if (check_line && leks.type == CLeksem::L_OPER && leks.GetOper() == O_MOD)    //!! add code for numbered parameters
+        if (check_line && leks.type == CTokenType::L_OPER && leks.GetOper() == O_MOD)    //!! add code for numbered parameters
         {
             leks = next_leks(false);
-            
-            if (leks.type == CLeksem::L_SPACE) // Space not allowed
+
+            if (leks.type == CTokenType::L_SPACE) // Space not allowed
                 return ERR_PARAM_NUMBER_EXPECTED;
 
             Stat ret = factor(leks, expr, false); // expected macro parameter number
@@ -1323,7 +1323,7 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
                     return ERR_UNDEF_PARAM_NUMBER; // Parameter number must be defined
             }
 
-            if (leks.type != CLeksem::L_BRACKET_R)
+            if (leks.type != CTokenType::L_BRACKET_R)
                 return ERR_BRACKET_R_EXPECTED; // Required bracket ')'
 
             expr.value = 0;
@@ -1340,7 +1340,7 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
             if (strexpr.inf != Expr::EX_STRING)
                 return ERR_STR_EXPECTED; // Required string as argument
 
-            if (leks.type != CLeksem::L_BRACKET_R)
+            if (leks.type != CTokenType::L_BRACKET_R)
                 return ERR_BRACKET_R_EXPECTED; // Required bracket ')'
 
             expr.value = strexpr.string.size();
@@ -1355,24 +1355,24 @@ CAsm6502::Stat CAsm6502::predef_function(CLeksem &leks, Expr &expr, bool &fn)
     return OK;
 }
 
-// warto�� sta�a - etykieta, parametr, liczba, predef. sta�a lub funkcja
-CAsm6502::Stat CAsm6502::constant_value(CLeksem &leks, Expr &expr, bool nospace)
+// constant value - label, parameter, number, predef. constant or function
+CAsm6502::Stat CAsm6502::constant_value(CToken &leks, Expr &expr, bool nospace)
 {
     switch (leks.type)
     {
-    case CLeksem::L_NUM:		// liczba (dec, hex, bin, lub znak)
-        expr.value = leks.GetValue();	// warto�� liczby lub znaku
+    case CTokenType::L_NUM: // liczba (dec, hex, bin, lub znak)
+        expr.value = leks.GetValue(); // warto�� liczby lub znaku
         break;
 
-    case CLeksem::L_STR:		// ci�g znak�w w cudzys�owach
+    case CTokenType::L_STR: // ci�g znak�w w cudzys�owach
         expr.string = *leks.GetString();
         expr.inf = Expr::EX_STRING;
         break;
 
-    case CLeksem::L_IDENT:		// identyfikator
+    case CTokenType::L_IDENT: // Identifier
     {
-        bool found= false;
-        Stat ret= predef_const(*leks.GetString(), expr, found);
+        bool found = false;
+        Stat ret = predef_const(*leks.GetString(), expr, found);
         if (ret)
             return ret;
         if (found)
@@ -1380,103 +1380,104 @@ CAsm6502::Stat CAsm6502::constant_value(CLeksem &leks, Expr &expr, bool nospace)
             leks = next_leks();
             return OK;
         }
-        ret =  predef_function(leks,expr,found);
+        ret = predef_function(leks, expr, found);
         if (ret)
             return ret;
         if (found)
             return OK;
         if (expanding_macro)
         {
-            // przeszukanie tablicy parametr�w makra, je�li jest rozwijane makro
-            Stat ret= expanding_macro->ParamLookup(leks, *leks.GetString(), expr, found, *this);
+            // search the macro parameter array if a macro is being expanded
+            ret = expanding_macro->ParamLookup(leks, *leks.GetString(), expr, found, *this);
             if (ret)
                 return ret;
             if (found)
                 return OK;
         }
-        CIdent id(CIdent::I_UNDEF);	// niezdefiniowany identyfikator
-        if (!add_ident(*leks.GetString(),id) && id.info!=CIdent::I_UNDEF)	// ju� zdefiniowany?
+        CIdent id(CIdent::I_UNDEF); // niezdefiniowany identyfikator
+        if (!add_ident(*leks.GetString(), id) && id.info != CIdent::I_UNDEF)	// ju� zdefiniowany?
             expr.value = id.val;		// odczytana warto�� etykiety
         else
         {
-            expr.inf = Expr::EX_UNDEF;	// jeszcze bez warto�ci
-            if (pass==2)
-                return err_ident=*leks.GetString(), ERR_UNDEF_LABEL;	// niezdefiniowana etykieta w drugim przebiegu
+            expr.inf = Expr::EX_UNDEF; // jeszcze bez warto�ci
+            if (pass == 2)
+                return err_ident = *leks.GetString(), ERR_UNDEF_LABEL;	// niezdefiniowana etykieta w drugim przebiegu
         }
         if (check_line)			// tryb sprawdzania jednego wiersza?
         {
             leks = next_leks(false);
-            if (leks.type == CLeksem::L_STR_ARG)	// omini�cie znaku '$' na ko�cu etykiety
+            if (leks.type == CTokenType::L_STR_ARG)	// omini�cie znaku '$' na ko�cu etykiety
                 leks = next_leks();
-            if (leks.type == CLeksem::L_SPACE)
+            if (leks.type == CTokenType::L_SPACE)
                 leks = next_leks();
             return OK;
         }
         break;
     }
 
-    case CLeksem::L_IDENT_N:		// identyfikator numerowany
+    case CTokenType::L_IDENT_N:		// identyfikator numerowany
     {
-        CLeksem ident(leks);
+        CToken ident(leks);
         Expr expr2(0);
         leks = next_leks();
-        Stat ret = factor(leks,expr2);
+        Stat ret = factor(leks, expr2);
         if (ret)
             return ret;
-        if (expr2.inf==Expr::EX_UNDEF)	// nieokre�lona warto��
+        if (expr2.inf == Expr::EX_UNDEF)	// nieokre�lona warto��
             return ERR_UNDEF_EXPR;
         ident.Format(expr2.value);	// znormalizowanie postaci etykiety
 
         CIdent id(CIdent::I_UNDEF);	// niezdefiniowany identyfikator
-        if (!add_ident(*ident.GetString(),id) && id.info!=CIdent::I_UNDEF)	// ju� zdefiniowany?
+        if (!add_ident(*ident.GetString(), id) && id.info != CIdent::I_UNDEF)	// ju� zdefiniowany?
             expr.value = id.val;		// odczytana warto�� etykiety
         else
         {
             expr.inf = Expr::EX_UNDEF;	// jeszcze bez warto�ci
-            if (pass==2)
-                return err_ident=*ident.GetString(), ERR_UNDEF_LABEL;	// niezdefiniowana etykieta w drugim przebiegu
+            if (pass == 2)
+                return err_ident = *ident.GetString(), ERR_UNDEF_LABEL;	// niezdefiniowana etykieta w drugim przebiegu
         }
         return OK;
     }
 
-    case CLeksem::L_OPER:		//
-        if (expanding_macro && leks.GetOper() == O_MOD)	// '%' (odwo�anie do parametru makra)?
+    case CTokenType::L_OPER:
+        if (expanding_macro && leks.GetOper() == O_MOD) // '%' (odwo�anie do parametru makra)?
         {
             leks = next_leks(false);
-            if (leks.type == CLeksem::L_SPACE)	// odst�p niedozwolony
+            if (leks.type == CTokenType::L_SPACE) // odst�p niedozwolony
                 return ERR_PARAM_NUMBER_EXPECTED;
-            Stat ret= factor(leks,expr,false);	// oczekiwany numer parametru makra
+            Stat ret = factor(leks, expr, false); // oczekiwany numer parametru makra
             if (ret)
                 return ret;
             if (expr.inf == Expr::EX_UNDEF)
-                return ERR_UNDEF_PARAM_NUMBER;	// numer parametru musi by� zdefiniowany
+                return ERR_UNDEF_PARAM_NUMBER; // numer parametru musi by� zdefiniowany
             ret = expanding_macro->ParamLookup(leks, expr.value - 1, expr, *this);
             if (ret)
                 return ret;
             return OK;
         }
-        else if (check_line && leks.GetOper() == O_MOD)	// tryb sprawdzania wiersza?
+        else if (check_line && leks.GetOper() == O_MOD) // tryb sprawdzania wiersza?
         {
             leks = next_leks(false);
-            if (leks.type == CLeksem::L_SPACE)	// odst�p niedozwolony
+            if (leks.type == CTokenType::L_SPACE) // odst�p niedozwolony
                 return ERR_PARAM_NUMBER_EXPECTED;
-            Stat ret= factor(leks,expr,false);	// oczekiwany numer parametru makra
+            Stat ret = factor(leks, expr, false); // oczekiwany numer parametru makra
             if (ret)
                 return ret;
-            ret = expanding_macro->AnyParamLookup(leks,*this);
+            ret = expanding_macro->AnyParamLookup(leks, *this);
             if (ret)
                 return ret;
             return OK;
         }
-        else if (leks.GetOper() == O_MUL)	// '*' ?
+        else if (leks.GetOper() == O_MUL) // '*' ?
         {
-//			if (origin > 0xFFFF)
+            //if (origin > 0xFFFF)
             if (origin > mem_mask)
                 return ERR_UNDEF_ORIGIN;
-            expr.value = origin;		// warto�� licznika rozkaz�w
+            expr.value = origin; // warto�� licznika rozkaz�w
             break;
         }
-    // no break here
+                
+        [[fallthrough]]; // no break here
     default:
         return ERR_CONST_EXPECTED;
     }
@@ -1485,164 +1486,197 @@ CAsm6502::Stat CAsm6502::constant_value(CLeksem &leks, Expr &expr, bool nospace)
     return OK;
 }
 
-
-CAsm6502::Stat CAsm6502::factor(CLeksem &leks, Expr &expr, bool nospace)
+CAsm6502::Stat CAsm6502::factor(CToken &leks, Expr &expr, bool nospace)
 // [~|!|-|>|<] sta�a | '['wyra�enie']'
 {
     OperType oper;
-//  bool operation= false;
+    //  bool operation= false;
 
-    if (leks.type==CLeksem::L_OPER)
+    if (leks.type == CTokenType::L_OPER)
     {
         oper = leks.GetOper();
         switch (oper)
         {
-        case O_B_NOT:	// negacja bitowa '~'
-        case O_NOT:	// negacja logiczna '!'
-        case O_MINUS:	// minus unarny '-'
-        case O_GT:	// g�rny bajt s�owa '>'
-        case O_LT:	// dolny bajt s�owa '<'
+        case O_B_NOT: // negacja bitowa '~'
+        case O_NOT:   // negacja logiczna '!'
+        case O_MINUS: // minus unarny '-'
+        case O_GT:    // g�rny bajt s�owa '>'
+        case O_LT:    // dolny bajt s�owa '<'
         {
             //        operation = true;
             leks = next_leks();	// kolejny niepusty leksem
-            Stat ret= factor(leks,expr,nospace);
+            Stat ret = factor(leks, expr, nospace);
+
             if (ret)
                 return ret;
-            if (expr.inf==Expr::EX_STRING)
-                return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
-            //        leks = next_leks(nospace);
-            if (expr.inf!=Expr::EX_UNDEF)
+
+            if (expr.inf == Expr::EX_STRING)
+                return ERR_STR_NOT_ALLOWED; // tekst niedozwolony
+
+            //leks = next_leks(nospace);
+            if (expr.inf != Expr::EX_UNDEF)
+            {
                 switch (oper)
                 {
-                case O_B_NOT:	// negacja bitowa '~'
+                case O_B_NOT: // negacja bitowa '~'
                     expr.value = ~expr.value;
                     break;
-                case O_NOT:		// negacja logiczna '!'
+
+                case O_NOT: // negacja logiczna '!'
                     expr.value = !expr.value;
                     break;
-                case O_MINUS:	// minus unarny '-'
+
+                case O_MINUS: // minus unarny '-'
                     expr.value = -expr.value;
                     break;
-                case O_GT:		// g�rny bajt s�owa '>'
+
+                case O_GT: // g�rny bajt s�owa '>'
                     expr.value = (expr.value >> 8) & 0xFF;
                     break;
-                case O_LT:		// dolny bajt s�owa '<'
+
+                case O_LT: // dolny bajt s�owa '<'
                     expr.value = expr.value & 0xFF;
                     break;
+
+                default:
+                    ASSERT(false);
+                    break;
                 }
+            }
+
             return OK;
         }
+
         default:
             break;
         }
     }
 
-    if (leks.type==CLeksem::L_EXPR_BRACKET_L)
+    if (leks.type == CTokenType::L_EXPR_BRACKET_L)
     {
-        leks = next_leks();		// kolejny niepusty leksem
-        Stat ret= expression(leks,expr,true);
+        leks = next_leks(); // kolejny niepusty leksem
+        Stat ret = expression(leks, expr, true);
+
         if (ret)
             return ret;
-        if (leks.type!=CLeksem::L_EXPR_BRACKET_R)
+
+        if (leks.type != CTokenType::L_EXPR_BRACKET_R)
             return ERR_EXPR_BRACKET_R_EXPECTED;
-        leks = next_leks(nospace);	// kolejny leksem
+
+        leks = next_leks(nospace); // kolejny leksem
     }
     else
     {
-        Stat ret= constant_value(leks,expr,nospace);
+        Stat ret = constant_value(leks, expr, nospace);
         if (ret)
             return ret;
     }
     return OK;
 }
 
-
-CAsm6502::Stat CAsm6502::mul_expr(CLeksem &leks, Expr &expr)
+CAsm6502::Stat CAsm6502::mul_expr(CToken &leks, Expr &expr)
 // czynnik [*|/|% czynnik]
 {
-    Stat ret= factor(leks,expr);		// obliczenie czynnika
+    Stat ret = factor(leks, expr); // obliczenie czynnika
     if (ret)
         return ret;
-//  leks = next_leks();
+    //  leks = next_leks();
 
     for (;;)
     {
-        if (leks.type!=CLeksem::L_OPER)	// nie operator?
+        if (leks.type != CTokenType::L_OPER) // nie operator?
             return OK;
-        OperType oper= leks.GetOper();
-        if (oper!=O_MUL && oper!=O_DIV && oper!=O_MOD)
-            return OK;
-        if (expr.inf==Expr::EX_STRING)
-            return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
 
-        leks = next_leks();		// omini�cie operatora '*', '/' lub '%'
+        OperType oper = leks.GetOper();
+
+        if (oper != O_MUL && oper != O_DIV && oper != O_MOD)
+            return OK;
+
+        if (expr.inf == Expr::EX_STRING)
+            return ERR_STR_NOT_ALLOWED; // tekst niedozwolony
+
+        leks = next_leks(); // omini�cie operatora '*', '/' lub '%'
 
         Expr expr2(0);
-        ret = factor(leks,expr2);		// kolejny czynnik
+        ret = factor(leks, expr2); // kolejny czynnik
         if (ret)
             return ret;
-        if (expr2.inf==Expr::EX_STRING)
-            return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
+
+        if (expr2.inf == Expr::EX_STRING)
+            return ERR_STR_NOT_ALLOWED; // tekst niedozwolony
         //    leks = next_leks();
 
-        if (expr.inf!=Expr::EX_UNDEF && expr2.inf!=Expr::EX_UNDEF)	// obliczy� warto��?
+        if (expr.inf != Expr::EX_UNDEF && expr2.inf != Expr::EX_UNDEF)	// obliczy� warto��?
+        {
             switch (oper)
             {
             case O_MUL:
                 expr.value *= expr2.value;
                 break;
+
             case O_DIV:
                 if (expr2.value == 0)
                     return ERR_DIV_BY_ZERO;
                 expr.value /= expr2.value;
                 break;
+
             case O_MOD:
                 if (expr2.value == 0)
                     return ERR_DIV_BY_ZERO;
                 expr.value %= expr2.value;
                 break;
+
+            default:
+                ASSERT(false);
+                break;
             }
+        }
         else
             expr.inf = Expr::EX_UNDEF;
     }
 }
 
-
-CAsm6502::Stat CAsm6502::shift_expr(CLeksem &leks, Expr &expr)
+CAsm6502::Stat CAsm6502::shift_expr(CToken &leks, Expr &expr)
 // czynnik1 [<<|>> czynnik1]
 {
-    Stat ret= mul_expr(leks,expr);	// obliczenie sk�adnika
+    Stat ret = mul_expr(leks, expr);	// obliczenie sk�adnika
     if (ret)
         return ret;		// b��d
 
     for (;;)
     {
-        if (leks.type!=CLeksem::L_OPER)	// nie operator?
+        if (leks.type != CTokenType::L_OPER) // nie operator?
             return OK;
 
         bool left;
         switch (leks.GetOper())
         {
-        case O_SHL:			// przesuni�cie w lewo?
+        case O_SHL: // przesuni�cie w lewo?
             left = true;
             break;
-        case O_SHR:			// przesuni�cie w prawo?
+
+        case O_SHR: // przesuni�cie w prawo?
             left = false;
             break;
+
         default:
             return OK;
         }
-        if (expr.inf==Expr::EX_STRING)
-            return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
-        leks = next_leks();		// omini�cie operatora '>>' lub '<<'
-        Expr expr2(0);
-        ret= mul_expr(leks,expr2);		// obliczenie kolejnego sk�adnika
-        if (ret)
-            return ret;		// b��d
-        if (expr2.inf==Expr::EX_STRING)
-            return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
 
-        if (expr.inf!=Expr::EX_UNDEF && expr2.inf!=Expr::EX_UNDEF)	// obliczy� warto��?
+        if (expr.inf == Expr::EX_STRING)
+            return ERR_STR_NOT_ALLOWED; // tekst niedozwolony
+
+        leks = next_leks(); // omini�cie operatora '>>' lub '<<'
+        Expr expr2(0);
+        ret = mul_expr(leks, expr2); // obliczenie kolejnego sk�adnika
+
+        if (ret)
+            return ret; // b��d
+
+        if (expr2.inf == Expr::EX_STRING)
+            return ERR_STR_NOT_ALLOWED; // tekst niedozwolony
+
+        if (expr.inf != Expr::EX_UNDEF && expr2.inf != Expr::EX_UNDEF)	// obliczy� warto��?
         {
             if (left)
                 expr.value <<= expr2.value;
@@ -1654,17 +1688,16 @@ CAsm6502::Stat CAsm6502::shift_expr(CLeksem &leks, Expr &expr)
     }
 }
 
-
-CAsm6502::Stat CAsm6502::add_expr(CLeksem &leks, Expr &expr)
+CAsm6502::Stat CAsm6502::add_expr(CToken &leks, Expr &expr)
 // sk�adnik [+|- sk�adnik]
 {
-    Stat ret= shift_expr(leks,expr);	// obliczenie sk�adnika
+    Stat ret = shift_expr(leks, expr);	// obliczenie sk�adnika
     if (ret)
         return ret;		// b��d
 
     for (;;)
     {
-        if (leks.type!=CLeksem::L_OPER)	// nie operator?
+        if (leks.type != CTokenType::L_OPER)	// nie operator?
             return OK;
 
         bool add;
@@ -1672,7 +1705,7 @@ CAsm6502::Stat CAsm6502::add_expr(CLeksem &leks, Expr &expr)
         {
         case O_MINUS:			// odejmowanie?
             add = false;
-            if (expr.inf==Expr::EX_STRING)
+            if (expr.inf == Expr::EX_STRING)
                 return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
             break;
         case O_PLUS:			// dodawanie?
@@ -1683,23 +1716,23 @@ CAsm6502::Stat CAsm6502::add_expr(CLeksem &leks, Expr &expr)
         }
         leks = next_leks();		// omini�cie operatora '+' lub '-'
         Expr expr2(0);
-        ret= shift_expr(leks,expr2);	// obliczenie kolejnego sk�adnika
+        ret = shift_expr(leks, expr2);	// obliczenie kolejnego sk�adnika
         if (ret)
             return ret;		// b��d
-        if (!add && expr2.inf==Expr::EX_STRING)
+        if (!add && expr2.inf == Expr::EX_STRING)
             return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
-        if ((expr.inf==Expr::EX_STRING) ^ (expr2.inf==Expr::EX_STRING))	// albo, albo
+        if ((expr.inf == Expr::EX_STRING) ^ (expr2.inf == Expr::EX_STRING))	// albo, albo
             return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
 
-        if (expr.inf!=Expr::EX_UNDEF && expr2.inf!=Expr::EX_UNDEF)	// obliczy� warto��?
+        if (expr.inf != Expr::EX_UNDEF && expr2.inf != Expr::EX_UNDEF)	// obliczy� warto��?
         {
             if (add)
             {
-                if (expr.inf==Expr::EX_STRING && expr2.inf==Expr::EX_STRING)
+                if (expr.inf == Expr::EX_STRING && expr2.inf == Expr::EX_STRING)
                     expr.string += expr2.string;
                 else
                 {
-                    ASSERT(expr.inf!=Expr::EX_STRING && expr2.inf!=Expr::EX_STRING);
+                    ASSERT(expr.inf != Expr::EX_STRING && expr2.inf != Expr::EX_STRING);
                     expr.value += expr2.value;
                 }
             }
@@ -1712,220 +1745,255 @@ CAsm6502::Stat CAsm6502::add_expr(CLeksem &leks, Expr &expr)
 }
 
 // wyr_proste [ & | '|' | ^ wyr_proste ]
-CAsm6502::Stat CAsm6502::bit_expr(CLeksem &leks, Expr &expr)
+CAsm6502::Stat CAsm6502::bit_expr(CToken &leks, Expr &expr)
 {
-    Stat ret= add_expr(leks,expr);	// obliczenie wyra�enia prostego
+    Stat ret = add_expr(leks, expr);	// obliczenie wyra�enia prostego
     if (ret)
         return ret;
 
     for (;;)
     {
-        if (leks.type!=CLeksem::L_OPER)	// nie operator?
+        if (leks.type != CTokenType::L_OPER)	// nie operator?
             return OK;
-        OperType oper= leks.GetOper();
-        if (oper!=O_B_AND && oper!=O_B_OR && oper!=O_B_XOR)
+        OperType oper = leks.GetOper();
+        if (oper != O_B_AND && oper != O_B_OR && oper != O_B_XOR)
             return OK;
-        if (expr.inf==Expr::EX_STRING)
+        if (expr.inf == Expr::EX_STRING)
             return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
 
         leks = next_leks();		// omini�cie operatora '&', '|' lub '^'
 
         Expr expr2(0);
-        ret = add_expr(leks,expr2);		// kolejne wyra�enie proste
+        ret = add_expr(leks, expr2);		// kolejne wyra�enie proste
         if (ret)
             return ret;
-        if (expr2.inf==Expr::EX_STRING)
+        if (expr2.inf == Expr::EX_STRING)
             return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
 
-        if (expr.inf!=Expr::EX_UNDEF && expr2.inf!=Expr::EX_UNDEF)	// obliczy� warto��?
+        if (expr.inf != Expr::EX_UNDEF && expr2.inf != Expr::EX_UNDEF)	// obliczy� warto��?
+        {
             switch (oper)
             {
             case O_B_AND:
                 expr.value &= expr2.value;
                 break;
+
             case O_B_OR:
                 expr.value |= expr2.value;
                 break;
+
             case O_B_XOR:
                 expr.value ^= expr2.value;
                 break;
+
+            default:
+                ASSERT(false);
+                break;
             }
+        }
         else
             expr.inf = Expr::EX_UNDEF;
     }
 }
 
-
-CAsm6502::Stat CAsm6502::cmp_expr(CLeksem &leks, Expr &expr)	// wyr [>|<|>=|<=|==|!= wyr]
+CAsm6502::Stat CAsm6502::cmp_expr(CToken &leks, Expr &expr)	// wyr [>|<|>=|<=|==|!= wyr]
 {
-    Stat ret= bit_expr(leks,expr);	// obliczenie sk�adnika
+    Stat ret = bit_expr(leks, expr);	// obliczenie sk�adnika
     if (ret)
         return ret;				// b��d
 
     for (;;)
     {
-        if (leks.type!=CLeksem::L_OPER)	// nie operator?
+        if (leks.type != CTokenType::L_OPER)	// nie operator?
             return OK;
-        OperType oper= leks.GetOper();
-        if (oper!=O_GT && oper!=O_GTE && oper!=O_LT && oper!=O_LTE && oper!=O_EQ && oper!=O_NE)
+        OperType oper = leks.GetOper();
+        if (oper != O_GT && oper != O_GTE && oper != O_LT && oper != O_LTE && oper != O_EQ && oper != O_NE)
             return OK;
 
         leks = next_leks();			// omini�cie operatora logicznego
         Expr expr2(0);
-        ret= bit_expr(leks,expr2);		// obliczenie kolejnego sk�adnika
+        ret = bit_expr(leks, expr2);		// obliczenie kolejnego sk�adnika
         if (ret)
             return ret;			// b��d
-        if ((expr.inf==Expr::EX_STRING) ^ (expr2.inf==Expr::EX_STRING))	// albo, albo
+        if ((expr.inf == Expr::EX_STRING) ^ (expr2.inf == Expr::EX_STRING))	// albo, albo
             return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
 
-        if (expr.inf!=Expr::EX_UNDEF && expr2.inf!=Expr::EX_UNDEF)	// obliczy� warto��?
-            if (expr.inf==Expr::EX_STRING && expr2.inf==Expr::EX_STRING)
+        if (expr.inf != Expr::EX_UNDEF && expr2.inf != Expr::EX_UNDEF)	// obliczy� warto��?
+        {
+            if (expr.inf == Expr::EX_STRING && expr2.inf == Expr::EX_STRING)
             {
                 switch (oper)
                 {
                 case O_GT:
                     expr.value = expr.string > expr2.string;
                     break;
+
                 case O_LT:
                     expr.value = expr.string < expr2.string;
                     break;
+
                 case O_GTE:
                     expr.value = expr.string >= expr2.string;
                     break;
+
                 case O_LTE:
                     expr.value = expr.string <= expr2.string;
                     break;
+
                 case O_EQ:
                     expr.value = expr.string == expr2.string;
                     break;
+
                 case O_NE:
                     expr.value = expr.string != expr2.string;
+                    break;
+
+                default:
+                    ASSERT(false);
                     break;
                 }
                 expr.inf = Expr::EX_BYTE;
             }
             else
             {
-                ASSERT(expr.inf!=Expr::EX_STRING && expr2.inf!=Expr::EX_STRING);
+                ASSERT(expr.inf != Expr::EX_STRING && expr2.inf != Expr::EX_STRING);
+
                 switch (oper)
                 {
                 case O_GT:
                     expr.value = expr.value > expr2.value;
                     break;
+
                 case O_LT:
                     expr.value = expr.value < expr2.value;
                     break;
+
                 case O_GTE:
                     expr.value = expr.value >= expr2.value;
                     break;
+
                 case O_LTE:
                     expr.value = expr.value <= expr2.value;
                     break;
+
                 case O_EQ:
                     expr.value = expr.value == expr2.value;
                     break;
+
                 case O_NE:
                     expr.value = expr.value != expr2.value;
                     break;
+
+                default:
+                    ASSERT(false);
+                    break;
                 }
             }
+        }
         else
             expr.inf = Expr::EX_UNDEF;
     }
 }
 
-
-CAsm6502::Stat CAsm6502::bool_expr_and(CLeksem &leks, Expr &expr)	// wyr [&& wyr]
+CAsm6502::Stat CAsm6502::bool_expr_and(CToken &leks, Expr &expr) // wyr [&& wyr]
 {
-    bool skip= false;
+    bool skip = false;
 
-    Stat ret= cmp_expr(leks,expr);	// obliczenie sk�adnika
+    Stat ret = cmp_expr(leks, expr); // obliczenie sk�adnika
     if (ret)
         return ret;				// b��d
 
     for (;;)
     {
-        if (leks.type!=CLeksem::L_OPER)	// nie operator?
+        if (leks.type != CTokenType::L_OPER)	// nie operator?
             return OK;
         if (leks.GetOper() != O_AND)
             return OK;
-        if (expr.inf==Expr::EX_STRING)
+        if (expr.inf == Expr::EX_STRING)
             return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
 
-        if (expr.inf!=Expr::EX_UNDEF && expr.value==0)
+        if (expr.inf != Expr::EX_UNDEF && expr.value == 0)
             skip = true;			// ju� false - nie potrzeba dalej liczy�
 
         leks = next_leks();			// omini�cie operatora '&&'
         Expr expr2(0);
-        ret= cmp_expr(leks,expr2);		// obliczenie kolejnego sk�adnika
+        ret = cmp_expr(leks, expr2);		// obliczenie kolejnego sk�adnika
         if (ret)
             return ret;			// b��d
-        if (expr2.inf==Expr::EX_STRING)
+        if (expr2.inf == Expr::EX_STRING)
             return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
 
         if (!skip)
-            if (expr.inf!=Expr::EX_UNDEF && expr2.inf!=Expr::EX_UNDEF)	// obliczy� warto��?
+        {
+            if ((expr.inf != Expr::EX_UNDEF) && (expr2.inf != Expr::EX_UNDEF)) // obliczy� warto��?
                 expr.value = expr2.value ? 1 : 0;
             else
                 expr.inf = Expr::EX_UNDEF;
+        }
     }
 }
 
-
-CAsm6502::Stat CAsm6502::bool_expr_or(CLeksem &leks, Expr &expr)	// wyr [|| wyr]
+CAsm6502::Stat CAsm6502::bool_expr_or(CToken &leks, Expr &expr) // wyr [|| wyr]
 {
-    bool skip= false;
+    bool skip = false;
 
-    Stat ret= bool_expr_and(leks,expr);	// obliczenie sk�adnika
+    Stat ret = bool_expr_and(leks, expr); // obliczenie sk�adnika
+
     if (ret)
-        return ret;				// b��d
+        return ret; // b��d
 
     for (;;)
     {
-        if (leks.type!=CLeksem::L_OPER)	// nie operator?
+        if (leks.type != CTokenType::L_OPER) // nie operator?
             return OK;
+
         if (leks.GetOper() != O_OR)
             return OK;
 
-        if (expr.inf!=Expr::EX_UNDEF && expr.value!=0)
-            skip = true;			// ju� true - nie potrzeba dalej liczy�
+        if (expr.inf != Expr::EX_UNDEF && expr.value != 0)
+            skip = true; // ju� true - nie potrzeba dalej liczy�
 
-        leks = next_leks();			// omini�cie operatora '||'
+        leks = next_leks(); // omini�cie operatora '||'
         Expr expr2(0);
-        ret= bool_expr_and(leks,expr2);	// obliczenie kolejnego sk�adnika
+        ret = bool_expr_and(leks, expr2); // obliczenie kolejnego sk�adnika
+
         if (ret)
-            return ret;			// b��d
-        if (expr2.inf==Expr::EX_STRING)
+            return ret; // b��d
+
+        if (expr2.inf == Expr::EX_STRING)
             return ERR_STR_NOT_ALLOWED;	// tekst niedozwolony
 
         if (!skip)
-            if (expr.inf!=Expr::EX_UNDEF && expr2.inf!=Expr::EX_UNDEF)	// obliczy� warto��?
+        {
+            if ((expr.inf != Expr::EX_UNDEF) && (expr2.inf != Expr::EX_UNDEF)) // obliczy� warto��?
                 expr.value = expr2.value ? 1 : 0;
             else
                 expr.inf = Expr::EX_UNDEF;
+        }
     }
 }
 
 // interpretacja wyra�enia
-CAsm6502::Stat CAsm6502::expression(CLeksem &leks, Expr &expr, bool str)
+CAsm6502::Stat CAsm6502::expression(CToken &leks, Expr &expr, bool str)
 {
     expr.inf = Expr::EX_LONG;
-    Stat ret= bool_expr_or(leks,expr);
+    Stat ret = bool_expr_or(leks, expr);
 
     if (ret)
         return ret;
+
     if (expr.inf == Expr::EX_STRING)
     {
-        if (!str)			// wyra�enie znakowe dozwolone?
+        if (!str) // wyra�enie znakowe dozwolone?
             return ERR_STR_NOT_ALLOWED;
     }
     else if (expr.inf != Expr::EX_UNDEF)
     {
         int32_t value = int32_t(expr.value);
-        
+
         if (value > -0x100 && value < 0x100)
             expr.inf = Expr::EX_BYTE;
-        else if (value>-0x10000 && value<0x10000)
+        else if (value > -0x10000 && value < 0x10000)
             expr.inf = Expr::EX_WORD;
         else
             expr.inf = Expr::EX_LONG;  //undo change EX_LONG to EX_WORD
@@ -1954,18 +2022,18 @@ CAsm6502::Stat CAsm6502::expression(CLeksem &leks, Expr &expr, bool str)
 
 CAsm6502::Stat CAsm6502::look_for_endm()	// szukanie .ENDM lub .MACRO
 {
-    CLeksem leks = next_leks(false);	// kolejny leksem, by� mo�e pusty (L_SPACE)
+    CToken leks = next_leks(false);	// kolejny leksem, by� mo�e pusty (L_SPACE)
     bool labelled = false;
 
     switch (leks.type)
     {
-    case CLeksem::L_IDENT:	// etykieta
-    case CLeksem::L_IDENT_N:	// etykieta numerowana
+    case CTokenType::L_IDENT:	// etykieta
+    case CTokenType::L_IDENT_N:	// etykieta numerowana
         leks = next_leks();
-        if (leks.type == CLeksem::L_IDENT_N)
+        if (leks.type == CTokenType::L_IDENT_N)
         {
             Expr expr(0);
-            Stat ret = factor(leks,expr);
+            Stat ret = factor(leks, expr);
             if (ret)
                 return ret;
         }
@@ -1973,33 +2041,33 @@ CAsm6502::Stat CAsm6502::look_for_endm()	// szukanie .ENDM lub .MACRO
         labelled = true;
         switch (leks.type)
         {
-        case CLeksem::L_LABEL:	// znak ':'
+        case CTokenType::L_LABEL:	// znak ':'
             leks = next_leks();
-            if (leks.type!=CLeksem::L_ASM_INSTR)
+            if (leks.type != CTokenType::L_ASM_INSTR)
                 return OK;
             break;
-        case CLeksem::L_ASM_INSTR:
+        case CTokenType::L_ASM_INSTR:
             break;
         default:
             return OK;
         }
         //      leks = next_leks();
         break;
-    case CLeksem::L_SPACE:	// odst�p
+    case CTokenType::L_SPACE:	// odst�p
         leks = next_leks();
-        if (leks.type!=CLeksem::L_ASM_INSTR)	// nie dyrektywa asemblera?
+        if (leks.type != CTokenType::L_ASM_INSTR)	// nie dyrektywa asemblera?
             return OK;
         break;
-    case CLeksem::L_COMMENT:	// komentarz
-    case CLeksem::L_CR:		// koniec wiersza
+    case CTokenType::L_COMMENT:	// komentarz
+    case CTokenType::L_CR:		// koniec wiersza
         return OK;
-    case CLeksem::L_FIN:	// koniec tekstu
+    case CTokenType::L_FIN:	// koniec tekstu
         return STAT_FIN;
     default:
         return ERR_UNEXP_DAT;
     }
 
-    ASSERT(leks.type==CLeksem::L_ASM_INSTR);	// dyrektywa asemblera
+    ASSERT(leks.type == CTokenType::L_ASM_INSTR);	// dyrektywa asemblera
 
     switch (leks.GetInstr())
     {
@@ -2017,7 +2085,7 @@ CAsm6502::Stat CAsm6502::record_macro() // Load the next line of the macro defin
 {
     CMacroDef *pMacro = get_last_macro_entry();
 
-    Stat ret= look_for_endm();
+    Stat ret = look_for_endm();
     if (ret > 0)
         return ret;
 
@@ -2161,10 +2229,10 @@ CAsm6502::Stat CAsm6502::chk_ident(const std::string &id, _Inout_ CIdent &inf)
             err_ident = ident;
             return ERR_UNDEF_LABEL; // Label without definition
         }
-            
-        ASSERT(info.variable && inf.variable || !info.variable && !inf.variable);
 
-        if (info.val != inf.val && !info.variable)
+        ASSERT((info.variable && inf.variable) || (!info.variable && !inf.variable));
+
+        if ((info.val != inf.val) && !info.variable)
         {
             err_ident = ident;
             return ERR_PHASE; // Inconsistent values ​​between waveforms -phase error
@@ -2197,36 +2265,35 @@ CAsm6502::Stat CAsm6502::chk_ident_def(const std::string &id, _Inout_ CIdent &in
 
     if (ret != OK && ret != ERR_UNDEF_LABEL)
         return ret;
-        
+
     if (inf.variable) // Variable label?
     {
         inf.val = val; // New variable value
-        bool ret;
-        
+        bool replaced;
+
         if (ident[0] == LOCAL_LABEL_CHAR) // local label?
         {
             if (expanding_macro) // Local label in macro extension?
-                ret = TryReplace(macro_ident, format_local_label(ident, macro_local_area), inf);
+                replaced = TryReplace(macro_ident, format_local_label(ident, macro_local_area), inf);
             else if (ident[1] == LOCAL_LABEL_CHAR) // file local?
-                ret = TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf);
+                replaced = TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf);
             else
-                ret = TryReplace(local_ident, format_local_label(ident, local_area), inf);
+                replaced = TryReplace(local_ident, format_local_label(ident, local_area), inf);
         }
         else
-            ret = TryReplace(global_ident, ident, inf);
-        ASSERT(ret); // The label must be redefined
+            replaced = TryReplace(global_ident, ident, inf);
+        ASSERT(replaced); // The label must be redefined
     }
     else if (ident[0] != LOCAL_LABEL_CHAR) // Global constant label?
     {
         ASSERT(!inf.checked);
         inf.checked = true; // Confirm the definition in the second assembly pass
-        bool ret = TryReplace(global_ident, ident, inf);
-        //ASSERT(!ret && info.info == I_ADDRESS || ret); // The label must be redefined
+        bool replaced = TryReplace(global_ident, ident, inf);
+        ASSERT((!replaced && (inf.info == CIdent::I_ADDRESS)) || (ret == CAsm::OK)); // The label must be redefined
     }
 
     return OK;
 }
-
 
 CAsm6502::Stat CAsm6502::def_macro_name(const std::string &id, _Out_ CIdent &inf)
 {
@@ -2264,7 +2331,7 @@ CAsm6502::Stat CAsm6502::chk_macro_name(const std::string &id)
         // Checked label found in the array
         ASSERT(info->second.info == CIdent::I_MACRONAME);
         return OK;
-        
+
         //if (info->val != inf.val)
         //    return err_ident = ident, ERR_PHASE; //inconsistent values ​​between runs -phase error
     }
@@ -2304,27 +2371,29 @@ bool CRepeatDef::GetCurrLine(std::string &str) // Read the current line for repe
 }
 
 
-CAsm6502::Stat CAsm6502::record_rept(CRepeatDef *pRept)	// wczytanie kolejnego wiersza do powt�rki
+CAsm6502::Stat CAsm6502::record_rept(CRepeatDef *repeatDef) // loading another line for repeat
 {
-    Stat ret= look_for_repeat();
+    Stat ret = look_for_repeat();
     if (ret > 0)
         return ret;
 
-    if (ret == STAT_REPEAT)	// zagnie�d�one .REPEAT
+    if (ret == STAT_REPEAT) // nested .REPEAT
     {
         ret = OK;
         reptNested++;
     }
     else if (ret == STAT_ENDR)
-        if (reptNested == 0)	// koniec .REPEAT?
+    {
+        if (reptNested == 0) // end of.REPEAT ?
             return ret;
         else
         {
-            reptNested--;		// koniec zagnie�d�onego .REPEAT
+            reptNested--; // end of nested .REPEAT
             ret = OK;
         }
+    }
 
-    pRept->AddLine(current_line,text->GetLineNo());
+    repeatDef->AddLine(current_line, text->GetLineNo());
 
     return ret;
 }
@@ -2332,50 +2401,50 @@ CAsm6502::Stat CAsm6502::record_rept(CRepeatDef *pRept)	// wczytanie kolejnego w
 
 CAsm6502::Stat CAsm6502::look_for_repeat()	// szukanie .ENDR lub .REPEAT
 {
-    CLeksem leks= next_leks(false);	// kolejny leksem, by� mo�e pusty (L_SPACE)
+    CToken leks = next_leks(false);	// kolejny leksem, by� mo�e pusty (L_SPACE)
 
     switch (leks.type)
     {
-    case CLeksem::L_IDENT:		// etykieta
-    case CLeksem::L_IDENT_N:	// etykieta numerowana
+    case CTokenType::L_IDENT:		// etykieta
+    case CTokenType::L_IDENT_N:	// etykieta numerowana
         leks = next_leks();
-        if (leks.type == CLeksem::L_IDENT_N)
+        if (leks.type == CTokenType::L_IDENT_N)
         {
             Expr expr(0);
-            Stat ret = factor(leks,expr);
+            Stat ret = factor(leks, expr);
             if (ret)
                 return ret;
         }
         //      leks = next_leks();
         switch (leks.type)
         {
-        case CLeksem::L_LABEL:	// znak ':'
+        case CTokenType::L_LABEL:	// znak ':'
             leks = next_leks();
-            if (leks.type!=CLeksem::L_ASM_INSTR)
+            if (leks.type != CTokenType::L_ASM_INSTR)
                 return OK;
             break;
-        case CLeksem::L_ASM_INSTR:
+        case CTokenType::L_ASM_INSTR:
             break;
         default:
             return OK;
         }
         //      leks = next_leks();
         break;
-    case CLeksem::L_SPACE:	// odst�p
+    case CTokenType::L_SPACE:	// odst�p
         leks = next_leks();
-        if (leks.type!=CLeksem::L_ASM_INSTR)	// nie dyrektywa asemblera?
+        if (leks.type != CTokenType::L_ASM_INSTR)	// nie dyrektywa asemblera?
             return OK;
         break;
-    case CLeksem::L_COMMENT:	// komentarz
-    case CLeksem::L_CR:		// koniec wiersza
+    case CTokenType::L_COMMENT:	// komentarz
+    case CTokenType::L_CR:		// koniec wiersza
         return OK;
-    case CLeksem::L_FIN:	// koniec tekstu
+    case CTokenType::L_FIN:	// koniec tekstu
         return STAT_FIN;
     default:
         return ERR_UNEXP_DAT;
     }
 
-    ASSERT(leks.type==CLeksem::L_ASM_INSTR);	// dyrektywa asemblera
+    ASSERT(leks.type == CTokenType::L_ASM_INSTR);	// dyrektywa asemblera
 
     switch (leks.GetInstr())
     {
@@ -2445,7 +2514,7 @@ void CAsm6502::asm_fin_pass()
 //$$asm starts here
 CAsm6502::Stat CAsm6502::assemble() // Program translation
 {
-    Stat ret;
+    Stat ret = Stat::ERR_LAST;
     swapbin = false;
     bool skip = false;
     bool skip_macro = false;
@@ -2481,7 +2550,7 @@ CAsm6502::Stat CAsm6502::assemble() // Program translation
                 }
 
                 ptr = hack ? nullptr : current_line.c_str();
-                
+
                 if (current_line.size() > 1024) // Check max line length
                     return ERR_LINE_TO_LONG;
 
@@ -2510,13 +2579,13 @@ CAsm6502::Stat CAsm6502::assemble() // Program translation
                 {
                 case STAT_INCLUDE:
                 {
-//	    if (text->IsMacro() || text->IsRepeat())
-//	    if (typeid(text) == typeid(CMacroDef) || typeid(text) == typeid(CRepeatDef))
-                    CSourceText* pSrc= dynamic_cast<CSourceText*>(text);
+                    //	    if (text->IsMacro() || text->IsRepeat())
+                    //	    if (typeid(text) == typeid(CMacroDef) || typeid(text) == typeid(CRepeatDef))
+                    CSourceText *pSrc = dynamic_cast<CSourceText *>(text);
                     if (pSrc == NULL)
                         return ERR_INCLUDE_NOT_ALLOWED;	// .INCLUDE w makrze/powt�rce niedozwolone
-//						proc_area++;
-                    pSrc->Include(include_fname,debug);
+                    //						proc_area++;
+                    pSrc->Include(include_fname, debug);
                     break;
                 }
 
@@ -2526,21 +2595,21 @@ CAsm6502::Stat CAsm6502::assemble() // Program translation
                     ret = conditional_asm.instr_if_found(ret);
                     if (ret > OK)
                         return ret;		// b��d
-                    skip = ret==STAT_SKIP;	// omijanie instrukcji a� do .ELSE lub .ENDIF?
+                    skip = ret == STAT_SKIP;	// omijanie instrukcji a� do .ELSE lub .ENDIF?
                     break;
 
                 case STAT_ELSE:
                     ret = conditional_asm.instr_else_found();
                     if (ret > OK)
                         return ret;		// b��d
-                    skip = ret==STAT_SKIP;	// omijanie instrukcji a� do .ELSE lub .ENDIF?
+                    skip = ret == STAT_SKIP;	// omijanie instrukcji a� do .ELSE lub .ENDIF?
                     break;
 
                 case STAT_ENDIF:
                     ret = conditional_asm.instr_endif_found();
                     if (ret > OK)
                         return ret;		// b��d
-                    skip = ret==STAT_SKIP;	// omijanie instrukcji a� do .ELSE lub .ENDIF?
+                    skip = ret == STAT_SKIP;	// omijanie instrukcji a� do .ELSE lub .ENDIF?
                     break;
 
                 case STAT_MACRO:		// makrodefinicja
@@ -2591,10 +2660,10 @@ CAsm6502::Stat CAsm6502::assemble() // Program translation
                     break;
 
                 case STAT_FIN:		// koniec pliku
-                    ASSERT(dynamic_cast<CSourceText*>(text));
-//	    ASSERT( typeid(text) != typeid(CMacroDef) && typeid(text) != typeid(CRepeatDef));
-//	    ASSERT(!text->IsMacro() && !text->IsRepeat());
-                    if (!static_cast<CSourceText*>(text)->TextFin()) // koniec zagnie�d�onego odczytu (.include) ?
+                    ASSERT(dynamic_cast<CSourceText *>(text) != nullptr);
+                    //ASSERT( typeid(text) != typeid(CMacroDef) && typeid(text) != typeid(CRepeatDef));
+                    //ASSERT(!text->IsMacro() && !text->IsRepeat());
+                    if (!static_cast<CSourceText *>(text)->TextFin()) // koniec zagnie�d�onego odczytu (.include) ?
                     {
                         if (conditional_asm.in_cond())	// w �rodku dyrektywy .IF ?
                             return ERR_ENDIF_REQUIRED;
@@ -2622,25 +2691,27 @@ CAsm6502::Stat CAsm6502::assemble() // Program translation
         asm_fin();
 
     }
-    catch (CMemoryException*)
+    catch (CMemoryException *)
     {
         return ERR_OUT_OF_MEM;
     }
-    catch (CFileException*)
+    catch (CFileException *)
     {
         return ERR_FILE_READ;
     }
+
+    ASSERT(ret != Stat::ERR_LAST);
 
     return ret;
 }
 
 //-----------------------------------------------------------------------------
-static const uint8_t NA = 0x42;   // WDM on 65816
+static const uint8_t NA = 0x42; // WDM on 65816
 
 CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, int &length)
 {
     uint8_t byte;
-    const uint8_t (&trans)[C_ILL][A_NO_OF_MODES] = TransformTable(m_procType);
+    const uint8_t(&trans)[C_ILL][A_NO_OF_MODES] = TransformTable(m_procType);
 
     if (mode >= A_NO_OF_MODES) // Undetermined addressing modes
     {
@@ -2649,7 +2720,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
         case A_ABS_OR_ZPG:
             byte = trans[code][mode = A_ABS]; // We choose ABS
             if (byte == NA) // if there is no ABS_X,
-                byte = trans[code][mode=A_ZPG];
+                byte = trans[code][mode = A_ZPG];
             break;
 
         case A_ABSX_OR_ZPGX:
@@ -2685,8 +2756,9 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
             break;
 
         default:
+            // Really an unknown addressing mode.
             ASSERT(false);
-            break;
+            return Stat::ERR_UNKNOWN_INSTR;
         }
     }
     else
@@ -2710,13 +2782,13 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
             if (m_procType == ProcessorType::WDC65816)
                 mode = A_ABSL;
 
-            if (trans[code][mode]==NA)
+            if (trans[code][mode] == NA)
                 mode = A_ABS;
 
-            if (trans[code][mode]==NA)
+            if (trans[code][mode] == NA)
                 mode = A_REL; // move to REL
 
-            if (trans[code][mode]==NA)
+            if (trans[code][mode] == NA)
                 mode = A_RELL; // move to RELL
             break;
 
@@ -2724,7 +2796,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
             if (m_procType == ProcessorType::WDC65816)
                 mode = A_ABSL_X;
 
-            if (trans[code][mode]==NA)
+            if (trans[code][mode] == NA)
                 mode = A_ABS_X;
             break;
 
@@ -2777,7 +2849,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
             else
             {
                 byte = trans[code][mode = A_ABS]; // We choose ABS
-                
+
                 if (byte == NA) // if there is no ABS_X,
                     byte = trans[code][mode = A_REL];
 
@@ -2826,7 +2898,10 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
 
             int32_t dist = expr.value - (int32_t(origin) + 2);
 
-            if (((expr.value >> 16) & 0xFF) != (((origin) >> 16) & 0xFF))
+            uint8_t exprBank = (expr.value >> 16) & 0xFF;
+            uint8_t orgBank = (origin >> 16) & 0xFF;
+
+            if (exprBank != orgBank)
                 return ERR_INVALID_BANK_CROSSING;
 
             if (dist > 127 || dist < -128)
@@ -2836,10 +2911,10 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
         break;
 
     case A_ABS: // absolute
-//		if (pass == 2 &&(((expr.value >> 16) & 0xFF) != ((origin >> 16) & 0xFF))) {
-//		}
-//		if ((pass == 2) && (byte == 0x20 || byte == 0x4C || byte == 0x6C || byte == 0xFC) && (((expr.value >> 16) & 0xFF) != ((origin >> 16) & 0xFF)))
-//			return ERR_INVALID_BANK_CROSSING;
+        //		if (pass == 2 &&(((expr.value >> 16) & 0xFF) != ((origin >> 16) & 0xFF))) {
+        //		}
+        //		if ((pass == 2) && (byte == 0x20 || byte == 0x4C || byte == 0x6C || byte == 0xFC) && (((expr.value >> 16) & 0xFF) != ((origin >> 16) & 0xFF)))
+        //			return ERR_INVALID_BANK_CROSSING;
 
         length = 1 + 2;
         break;
@@ -2863,7 +2938,10 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
             if (dist > 127 || dist < -128)
                 return ERR_REL_OUT_OF_RNG;
 
-            if (((expr.value >> 16) & 0xFF) != (((origin) >> 16) & 0xFF))
+            uint8_t exprBank = (expr.value >> 16) & 0xFF;
+            uint8_t orgBank = (origin >> 16) & 0xFF;
+
+            if (exprBank != orgBank)
                 return ERR_INVALID_BANK_CROSSING;
         }
         length = 1 + 1 + 1;
@@ -2889,9 +2967,15 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
         break;
 
     case A_RELL: //$$
-        if ((pass == 2) &&((expr.value >> 16) & 0xFF) != (((origin) >> 16) & 0xFF))
-            return ERR_INVALID_BANK_CROSSING;
-        length = 1 + 2;
+        {
+            uint8_t exprBank = (expr.value >> 16) & 0xFF;
+            uint8_t orgBank = (origin >> 16) & 0xFF;
+
+            if ((pass == 2) && (exprBank != orgBank))
+                return ERR_INVALID_BANK_CROSSING;
+
+            length = 1 + 2;
+        }
         break;
 
     case A_XYC:
@@ -2907,7 +2991,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
         break;
     }
 
-    if ((pass == 2) &&(((origin + length - 1) >> 16) & 0xFF) != (((origin) >> 16) & 0xFF))
+    if ((pass == 2) && (((origin + length - 1) >> 16) & 0xFF) != (((origin) >> 16) & 0xFF))
         return ERR_INVALID_BANK_CROSSING;
 
     return OK;
@@ -2916,10 +3000,10 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
 // Code generation
 void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit, Expr expr_zpg)
 {
-    ASSERT(TransformTable(m_procType)[code][mode] != NA || mode == A_IMP2 && code == CAsm::C_BRK);
+    ASSERT((TransformTable(m_procType)[code][mode] != NA) || ((mode == A_IMP2) && (code == CAsm::C_BRK)));
     ASSERT(origin <= 0xFFFF);
 
-    if (mode == A_IMP2 && code == C_BRK)
+    if ((mode == A_IMP2) && (code == C_BRK))
         (*out)[origin] = 0;
     else
         (*out)[origin] = TransformTable(m_procType)[code][mode]; // command
@@ -2929,7 +3013,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
     case A_IMP: // implied
     case A_ACC: // accumulator
         if (listing.IsOpen())
-            listing.AddCodeBytes(origin,(*out)[origin]);
+            listing.AddCodeBytes(origin, (*out)[origin]);
         return;
 
     case A_IMP2: // implied dla BRK
@@ -2939,7 +3023,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
             (*out)[origin + 1] = BRKExtraByte;
 
         if (listing.IsOpen())
-            listing.AddCodeBytes(origin,(*out)[origin],generateBRKExtraByte ? (*out)[origin + 1] : -1);
+            listing.AddCodeBytes(origin, (*out)[origin], generateBRKExtraByte ? (*out)[origin + 1] : -1);
         return;
 
     case A_ZPG:    // zero page
@@ -2961,7 +3045,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
     {
         //ASSERT(origin + 1 <= mem_mask);
         //ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
-        int32_t dist= expr.value - ( int32_t(origin & mem_mask) + 2 ); // 65816
+        int32_t dist = expr.value - (int32_t(origin & mem_mask) + 2); // 65816
         //ASSERT(dist < 128 && dist > -129);
         (*out)[origin + 1] = uint8_t(dist & 0xFF);
         if (listing.IsOpen())
@@ -3010,7 +3094,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
         (*out)[origin + 1] = uint8_t(expr_zpg.value & 0xFF);
 
         ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
-        int32_t dist = expr.value - ( int32_t(origin & 0xFFFF) + 3 );
+        int32_t dist = expr.value - (int32_t(origin & 0xFFFF) + 3);
 
         ASSERT(dist < 128 && dist > -129);
         (*out)[origin + 2] = uint8_t(dist & 0xFF);
@@ -3021,7 +3105,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
     }
     case A_ABSL:   // absolute Long
     case A_ABSL_X: // absolute Long indexed X
-        ASSERT(origin+2 <= mem_mask);
+        ASSERT(origin + 2 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
 
         (*out)[origin + 1] = uint8_t(expr.value & 0xFF);
@@ -3042,18 +3126,18 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
         (*out)[origin + 1] = uint8_t(expr.value & 0xFF);
 
         if (listing.IsOpen())
-            listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin+1]);
+            listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1]);
         break;
 
     case A_RELL:
     {
         ASSERT(origin + 1 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
-        int32_t dist = expr.value - ( int32_t(origin & mem_mask) + 3 );
+        int32_t dist = expr.value - (int32_t(origin & mem_mask) + 3);
         ASSERT(dist < 128 && dist > -129);
 
         (*out)[origin + 1] = uint8_t(dist & 0xFF);
-        (*out)[origin + 2] = uint8_t((dist >>8) & 0xFF);
+        (*out)[origin + 2] = uint8_t((dist >> 8) & 0xFF);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1], (*out)[origin + 2]);
@@ -3072,11 +3156,11 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
         break;
 
     case A_IMM2:
-        ASSERT(origin+1 <= mem_mask);
+        ASSERT(origin + 1 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
 
         (*out)[origin + 1] = uint8_t(expr.value & 0xFF);
-        (*out)[origin + 2] = uint8_t((expr.value>>8) & 0xFF);
+        (*out)[origin + 2] = uint8_t((expr.value >> 8) & 0xFF);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1], (*out)[origin + 2]);
@@ -3098,7 +3182,7 @@ CAsm6502::Stat CAsm6502::inc_prog_counter(int dist)
 
     origin += dist;
 
-    if (origin == mem_mask +1)
+    if (origin == mem_mask + 1)
     {
         originWrapped = true;
         origin = 0;
@@ -3130,7 +3214,7 @@ void CAsm6502::generate_debug(uint32_t addr, int line_no, FileUID file_UID)
 {
     ASSERT(debug);
 
-    CDebugLine line(line_no, file_UID,addr, typeid(text) == typeid(CMacroDef) ? DBG_CODE | DBG_MACRO : DBG_CODE);
+    CDebugLine line(line_no, file_UID, addr, typeid(text) == typeid(CMacroDef) ? DBG_CODE | DBG_MACRO : DBG_CODE);
     debug->AddLine(line);
 }
 
@@ -3149,10 +3233,10 @@ CAsm::Stat CAsm6502::generate_debug(InstrType it, int line_no, FileUID file_UID)
     case I_ASCIS:   // ascii + $80 ostatni bajt
     {
         if (origin > mem_mask)
-//			if (origin > 0xFFFF)		// 65816 - rollover error
+            //			if (origin > 0xFFFF)		// 65816 - rollover error
             return ERR_UNDEF_ORIGIN;
 
-        CDebugLine dl(line_no,file_UID, (uint32_t)origin, DBG_DATA);
+        CDebugLine dl(line_no, file_UID, (uint32_t)origin, DBG_DATA);
         debug->AddLine(dl);
         break;
     }
@@ -3200,6 +3284,8 @@ void CAsm6502::generate_debug()
 
 std::string CAsm6502::GetErrMsg(Stat stat)
 {
+    UNUSED(stat);
+
 #if 0
     if ((stat < OK || stat >= ERR_LAST) && stat != STAT_USER_DEF_ERR)
     {
@@ -3257,7 +3343,7 @@ std::string CAsm6502::GetErrMsg(Stat stat)
         break;
 
     default:
-        if (form.LoadString(IDS_ASM_FORM1) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST+stat))
+        if (form.LoadString(IDS_ASM_FORM1) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
         {
             try
             {

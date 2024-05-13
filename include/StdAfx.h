@@ -88,7 +88,7 @@ typedef wxOutputStream DocOStream;
 #include "StrUtils.h"
 
 #ifdef _MSC_VER
-# define strcasecmp stricmp
+# define strcasecmp _stricmp
 #endif
 
 #define __AFXWIN_H__
@@ -101,6 +101,8 @@ typedef wxOutputStream DocOStream;
 #define WPARAM uint32_t
 #define LPARAM uint32_t
 
+#define UNUSED(X_) (void)(X_)
+
 // No indication as to what this POSITION type actually is, we're stubbing in an int for now. -- B.Simonds (April 25, 2024)
 typedef int POSITION;
 
@@ -112,7 +114,7 @@ class CCmdUI;
 class CFileException
 {
 public:
-    CFileException(int err) { }
+    CFileException(int err) { UNUSED(err); }
     virtual ~CFileException() { }
 };
 

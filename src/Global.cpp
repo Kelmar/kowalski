@@ -194,6 +194,12 @@ void CGlobal::SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info
 
 void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info, int nClear/*= 0*/)
 {
+    UNUSED(archive);
+    UNUSED(start);
+    UNUSED(end);
+    UNUSED(info);
+    UNUSED(nClear);
+
 #if 0
     COutputMem mem;	// Memory for the loaded program
     int prog_start = -1;

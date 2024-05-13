@@ -54,6 +54,8 @@ std::string CMainFrame::ProjName = "";
 
 void CMainFrame::ConfigSettings(bool load)
 {
+    UNUSED(load);
+
 #if 0
     static const LOGFONT LogFont =
     {
@@ -73,6 +75,8 @@ void CMainFrame::ConfigSettings(bool load)
         "Fixedsys"	// CHAR lfFaceName[LF_FACESIZE];
     };
 #endif
+
+#if 0
 
     static const char ENTRY_SYM[] = "Simulator";
     static const char SYM_FIN[] = "Finish";
@@ -170,6 +174,7 @@ void CMainFrame::ConfigSettings(bool load)
     { "ColorInstruction", "ColorDirective", "ColorComment", "ColorNumber", "ColorString", "ColorSelection", 0 };
     static const char * const syntax_font[] =
     { "FontInstruction", "FontDirective", "FontComment", "FontNumber", "FontString", 0 };
+#endif
 
 #if REWRITE_TO_WX_WIDGET
     CWinApp *pApp = &wxGetApp();
@@ -568,6 +573,8 @@ const uint32_t CMainFrame::dwDockBarMapEx[4][2] =
 
 void CMainFrame::EnableDockingEx(uint32_t dwDockStyle)
 {
+    UNUSED(dwDockStyle);
+
 #if REWRITE_TO_WX_WIDGET
     // must be CBRS_ALIGN_XXX or CBRS_FLOAT_MULTI only
     ASSERT((dwDockStyle & ~(CBRS_ALIGN_ANY | CBRS_FLOAT_MULTI)) == 0);
@@ -597,7 +604,7 @@ void CMainFrame::EnableDockingEx(uint32_t dwDockStyle)
 
 void CMainFrame::InitMenu()
 {
-    wxDocManager *docManager = wxDocManager::GetDocumentManager();
+    //wxDocManager *docManager = wxDocManager::GetDocumentManager();
 
     // File Menu
     wxMenu *file = new wxMenu();
@@ -1109,6 +1116,8 @@ void CMainFrame::OnAssemble()
 
 void CMainFrame::OnUpdateAssemble(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(GetCurrentDocument() != nullptr && // Is the document active?
                    !m_IOWindow.IsWaiting());
@@ -1157,6 +1166,8 @@ CSrc6502View *CMainFrame::GetCurrentView()
 
 void CMainFrame::OnUpdateSymDebug(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is the program assembled?
     pCmdUI->SetCheck(wxGetApp().m_global.IsDebugger());  // Debugger started
@@ -1222,11 +1233,6 @@ void CMainFrame::SetPositionText(int row, int col)
     //m_statusBar.SetStatusText(buf, 1);
 }
 
-void CMainFrame::SetStatusText(int row, const std::string& message)
-{
-    //m_statusBar.SetStatusText(message, row);
-}
-
 /*
 void CMainFrame::SetRowColumn(CEdit &edit)
 {
@@ -1279,6 +1285,8 @@ void CMainFrame::OnSymBreakpoint()
 
 void CMainFrame::OnUpdateSymBreakpoint(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // is there a working debugger
                    GetActiveFrame()->GetActiveView()); // and an active document?
@@ -1287,6 +1295,10 @@ void CMainFrame::OnUpdateSymBreakpoint(CCmdUI* pCmdUI)
 
 void CMainFrame::AddBreakpoint(CSrc6502View* pView, int nLine, CAsm::Breakpoint bp)
 {
+    UNUSED(pView);
+    UNUSED(nLine);
+    UNUSED(bp);
+
 #if REWRITE_TO_WX_WIDGET
     if (pView == 0)
         return;
@@ -1306,6 +1318,9 @@ void CMainFrame::AddBreakpoint(CSrc6502View* pView, int nLine, CAsm::Breakpoint 
 
 void CMainFrame::RemoveBreakpoint(CSrc6502View* pView, int nLine)
 {
+    UNUSED(pView);
+    UNUSED(nLine);
+
 #if REWRITE_TO_WX_WIDGET
     if (pView == 0)
         return;
@@ -1364,6 +1379,8 @@ void CMainFrame::OnSymEditBreakpoint()
 
 void CMainFrame::OnUpdateSymEditBreakpoint(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // is there a working debugger
                    GetActiveFrame()->GetActiveView()); // and an active document?
@@ -1388,6 +1405,8 @@ void CMainFrame::OnSymBreak()
 
 void CMainFrame::OnUpdateSymBreak(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsProgramRunning()); // Is there a working program and debugger?
 #endif
@@ -1409,6 +1428,8 @@ void CMainFrame::OnSymSkipInstr()	// Skip the current statement
 
 void CMainFrame::OnUpdateSymSkipInstr(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&        // is there a running debugger
                    !wxGetApp().m_global.IsProgramRunning() && // and a stopped
@@ -1432,6 +1453,8 @@ void CMainFrame::OnSymGo()		// uruchomienie programu
 
 void CMainFrame::OnUpdateSymGo(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&        // is there a running debugger
                    !wxGetApp().m_global.IsProgramRunning() && // and a stopped
@@ -1476,6 +1499,8 @@ void CMainFrame::OnSymGoToLine() // Run to line
 
 void CMainFrame::OnUpdateSymGoToLine(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&          // Is there a running debugger 
                    !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
@@ -1522,6 +1547,8 @@ void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bie��cy wiersz
 
 void CMainFrame::OnUpdateSymSkipToLine(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&          // Is there a running debugger 
                    !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
@@ -1546,6 +1573,8 @@ void CMainFrame::OnSymGoToRts() // Run to return from the subroutine
 
 void CMainFrame::OnUpdateSymGoToRts(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
                    !wxGetApp().m_global.IsProgramRunning() && // and stopped
@@ -1569,6 +1598,8 @@ void CMainFrame::OnSymStepInto()	// wykonanie bie��cej instrukcji
 
 void CMainFrame::OnUpdateSymStepInto(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
                    !wxGetApp().m_global.IsProgramRunning() && // and stopped
@@ -1591,6 +1622,8 @@ void CMainFrame::OnSymStepOver()
 
 void CMainFrame::OnUpdateSymStepOver(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
                    !wxGetApp().m_global.IsProgramRunning() && // and stopped
@@ -1611,6 +1644,8 @@ void CMainFrame::OnSymRestart()
 
 void CMainFrame::OnUpdateSymRestart(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
                    !wxGetApp().m_global.IsProgramRunning() ); // and stopped program?
@@ -1632,6 +1667,8 @@ void CMainFrame::OnSymAnimate()
 
 void CMainFrame::OnUpdateSymAnimate(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
                    !wxGetApp().m_global.IsProgramRunning() && // and stopped
@@ -1879,13 +1916,17 @@ void CMainFrame::OnOptions()
 
 void CMainFrame::OnUpdateOptions(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
 }
 
-int CMainFrame::RedrawAllViews(int chgHint)	// 'Invalidate' wszystkich okien
+int CMainFrame::RedrawAllViews(int chgHint) // 'Invalidate' all windows
 {
+    UNUSED(chgHint);
+
 #if REWRITE_TO_WX_WIDGET
     CWinApp *pApp = AfxGetApp();
     POSITION posTempl = pApp->GetFirstDocTemplatePosition();
@@ -1941,6 +1982,8 @@ void CMainFrame::OnViewRegisterWnd()
 
 void CMainFrame::OnUpdateIdViewRegisterbar(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
     //OnUpdateControlBarMenu(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
@@ -1973,6 +2016,8 @@ void CMainFrame::OnFileSaveCode() //@@
 
 void CMainFrame::OnUpdateFileSaveCode(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is there a loaded program?
 #endif
@@ -1990,6 +2035,8 @@ void CMainFrame::OnViewDeasm()
 
 void CMainFrame::OnUpdateViewDeasm(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger());//is there a working debugger?
 #endif
@@ -2007,6 +2054,8 @@ void CMainFrame::OnViewIdents()
 
 void CMainFrame::OnUpdateViewIdents(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugInfoPresent()); // jest zasemblowany program?
     pCmdUI->SetCheck(m_Idents.IsShown());
@@ -2025,6 +2074,8 @@ void CMainFrame::OnViewMemory()
 
 void CMainFrame::OnUpdateViewMemory(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is there a program?
     pCmdUI->SetCheck(m_Memory.IsShown());
@@ -2040,6 +2091,8 @@ void CMainFrame::OnEditorOpt()
 
 void CMainFrame::OnUpdateEditorOpt(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
@@ -2057,6 +2110,8 @@ void CMainFrame::OnViewIOWindow()
 
 void CMainFrame::OnUpdateViewIOWindow(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger()); // Is the debugger running?
     pCmdUI->SetCheck(m_IOWindow.IsShown());
@@ -2080,6 +2135,8 @@ void CMainFrame::OnFileLoadCode()
 
 void CMainFrame::OnUpdateFileLoadCode(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable( true );
 #endif
@@ -2109,6 +2166,8 @@ void CMainFrame::OnDeasmOptions()
 
 void CMainFrame::OnUpdateDeasmOptions(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
@@ -2132,6 +2191,8 @@ void CMainFrame::OnSysColorChange()
 
 void CMainFrame::OnUpdateViewZeropage(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is there a program?
     pCmdUI->SetCheck(m_ZeroPage.IsShown());
@@ -2158,6 +2219,8 @@ void CMainFrame::OnViewLog()
 
 void CMainFrame::OnUpdateViewLog(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger()); // is simulator present?
     pCmdUI->SetCheck(m_wndLog.IsShown());
@@ -2176,6 +2239,8 @@ void CMainFrame::OnViewStack()
 
 void CMainFrame::OnUpdateViewStack(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is there a program?
     pCmdUI->SetCheck(m_Stack.IsShown());
@@ -2186,6 +2251,8 @@ void CMainFrame::OnUpdateViewStack(CCmdUI* pCmdUI)
 
 void CMainFrame::OnUpdateMemoryOptions(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
@@ -2243,6 +2310,8 @@ void CMainFrame::DelayedUpdateAll()
 
 void CMainFrame::OnTimer(UINT nIDEvent)
 {
+    UNUSED(nIDEvent);
+
 #if REWRITE_TO_WX_WIDGET
     KillTimer(m_uTimer);
     m_uTimer = 0;
@@ -2262,6 +2331,8 @@ void CMainFrame::SymGenInterrupt(CSym6502::IntType eInt)
 
 void CMainFrame::UpdateSymGenInterrupt(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && !wxGetApp().m_global.IsProgramFinished());
 #endif
@@ -2374,6 +2445,8 @@ void CMainFrame::OnSymGenIntDlg()
 
 void CMainFrame::OnUpdateSymGenIntDlg(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable();
 #endif
@@ -2421,6 +2494,8 @@ void CMainFrame::OnHelpDynamic()
 
 void CMainFrame::OnUpdateHelpDynamic(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->SetCheck(m_wndHelpBar.IsShown() ? 1 : 0);
 #endif

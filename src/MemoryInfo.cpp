@@ -41,6 +41,10 @@ CMemoryInfo::~CMemoryInfo()
 
 bool CMemoryInfo::Create(COutputMem *pMem, uint32_t uAddr, ViewType bView)
 {
+    UNUSED(pMem);
+    UNUSED(uAddr);
+    UNUSED(bView);
+
 #if REWRITE_TX_WX_WIDGET
     m_pMem = pMem;
     m_uAddr = uAddr;
@@ -113,7 +117,9 @@ END_MESSAGE_MAP()
 
 afx_msg LRESULT CMemoryInfo::OnChangeCode(WPARAM wParam, LPARAM lParam)
 {
-    if (lParam == -1)
+    UNUSED(wParam);
+
+    if (lParam == static_cast<LPARAM>(-1))
         Close(); // No code -close the window
     else
         Refresh();
@@ -148,6 +154,9 @@ afx_msg LRESULT CMemoryInfo::OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 
 void CMemoryInfo::OnShowWindow(bool bShow, UINT nStatus)
 {
+    UNUSED(bShow);
+    UNUSED(nStatus);
+
 #if REWRITE_TO_WX_WIDGET
     CMiniFrameWnd::OnShowWindow(bShow, nStatus);
 

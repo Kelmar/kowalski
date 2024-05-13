@@ -88,6 +88,10 @@ END_MESSAGE_MAP()
 
 int COptionsViewPage::OnCtlColor(wxDC* pDC, wxWindow* pWnd, UINT nCtlColor)
 {
+    UNUSED(pDC);
+    UNUSED(pWnd);
+    UNUSED(nCtlColor);
+
 #if REWRITE_TO_WX_WIDGETS
     if (nCtlColor == CTLCOLOR_STATIC && pWnd->GetDlgCtrlID() == IDC_OPT_VIEW_EXAMPLE)
     {

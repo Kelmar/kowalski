@@ -334,6 +334,10 @@ int CCrystalTextView::GetLineActualLength(int nLineIndex)
 
 void CCrystalTextView::ScrollToChar(int nNewOffsetChar, bool bNoSmoothScroll /*= false*/, bool bTrackScrollBar /*= true*/)
 {
+    UNUSED(nNewOffsetChar);
+    UNUSED(bNoSmoothScroll);
+    UNUSED(bTrackScrollBar);
+
 #if REWRITE_TO_WX_WIDGET
     //	For now, ignoring bNoSmoothScroll and m_bSmoothScroll
     if (m_nOffsetChar != nNewOffsetChar)
@@ -353,6 +357,10 @@ void CCrystalTextView::ScrollToChar(int nNewOffsetChar, bool bNoSmoothScroll /*=
 
 void CCrystalTextView::ScrollToLine(int nNewTopLine, bool bNoSmoothScroll /*= false*/, bool bTrackScrollBar /*= true*/)
 {
+    UNUSED(nNewTopLine);
+    UNUSED(bNoSmoothScroll);
+    UNUSED(bTrackScrollBar);
+
 #if REWRITE_TO_WX_WIDGET
     if (m_nTopLine != nNewTopLine)
     {
@@ -419,6 +427,11 @@ void CCrystalTextView::ScrollToLine(int nNewTopLine, bool bNoSmoothScroll /*= fa
 
 void CCrystalTextView::ExpandChars(const std::string &chars, int nOffset, int nCount, std::string &line)
 {
+    UNUSED(chars);
+    UNUSED(nOffset);
+    UNUSED(nCount);
+    UNUSED(line);
+
 #if REWRITE_TO_WX_WIDGET
     if (nCount <= 0)
     {
@@ -491,6 +504,13 @@ void CCrystalTextView::ExpandChars(const std::string &chars, int nOffset, int nC
 
 void CCrystalTextView::DrawLineHelperImpl(wxDC *pdc, wxPoint &ptOrigin, const wxRect &rcClip, const std::string &chars, int nOffset, int nCount)
 {
+    UNUSED(pdc);
+    UNUSED(ptOrigin);
+    UNUSED(rcClip);
+    UNUSED(chars);
+    UNUSED(nOffset);
+    UNUSED(nCount);
+
 #if REWRITE_TO_WX_WIDGET
     ASSERT(nCount >= 0);
 
@@ -522,6 +542,8 @@ void CCrystalTextView::DrawLineHelperImpl(wxDC *pdc, wxPoint &ptOrigin, const wx
 void CCrystalTextView::DrawLineHelper(wxDC *pdc, wxPoint &ptOrigin, const wxRect &rcClip, int nColorIndex,
                                       const std::string &chars, int nOffset, int nCount, wxPoint ptTextPos)
 {
+    UNUSED(nColorIndex);
+
     if (nCount > 0)
     {
         if (m_bFocused || m_bShowInactiveSelection)
@@ -666,6 +688,10 @@ uint32_t CCrystalTextView::GetParseCookie(int nLineIndex)
 
 void CCrystalTextView::DrawSingleLine(wxDC *pdc, const wxRect &rc, int nLineIndex)
 {
+    UNUSED(pdc);
+    UNUSED(rc);
+    UNUSED(nLineIndex);
+
 #if REWRITE_TO_WX_WIDGET
     ASSERT(nLineIndex >= -1 && nLineIndex < GetLineCount());
 
@@ -806,6 +832,8 @@ void CCrystalTextView::DrawSingleLine(wxDC *pdc, const wxRect &rc, int nLineInde
 
 wxColour CCrystalTextView::GetColor(int nColorIndex)
 {
+    UNUSED(nColorIndex);
+
 #if REWRITE_TO_WX_WIDGET
     switch (nColorIndex)
     {
@@ -867,6 +895,10 @@ uint32_t CCrystalTextView::GetLineFlags(int nLineIndex)
 
 void CCrystalTextView::DrawMargin(wxDC *pdc, const wxRect &rect, int nLineIndex)
 {
+    UNUSED(pdc);
+    UNUSED(rect);
+    UNUSED(nLineIndex);
+
 #if REWRITE_TO_WX_WIDGET
     if (!m_bSelMargin)
     {
@@ -943,10 +975,17 @@ void CCrystalTextView::DrawMargin(wxDC *pdc, const wxRect &rect, int nLineIndex)
 
 void CCrystalTextView::DrawMarginMarker(int nLine, wxDC* pDC, const wxRect &rect)
 {
+    UNUSED(nLine);
+    UNUSED(pDC);
+    UNUSED(rect);
 }
 
 void CCrystalTextView::DrawMarginIcon(wxDC* pDC, const wxRect &rect, int nImageIndex)
 {
+    UNUSED(pDC);
+    UNUSED(rect);
+    UNUSED(nImageIndex);
+
 #if REWRITE_TO_WX_WIDGET
     if (nImageIndex >= 0)
     {
@@ -1012,6 +1051,8 @@ void CCrystalTextView::PrepareSelBounds()
 
 void CCrystalTextView::OnDraw(wxDC* pdc)
 {
+    UNUSED(pdc);
+
 #if REWRITE_TO_WX_WIDGET
     wxRect rcClient = GetClientRect();
 
@@ -1100,7 +1141,7 @@ void CCrystalTextView::FindBlockBoundaries(int nTopLine, int nLines)
     std::vector<bool>::iterator itInside = m_vLineInsideBlock.begin();
     std::vector<bool>::iterator itEnd = m_vLineInsideBlock.end();
 
-    for (int nLine = nTopLine, nIndex = 0; nLines > 0; ++itInside)
+    for (int nLine = nTopLine; nLines > 0; ++itInside)
     {
         uint32_t flags = m_pTextBuffer->GetLineFlags(nLine);
 
@@ -1241,6 +1282,8 @@ int CCrystalTextView::GetTabSize()
 
 void CCrystalTextView::SetTabSize(int nTabSize)
 {
+    UNUSED(nTabSize);
+
 #if REWRITE_TO_WX_WIDGET
     ASSERT(nTabSize >= 0 && nTabSize <= 64);
 
@@ -1265,6 +1308,9 @@ void CCrystalTextView::SetTabSize(int nTabSize)
 
 wxFont *CCrystalTextView::GetFont(bool bItalic /*= FALSE*/, bool bBold /*= FALSE*/)
 {
+    UNUSED(bItalic);
+    UNUSED(bBold);
+
 #if REWRITE_TO_WX_WIDGET
     int nIndex = 0;
 
@@ -1351,6 +1397,9 @@ int CCrystalTextView::GetMaxLineLength()
 
 CCrystalTextView *CCrystalTextView::GetSiblingView(int nRow, int nCol)
 {
+    UNUSED(nRow);
+    UNUSED(nCol);
+
 #if REWRITE_TO_WX_WIDGET
     CSplitterWnd *pSplitter = GetParentSplitter(this, FALSE);
 
@@ -1647,13 +1696,15 @@ int CCrystalTextView::GetLineLength(int nLineIndex)
 std::string CCrystalTextView::GetLineChars(int nLineIndex)
 {
     if (m_pTextBuffer == NULL)
-        return NULL;
+        return std::string("");
 
     return m_pTextBuffer->GetLineChars(nLineIndex);
 }
 
 void CCrystalTextView::AttachToBuffer(CCrystalTextBuffer *pBuf /*= NULL*/)
 {
+    UNUSED(pBuf);
+
 #if REWRITE_TO_WX_WIDGET
     if (m_pTextBuffer != NULL)
         m_pTextBuffer->RemoveView(this);
@@ -1713,13 +1764,16 @@ int CCrystalTextView::GetScreenLines()
 
 bool CCrystalTextView::GetItalic(int nColorIndex)
 {
+    UNUSED(nColorIndex);
     return false;
 }
 
 bool CCrystalTextView::GetBold(int nColorIndex)
 {
-//	if (nColorIndex == COLORINDEX_KEYWORD)
-//		return true;
+    UNUSED(nColorIndex);
+
+    //if (nColorIndex == COLORINDEX_KEYWORD)
+    //    return true;
 
     return false;
 }
@@ -1767,11 +1821,16 @@ void CCrystalTextView::OnDestroy()
 
 bool CCrystalTextView::OnEraseBkgnd(wxDC *pdc)
 {
+    UNUSED(pdc);
     return true;
 }
 
 void CCrystalTextView::OnSize(UINT nType, int cx, int cy)
 {
+    UNUSED(nType);
+    UNUSED(cx);
+    UNUSED(cy);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnSize(nType, cx, cy);
 
@@ -1790,6 +1849,8 @@ void CCrystalTextView::OnSize(UINT nType, int cx, int cy)
 
 void CCrystalTextView::UpdateSiblingScrollPos(bool bHorz)
 {
+    UNUSED(bHorz);
+
 #if REWRITE_TO_WX_WIDGET
     CSplitterWnd *pSplitterWnd = GetParentSplitter(this, FALSE);
     if (pSplitterWnd != NULL)
@@ -1832,6 +1893,9 @@ void CCrystalTextView::UpdateSiblingScrollPos(bool bHorz)
 
 void CCrystalTextView::OnUpdateSibling(CCrystalTextView *pUpdateSource, bool bHorz)
 {
+    UNUSED(pUpdateSource);
+    UNUSED(bHorz);
+
 #if REWRITE_TO_WX_WIDGET
     if (pUpdateSource != this)
     {
@@ -1863,6 +1927,8 @@ void CCrystalTextView::OnUpdateSibling(CCrystalTextView *pUpdateSource, bool bHo
 
 void CCrystalTextView::RecalcVertScrollBar(bool bPositionOnly /*= FALSE*/)
 {
+    UNUSED(bPositionOnly);
+
 #if REWRITE_TO_WX_WIDGET
     SCROLLINFO si;
     si.cbSize = sizeof(si);
@@ -1894,6 +1960,10 @@ void CCrystalTextView::RecalcVertScrollBar(bool bPositionOnly /*= FALSE*/)
 
 void CCrystalTextView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 {
+    UNUSED(nSBCode);
+    UNUSED(nPos);
+    UNUSED(pScrollBar);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnVScroll(nSBCode, nPos, pScrollBar);
 
@@ -1966,6 +2036,8 @@ void CCrystalTextView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBa
 
 void CCrystalTextView::RecalcHorzScrollBar(bool bPositionOnly /*= FALSE*/)
 {
+    UNUSED(bPositionOnly);
+
 #if REWRITE_WX_WIDGET
     //	Again, we cannot use nPos because it's 16-bit
     SCROLLINFO si;
@@ -1997,6 +2069,10 @@ void CCrystalTextView::RecalcHorzScrollBar(bool bPositionOnly /*= FALSE*/)
 
 void CCrystalTextView::OnHScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 {
+    UNUSED(nSBCode);
+    UNUSED(nPos);
+    UNUSED(pScrollBar);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnHScroll(nSBCode, nPos, pScrollBar);
 
@@ -2058,6 +2134,10 @@ void CCrystalTextView::OnHScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBa
 
 bool CCrystalTextView::OnSetCursor(wxWindow* pWnd, UINT nHitTest, UINT message)
 {
+    UNUSED(pWnd);
+    UNUSED(nHitTest);
+    UNUSED(message);
+
 #if REWRITE_TO_WX_WIDGET
     if (nHitTest == HTCLIENT)
     {
@@ -2152,7 +2232,6 @@ void CCrystalTextView::AssertValidTextPos(const wxPoint &point)
 wxPoint CCrystalTextView::TextToClient(const wxPoint &point)
 {
     ASSERT_VALIDTEXTPOS(point);
-    int nLength = GetLineLength(point.y);
     std::string line = GetLineChars(point.y);
 
     wxPoint pt;
@@ -2174,6 +2253,10 @@ wxPoint CCrystalTextView::TextToClient(const wxPoint &point)
 
 void CCrystalTextView::InvalidateLines(int nLine1, int nLine2, bool bInvalidateMargin /*= FALSE*/)
 {
+    UNUSED(nLine1);
+    UNUSED(nLine2);
+    UNUSED(bInvalidateMargin);
+
 #if REWRITE_TO_WX_WIDGET
     bInvalidateMargin = true;
 
@@ -2240,6 +2323,8 @@ void CCrystalTextView::AdjustTextPoint(wxPoint &point)
 
 void CCrystalTextView::OnSetFocus(wxWindow* pOldWnd)
 {
+    UNUSED(pOldWnd);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnSetFocus(pOldWnd);
 
@@ -2254,6 +2339,11 @@ void CCrystalTextView::OnSetFocus(wxWindow* pOldWnd)
 
 uint32_t CCrystalTextView::ParseLine(uint32_t cookie, int nLineIndex, TEXTBLOCK *pBuf, int &nActualItems)
 {
+    UNUSED(cookie);
+    UNUSED(nLineIndex);
+    UNUSED(pBuf);
+    UNUSED(nActualItems);
+
     return 0;
 }
 
@@ -2368,6 +2458,8 @@ void CCrystalTextView::EnsureVisible(wxPoint pt)
 
 void CCrystalTextView::OnKillFocus(wxWindow* pNewWnd)
 {
+    UNUSED(pNewWnd);
+
 #if REWRITE_TO_WX_WIDGET
 
     CView::OnKillFocus(pNewWnd);
@@ -2423,6 +2515,11 @@ std::string CCrystalTextView::GetCurLine()
 void CCrystalTextView::UpdateView(CCrystalTextView *pSource, CUpdateContext *pContext,
                                   uint32_t flags, int nLineIndex /*= -1*/)
 {
+    UNUSED(pSource);
+    UNUSED(pContext);
+    UNUSED(flags);
+    UNUSED(nLineIndex);
+
 #if REWRITE_TO_WX_WIDGET
     if (flags & UPDATE_RESET)
     {
@@ -2585,6 +2682,8 @@ void CCrystalTextView::SetAnchor(const wxPoint &ptNewAnchor)
 
 void CCrystalTextView::OnEditOperation(int action, const std::string &text)
 {
+    UNUSED(action);
+    UNUSED(text);
 }
 
 #if REWRITE_TO_WX_WIDGET
@@ -2620,6 +2719,8 @@ void CCrystalTextView::SetCursorPos(const wxPoint &ptCursorPos)
 
 void CCrystalTextView::SetSelectionMargin(bool bSelMargin)
 {
+    UNUSED(bSelMargin);
+
 #if REWRITE_TO_WX_WIDGET
     if (m_bSelMargin != bSelMargin)
     {
@@ -2641,6 +2742,8 @@ void CCrystalTextView::GetFont(wxFontInfo &lf)
 
 void CCrystalTextView::SetFont(const wxFontInfo &lf)
 {
+    UNUSED(lf);
+
 #if REWRITE_TO_WX_WIDGET
     m_lfBaseFont = lf;
     m_nScreenLines = -1;
@@ -2677,6 +2780,8 @@ void CCrystalTextView::SetFont(const wxFontInfo &lf)
 
 void CCrystalTextView::OnUpdateIndicatorPosition(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     ASSERT_VALIDTEXTPOS(m_ptCursorPos);
     wxString stat;
@@ -2688,6 +2793,8 @@ void CCrystalTextView::OnUpdateIndicatorPosition(CCmdUI* pCmdUI)
 
 void CCrystalTextView::OnUpdateIndicatorCRLF(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
 
     if (m_pTextBuffer != NULL)
@@ -2818,8 +2925,12 @@ HGLOBAL CCrystalTextView::PrepareDragData()
 
 #endif
 
+#if 0
+
 static int FindStringHelper(const std::string &findWhere, const std::string &findWhat, bool wholeWord)
 {
+    UNUSED(wholeWord);
+
     if (findWhere.empty() || findWhat.empty())
         return -1;
 
@@ -2858,6 +2969,8 @@ static int FindStringHelper(const std::string &findWhere, const std::string &fin
     return -1;
 }
 
+#endif
+
 bool CCrystalTextView::HighlightText(const wxPoint &ptStartPos, int nLength)
 {
     ASSERT_VALIDTEXTPOS(ptStartPos);
@@ -2890,6 +3003,8 @@ bool CCrystalTextView::FindTextInBlock(const std::string &text, const wxPoint &p
                                        const wxPoint &ptBlockBegin, const wxPoint &ptBlockEnd,
                                        uint32_t flags, bool bWrapSearch, wxPoint *pptFoundPos)
 {
+    UNUSED(pptFoundPos);
+
     wxPoint ptCurrentPos = ptStartPosition;
 
     if (text.empty())
@@ -2898,12 +3013,12 @@ bool CCrystalTextView::FindTextInBlock(const std::string &text, const wxPoint &p
     ASSERT_VALIDTEXTPOS(ptCurrentPos);
     ASSERT_VALIDTEXTPOS(ptBlockBegin);
     ASSERT_VALIDTEXTPOS(ptBlockEnd);
-    ASSERT(ptBlockBegin.y < ptBlockEnd.y || ptBlockBegin.y == ptBlockEnd.y && ptBlockBegin.x <= ptBlockEnd.x);
+    ASSERT((ptBlockBegin.y < ptBlockEnd.y) || ((ptBlockBegin.y == ptBlockEnd.y) && (ptBlockBegin.x <= ptBlockEnd.x)));
 
     if (ptBlockBegin == ptBlockEnd)
         return FALSE;
 
-    if (ptCurrentPos.y < ptBlockBegin.y || ptCurrentPos.y == ptBlockBegin.y && ptCurrentPos.x < ptBlockBegin.x)
+    if ((ptCurrentPos.y < ptBlockBegin.y) || ((ptCurrentPos.y == ptBlockBegin.y) && (ptCurrentPos.x < ptBlockBegin.x)))
         ptCurrentPos = ptBlockBegin;
 
     std::string what = text;
@@ -3029,9 +3144,6 @@ bool CCrystalTextView::FindTextInBlock(const std::string &text, const wxPoint &p
             ptCurrentPos = ptBlockBegin;
         }
     }
-
-    ASSERT(false); // Unreachable
-    return false;
 }
 
 void CCrystalTextView::OnEditFind()
@@ -3129,6 +3241,8 @@ void CCrystalTextView::OnEditRepeat()
 
 void CCrystalTextView::OnUpdateEditRepeat(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(m_bLastSearch);
 #endif
@@ -3150,6 +3264,8 @@ void CCrystalTextView::OnEditFindPrevious()
 
 void CCrystalTextView::OnUpdateEditFindPrevious(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(m_bLastSearch);
 #endif
@@ -3259,6 +3375,8 @@ void CCrystalTextView::OnClearAllBookmarks()
 
 void CCrystalTextView::OnUpdateNextBookmark(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(m_bBookmarkExist);
 #endif
@@ -3266,6 +3384,8 @@ void CCrystalTextView::OnUpdateNextBookmark(CCmdUI* pCmdUI)
 
 void CCrystalTextView::OnUpdatePrevBookmark(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(m_bBookmarkExist);
 #endif
@@ -3273,6 +3393,8 @@ void CCrystalTextView::OnUpdatePrevBookmark(CCmdUI* pCmdUI)
 
 void CCrystalTextView::OnUpdateClearAllBookmarks(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(m_bBookmarkExist);
 #endif
@@ -3306,6 +3428,8 @@ bool CCrystalTextView::GetViewTabs()
 
 void CCrystalTextView::SetViewTabs(bool bViewTabs)
 {
+    UNUSED(bViewTabs);
+
 #if REWRITE_TO_WX_WIDGET
     if (bViewTabs != m_bViewTabs)
     {
@@ -3324,6 +3448,8 @@ void CCrystalTextView::OnEditViewTabs()
 
 void CCrystalTextView::OnUpdateEditViewTabs(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable();
     pCmdUI->SetCheck(m_bViewTabs);
@@ -3364,6 +3490,9 @@ void CCrystalTextView::SetDisableDragAndDrop(bool bDDAD)
 
 bool CCrystalTextView::OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt)
 {
+    UNUSED(nFlags);
+    UNUSED(pt);
+
     if (zDelta)
         OnVScroll(zDelta > 0 ? 98 : 99, 0, 0);
 //	return CView::OnMouseWheel(nFlags, zDelta, pt);
@@ -3523,16 +3652,16 @@ void CCrystalTextView::MoveWordRight(bool select)
 
     if (isalnum(chars[nPos]) || chars[nPos] == '_')
     {
-        while (nPos < nLength && isalnum(chars[nPos]) || chars[nPos] == '_')
+        while ((nPos < nLength) && (isalnum(chars[nPos]) || chars[nPos] == '_'))
             nPos++;
     }
     else
     {
-        while (nPos < nLength && ! isalnum(chars[nPos]) && chars[nPos] != '_' && ! isspace(chars[nPos]))
+        while ((nPos < nLength) && (!isalnum(chars[nPos]) && (chars[nPos] != '_') && !isspace(chars[nPos])))
             nPos++;
     }
 
-    while (nPos < nLength && isspace(chars[nPos]))
+    while ((nPos < nLength) && isspace(chars[nPos]))
         nPos++;
 
     m_ptCursorPos.x = nPos;
@@ -3810,6 +3939,9 @@ void CCrystalTextView::SelectAll()
 
 void CCrystalTextView::OnLButtonDown(UINT nFlags, wxPoint point)
 {
+    UNUSED(nFlags);
+    UNUSED(point);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnLButtonDown(nFlags, point);
 
@@ -3926,6 +4058,9 @@ void CCrystalTextView::OnLButtonDown(UINT nFlags, wxPoint point)
 
 void CCrystalTextView::OnMouseMove(UINT nFlags, wxPoint point)
 {
+    UNUSED(nFlags);
+    UNUSED(point);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnMouseMove(nFlags, point);
 
@@ -4038,6 +4173,9 @@ void CCrystalTextView::OnMouseMove(UINT nFlags, wxPoint point)
 
 void CCrystalTextView::OnLButtonUp(UINT nFlags, wxPoint point)
 {
+    UNUSED(nFlags);
+    UNUSED(point);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnLButtonUp(nFlags, point);
 
@@ -4139,6 +4277,8 @@ void CCrystalTextView::OnLButtonUp(UINT nFlags, wxPoint point)
 
 void CCrystalTextView::OnTimer(UINT nIDEvent)
 {
+    UNUSED(nIDEvent);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnTimer(nIDEvent);
 
@@ -4225,6 +4365,9 @@ void CCrystalTextView::OnTimer(UINT nIDEvent)
 
 void CCrystalTextView::OnLButtonDblClk(UINT nFlags, wxPoint point)
 {
+    UNUSED(nFlags);
+    UNUSED(point);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnLButtonDblClk(nFlags, point);
 
@@ -4270,6 +4413,8 @@ void CCrystalTextView::OnEditCopy()
 
 void CCrystalTextView::OnUpdateEditCopy(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(m_ptSelStart != m_ptSelEnd);
 #endif
@@ -4282,6 +4427,8 @@ void CCrystalTextView::OnEditSelectAll()
 
 void CCrystalTextView::OnUpdateEditSelectAll(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(TRUE);
 #endif
@@ -4289,6 +4436,8 @@ void CCrystalTextView::OnUpdateEditSelectAll(CCmdUI* pCmdUI)
 
 void CCrystalTextView::OnRButtonDown(UINT nFlags, wxPoint point)
 {
+    UNUSED(nFlags);
+
     wxPoint pt = point;
     AdjustTextPoint(pt);
     pt = ClientToText(pt);
@@ -4361,6 +4510,8 @@ bool CCrystalTextView::PutToClipboard(const std::string &text)
 
 bool CCrystalTextView::GetFromClipboard(std::string &text)
 {
+    UNUSED(text);
+
 #if REWRITE_TO_WX_WIDGET
     bool success = false;
 
@@ -4641,7 +4792,7 @@ bool CCrystalTextView::CollapseBlock(int nLineFrom, int nLineTo)
 
 bool CCrystalTextView::IsLineCollapsed(int nLine)
 {
-    if (m_pTextBuffer == NULL || nLine >= m_pTextBuffer->GetLineCount())
+    if ((m_pTextBuffer == nullptr) || (static_cast<std::size_t>(nLine) >= m_pTextBuffer->GetLineCount()))
         return false;
 
     uint32_t flags = m_pTextBuffer->GetLineFlags(nLine);
@@ -4651,7 +4802,7 @@ bool CCrystalTextView::IsLineCollapsed(int nLine)
 
 bool CCrystalTextView::IsLineHidden(int nLine)
 {
-    if (m_pTextBuffer == NULL || nLine >= m_pTextBuffer->GetLineCount())
+    if ((m_pTextBuffer == nullptr) || (static_cast<std::size_t>(nLine) >= m_pTextBuffer->GetLineCount()))
         return false;
 
     uint32_t flags = m_pTextBuffer->GetLineFlags(nLine);
@@ -4683,7 +4834,7 @@ bool CCrystalTextView::IsLineHidden(int nLine)
 
 bool CCrystalTextView::IsFirstLineOfCollapsedBlock(int nLine)
 {
-    if (m_pTextBuffer == NULL || nLine >= m_pTextBuffer->GetLineCount())
+    if ((m_pTextBuffer == nullptr) || (static_cast<std::size_t>(nLine) >= m_pTextBuffer->GetLineCount()))
         return false;
 
     uint32_t flags = m_pTextBuffer->GetLineFlags(nLine);
@@ -4696,6 +4847,9 @@ bool CCrystalTextView::IsFirstLineOfCollapsedBlock(int nLine)
 
 void CCrystalTextView::DrawEllipsis(wxDC* pDC, const wxRect& rcLine)
 {
+    UNUSED(pDC);
+    UNUSED(rcLine);
+
 #if REWRITE_TO_WX_WIDGET
     pDC->FillSolidRect(rcLine, GetColor(COLORINDEX_WHITESPACE));
     pDC->SelectObject(GetFont(false, false));
@@ -4826,4 +4980,7 @@ void CCrystalTextView::CaretMoved()
 
 void CCrystalTextView::CaretMoved(const std::string& strLine, int nWordStart, int nWordEnd)
 {
+    UNUSED(strLine);
+    UNUSED(nWordStart);
+    UNUSED(nWordEnd);
 }

@@ -492,6 +492,10 @@ void CIOWindow::OnGetMinMaxInfo(MINMAXINFO* pMMI)
 
 void CIOWindow::OnSize(UINT nType, int cx, int cy)
 {
+    UNUSED(nType);
+    UNUSED(cx);
+    UNUSED(cy);
+
 #if 0
     CMiniFrameWnd::OnSize(nType,cx,cy);
 
@@ -661,6 +665,10 @@ void CIOWindow::DrawCursor()
 
 void CIOWindow::DrawCursor(int nX, int nY, bool bVisible)
 {
+    UNUSED(nX);
+    UNUSED(nY);
+    UNUSED(bVisible);
+
 #if 0
     if (m_pData == nullptr)
         return;
@@ -702,6 +710,8 @@ void CIOWindow::DrawCursor(int nX, int nY, bool bVisible)
 
 void CIOWindow::OnTimer(UINT nIDEvent)
 {
+    UNUSED(nIDEvent);
+
     m_bCursorVisible = !m_bCursorVisible;
 
     DrawCursor();
@@ -714,6 +724,10 @@ void CIOWindow::OnTimer(UINT nIDEvent)
 
 void CIOWindow::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+    UNUSED(nChar);
+    UNUSED(nRepCnt);
+    UNUSED(nFlags);
+
     char c = (char)nChar;
 
     if (c)
@@ -820,6 +834,10 @@ void CInputBuffer::Paste(const char* pcText)
 
 void CIOWindow::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+    UNUSED(nChar);
+    UNUSED(nRepCnt);
+    UNUSED(nFlags);
+
 #if 0
     if (nChar == VK_INSERT)
         Paste();

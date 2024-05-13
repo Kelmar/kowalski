@@ -147,8 +147,12 @@ protected:
 
         //	constructor/destructor for this struct
         SUndoRecord()
+            : m_pszText(nullptr)
+            , m_flags(0)
+            , m_ptStartPos(0, 0)
+            , m_ptEndPos(0, 0)
+            , m_action(0)
         {
-            memset(this, 0, sizeof(SUndoRecord));
         };
 
         void SetText(const std::string &text);
@@ -156,6 +160,7 @@ protected:
 
         std::string GetText() const
         {
+            ASSERT(false); // This class needs to be rewritten to not use Win32 hack -- B.Simonds (May 12, 2024)
             /*
             if (HIWORD((uint32_t)m_pszText) != 0)
                 return m_pszText;

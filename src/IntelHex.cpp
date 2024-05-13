@@ -28,6 +28,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void CIntelHex::SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start/*= -1*/)
 {
+    UNUSED(archive);
+    UNUSED(mem);
+    UNUSED(area);
+    UNUSED(prog_start);
+
 #if 0
     char buf[80], *ptr;
 
@@ -122,6 +127,11 @@ UINT CIntelHex::geth(const char *&ptr, UINT &sum)
 
 void CIntelHex::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start)
 {
+    UNUSED(archive);
+    UNUSED(mem);
+    UNUSED(area);
+    UNUSED(prog_start);
+
 #if 0
     char buf[256];
     int bank = 0;
@@ -263,9 +273,13 @@ void CIntelHex::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &are
 
 //-----------------------------------------------------------------------------
 
-/*virtual*/ bool CIntelHex::CIntelHexException::GetErrorMessage(char *error,
+/*virtual*/ bool CIntelHex::CIntelHexException::GetErrorMessage(char *errBuf,
         UINT nMaxError, UINT *pnHelpContext/*= NULL*/)
 {
+    UNUSED(errBuf);
+    UNUSED(nMaxError);
+    UNUSED(pnHelpContext);
+
 #if 0
     std::string msg;
     char num[16];
@@ -293,7 +307,7 @@ void CIntelHex::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &are
         return false;
     }
 
-    strncpy(error, msg, nMaxError);
+    strncpy(errBuf, msg, nMaxError);
 #endif
 
     return true;

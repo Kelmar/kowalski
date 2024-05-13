@@ -53,14 +53,16 @@ public:
     std::string m_strListingFile;   // listing file
     CIntGenerator m_IntGenerator;   // interrupt request generator data
 
-    CGlobal() : m_pSym6502(NULL), m_bCodePresent(false)
+    CGlobal()
+        : m_bCodePresent(false)
+        , m_pSym6502(nullptr)
     {
         SetAddrBusWidth(16);
     }
 
     ~CGlobal()
     {
-        if (m_pSym6502) delete m_pSym6502;
+        delete m_pSym6502;
     }
 
     void SetAddrBusWidth(UINT w)

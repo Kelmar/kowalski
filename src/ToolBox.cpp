@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -41,18 +41,21 @@ CToolBox::~CToolBox()
 /////////////////////////////////////////////////////////////////////////////
 // CToolBox message handlers
 
-bool CToolBox::Create(int rsc_id, wxWindow* pParentWnd)
+bool CToolBox::Create(int rscId, wxWindow *pParentWnd)
 {
-#if REWRITE_TO_WX_WIDGET
-    this->rsc_id = rsc_id;
+    UNUSED(rscId);
+    UNUSED(pParentWnd);
 
-    int ret= CDialog::Create(IDD, pParentWnd);
+#if REWRITE_TO_WX_WIDGET
+    rsc_id = rscId;
+
+    int ret = CDialog::Create(IDD, pParentWnd);
     if (!ret)
         return ret;
 
     CString regs;
     if (regs.LoadString(rsc_id))
-        SetWindowText(regs);	// nazwa (tytu�) okna
+        SetWindowText(regs); // name (title) of the window
 
     created = true;
 #endif

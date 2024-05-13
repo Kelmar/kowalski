@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 bool CInputWin::read_line(std::string &buf)
 {
+    UNUSED(buf);
+
 #if 0
     int ret = SendMessage(m_window->GetSafeHwnd(), WM_USER_GET_NEXT_LINE,
                           WPARAM(max_len), LPARAM(str));

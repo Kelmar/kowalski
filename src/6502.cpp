@@ -238,6 +238,8 @@ BOOL C6502App::InitInstance()
 
 void C6502App::AddToRecentFileList(const std::string &pathName)
 {
+    UNUSED(pathName);
+
     if (!m_bDoNotAddToRecentFileList)
         return;
 

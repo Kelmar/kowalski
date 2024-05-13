@@ -145,6 +145,8 @@ void CDeasmSaveOptions::OnDeltaposDeasmSpinStart(NMHDR* pNMHDR, LRESULT* pResult
 
 void CDeasmSaveOptions::CalculateNums(int pos)
 {
+    UNUSED(pos);
+
 #if 0
     NumFmt fmt1;
     int start = ReadNumber(GetDlgItem(IDC_DEASM_SAVE_START), fmt1);

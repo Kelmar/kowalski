@@ -62,8 +62,8 @@ CAsm6502::Stat CConditionalAsm::instr_else_found()
     else
     {
         // lines before .ELSE were not assembled
-        if (level > 0 && get_prev_assemble() || level == 0)	// Parent if/endif assembled
-            set_state(AFTER_ELSE, true);                    // or no parent if/endif
+        if ((level > 0 && get_prev_assemble()) || (level == 0)) // Parent if/endif assembled
+            set_state(AFTER_ELSE, true);                        // or no parent if/endif
         else
             set_state(AFTER_ELSE, false);
     }
@@ -86,7 +86,7 @@ CAsm6502::Stat CConditionalAsm::instr_endif_found()
 
 void CConditionalAsm::restore_level(int new_level)
 {
-    if (new_level >= -1 && new_level < stack.size())
+    if ((new_level >= -1) && (static_cast<std::size_t>(new_level) < stack.size()))
         level = new_level;
 }
 

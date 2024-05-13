@@ -165,6 +165,8 @@ bool CSaveCodeOptions::OnInitDialog()
 
 void CSaveCodeOptions::CalculateNums(int pos)
 {
+    UNUSED(pos);
+
 #if REWRITE_TO_WX_WIDGET
     NumFmt fmt1;
     int start= ReadNumber(GetDlgItem(IDC_SAVE_CODE_OPT_1_START),fmt1);

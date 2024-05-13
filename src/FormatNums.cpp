@@ -75,7 +75,7 @@ int NumberFormats::ReadNumber(wxControl *pCtrl, NumberFormat &fmt)
     }
 
     int num = 0;
-    for (int i = start; i < buf.Length(); ++i)
+    for (size_t i = start; i < buf.Length(); ++i)
     {
         char c = buf[i];
         int val;

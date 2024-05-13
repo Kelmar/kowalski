@@ -35,6 +35,8 @@ const int nMinH = 50;
 static const char* s_REGISTRY_SECTION = "DynamicHelp";
 static const char* s_REGISTRY_WIDTH = "Height";
 
+//static const char *s_pcszTitle = _("Dynamic Help");
+
 std::string GetConfigPath()
 {
     std::string path = "/";
@@ -94,6 +96,9 @@ wxSize CDynamicHelp::CalcDynamicLayout(int nLength, uint32_t dwMode)
 
 wxSize CDynamicHelp::CalcLayout(uint32_t dwMode, int nLength)
 {
+    UNUSED(dwMode);
+    UNUSED(nLength);
+
 #if 0
     wxSize sizeResult(50, 50);
     if (dwMode & (LM_HORZDOCK | LM_VERTDOCK))
@@ -158,10 +163,12 @@ void CDynamicHelp::OnNcPaint()
 }
 
 //-----------------------------------------------------------------------------
-static const char* s_pcszTitle = "Dynamic Help";
 
 bool CDynamicHelp::Create(wxWindow* pParentWnd, UINT nID)
 {
+    UNUSED(pParentWnd);
+    UNUSED(nID);
+
 #if 0
     CControlBar::Create(s_strWndClass, s_pcszTitle,
                         WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
@@ -222,6 +229,8 @@ void CDynamicHelp::DoPaint(wxDC* dc)
 
         int nW = rect.GetWidth() - 9 - m_nHeaderHeight;
         int nX = rect.GetLeft() + 5;
+
+        UNUSED(nX);
 
         if (nW > 0)
         {
@@ -297,6 +306,10 @@ void CDynamicHelp::Resize()
 
 void CDynamicHelp::OnSize(UINT nType, int cx, int cy)
 {
+    UNUSED(nType);
+    UNUSED(cx);
+    UNUSED(cy);
+
     //CControlBar::OnSize(nType, cx, cy);
 
     Resize();
@@ -405,6 +418,10 @@ void CDynamicHelp::SetContextHelp(const char* pcszText, const char* pcszHeader/*
 
 void CDynamicHelp::DisplayHelp(const std::string& strLine, int nWordStart, int nWordEnd)
 {
+    UNUSED(strLine);
+    UNUSED(nWordStart);
+    UNUSED(nWordEnd);
+
 #if 0
     std::string strHelp;
     const char* pcszHeader = 0;
@@ -453,6 +470,9 @@ void CDynamicHelp::DisplayHelp(const std::string& strLine, int nWordStart, int n
 
 void CDynamicHelp::OnBarStyleChange(uint32_t dwOldStyle, uint32_t dwNewStyle)
 {
+    UNUSED(dwOldStyle);
+    UNUSED(dwNewStyle);
+
     //PostMessage(WM_USER);
 }
 

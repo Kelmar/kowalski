@@ -114,13 +114,15 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
 
     case A_ABS_X:
         addr = get_word(ctx.pc) + ctx.x;
-        if ((addr >> 8) != (get_word(ctx.pc) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        if ((addr >> 8) != static_cast<uint32_t>(get_word(ctx.pc) >> 8))
+            extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         break;
 
     case A_ABS_Y:
         addr = get_word(ctx.pc) + ctx.y;
-        if ((addr >> 8) != (get_word(ctx.pc) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        if ((addr >> 8) != static_cast<uint32_t>(get_word(ctx.pc) >> 8))
+            extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         break;
 
@@ -133,7 +135,8 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
     case A_ZPGI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg) + ctx.y;
-        if ((addr >> 8) != (get_word_indirect(arg) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        if ((addr >> 8) != static_cast<uint32_t>(get_word_indirect(arg) >> 8))
+            extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter();
         break;
 
@@ -188,7 +191,7 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg) + ctx.y;
 
-        if ((addr >> 8) != (get_word_indirect(arg) >> 8))
+        if ((addr >> 8) != static_cast<uint32_t>(get_word_indirect(arg) >> 8))
             extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
 
         inc_prog_counter();
@@ -278,13 +281,15 @@ uint8_t CSym6502::get_argument_value()
 
     case A_ABS_X:
         addr = get_word(ctx.pc) + ctx.x;
-        if ((addr >> 8) != (get_word(ctx.pc) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        if ((addr >> 8) != static_cast<uint32_t>(get_word(ctx.pc) >> 8))
+            extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
     case A_ABS_Y:
         addr = get_word(ctx.pc) + ctx.y;
-        if ((addr >> 8) != (get_word(ctx.pc) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        if ((addr >> 8) != static_cast<uint32_t>(get_word(ctx.pc) >> 8))
+            extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
@@ -297,7 +302,8 @@ uint8_t CSym6502::get_argument_value()
     case A_ZPGI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg) + ctx.y;
-        if ((addr >> 8) != (get_word_indirect(arg) >> 8)) extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
+        if ((addr >> 8) != static_cast<uint32_t>(get_word_indirect(arg) >> 8))
+            extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
@@ -357,14 +363,13 @@ CAsm::SymStat CSym6502::perform_cmd()
     {
         return s;
     }
-
-    return SYM_OK; // !? -- Not possible to get here. -- B.Simonds (May 1, 2024)
 }
 
 CAsm::SymStat CSym6502::perform_command()
 {
     uint8_t cmd = ctx.mem[ctx.pc];
-    uint8_t arg, acc;
+    uint8_t arg;
+    uint16_t acc;
     //uint16_t addr;
     uint32_t addr;
     uint8_t zero, overflow, carry, negative;
@@ -692,8 +697,6 @@ CAsm::SymStat CSym6502::perform_command()
                 negative = false;
             }
 
-            zero = acc == 0;
-
             ctx.a = acc;
         }
         else
@@ -719,6 +722,7 @@ CAsm::SymStat CSym6502::perform_command()
             if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
                 ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         }
+        zero = acc == 0;
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
@@ -918,8 +922,8 @@ CAsm::SymStat CSym6502::perform_command()
 
     case C_JSR:
         addr = get_argument_address(false);
-        push_addr_on_stack(ctx.pc - 1 & 0xFFFF);
-        //	push_addr_on_stack(ctx.pc - 1 & ctx.mem_mask);
+        push_addr_on_stack((ctx.pc - 1) & 0xFFFF);
+        //push_addr_on_stack((ctx.pc - 1) & ctx.mem_mask);
         ctx.pc = addr;
         break;
 
@@ -931,7 +935,7 @@ CAsm::SymStat CSym6502::perform_command()
     case C_RTS:
         if (finish == FIN_BY_RTS && ctx.s == 0xFF) // RTS on empty stack?
             return SYM_FIN;
-        ctx.pc = pull_addr_from_stack() + 1 & 0xFFFF; // & ctx.mem_mask;
+        ctx.pc = (pull_addr_from_stack() + 1) & 0xFFFF; // & ctx.mem_mask;
         break;
 
     case C_RTI:
@@ -1352,6 +1356,8 @@ CAsm::SymStat CSym6502::StepOver()
 
 UINT CSym6502::start_step_over_thread(void *ptr)
 {
+    UNUSED(ptr);
+
 #if REWRITE_TO_WX_WIDGET
     CSym6502 *pSym = (CSym6502 *)ptr;
     pSym->fin_stat = pSym->step_over();
@@ -1362,13 +1368,13 @@ UINT CSym6502::start_step_over_thread(void *ptr)
     return 0;
 }
 
-CAsm::SymStat CSym6502::step_over() // wykonanie instrukcji bez wchodzenia do podprogramu
+CAsm::SymStat CSym6502::step_over() // execution of the instruction without entering the subroutine
 {
-    //uint16_t addr= uint16_t(ctx.pc & ctx.mem_mask);
+    //uint16_t addr = uint16_t(ctx.pc & ctx.mem_mask);
     uint32_t addr = ctx.pc;
+    uint8_t stack = 0;
     bool jsr = false;
-    uint8_t stack;
-
+    
     set_translation_tables();
 
     switch (m_vCodeToCommand[ctx.mem[addr]])
@@ -1376,6 +1382,7 @@ CAsm::SymStat CSym6502::step_over() // wykonanie instrukcji bez wchodzenia do po
     case C_JSR:
         stack = ctx.s;
         jsr = true;
+        [[fallthrough]];
 
     case C_BRK:
         if (debug && !jsr)
@@ -1434,6 +1441,8 @@ CAsm::SymStat CSym6502::RunTillRet()
 
 UINT CSym6502::start_run_till_ret_thread(void *ptr)
 {
+    UNUSED(ptr);
+
 #if REWRITE_TO_WX_WIDGET
     CSym6502 *pSym = (CSym6502 *)ptr;
     pSym->fin_stat = pSym->run_till_ret();
@@ -1498,6 +1507,8 @@ CAsm::SymStat CSym6502::Run()
 
 UINT CSym6502::start_run_thread(void *ptr)
 {
+    UNUSED(ptr);
+
 #if REWRITE_TO_WX_WIDGET
     CSym6502 *pSym = (CSym6502 *)ptr;
     pSym->fin_stat = pSym->run();
@@ -1510,6 +1521,8 @@ UINT CSym6502::start_run_thread(void *ptr)
 
 CAsm::SymStat CSym6502::perform_step(bool animate)
 {
+    UNUSED(animate);
+
     if (stop_prog) // stop executing?
         return SYM_STOP;
 
@@ -1644,6 +1657,8 @@ CAsm::SymStat CSym6502::Animate()
 
 UINT CSym6502::start_animate_thread(void *ptr)
 {
+    UNUSED(ptr);
+
 #if REWRITE_TO_WX_WIDGET
     //WinThread *pThread = AfxGetThread();
     //pThread->SetThreadPriority(THREAD_PRIORITY_IDLE); // Enable refreshing
@@ -1735,6 +1750,8 @@ std::string CSym6502::GetLastStatMsg()
 
 std::string CSym6502::GetStatMsg(SymStat stat)
 {
+    UNUSED(stat);
+
     std::string msg = "";
 
 #if REWRITE_TO_WX_WIDGET
@@ -1793,6 +1810,9 @@ std::string CSym6502::GetStatMsg(SymStat stat)
 
 void CSym6502::Update(SymStat stat, bool no_ok /*=false*/)
 {
+    UNUSED(stat);
+    UNUSED(no_ok);
+
 #if REWRITE_TO_WX_WIDGET
     wxWindow *pMain = (wxWindow *)wxGetApp()->m_pMainWnd;
     //pMain->m_wndRegisterBar.Update(&ctx,GetStatMsg(stat),&old);
@@ -1864,6 +1884,9 @@ void CSym6502::SymStart(uint32_t org)
 
 void CSym6502::SetPointer(const CLine &line, uint32_t addr) // position the arrow (->) in front of the current line
 {
+    UNUSED(line);
+    UNUSED(addr);
+
 #if REWRITE_TO_WX_WIDGET
     POSITION posDoc = wxGetApp().m_pDocDeasmTemplate->GetFirstDocPosition();
     while (posDoc != NULL) // Are the windows from the disassembler?
@@ -1911,6 +1934,9 @@ void CSym6502::SetPointer(const CLine &line, uint32_t addr) // position the arro
 
 void CSym6502::SetPointer(CSrc6502View *pView, int nLine, bool bScroll)
 {
+    UNUSED(nLine);
+    UNUSED(bScroll);
+
     if (!pView)
         return;
 
@@ -1949,6 +1975,8 @@ void CSym6502::ResetPointer() // hide the arrow
 
 CSrc6502View *CSym6502::FindDocView(FileUID fuid)
 {
+    UNUSED(fuid);
+
 #if REWRITE_TO_WX_WIDGET
     if (debug == NULL)
         return NULL;
@@ -2014,6 +2042,8 @@ uint8_t CSym6502::io_function()
 
 CAsm::SymStat CSym6502::io_function(uint8_t arg)
 {
+    UNUSED(arg);
+
     wxWindow *terminal = io_window();
 
     switch (io_func)
@@ -2083,12 +2113,12 @@ void CSym6502::AddBranchCycles(uint8_t arg)
 
     if (arg & 0x80) // jump back
     {
-        if (ctx.pc >> 8 != uint16_t(ctx.pc - (0x100 - arg)) >> 8)
+        if (ctx.pc >> 8 != static_cast<uint32_t>((ctx.pc - (0x100 - arg)) >> 8))
             ctx.uCycles++; // changing memory page -> additional cycle
     }
     else // jump forward
     {
-        if (ctx.pc >> 8 != uint16_t(ctx.pc + arg) >> 8)
+        if (ctx.pc >> 8 != static_cast<uint32_t>((ctx.pc + arg) >> 8))
             ctx.uCycles++; // changing memory page -> additional cycle
     }
 }

@@ -45,6 +45,11 @@ add_executable(6502 ${execType} README.md ${SRCS} ${HDRS})
 
 set_property (TARGET 6502 PROPERTY CXX_STANDARD 20)
 
+target_compile_options(6502 PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+)
+
 target_include_directories(6502
     PRIVATE include/
     PRIVATE include/crystal

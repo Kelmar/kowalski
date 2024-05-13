@@ -147,6 +147,8 @@ bool CDialAsmStat::OnInitDialog()
 
 std::string CDialAsmStat::GetLine(int nLine)
 {
+    UNUSED(nLine);
+
 #if 0
 
 #ifdef USE_CRYSTAL_EDIT
@@ -179,6 +181,8 @@ std::string CDialAsmStat::GetLine(int nLine)
 
 void CDialAsmStat::GetLine(int nLine, char *buf, size_t max_len)
 {
+    UNUSED(nLine);
+
     if (m_pText == NULL)
     {
         buf[0] = 0;
@@ -219,6 +223,8 @@ void CDialAsmStat::GetLine(int nLine, char *buf, size_t max_len)
 
 afx_msg LRESULT CDialAsmStat::OnAbortAsm(WPARAM wParam, LPARAM /* lParam */)
 {
+    UNUSED(wParam);
+
     // TODO: I expect there to be more to this. -- B.Simonds (April 27, 2024)
 
     EndModal(wxID_CANCEL);
@@ -227,6 +233,9 @@ afx_msg LRESULT CDialAsmStat::OnAbortAsm(WPARAM wParam, LPARAM /* lParam */)
 
 afx_msg LRESULT CDialAsmStat::OnGetNextLine(WPARAM wParam, LPARAM lParam)
 {
+    UNUSED(wParam);
+    UNUSED(lParam);
+
 #if 0
 //  std::string test;
 //  m_edit.GetWindowText(test);
@@ -262,16 +271,20 @@ afx_msg LRESULT CDialAsmStat::OnGetNextLine(WPARAM wParam, LPARAM lParam)
 
 void CDialAsmStat::SetPassNo(int val) // Display the assembly pass number
 {
+    UNUSED(val);
     //SetCtrlText(IDC_PASS_NO, val);
 }
 
 void CDialAsmStat::SetLineNo(int val) // Display the line number
 {
+    UNUSED(val);
     //SetCtrlText(IDC_CURR_ROW, val);
 }
 
 void CDialAsmStat::SetCtrlText(int id, int val)
 {
+    UNUSED(id);
+    UNUSED(val);
     //SetDlgItemInt(id, val, FALSE);
 }
 
@@ -283,12 +296,16 @@ void CDialAsmStat::ProgressStep()
 
 void CDialAsmStat::SetProgressRange(int max_line)
 {
+    UNUSED(max_line);
     //CProgressCtrl *pProgress = static_cast<CProgressCtrl *>(FindControl(IDC_ASM_PROGRESS));
     //pProgress->SetRange(1, 2 * max_line);
 }
 
 afx_msg LRESULT CDialAsmStat::OnGetLineNo(WPARAM wParam, LPARAM lParam)
 {
+    UNUSED(wParam);
+    UNUSED(lParam);
+
 #if 0
     ASSERT((int *)lParam != nullptr);
     *(int *)lParam = m_nCurrLine - 1; // Current line (numbers from 0)
@@ -299,6 +316,9 @@ afx_msg LRESULT CDialAsmStat::OnGetLineNo(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CDialAsmStat::OnGetDocTitle(WPARAM wParam, LPARAM lParam)
 {
+    UNUSED(wParam);
+    UNUSED(lParam);
+
 #if 0
     ASSERT((char *)lParam != nullptr); // Required return buffer address
     ASSERT(wParam > 0); // Minimum length required for buffer
@@ -322,6 +342,8 @@ afx_msg LRESULT CDialAsmStat::OnGetDocTitle(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CDialAsmStat::OnNextPass(WPARAM wParam, LPARAM /* lParam */)
 {
+    UNUSED(wParam);
+
     //ASSERT(wParam > 0); // Assembly pass number required
     SetPassNo(++m_nPassNo); // Display the assembly pass number
     m_nCurrLine = 0; // Reading returns to the beginning
@@ -446,6 +468,10 @@ UINT CDialAsmStat::StartAsm()
 
 bool CDialAsmStat::OnSetCursor(wxWindow* pWnd, UINT nHitTest, UINT message)
 {
+    UNUSED(pWnd);
+    UNUSED(nHitTest);
+    UNUSED(message);
+
 #if 0
     if (!m_bFinished && nHitTest == HTCLIENT)
     {

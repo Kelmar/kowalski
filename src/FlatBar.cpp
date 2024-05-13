@@ -11,6 +11,8 @@
 //
 bool CFlatToolBar::LoadToolBar(const char *resourceName)
 {
+    UNUSED(resourceName);
+
 #if 0
     if (!CToolBar::LoadToolBar(lpszResourceName))
         return FALSE;
@@ -95,6 +97,8 @@ public: // re-implementations only
 
 void CFlatOrCoolBarCmdUI::Enable(bool bOn)
 {
+    UNUSED(bOn);
+
 #if 0
     m_bEnableChanged = TRUE;
     wxToolBar* pToolBar = (wxToolBar*)m_pOther;
@@ -125,6 +129,8 @@ void CFlatOrCoolBarCmdUI::Enable(bool bOn)
 //
 void CFlatOrCoolBarCmdUI::SetCheck(int nCheck)
 {
+    UNUSED(nCheck);
+
 #if 0
     ASSERT(nCheck >= 0 && nCheck <= 2); // 0=>off, 1=>on, 2=>indeterminate
     CToolBar* pToolBar = (CToolBar*)m_pOther;
@@ -201,6 +207,9 @@ void CFlatOrCoolBarCmdUI::SetText(const char *)
 
 void CFlatToolBar::OnUpdateCmdUI(wxFrame* pTarget, bool disableIfNoHndler)
 {
+    UNUSED(pTarget);
+    UNUSED(disableIfNoHndler);
+
 #if 0
     CFlatOrCoolBarCmdUI state; // <<<< This is the only line that's different--PD
     state.m_pOther = this;

@@ -38,10 +38,41 @@ struct CLine
         : ln(0), file(0)
     { }
 
-    int operator ==(const CLine &arg) const
+    CLine(const CLine &rhs)
+        : ln(rhs.ln)
+        , file(rhs.file)
     {
-        return ln == arg.ln && file == arg.file;
+
     }
+
+    CLine(CLine &&rhs)
+        : ln(std::move(rhs.ln))
+        , file(std::move(rhs.file))
+    {
+    }
+
+    const CLine &operator =(const CLine &rhs)
+    {
+        ln = rhs.ln;
+        file = rhs.file;
+
+        return *this;
+    }
+
+    const CLine &operator =(CLine &&rhs)
+    {
+        ln = std::move(rhs.ln);
+        file = std::move(rhs.file);
+
+        return *this;
+    }
+
+    bool operator ==(const CLine &arg) const
+    {
+        return (ln == arg.ln) && (file == arg.file);
+    }
+
+    bool operator !=(const CLine &arg) const { return !(this->operator ==(arg)); }
 };
 
 template<>
@@ -77,13 +108,34 @@ struct CDebugLine
     }
 
     CDebugLine(const CDebugLine &src)
+        : flags(src.flags)
+        , addr(src.addr)
+        , line(src.line)
     {
-        memcpy(this, &src, sizeof(*this));
     }
 
-    const CDebugLine &operator=(const CDebugLine &src)
+    CDebugLine(CDebugLine &&src)
+        : flags(std::move(src.flags))
+        , addr(std::move(src.addr))
+        , line(std::move(src.line))
     {
-        memcpy(this, &src, sizeof(*this));
+    }
+
+    const CDebugLine &operator =(const CDebugLine &src)
+    {
+        flags = src.flags;
+        addr = src.addr;
+        line = src.line;
+
+        return *this;
+    }
+
+    const CDebugLine &operator =(CDebugLine &&src)
+    {
+        flags = std::move(src.flags);
+        addr = std::move(src.addr);
+        line = std::move(src.line);
+
         return *this;
     }
 };

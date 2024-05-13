@@ -92,6 +92,10 @@ CSaveCode::CSaveCode(const char *fileName, const char *filter, wxWindow *parent)
                   OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY, lpszFilter, pParentWnd, 0) //, false) //% Removed to compile correctly
 */
 {
+    UNUSED(fileName);
+    UNUSED(filter);
+    UNUSED(parent);
+
 #if REWRITE_TO_WX_WIDGET    
     m_ofn.lpTemplateName = MAKEINTRESOURCE(IDD_SAVE_CODE);
     m_ofn.hInstance = AfxGetResourceHandle();
@@ -271,6 +275,8 @@ void CSaveCode::OnTypeChange()
 
 void CSaveCode::EnableOptions(bool bRedraw /*= TRUE*/)
 {
+    UNUSED(bRedraw);
+
 #if REWRITE_TO_WX_WIDGET
     CWnd* btn = GetDlgItem(IDC_SAVE_CODE_OPT);
     

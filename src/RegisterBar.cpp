@@ -74,6 +74,10 @@ END_MESSAGE_MAP()
 
 bool CRegisterBar::Create(wxWindow *parent, UINT nStyle, UINT nID)
 {
+    UNUSED(parent);
+    UNUSED(nStyle);
+    UNUSED(nID);
+
 #if REWRITE_TO_WX_WIDGET
     bool ret = CDialogBar::Create(pParentWnd, IDD, nStyle, nID);
     if (!ret)
@@ -100,6 +104,8 @@ bool CRegisterBar::Create(wxWindow *parent, UINT nStyle, UINT nID)
 
 bool CRegisterBar::UpdateItem(int itemID)
 {
+    UNUSED(itemID);
+
 #if REWRITE_TO_WX_WIDGET
     HWND hWnd = ::GetDlgItem(m_hWnd, itemID);
     if (hWnd)
@@ -110,6 +116,11 @@ bool CRegisterBar::UpdateItem(int itemID)
 
 void CRegisterBar::Update(const CContext *pCtx, const std::string &stat, const CContext *pOld /*= NULL*/, bool bDraw /*= TRUE*/)
 {
+    UNUSED(pCtx);
+    UNUSED(stat);
+    UNUSED(pOld);
+    UNUSED(bDraw);
+
 #if REWRITE_TO_WX_WIDGETS
     ASSERT(pCtx);
 
@@ -170,6 +181,8 @@ void CRegisterBar::Update(const CContext *pCtx, const std::string &stat, const C
 
 void CRegisterBar::SetDlgItemByteHex(int nID, uint8_t val)
 {
+    UNUSED(nID);
+
     char buf[32];
     snprintf(buf, sizeof(buf), "$%02X", val & 0xFF);
 
@@ -181,6 +194,8 @@ void CRegisterBar::SetDlgItemByteHex(int nID, uint8_t val)
 
 void CRegisterBar::SetDlgItemWordHex(int nID, uint16_t val)
 {
+    UNUSED(nID);
+
     char buf[32];
     snprintf(buf, sizeof(buf), "$%04X", val & 0xFFFF);
 
@@ -192,6 +207,8 @@ void CRegisterBar::SetDlgItemWordHex(int nID, uint16_t val)
 
 void CRegisterBar::SetDlgItemMem(int nID, int nBytes, uint16_t ptr, const CContext *pCtx)
 {
+    UNUSED(nID);
+
     std::string str;
     char num[16];
 
@@ -209,6 +226,8 @@ void CRegisterBar::SetDlgItemMem(int nID, int nBytes, uint16_t ptr, const CConte
 
 void CRegisterBar::SetDlgItemInf(int nID, uint8_t val)
 {
+    UNUSED(nID);
+
     wxString str;
 
     if (val != ~0)
@@ -241,6 +260,9 @@ std::string CRegisterBar::Binary(uint8_t val)
 
 afx_msg LRESULT CRegisterBar::OnUpdate(WPARAM wParam, LPARAM lParam)
 {
+    UNUSED(wParam);
+    UNUSED(lParam);
+
 #if REWRITE_TO_WX_WIDGET
     Update((const CContext*)lParam, *(const std::string*)wParam);
 #endif
@@ -289,21 +311,33 @@ afx_msg LRESULT CRegisterBar::OnExitDebug(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 void CRegisterBar::UpdateRegA(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
+    UNUSED(pCtx);
+    UNUSED(pOld);
+
     //SetDlgItemInf(IDC_REGS_A_MEM, pCtx->a);
 }
 
 void CRegisterBar::UpdateRegX(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
+    UNUSED(pCtx);
+    UNUSED(pOld);
+
     //SetDlgItemInf(IDC_REGS_X_MEM, pCtx->x);
 }
 
 void CRegisterBar::UpdateRegY(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
+    UNUSED(pCtx);
+    UNUSED(pOld);
+
     //SetDlgItemInf(IDC_REGS_Y_MEM, pCtx->y);
 }
 
 void CRegisterBar::UpdateRegP(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
+    UNUSED(pCtx);
+    UNUSED(pOld);
+
 #if REWRITE_TO_WX_WIDGETS
     CheckDlgButton(IDC_REGS_NEG, pCtx->negative);
     CheckDlgButton(IDC_REGS_ZERO, pCtx->zero);
@@ -317,6 +351,9 @@ void CRegisterBar::UpdateRegP(const CContext *pCtx, const CContext *pOld /*= NUL
 
 void CRegisterBar::UpdateRegPC(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
+    UNUSED(pCtx);
+    UNUSED(pOld);
+
 #if REWRITE_TO_WX_WIDGETS
     CDeasm deasm;
     int ptr= -1;
@@ -329,6 +366,9 @@ void CRegisterBar::UpdateRegPC(const CContext *pCtx, const CContext *pOld /*= NU
 
 void CRegisterBar::UpdateRegS(const CContext *pCtx, const CContext *pOld /*= NULL*/)
 {
+    UNUSED(pCtx);
+    UNUSED(pOld);
+
 #if REWRITE_TO_WX_WIDGETS
     if (pCtx->s != 0xFF) // is there anything on the stack?
         SetDlgItemMem(IDC_REGS_S_MEM, 0xFF - pCtx->s, pCtx->s + 0x0100 + 1, pCtx);
@@ -343,6 +383,8 @@ void CRegisterBar::UpdateRegS(const CContext *pCtx, const CContext *pOld /*= NUL
 
 void CRegisterBar::UpdateCycles(ULONG uCycles)
 {
+    UNUSED(uCycles);
+
 #if REWRITE_TO_WX_WIDGETS
     SetDlgItemInt(IDC_REGS_CYCLES, uCycles, false);
     UpdateItem(IDC_REGS_CYCLES);
@@ -353,6 +395,9 @@ void CRegisterBar::UpdateCycles(ULONG uCycles)
 
 void CRegisterBar::ChangeRegister(int ID, int reg_no)
 {
+    UNUSED(ID);
+    UNUSED(reg_no);
+
 #if REWRITE_TO_WX_WIDGET
     if (m_bInUpdate || wxGetApp().m_global.IsProgramRunning()) // Update or is the program running?
         return; // Ignoring changes

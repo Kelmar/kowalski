@@ -45,7 +45,11 @@ CAtariBin::~CAtariBin()
 
 bool CAtariBin::LoadAtaBinFormat(CArchive &ar, COutputMem &mem, CMarkArea &area, int &prog_start)
 {
-    ASSERT(false);
+    UNUSED(ar);
+    UNUSED(mem);
+    UNUSED(area);
+    UNUSED(prog_start);
+
     return false;
 
     // TODO: Write replacement for CArchive class.

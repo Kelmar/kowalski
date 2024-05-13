@@ -40,6 +40,9 @@ CLoadCode::CLoadCode(const char *fileName, const char *filter)
                 filter)
 #endif
 {
+    UNUSED(fileName);
+    UNUSED(filter);
+
 #if 0
     m_strTitle.LoadString(IDS_LOAD_CODE_DLG);
 

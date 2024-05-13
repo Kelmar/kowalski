@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*************************************************************************/
 
 // Interpretation of the directive
-CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType it, const std::string *pLabel)
+CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType it, const std::string *pLabel)
 {
     Stat ret;
     int def = -2;
@@ -66,7 +66,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         }
         else
         {
-            if (markArea && pass == 2 && origin != -1)
+            if (markArea && (pass == 2) && (origin != static_cast<uint32_t>(-1)))
                 markArea->SetEnd(uint32_t(origin - 1));
 
             origin = expr.value & mem_mask;
@@ -109,23 +109,34 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
     case I_DDW:  // 4 def DWORD 32 bit number
         def++;
+        [[fallthrough]];
+
     case I_DX:   // 3 def long 24 bit number
         def++;
+        [[fallthrough]];
+
     case I_DD:   // 2 def double byte
         def++;
+        [[fallthrough]];
+
     case I_DW:   // 1 def word
         def++;
+        [[fallthrough]];
+
     case I_DB:   // 0 def byte
         def++;
+        [[fallthrough]];
+
     case I_DS:    // -1 def string
     case I_LS:    // -1 def long string
         def++;
+        [[fallthrough]];
 
     case I_ASCIS: // -2 def ascii + $80
     {
         uint32_t cnt_org = origin; // Space for data length byte (.STR only)
         int cnt = 0; // Data length (info for .STR)
-        
+
         if (def == -1) // If .STR then reserve a byte
         {
             if (it == I_LS)
@@ -144,7 +155,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
             if (ret)
                 return ret;
-                
+
             if (expr.inf == Expr::EX_STRING) // Text?
             {
                 ASSERT(def <= 0); // Text only in .DB and .STR
@@ -194,13 +205,15 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
                 if (ret)
                     return ret; // The data does not fit in the memory of the 6502 system
-                    
+
                 if (out)
                 {
                     switch (def)
                     {
                     case -1: // .str
                         cnt++;
+                        [[fallthrough]];
+
                     case -2: // .ascis
                     case 0: // .db
                         (*out)[org] = (UINT)(expr.value & 0xFF);
@@ -231,27 +244,29 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
                     }
                 }
             }
-            
-            if (leks.type != CLeksem::L_COMMA) // Next data after the decimal point (if present).
+
+            if (leks.type != CTokenType::L_COMMA) // Next data after the decimal point (if present).
             {
                 if (def == -1) // .STR ?
                 {
                     if (cnt >= 256 && it == I_DS)
                         return ERR_STRING_TOO_LONG; //***
 
-                    if (pass == 2 && out)
+                    if ((pass == 2) && out)
+                    {
                         if (it == I_LS)
                         {
                             (*out)[cnt_org] = (UINT)(cnt & 0xFF);
-                            (*out)[cnt_org+1] = (UINT)((cnt>>8) & 0xFF);
+                            (*out)[cnt_org + 1] = (UINT)((cnt >> 8) & 0xFF);
                         }
                         else
                             (*out)[cnt_org] = uint8_t(cnt);
+                    }
                 }
                 else if (def == -2) // .ASCIS ?
                 {
                     if (pass == 2 && out)
-                        (*out)[origin-1] ^= uint8_t(0x80);
+                        (*out)[origin - 1] ^= uint8_t(0x80);
                 }
                 return OK; // There is no comma -end of data
             }
@@ -260,12 +275,13 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         }
 
         // Assignment in if, BUG? -- B.Simonds (April 28, 2024)
-        if (pass = 2 && listing.IsOpen())
-            listing.AddBytes(uint32_t(cnt_org), mem_mask,out->Mem(), origin-cnt_org);
-
+        // Unreachable -- B.Simonds (May 12, 2024)
+        /*if (pass = 2 && listing.IsOpen())
+            listing.AddBytes(uint32_t(cnt_org), mem_mask,out->Mem(), origin-cnt_org);*/
     }
+    break;
 
-    case I_DCB:		// declare block
+    case I_DCB: // declare block
     {
         Expr expr;
         ret = expression(leks, expr); // Expected word
@@ -288,7 +304,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         if (ret)
             return ret;
 
-        if (leks.type != CLeksem::L_COMMA) // Next data after the decimal point
+        if (leks.type != CTokenType::L_COMMA) // Next data after the decimal point
             return OK;
 
         leks = next_leks();
@@ -360,7 +376,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
             return ret;
 
         if (expr.inf == Expr::EX_UNDEF) // Undefined value
-            return pass==1 ? OK : ERR_UNDEF_EXPR;
+            return pass == 1 ? OK : ERR_UNDEF_EXPR;
 
         if (expr.value < 0)
             return ERR_NUM_NEGATIVE; // Expected non-negative value
@@ -376,7 +392,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         if (pLabel) // Is there a label before .ERROR?
             return ERR_LABEL_NOT_ALLOWED;
 
-        if (leks.type == CLeksem::L_STR)
+        if (leks.type == CTokenType::L_STR)
         {
             Expr expr;
             ret = expression(leks, expr, true); // Expected text
@@ -398,7 +414,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         if (pLabel) // Is there a label before .INCLUDE?
             return ERR_LABEL_NOT_ALLOWED;
 
-        if (leks.type == CLeksem::L_STR)
+        if (leks.type == CTokenType::L_STR)
         {
             Expr expr;
 
@@ -409,7 +425,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
             if (expr.inf != Expr::EX_STRING)
                 return ERR_STR_EXPECTED;
-            
+
 #if REWRITE_TO_WX_WIDGET
             // TODO: Fix this to not use Win32 path functions.
             std::string strPath = expr.string;
@@ -417,7 +433,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
             if (::PathIsRelative(strPath)) // if path is relative combine it with current dir
             {
-                char szBuf[MAX_PATH]= {0};
+                char szBuf[MAX_PATH] = { 0 };
                 ::GetCurrentDirectory(MAX_PATH, szBuf);
                 char szPath[MAX_PATH];
                 ::PathCombine(szPath, szBuf, strPath);
@@ -439,7 +455,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
     {
         if (pLabel) // Is there a label before .IF ?
             return ERR_LABEL_NOT_ALLOWED;
-            
+
         Expr expr;
         ret = expression(leks, expr); // Expected expression
 
@@ -473,7 +489,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         if ((*pLabel)[0] == LOCAL_LABEL_CHAR) // Local labels not allowed
             return ERR_BAD_MACRONAME;
 
-        CMacroDef* pMacro = nullptr;
+        CMacroDef *pMacro = nullptr;
 
         if (pass == 1)
         {
@@ -502,12 +518,12 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
         for (bool bRequired = false;;)
         {
-            if (leks.type == CLeksem::L_IDENT) // Parameter name?
+            if (leks.type == CTokenType::L_IDENT) // Parameter name?
             {
                 if (pMacro->AddParam(*leks.GetString()) < 0)
                     return ERR_PARAM_ID_REDEF; // Repeated parameter name
             }
-            else if (leks.type == CLeksem::L_MULTI) // Ellipsis?
+            else if (leks.type == CTokenType::L_MULTI) // Ellipsis?
             {
                 pMacro->AddParam(MULTIPARAM);
                 leks = next_leks();
@@ -521,7 +537,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
             }
             leks = next_leks();
 
-            if (leks.type == CLeksem::L_COMMA)
+            if (leks.type == CTokenType::L_COMMA)
             {
                 leks = next_leks();
                 bRequired = true;
@@ -559,7 +575,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
         CIdent t1(info, expr.value, true);
         CIdent t2(info, expr.value, true);
-        
+
         ret = pass == 1 ? def_ident(*pLabel, _Inout_ t1) : chk_ident_def(*pLabel, _Inout_ t2);
 
         if (ret)
@@ -576,7 +592,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         ret = expression(leks, expr);	// oczekiwane wyra�enie
         if (ret)
             return ret;
-        if (expr.inf==Expr::EX_UNDEF)	// nieokre�lona warto��
+        if (expr.inf == Expr::EX_UNDEF)	// nieokre�lona warto��
             return ERR_UNDEF_EXPR;
         if (expr.value < 0 || expr.value > 0xFFFF)
             return ERR_BAD_REPT_NUM;
@@ -605,7 +621,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
         for (;;)
         {
-            if (leks.type == CLeksem::L_IDENT) // option name?
+            if (leks.type == CTokenType::L_IDENT) // option name?
             {
                 std::string literal = *leks.GetString();
 
@@ -631,7 +647,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
             leks = next_leks();
 
-            if (leks.type == CLeksem::L_COMMA)
+            if (leks.type == CTokenType::L_COMMA)
                 leks = next_leks();
             else
                 break;
@@ -658,7 +674,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         else if ((uint32_t)addr_from.value > mem_mask)		// 65816
             return ERR_NUM_LONG;
 
-        if (leks.type != CLeksem::L_COMMA) // Next data after the decimal point
+        if (leks.type != CTokenType::L_COMMA) // Next data after the decimal point
             return ERR_CONST_EXPECTED;
 
         leks = next_leks();
@@ -668,7 +684,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
         if (ret)
             return ret;
-            
+
         if (addr_to.inf == Expr::EX_UNDEF) // Undefined value
         {
             if (pass == 2)
@@ -703,7 +719,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
         if (ret)
             return ret;
-            
+
         if (width.inf == Expr::EX_UNDEF) // Undefined value
         {
             if (pass == 2)
@@ -714,7 +730,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         else if (width.inf != Expr::EX_BYTE) // Value too large?
             return ERR_NUM_NOT_BYTE;
 
-        if (leks.type != CLeksem::L_COMMA) // Next data after the decimal point
+        if (leks.type != CTokenType::L_COMMA) // Next data after the decimal point
             return ERR_CONST_EXPECTED;
 
         leks = next_leks();
@@ -751,7 +767,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
     case I_DATE:
     {
         Expr delim;
-        ret = expression(leks,delim); // Expected word
+        ret = expression(leks, delim); // Expected word
 
         if (ret)
         {
@@ -783,7 +799,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
             cs.Printf("%d%02d%02d", ltm->tm_year + 1900, ltm->tm_mon + 1, ltm->tm_mday);
         else
             cs.Printf("%d%c%02d%c%02d", ltm->tm_year + 1900, delim.value, ltm->tm_mon + 1, delim.value, ltm->tm_mday);
-            
+
         int len = cs.size();
         cnt += len;
         ret = inc_prog_counter(len);
@@ -820,7 +836,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
         //return ERR_UNDEF_EXPR;
         if (delim.value < 0)
             return ERR_NUM_NEGATIVE; // Expected non-negative value
-            
+
         if (delim.inf != Expr::EX_BYTE) // Value too large?
             return ERR_NUM_NOT_BYTE;
 

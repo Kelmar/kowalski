@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -97,12 +97,14 @@ int CMemoryView::bytes_in_line()
 /////////////////////////////////////////////////////////////////////////////
 // CMemoryView drawing
 
-void CMemoryView::OnDraw(wxDC* pDC)
+void CMemoryView::OnDraw(wxDC *pDC)
 {
+    UNUSED(pDC);
+
 #if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc = (CMemoryDoc *)GetDocument();
     ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CMemoryDoc)));
-    const COutputMem& mem = *pDoc->m_pMem;
+    const COutputMem &mem = *pDoc->m_pMem;
     uint32_t addr = pDoc->m_uAddress;
     wxString line;
     char hex[8];
@@ -169,6 +171,8 @@ void CMemoryView::OnDraw(wxDC* pDC)
 
 void CMemoryView::calc(wxDC *pDC)
 {
+    UNUSED(pDC);
+
 #if REWRITE_TO_WX_WIDGET
     wxRect rect = GetClientRect();
 
@@ -178,9 +182,9 @@ void CMemoryView::calc(wxDC *pDC)
     m_nChrH = (int)tm.tmHeight + (int)tm.tmExternalLeading;
     m_nChrW = tm.tmAveCharWidth;
 
-    m_nCx = (rect.right-1) / m_nChrW;	// ilo�� kolumn
+    m_nCx = (rect.right - 1) / m_nChrW;	// ilo�� kolumn
     m_nCy = rect.bottom / m_nChrH;	// ilo�� wierszy
-//  if (rect.bottom % m_nCharH)	// na dole wystaje kawa�ek wiersza?
+    //  if (rect.bottom % m_nCharH)	// na dole wystaje kawa�ek wiersza?
     if (m_nCy == 0)
         m_nCy++;
 #endif
@@ -190,6 +194,10 @@ void CMemoryView::calc(wxDC *pDC)
 
 void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
 {
+    UNUSED(nSBCode);
+    UNUSED(nPos);
+    UNUSED(nRepeat);
+
 #if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc = (CMemoryDoc *)GetDocument();
 
@@ -202,7 +210,7 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         break;
 
     case SB_LINEDOWN: // Scroll one line down
-        switch (find_next_addr(pDoc->m_uAddress,*pDoc->m_pMem))
+        switch (find_next_addr(pDoc->m_uAddress, *pDoc->m_pMem))
         {
         case 0:
             break; // Cannot scroll any further
@@ -211,7 +219,7 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
             RECT rect;
             get_view_rect(rect);
             UpdateWindow();	// To avoid refreshing problems
-            ScrollWindow(0,-m_nChrH,&rect,&rect);
+            ScrollWindow(0, -m_nChrH, &rect, &rect);
             UpdateWindow();
             break;
 
@@ -231,7 +239,7 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
             RECT rect;
             get_view_rect(rect);
             UpdateWindow();	// To avoid refreshing problems
-            ScrollWindow(0,m_nChrH,&rect,&rect);
+            ScrollWindow(0, m_nChrH, &rect, &rect);
             UpdateWindow();
             break;
 
@@ -295,7 +303,7 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
     case SB_BOTTOM:	// Scroll to bottom
     {
         wxRect rect = GetViewRect();
-        
+
         int lines = find_delta(pDoc->m_uAddress, max_mem - 1, *pDoc->m_pMem, m_nCy);
 
         if (lines == 9999999) // 1.3.3 changed to be beyond scroll value from 999999
@@ -379,8 +387,8 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
     default:
         break;
     }
-//  set_scroll_range();
-    SetScrollPos(SB_VERT, ((int)pDoc->m_uAddress - (max_mem / 2)) /* / bytes_in_line() */ );
+    //  set_scroll_range();
+    SetScrollPos(SB_VERT, ((int)pDoc->m_uAddress - (max_mem / 2)) /* / bytes_in_line() */);
 
 #endif
 }
@@ -389,7 +397,7 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
 // CMemoryView message handlers
 
 #if REWRITE_TO_WX_WIDGET
-void CMemoryView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
+void CMemoryView::OnPrepareDC(CDC *pDC, CPrintInfo *pInfo)
 {
     if (pInfo)
         return;
@@ -403,7 +411,7 @@ void CMemoryView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
     CView::OnPrepareDC(pDC, pInfo);
 }
 
-BOOL CMemoryView::PreCreateWindow(CREATESTRUCT& cs)
+BOOL CMemoryView::PreCreateWindow(CREATESTRUCT &cs)
 {
     cs.style |= /*WS_CLIPSIBLINGS |*/ WS_VSCROLL;
 
@@ -411,15 +419,21 @@ BOOL CMemoryView::PreCreateWindow(CREATESTRUCT& cs)
 }
 #endif
 
-void CMemoryView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
+void CMemoryView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar *pScrollBar)
 {
-    scroll(nSBCode,nPos);
+    UNUSED(pScrollBar);
+
+    scroll(nSBCode, nPos);
 
     // CView::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
 bool CMemoryView::OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt) // 1.3.2 added mouse scroll wheel support
 {
+    UNUSED(nFlags);
+    UNUSED(zDelta);
+    UNUSED(pt);
+
 #if REWRITE_TO_WX_WIDGET
     if (zDelta > 0)
         scroll(SB_LINEUP, 0, 0);
@@ -476,7 +490,7 @@ int CMemoryView::set_scroll_range()
     si.nMin = -rng;
     si.nMax = rng;
     si.nPage = scr;
-    int nPos= pDoc->m_uAddress - rng;
+    int nPos = pDoc->m_uAddress - rng;
 
     if (nPos > rng - scr)
         nPos = rng - scr;
@@ -499,9 +513,11 @@ int CMemoryView::find_prev_addr(uint32_t &addr, const COutputMem &mem, int cnt/*
 {
     ASSERT(cnt > 0);
 
+    UNUSED(mem);
+
     if (cnt < 0)
         return 0;
- 
+
     if (!bytes)
         bytes = bytes_in_line();
 
@@ -511,7 +527,7 @@ int CMemoryView::find_prev_addr(uint32_t &addr, const COutputMem &mem, int cnt/*
     if (pos < 0)
     {
         if (addr % bytes)
-            return addr= 0, 9999999; // Redraw whole window - 1.3.3 changed to be beyond scroll value from 999999
+            return addr = 0, 9999999; // Redraw whole window - 1.3.3 changed to be beyond scroll value from 999999
 
         cnt = addr / bytes;
         addr = (uint32_t)0;
@@ -523,10 +539,11 @@ int CMemoryView::find_prev_addr(uint32_t &addr, const COutputMem &mem, int cnt/*
 }
 
 // Finding the address of a memory line following a given line
-int CMemoryView::find_next_addr(uint32_t &addr, const COutputMem &mem,
-                                int cnt/*= 1*/, int bytes/*= 0*/)
+int CMemoryView::find_next_addr(uint32_t &addr, const COutputMem &mem, int cnt/*= 1*/, int bytes/*= 0*/)
 {
     ASSERT(cnt > 0);
+
+    UNUSED(mem);
 
     if (cnt < 0)
         return 0;
@@ -559,6 +576,9 @@ int CMemoryView::find_next_addr(uint32_t &addr, const COutputMem &mem,
 // Check how many lines should the window content be moved to reach from 'addr' to 'dest'
 int CMemoryView::find_delta(uint32_t &addr, uint32_t dest, const COutputMem &mem, int max_lines)
 {
+    UNUSED(mem);
+    UNUSED(max_lines);
+
     if (dest == addr)
         return 0;
 
@@ -566,7 +586,7 @@ int CMemoryView::find_delta(uint32_t &addr, uint32_t dest, const COutputMem &mem
 
     if (dest < addr)
     {
-        int lines= (addr - dest);
+        int lines = (addr - dest);
         addr = dest;
 
         if (lines % bytes)
@@ -589,7 +609,7 @@ int CMemoryView::find_delta(uint32_t &addr, uint32_t dest, const COutputMem &mem
                 return 0;
         }
 
-        if ((int)dest > max_mem-scr)
+        if ((int)dest > max_mem - scr)
             dest = max_mem - scr;
 
         int lines = (dest - addr);
@@ -609,44 +629,48 @@ int CMemoryView::find_delta(uint32_t &addr, uint32_t dest, const COutputMem &mem
 
 void CMemoryView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+    UNUSED(nChar);
+    UNUSED(nRepCnt);
+    UNUSED(nFlags);
+
 #if REWRITE_TO_WX_WIDGET
     switch (nChar)
     {
     case VK_DOWN:
-        scroll(SB_LINEDOWN,0,nRepCnt);
+        scroll(SB_LINEDOWN, 0, nRepCnt);
         break;
 
     case VK_UP:
-        scroll(SB_LINEUP,0,nRepCnt);
+        scroll(SB_LINEUP, 0, nRepCnt);
         break;
 
     case VK_NEXT:
-        scroll(SB_PAGEDOWN,0,nRepCnt);
+        scroll(SB_PAGEDOWN, 0, nRepCnt);
         break;
 
     case VK_PRIOR:
-        scroll(SB_PAGEUP,0,nRepCnt);
+        scroll(SB_PAGEUP, 0, nRepCnt);
         break;
 
     case VK_HOME:
-        scroll(SB_TOP,0,nRepCnt);
+        scroll(SB_TOP, 0, nRepCnt);
         break;
 
     case VK_END:
-        scroll(SB_BOTTOM,0,nRepCnt);
+        scroll(SB_BOTTOM, 0, nRepCnt);
         break;
 
     case VK_LEFT:
-        scroll(0x100+SB_LINELEFT,0,nRepCnt);
+        scroll(0x100 + SB_LINELEFT, 0, nRepCnt);
         break;
 
     case VK_RIGHT:
-        scroll(0x100+SB_LINERIGHT,0,nRepCnt);
+        scroll(0x100 + SB_LINERIGHT, 0, nRepCnt);
         break;
 
     default:
         break;
-//      CView::OnKeyDown(nChar, nRepCnt, nFlags);
+        //      CView::OnKeyDown(nChar, nRepCnt, nFlags);
     }
 #endif
 }
@@ -654,6 +678,10 @@ void CMemoryView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CMemoryView::OnSize(UINT nType, int cx, int cy)
 {
+    UNUSED(nType);
+    UNUSED(cx);
+    UNUSED(cy);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnSize(nType, cx, cy);
 
@@ -663,8 +691,10 @@ void CMemoryView::OnSize(UINT nType, int cx, int cy)
 #endif
 }
 
-bool CMemoryView::OnEraseBkgnd(wxDC* pDC)
+bool CMemoryView::OnEraseBkgnd(wxDC *pDC)
 {
+    UNUSED(pDC);
+
 #if REWRITE_TO_WX_WIDGET
     wxRect rect = GetClientRect();
     pDC->FillSolidRect(rect, m_rgbBkgndColor);
@@ -672,8 +702,11 @@ bool CMemoryView::OnEraseBkgnd(wxDC* pDC)
     return true;
 }
 
-void CMemoryView::OnContextMenu(wxWindow* pWnd, wxPoint point)
+void CMemoryView::OnContextMenu(wxWindow *pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
 #if REWRITE_TO_WX_WIDGET
     CMenu menu;
     if (!menu.LoadMenu(IDR_POPUP_MEMORY))
@@ -699,8 +732,10 @@ void CMemoryView::OnContextMenu(wxWindow* pWnd, wxPoint point)
 
 //-----------------------------------------------------------------------------
 
-void CMemoryView::OnUpdateMemoryGoto(CCmdUI* pCmdUI)
+void CMemoryView::OnUpdateMemoryGoto(CCmdUI *pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
@@ -718,11 +753,13 @@ void CMemoryView::OnMemoryGoto()
 #if REWRITE_TO_WX_WIDGET
         scroll(SB_THUMBTRACK, dlg.m_uAddr - (max_mem / 2), 2);  //1.3.3 change ,1 to ,2 to allow passing nPos
 #endif
-    }
+}
 }
 
-void CMemoryView::OnUpdateMemoryChg(CCmdUI* pCmdUI)
+void CMemoryView::OnUpdateMemoryChg(CCmdUI *pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
@@ -760,32 +797,39 @@ void CMemoryView::OnMemoryText()
     Refresh();
 }
 
-void CMemoryView::OnUpdateMemoryFull(CCmdUI* pCmdUI)
+void CMemoryView::OnUpdateMemoryFull(CCmdUI *pCmdUI)
 {
+    UNUSED(pCmdUI);
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
     pCmdUI->SetRadio(m_eDump == FULL);
 #endif
 }
 
-void CMemoryView::OnUpdateMemoryHex(CCmdUI* pCmdUI)
+void CMemoryView::OnUpdateMemoryHex(CCmdUI *pCmdUI)
 {
+    UNUSED(pCmdUI);
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
     pCmdUI->SetRadio(m_eDump == HEX);
 #endif
 }
 
-void CMemoryView::OnUpdateMemoryText(CCmdUI* pCmdUI)
+void CMemoryView::OnUpdateMemoryText(CCmdUI *pCmdUI)
 {
+    UNUSED(pCmdUI);
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
     pCmdUI->SetRadio(m_eDump == TEXT);
 #endif
 }
 
-void CMemoryView::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
+void CMemoryView::OnUpdate(wxView *pSender, LPARAM lHint, wxObject *pHint)
 {
+    UNUSED(pSender);
+    UNUSED(lHint);
+    UNUSED(pHint);
+
 #if REWRITE_TO_WX_WIDGET
     if (lHint == 'show')
     {

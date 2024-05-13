@@ -132,6 +132,8 @@ void CCrystalEditView::OnEditPaste()
 
 void CCrystalEditView::OnUpdateEditPaste(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(TextInClipboard());
 #endif
@@ -139,6 +141,8 @@ void CCrystalEditView::OnUpdateEditPaste(CCmdUI* pCmdUI)
 
 void CCrystalEditView::OnUpdateEditCut(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(IsSelection());
 #endif
@@ -262,6 +266,10 @@ void CCrystalEditView::OnEditDelete()
 
 void CCrystalEditView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+    UNUSED(nChar);
+    UNUSED(nRepCnt);
+    UNUSED(nFlags);
+
 #if REWRITE_TO_WX_WIDGET
     CCrystalTextView::OnChar(nChar, nRepCnt, nFlags);
 
@@ -668,6 +676,8 @@ void CCrystalEditView::OnEditUntab()
 
 void CCrystalEditView::OnUpdateIndicatorCol(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(false);
 #endif
@@ -675,6 +685,8 @@ void CCrystalEditView::OnUpdateIndicatorCol(CCmdUI* pCmdUI)
 
 void CCrystalEditView::OnUpdateIndicatorOvr(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(m_bOvrMode);
 #endif
@@ -682,6 +694,8 @@ void CCrystalEditView::OnUpdateIndicatorOvr(CCmdUI* pCmdUI)
 
 void CCrystalEditView::OnUpdateIndicatorRead(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     if (m_pTextBuffer == NULL)
         pCmdUI->Enable(false);
@@ -697,6 +711,8 @@ void CCrystalEditView::OnEditSwitchOvrmode()
 
 void CCrystalEditView::OnUpdateEditSwitchOvrmode(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->SetCheck(m_bOvrMode ? 1 : 0);
 #endif
@@ -809,6 +825,8 @@ DROPEFFECT CEditDropTargetImpl::OnDragScroll(wxWindow* pWnd, uint32_t dwKeyState
 
 void CCrystalEditView::DoDragScroll(const wxPoint &point)
 {
+    UNUSED(point);
+
 #if REWRITE_TO_WX_WIDGET
     wxRect rcClientRect;
     GetClientRect(rcClientRect);
@@ -917,6 +935,8 @@ void CCrystalEditView::OnDestroy()
 
 void CCrystalEditView::ShowDropIndicator(const wxPoint &point)
 {
+    UNUSED(point);
+
 #if REWRITE_TO_WX_WIDGET
     if (! m_bDropPosVisible)
     {
@@ -1065,6 +1085,8 @@ bool CCrystalEditView::ReplaceSelection(const char *newText)
 
 void CCrystalEditView::OnUpdateEditUndo(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     bool bCanUndo = m_pTextBuffer != NULL && m_pTextBuffer->CanUndo();
     pCmdUI->Enable(bCanUndo);
@@ -1131,6 +1153,8 @@ void CCrystalEditView::OnEditRedo()
 
 void CCrystalEditView::OnUpdateEditRedo(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     bool bCanRedo = m_pTextBuffer != NULL && m_pTextBuffer->CanRedo();
     pCmdUI->Enable(bCanRedo);
@@ -1167,6 +1191,9 @@ void CCrystalEditView::OnUpdateEditRedo(CCmdUI* pCmdUI)
 
 void CCrystalEditView::OnEditOperation(int nAction, const char *text)
 {
+    UNUSED(nAction);
+    UNUSED(text);
+
 #if REWRITE_TO_WX_WIDGET
     if (m_bAutoIndent)
     {
@@ -1208,6 +1235,9 @@ void CCrystalEditView::OnEditOperation(int nAction, const char *text)
 
 CCrystalEditView::LineChange CCrystalEditView::NotifyEnterPressed(wxPoint ptCursor, std::string& strLine)
 {
+    UNUSED(ptCursor);
+    UNUSED(strLine);
+
     return NOTIF_NO_CHANGES;
 }
 
@@ -1251,6 +1281,8 @@ void CCrystalEditView::OnEditDeleteToEOL()
 
 void CCrystalEditView::OnUpdateEditDeleteToEol(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(QueryEditable());
 #endif

@@ -85,6 +85,8 @@ int CDeasm6502View::CalcLineCount(const wxRect &rect) // calc. number of lines i
 
 void CDeasm6502View::OnDraw(wxDC *dc) // Disassembled program -display instructions
 {
+    UNUSED(dc);
+
 #if 0
     CDeasm6502Doc *pDoc = GetDocument();
 
@@ -207,7 +209,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
 
             if (start == pDoc->m_uStartAddr)
             {
-                int y= (i + 1) * m_nFontHeight;
+                //int y = (i + 1) * m_nFontHeight;
                 /*
                 	if ((rect.bottom -= y) <= 0)
                 	{
@@ -257,7 +259,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
 
         if (i == lines) // previous loop ended normally (not with 'break')?
         {
-            for (int i = 0; i < lines; i++) // We go from 'start' down until we meet 'addr'
+            for (i = 0; i < lines; i++) // We go from 'start' down until we meet 'addr'
             {
                 // Or the number of available lines runs out
                 if (deasm.FindNextAddr(start, *pDoc->m_pCtx) == 0)
@@ -268,7 +270,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
 
                 if (start == addr)
                 {
-                    int y = (i + 1) * m_nFontHeight;
+                    //int y = (i + 1) * m_nFontHeight;
                     /*
                     	  if ((rect.top += y) >= rect.bottom)
                     	  {
@@ -302,6 +304,9 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
 
 bool CDeasm6502View::OnScroll(UINT nScrollCode, UINT nPos, bool bDoScroll)
 {
+    UNUSED(nScrollCode);
+    UNUSED(nPos);
+
     if (bDoScroll)
         return true;
 
@@ -311,6 +316,9 @@ bool CDeasm6502View::OnScroll(UINT nScrollCode, UINT nPos, bool bDoScroll)
 
 bool CDeasm6502View::OnScrollBy(wxSize sizeScroll, bool bDoScroll)
 {
+    UNUSED(sizeScroll);
+    UNUSED(bDoScroll);
+
     //return CView::OnScrollBy(sizeScroll, bDoScroll);
     return false;
 }
@@ -337,6 +345,10 @@ void CDeasm6502View::OnInitialUpdate()
 //
 void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
 {
+    UNUSED(nSBCode);
+    UNUSED(nPos);
+    UNUSED(nRepeat);
+
 #if 0
 
     CDeasm6502Doc *pDoc = (CDeasm6502Doc*)GetDocument();
@@ -513,6 +525,8 @@ void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
 
 void CDeasm6502View::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 {
+    UNUSED(pScrollBar);
+
     Scroll(nSBCode, nPos);
 
     //int SetScrollPos(int nBar, int nPos);
@@ -522,6 +536,10 @@ void CDeasm6502View::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 
 bool CDeasm6502View::OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt) // 1.3.2 addes Mouse scroll wheel support
 {
+    UNUSED(nFlags);
+    UNUSED(zDelta);
+    UNUSED(pt);
+
 #if 0
     if (zDelta > 0)
         Scroll(SB_LINEUP, 0, 0);
@@ -534,6 +552,10 @@ bool CDeasm6502View::OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt) // 1.3.
 
 void CDeasm6502View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+    UNUSED(nChar);
+    UNUSED(nRepCnt);
+    UNUSED(nFlags);
+
 #if 0
     switch (nChar)
     {
@@ -571,11 +593,15 @@ void CDeasm6502View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CDeasm6502View::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
 {
+    UNUSED(pSender);
+    UNUSED(lHint);
+    UNUSED(pHint);
+
     int item = 0; //LOWORD(lHint);
 
     switch (item)
     {
-    case 1:	// Redraw the indicators?
+    case 1: // Redraw the indicators?
     {
         //wxRect rect = GetViewRect();
         //rect.right = m_nFontHeight; // The size of the left margin
@@ -584,12 +610,12 @@ void CDeasm6502View::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
         break;
     }
 
-    case 2:	// Move the contents of the window?
+    case 2: // Move the contents of the window?
         //ScrollToLine(uint16_t(HIWORD(lHint)));
-        ScrollToLine(-1);
+        ScrollToLine(static_cast<uint32_t>(-1));
         break;
 
-    case 0:	// Redraw the contents of the window?
+    case 0: // Redraw the contents of the window?
         Refresh();
         break;
     }
@@ -631,6 +657,7 @@ void CDeasm6502View::OnDeasmGoto()
 
 void CDeasm6502View::OnUpdateDeasmGoto(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
     //pCmdUI->Enable(true);
 }
 
@@ -639,6 +666,9 @@ void CDeasm6502View::OnUpdateDeasmGoto(CCmdUI* pCmdUI)
 
 void CDeasm6502View::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
 #if 0
     CMenu menu;
     VERIFY(menu.LoadMenu(IDR_POPUP_DEASM6502));
@@ -669,6 +699,10 @@ void CDeasm6502View::OnContextMenu(wxWindow* pWnd, wxPoint point)
 
 void CDeasm6502View::OnSize(UINT nType, int cx, int cy)
 {
+    UNUSED(nType);
+    UNUSED(cx);
+    UNUSED(cy);
+
     //wxView::OnSize(nType, cx, cy);
 
     UpdateScrollRange();
@@ -678,6 +712,8 @@ void CDeasm6502View::UpdateScrollRange()  // 65816 fix
 {
     wxRect rect = GetViewRect();
     int lines = CalcLineCount(rect);
+
+    UNUSED(lines);
 
 #if 0
     SCROLLINFO si;

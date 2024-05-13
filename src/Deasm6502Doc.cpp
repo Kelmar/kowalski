@@ -94,6 +94,7 @@ std::ostream &CDeasm6502Doc::SaveObject(std::ostream &stream)
 
 void CDeasm6502Doc::SetStart(uint32_t addr, bool bDraw)
 {
+    UNUSED(bDraw);
     m_uStartAddr = addr;
 }
 
@@ -106,7 +107,9 @@ void CDeasm6502Doc::SetContext(const CContext *pCtx)
 // Drawing/erasing an arrow in the line
 void CDeasm6502Doc::SetPointer(int addr, bool scroll/*= FALSE*/)
 {
-    ASSERT(addr == -1 || addr >= 0 && addr <= 0xFFFF);
+    ASSERT((addr == -1) || ((addr >= 0) && (addr <= 0xFFFF)));
+    UNUSED(scroll);
+
     m_nPointerAddr = addr;
 
     UpdateAllViews(); // Redrawing of indicators
@@ -116,6 +119,12 @@ void CDeasm6502Doc::SetPointer(int addr, bool scroll/*= FALSE*/)
 
 void CDeasm6502Doc::DeassembleSave(std::ostream &stream, const CContext &ctx, uint32_t start, uint32_t end, int opt)
 {
+    UNUSED(stream);
+    UNUSED(ctx);
+    UNUSED(start);
+    UNUSED(end);
+    UNUSED(opt);
+
 #if 0
     COutputMem info;
     info.ClearMem();

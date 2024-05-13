@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -64,12 +64,12 @@ void CAsm6502::CListing::Remove()
 void CAsm6502::CListing::NextLine()
 {
     ASSERT(IsOpen()); // The file must be open
-    
+
     if (m_lineNumber != 0)
     {
         // Looks like we're trying to play some games with line endings, we should let the OS handle this. -- B.Simonds (April 29, 2024)
 #if 0
-        
+
         if (m_str.Replace(0xd, '\n') == 0 && m_str.size() > 0 && m_str[m_str.size() - 1] != '\n')
             m_str += '\n';
 #endif
@@ -113,7 +113,7 @@ void CAsm6502::CListing::AddValue(uint32_t val)
     char buf[32];
 
     //% Bug Fix 1.2.13.2 - remove extra space from list report
-    
+
     if (val > 0xFFFFFF)
         snprintf(buf, sizeof(buf), "  %08X          ", val);
     else if (val > 0xFFFF)
@@ -128,31 +128,40 @@ void CAsm6502::CListing::AddBytes(uint32_t addr, uint16_t mask, const uint8_t me
 {
     ASSERT(IsOpen()); // The file must be open
     ASSERT(len > 0);
-    char buf[32];
-    
-    for (int i = 0; i < len; i +=4)
+
+    wxString buf;
+
+    for (int i = 0; i < len; i += 4)
     {
         switch ((len - i) % 4)
         {
-        //% Bug Fix 1.2.13.2 - remove extra space from list report
+            //% Bug Fix 1.2.13.2 - remove extra space from list report
         case 1:
-            snprintf(buf, sizeof(buf), "%06X  %02X        ", int(addr), int(mem[addr & mask]));
+            buf.Printf("%06X  %02X        ", int(addr), int(mem[addr & mask]));
             break;
+
         case 2:
-            snprintf(buf, sizeof(buf), "%06X  %02X %02X     ", int(addr), int(mem[addr & mask]),
-                     int(mem[addr + 1 & mask]));
+            buf.Printf("%06X  %02X %02X     ", int(addr), int(mem[addr & mask]),
+                int(mem[(addr + 1) & mask]));
             break;
+
         case 3:
-            snprintf(buf, sizeof(buf), "%06X  %02X %02X %02X  ", int(addr), int(mem[addr & mask]),
-                     int(mem[addr + 1 & mask]),int(mem[addr + 2 & mask]));
+            buf.Printf("%06X  %02X %02X %02X  ", int(addr), int(mem[addr & mask]),
+                int(mem[(addr + 1) & mask]), int(mem[(addr + 2) & mask]));
             break;
+
         case 0:
-            snprintf(buf, sizeof(buf), "%06X  %02X %02X %02X %02X  ", int(addr), int(mem[addr & mask]),
-                     int(mem[addr + 1 & mask]),int(mem[addr + 2 & mask]), int(mem[addr + 3 & mask]));
+            buf.Printf("%06X  %02X %02X %02X %02X  ", int(addr), int(mem[addr & mask]),
+                int(mem[(addr + 1) & mask]), int(mem[(addr + 2) & mask]), int(mem[(addr + 3) & mask]));
             break;
+
+        default:
+            ASSERT(false);
+            return;
         }
+
         m_str += buf;
-        addr = addr+4 & mask;
+        addr = (addr + 4) & mask;
         NextLine();
     }
 }

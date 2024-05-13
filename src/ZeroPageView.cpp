@@ -64,13 +64,15 @@ END_MESSAGE_MAP()
 
 void CZeroPageView::OnDraw(wxDC* pDC)
 {
+    UNUSED(pDC);
+
 #if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc= (CMemoryDoc *)GetDocument();
     ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CMemoryDoc)));
     CString line(_T(' '), 1 + max(m_nCx, 8));
     UINT16 addr= pDoc->m_uAddress;
     TCHAR hex[8];
-    int lim= bytes_in_line();	// ilo�� wy�wietlanych w jednym wierszu bajt�w
+    int lim= bytes_in_line(); // the number of bytes displayed in one line
     COutputMem& mem= *pDoc->m_pMem;
     CMemoryDC dcMem(*pDC, this, m_rgbBkgndColor);
     if (dcMem.m_hDC == 0)
@@ -109,6 +111,8 @@ void CZeroPageView::OnDraw(wxDC* pDC)
 
 void CZeroPageView::calc(wxDC *pDC)
 {
+    UNUSED(pDC);
+
 #if REWRITE_TO_WX_WIDGET
     RECT rect;
     GetClientRect(&rect);
@@ -131,6 +135,10 @@ void CZeroPageView::calc(wxDC *pDC)
 
 void CZeroPageView::scroll(UINT nSBCode, int nPos, int nRepeat)
 {
+    UNUSED(nSBCode);
+    UNUSED(nPos);
+    UNUSED(nRepeat);
+
 #if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc = (CMemoryDoc *)GetDocument();
     if (pDoc == NULL)
@@ -326,6 +334,10 @@ BOOL CZeroPageView::PreCreateWindow(CREATESTRUCT& cs)
 
 void CZeroPageView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 {
+    UNUSED(nSBCode);
+    UNUSED(nPos);
+    UNUSED(pScrollBar);
+
 #if REWRITE_TO_WX_WIDGET
     scroll(nSBCode,nPos);
 
@@ -335,6 +347,10 @@ void CZeroPageView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 
 bool CZeroPageView::OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt) // 1.3.2 added mouse scroll wheel support
 {
+    UNUSED(nFlags);
+    UNUSED(zDelta);
+    UNUSED(pt);
+
 #if REWRITE_TO_WX_WIDGET
     if (zDelta > 0)
         scroll(SB_LINEUP,0,0);
@@ -394,6 +410,11 @@ int CZeroPageView::set_scroll_range()
 // odszukanie adresu wiersza pami�ci poprzedzaj�cego dany wiersz
 int CZeroPageView::find_prev_addr(uint32_t &addr, const COutputMem &mem, int cnt/*= 1*/, int bytes/*= 0*/)
 {
+    UNUSED(addr);
+    UNUSED(mem);
+    UNUSED(cnt);
+    UNUSED(bytes);
+
 #if REWRITE_TO_WX_WIDGET
     ASSERT(cnt > 0);
     if (cnt < 0)
@@ -422,6 +443,11 @@ int CZeroPageView::find_prev_addr(uint32_t &addr, const COutputMem &mem, int cnt
 int CZeroPageView::find_next_addr(uint32_t &addr, const COutputMem &mem,
                                   int cnt/*= 1*/, int bytes/*= 0*/)
 {
+    UNUSED(addr);
+    UNUSED(mem);
+    UNUSED(cnt);
+    UNUSED(bytes);
+
 #if REWRITE_TO_WX_WIDGET
     ASSERT(cnt > 0);
     if (cnt < 0)
@@ -452,6 +478,11 @@ int CZeroPageView::find_next_addr(uint32_t &addr, const COutputMem &mem,
 // spr. o ile wierszy nale�y przesun�� zawarto�� okna aby dotrze� od 'addr' do 'dest'
 int CZeroPageView::find_delta(uint32_t &addr, uint16_t dest, const COutputMem &mem, int max_lines)
 {
+    UNUSED(addr);
+    UNUSED(dest);
+    UNUSED(mem);
+    UNUSED(max_lines);
+
 #if REWRITE_TO_WX_WIDGET
     if (dest == addr)
         return 0;
@@ -494,6 +525,10 @@ int CZeroPageView::find_delta(uint32_t &addr, uint16_t dest, const COutputMem &m
 
 void CZeroPageView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+    UNUSED(nChar);
+    UNUSED(nRepCnt);
+    UNUSED(nFlags);
+
 #if REWRITE_TO_WX_WIDGET
     switch (nChar)
     {
@@ -531,6 +566,10 @@ void CZeroPageView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CZeroPageView::OnSize(UINT nType, int cx, int cy)
 {
+    UNUSED(nType);
+    UNUSED(cx);
+    UNUSED(cy);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnSize(nType, cx, cy);
 
@@ -543,6 +582,8 @@ void CZeroPageView::OnSize(UINT nType, int cx, int cy)
 
 bool CZeroPageView::OnEraseBkgnd(wxDC* pDC)
 {
+    UNUSED(pDC);
+
 //  CRect rect;
 //  GetClientRect(rect);
 //  pDC->FillSolidRect(rect, m_rgbBkgndColor);
@@ -553,6 +594,9 @@ bool CZeroPageView::OnEraseBkgnd(wxDC* pDC)
 
 void CZeroPageView::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
 #if REWRITE_TO_WX_WIDGET
     CMenu menu;
     if (!menu.LoadMenu(IDR_POPUP_ZPMEMORY))
@@ -580,6 +624,8 @@ void CZeroPageView::OnContextMenu(wxWindow* pWnd, wxPoint point)
 
 void CZeroPageView::OnUpdateMemoryGoto(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
@@ -603,6 +649,8 @@ void CZeroPageView::OnMemoryGoto()
 
 void CZeroPageView::OnUpdateMemoryChg(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
@@ -624,6 +672,10 @@ void CZeroPageView::OnMemoryChg()
 
 void CZeroPageView::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
 {
+    UNUSED(pSender);
+    UNUSED(lHint);
+    UNUSED(pHint);
+
 #if REWRITE_TO_WX_WIDGET
     if (lHint == 'show')
     {

@@ -27,37 +27,40 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
-CLeksem::CLeksem(const CLeksem &leks)
+CToken::CToken(const CToken &leks)
     : type(leks.type)
 {
-    memcpy(this, &leks, sizeof(CLeksem)); // copy whole union and type field
-    if (leks.type == L_STR || leks.type == L_IDENT || leks.type == L_IDENT_N) // contains string?
+    memcpy(block, leks.block, sizeof(block)); // copy whole union and type field
+
+    if (leks.type == CTokenType::L_STR || leks.type == CTokenType::L_IDENT || leks.type == CTokenType::L_IDENT_N) // contains string?
         str = new std::string(*leks.str); // duplicate string
 }
 
-
-CLeksem & CLeksem::operator = (const CLeksem &leks)
+CToken & CToken::operator = (const CToken &leks)
 {
 //  ASSERT(type == leks.type);
-    if (type == L_STR || type == L_IDENT || type == L_IDENT_N) // the target lexeme contains the string?
+    if (type == CTokenType::L_STR || type == CTokenType::L_IDENT || type == CTokenType::L_IDENT_N) // the target lexeme contains the string?
     {
         delete str;
         str = NULL;
     }
-//  type = leks.type;
-    memcpy(this, &leks, sizeof(CLeksem)); // copy the entire union and type field
-    if (leks.type == L_STR || leks.type == L_IDENT || leks.type == L_IDENT_N) // the source lexeme contains a string of characters?
+
+    type = leks.type;
+    memcpy(block, leks.block, sizeof(block)); // copy the entire union and type field
+
+    if (leks.type == CTokenType::L_STR || leks.type == CTokenType::L_IDENT || leks.type == CTokenType::L_IDENT_N) // the source lexeme contains a string of characters?
         str = new std::string(*leks.str); // duplicate the string
+
     return *this;
 }
 
-CLeksem::~CLeksem()
+CToken::~CToken()
 {
     switch (type)
     {
-    case L_STR:
-    case L_IDENT:
-    case L_IDENT_N:
+    case CTokenType::L_STR:
+    case CTokenType::L_IDENT:
+    case CTokenType::L_IDENT_N:
         if (str)
         {
 #ifdef _DEBUG
@@ -66,6 +69,10 @@ CLeksem::~CLeksem()
 #endif
             delete str;
         }
+        break;
+
+    default:
+        // Nothing to do
         break;
     }
 }

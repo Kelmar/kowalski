@@ -31,11 +31,39 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "ConditionalAsm.h"
 
-// Leksem == Lex
+enum class CTokenType
+{
+    L_UNKNOWN,      // Unrecognized character
 
-// This actually looks like a class to hold a token. -- B.Simonds (April 25, 2024)
+    L_NUM,          // Number (dec, hex, bin, or sign)
+    L_STR,          // A string of characters in apostrophes or quotation marks
+    L_IDENT,        // Identifier
+    L_IDENT_N,      // Numbered identifier (ending with '#' and a number)
+    L_SPACE,        // Space
+    L_OPER,         // Operator
+    L_BRACKET_L,    // Left paren '('
+    L_BRACKET_R,    // Right paren ')'
+    L_LBRACKET_L,   // Left bracket '('
+    L_LBRACKET_R,   // Right bracket ')'
+    L_EXPR_BRACKET_L, // Left square bracket '['
+    L_EXPR_BRACKET_R, // Right square bracket ']'
+    L_COMMENT,      // Comment character ';'
+    L_LABEL,        // Label character ':'
+    L_COMMA,        // Comma character ','
+    L_STR_ARG,      // Dollar sign '$', ends text type parameter
+    L_MULTI,        // Ellipsis character '...'
+    L_INV_COMMAS,   // Sign in quotation marks ????
+    L_LHASH,        // '!#'
+    L_HASH,         // Hash sign '#'
+    L_EQUAL,        // Assignment character '='
+    L_PROC_INSTR,   // Processor instruction
+    L_ASM_INSTR,    // Assembler directive
+    L_CR,           // End of line
+    L_FIN,          // End of data
+    L_ERROR         // Bad token type
+};
 
-class CLeksem //: public CAsm
+class CToken
 {
 public:
     struct Code
@@ -44,7 +72,7 @@ public:
         CAsm::CodeAdr adr;
     };
 
-    enum InstrArg   // Type of directive arguments
+    enum InstrArg // Type of directive arguments
     {
         A_BYTE,
         A_NUM,
@@ -59,7 +87,7 @@ public:
         InstrArg arg;
     };
 
-    enum NumType    // Type of number
+    enum NumType // Type of number
     {
         N_DEC,
         N_HEX,
@@ -87,39 +115,7 @@ public:
 
     //...........................................................................
 
-    enum LeksType
-    {
-        L_UNKNOWN,      // Unrecognized character
-
-        L_NUM,          // Number (dec, hex, bin, or sign)
-        L_STR,          // A string of characters in apostrophes or quotation marks
-        L_IDENT,        // Identifier
-        L_IDENT_N,      // Numbered identifier (ending with '#' and a number)
-        L_SPACE,        // Space
-        L_OPER,         // Operator
-        L_BRACKET_L,    // Left paren '('
-        L_BRACKET_R,    // Right paren ')'
-        L_LBRACKET_L,   // Left bracket '('
-        L_LBRACKET_R,   // Right bracket ')'
-        L_EXPR_BRACKET_L, // Left square bracket '['
-        L_EXPR_BRACKET_R, // Right square bracket ']'
-        L_COMMENT,      // Comment character ';'
-        L_LABEL,        // Label character ':'
-        L_COMMA,        // Comma character ','
-        L_STR_ARG,      // Dollar sign '$', ends text type parameter
-        L_MULTI,        // Ellipsis character '...'
-        L_INV_COMMAS,   // Sign cudzys�owu ????
-        L_LHASH,		// '!#'
-        L_HASH,         // Hash sign '#'
-        L_EQUAL,        // Assignment character '='
-        L_PROC_INSTR,   // Processor instruction
-        L_ASM_INSTR,    // Assembler directive
-        L_CR,           // End of line
-        L_FIN,          // End of data
-        L_ERROR         // Bad token type
-    };
-
-    const LeksType type;
+    CTokenType type;
 
 private:
     union
@@ -131,109 +127,128 @@ private:
         Num num;               // Numeric or character constant
         std::string *str;      // Identifier or string
         Error err;
+
+        char block[32]; // Used for block copy
     };
 
 public:
-    CLeksem(const CLeksem &leks);
+    CToken(const CToken &leks);
 
-    ~CLeksem();
+    ~CToken();
 
-    CLeksem(LeksType type) : type(type)
-    {}
+    CToken(CTokenType t)
+        : type(t)
+        , op()
+    {
+    }
 
-    CLeksem(CAsm::OperType oper) : type(L_OPER), op(oper)
-    {}
+    CToken(CAsm::OperType oper)
+        : type(CTokenType::L_OPER)
+        , op(oper)
+    {
+    }
 
-    CLeksem(CAsm::OpCode code) : type(L_PROC_INSTR), code(code)
-    {}
+    CToken(CAsm::OpCode code)
+        : type(CTokenType::L_PROC_INSTR)
+        , code(code)
+    {
+    }
 
-    CLeksem(CAsm::InstrType it) : type(L_ASM_INSTR), instr(it)
-    {}
+    CToken(CAsm::InstrType it)
+        : type(CTokenType::L_ASM_INSTR)
+        , instr(it)
+    {
+    }
 
-    CLeksem(Error err) : type(L_ERROR), err(err)
-    {}
+    CToken(Error err)
+        : type(CTokenType::L_ERROR)
+        , err(err)
+    {
+    }
 
-    CLeksem(NumType type, int32_t val) : type(L_NUM)
+    CToken(NumType type, int32_t val)
+        : type(CTokenType::L_NUM)
     {
         num.type = type;
         num.value = val;
     }
 
-    CLeksem(std::string *str) : type(L_STR), str(str)
-    {}
+    CToken(std::string *str) 
+        : type(CTokenType::L_STR)
+        , str(str)
+    {
+    }
 
-    CLeksem(std::string *str, int dummy) : type(L_IDENT), str(str)
-    {}
+    CToken(std::string *str, int) 
+        : type(CTokenType::L_IDENT)
+        , str(str)
+    {
+    }
 
-    CLeksem(std::string *str, long dummy) : type(L_IDENT_N), str(str)
-    {}
+    CToken(std::string *str, long) 
+        : type(CTokenType::L_IDENT_N)
+        , str(str)
+    {
+    }
 
-//  CLeksem(const CLeksem &leks, long dummy) : type(L_IDENT_N)
-//  { ASSERT(leks.type == L_IDENT);  str = new std::string(*leks.str); }
+//  CToken(const CToken &leks, long) : type(TokenType::L_IDENT_N)
+//  { ASSERT(leks.type == TokenType::L_IDENT);  str = new std::string(*leks.str); }
 
-    CLeksem & operator =(const CLeksem &);
+    CToken & operator =(const CToken &);
 
     const std::string *GetIdent() const
     {
-        ASSERT(type == L_IDENT);
+        ASSERT(type == CTokenType::L_IDENT);
         return str;
     }
 
     CAsm::OperType GetOper()
     {
-        ASSERT(type == L_OPER);
+        ASSERT(type == CTokenType::L_OPER);
         return op;
     }
 
     CAsm::OpCode GetCode()
     {
-        ASSERT(type == L_PROC_INSTR);
+        ASSERT(type == CTokenType::L_PROC_INSTR);
         return code;
     }
 
     CAsm::InstrType GetInstr()
     {
-        ASSERT(type == L_ASM_INSTR);
+        ASSERT(type == CTokenType::L_ASM_INSTR);
         return instr;
     }
 
     int GetValue()
     {
-        ASSERT(type == L_NUM);
+        ASSERT(type == CTokenType::L_NUM);
         return num.value;
     }
 
     const std::string* GetString() const
     {
-        ASSERT(type == L_STR || type == L_IDENT || type == L_IDENT_N);
+        ASSERT(type == CTokenType::L_STR || type == CTokenType::L_IDENT || type == CTokenType::L_IDENT_N);
         return str;
     }
 
     void Format(int32_t val) // Normalize the form of the numeric label
     {
 #if 0
-        ASSERT(type == L_IDENT_N);
+        ASSERT(type == CTokenType::L_IDENT_N);
         CString num(' ', 9);
         num.Format("#%08X", (int)val);
         *str += num; // Append number
 #endif
 
-        // TODO: Definately need to verify this change. -- B.Simonds (April 25, 2024)
+        // TODO: Definitely need to verify this change. -- B.Simonds (April 25, 2024)
 
-        ASSERT(type == L_IDENT_N);
+        ASSERT(type == CTokenType::L_IDENT_N);
 
         char tmp[64];
 
         snprintf(tmp, sizeof(tmp), "       #%08X%d", (int)val, num.value);
         str = new std::string(tmp);
-    }
-
-    //debugging log  use= leks.Logger(cs);
-    void Logger(const char *logMsg)
-    {
-        std::FILE* file = std::fopen("logfile.txt", "a");
-        std::fprintf(file, "%s\n", logMsg);
-        std::fclose(file);
     }
 };
 
@@ -261,13 +276,13 @@ struct Expr
     } inf;
 
     Expr()
-        : inf(EX_UNDEF)
-        , value(0)
+        : value(0)
+        , inf(EX_UNDEF)
     {}
 
     Expr(int32_t value)
-        : inf(EX_LONG)
-        , value(value)
+        : value(value)
+        , inf(EX_LONG)
     {}
 };
 
@@ -427,7 +442,7 @@ public:
     //virtual bool IsRepeat() //data source is repeat (.REPEAT)
     //{ return true; }
 
-    CRepeatDef &operator= (const CRepeatDef &src)
+    CRepeatDef &operator= (const CRepeatDef &)
     {
         ASSERT(false); // objects of type CRepeatDef cannot be assigned
         return *this;
@@ -617,16 +632,16 @@ class CAsm6502 : public CAsm /*, public CObject */
     CRepeatDef *pRept;
 
     // leksyka:
-    CLeksem get_dec_num();          // Interpretation of a decimal number
-    CLeksem get_hex_num();          // Interpretation of a hexadecimal number
-    CLeksem get_bin_num();          // Interpretation of binary number
-    CLeksem get_char_num();         // Interpretation of the character constant
+    CToken get_dec_num();          // Interpretation of a decimal number
+    CToken get_hex_num();          // Interpretation of a hexadecimal number
+    CToken get_bin_num();          // Interpretation of binary number
+    CToken get_char_num();         // Interpretation of the character constant
     std::string* get_ident();       // Extract the string
-    CLeksem get_string(char lim);	// Extracting a string of characters
-    CLeksem eat_space();			// Skip whitespace
+    CToken get_string(char lim);	// Extracting a string of characters
+    CToken eat_space();			// Skip whitespace
     bool proc_instr(const std::string &str, OpCode &code);
     bool asm_instr(const std::string &str, InstrType &it);
-    CLeksem next_leks(bool nospace= true); // Get the next symbol
+    CToken next_leks(bool nospace= true); // Get the next symbol
     bool next_line();               // Load the next line
 
     COutputMem *out;				// memory for the object code
@@ -659,9 +674,9 @@ class CAsm6502 : public CAsm /*, public CObject */
 
     std::string format_local_label(const std::string &ident, int area);
     // Interpretation of processor instructions
-    Stat proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &expr, Expr &expr_bit, Expr &expr_zpg);
+    Stat proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &expr, Expr &expr_bit, Expr &expr_zpg);
     // Interpretation of the directive
-    Stat asm_instr_syntax_and_generate(CLeksem &leks, InstrType it, const std::string *pLabel);
+    Stat asm_instr_syntax_and_generate(CToken &leks, InstrType it, const std::string *pLabel);
 
     CMacroDef *get_new_macro_entry()
     {
@@ -684,18 +699,18 @@ class CAsm6502 : public CAsm /*, public CObject */
 //  Stat (CLeksem &leks);
     int find_const(const std::string& str);
     Stat predef_const(const std::string &str, Expr &expr, bool &found);
-    Stat predef_function(CLeksem &leks, Expr &expr, bool &fn);
-    Stat constant_value(CLeksem &leks, Expr &expr, bool nospace);
-    Stat factor(CLeksem &leks, Expr &expr, bool nospace= true);
-    Stat mul_expr(CLeksem &leks, Expr &expr);
-    Stat shift_expr(CLeksem &leks, Expr &expr);
-    Stat add_expr(CLeksem &leks, Expr &expr);
-    Stat bit_expr(CLeksem &leks, Expr &expr);
-    Stat cmp_expr(CLeksem &leks, Expr &expr);
-    Stat bool_expr_and(CLeksem &leks, Expr &expr);
-    Stat bool_expr_or(CLeksem &leks, Expr &expr);
-    Stat expression(CLeksem &leks, Expr &expr, bool str= false); // Expression expansion
-    bool is_expression(const CLeksem &leks);
+    Stat predef_function(CToken &leks, Expr &expr, bool &fn);
+    Stat constant_value(CToken &leks, Expr &expr, bool nospace);
+    Stat factor(CToken &leks, Expr &expr, bool nospace= true);
+    Stat mul_expr(CToken &leks, Expr &expr);
+    Stat shift_expr(CToken &leks, Expr &expr);
+    Stat add_expr(CToken &leks, Expr &expr);
+    Stat bit_expr(CToken &leks, Expr &expr);
+    Stat cmp_expr(CToken &leks, Expr &expr);
+    Stat bool_expr_and(CToken &leks, Expr &expr);
+    Stat bool_expr_or(CToken &leks, Expr &expr);
+    Stat expression(CToken &leks, Expr &expr, bool str= false); // Expression expansion
+    bool is_expression(const CToken &leks);
     Stat assemble_line();           // Line interpretation
     Stat assemble();
 
@@ -815,10 +830,10 @@ public:
              const char *listing_file = NULL)
         : entire_text(file_in_name)
         , out(out)
-        , debug(debug)
         , markArea(area)
-        , m_procType(procType)
+        , debug(debug)
         , listing(listing_file)
+        , m_procType(procType)
     {
         init();
     }
@@ -831,10 +846,10 @@ public:
              const char *listing_file = NULL)
         : entire_text(pWnd)
         , out(out)
-        , debug(debug)
         , markArea(area)
-        , m_procType(procType)
+        , debug(debug)
         , listing(listing_file)
+        , m_procType(procType)
     {
         init();
     }

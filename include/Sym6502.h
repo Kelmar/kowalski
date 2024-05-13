@@ -24,10 +24,44 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "DebugInfo.h"
 #include "OutputMem.h"
 #include "LogBuffer.h"
+
 class CSrc6502View;
 #undef OVERFLOW
 
-class CContext
+struct ContextBase
+{
+    uint8_t a, x, y, s;
+    uint32_t pc;
+
+    ULONG uCycles;
+    bool intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
+
+    bool negative, overflow, zero, carry;
+    bool reserved, break_bit, decimal, interrupt;
+
+    uint32_t mem_mask; // memory mask - depends on the width of the address bus,
+    // contains ones in place of valid address bits
+    bool io;
+    uint16_t io_from, io_to;
+
+    ContextBase()
+    {
+        memset(this, 0, sizeof(ContextBase));
+    }
+
+    ContextBase(const ContextBase &rhs)
+    {
+        memcpy(this, &rhs, sizeof(ContextBase));
+    }
+
+    const ContextBase &operator =(const ContextBase &rhs)
+    {
+        memcpy(this, &rhs, sizeof(ContextBase));
+        return *this;
+    }
+};
+
+class CContext : public ContextBase
 {
     void reset()
     {
@@ -41,14 +75,7 @@ class CContext
     }
 
 public:
-    uint8_t a, x, y, s;
-    uint32_t pc;
-
-    ULONG uCycles;
-    bool intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
-
-    bool negative, overflow, zero, carry;
-    bool reserved, break_bit, decimal, interrupt;
+    
 
     enum Flags
     {
@@ -74,11 +101,6 @@ public:
     };
 
     COutputMem &mem;
-
-    uint32_t mem_mask; // memory mask - depends on the width of the address bus,
-    // contains ones in place of valid address bits
-    bool io;
-    uint16_t io_from, io_to;
 
     // functions that change the contents of the flag register
     void set_status_reg_VZNC(bool v, bool z, bool n, bool c)
@@ -129,20 +151,22 @@ public:
         reset();
     }
 
-    CContext(const CContext &src) : mem(src.mem)
+    CContext(const CContext &src) 
+        : ContextBase(src)
+        , mem(src.mem)
     {
-        *this = src;
     }
 
     CContext &operator= (const CContext &src)
     {
-        memcpy(this,&src,sizeof *this);
+        ContextBase::operator =(src);
+        mem = src.mem;
         return *this;
     }
 
-    void Reset(const COutputMem &mem)
+    void Reset(const COutputMem &newMem)
     {
-        this->mem = mem;
+        this->mem = newMem;
         reset();
     }
 };
@@ -174,11 +198,11 @@ struct CmdInfo	// single command info (for logging)
         , y(y)
         , s(s)
         , flags(flags)
-        , pc(pc)
         , cmd(cmd)
         , arg1(arg1)
         , arg2(arg2)
         , arg3(0)
+        , pc(pc)
         , uCycles(0)
         , intFlag(0)
         , argVal(0)
@@ -210,7 +234,7 @@ typedef CLogBuffer<CmdInfo> CommandLog;
 
 class CSym6502 : public CAsm
 {
-    CContext pre, ctx, old;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers (added pre)
+    CContext ctx, pre, old;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers (added pre)
     CDebugInfo *debug;
     CommandLog m_Log;
 
@@ -359,7 +383,7 @@ public:
 
     SymStat SkipInstr();
     void SkipToAddr(uint16_t addr);
-    void set_addr_bus_width(UINT w) {}
+    void set_addr_bus_width(UINT w) { UNUSED(w); }
 
     uint32_t get_pc() const { return ctx.pc; }
     void set_pc(uint32_t pc) { ctx.pc = pc; }

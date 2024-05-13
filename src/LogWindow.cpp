@@ -98,6 +98,10 @@ void CLogWindow::PostNcDestroy()
 
 int CLogWindow::OnCtlColor(wxDC* dc, wxWindow* pWnd, UINT nCtlColor)
 {
+    UNUSED(dc);
+    UNUSED(pWnd);
+    UNUSED(nCtlColor);
+
     //dc->SetBkColor(::GetSysColor(COLOR_WINDOW));
     //dc->SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
     //return m_brBackground;
@@ -106,6 +110,8 @@ int CLogWindow::OnCtlColor(wxDC* dc, wxWindow* pWnd, UINT nCtlColor)
 
 void CLogWindow::SetText(const CommandLog& log)
 {
+    UNUSED(log);
+
 #if 0
     int nCount = log.GetCount();
 
@@ -145,7 +151,9 @@ void CLogWindow::Invalidate()
 
 afx_msg LRESULT CLogWindow::OnChangeCode(WPARAM wParam, LPARAM lParam)
 {
-    if (lParam == -1)
+    UNUSED(wParam);
+
+    if (lParam == static_cast<uint32_t>(-1))
         Close();
     else
         Refresh();

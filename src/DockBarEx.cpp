@@ -49,6 +49,10 @@ CDockBarEx::~CDockBarEx()
 
 bool CDockBarEx::OnSetCursor(wxWindow* pWnd, UINT nHitTest, UINT message)
 {
+    UNUSED(pWnd);
+    UNUSED(nHitTest);
+    UNUSED(message);
+
 #if 0
 
     if (GetDockedVisibleCount() == 0)
@@ -103,6 +107,8 @@ wxRect CDockBarEx::ResizeArea()
 //
 void CDockBarEx::ResizeBars(int nWidth)
 {
+    UNUSED(nWidth);
+
 #if 0
     for (int i = 0; i < m_arrBars.GetSize(); i++)
     {
@@ -146,6 +152,8 @@ bool CDockBarEx::PreCreateWindow(CREATESTRUCT& cs)
 //
 LRESULT CDockBarEx::OnNcHitTest(wxPoint ptPos)
 {
+    UNUSED(ptPos);
+
 #if 0
 //	wxPoint ptPos(0, 0);
 //	::GetCursorPos(&ptPos);
@@ -175,6 +183,10 @@ LRESULT CDockBarEx::OnNcHitTest(wxPoint ptPos)
 //
 void CDockBarEx::OnSize(UINT nType, int cx, int cy)
 {
+    UNUSED(nType);
+    UNUSED(cx);
+    UNUSED(cy);
+
     //CDockBar::OnSize(nType, cx, cy);
 
     if (m_bResizing)
@@ -190,6 +202,9 @@ void CDockBarEx::OnSize(UINT nType, int cx, int cy)
 //
 LRESULT CDockBarEx::OnEnterSizeMove(WPARAM wParam, LPARAM lParam)
 {
+    UNUSED(wParam);
+    UNUSED(lParam);
+
     m_nDeltaWidth = 4;
     // Calc difference between dockbar client area and docked bar width
     /*	for (int i = 0; i < m_arrBars.GetSize(); i++)
@@ -209,6 +224,9 @@ LRESULT CDockBarEx::OnEnterSizeMove(WPARAM wParam, LPARAM lParam)
 
 LRESULT CDockBarEx::OnExitSizeMove(WPARAM wParam, LPARAM lParam)
 {
+    UNUSED(wParam);
+    UNUSED(lParam);
+
     m_bResizing = false;
     return 0; //Default();
 }

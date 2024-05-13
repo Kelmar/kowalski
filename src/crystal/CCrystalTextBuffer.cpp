@@ -45,6 +45,15 @@
 
 const char crlf[] = "\r\n";
 
+#if 0
+static const char *crlfs[] =
+{
+    "\x0d\x0a", // DOS/Windows style
+    "\x0a",     // UNIX style
+    "\x0d"      // Macintosh style
+};
+#endif
+
 #ifdef _DEBUG
 #define _ADVANCED_BUGCHECK	1
 #endif
@@ -76,7 +85,7 @@ void CCrystalTextBuffer::SUndoRecord::FreeText()
 
 void CCrystalTextBuffer::CInsertContext::RecalcPoint(wxPoint &ptPoint)
 {
-    ASSERT(m_ptEnd.y > m_ptStart.y || m_ptEnd.y == m_ptStart.y && m_ptEnd.x >= m_ptStart.x);
+    ASSERT((m_ptEnd.y > m_ptStart.y) || ((m_ptEnd.y == m_ptStart.y) && (m_ptEnd.x >= m_ptStart.x)));
 
     if (ptPoint.y < m_ptStart.y)
         return;
@@ -96,7 +105,7 @@ void CCrystalTextBuffer::CInsertContext::RecalcPoint(wxPoint &ptPoint)
 
 void CCrystalTextBuffer::CDeleteContext::RecalcPoint(wxPoint &ptPoint)
 {
-    ASSERT(m_ptEnd.y > m_ptStart.y || m_ptEnd.y == m_ptStart.y && m_ptEnd.x >= m_ptStart.x);
+    ASSERT((m_ptEnd.y > m_ptStart.y) || ((m_ptEnd.y == m_ptStart.y) && (m_ptEnd.x >= m_ptStart.x)));
 
     if (ptPoint.y < m_ptStart.y)
         return;
@@ -225,7 +234,7 @@ void CCrystalTextBuffer::FreeAll()
     //	Free text
     size_t nCount = m_aLines.size();
 
-    for (int i = 0; i < nCount; i++)
+    for (size_t i = 0; i < nCount; i++)
     {
         if (m_aLines[i].m_nMax > 0)
             delete m_aLines[i].m_pcLine;
@@ -235,7 +244,7 @@ void CCrystalTextBuffer::FreeAll()
     //	Free undo buffer
     size_t bufSize = m_aUndoBuf.size();
 
-    for (int i = 0; i < bufSize; i++)
+    for (size_t i = 0; i < bufSize; i++)
         m_aUndoBuf[i].FreeText();
 
     m_aUndoBuf.clear();
@@ -276,15 +285,11 @@ void CCrystalTextBuffer::SetReadOnly(bool bReadOnly /*= true */)
     m_bReadOnly = bReadOnly;
 }
 
-static const char *crlfs[] =
-{
-    "\x0d\x0a", // DOS/Windows style
-    "\x0a",     // UNIX style
-    "\x0d"      // Macintosh style
-};
-
 bool CCrystalTextBuffer::LoadFromFile(const std::string &fileName, int nCrlfStyle /*= CRLF_STYLE_AUTOMATIC*/)
 {
+    UNUSED(fileName);
+    UNUSED(nCrlfStyle);
+
 #if REWRITE_TO_WX_WIDGET
     ASSERT(!m_bInit);
     ASSERT(m_aLines.GetSize() == 0);
@@ -438,6 +443,10 @@ bool CCrystalTextBuffer::LoadFromFile(const std::string &fileName, int nCrlfStyl
 
 bool CCrystalTextBuffer::SaveToFile(const std::string &fileName, int nCrlfStyle /*= CRLF_STYLE_AUTOMATIC*/, bool bClearModifiedFlag /*= true*/)
 {
+    UNUSED(fileName);
+    UNUSED(nCrlfStyle);
+    UNUSED(bClearModifiedFlag);
+
 #if REWRITE_TO_WX_WIDGET
 
     ASSERT(nCrlfStyle == CRLF_STYLE_AUTOMATIC || nCrlfStyle == CRLF_STYLE_DOS||
@@ -617,7 +626,7 @@ int CCrystalTextBuffer::FindLineWithFlag(uint32_t flag)
 {
     size_t size = m_aLines.size();
 
-    for (int l = 0; l < size; l ++)
+    for (size_t l = 0; l < size; l ++)
     {
         if ((m_aLines[l].m_flags & flag) != 0)
             return l;
@@ -709,8 +718,15 @@ void CCrystalTextBuffer::SetLinesFlags(int nLineFrom, int nLineTo, uint32_t addF
     UpdateViews(NULL, NULL, UPDATE_FLAGSONLY, 0);
 }
 
-void CCrystalTextBuffer::GetText(int nStartLine, int nStartChar, int nEndLine, int nEndChar, std::string &text, const char *crlf /*= NULL*/)
+void CCrystalTextBuffer::GetText(int nStartLine, int nStartChar, int nEndLine, int nEndChar, std::string &text, const char *crlfStr /*= NULL*/)
 {
+    UNUSED(nStartLine);
+    UNUSED(nStartChar);
+    UNUSED(nEndLine);
+    UNUSED(nEndChar);
+    UNUSED(text);
+    UNUSED(crlfStr);
+
 #if REWRITE_TO_WX_WIDGET
     ASSERT(m_bInit); // Text buffer not yet initialized.
     // You must call InitNew() or LoadFromFile() first!
@@ -787,7 +803,7 @@ void CCrystalTextBuffer::GetText(int nStartLine, int nStartChar, int nEndLine, i
 #endif
 }
 
-void CCrystalTextBuffer::GetText(std::string& text, const char *crlf/* = NULL*/)
+void CCrystalTextBuffer::GetText(std::string& text, const char *crlfStr/* = NULL*/)
 {
     text.clear();
 
@@ -796,7 +812,7 @@ void CCrystalTextBuffer::GetText(std::string& text, const char *crlf/* = NULL*/)
         return;
 
     int endLine = size - 1;
-    GetText(0, 0, endLine, m_aLines[endLine].m_nLength, text, crlf);
+    GetText(0, 0, endLine, m_aLines[endLine].m_nLength, text, crlfStr);
 }
 
 void CCrystalTextBuffer::AddView(CCrystalTextView *pView)
@@ -806,6 +822,8 @@ void CCrystalTextBuffer::AddView(CCrystalTextView *pView)
 
 void CCrystalTextBuffer::RemoveView(CCrystalTextView *pView)
 {
+    UNUSED(pView);
+
 #if REWRITE_TO_WX_WIDGETS
     POSITION pos = m_lpViews.GetHeadPosition();
 
@@ -828,6 +846,11 @@ void CCrystalTextBuffer::RemoveView(CCrystalTextView *pView)
 
 void CCrystalTextBuffer::UpdateViews(CCrystalTextView *pSource, CUpdateContext *pContext, uint32_t updateFlags, int nLineIndex /*= -1*/)
 {
+    UNUSED(pSource);
+    UNUSED(pContext);
+    UNUSED(updateFlags);
+    UNUSED(nLineIndex);
+
 #if REWRITE_TO_WX_WIDGET
     POSITION pos = m_lpViews.GetHeadPosition();
 
@@ -845,11 +868,11 @@ bool CCrystalTextBuffer::InternalDeleteText(CCrystalTextView *pSource, int nStar
     ASSERT(m_bInit); // Text buffer not yet initialized.
     // You must call InitNew() or LoadFromFile() first!
 
-    ASSERT(nStartLine >= 0 && nStartLine < m_aLines.size());
-    ASSERT(nStartChar >= 0 && nStartChar <= m_aLines[nStartLine].m_nLength);
-    ASSERT(nEndLine >= 0 && nEndLine < m_aLines.size());
-    ASSERT(nEndChar >= 0 && nEndChar <= m_aLines[nEndLine].m_nLength);
-    ASSERT(nStartLine < nEndLine || nStartLine == nEndLine && nStartChar < nEndChar);
+    ASSERT((nStartLine >= 0) && (static_cast<std::size_t>(nStartLine) < m_aLines.size()));
+    ASSERT((nStartChar >= 0) && (nStartChar <= m_aLines[nStartLine].m_nLength));
+    ASSERT((nEndLine >= 0) && (static_cast<std::size_t>(nEndLine) < m_aLines.size()));
+    ASSERT((nEndChar >= 0) && (nEndChar <= m_aLines[nEndLine].m_nLength));
+    ASSERT((nStartLine < nEndLine) || ((nStartLine == nEndLine) && (nStartChar < nEndChar)));
 
     if (m_bReadOnly)
         return false;
@@ -884,7 +907,7 @@ bool CCrystalTextBuffer::InternalDeleteText(CCrystalTextView *pSource, int nStar
             memcpy(restChars, m_aLines[nEndLine].m_pcLine + nEndChar, restCount * sizeof(char));
         }
 
-        int nDelCount = nEndLine - nStartLine;
+        //int nDelCount = nEndLine - nStartLine;
 
         for (int l = nStartLine + 1; l <= nEndLine; l++)
             delete m_aLines[l].m_pcLine;
@@ -916,8 +939,8 @@ bool CCrystalTextBuffer::InternalInsertText(CCrystalTextView *pSource, int nLine
     ASSERT(m_bInit); // Text buffer not yet initialized.
     // You must call InitNew() or LoadFromFile() first!
 
-    ASSERT(nLine >= 0 && nLine < m_aLines.size());
-    ASSERT(nPos >= 0 && nPos <= m_aLines[nLine].m_nLength);
+    ASSERT((nLine >= 0) && (static_cast<std::size_t>(nLine) < m_aLines.size()));
+    ASSERT((nPos >= 0) && (nPos <= m_aLines[nLine].m_nLength));
 
     if (m_bReadOnly)
         return false;
@@ -1000,14 +1023,14 @@ bool CCrystalTextBuffer::InternalInsertText(CCrystalTextView *pSource, int nLine
 
 bool CCrystalTextBuffer::CanUndo()
 {
-    ASSERT(m_nUndoPosition >= 0 && m_nUndoPosition <= m_aUndoBuf.size());
+    ASSERT((m_nUndoPosition >= 0) && (static_cast<std::size_t>(m_nUndoPosition) <= m_aUndoBuf.size()));
     return m_nUndoPosition > 0;
 }
 
 bool CCrystalTextBuffer::CanRedo()
 {
-    ASSERT(m_nUndoPosition >= 0 && m_nUndoPosition <= m_aUndoBuf.size());
-    return m_nUndoPosition < m_aUndoBuf.size();
+    ASSERT((m_nUndoPosition >= 0) && (static_cast<std::size_t>(m_nUndoPosition) <= m_aUndoBuf.size()));
+    return static_cast<std::size_t>(m_nUndoPosition) < m_aUndoBuf.size();
 }
 
 POSITION CCrystalTextBuffer::GetUndoDescription(std::string &desc, POSITION pos /*= NULL*/)
@@ -1071,10 +1094,13 @@ POSITION CCrystalTextBuffer::GetRedoDescription(std::string &desc, POSITION pos 
 
     // Advance to next undo group
     position++;
-    while (position < m_aUndoBuf.size() && (m_aUndoBuf[position].m_flags & UNDO_BEGINGROUP) == 0)
+    while ((static_cast<std::size_t>(position) < m_aUndoBuf.size()) && 
+           (m_aUndoBuf[position].m_flags & UNDO_BEGINGROUP) == 0)
+    {
         position--;
+    }
 
-    if (position >= m_aUndoBuf.size())
+    if (static_cast<std::size_t>(position) >= m_aUndoBuf.size())
         return 0; //NULL; // No more redo actions!
 
     return (POSITION)position;
@@ -1161,7 +1187,7 @@ bool CCrystalTextBuffer::Redo(wxPoint &ptCursorPos)
 
         m_nUndoPosition++;
 
-        if (m_nUndoPosition == m_aUndoBuf.size())
+        if (static_cast<std::size_t>(m_nUndoPosition) == m_aUndoBuf.size())
             break;
 
         if ((m_aUndoBuf[m_nUndoPosition].m_flags & UNDO_BEGINGROUP) != 0)
@@ -1198,7 +1224,7 @@ void CCrystalTextBuffer::AddUndoRecord(bool insert, const wxPoint &ptStartPos, c
     }
 
     // If undo buffer size is close to critical, remove the oldest records
-    ASSERT(m_aUndoBuf.size() <= m_nUndoBufSize);
+    ASSERT(m_aUndoBuf.size() <= static_cast<std::size_t>(m_nUndoBufSize));
     bufSize = m_aUndoBuf.size();
 
     if (bufSize >= m_nUndoBufSize)
@@ -1227,7 +1253,7 @@ void CCrystalTextBuffer::AddUndoRecord(bool insert, const wxPoint &ptStartPos, c
         m_aUndoBuf.erase(m_aUndoBuf.begin(), end);
     }
 
-    ASSERT(m_aUndoBuf.size() < m_nUndoBufSize);
+    ASSERT(m_aUndoBuf.size() < static_cast<std::size_t>(m_nUndoBufSize));
 
     // Add new record
     SUndoRecord ur;
@@ -1247,7 +1273,7 @@ void CCrystalTextBuffer::AddUndoRecord(bool insert, const wxPoint &ptStartPos, c
     m_aUndoBuf.push_back(ur);
     m_nUndoPosition = m_aUndoBuf.size();
 
-    ASSERT(m_aUndoBuf.size() <= m_nUndoBufSize);
+    ASSERT(m_aUndoBuf.size() <= static_cast<std::size_t>(m_nUndoBufSize));
 }
 
 bool CCrystalTextBuffer::InsertText(CCrystalTextView *pSource, int nLine, int nPos, const std::string &text,
@@ -1297,6 +1323,9 @@ bool CCrystalTextBuffer::DeleteText(CCrystalTextView *pSource, int nStartLine, i
 
 bool CCrystalTextBuffer::GetActionDescription(int action, std::string &desc)
 {
+    UNUSED(action);
+    UNUSED(desc);
+
 #if REWRITE_TO_WX_WIDGET
 
     HINSTANCE hOldResHandle = AfxGetResourceHandle();
@@ -1371,7 +1400,7 @@ void CCrystalTextBuffer::BeginUndoGroup(bool bMergeWithPrevious /*= FALSE*/)
 {
     ASSERT(!m_bUndoGroup);
     m_bUndoGroup = true;
-    m_bUndoBeginGroup = m_nUndoPosition == 0 || ! bMergeWithPrevious;
+    m_bUndoBeginGroup = m_nUndoPosition == 0 || !bMergeWithPrevious;
 }
 
 void CCrystalTextBuffer::FlushUndoGroup(CCrystalTextView *pSource)
@@ -1380,7 +1409,7 @@ void CCrystalTextBuffer::FlushUndoGroup(CCrystalTextView *pSource)
 
     if (pSource != NULL)
     {
-        ASSERT(m_nUndoPosition == m_aUndoBuf.size());
+        ASSERT(static_cast<std::size_t>(m_nUndoPosition) == m_aUndoBuf.size());
 
         if (m_nUndoPosition > 0)
         {
@@ -1403,7 +1432,7 @@ int CCrystalTextBuffer::FindNextBookmarkLine(int nCurrentLine)
     size_t size = m_aLines.size();
     for (;;)
     {
-        while (nCurrentLine < size)
+        while (static_cast<std::size_t>(nCurrentLine) < size)
         {
             if ((m_aLines[nCurrentLine].m_flags & LF_BOOKMARKS) != 0)
                 return nCurrentLine;
@@ -1418,7 +1447,6 @@ int CCrystalTextBuffer::FindNextBookmarkLine(int nCurrentLine)
         bWrapIt = false;
         nCurrentLine = 0;
     }
-    return -1;
 }
 
 int CCrystalTextBuffer::FindPrevBookmarkLine(int nCurrentLine)
@@ -1439,6 +1467,7 @@ int CCrystalTextBuffer::FindPrevBookmarkLine(int nCurrentLine)
             // Keep moving up
             nCurrentLine--;
         }
+
         // Beginning of text reached
         if (!bWrapIt)
             return -1;
@@ -1447,5 +1476,4 @@ int CCrystalTextBuffer::FindPrevBookmarkLine(int nCurrentLine)
         bWrapIt = false;
         nCurrentLine = size - 1;
     }
-    return -1;
 }

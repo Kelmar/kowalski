@@ -174,6 +174,8 @@ void CSaveCodeBlockOptions::OnDeltaposSpinLength(NMHDR* pNMHDR, LRESULT* pResult
 
 void CSaveCodeBlockOptions::CalculateNums(int pos)
 {
+    UNUSED(pos);
+
 #if 0
     NumberFormat fmt1;
     int start = NumberFormats::ReadNumber(GetControlById(IDC_SAVE_CODE_OPT_2_START), fmt1);

@@ -42,6 +42,8 @@ CIdentInfoView::~CIdentInfoView()
 
 void CIdentInfoView::OnDraw(wxDC* pDC)
 {
+    UNUSED(pDC);
+
     //CDocument* pDoc = GetDocument();
     // TODO: add draw code here
 }

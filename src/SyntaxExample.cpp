@@ -206,5 +206,6 @@ void CSyntaxExample::DrawItem(LPDRAWITEMSTRUCT pDrawItemStruct)
 
 bool CSyntaxExample::OnEraseBkgnd(wxDC* pDC)
 {
+    UNUSED(pDC);
     return true;
 }

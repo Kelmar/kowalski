@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -27,8 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 // Interpretation of processor instruction arguments
-CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &expr,
-        Expr &expr_bit, Expr &expr_zpg)
+CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &expr,
+    Expr &expr_bit, Expr &expr_zpg)
 {
     static char x_idx_reg[] = "X";
     static char y_idx_reg[] = "Y";
@@ -41,12 +41,12 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
     switch (leks.type)
     {
-    case CLeksem::L_LBRACKET_L: // 65816 '[' long indirect
+    case CTokenType::L_LBRACKET_L: // 65816 '[' long indirect
         if (m_procType != ProcessorType::WDC65816)
             return ERR_MODE_NOT_ALLOWED; // [ only allowed for 65816
 
         leks = next_leks(); // another non-empty lexeme
-        ret = expression(leks,expr);
+        ret = expression(leks, expr);
 
         if (ret) // invalid expression?
             return ret;
@@ -56,17 +56,17 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
         switch (leks.type)
         {
-        case CLeksem::L_SPACE:
+        case CTokenType::L_SPACE:
             ASSERT(false);
             break;
 
-        case CLeksem::L_COMMA:
+        case CTokenType::L_COMMA:
             return ERR_BRACKET_R_EXPECTED;
 
-        case CLeksem::L_LBRACKET_R: // 65816 ']'
+        case CTokenType::L_LBRACKET_R: // 65816 ']'
             leks = next_leks(); // Another non-empty lexeme
 
-            if (leks.type != CLeksem::L_COMMA)
+            if (leks.type != CTokenType::L_COMMA)
             {
                 switch (expr.inf)
                 {
@@ -90,7 +90,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
             leks = next_leks(); // Another non-empty lexeme
 
-            if (leks.type != CLeksem::L_IDENT)
+            if (leks.type != CTokenType::L_IDENT)
                 return ERR_IDX_REG_Y_EXPECTED;
 
             val = *leks.GetString();
@@ -110,7 +110,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
         }
         return OK;
 
-    case CLeksem::L_BRACKET_L: // Left paren '('
+    case CTokenType::L_BRACKET_L: // Left paren '('
         leks = next_leks(); // Another non-empty lexeme
         ret = expression(leks, expr);
 
@@ -122,18 +122,18 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
         switch (leks.type)
         {
-        case CLeksem::L_SPACE:
+        case CTokenType::L_SPACE:
             ASSERT(false);
             break;
 
-        case CLeksem::L_COMMA:
+        case CTokenType::L_COMMA:
             reg_x = false;
             if ((m_procType == ProcessorType::M6502) && expr.inf != Expr::EX_BYTE && expr.inf != Expr::EX_UNDEF)
                 return ERR_NUM_NOT_BYTE; // Too large number, max $FF
 
             leks = next_leks(); // Another non-empty lexeme
 
-            if (leks.type != CLeksem::L_IDENT)
+            if (leks.type != CTokenType::L_IDENT)
                 return ERR_IDX_REG_EXPECTED;
 
             val = *leks.GetString();
@@ -145,7 +145,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
             leks = next_leks(); // Another non-empty lexeme
 
-            if (leks.type != CLeksem::L_BRACKET_R)
+            if (leks.type != CTokenType::L_BRACKET_R)
                 return ERR_BRACKET_R_EXPECTED;	// brak nawiasu ')'
 
             if (expr.inf == Expr::EX_LONG)
@@ -161,18 +161,18 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
             {
                 leks = next_leks(); // Another non-empty lexeme
 
-                if (leks.type != CLeksem::L_COMMA)
+                if (leks.type != CTokenType::L_COMMA)
                     return ERR_COMMA_OR_BRACKET_EXPECTED;
 
                 leks = next_leks(); // Another non-empty lexeme
 
                 val = *leks.GetString();
 
-                if (leks.type != CLeksem::L_IDENT)
+                if (leks.type != CTokenType::L_IDENT)
                     return ERR_IDX_REG_Y_EXPECTED;
                 else if (strcasecmp(val.c_str(), y_idx_reg)) // Not 'S' register?
                     return ERR_IDX_REG_Y_EXPECTED;
-                    
+
                 if ((expr.inf == Expr::EX_BYTE) | (expr.inf == Expr::EX_UNDEF))
                     mode = A_SRI_Y;
                 else
@@ -182,10 +182,10 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
             leks = next_leks(); // Another non-empty lexeme
             return OK;
 
-        case CLeksem::L_BRACKET_R:
+        case CTokenType::L_BRACKET_R:
             leks = next_leks(); // Another non-empty lexeme
 
-            if (leks.type != CLeksem::L_COMMA)
+            if (leks.type != CTokenType::L_COMMA)
             {
                 switch (expr.inf)
                 {
@@ -213,7 +213,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
             leks = next_leks(); // Another non-empty lexeme
 
-            if (leks.type!=CLeksem::L_IDENT)
+            if (leks.type != CTokenType::L_IDENT)
                 return ERR_IDX_REG_Y_EXPECTED;
 
             val = *leks.GetString();
@@ -223,7 +223,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
             if (expr.inf == Expr::EX_WORD)
                 return ERR_INDIRECT_BYTE_EXPECTED;
-                
+
             mode = A_ZPGI_Y;
             leks = next_leks(); // Another non-empty lexeme
             return OK;
@@ -234,11 +234,12 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
         return OK;
 
 
-    case CLeksem::L_LHASH: // Immediate argument '#'
+    case CTokenType::L_LHASH: // Immediate argument '#'
         if (m_procType == ProcessorType::WDC65816)
             longImm = true;
+        [[fallthrough]];
 
-    case CLeksem::L_HASH: // Immediate argument '#'
+    case CTokenType::L_HASH: // Immediate argument '#'
         leks = next_leks(); // Another non-empty lexeme
 
         ret = expression(leks, expr);
@@ -253,19 +254,19 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
         else
             mode = A_IMM;
 
-        if (!(m_procType == ProcessorType::M6502) && leks.type == CLeksem::L_COMMA) // only for M6502
+        if (!(m_procType == ProcessorType::M6502) && leks.type == CTokenType::L_COMMA) // only for M6502
         {
             leks = next_leks(); // Another non-empty lexeme
 
-            if (leks.type == CLeksem::L_HASH)
+            if (leks.type == CTokenType::L_HASH)
             {
-                move = (uint8_t) expr.value;
+                move = (uint8_t)expr.value;
                 leks = next_leks(); // Another non-empty lexeme
                 ret = expression(leks, expr);
 
                 if (ret) // Invalid expression?
                     return ret;
-                    
+
                 if (expr.inf != Expr::EX_BYTE && expr.inf != Expr::EX_UNDEF)
                     return ERR_NUM_NOT_BYTE;
 
@@ -273,11 +274,11 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
                 mode = A_XYC;
                 return OK;
             }
-            
+
             if (expr.inf == Expr::EX_BYTE && abs(expr.value) > 7)
                 return ERR_NOT_BIT_NUM; // Wrong bit number
 
-            ret = expression(leks,expr_zpg);
+            ret = expression(leks, expr_zpg);
 
             if (ret) // Invalid expression?
                 return ret;
@@ -287,11 +288,11 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
             if (expr_zpg.inf != Expr::EX_BYTE && expr_zpg.inf != Expr::EX_UNDEF)
                 return ERR_NUM_NOT_BYTE; // Too large number, max $FF
 
-            if (leks.type == CLeksem::L_COMMA) // Comma after expression?
+            if (leks.type == CTokenType::L_COMMA) // Comma after expression?
             {
                 leks = next_leks(); // Another non-empty lexeme
                 ret = expression(leks, expr);
-                
+
                 if (ret) // Invalid expression?
                     return ret;
 
@@ -314,7 +315,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
         if (ret) // Invalid expression?
             return ret;
 
-        if (leks.type != CLeksem::L_COMMA) // Does not comma after expression?
+        if (leks.type != CTokenType::L_COMMA) // Does not comma after expression?
         {
             switch (expr.inf)
             {
@@ -329,15 +330,21 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
             case Expr::EX_WORD:
                 mode = A_ABS;
                 break;
-                
+
             case Expr::EX_LONG: // $65816
-//				mode = A_ABSL;
+                //				mode = A_ABSL;
                 if (forcelong == 3)
                     mode = A_ABSL;
-                else if (((expr.value >> 16) & 0xFF) != (((origin) >> 16) & 0xFF)) // fix using long when abs should be used
-                    mode = A_ABSL;
                 else
-                    mode = A_ABS; // Add test for A_ABS vs A_ABSL?
+                {
+                    uint8_t exprBank = (expr.value >> 16) & 0xFF;
+                    uint8_t orgBank = (origin >> 16) & 0xFF;
+
+                    if (exprBank != orgBank) // fix using long when abs should be used
+                        mode = A_ABSL;
+                    else
+                        mode = A_ABS; // Add test for A_ABS vs A_ABSL?
+                }
                 break;
 
             default:
@@ -350,14 +357,14 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 
         leks = next_leks(); // comma found
 
-        if (leks.type != CLeksem::L_IDENT)
+        if (leks.type != CTokenType::L_IDENT)
             return ERR_IDX_REG_EXPECTED;
 
         val = *leks.GetString();
 
         if (strcasecmp(val.c_str(), s_idx_reg) == 0) // 'S'?
         {
-            if ((expr.inf == Expr::EX_BYTE) | (expr.inf == Expr::EX_UNDEF))
+            if ((expr.inf == Expr::EX_BYTE) || (expr.inf == Expr::EX_UNDEF))
                 mode = A_SR;
             else
                 return ERR_NUM_NOT_BYTE;
@@ -366,12 +373,12 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
             return OK;
         }
 
-        bool reg_x = false;
+        reg_x = false;
 
         if (strcasecmp(val.c_str(), x_idx_reg) == 0) // 'X'?
             reg_x = true;
 
-        if (reg_x | (strcasecmp(val.c_str(), y_idx_reg) == 0)) // 'Y'?
+        if (reg_x || (strcasecmp(val.c_str(), y_idx_reg) == 0)) // 'Y'?
         {
             switch (expr.inf)
             {
@@ -382,23 +389,31 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
             case Expr::EX_BYTE: // expression < 256?
                 mode = reg_x ? A_ZPG_X : A_ZPG_Y;
                 break;
-                
+
             case Expr::EX_WORD:
                 mode = reg_x ? A_ABS_X : A_ABS_Y;
                 break;
 
             case Expr::EX_LONG:  //$65816
                 if (reg_x)
-                    if (forcelong==3)
-                        mode = A_ABSL_X;
-                    else if (((expr.value >> 16) & 0xFF) != (((origin) >> 16) & 0xFF)) // fix using long when abs should be used
+                {
+                    if (forcelong == 3)
                         mode = A_ABSL_X;
                     else
-                        mode = A_ABS_X; // Add test for A_ABS vs A_ABSL?
+                    {
+                        uint8_t exprBank = (expr.value >> 16) & 0xFF;
+                        uint8_t orgBank = (origin >> 16) & 0xFF;
 
-//			 	    mode = A_ABSL_X;
-//				    else
-//						mode = A_ABS_X; // Add test for A_ABS vs A_ABSL?
+                        if (exprBank != orgBank) // fix using long when abs should be used
+                            mode = A_ABSL_X;
+                        else
+                            mode = A_ABS_X; // Add test for A_ABS vs A_ABSL?
+                    }
+                }
+
+                //			 	    mode = A_ABSL_X;
+                //				    else
+                //						mode = A_ABS_X; // Add test for A_ABS vs A_ABSL?
                 else
                     return ERR_IDX_REG_X_EXPECTED;
                 break;

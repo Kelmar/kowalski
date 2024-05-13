@@ -29,6 +29,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void CMotorolaSRecord::SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start)
 {
+    UNUSED(archive);
+    UNUSED(mem);
+    UNUSED(area);
+    UNUSED(prog_start);
+
+
 #if REWRITE_TO_WX_WIDGET
     char buf[80], *ptr;
 
@@ -126,6 +132,11 @@ UINT CMotorolaSRecord::geth(const char *&ptr, UINT &sum)
 
 void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start)
 {
+    UNUSED(archive);
+    UNUSED(mem);
+    UNUSED(area);
+    UNUSED(prog_start);
+
 #if REWRITE_TO_WX_WIDGET
     char buf[256];
 
@@ -239,9 +250,13 @@ void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkAr
 
 //-----------------------------------------------------------------------------
 
-/*virtual*/bool CMotorolaSRecord::CMotorolaSRecordException::GetErrorMessage(char *lpszError,
-        UINT nMaxError, UINT *pnHelpContext/*= NULL*/)
+/*virtual*/bool CMotorolaSRecord::CMotorolaSRecordException::GetErrorMessage(char *errBuf,
+        UINT maxError, UINT *pnHelpContext/*= NULL*/)
 {
+    UNUSED(errBuf);
+    UNUSED(maxError);
+    UNUSED(pnHelpContext);
+
 #if REWRITE_TO_WX_WIDGET
     std::string msg;
     char num[16];

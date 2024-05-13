@@ -62,6 +62,8 @@ END_MESSAGE_MAP()
 
 void CStackView::OnDraw(wxDC* pDC)
 {
+    UNUSED(pDC);
+
 #if REWRITE_TO_WX_WIDGET
     CMemoryDoc* pDoc= (CMemoryDoc *)GetDocument();
     ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CMemoryDoc)));
@@ -107,6 +109,8 @@ void CStackView::OnDraw(wxDC* pDC)
 
 void CStackView::calc(wxDC *pDC)
 {
+    UNUSED(pDC);
+
 #if REWRITE_TO_WX_WIDGET
     wxRect rect = GetClientRect());
 
@@ -128,6 +132,10 @@ void CStackView::calc(wxDC *pDC)
 
 void CStackView::scroll(UINT nSBCode, int nPos, int nRepeat)
 {
+    UNUSED(nSBCode);
+    UNUSED(nPos);
+    UNUSED(nRepeat);
+
 #if REWRITE_TO_WX_WIDGET
     CMemoryDoc *pDoc = (CMemoryDoc *)GetDocument();
     if (pDoc == NULL)
@@ -319,6 +327,10 @@ BOOL CStackView::PreCreateWindow(CREATESTRUCT& cs)
 
 void CStackView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 {
+    UNUSED(nSBCode);
+    UNUSED(nPos);
+    UNUSED(pScrollBar);
+
 #if REWRITE_TO_WX_WIDGET
     scroll(nSBCode, nPos);
 #endif
@@ -327,6 +339,10 @@ void CStackView::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
 
 bool CStackView::OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt) // 1.3.2 added mouse scroll wheel support
 {
+    UNUSED(nFlags);
+    UNUSED(zDelta);
+    UNUSED(pt);
+
 #if REWRITE_TO_WX_WIDGET
     if (zDelta > 0)
         scroll(SB_LINEUP, 0, 0);
@@ -392,6 +408,11 @@ int CStackView::set_scroll_range()
 // odszukanie adresu wiersza pami�ci poprzedzaj�cego dany wiersz
 int CStackView::find_prev_addr(uint16_t &addr, const COutputMem &mem, int cnt/*= 1*/, int bytes/*= 0*/)
 {
+    UNUSED(addr);
+    UNUSED(mem);
+    UNUSED(cnt);
+    UNUSED(bytes);
+
     return 0;
 
 #if REWRITE_TO_WX_WIDGET
@@ -421,6 +442,11 @@ int CStackView::find_prev_addr(uint16_t &addr, const COutputMem &mem, int cnt/*=
 int CStackView::find_next_addr(uint16_t &addr, const COutputMem &mem,
                                int cnt/*= 1*/, int bytes/*= 0*/)
 {
+    UNUSED(addr);
+    UNUSED(mem);
+    UNUSED(cnt);
+    UNUSED(bytes);
+
     return 0;
 
 #if REWRITE_TO_WX_WIDGET
@@ -452,6 +478,11 @@ int CStackView::find_next_addr(uint16_t &addr, const COutputMem &mem,
 // spr. o ile wierszy nale�y przesun�� zawarto�� okna aby dotrze� od 'addr' do 'dest'
 int CStackView::find_delta(uint16_t &addr, uint16_t dest, const COutputMem &mem, int max_lines)
 {
+    UNUSED(addr);
+    UNUSED(dest);
+    UNUSED(mem);
+    UNUSED(max_lines);
+
     return 0;
 
 #if REWRITE_TO_WX_WIDGET
@@ -495,6 +526,10 @@ int CStackView::find_delta(uint16_t &addr, uint16_t dest, const COutputMem &mem,
 
 void CStackView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+    UNUSED(nChar);
+    UNUSED(nRepCnt);
+    UNUSED(nFlags);
+
 #if REWRITE_TO_WX_WIDGET
     switch (nChar)
     {
@@ -531,6 +566,10 @@ void CStackView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CStackView::OnSize(UINT nType, int cx, int cy)
 {
+    UNUSED(nType);
+    UNUSED(cx);
+    UNUSED(cy);
+
 #if REWRITE_TO_WX_WIDGET
     CView::OnSize(nType, cx, cy);
 
@@ -542,6 +581,8 @@ void CStackView::OnSize(UINT nType, int cx, int cy)
 
 bool CStackView::OnEraseBkgnd(wxDC* pDC)
 {
+    UNUSED(pDC);
+
 //	CRect rect;
 //	GetClientRect(rect);
 //	pDC->FillSolidRect(rect, m_rgbBkgndColor);
@@ -550,6 +591,9 @@ bool CStackView::OnEraseBkgnd(wxDC* pDC)
 
 void CStackView::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
 #if REWRITE_TO_WX_WIDGET
     CMenu menu;
     if (!menu.LoadMenu(IDR_POPUP_ZPMEMORY))
@@ -577,6 +621,8 @@ void CStackView::OnContextMenu(wxWindow* pWnd, wxPoint point)
 
 void CStackView::OnUpdateMemoryGoto(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
@@ -599,6 +645,8 @@ void CStackView::OnMemoryGoto()
 
 void CStackView::OnUpdateMemoryChg(CCmdUI* pCmdUI)
 {
+    UNUSED(pCmdUI);
+
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
@@ -620,6 +668,10 @@ void CStackView::OnMemoryChg()
 
 void CStackView::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
 {
+    UNUSED(pSender);
+    UNUSED(lHint);
+    UNUSED(pHint);
+
 #if REWRITE_TO_WX_WIDGET
     switch (lHint)
     {

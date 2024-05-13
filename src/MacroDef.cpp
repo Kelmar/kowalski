@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*************************************************************************/
 
 // Loading the arguments of the macro call
-CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
+CAsm::Stat CMacroDef::ParseArguments(CToken &leks, CAsm6502 &asmb)
 {
     std::string literal;
     bool get_param = true;
@@ -53,7 +53,7 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
         {
             switch (leks.type)
             {
-            case CLeksem::L_STR:
+            case CTokenType::L_STR:
                 literal = *leks.GetString();
 
                 m_strarrArgs.push_back(literal);
@@ -67,7 +67,7 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
                 leks = asmb.next_leks();
                 break;
 
-            case CLeksem::L_ERROR:
+            case CTokenType::L_ERROR:
                 // Added to prevent looping C runtime errors if first param is ''
                 // use this or ERR_PARAM_REQUIRED;
                 return CAsm::ERR_EMPTY_PARAM;
@@ -130,7 +130,7 @@ CAsm::Stat CMacroDef::ParseArguments(CLeksem &leks, CAsm6502 &asmb)
 
             switch (leks.type)
             {
-            case CLeksem::L_COMMA:
+            case CTokenType::L_COMMA:
                 get_param = true; // Next Parameter
 
                 leks = asmb.next_leks();
@@ -174,7 +174,8 @@ CAsm::Stat CMacroDef::ParamType(int param_number, _Out_ bool &found, _Out_ int &
 
     found = true;
 
-    ASSERT(m_arrArgType.size() > param_number);
+    ASSERT(m_arrArgType.size() > static_cast<std::size_t>(param_number));
+
     switch (m_arrArgType[param_number])
     {
     case NUM:
@@ -194,7 +195,7 @@ CAsm::Stat CMacroDef::ParamType(int param_number, _Out_ bool &found, _Out_ int &
 }
 
 // Finding the 'param_name' parameter of the current macro
-CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, const std::string& param_name, Expr &expr, bool &found, CAsm6502 &asmb)
+CAsm::Stat CMacroDef::ParamLookup(CToken &leks, const std::string& param_name, Expr &expr, bool &found, CAsm6502 &asmb)
 {
     CIdent ident;
 
@@ -210,11 +211,11 @@ CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, const std::string& param_name, 
 }
 
 // Finding the value of parameter number 'param number' of the current macro
-CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, int param_number, Expr &expr, CAsm6502 &asmb)
+CAsm::Stat CMacroDef::ParamLookup(CToken &leks, int param_number, Expr &expr, CAsm6502 &asmb)
 {
     bool special = param_number == -1; // Variable %0 ? (not a parameter)
     
-    if (leks.type == CLeksem::L_STR_ARG) // Reference to the parameter's character value?
+    if (leks.type == CTokenType::L_STR_ARG) // Reference to the parameter's character value?
     {
         if (!special && (param_number >= m_nParamCount || param_number < 0))
             return CAsm::ERR_EMPTY_PARAM;
@@ -223,12 +224,12 @@ CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, int param_number, Expr &expr, C
             expr.string = m_strName;
         else
         {
-            ASSERT(m_arrArgType.size() > param_number);
+            ASSERT(m_arrArgType.size() > static_cast<std::size_t>(param_number));
             
             if (m_arrArgType[param_number] != STR) // Check whether the variable has a text value
                 return CAsm::ERR_NOT_STR_PARAM;
 
-            ASSERT(m_strarrArgs.size() > param_number);
+            ASSERT(m_strarrArgs.size() > static_cast<std::size_t>(param_number));
             expr.string = m_strarrArgs[param_number];
         }
 
@@ -236,7 +237,7 @@ CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, int param_number, Expr &expr, C
         leks = asmb.next_leks();
         return CAsm::OK;
     }
-    else if (leks.type == CLeksem::L_SPACE)
+    else if (leks.type == CTokenType::L_SPACE)
         leks = asmb.next_leks();
 
     if (special) // Reference to %0 -> number of current parameters in the macro call
@@ -249,19 +250,19 @@ CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, int param_number, Expr &expr, C
         if (param_number >= m_nParamCount || param_number < 0)
             return CAsm::ERR_EMPTY_PARAM; // There is no parameter with this number
             
-        ASSERT(m_arrArgType.size() > param_number);
+        ASSERT(m_arrArgType.size() > static_cast<std::size_t>(param_number));
 
         switch (m_arrArgType[param_number]) // current parameter type
         {
         case NUM: // Numeric parameter
         case STR: // Text parameter (its length is given)
-            ASSERT(m_narrArgs.size() > param_number);
+            ASSERT(m_narrArgs.size() > static_cast<std::size_t>(param_number));
             expr.inf = Expr::EX_LONG;
             expr.value = m_narrArgs[param_number];
             break;
 
         case UNDEF_EXPR: // Numeric parameter, undefined value
-            ASSERT(m_narrArgs.size() > param_number);
+            ASSERT(m_narrArgs.size() > static_cast<std::size_t>(param_number));
             expr.inf = Expr::EX_UNDEF;
             expr.value = 0;
             break;
@@ -276,14 +277,14 @@ CAsm::Stat CMacroDef::ParamLookup(CLeksem &leks, int param_number, Expr &expr, C
 }
 
 // Check macro parameter reference syntax (line checking mode)
-CAsm::Stat CMacroDef::AnyParamLookup(CLeksem &leks, CAsm6502 &asmb)
+CAsm::Stat CMacroDef::AnyParamLookup(CToken &leks, CAsm6502 &asmb)
 {
-    if (leks.type == CLeksem::L_STR_ARG) // Reference to the parameter's character value?
+    if (leks.type == CTokenType::L_STR_ARG) // Reference to the parameter's character value?
     {
         leks = asmb.next_leks();
         return CAsm::OK;
     }
-    else if (leks.type == CLeksem::L_SPACE)
+    else if (leks.type == CTokenType::L_SPACE)
         leks = asmb.next_leks();
 
     return CAsm::OK;

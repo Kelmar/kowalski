@@ -98,22 +98,22 @@ private:
 
 public:
     CInputStack(const std::string& fname)
-        : m_lastId(0)
-        , m_current(nullptr)
+        : m_current(nullptr)
+        , m_lastId(0)
     {
         OpenFile(fname);
     }
 
     CInputStack(wxWindow* window)
-        : m_lastId(0)
-        , m_current(nullptr)
+        : m_current(nullptr)
+        , m_lastId(0)
     {
         OpenFile(window);
     }
 
     CInputStack()
-        : m_lastId(0)
-        , m_current(nullptr)
+        : m_current(nullptr)
+        , m_lastId(0)
     {}
 
     ~CInputStack();

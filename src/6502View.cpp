@@ -399,6 +399,10 @@ int CSrc6502View::ScrollToLine(int line, int &height, bool scroll)
 {
     ASSERT(line >= 0);
 
+    UNUSED(line);
+    UNUSED(height);
+    UNUSED(scroll);
+
 #ifdef USE_CRYSTAL_EDIT
     GoToLine(line);
     return 0;
@@ -466,6 +470,10 @@ int CSrc6502View::ScrollToLine(int line, int &height, bool scroll)
 //
 void CSrc6502View::GetDispInfo(int &nTopLine, int &nLineCount, int &nLineHeight)
 {
+    UNUSED(nTopLine);
+    UNUSED(nLineCount);
+    UNUSED(nLineHeight);
+
 #ifdef USE_CRYSTAL_EDIT
     nLineHeight = GetLineHeight();
     return;
@@ -526,6 +534,8 @@ void CSrc6502View::draw_breakpoints(HDC hDC)
 
 void CSrc6502View::SetPointer(int line, bool scroll) // draw/erase an arrow in the line
 {
+    UNUSED(scroll);
+
     if (m_nActualPointerLine != -1)
     {
         int tmp_line = m_nActualPointerLine;
@@ -649,6 +659,8 @@ void CSrc6502View::RemoveBreakpoint(int line, bool draw)
 
 void CSrc6502View::EraseMark(int line)
 {
+    UNUSED(line);
+
     //ASSERT(line >= 0);
     //DrawMark(line, MT_ERASE);
     //RedrawMarks(line);
@@ -656,6 +668,9 @@ void CSrc6502View::EraseMark(int line)
 
 void CSrc6502View::OnContextMenu(wxWindow *pWnd, const wxPoint &point)
 {
+    UNUSED(pWnd);
+    UNUSED(point);
+
 #if 0
     CMenu menu;
 

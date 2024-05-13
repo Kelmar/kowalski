@@ -190,7 +190,7 @@ std::string makeUpper(const std::string &str)
     std::string rval;
     rval.reserve(str.size());
 
-    for (int i = 0; i < str.size(); ++i)
+    for (size_t i = 0; i < str.size(); ++i)
         rval += std::toupper(str[i]);
 
     return rval;
@@ -239,7 +239,7 @@ bool IsDirective(const std::string &chars)
     return false;
 }
 
-
+#if 0
 static bool Is6502Number(const std::string &chars)
 {
     if (chars.size() > 1) // && (chars[0] == '$' || chars[0] == '@'))
@@ -282,7 +282,7 @@ static bool Is6502Number(const std::string &chars)
 
     return false;
 }
-
+#endif
 
 #define DEFINE_BLOCK(pos, colorindex)	\
 	ASSERT((pos) >= 0 && (pos) <= nLength);\
@@ -555,6 +555,9 @@ uint32_t CSrc6502View::ParseLine(uint32_t cookie, int nLineIndex, TEXTBLOCK* pBu
 
 extern int MatchingDirectives(const std::string& strWord, std::string& strOut)
 {
+    UNUSED(strWord);
+    UNUSED(strOut);
+
 #if REWRITE_TO_WX_WIDGET
     strOut.clear();
 
@@ -615,7 +618,7 @@ extern std::string GetDirectiveDesc(const std::string& strDirective)
     std::string dirUpper;
     dirUpper.reserve(strDirective.size());
 
-    for (int i = 0; i < strDirective.size(); ++i)
+    for (size_t i = 0; i < strDirective.size(); ++i)
         dirUpper += std::toupper(strDirective[i]);
 
     if (dirUpper == ".ASCIS")
@@ -1088,6 +1091,8 @@ public:
 
 std::string Instructions::AddMode(uint8_t cmd, OpCode inst, CodeAdr mode, ProcessorType procType)
 {
+    UNUSED(inst);
+
     std::string cs;
     cs = CDeasm::Mnemonic(cmd, procType, false);
     cs += CDeasm::Argument(cmd, mode, 0x8000, 0x34, 0x12, 0x00, false, true);

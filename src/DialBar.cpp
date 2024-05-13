@@ -59,6 +59,9 @@ wxSize CDialBar::CalcDynamicLayout(int nLength, uint32_t dwMode)
 
 wxSize CDialBar::CalcLayout(int nLength, uint32_t dwMode)
 {
+    UNUSED(nLength);
+    UNUSED(dwMode);
+
 #if 0
     if (dwMode & LM_HORZDOCK)
         return m_lastSize;
@@ -96,6 +99,9 @@ wxSize CDialBar::CalcLayout(int nLength, uint32_t dwMode)
 
 wxSize CDialBar::CalcFixedLayout(bool stretch, bool horz)
 {
+    UNUSED(stretch);
+    UNUSED(horz);
+
     return m_lastSize;
     /*
       DWORD dwMode = bStretch ? LM_STRETCH : 0;
@@ -120,6 +126,11 @@ wxSize CDialBar::CalcFixedLayout(bool stretch, bool horz)
 
 bool CDialBar::Create(wxWindow* parent, UINT nIDTemplate, UINT nStyle, UINT nID)
 {
+    UNUSED(parent);
+    UNUSED(nIDTemplate);
+    UNUSED(nStyle);
+    UNUSED(nID);
+
 #if 0
     bool ret = CDialogBar::Create(parent, nIDTemplate, nStyle, nID);
 
@@ -139,6 +150,9 @@ bool CDialBar::Create(wxWindow* parent, UINT nIDTemplate, UINT nStyle, UINT nID)
 
 void CDialBar::OnLButtonDown(UINT nFlags, wxPoint point)
 {
+    UNUSED(nFlags);
+    UNUSED(point);
+
 #if 0
     wxWindow *parent = GetParent();
 
