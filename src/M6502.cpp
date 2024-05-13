@@ -1089,13 +1089,13 @@ bool CAsm6502::is_expression(const CToken &leks)
 {
     switch (leks.type)
     {
-    case CTokenType::L_NUM:			// Number (dec, hex, bin, or sign)
-    case CTokenType::L_IDENT:			// Identifier
-    case CTokenType::L_IDENT_N:		// Numeric identifier
-    case CTokenType::L_OPER:			// Operator
-    case CTokenType::L_EXPR_BRACKET_L:	// Left bracket for expressions '['
-    case CTokenType::L_EXPR_BRACKET_R:	// Right bracket for expressions ']'
-        return true;				// This is the beginning of an expression
+    case CTokenType::L_NUM:            // Number (dec, hex, bin, or sign)
+    case CTokenType::L_IDENT:          // Identifier
+    case CTokenType::L_IDENT_N:        // Numeric identifier
+    case CTokenType::L_OPER:           // Operator
+    case CTokenType::L_EXPR_BRACKET_L: // Left bracket for expressions '['
+    case CTokenType::L_EXPR_BRACKET_R: // Right bracket for expressions ']'
+        return true;                   // This is the beginning of an expression
 
     default:
         return false; // This is not the beginning of an expression

@@ -24,6 +24,7 @@ CTestTestfile.ccmake
 _deps
 
 # Visual Studio generated files
+*.user
 *.suo
 *.ncb
 .vs/
