@@ -31,19 +31,22 @@
 #include "MotorolaSRecord.h"
 
 /*************************************************************************/
+/*************************************************************************/
 
 bool CodeTemplate::SupportsExt(const std::string &ext) const
 {
     auto e = GetExtensions()
-        | std::views::transform(str::getLower);
+        | std::views::transform(str::tolower);
 
-    return std::ranges::find(e, str::getLower(ext)) != e.end();
+    return std::ranges::find(e, ext | str::trim | str::tolower) != e.end();
 }
+
+/*************************************************************************/
 
 std::string CodeTemplate::ToString() const
 {
     auto exts = GetExtensions()
-        | std::views::transform(str::getLower)
+        | std::views::transform(str::tolower)
         | std::views::transform([](auto s) -> std::string { return "*." + s; });
 
     // Using wsString::Format() until we can get std::format() from GNU... >_<
@@ -106,8 +109,8 @@ wxString ProjectManager::GetSupportedFileTypes(
 /*************************************************************************/
 
 wxBEGIN_EVENT_TABLE(ProjectManager, wxEvtHandler)
-  EVT_MENU(evID_LOAD_CODE, ProjectManager::OnLoadCode)
-  EVT_MENU(evID_SAVE_CODE, ProjectManager::OnSaveCode)
+    EVT_MENU(evID_LOAD_CODE, ProjectManager::OnLoadCode)
+    EVT_MENU(evID_SAVE_CODE, ProjectManager::OnSaveCode)
 wxEND_EVENT_TABLE()
 
 /*************************************************************************/

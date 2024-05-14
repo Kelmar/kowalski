@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-class CDeasm : public CAsm
+class CDeasm
 {
     static const char mnemonics[];
 
@@ -33,12 +33,12 @@ public:
     virtual ~CDeasm()
     { }
 
-    std::string DeasmInstr(const CContext& ctx, DeasmFmt flags, int& ptr);
-    std::string DeasmInstr(const CmdInfo& ci, DeasmFmt flags);
+    std::string DeasmInstr(const CContext& ctx, CAsm::DeasmFmt flags, int& ptr);
+    std::string DeasmInstr(const CmdInfo& ci, CAsm::DeasmFmt flags);
     std::string ArgumentValue(const CContext &ctx, int ptr= -1);
 
     std::string Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk = false);
-    std::string Argument(uint8_t cmd, CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel = false, bool bHelp = false);
+    std::string Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel = false, bool bHelp = false);
     std::string Binary(uint8_t val);
 
     int FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt = 1);

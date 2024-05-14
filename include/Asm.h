@@ -35,7 +35,7 @@ enum class ProcessorType
 
 // Being used more like a namespace than a class? -- B.Simonds (April 25, 2024)
 
-class CAsm	  // base class - type definitions
+class CAsm // base class - type definitions
 {
 public:
 
@@ -54,7 +54,7 @@ public:
         STAT_ENDIF,
         STAT_ASM,
         STAT_SKIP,
-        STAT_USER_DEF_ERR,			// user error (.ERROR)
+        STAT_USER_DEF_ERR, // user error (.ERROR)
         STAT_FIN,
         
         OK = 0,
@@ -351,7 +351,7 @@ public:
     };
 
     //---------------------------------------------------------------------------
-protected:
+public:
     static const uint8_t code_to_mode[];                 // Converting the command code to the addressing mode
     static const uint8_t code_to_mode_c[];               // As above for 65c02
     static const uint8_t code_to_mode_8[];               // As above for 65816
@@ -368,18 +368,18 @@ protected:
 public:
     static const uint8_t mode_to_len[]; // Changing the addressing mode to the length of the instruction and arguments
 
-    const uint8_t (&TransformTable(const ProcessorType procType))[C_ILL][A_NO_OF_MODES];
+    static const uint8_t (&TransformTable(const ProcessorType procType))[C_ILL][A_NO_OF_MODES];
 
-    const uint8_t (&CodeToCommand(const ProcessorType procType))[0x100];
-    const uint8_t (&CodeToCommand())[0x100];
+    static const uint8_t (&CodeToCommand(const ProcessorType procType))[0x100];
+    static const uint8_t (&CodeToCommand())[0x100];
 
-    const uint8_t (&CodeToMode(const ProcessorType procType))[0x100];
-    const uint8_t (&CodeToMode())[0x100];
+    static const uint8_t (&CodeToMode(const ProcessorType procType))[0x100];
+    static const uint8_t (&CodeToMode())[0x100];
 
-    const uint8_t (&CodeToCycles(const ProcessorType procType))[0x100];
-    const uint8_t (&CodeToCycles())[0x100];
+    static const uint8_t (&CodeToCycles(const ProcessorType procType))[0x100];
+    static const uint8_t (&CodeToCycles())[0x100];
 
-    ProcessorType ProcType();
+    static ProcessorType ProcType();
 };
 
 CAsm::DeasmFmt inline operator | (CAsm::DeasmFmt f1, CAsm::DeasmFmt f2)

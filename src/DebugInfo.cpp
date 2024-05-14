@@ -21,79 +21,79 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "DebugInfo.h"
 
-CAsm::Breakpoint CDebugInfo::SetBreakpoint(int line, FileUID file, int bp)
+CAsm::Breakpoint CDebugInfo::SetBreakpoint(int line, CAsm::FileUID file, int bp)
 {
-    ASSERT( (bp & ~BPT_MASK) == 0 ); // Illegal combination of breakpoint bits
+    ASSERT( (bp & ~CAsm::BPT_MASK) == 0 ); // Illegal combination of breakpoint bits
 
     CDebugLine dl;
     GetAddress(dl, line, file); // Find the address corresponding to the line
 
-    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
-        return BPT_NO_CODE; // There is no code in line 'line'
+    if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
+        return CAsm::BPT_NO_CODE; // There is no code in line 'line'
 
-    if (bp == BPT_NONE) // Breakpoint type not specified?
-        bp = dl.flags & DBG_CODE ? BPT_EXECUTE : BPT_READ | BPT_WRITE | BPT_EXECUTE;
+    if (bp == CAsm::BPT_NONE) // Breakpoint type not specified?
+        bp = dl.flags & CAsm::DBG_CODE ? CAsm::BPT_EXECUTE : CAsm::BPT_READ | CAsm::BPT_WRITE | CAsm::BPT_EXECUTE;
 
     return m_breakpoints.Set(dl.addr,bp);
 }
 
-CAsm::Breakpoint CDebugInfo::ModifyBreakpoint(int line, FileUID file, int bp)
+CAsm::Breakpoint CDebugInfo::ModifyBreakpoint(int line, CAsm::FileUID file, int bp)
 {
     // Illegal combination of breakpoint bits
-    ASSERT((bp & ~(BPT_MASK | BPT_DISABLED)) == 0);
+    ASSERT((bp & ~(CAsm::BPT_MASK | CAsm::BPT_DISABLED)) == 0);
 
     CDebugLine dl;
     GetAddress(dl, line, file); // Finding the address corresponding to the line
 
-    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
-        return BPT_NO_CODE; // There is no code in line 'line'
+    if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
+        return CAsm::BPT_NO_CODE; // There is no code in line 'line'
 
-    if ((bp & BPT_MASK) == BPT_NONE)
+    if ((bp & CAsm::BPT_MASK) == CAsm::BPT_NONE)
     {
         m_breakpoints.ClrBrkp(dl.addr); // Clearing the breakpoint
-        return BPT_NONE;
+        return CAsm::BPT_NONE;
     }
 
-    bp = m_breakpoints.Set(dl.addr,bp & ~BPT_DISABLED);
-    m_breakpoints.Enable(dl.addr, !(bp & BPT_DISABLED));
+    bp = m_breakpoints.Set(dl.addr,bp & ~CAsm::BPT_DISABLED);
+    m_breakpoints.Enable(dl.addr, !(bp & CAsm::BPT_DISABLED));
 
-    return (Breakpoint)bp;
+    return (CAsm::Breakpoint)bp;
 }
 
-CAsm::Breakpoint CDebugInfo::GetBreakpoint(int line, FileUID file)
+CAsm::Breakpoint CDebugInfo::GetBreakpoint(int line, CAsm::FileUID file)
 {
     CDebugLine dl;
     GetAddress(dl, line, file); // Finding the address corresponding to the line
 
-    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
+    if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
     {
         //ASSERT(false);
-        return BPT_NO_CODE; // There is no code in line 'line'
+        return CAsm::BPT_NO_CODE; // There is no code in line 'line'
     }
 
     return m_breakpoints.Get(dl.addr);
 }
 
-CAsm::Breakpoint CDebugInfo::ToggleBreakpoint(int line, FileUID file)
+CAsm::Breakpoint CDebugInfo::ToggleBreakpoint(int line, CAsm::FileUID file)
 {
     CDebugLine dl;
     GetAddress(dl, line, file); // Find the address corresponding to the line
 
-    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
-        return BPT_NO_CODE; // There is no code in line 'line'
+    if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
+        return CAsm::BPT_NO_CODE; // There is no code in line 'line'
 
-    if (m_breakpoints.Get(dl.addr) != BPT_NONE) // Is the interrupt already set?
+    if (m_breakpoints.Get(dl.addr) != CAsm::BPT_NONE) // Is the interrupt already set?
         return m_breakpoints.Clr(dl.addr);
     else
-        return m_breakpoints.Set(dl.addr, dl.flags & DBG_CODE ? BPT_EXECUTE : BPT_READ | BPT_WRITE | BPT_EXECUTE);
+        return m_breakpoints.Set(dl.addr, dl.flags & CAsm::DBG_CODE ? CAsm::BPT_EXECUTE : CAsm::BPT_READ | CAsm::BPT_WRITE | CAsm::BPT_EXECUTE);
 }
 
-void CDebugInfo::ClrBreakpoint(int line, FileUID file)
+void CDebugInfo::ClrBreakpoint(int line, CAsm::FileUID file)
 {
     CDebugLine dl;
     GetAddress(dl, line, file);// Find the address corresponding to the line
 
-    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
+    if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
     {
         ASSERT(false); // There is no code in line 'line'
         return;

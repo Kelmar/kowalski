@@ -196,7 +196,6 @@ protected:
     afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
 
 private: // Event handlers
-    void OnLoadCode(wxCommandEvent &);
     void OnAbout(wxCommandEvent &);
 
 private:

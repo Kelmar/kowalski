@@ -32,9 +32,9 @@ void CMarkArea::SetEnd(int end)
 
     Pair pair = { start, end };
     
-    for (UINT i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
-        if (arr[i].a > end || arr[i].b < start)
+        if ((arr[i].a > end) || (arr[i].b < start))
             continue; // separate intervals
 
         if (arr[i].a <= start)
@@ -64,7 +64,7 @@ void CMarkArea::SetEnd(int end)
     n++;
 }
 
-bool CMarkArea::GetPartition(UINT no, int &a, int &b)
+bool CMarkArea::GetPartition(size_t no, int &a, int &b)
 {
     if (no >= n)
         return false;

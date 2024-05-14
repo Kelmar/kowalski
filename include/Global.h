@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Temporary place holder for now
 class CArchive;
 
-class CGlobal : public CAsm
+class CGlobal
 {
 private:
     UINT m_uAddrBusWidth;           // width of the address bus
@@ -39,7 +39,7 @@ private:
     CDebugInfo m_Debug;             // startup information for the simulator
     uint32_t m_uOrigin;             // start of program 6502
     CSym6502 *m_pSym6502;           // simulator
-    Finish m_SymFinish;             // how the simulator ends the program
+    CAsm::Finish m_SymFinish;       // how the simulator ends the program
     CMarkArea m_MarkArea;           // designation of fragments of memory containing the object code
 
 public:
@@ -164,23 +164,23 @@ public:
         return m_pSym6502->GetLastStatMsg();
     }
 
-    Finish GetSymFinish()
+    CAsm::Finish GetSymFinish()
     {
         ASSERT(m_pSym6502 == NULL || m_pSym6502->finish == m_SymFinish);
         return m_SymFinish;
     }
 
-    void SetSymFinish(Finish fin)
+    void SetSymFinish(CAsm::Finish fin)
     {
         m_SymFinish = fin;
         if (m_pSym6502) m_pSym6502->finish = fin;
     }
 
-    Breakpoint SetBreakpoint(int line, const std::string &doc_title);
-    Breakpoint GetBreakpoint(int line, const std::string &doc_title);
-    Breakpoint ModifyBreakpoint(int line, const std::string &doc_title, Breakpoint bp);
+    CAsm::Breakpoint SetBreakpoint(int line, const std::string &doc_title);
+    CAsm::Breakpoint GetBreakpoint(int line, const std::string &doc_title);
+    CAsm::Breakpoint ModifyBreakpoint(int line, const std::string &doc_title, CAsm::Breakpoint bp);
     void ClrBreakpoint(int line, const std::string &doc_title);
-    DbgFlag GetLineDebugFlags(int line, const std::string &doc_title);
+    CAsm::DbgFlag GetLineDebugFlags(int line, const std::string &doc_title);
     uint32_t GetLineCodeAddr(int line, const std::string &doc_title);
     bool SetTempExecBreakpoint(int line, const std::string &doc_title);
 
@@ -216,7 +216,7 @@ public:
 
     bool CreateDeasm(); // New disassembler window
 
-    Breakpoint GetBreakpoint(uint32_t addr) // Get the interrupt at the given address
+    CAsm::Breakpoint GetBreakpoint(uint32_t addr) // Get the interrupt at the given address
     {
         return m_Debug.GetBreakpoint(addr);
     }

@@ -27,39 +27,39 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 CAsm::Breakpoint CGlobal::SetBreakpoint(int line, const std::string &doc_title)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title);
+    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title);
     return m_Debug.ToggleBreakpoint(line, fuid); // set/delete breakpoint
 }
 
 CAsm::Breakpoint CGlobal::GetBreakpoint(int line, const std::string &doc_title)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title);
+    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title);
     return m_Debug.GetBreakpoint(line, fuid); // set/delete breakpoint
 }
 
-CAsm::Breakpoint CGlobal::ModifyBreakpoint(int line, const std::string &doc_title, Breakpoint bp)
+CAsm::Breakpoint CGlobal::ModifyBreakpoint(int line, const std::string &doc_title, CAsm::Breakpoint bp)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title);
+    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title);
     return m_Debug.ModifyBreakpoint(line, fuid, bp); // Breakpoint setting
 }
 
 void CGlobal::ClrBreakpoint(int line, const std::string &doc_title)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title);
+    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title);
     m_Debug.ClrBreakpoint(line, fuid); // Clear the breakpoint
 }
 
 CAsm::DbgFlag CGlobal::GetLineDebugFlags(int line, const std::string &doc_title)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title); //File ID
+    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title); //File ID
     CDebugLine dl;
     m_Debug.GetAddress(dl, line, fuid); // Find the address corresponding to the line
-    return (DbgFlag)dl.flags; // Flags describing the program line
+    return (CAsm::DbgFlag)dl.flags; // Flags describing the program line
 }
 
 uint32_t CGlobal::GetLineCodeAddr(int line, const std::string &doc_title)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title); // File ID
+    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title); // File ID
     CDebugLine dl;
     m_Debug.GetAddress(dl, line, fuid); // Find the address corresponding to the line
     return dl.addr;
@@ -67,11 +67,11 @@ uint32_t CGlobal::GetLineCodeAddr(int line, const std::string &doc_title)
 
 bool CGlobal::SetTempExecBreakpoint(int line, const std::string &doc_title)
 {
-    FileUID fuid = m_Debug.GetFileUID(doc_title); // File ID
+    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title); // File ID
     CDebugLine dl;
     m_Debug.GetAddress(dl, line, fuid); // Find the address corresponding to the line
 
-    if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
+    if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
         return false; // There is no code in line 'line'
 
     m_Debug.SetTemporaryExecBreakpoint(dl.addr);
@@ -156,6 +156,12 @@ void CGlobal::ExitDebugger()
 
 void CGlobal::SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info)
 {
+    UNUSED(archive);
+    UNUSED(start);
+    UNUSED(end);
+    UNUSED(info);
+
+#if 0
     //ASSERT(m_bCodePresent);
 
     switch (info)
@@ -190,6 +196,7 @@ void CGlobal::SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info
         ASSERT(false);
         break;
     }
+#endif
 }
 
 void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info, int nClear/*= 0*/)

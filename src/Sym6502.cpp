@@ -85,54 +85,54 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
 
     switch (mode)
     {
-    case A_ZPG:
-    case A_ZPG2:
+    case CAsm::A_ZPG:
+    case CAsm::A_ZPG2:
         addr = ctx.mem[ctx.pc]; // address on zero page
         inc_prog_counter();
         break;
 
-    case A_ZPG_X:
+    case CAsm::A_ZPG_X:
         addr = uint8_t(ctx.mem[ctx.pc] + ctx.x);
         inc_prog_counter();
         break;
 
-    case A_ZPG_Y:
+    case CAsm::A_ZPG_Y:
         addr = uint8_t(ctx.mem[ctx.pc] + ctx.y);
         inc_prog_counter();
         break;
 
-    case A_ZPGI:
+    case CAsm::A_ZPGI:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg);
         inc_prog_counter();
         break;
 
-    case A_ABS:
+    case CAsm::A_ABS:
         addr = get_word(ctx.pc);
         inc_prog_counter(2);
         break;
 
-    case A_ABS_X:
+    case CAsm::A_ABS_X:
         addr = get_word(ctx.pc) + ctx.x;
         if ((addr >> 8) != static_cast<uint32_t>(get_word(ctx.pc) >> 8))
             extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         break;
 
-    case A_ABS_Y:
+    case CAsm::A_ABS_Y:
         addr = get_word(ctx.pc) + ctx.y;
         if ((addr >> 8) != static_cast<uint32_t>(get_word(ctx.pc) >> 8))
             extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         break;
 
-    case A_ZPGI_X:
+    case CAsm::A_ZPGI_X:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg + ctx.x);
         inc_prog_counter();
         break;
 
-    case A_ZPGI_Y:
+    case CAsm::A_ZPGI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg) + ctx.y;
         if ((addr >> 8) != static_cast<uint32_t>(get_word_indirect(arg) >> 8))
@@ -140,7 +140,7 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
         inc_prog_counter();
         break;
 
-    case A_ABSI: // only JMP(xxxx) supports this addr mode
+    case CAsm::A_ABSI: // only JMP(xxxx) supports this addr mode
         addr = get_word(ctx.pc);
         if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && (addr & 0xFF) == 0xFF) // LSB == 0xFF?
         {
@@ -156,13 +156,13 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
         inc_prog_counter(2);
         break;
 
-    case A_ABSI_X:
+    case CAsm::A_ABSI_X:
         addr = get_word(ctx.pc) + ctx.x;
         addr = get_word(addr);
         inc_prog_counter(2);
         break;
 
-    case A_ZREL: // exceptionally here: addr = zpg (lo) + relative (hi)
+    case CAsm::A_ZREL: // exceptionally here: addr = zpg (lo) + relative (hi)
         //the cell number from page zero is returned in the lower byte
         //in the top byte the relative offset
         addr = get_word(ctx.pc);
@@ -171,23 +171,23 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
         inc_prog_counter(2);
         break;
 
-    case A_ABSL:
+    case CAsm::A_ABSL:
         addr = get_word(ctx.pc);
         inc_prog_counter(3);
         break;
 
-    case A_ABSL_X:
+    case CAsm::A_ABSL_X:
         addr = get_word(ctx.pc) + ctx.x;
         inc_prog_counter(3);
         break;
 
-    case A_ZPIL:
+    case CAsm::A_ZPIL:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg);
         inc_prog_counter();
         break;
 
-    case A_ZPIL_Y:
+    case CAsm::A_ZPIL_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg) + ctx.y;
 
@@ -197,21 +197,21 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
         inc_prog_counter();
         break;
 
-    case A_SR:
+    case CAsm::A_SR:
         addr = ctx.mem[ctx.pc]; // address on zero page
         inc_prog_counter();
         break;
 
-    case A_SRI_Y:
+    case CAsm::A_SRI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg) + ctx.y;
         inc_prog_counter();
         break;
 
-    case A_IMP:
-    case A_IMP2:
-    case A_ACC:
-    case A_IMM:
+    case CAsm::A_IMP:
+    case CAsm::A_IMP2:
+    case CAsm::A_ACC:
+    case CAsm::A_IMM:
     default:
         ASSERT(false);
         return 0;
@@ -220,7 +220,7 @@ uint16_t CSym6502::get_argument_address(bool bWrite)
     if (bWrite && addr >= s_uProtectFromAddr && addr <= s_uProtectToAddr)
     {
         ctx.pc = pc; // restore original value
-        throw SYM_ILL_WRITE;
+        throw CAsm::SYM_ILL_WRITE;
     }
 
     return addr;
@@ -239,67 +239,67 @@ uint8_t CSym6502::get_argument_value()
 
     switch (mode)
     {
-    case A_IMP:
-    case A_ACC:
+    case CAsm::A_IMP:
+    case CAsm::A_ACC:
         return 0;
 
-    case A_IMP2:
-    case A_IMM:
-    case A_REL:
+    case CAsm::A_IMP2:
+    case CAsm::A_IMM:
+    case CAsm::A_REL:
         arg = ctx.mem[ctx.pc];
         inc_prog_counter();
         return arg;
 
-    case A_ZPGI:
+    case CAsm::A_ZPGI:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg);
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_ZPG:
+    case CAsm::A_ZPG:
         arg = ctx.mem[ctx.mem[ctx.pc]]; // number at address
         inc_prog_counter();
         return arg;
 
-    case A_ZPG_X:
+    case CAsm::A_ZPG_X:
         addr = (ctx.mem[ctx.pc] + ctx.x) & 0xFF; // address
         arg = ctx.mem[addr]; // number at address
         inc_prog_counter();
         return arg;
 
-    case A_ZPG_Y:
+    case CAsm::A_ZPG_Y:
         arg = ctx.mem[(ctx.mem[ctx.pc] + ctx.y) & 0xFF]; // number at address
         inc_prog_counter();
         return arg;
 
-    case A_ABS:
+    case CAsm::A_ABS:
         addr = get_word(ctx.pc);
         inc_prog_counter(2);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
         //	case A_ABSI:
 
-    case A_ABS_X:
+    case CAsm::A_ABS_X:
         addr = get_word(ctx.pc) + ctx.x;
         if ((addr >> 8) != static_cast<uint32_t>(get_word(ctx.pc) >> 8))
             extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_ABS_Y:
+    case CAsm::A_ABS_Y:
         addr = get_word(ctx.pc) + ctx.y;
         if ((addr >> 8) != static_cast<uint32_t>(get_word(ctx.pc) >> 8))
             extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         inc_prog_counter(2);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_ZPGI_X:
+    case CAsm::A_ZPGI_X:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg + ctx.x);
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_ZPGI_Y:
+    case CAsm::A_ZPGI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg) + ctx.y;
         if ((addr >> 8) != static_cast<uint32_t>(get_word_indirect(arg) >> 8))
@@ -307,44 +307,44 @@ uint8_t CSym6502::get_argument_value()
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_ABSL:
+    case CAsm::A_ABSL:
         addr = get_word(ctx.pc);
         inc_prog_counter(3);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_ABSL_X:
+    case CAsm::A_ABSL_X:
         addr = get_word(ctx.pc) + ctx.x;
         inc_prog_counter(3);
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_ZPIL:
+    case CAsm::A_ZPIL:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg);
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_ZPIL_Y:
+    case CAsm::A_ZPIL_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg) + ctx.y;
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_SR:
+    case CAsm::A_SR:
         arg = ctx.mem[ctx.mem[ctx.pc]]; // number at address
         inc_prog_counter();
         return arg;
 
-    case A_SRI_Y:
+    case CAsm::A_SRI_Y:
         arg = ctx.mem[ctx.pc]; // cell address on zero page
         addr = get_word_indirect(arg) + ctx.y;
         inc_prog_counter();
         return check_io_read(addr) ? io_function() : ctx.mem[addr]; // number at address
 
-    case A_RELL:
-    case A_ABSI_X:
-    case A_ABSI: // These modes are only supported through get_argument_address()
-    case A_ZREL:
-    case A_ZPG2:
+    case CAsm::A_RELL:
+    case CAsm::A_ABSI_X:
+    case CAsm::A_ABSI: // These modes are only supported through get_argument_address()
+    case CAsm::A_ZREL:
+    case CAsm::A_ZPG2:
     default:
         ASSERT(false);
         return 0;
@@ -359,7 +359,7 @@ CAsm::SymStat CSym6502::perform_cmd()
     {
         return perform_command();
     }
-    catch (SymStat s)
+    catch (CAsm::SymStat s)
     {
         return s;
     }
@@ -400,7 +400,7 @@ CAsm::SymStat CSym6502::perform_command()
 
     switch (m_vCodeToCommand[cmd])
     {
-    case C_ADC:
+    case CAsm::C_ADC:
         arg = get_argument_value();
         acc = ctx.a;
 
@@ -460,7 +460,7 @@ CAsm::SymStat CSym6502::perform_command()
 
         break;
 
-    case C_SBC:
+    case CAsm::C_SBC:
         arg = get_argument_value();
         acc = ctx.a;
         carry = ctx.carry;
@@ -526,7 +526,7 @@ CAsm::SymStat CSym6502::perform_command()
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
-    case C_CMP:
+    case CAsm::C_CMP:
         arg = get_argument_value();
         acc = ctx.a;
 
@@ -542,7 +542,7 @@ CAsm::SymStat CSym6502::perform_command()
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
-    case C_CPX:
+    case CAsm::C_CPX:
         arg = get_argument_value();
         acc = ctx.x;
 
@@ -556,7 +556,7 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.set_status_reg_ZNC(zero, negative, !carry);
         break;
 
-    case C_CPY:
+    case CAsm::C_CPY:
         arg = get_argument_value();
         acc = ctx.y;
 
@@ -570,8 +570,8 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.set_status_reg_ZNC(zero, negative, !carry);
         break;
 
-    case C_ASL:
-        if (m_vCodeToMode[cmd] == A_ACC) // Accumulator operation
+    case CAsm::C_ASL:
+        if (m_vCodeToMode[cmd] == CAsm::A_ACC) // Accumulator operation
         {
             inc_prog_counter(); // bypass the command
             acc = ctx.a;
@@ -601,8 +601,8 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
-    case C_LSR:
-        if (m_vCodeToMode[cmd] == A_ACC) // Accumulator operation
+    case CAsm::C_LSR:
+        if (m_vCodeToMode[cmd] == CAsm::A_ACC) // Accumulator operation
         {
             inc_prog_counter(); // bypass the command
             acc = ctx.a;
@@ -631,9 +631,9 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
-    case C_ROL:
+    case CAsm::C_ROL:
         carry = ctx.carry;
-        if (m_vCodeToMode[cmd] == A_ACC) // Accumulator operation
+        if (m_vCodeToMode[cmd] == CAsm::A_ACC) // Accumulator operation
         {
             inc_prog_counter(); // bypass the command
             acc = ctx.a;
@@ -676,9 +676,9 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
-    case C_ROR:
+    case CAsm::C_ROR:
         carry = ctx.carry;
-        if (m_vCodeToMode[cmd] == A_ACC) // Accumulator operation
+        if (m_vCodeToMode[cmd] == CAsm::A_ACC) // Accumulator operation
         {
             inc_prog_counter(); // bypass the command
             acc = ctx.a;
@@ -726,29 +726,29 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
-    case C_AND:
+    case CAsm::C_AND:
         arg = get_argument_value();
         ctx.a &= arg;
         ctx.set_status_reg(ctx.a);
         if (extracycle) ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
-    case C_ORA:
+    case CAsm::C_ORA:
         arg = get_argument_value();
         ctx.a |= arg;
         ctx.set_status_reg(ctx.a);
         if (extracycle) ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
-    case C_EOR:
+    case CAsm::C_EOR:
         arg = get_argument_value();
         ctx.a ^= arg;
         ctx.set_status_reg(ctx.a);
         if (extracycle) ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
-    case C_INC:
-        if (m_vCodeToMode[cmd] == A_ACC)
+    case CAsm::C_INC:
+        if (m_vCodeToMode[cmd] == CAsm::A_ACC)
         {
             inc_prog_counter();
             ctx.a++;
@@ -763,8 +763,8 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_DEC:
-        if (m_vCodeToMode[cmd] == A_ACC)
+    case CAsm::C_DEC:
+        if (m_vCodeToMode[cmd] == CAsm::A_ACC)
         {
             inc_prog_counter();
             ctx.a--;
@@ -778,66 +778,66 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_INX:
+    case CAsm::C_INX:
         inc_prog_counter();
         ctx.x++;
         ctx.set_status_reg(ctx.x);
         break;
 
-    case C_DEX:
+    case CAsm::C_DEX:
         inc_prog_counter();
         ctx.x--;
         ctx.set_status_reg(ctx.x);
         break;
 
-    case C_INY:
+    case CAsm::C_INY:
         inc_prog_counter();
         ctx.y++;
         ctx.set_status_reg(ctx.y);
         break;
 
-    case C_DEY:
+    case CAsm::C_DEY:
         inc_prog_counter();
         ctx.y--;
         ctx.set_status_reg(ctx.y);
         break;
 
-    case C_TAX:
+    case CAsm::C_TAX:
         inc_prog_counter();
         ctx.x = ctx.a;
         ctx.set_status_reg(ctx.x);
         break;
 
-    case C_TXA:
+    case CAsm::C_TXA:
         inc_prog_counter();
         ctx.a = ctx.x;
         ctx.set_status_reg(ctx.a);
         break;
 
-    case C_TAY:
+    case CAsm::C_TAY:
         inc_prog_counter();
         ctx.y = ctx.a;
         ctx.set_status_reg(ctx.y);
         break;
 
-    case C_TYA:
+    case CAsm::C_TYA:
         inc_prog_counter();
         ctx.a = ctx.y;
         ctx.set_status_reg(ctx.a);
         break;
 
-    case C_TSX:
+    case CAsm::C_TSX:
         inc_prog_counter();
         ctx.x = ctx.s;
         ctx.set_status_reg(ctx.x);
         break;
 
-    case C_TXS:
+    case CAsm::C_TXS:
         inc_prog_counter();
         ctx.s = ctx.x;
         break;
 
-    case C_STA:
+    case CAsm::C_STA:
         addr = get_argument_address(s_bWriteProtectArea);
         if (check_io_write(addr))
             io_function(ctx.a);
@@ -845,7 +845,7 @@ CAsm::SymStat CSym6502::perform_command()
             ctx.mem[addr] = ctx.a;
         break;
 
-    case C_STX:
+    case CAsm::C_STX:
         addr = get_argument_address(s_bWriteProtectArea);
         if (check_io_write(addr))
             io_function(ctx.x);
@@ -853,7 +853,7 @@ CAsm::SymStat CSym6502::perform_command()
             ctx.mem[addr] = ctx.x;
         break;
 
-    case C_STY:
+    case CAsm::C_STY:
         addr = get_argument_address(s_bWriteProtectArea);
         if (check_io_write(addr))
             io_function(ctx.y);
@@ -861,25 +861,25 @@ CAsm::SymStat CSym6502::perform_command()
             ctx.mem[addr] = ctx.y;
         break;
 
-    case C_LDA:
+    case CAsm::C_LDA:
         ctx.set_status_reg(ctx.a = get_argument_value());
         if (extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
-    case C_LDX:
+    case CAsm::C_LDX:
         ctx.set_status_reg(ctx.x = get_argument_value());
         if (extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
-    case C_LDY:
+    case CAsm::C_LDY:
         ctx.set_status_reg(ctx.y = get_argument_value());
         if (extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
         break;
 
-    case C_BIT:
+    case CAsm::C_BIT:
         arg = get_argument_value();
         ctx.zero = (ctx.a & arg) == 0;
         //% bug Fix 1.2.13.5 - 65C02 BIT # only updates Z flag
@@ -892,24 +892,24 @@ CAsm::SymStat CSym6502::perform_command()
             ctx.uCycles++; //% bug Fix 1.2.13.1 - fix cycle timing
         break;
 
-    case C_PHA:
+    case CAsm::C_PHA:
         inc_prog_counter();
         push_on_stack(ctx.a);
         break;
 
-    case C_PLA:
+    case CAsm::C_PLA:
         inc_prog_counter();
         ctx.a = pull_from_stack();
         ctx.set_status_reg(ctx.a);
         break;
 
-    case C_PHP:
+    case CAsm::C_PHP:
         inc_prog_counter();
         //% Bug Fix 1.2.12.10 - PHP not pushing flags correctly
         push_on_stack(ctx.get_status_reg() | CContext::BREAK | CContext::RESERVED);
         break;
 
-    case C_PLP:
+    case CAsm::C_PLP:
         inc_prog_counter();
         ctx.set_status_reg_bits(pull_from_stack());
         if (wxGetApp().m_global.GetProcType() != ProcessorType::M6502)
@@ -920,30 +920,30 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_JSR:
+    case CAsm::C_JSR:
         addr = get_argument_address(false);
         push_addr_on_stack((ctx.pc - 1) & 0xFFFF);
         //push_addr_on_stack((ctx.pc - 1) & ctx.mem_mask);
         ctx.pc = addr;
         break;
 
-    case C_JMP:
+    case CAsm::C_JMP:
         addr = get_argument_address(false);
         ctx.pc = addr;
         break;
 
-    case C_RTS:
-        if (finish == FIN_BY_RTS && ctx.s == 0xFF) // RTS on empty stack?
-            return SYM_FIN;
+    case CAsm::C_RTS:
+        if (finish == CAsm::FIN_BY_RTS && ctx.s == 0xFF) // RTS on empty stack?
+            return CAsm::SYM_FIN;
         ctx.pc = (pull_addr_from_stack() + 1) & 0xFFFF; // & ctx.mem_mask;
         break;
 
-    case C_RTI:
+    case CAsm::C_RTI:
         ctx.set_status_reg_bits(pull_from_stack());
         ctx.pc = pull_addr_from_stack(); // & ctx.mem_mask;
         break;
 
-    case C_BCC:
+    case CAsm::C_BCC:
         arg = get_argument_value();
         if (!ctx.carry)
         {
@@ -955,7 +955,7 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_BCS:
+    case CAsm::C_BCS:
         arg = get_argument_value();
         if (ctx.carry)
         {
@@ -967,7 +967,7 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_BVC:
+    case CAsm::C_BVC:
         arg = get_argument_value();
         if (!ctx.overflow)
         {
@@ -979,7 +979,7 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_BVS:
+    case CAsm::C_BVS:
         arg = get_argument_value();
         if (ctx.overflow)
         {
@@ -991,7 +991,7 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_BNE:
+    case CAsm::C_BNE:
         arg = get_argument_value();
         if (!ctx.zero)
         {
@@ -1003,7 +1003,7 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_BEQ:
+    case CAsm::C_BEQ:
         arg = get_argument_value();
         if (ctx.zero)
         {
@@ -1015,7 +1015,7 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_BPL:
+    case CAsm::C_BPL:
         arg = get_argument_value();
         if (!ctx.negative)
         {
@@ -1027,7 +1027,7 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_BMI:
+    case CAsm::C_BMI:
         arg = get_argument_value();
         if (ctx.negative)
         {
@@ -1039,48 +1039,48 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_NOP:
+    case CAsm::C_NOP:
         inc_prog_counter();
         break;
 
-    case C_CLI:
+    case CAsm::C_CLI:
         inc_prog_counter();
         ctx.interrupt = false;
         break;
 
-    case C_SEI:
+    case CAsm::C_SEI:
         inc_prog_counter();
         ctx.interrupt = true;
         break;
 
-    case C_CLD:
+    case CAsm::C_CLD:
         inc_prog_counter();
         ctx.decimal = false;
         break;
 
-    case C_SED:
+    case CAsm::C_SED:
         inc_prog_counter();
         ctx.decimal = true;
         break;
 
-    case C_CLC:
+    case CAsm::C_CLC:
         inc_prog_counter();
         ctx.carry = false;
         break;
 
-    case C_SEC:
+    case CAsm::C_SEC:
         inc_prog_counter();
         ctx.carry = true;
         break;
 
-    case C_CLV:
+    case CAsm::C_CLV:
         inc_prog_counter();
         ctx.overflow = false;
         break;
 
-    case C_BRK:
-        if (finish == FIN_BY_BRK) // BRK instruction terminates the program?
-            return SYM_FIN;
+    case CAsm::C_BRK:
+        if (finish == CAsm::FIN_BY_BRK) // BRK instruction terminates the program?
+            return CAsm::SYM_FIN;
 
         inc_prog_counter(2);
         //% Bug Fix 1.2.12.8 - BRK not executing when IRQ bit set
@@ -1100,50 +1100,50 @@ CAsm::SymStat CSym6502::perform_command()
 
         //---------- 65c02 --------------------------------------------------------
 
-    case C_PLY:
+    case CAsm::C_PLY:
         inc_prog_counter();
         ctx.y = pull_from_stack();
         ctx.set_status_reg(ctx.y);
         break;
 
-    case C_PLX:
+    case CAsm::C_PLX:
         inc_prog_counter();
         ctx.x = pull_from_stack();
         ctx.set_status_reg(ctx.x);
         break;
 
-    case C_PHY:
+    case CAsm::C_PHY:
         inc_prog_counter();
         push_on_stack(ctx.y);
         break;
 
-    case C_PHX:
+    case CAsm::C_PHX:
         inc_prog_counter();
         push_on_stack(ctx.x);
         break;
 
-    case C_BRA:
+    case CAsm::C_BRA:
         arg = get_argument_value();
         AddBranchCycles(arg);
         if (arg & 0x80) // jump back
             ctx.pc -= 0x100 - arg;
-        else // jump foward
+        else // jump forward
             ctx.pc += arg;
         break;
 
-    case C_INA:
+    case CAsm::C_INA:
         inc_prog_counter();
         ctx.a++;
         ctx.set_status_reg(ctx.a);
         break;
 
-    case C_DEA:
+    case CAsm::C_DEA:
         inc_prog_counter();
         ctx.a--;
         ctx.set_status_reg(ctx.a);
         break;
 
-    case C_STZ:
+    case CAsm::C_STZ:
         addr = get_argument_address(s_bWriteProtectArea);
         if (check_io_write(addr))
         {
@@ -1154,7 +1154,7 @@ CAsm::SymStat CSym6502::perform_command()
             ctx.mem[addr] = 0;
         break;
 
-    case C_TRB:
+    case CAsm::C_TRB:
         addr = get_argument_address(s_bWriteProtectArea);
         arg = ctx.mem[addr];
         //% bug Fix 1.2.12.6 - Only set the Z bit
@@ -1164,7 +1164,7 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.zero = (arg & ctx.a) == 0;
         break;
 
-    case C_TSB:
+    case CAsm::C_TSB:
         addr = get_argument_address(s_bWriteProtectArea);
         arg = ctx.mem[addr];
         //% bug Fix 1.2.12.6 - Only set the Z bit
@@ -1174,19 +1174,19 @@ CAsm::SymStat CSym6502::perform_command()
         ctx.zero = (arg & ctx.a) == 0;
         break;
 
-    case C_BBR:
+    case CAsm::C_BBR:
         addr = get_argument_address(false); // zpg (lo), rel (hi)
         if (!(ctx.mem[addr & 0xFF] & uint8_t(1 << ((cmd >> 4) & 0x07))))
         {
             arg = addr >> 8;
             if (arg & 0x80) // jump back
                 ctx.pc -= 0x100 - arg;
-            else // jump foward
+            else // jump forward
                 ctx.pc += arg;
         }
         break;
 
-    case C_BBS:
+    case CAsm::C_BBS:
         addr = get_argument_address(false); // zpg (lo), rel (hi)
         if (ctx.mem[addr & 0xFF] & uint8_t(1 << ((cmd >> 4) & 0x07)))
         {
@@ -1197,46 +1197,46 @@ CAsm::SymStat CSym6502::perform_command()
         }
         break;
 
-    case C_RMB:
+    case CAsm::C_RMB:
         addr = get_argument_address(s_bWriteProtectArea);
         ctx.mem[addr] &= uint8_t(~(1 << ((cmd >> 4) & 0x07)));
         break;
 
-    case C_SMB:
+    case CAsm::C_SMB:
         addr = get_argument_address(s_bWriteProtectArea);
         ctx.mem[addr] |= uint8_t(1 << ((cmd >> 4) & 0x07));
         break;
 
         //------------65816--------------------------------------------------------
-    case C_TXY:
+    case CAsm::C_TXY:
         inc_prog_counter();
         ctx.y = ctx.x;
         ctx.set_status_reg(ctx.y);
         break;
 
-    case C_TYX:
+    case CAsm::C_TYX:
         inc_prog_counter();
         ctx.x = ctx.y;
         ctx.set_status_reg(ctx.x);
         break;
 
-    case C_STP:
-        return SYM_FIN;
+    case CAsm::C_STP:
+        return CAsm::SYM_FIN;
 
-    case C_BRL:
+    case CAsm::C_BRL:
         addr = get_word(ctx.pc);
         inc_prog_counter(2);
         if (addr & 0x8000) // jump back
             ctx.pc -= 0x10000 - addr;
-        else // jump foward
+        else // jump forward
             ctx.pc += addr;
         break;
 
         //-------------------------------------------------------------------------
 
-    case C_ILL:
-        if (finish == FIN_BY_DB && cmd == 0xDB) // DB is invalid for 6502, 65C02 - STP for 65816
-            return SYM_FIN;
+    case CAsm::C_ILL:
+        if (finish == CAsm::FIN_BY_DB && cmd == 0xDB) // DB is invalid for 6502, 65C02 - STP for 65816
+            return CAsm::SYM_FIN;
 
         //% Bug Fix 1.2.12.2 - allow unused opcode to execute NOP's on 65C02
         if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
@@ -1247,7 +1247,7 @@ CAsm::SymStat CSym6502::perform_command()
             break;
         }
 
-        return SYM_ILLEGAL_CODE;
+        return CAsm::SYM_ILLEGAL_CODE;
 
     default:
         ASSERT(false);
@@ -1271,13 +1271,13 @@ CAsm::SymStat CSym6502::perform_command()
     saveCycles = ctx.uCycles;
     // end bug fix
 
-    return SYM_OK;
+    return CAsm::SYM_OK;
 }
 
 CAsm::SymStat CSym6502::skip_cmd() // Skip the current statement
 {
-    inc_prog_counter(mode_to_len[m_vCodeToMode[ctx.mem[ctx.pc]]]);
-    return SYM_OK;
+    inc_prog_counter(CAsm::mode_to_len[m_vCodeToMode[ctx.mem[ctx.pc]]]);
+    return CAsm::SYM_OK;
 }
 
 uint16_t CSym6502::get_irq_addr()
@@ -1299,12 +1299,12 @@ uint16_t CSym6502::get_rst_addr()
 
 CAsm::SymStat CSym6502::StepInto()
 {
-    ASSERT(fin_stat != SYM_FIN); // the program has already finished running
+    ASSERT(fin_stat != CAsm::SYM_FIN); // the program has already finished running
 
     if (running)
     {
         ASSERT(false);
-        return SYM_OK;
+        return CAsm::SYM_OK;
     }
 
     set_translation_tables();
@@ -1323,15 +1323,15 @@ CAsm::SymStat CSym6502::StepInto()
 
 CAsm::SymStat CSym6502::StepOver()
 {
-    ASSERT(fin_stat != SYM_FIN); // the program has already finished running
+    ASSERT(fin_stat != CAsm::SYM_FIN); // the program has already finished running
 
     if (running)
     {
         ASSERT(false);
-        return SYM_OK;
+        return CAsm::SYM_OK;
     }
 
-    Update(SYM_RUN);
+    Update(CAsm::SYM_RUN);
     old = ctx; // remembering the state to find differences
     stop_prog = false;
     running = true;
@@ -1351,7 +1351,7 @@ CAsm::SymStat CSym6502::StepOver()
     }
 #endif
 
-    return SYM_OK;
+    return CAsm::SYM_OK;
 }
 
 UINT CSym6502::start_step_over_thread(void *ptr)
@@ -1379,23 +1379,23 @@ CAsm::SymStat CSym6502::step_over() // execution of the instruction without ente
 
     switch (m_vCodeToCommand[ctx.mem[addr]])
     {
-    case C_JSR:
+    case CAsm::C_JSR:
         stack = ctx.s;
         jsr = true;
         [[fallthrough]];
 
-    case C_BRK:
+    case CAsm::C_BRK:
         if (debug && !jsr)
             debug->SetTemporaryExecBreakpoint((addr + 2) & ctx.mem_mask); // Break after instruction
 
         for (;;)
         {
-            SymStat stat = perform_step(false);
-            if (stat != SYM_OK)
+            CAsm::SymStat stat = perform_step(false);
+            if (stat != CAsm::SYM_OK)
                 return stat;
 
             if (jsr && ctx.s == stack) // Return address removed after JSR command?
-                return SYM_BPT_TEMP; // so stop
+                return CAsm::SYM_BPT_TEMP; // so stop
         }
         break;
 
@@ -1408,15 +1408,15 @@ CAsm::SymStat CSym6502::step_over() // execution of the instruction without ente
 
 CAsm::SymStat CSym6502::RunTillRet()
 {
-    ASSERT(fin_stat != SYM_FIN); // the program has already finished running
+    ASSERT(fin_stat != CAsm::SYM_FIN); // the program has already finished running
 
     if (running)
     {
         ASSERT(false);
-        return SYM_OK;
+        return CAsm::SYM_OK;
     }
 
-    Update(SYM_RUN);
+    Update(CAsm::SYM_RUN);
     old = ctx; // remembering the state to find differences
     stop_prog = false;
     running = true;
@@ -1436,7 +1436,7 @@ CAsm::SymStat CSym6502::RunTillRet()
     }
 #endif
 
-    return SYM_OK;
+    return CAsm::SYM_OK;
 }
 
 UINT CSym6502::start_run_till_ret_thread(void *ptr)
@@ -1460,12 +1460,12 @@ CAsm::SymStat CSym6502::run_till_ret() // Run to return from the subroutine
     uint8_t stack = ctx.s + 2;
     for (;;)
     {
-        SymStat stat = perform_step(false);
-        if (stat != SYM_OK)
+        CAsm::SymStat stat = perform_step(false);
+        if (stat != CAsm::SYM_OK)
             return stat;
 
         if (ctx.s == stack) // Return address removed from the stack?
-            return SYM_BPT_TEMP; // so stop
+            return CAsm::SYM_BPT_TEMP; // so stop
     }
 }
 
@@ -1473,15 +1473,15 @@ CAsm::SymStat CSym6502::run_till_ret() // Run to return from the subroutine
 
 CAsm::SymStat CSym6502::Run()
 {
-    ASSERT(fin_stat != SYM_FIN); // the program has already finished running
+    ASSERT(fin_stat != CAsm::SYM_FIN); // the program has already finished running
 
     if (running)
     {
         ASSERT(false);
-        return SYM_OK;
+        return CAsm::SYM_OK;
     }
 
-    Update(SYM_RUN);
+    Update(CAsm::SYM_RUN);
     old = ctx; // remembering the state to find differences
     stop_prog = false;
     running = true;
@@ -1501,7 +1501,7 @@ CAsm::SymStat CSym6502::Run()
     }
 #endif
 
-    return SYM_OK;
+    return CAsm::SYM_OK;
 }
 
 
@@ -1524,22 +1524,22 @@ CAsm::SymStat CSym6502::perform_step(bool animate)
     UNUSED(animate);
 
     if (stop_prog) // stop executing?
-        return SYM_STOP;
+        return CAsm::SYM_STOP;
 
     if (m_nInterruptTrigger != NONE) // interrupt requested?
         interrupt(m_nInterruptTrigger);
 
-    SymStat stat = perform_cmd();
-    if (stat != SYM_OK)
+    CAsm::SymStat stat = perform_cmd();
+    if (stat != CAsm::SYM_OK)
         return stat;
 
-    Breakpoint bp;
-    if (debug && (bp = debug->GetBreakpoint(ctx.pc)) != BPT_NONE)
+    CAsm::Breakpoint bp;
+    if (debug && (bp = debug->GetBreakpoint(ctx.pc)) != CAsm::BPT_NONE)
     {
-        if (bp & BPT_EXECUTE)
-            return SYM_BPT_EXECUTE;
-        if (bp & BPT_TEMP_EXEC)
-            return SYM_BPT_TEMP;
+        if (bp & CAsm::BPT_EXECUTE)
+            return CAsm::SYM_BPT_EXECUTE;
+        if (bp & CAsm::BPT_TEMP_EXEC)
+            return CAsm::SYM_BPT_TEMP;
     }
 
 #if REWRITE_TO_WX_WIDGET
@@ -1551,7 +1551,7 @@ CAsm::SymStat CSym6502::perform_step(bool animate)
     }
 #endif
 
-    return SYM_OK;
+    return CAsm::SYM_OK;
 }
 
 CAsm::SymStat CSym6502::run(bool animate /*= false*/)
@@ -1560,8 +1560,8 @@ CAsm::SymStat CSym6502::run(bool animate /*= false*/)
 
     for (;;)
     {
-        SymStat stat = perform_step(animate);
-        if (stat != SYM_OK)
+        CAsm::SymStat stat = perform_step(animate);
+        if (stat != CAsm::SYM_OK)
             return stat;
     }
 }
@@ -1624,15 +1624,15 @@ void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
 
 CAsm::SymStat CSym6502::Animate()
 {
-    ASSERT(fin_stat != SYM_FIN); // the program has already finished running
+    ASSERT(fin_stat != CAsm::SYM_FIN); // the program has already finished running
 
     if (running)
     {
         ASSERT(false);
-        return SYM_OK;
+        return CAsm::SYM_OK;
     }
 
-    Update(SYM_RUN);
+    Update(CAsm::SYM_RUN);
     old = ctx; // remembering the state to find differences
     stop_prog = false;
     running = true;
@@ -1651,7 +1651,7 @@ CAsm::SymStat CSym6502::Animate()
     }
 #endif
 
-    return SYM_OK;
+    return CAsm::SYM_OK;
 }
 
 
@@ -1675,21 +1675,21 @@ UINT CSym6502::start_animate_thread(void *ptr)
 
 void CSym6502::SkipToAddr(uint16_t addr)
 {
-    ASSERT(fin_stat != SYM_FIN); // the program has already finished running
+    ASSERT(fin_stat != CAsm::SYM_FIN); // the program has already finished running
 
     if (running)
         return; // The program is now running
 
     ctx.pc = addr; // & ctx.mem_mask;
-    Update(SYM_OK);
+    Update(CAsm::SYM_OK);
 }
 
 CAsm::SymStat CSym6502::SkipInstr()
 {
-    ASSERT(fin_stat != SYM_FIN); // the program has already finished running
+    ASSERT(fin_stat != CAsm::SYM_FIN); // the program has already finished running
 
     if (running)
-        return SYM_OK; // The program is now running
+        return CAsm::SYM_OK; // The program is now running
 
     fin_stat = skip_cmd();
 
@@ -1748,7 +1748,7 @@ std::string CSym6502::GetLastStatMsg()
     return GetStatMsg(fin_stat);
 }
 
-std::string CSym6502::GetStatMsg(SymStat stat)
+std::string CSym6502::GetStatMsg(CAsm::SymStat stat)
 {
     UNUSED(stat);
 
@@ -1808,7 +1808,7 @@ std::string CSym6502::GetStatMsg(SymStat stat)
 
 //-----------------------------------------------------------------------------
 
-void CSym6502::Update(SymStat stat, bool no_ok /*=false*/)
+void CSym6502::Update(CAsm::SymStat stat, bool no_ok /*=false*/)
 {
     UNUSED(stat);
     UNUSED(no_ok);
@@ -1859,7 +1859,7 @@ void CSym6502::Restart(const COutputMem &mem)
 {
     ctx.Reset(mem);
     old = ctx;
-    fin_stat = SYM_OK;
+    fin_stat = CAsm::SYM_OK;
     m_Log.Clear();
     saveCycles = 0;
     ctx.set_status_reg_bits(0); //% Bug fix 1.2.12.3&10 - S reg bits not correct
@@ -1973,7 +1973,7 @@ void CSym6502::ResetPointer() // hide the arrow
     m_fuidLastView = 0;
 }
 
-CSrc6502View *CSym6502::FindDocView(FileUID fuid)
+CSrc6502View *CSym6502::FindDocView(CAsm::FileUID fuid)
 {
     UNUSED(fuid);
 
@@ -2098,7 +2098,7 @@ CAsm::SymStat CSym6502::io_function(uint8_t arg)
     }
 
     io_func = IO_NONE;
-    return SYM_OK;
+    return CAsm::SYM_OK;
 }
 
 void CSym6502::ClearCyclesCounter()
@@ -2153,7 +2153,7 @@ bool CSym6502::check_io_read(uint16_t addr)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CSym6502::SymStat CSym6502::Interrupt(IntType eInt)
+CAsm::SymStat CSym6502::Interrupt(IntType eInt)
 {
     m_nInterruptTrigger |= eInt;
 
@@ -2161,7 +2161,7 @@ CSym6502::SymStat CSym6502::Interrupt(IntType eInt)
     //if (!running)
     //    Run();
 
-    return SYM_OK;
+    return CAsm::SYM_OK;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2170,8 +2170,8 @@ void CSym6502::init()
 {
     running = false;
     m_fuidLastView = 0;
-    finish = FIN_BY_BRK;
-    fin_stat = SYM_OK;
+    finish = CAsm::FIN_BY_BRK;
+    fin_stat = CAsm::SYM_OK;
     //hThread = 0;
     //io_enabled = false;
     //io_addr = 0xE000;
@@ -2186,9 +2186,9 @@ void CSym6502::init()
 
 void CSym6502::set_translation_tables()
 {
-    m_vCodeToCommand = CodeToCommand();
-    m_vCodeToCycles = CodeToCycles();
-    m_vCodeToMode = CodeToMode();
+    m_vCodeToCommand = CAsm::CodeToCommand();
+    m_vCodeToCycles = CAsm::CodeToCycles();
+    m_vCodeToMode = CAsm::CodeToMode();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

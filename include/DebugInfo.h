@@ -334,7 +334,7 @@ public:
     }
 };
 
-class CDebugInfo : CAsm
+class CDebugInfo
 {
     CDebugLines m_lines;             // Information about lines
     CDebugIdents m_idents;           // Information about identifiers
@@ -359,18 +359,18 @@ public:
         m_lines.GetLine(ret,addr);
     }
 
-    void GetAddress(CDebugLine &ret, int ln, FileUID file) // Finding the address corresponding to the line
+    void GetAddress(CDebugLine &ret, int ln, CAsm::FileUID file) // Finding the address corresponding to the line
     {
         m_lines.GetAddress(ret, ln, file);
     }
 
-    Breakpoint SetBreakpoint(int line, FileUID file, int bp= BPT_NONE); // Interrupt setting
-    Breakpoint ToggleBreakpoint(int line, FileUID file);
-    Breakpoint GetBreakpoint(int line, FileUID file);
-    Breakpoint ModifyBreakpoint(int line, FileUID file, int bp);
-    void ClrBreakpoint(int line, FileUID file);
+    CAsm::Breakpoint SetBreakpoint(int line, CAsm::FileUID file, int bp= CAsm::BPT_NONE); // Interrupt setting
+    CAsm::Breakpoint ToggleBreakpoint(int line, CAsm::FileUID file);
+    CAsm::Breakpoint GetBreakpoint(int line, CAsm::FileUID file);
+    CAsm::Breakpoint ModifyBreakpoint(int line, CAsm::FileUID file, int bp);
+    void ClrBreakpoint(int line, CAsm::FileUID file);
 
-    Breakpoint GetBreakpoint(uint32_t addr)
+    CAsm::Breakpoint GetBreakpoint(uint32_t addr)
     {
         return m_breakpoints.Get(addr);
     }
@@ -385,14 +385,14 @@ public:
         m_breakpoints.RemoveTemporaryExec();
     }
 
-    FileUID GetFileUID(const std::string &doc_title)
+    CAsm::FileUID GetFileUID(const std::string &doc_title)
     {
         return m_map_file.GetFileUID(doc_title); // File ID
     }
 
-    const std::string GetFilePath(FileUID fuid)
+    const std::string GetFilePath(CAsm::FileUID fuid)
     {
-        return fuid ? m_map_file.GetPath(fuid) : NULL; // name (path to) file
+        return fuid ? m_map_file.GetPath(fuid) : ""; // name (path to) file
     }
 
     void ResetFileMap()

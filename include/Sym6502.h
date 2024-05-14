@@ -221,9 +221,9 @@ struct CmdInfo	// single command info (for logging)
     uint8_t cmd;
     uint8_t arg1;
     uint8_t arg2;
-    uint8_t arg3;  //% 65816
+    uint8_t arg3; //% 65816
     uint32_t pc;
-    ULONG uCycles;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
+    ULONG uCycles; //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
     bool intFlag;
     uint16_t argVal;
 };
@@ -232,21 +232,21 @@ typedef CLogBuffer<CmdInfo> CommandLog;
 
 //=============================================================================
 
-class CSym6502 : public CAsm
+class CSym6502 //: public CAsm::
 {
-    CContext ctx, pre, old;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers (added pre)
+    CContext ctx, pre, old; //% bug Fix 1.2.13.18 - command log assembly not lined up with registers (added pre)
     CDebugInfo *debug;
     CommandLog m_Log;
 
 public:
     static int bus_width;
-    static uint16_t io_addr;	// the beginning of the simulator I/O area
+    static uint16_t io_addr; // the beginning of the simulator I/O area
     static bool io_enabled;
     static bool s_bWriteProtectArea;
     static uint16_t s_uProtectFromAddr;
     static uint16_t s_uProtectToAddr;
 
-    enum IOFunc			// functions of subsequent bytes from the simulator's I/O area
+    enum IOFunc // functions of subsequent bytes from the simulator's I/O area
     {
         IO_NONE      = -1,
         TERMINAL_CLS = 0,
@@ -267,7 +267,7 @@ public:
 private:
     IOFunc io_func;
 
-    wxWindow *io_window();      // Finding the terminal window
+    wxWindow *io_window(); // Finding the terminal window
     wxWindow *io_open_window(); // Opening a terminal window
 
     void inc_prog_counter(int step = 1)
@@ -277,20 +277,20 @@ private:
 
     bool running;
     bool stop_prog;
-    SymStat fin_stat;
+    CAsm::SymStat fin_stat;
     int m_nInterruptTrigger;
 
-    SymStat perform_cmd();
-    SymStat skip_cmd();         // Skip the current statement
-    SymStat step_over();
-    SymStat run_till_ret();
-    SymStat run(bool animate= false);
+    CAsm::SymStat perform_cmd();
+    CAsm::SymStat skip_cmd(); // Skip the current statement
+    CAsm::SymStat step_over();
+    CAsm::SymStat run_till_ret();
+    CAsm::SymStat run(bool animate= false);
     void interrupt(int& nInterrupt);    // interrupt requested: load pc
-    SymStat perform_step(bool animate);
-    SymStat perform_command();
+    CAsm::SymStat perform_step(bool animate);
+    CAsm::SymStat perform_command();
 
     uint16_t get_argument_address(bool bWrite); // get current cmd argument address
-    uint8_t get_argument_value();               // get current cmd argument value
+    uint8_t get_argument_value(); // get current cmd argument value
 
     uint16_t get_word_indirect(uint32_t zp)
     {
@@ -349,8 +349,8 @@ private:
     void SetPointer(const CLine &line, uint32_t addr);	// Placing an arrow (->) in front of the current line
     void SetPointer(CSrc6502View* pView, int nLine, bool bScroll); // helper fn
     void ResetPointer();			// Hiding the arrow
-    CSrc6502View *FindDocView(FileUID fuid);	// Find the document window
-    FileUID m_fuidLastView;			// Remembering the window in which the arrow is drawn
+    CSrc6502View *FindDocView(CAsm::FileUID fuid);	// Find the document window
+    CAsm::FileUID m_fuidLastView;			// Remembering the window in which the arrow is drawn
     //HWND m_hwndLastView;				// j.w.
     void AddBranchCycles(uint8_t arg);
 
@@ -363,7 +363,7 @@ private:
     bool check_io_write(uint16_t addr);
     bool check_io_read(uint16_t addr);
 
-    SymStat io_function(uint8_t arg);
+    CAsm::SymStat io_function(uint8_t arg);
     uint8_t io_function();
 
     const uint8_t* m_vCodeToCommand;
@@ -371,17 +371,17 @@ private:
     const uint8_t* m_vCodeToMode;
 
 public:
-    Finish finish;		// Specifying how to end program execution
+    CAsm::Finish finish;		// Specifying how to end program execution
 
     uint16_t get_rst_addr();
     uint16_t get_nmi_addr();
 
-    void Update(SymStat stat, bool no_ok = false);
+    void Update(CAsm::SymStat stat, bool no_ok = false);
 
-    std::string GetStatMsg(SymStat stat);
+    std::string GetStatMsg(CAsm::SymStat stat);
     std::string GetLastStatMsg();
 
-    SymStat SkipInstr();
+    CAsm::SymStat SkipInstr();
     void SkipToAddr(uint16_t addr);
     void set_addr_bus_width(UINT w) { UNUSED(w); }
 
@@ -415,16 +415,16 @@ public:
     void Restart(const COutputMem &mem);
     void SymStart(uint32_t org);
 
-    SymStat StepInto();
-    SymStat StepOver();
-    SymStat RunTillRet();
-    SymStat Run();
-    SymStat Animate();
-    SymStat Interrupt(IntType eInt);
+    CAsm::SymStat StepInto();
+    CAsm::SymStat StepOver();
+    CAsm::SymStat RunTillRet();
+    CAsm::SymStat Run();
+    CAsm::SymStat Animate();
+    CAsm::SymStat Interrupt(IntType eInt);
 
     bool IsFinished() const
     {
-        return fin_stat == SYM_FIN;
+        return fin_stat == CAsm::SYM_FIN;
     }
 
     bool IsRunning() const { return running; }

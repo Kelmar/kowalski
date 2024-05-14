@@ -1081,15 +1081,15 @@ extern int MatchingInstructions(const std::string& strWord, std::string& strResu
 
 class Instructions : CDeasm
 {
-    std::string AddMode(uint8_t cmd, OpCode inst, CodeAdr mode, ProcessorType procType);
+    std::string AddMode(uint8_t cmd, CAsm::OpCode inst, CAsm::CodeAdr mode, ProcessorType procType);
 
 public:
 
-    std::string GetModes(OpCode inst);
+    std::string GetModes(CAsm::OpCode inst);
     std::string GetBranchInfo(bool bConditional = true);
 };
 
-std::string Instructions::AddMode(uint8_t cmd, OpCode inst, CodeAdr mode, ProcessorType procType)
+std::string Instructions::AddMode(uint8_t cmd, CAsm::OpCode inst, CAsm::CodeAdr mode, ProcessorType procType)
 {
     UNUSED(inst);
 
@@ -1113,7 +1113,7 @@ std::string Instructions::GetBranchInfo(bool bConditional/*= true*/)
     return str;
 }
 
-std::string Instructions::GetModes(OpCode inst)
+std::string Instructions::GetModes(CAsm::OpCode inst)
 {
     const uint8_t NA = 0x42;  //WDM on 65816
     std::string strModes;
@@ -1123,34 +1123,34 @@ std::string Instructions::GetModes(OpCode inst)
 
     uint8_t codeC;
 
-    for (int i = 0; i < A_NO_OF_MODES; ++i)
+    for (int i = 0; i < CAsm::A_NO_OF_MODES; ++i)
     {
-        uint8_t code = trans_table[inst][i];
+        uint8_t code = CAsm::trans_table[inst][i];
         if (code != NA)
-            strModes += "<pre> " + AddMode(code, inst, CodeAdr(i), ProcessorType::M6502);
+            strModes += "<pre> " + AddMode(code, inst, CAsm::CodeAdr(i), ProcessorType::M6502);
         else
         {
-            codeC = trans_table_c[inst][i];
+            codeC = CAsm::trans_table_c[inst][i];
             if (codeC != NA)
             {
-                code = trans_table_8[inst][i];
+                code = CAsm::trans_table_8[inst][i];
                 if (code != NA)
                 {
                     bExt3 = true;
-                    strModes += "<pre>�" + AddMode(code, inst, CodeAdr(i), ProcessorType::WDC65816);
+                    strModes += "<pre>�" + AddMode(code, inst, CAsm::CodeAdr(i), ProcessorType::WDC65816);
                 }
                 else
                 {
-                    strModes += "<pre>�" + AddMode(codeC, inst, CodeAdr(i), ProcessorType::WDC65C02);
+                    strModes += "<pre>�" + AddMode(codeC, inst, CAsm::CodeAdr(i), ProcessorType::WDC65C02);
                     bExt1 = true;
                 }
             }
             else
             {
-                code = trans_table_8[inst][i];
+                code = CAsm::trans_table_8[inst][i];
                 if (code != NA)
                 {
-                    strModes += "<pre>�" + AddMode(code, inst, CodeAdr(i), ProcessorType::WDC65816);
+                    strModes += "<pre>�" + AddMode(code, inst, CAsm::CodeAdr(i), ProcessorType::WDC65816);
                     bExt2 = true;
                 }
             }

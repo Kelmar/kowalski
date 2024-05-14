@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef MARK_AREA_H__
 #define MARK_AREA_H__
 
+/**
+ * @brief Used in highlighting sections of memory.
+ */
 class CMarkArea
 {
 private:
@@ -30,14 +33,16 @@ private:
     };
 
     int start;
-    UINT n;
+    size_t n;
 
     std::vector<Pair> arr;
 
 public:
-
-    CMarkArea() : start(-1), n(0)
-    { }
+    /* constructor */ CMarkArea()
+        : start(-1)
+        , n(0)
+    {
+    }
 
     void SetStart(int s)
     {
@@ -52,12 +57,9 @@ public:
         return start != -1;
     }
 
-    UINT GetSize()
-    {
-        return n;
-    }
+    size_t GetSize() const { return n; }
 
-    bool GetPartition(UINT no, int &a, int &b);
+    bool GetPartition(size_t no, int &a, int &b);
 
     void Clear()
     {
