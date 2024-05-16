@@ -29,6 +29,12 @@
 
 #include "StdAfx.h"
 
+// ATARI- archive, mem, area, prog_start
+// Intel- archive, mem, area, prog_start
+// Moto - archive, mem, area, prog_start
+// Bin  - archive, start, end (raw bin)
+// 65p  - archive, from, to (some header)
+
 /*************************************************************************/
 
 /**
@@ -40,9 +46,6 @@ protected:
     /* constructor */ CodeTemplate() { }
 
 public:
-    /// <summary>
-    /// Foo bar
-    /// </summary>
     virtual ~CodeTemplate() { }
 
     /// Check if we can read this format from disk

@@ -545,12 +545,18 @@ CMainFrame::~CMainFrame()
 void CMainFrame::BindEvents()
 {
     // Bind events after everything was created okay.
+    Bind(wxEVT_MENU, &CMainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &CMainFrame::OnAbout, this, wxID_ABOUT);
 }
 
 /*************************************************************************/
 /*************************************************************************/
 // Main Frame Events
+
+void CMainFrame::OnExit(wxCommandEvent &)
+{
+    wxGetApp().Exit();
+}
 
 /*************************************************************************/
 

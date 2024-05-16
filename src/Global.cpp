@@ -208,7 +208,7 @@ void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info
     UNUSED(nClear);
 
 #if 0
-    COutputMem mem;	// Memory for the loaded program
+    COutputMem mem; // Memory for the loaded program
     int prog_start = -1;
 
     if (nClear != -1)
@@ -237,38 +237,8 @@ void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info
         break;
 
     case 3: // result program (*.65p)
-    {
-        uint16_t wTemp;
-        archive >> wTemp;
-
-        if (wTemp != 0xFFFF)
-            throw new CFileException(CFileException::invalidFile);
-
-        int nLen = static_cast<int>(archive.GetFile()->GetLength() - 2);
-
-        do
-        {
-            uint16_t from, to;
-            archive >> from;
-
-            if (from == 0xFFFF)
-            {
-                nLen -= 2;
-                archive >> from;
-            }
-
-            archive >> to;
-            nLen -= 4;
-            
-            if (to < from)
-                throw new CFileException(CFileException::invalidFile);
-
-            mem.Load(archive, from, to);
-            nLen -= to - from + 1;
-        }
-        while (nLen > 0);
-        //while (archive.GetFile()->GetLength() > archive.GetFile()->GetPosition());
-    }
+        CCode65p code;
+        code.LoadCode65p(archive, mem);
     break; // 1.3.3 added break - was missing and causing read past end of file error
 
     case 4: // Atari binary program

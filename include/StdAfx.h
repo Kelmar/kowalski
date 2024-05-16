@@ -48,6 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <wx/richtext/richtextctrl.h>
 #include <wx/settings.h>
 #include <wx/stc/stc.h>
+#include <wx/xrc/xmlres.h>
 
 #include <algorithm>
 #include <array>
@@ -84,6 +85,7 @@ typedef wxOutputStream DocOStream;
 #endif
 
 #include "debug.h"
+#include "Except.h"
 #include "Utils.h"
 #include "StrUtils.h"
 

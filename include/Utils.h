@@ -70,7 +70,7 @@ private:
 
 public:
     explicit defer(CallableType &&block) noexcept
-        : m_block(block)
+        : m_block(std::forward(block))
     {
     }
 

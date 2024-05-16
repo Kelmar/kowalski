@@ -26,9 +26,9 @@ if (WIN32)
     add_subdirectory(${wxwidgets_SOURCE_DIR} ${wxwidgets_BUILD_DIR})
   endif ()
 
-  SET (wxLibs wx::base wx::core wx::richtext wx::adv wx::stc wx::aui wx::html wx::xml)
+  SET (wxLibs wx::base wx::core wx::richtext wx::adv wx::stc wx::aui wx::html wx::xml wx::xrc)
 else ()
-  find_package(wxWidgets 3.0 COMPONENTS base core richtext adv stc aui html xml REQUIRED)
+  find_package(wxWidgets 3.0 COMPONENTS base core richtext adv stc aui html xml xrc REQUIRED)
   include("${wxWidgets_USE_FILE}")
 
   SET (wxLibs ${wxWidgets_LIBRARIES})
@@ -42,6 +42,8 @@ file (GLOB_RECURSE SRCS src/*.cpp)
 file (GLOB_RECURSE HDRS include/*.h)
 
 add_executable(6502 ${execType} README.md ${SRCS} ${HDRS})
+
+configure_file(res/res6502.xrc res6502.xrc COPYONLY)
 
 set_property (TARGET 6502 PROPERTY CXX_STANDARD 20)
 

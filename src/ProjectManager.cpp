@@ -24,6 +24,8 @@
 
 #include "StdAfx.h"
 
+#include "LoadCodeOptions.h"
+
 #include "Events.h"
 #include "MainFrm.h"
 #include "ProjectManager.h"
@@ -35,8 +37,9 @@
 
 bool CodeTemplate::SupportsExt(const std::string &ext) const
 {
-    auto e = GetExtensions()
-        | std::views::transform(str::tolower);
+    // GCC 11 makes us assign to a useless temp variable first. >_<
+    std::vector<std::string> exts = GetExtensions();
+    auto e = exts | std::views::transform(str::tolower);
 
     return std::ranges::find(e, ext | str::trim | str::tolower) != e.end();
 }
@@ -45,14 +48,17 @@ bool CodeTemplate::SupportsExt(const std::string &ext) const
 
 std::string CodeTemplate::ToString() const
 {
-    auto exts = GetExtensions()
+    // GCC 11 makes us assign to a useless temp variable first. >_<
+    auto exts = GetExtensions();
+
+    auto filters = exts
         | std::views::transform(str::tolower)
         | std::views::transform([](auto s) -> std::string { return "*." + s; });
 
     // Using wsString::Format() until we can get std::format() from GNU... >_<
 
     std::string desc = GetDescription();
-    std::string allExts = str::join(";", exts);
+    std::string allExts = str::join(";", filters);
         
     return wxString::Format("%s (%s)", desc.c_str(), allExts.c_str()).ToStdString();
     //return std::format("{} ({})", GetDescription(), str::join(";", exts));
@@ -120,6 +126,9 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     event.Skip();
 
     wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->CanRead(); });
+
+    auto optDlg = new CLoadCodeOptions();
+    optDlg->ShowModal();
 
     //auto dlg = new wxFileDialog(this);
 

@@ -31,7 +31,7 @@ class CLoadCode // : public CFileDialog
 {
     std::string m_strTitle;
     int m_nPos;
-    static int m_nInitPos;
+    int m_nInitPos;
 
 public:
     CLoadCode(const char *fileName = nullptr,

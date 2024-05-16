@@ -33,9 +33,9 @@ class CLoadCodeOptions : public wxDialog
 public:
     /* constructor */ CLoadCodeOptions();
 
-    static UINT m_uStart;
-    static bool m_bClearMem;
-    static UINT m_uFill;
+    static UINT s_startAddress;
+    static bool s_clearMem;
+    static UINT s_fillValue;
 };
 
 #endif /* LOAD_CODE_OPTIONS_H__ */

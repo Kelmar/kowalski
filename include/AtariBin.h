@@ -18,17 +18,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// AtariBin.h: interface for the CAtariBin class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_ATARIBIN_H__CDA48FC2_1432_11D2_809C_AEA13AAADC12__INCLUDED_)
-#define AFX_ATARIBIN_H__CDA48FC2_1432_11D2_809C_AEA13AAADC12__INCLUDED_
-
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-
+#ifndef ATARI_BIN_H__
+#define ATARI_BIN_H__
+/**
+ * @brief Loads Atari binary files (xex) into simulator memory.
+ */
 class CAtariBin
 {
 public:
@@ -38,4 +32,5 @@ public:
     bool LoadAtaBinFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
 };
 
-#endif // !defined(AFX_ATARIBIN_H__CDA48FC2_1432_11D2_809C_AEA13AAADC12__INCLUDED_)
+#endif /* ATARI_BIN_H__ */
+

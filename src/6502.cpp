@@ -81,7 +81,21 @@ bool C6502App::OnInit()
     SetVendorName(VENDOR_NAME);
     SetAppName(APP_NAME);
 
-    // TODO: Look this up from i18n strings.
+    // Load up resources
+    wxXmlResource::Get()->InitAllHandlers();
+
+    wxLogDebug("Loading resource file....");
+    if (!wxXmlResource::Get()->Load("res6502.xrc"))
+    {
+        wxLogError("Unable to load XRC resources!");
+        wxMessageBox(
+            _("Unable to load resources!"),
+            _("6502 Simulator - Fatal Error"),
+            wxCENTER | wxOK | wxICON_ERROR);
+
+        return false;
+    }
+
     SetAppDisplayName(_("6502 Simulator"));
 
     m_config = new wxConfig();
@@ -114,6 +128,7 @@ bool C6502App::InitFrame()
     wxDocManager *docManager = wxDocManager::GetDocumentManager();
 
     m_mainFrame = new CMainFrame(docManager);
+
     return true;
 }
 
@@ -283,6 +298,8 @@ wxFrame *C6502App::CreateChildFrame(wxView *view)
 
 int C6502App::OnExit()
 {
+    wxLogDebug("Application shutting down");
+
     wxDocManager *const docManager = wxDocManager::GetDocumentManager();
 
     docManager->FileHistorySave(*m_config);

@@ -34,6 +34,7 @@ public:
     bool SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start = -1);
     bool SaveCode65p(CArchive &archive, COutputMem &mem, uint32_t start, uint32_t end);
 
+    void LoadCode65p(CArchive &archve, COutputMem &mem);
 };
 
 #endif /* CODE_65P_H__ */
