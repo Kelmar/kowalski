@@ -64,7 +64,9 @@ public:
 
     virtual wxObject *Clone() const
     {
-        return new HexValidator(m_value, m_format, m_digits);
+        auto rval = new HexValidator(m_value, m_format, m_digits);
+        rval->m_maxValue = m_maxValue;
+        return rval;
     }
 };
 
