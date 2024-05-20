@@ -48,6 +48,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <wx/richtext/richtextctrl.h>
 #include <wx/settings.h>
 #include <wx/stc/stc.h>
+#include <wx/utils.h>
+#include <wx/validate.h>
+#include <wx/valnum.h>
 #include <wx/xrc/xmlres.h>
 
 #include <algorithm>
@@ -89,11 +92,13 @@ typedef wxOutputStream DocOStream;
 #include "Utils.h"
 #include "StrUtils.h"
 
+#include "wxExtra.h"
+
+#define UNUSED(X_) (void)(X_)
+
 #ifdef _MSC_VER
 # define strcasecmp _stricmp
 #endif
-
-#define __AFXWIN_H__
 
 // Some Win32/MFC temp place holders
 
@@ -102,8 +107,6 @@ typedef wxOutputStream DocOStream;
 #define LRESULT int
 #define WPARAM uint32_t
 #define LPARAM uint32_t
-
-#define UNUSED(X_) (void)(X_)
 
 // No indication as to what this POSITION type actually is, we're stubbing in an int for now. -- B.Simonds (April 25, 2024)
 typedef int POSITION;

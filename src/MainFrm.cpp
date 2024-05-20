@@ -1688,9 +1688,7 @@ void CMainFrame::OnSymDebugStop()
 {
     if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramRunning())
     {
-#if REWRITE_TO_WX_WIDGET
-        MessageBeep(-2);
-#endif
+        wxBell();
         return;
     }
     wxGetApp().m_global.ExitDebugger();

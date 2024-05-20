@@ -39,9 +39,9 @@ bool CodeTemplate::SupportsExt(const std::string &ext) const
 {
     // GCC 11 makes us assign to a useless temp variable first. >_<
     std::vector<std::string> exts = GetExtensions();
-    auto e = exts | std::views::transform(str::tolower);
+    auto e = exts | std::views::transform(str::toLower);
 
-    return std::ranges::find(e, ext | str::trim | str::tolower) != e.end();
+    return std::ranges::find(e, ext | str::trim | str::toLower) != e.end();
 }
 
 /*************************************************************************/
@@ -52,7 +52,7 @@ std::string CodeTemplate::ToString() const
     auto exts = GetExtensions();
 
     auto filters = exts
-        | std::views::transform(str::tolower)
+        | std::views::transform(str::toLower)
         | std::views::transform([](auto s) -> std::string { return "*." + s; });
 
     // Using wsString::Format() until we can get std::format() from GNU... >_<
@@ -128,7 +128,16 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->CanRead(); });
 
     auto optDlg = new CLoadCodeOptions();
-    optDlg->ShowModal();
+    int res = optDlg->ShowModal();
+
+    if (res != wxID_OK)
+        return;
+    
+    // TODO: This validate should probably be in the CLoadCodeOptions class.
+    if (!optDlg->Validate())
+    {
+        wxBell();
+    }
 
     //auto dlg = new wxFileDialog(this);
 

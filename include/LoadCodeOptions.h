@@ -21,21 +21,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef LOAD_CODE_OPTIONS_H__
 #define LOAD_CODE_OPTIONS_H__
 
-// LoadCodeOptions.h : header file
-//
+#include "HexValidator.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CLoadCodeOptions dialog
 
-class CLoadCodeOptions : public wxDialog
+class CLoadCodeOptions : public wxDialog, public wxExtra
 {
-    // Construction
+private:
+    HexValidator m_byteValidate;
+    HexValidator m_addrValidate;
+
 public:
     /* constructor */ CLoadCodeOptions();
 
-    static UINT s_startAddress;
-    static bool s_clearMem;
-    static UINT s_fillValue;
+    static uint32_t s_startAddress;
+    static bool	    s_clearMem;
+    static uint32_t s_fillValue;
 };
 
 #endif /* LOAD_CODE_OPTIONS_H__ */

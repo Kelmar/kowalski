@@ -34,6 +34,9 @@ namespace NumberFormats
     int ReadNumber(wxControl *pCtrl, NumberFormat &fmt);
     void SetNumber(wxControl *pCtrl, int num, NumberFormat fmt);
     void IncEditField(wxControl *pCtrl, int iDelta, int iMin, int iMax);
+
+    wxString ToString(uint32_t value, NumberFormat format, int digits = 0);
+    NumberFormat FromString(const wxString &str, _Out_ uint32_t &value);
 };
 
 #endif /* FORMAT_NUMS_H__ */

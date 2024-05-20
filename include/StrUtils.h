@@ -33,41 +33,53 @@
 #include <cctype>
 #include <stdexcept>
 
-namespace str
+/*************************************************************************/
+/**
+ * @brief Namespace containing character functions.
+ */
+namespace chr
 {
-    namespace 
+    // C defines tolower() and toupper() as int types, C++ doesn't like this.
+    inline char toLower(char c) { return std::tolower(c); }
+    inline char toUpper(char c) { return std::toupper(c); }
+
+    inline bool isAlpha(char c) { return std::isalpha(c); }
+    inline bool isDigit(char c) { return std::isdigit(c); }
+    inline bool isAlNum(char c) { return std::isalnum(c); }
+    inline bool isSpace(char c) { return std::isspace(c); }
+
+    inline bool notSpace(char c) { return !std::isspace(c); }
+
+    inline constexpr bool isHex(char c) { return ((c >= 'A') && (c <= 'F')) || ((c >= 'a') && (c <= 'f')); }
+
+    inline constexpr uint8_t hexVal(char c)
     {
-        // C defines tolower() and toupper() as int types, C++ doesn't like this.
-        inline char c_tolower(char c) { return std::tolower(c); }
-        inline char c_toupper(char c) { return std::toupper(c); }
-
-        inline bool c_isspace(char c) { return std::isspace(c); }
-
-        inline bool c_notSpace(char c) { return !std::isspace(c); }
-
-        inline constexpr uint8_t hex_val(char c) {
-            return (
-                ((c >= '0') && (c <= '9')) ?
-                    (c - '0') : 
-                    (
-                        ((c >= 'A') && (c <= 'F')) ? 
-                            (c - 'A' + 10) :
-                            ((c >= 'a') && (c <= 'f')) ?
-                                (c - 'a' + 10) :
-                                throw std::runtime_error("Invalid hex character")
-                        )
-                    );
-        }
-
-        // Poor man's unit testing
-        static_assert(hex_val('0') == 0);
-        static_assert(hex_val('9') == 9);
-        static_assert(hex_val('A') == 10);
-        static_assert(hex_val('F') == 15);
-        static_assert(hex_val('a') == 10);
-        static_assert(hex_val('f') == 15);
+        return (
+            ((c >= '0') && (c <= '9')) ?
+            (c - '0') :
+            (
+                ((c >= 'A') && (c <= 'F')) ?
+                (c - 'A' + 10) :
+                ((c >= 'a') && (c <= 'f')) ?
+                (c - 'a' + 10) :
+                0xFF
+            )
+        );
     }
 
+    // Poor man's unit testing
+    static_assert(hexVal('0') == 0);
+    static_assert(hexVal('9') == 9);
+    static_assert(hexVal('A') == 10);
+    static_assert(hexVal('F') == 15);
+    static_assert(hexVal('a') == 10);
+    static_assert(hexVal('f') == 15);
+}
+
+/*************************************************************************/
+
+namespace str
+{
     /**
      * @brief Convert string of 2 hex character into single byte.
      */
@@ -80,9 +92,9 @@ namespace str
 
         try
         {
-            out = hex_val(s[0]);
+            out = chr::hexVal(s[0]);
             out <<= 4;
-            out |= hex_val(s[1]);
+            out |= chr::hexVal(s[1]);
         }
         catch (...)
         {
@@ -108,7 +120,7 @@ namespace str
     {
         std::string operator ()(const std::string &s) const override
         {
-            auto it = std::find_if(s.begin(), s.end(), c_notSpace);
+            auto it = std::find_if(s.begin(), s.end(), chr::notSpace);
             std::size_t dist = it - s.begin();
             return s.substr(dist);
         }
@@ -121,7 +133,7 @@ namespace str
     {
         std::string operator ()(const std::string &s) const override
         {
-            auto it = std::find_if(s.rbegin(), s.rend(), c_notSpace);
+            auto it = std::find_if(s.rbegin(), s.rend(), chr::notSpace);
             std::size_t dist = it - s.rbegin();
             return s.substr(0, s.length() - dist);
         }
@@ -150,13 +162,13 @@ namespace str
     /**
      * @brief Runs a conversion function over a string and returns the result.
      */
-    struct transform : public basic_operator
+    struct transform_t : public basic_operator
     {
     private:
         std::function<char(char)> fn;
 
     public:
-        transform(std::function<char(char)> f) : fn(f) { }
+        transform_t(std::function<char(char)> f) : fn(f) { }
 
         std::string operator ()(const std::string &s) const override
         {
@@ -168,10 +180,10 @@ namespace str
     };
 
     // Convert a string to all lower case
-    const transform tolower(c_tolower);
+    const transform_t toLower(chr::toLower);
 
     // Convert a string to all upper case
-    const transform toupper(c_toupper);
+    const transform_t toUpper(chr::toUpper);
 
     /**
      * @brief Convert a container of items into a single string separated by separator.

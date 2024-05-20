@@ -4566,11 +4566,7 @@ void CCrystalTextView::ClearCollapsibleBlockMark(int nLineIndex)
 void CCrystalTextView::OnToggleCollapsibleBlock()
 {
     if (!CollapseBlock(m_ptCursorPos.y))
-    {
-#if REWRITE_TO_WX_WIDGET
-        MessageBeep(MB_OK);
-#endif
-    }
+        wxBell();
 }
 
 void CCrystalTextView::OnCollapseAllBlocks()

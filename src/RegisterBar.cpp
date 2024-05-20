@@ -593,9 +593,7 @@ void CRegisterBar::OnRegsCyclesClr()
 {
     if (wxGetApp().m_global.IsProgramRunning())
     {
-#if REWRITE_TO_WX_WIDGETS
-        MessageBeep(-2);
-#endif
+        wxBell();
         return;
     }
 

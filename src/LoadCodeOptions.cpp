@@ -23,31 +23,40 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 #include "resource.h"
+
+#include "FormatNums.h"
+#include "HexValidator.h"
 #include "LoadCodeOptions.h"
 
-
-UINT CLoadCodeOptions::s_startAddress = 0;
-bool CLoadCodeOptions::s_clearMem = true;
-UINT CLoadCodeOptions::s_fillValue = 0x00;
+uint32_t CLoadCodeOptions::s_startAddress = 0;
+bool     CLoadCodeOptions::s_clearMem = true;
+uint32_t CLoadCodeOptions::s_fillValue = 0x00;
 
 /////////////////////////////////////////////////////////////////////////////
 // CLoadCodeOptions dialog
 
 CLoadCodeOptions::CLoadCodeOptions()
     : wxDialog()
+    , wxExtra(this)
+    , m_byteValidate(&s_fillValue, NumberFormat::DollarHex, 2)
+    , m_addrValidate(&s_startAddress)
 {
     if (!wxXmlResource::Get()->LoadDialog(this, nullptr, "CodeLoadOptionsDlg"))
         throw ResourceError();
 
-    wxWindow *t = FindWindow("m_addressTxt"); // ->SetValidator()
-    (void)(t);
+    wxTextCtrl *addrTxt = FindChild<wxTextCtrl>("m_addressTxt");
+    wxCheckBox *clearChk = FindChild<wxCheckBox>("m_memClearChk");
+    wxTextCtrl *byteTxt = FindChild<wxTextCtrl>("m_memByteTxt");
 
-    wxCheckBox *clearChk = dynamic_cast<wxCheckBox *>(FindWindow("m_memClearChk"));
+    addrTxt->SetValidator(m_addrValidate);
 
     clearChk->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, [=](wxCommandEvent &) {
         s_clearMem = clearChk->IsChecked();
-        wxLogDebug("Doot!");
     });
+
+    byteTxt->SetValidator(m_byteValidate);
+
+    addrTxt->SetFocus();
 }
 
 #if 0

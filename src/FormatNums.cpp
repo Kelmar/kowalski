@@ -120,3 +120,72 @@ void NumberFormats::SetNumber(wxControl *pCtrl, int num, NumberFormat fmt)
 
     pCtrl->SetLabel(buf);
 }
+
+wxString NumberFormats::ToString(uint32_t value, NumberFormat fmt, int digits /* = 0 */)
+{
+    wxString fmtStr = "%";
+
+    if (digits > 0)
+        fmtStr += "0" + wxString::Format("%d", digits);
+
+    switch (fmt)
+    {
+    case NumberFormat::Decimal:
+        fmtStr += "d";
+        break;
+
+    case NumberFormat::IntelHex:
+        fmtStr = "0x" + fmtStr + "X";
+        break;
+
+    case NumberFormat::DollarHex:
+        fmtStr = "$" + fmtStr + "X";
+        break;
+
+    default:
+        ASSERT(false);
+    }
+
+    return wxString::Format(fmtStr, value);
+}
+
+NumberFormat NumberFormats::FromString(const wxString &buf, _Out_ uint32_t &value)
+{
+    value = 0;
+
+    if (buf.IsEmpty())
+        return NumberFormat::Error;
+
+    NumberFormat rval = NumberFormat::Decimal;
+    int radix = 10;
+    int start = 0;
+
+    if (buf[0] == '$')
+    {
+        rval = NumberFormat::DollarHex;
+        radix = 16;
+        start = 1;
+    }
+    else if (buf.StartsWith("0X") || buf.StartsWith("0x"))
+    {
+        rval = NumberFormat::IntelHex;
+        radix = 16;
+        start = 2;
+    }
+
+    uint32_t num = 0;
+    for (size_t i = start; i < buf.Length(); ++i)
+    {
+        int c = chr::hexVal(buf[i]);
+
+        if (c >= radix)
+            return NumberFormat::Error;
+
+        num *= radix;
+        num |= c;
+    }
+
+    value = num;
+
+    return rval;
+}
