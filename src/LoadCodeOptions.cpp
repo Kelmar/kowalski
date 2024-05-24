@@ -44,6 +44,13 @@ CLoadCodeOptions::CLoadCodeOptions()
     if (!wxXmlResource::Get()->LoadDialog(this, nullptr, "CodeLoadOptionsDlg"))
         throw ResourceError();
 
+    if (wxGetApp().m_global.m_procType == ProcessorType::WDC65816)
+        m_addrValidate.SetMaxValue(0x00FF'FFFF); // 1.3.3 support for 24-bit addressing
+    else
+        m_addrValidate.SetMaxValue(0x0000'FFFF);
+
+    m_byteValidate.SetMaxValue(255);
+
     wxTextCtrl *addrTxt = FindChild<wxTextCtrl>("m_addressTxt");
     wxCheckBox *clearChk = FindChild<wxCheckBox>("m_memClearChk");
     wxTextCtrl *byteTxt = FindChild<wxTextCtrl>("m_memByteTxt");
@@ -58,25 +65,6 @@ CLoadCodeOptions::CLoadCodeOptions()
 
     addrTxt->SetFocus();
 }
-
-#if 0
-extern void AFX_CDECL DDX_HexDec(CDataExchange *pDX, int nIDC, unsigned int &num, bool bWord = true);
-
-void CLoadCodeOptions::DoDataExchange(CDataExchange *pDX)
-{
-    CDialog::DoDataExchange(pDX);
-    //{{AFX_DATA_MAP(CLoadCodeOptions)
-    DDX_HexDec(pDX, IDC_LOAD_CODE_START, m_uStart);
-    if (theApp.m_global.m_bProc6502 == 2)  // 1.3.3 support for 24-bit addressing
-        DDV_MinMaxUInt(pDX, m_uStart, 0, 0xFFFFFF);
-    else
-        DDV_MinMaxUInt(pDX, m_uStart, 0, 65535);
-    DDX_Check(pDX, IDC_LOAD_CODE_CLR, m_bClearMem);
-    DDX_HexDec(pDX, IDC_LOAD_CODE_FILL_VALUE, m_uFill, false);
-    DDV_MinMaxUInt(pDX, m_uFill, 0, 255);
-    //}}AFX_DATA_MAP
-}
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CLoadCodeOptions message handlers

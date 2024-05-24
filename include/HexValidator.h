@@ -37,7 +37,6 @@
 class HexValidator : public wxValidator
 {
 private:
-    wxTextEntry *m_valueCtrl;
     uint32_t *m_value;
 
     NumberFormat m_format;
@@ -55,18 +54,14 @@ public:
 
     void SetMaxValue(uint32_t value) { m_maxValue = value; }
 
-    bool TransferFromWindow() override;
-    bool TransferToWindow() override;
+    virtual bool TransferFromWindow();
+    virtual bool TransferToWindow();
 
     virtual bool Validate(wxWindow *);
 
-    virtual void SetWindow(wxWindow *window);
-
     virtual wxObject *Clone() const
     {
-        auto rval = new HexValidator(m_value, m_format, m_digits);
-        rval->m_maxValue = m_maxValue;
-        return rval;
+        return new HexValidator(*this);
     }
 };
 

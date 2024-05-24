@@ -33,8 +33,7 @@ HexValidator::HexValidator(
     uint32_t *value,
     NumberFormat format /* = NumberFormat::DollarHex */,
     int digits /* = 4 */)
-    : m_valueCtrl(nullptr)
-    , m_value(value)
+    : m_value(value)
     , m_format(format)
     , m_digits(digits)
 {
@@ -43,18 +42,14 @@ HexValidator::HexValidator(
 
 /*************************************************************************/
 
-void HexValidator::SetWindow(wxWindow *win)
-{
-    wxValidator::SetWindow(win);
-
-    m_valueCtrl = dynamic_cast<wxTextEntry *>(win);
-}
-
-/*************************************************************************/
-
 bool HexValidator::ReadValue(_Out_ uint32_t &value)
 {
-    std::string valStr = m_valueCtrl->GetValue().ToStdString();
+    auto valueCtrl = dynamic_cast<wxTextEntry *>(GetWindow());
+
+    if (!valueCtrl)
+        return false;
+
+    std::string valStr = valueCtrl->GetValue().ToStdString();
 
     uint32_t test;
 
@@ -89,11 +84,13 @@ bool HexValidator::TransferFromWindow()
 
 bool HexValidator::TransferToWindow()
 {
-    if (!m_valueCtrl)
+    auto valueCtrl = dynamic_cast<wxTextEntry *>(GetWindow());
+
+    if (!valueCtrl)
         return false;
 
     wxString valStr = NumberFormats::ToString(*m_value, m_format, m_digits);
-    m_valueCtrl->SetValue(valStr);
+    valueCtrl->SetValue(valStr);
 
     return true;
 }

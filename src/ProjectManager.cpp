@@ -127,7 +127,8 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
 
     wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->CanRead(); });
 
-    auto optDlg = new CLoadCodeOptions();
+    std::shared_ptr<CLoadCodeOptions> optDlg(new CLoadCodeOptions());
+
     int res = optDlg->ShowModal();
 
     if (res != wxID_OK)

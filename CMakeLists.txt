@@ -14,7 +14,7 @@ if (WIN32)
 
   FetchContent_Declare(wxWidgets
       GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
-      GIT_TAG v3.2.4
+      GIT_TAG v3.2.5
       GIT_SHALLOW ON
       OVERRIDE_FIND_PACKAGE
   )
@@ -28,7 +28,10 @@ if (WIN32)
 
   SET (wxLibs wx::base wx::core wx::richtext wx::adv wx::stc wx::aui wx::html wx::xml wx::xrc)
 else ()
-  find_package(wxWidgets 3.0 COMPONENTS base core richtext adv stc aui html xml xrc REQUIRED)
+  find_package(wxWidgets 3.0
+    COMPONENTS base core richtext adv stc aui html xml xrc
+    REQUIRED)
+
   include("${wxWidgets_USE_FILE}")
 
   SET (wxLibs ${wxWidgets_LIBRARIES})
@@ -54,7 +57,7 @@ target_compile_options(6502 PRIVATE
 
 target_include_directories(6502
     PRIVATE include/
-    PRIVATE include/crystal
+    PRIVATE include/crystal 
     PRIVATE ${wxWidgets_SOURCE_DIR}/include
 )
 
