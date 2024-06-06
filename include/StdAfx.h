@@ -47,6 +47,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <wx/persist/toplevel.h>
 #include <wx/richtext/richtextctrl.h>
 #include <wx/settings.h>
+#include <wx/spinctrl.h>
 #include <wx/stc/stc.h>
 #include <wx/utils.h>
 #include <wx/validate.h>
@@ -60,6 +61,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <list>
 #include <memory>
 #include <ranges>
+#include <span>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
@@ -68,6 +70,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <cstdio>
 #include <cctype>
+
+#include <fmt/core.h>
 
 #ifndef wxHAVE_DPI_INDEPENDENT_PIXELS
 // Hack for wxWidgets 3.0 on Ubuntu

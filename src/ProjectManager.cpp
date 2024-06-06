@@ -30,6 +30,7 @@
 #include "MainFrm.h"
 #include "ProjectManager.h"
 
+#include "AtariBin.h"
 #include "MotorolaSRecord.h"
 
 /*************************************************************************/
@@ -38,7 +39,7 @@
 bool CodeTemplate::SupportsExt(const std::string &ext) const
 {
     // GCC 11 makes us assign to a useless temp variable first. >_<
-    std::vector<std::string> exts = GetExtensions();
+    auto exts = GetExtensions();
     auto e = exts | std::views::transform(str::toLower);
 
     return std::ranges::find(e, ext | str::trim | str::toLower) != e.end();
@@ -55,13 +56,23 @@ std::string CodeTemplate::ToString() const
         | std::views::transform(str::toLower)
         | std::views::transform([](auto s) -> std::string { return "*." + s; });
 
-    // Using wsString::Format() until we can get std::format() from GNU... >_<
+    return fmt::format("{} ({})", GetDescription(), str::join(";", filters));
+}
 
-    std::string desc = GetDescription();
-    std::string allExts = str::join(";", filters);
-        
-    return wxString::Format("%s (%s)", desc.c_str(), allExts.c_str()).ToStdString();
-    //return std::format("{} ({})", GetDescription(), str::join(";", exts));
+/*************************************************************************/
+
+void CodeTemplate::Read(const std::string &filename, LoadCodeState *state)
+{
+    UNUSED(filename);
+    UNUSED(state);
+}
+
+/*************************************************************************/
+
+void CodeTemplate::Write(const std::string &filename, LoadCodeState *state)
+{
+    UNUSED(filename);
+    UNUSED(state);
 }
 
 /*************************************************************************/
@@ -93,6 +104,7 @@ void ProjectManager::InitCodeTemplates()
     // Hard coded for now.
 
     //AddTemplate<CMotorolaSRecord>();
+    AddTemplate<CAtariBin>();
 }
 
 /*************************************************************************/
@@ -109,7 +121,11 @@ void ProjectManager::AddTemplate(const std::shared_ptr<CodeTemplate> &codeTempla
 wxString ProjectManager::GetSupportedFileTypes(
     std::function<bool(const std::shared_ptr<CodeTemplate> &)> predicate)
 {
-    return str::join("|", m_templates | std::views::filter(predicate));
+    return str::join("|",
+        m_templates
+        | std::views::filter(predicate)
+        | std::ranges::views::transform([](auto ptr) -> std::string { return ptr->ToString(); })
+    );
 }
 
 /*************************************************************************/
@@ -123,26 +139,62 @@ wxEND_EVENT_TABLE()
 
 void ProjectManager::OnLoadCode(wxCommandEvent &event)
 {
+    // TODO: Remove static qualifier from this, and save values to registry.
+    /*static LoadCodeState options =
+    {
+        0, false, 0
+    };*/
+
+    LoadCodeState state;
+
     event.Skip();
 
     wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->CanRead(); });
+    std::string foo = exts.ToStdString();
 
-    std::shared_ptr<CLoadCodeOptions> optDlg(new CLoadCodeOptions());
+    std::unique_ptr<wxFileDialog> fileDlg(new wxFileDialog());
+
+    if (fileDlg->ShowModal() != wxID_OK)
+        return;
+
+    std::string path = fileDlg->GetFilename().ToStdString();
+
+    std::string ext = file::getExtension(path);
+    std::shared_ptr<CodeTemplate> codeTmp;
+
+    if (ext.empty())
+    {
+        // Try based on selected drop down.
+        int filterIdx = fileDlg->GetFilterIndex();
+
+        codeTmp = m_templates[filterIdx];
+    }
+    else
+    {
+        auto supportsExt = [&ext](std::shared_ptr<CodeTemplate> t) { return t->SupportsExt(ext); };
+        codeTmp = *std::ranges::find_if(m_templates, supportsExt);
+    }
+
+    if (!codeTmp)
+    {
+        // TODO: In the future we might be able to do this with some magic bytes.
+
+        wxString err = "Unable to find supported file type for filename: " + path;
+
+        wxLogWarning(err);
+        wxMessageBox(err);
+
+        return;
+    }
+
+    codeTmp->Read(path, &state);
+    
+    std::unique_ptr<LoadCodeOptionsDlg> optDlg(new LoadCodeOptionsDlg(&state));
 
     int res = optDlg->ShowModal();
 
     if (res != wxID_OK)
         return;
-    
-    // TODO: This validate should probably be in the CLoadCodeOptions class.
-    if (!optDlg->Validate())
-    {
-        wxBell();
-    }
-
-    //auto dlg = new wxFileDialog(this);
-
-    //dlg->ShowModal();
 }
 
 /*************************************************************************/

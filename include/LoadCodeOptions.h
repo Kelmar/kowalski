@@ -23,21 +23,50 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "HexValidator.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// CLoadCodeOptions dialog
+/*************************************************************************/
+/**
+ * @brief Model that holds the state of loading and saving raw binary code.
+ */
+struct LoadCodeState
+{
+    LoadCodeState()
+	: StartAddress(0)
+	, ClearMemory(false)
+	, FillByte(0)
+	, Memory(new COutputMem())
+	, Marks()
+    {
+    }
 
-class CLoadCodeOptions : public wxDialog, public wxExtra
+    // Address where simulator should jump to, to begin execution.
+    uint32_t StartAddress;
+
+    // Set if the memory should be cleared with FillByte
+    bool ClearMemory;
+
+    // The byte value to clear the memory with.
+    uint32_t FillByte;
+
+    // The memory that is to be loaded into the simulator
+    CMemoryPtr Memory;
+
+    // Sections of memory to be marked.
+    CMarkArea Marks;
+};
+
+/*************************************************************************/
+/**
+ * @brief Dialog box that shows options for loading binary code.
+ */
+class LoadCodeOptionsDlg : public wxDialog, public wxExtra
 {
 private:
-    HexValidator m_byteValidate;
-    HexValidator m_addrValidate;
+    LoadCodeState *m_state;
 
 public:
-    /* constructor */ CLoadCodeOptions();
-
-    static uint32_t s_startAddress;
-    static bool	    s_clearMem;
-    static uint32_t s_fillValue;
+    /* constructor */ LoadCodeOptionsDlg(LoadCodeState *state);
 };
+
+/*************************************************************************/
 
 #endif /* LOAD_CODE_OPTIONS_H__ */

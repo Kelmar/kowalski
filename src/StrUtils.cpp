@@ -22,76 +22,62 @@
  */
 /*************************************************************************/
 
-#ifndef EXCEPT_6502_H__
-#define EXCEPT_6502_H__
+#include "StdAfx.h"
+#include "StrUtils.h"
 
 /*************************************************************************/
 
-#include <cerrno>
-#include <stdexcept>
-
-/*************************************************************************/
-
-class ResourceError : public std::runtime_error
+/**
+ * @brief Extract the directory information from a path.
+ */
+std::string file::getDirectory(const std::string &path)
 {
-public:
-    /* constructor */ ResourceError()
-        : runtime_error(_("Unable to load resource"))
-    {
-    }
-};
+    size_t idx = path.find_last_of('/');
+
+#if WIN32
+    if (idx == std::string::npos)
+        idx = path.find_last_of('\\');
+#endif
+
+    if (idx == std::string::npos)
+        return str::empty;
+
+    return path.substr(0, idx);
+}
 
 /*************************************************************************/
-
-class FileError : public std::runtime_error
+/**
+ * @brief Extract the filename from a path.
+ */
+std::string file::getFilename(const std::string &path)
 {
-public:
-    enum ErrorCode
-    {
-        // There was no error
-        NoError = 0,
+    size_t idx = path.find_last_of('/');
 
-        // Check errno for error
-        SysError,
+#if WIN32
+    if (idx == std::string::npos)
+        idx = path.find_last_of('\\');
+#endif
 
-        // File format is corrupt
-        Corrupt
-    };
+    if (idx == std::string::npos)
+        return path;
 
-private:
-    ErrorCode m_error;
-    int m_sysError;
-
-    std::string getErrString(ErrorCode error, int sysError)
-    {
-        switch (error)
-        {
-        case NoError: return std::string(_("No error."));
-        case SysError: return std::string(std::strerror(sysError));
-        case Corrupt: return std::string(_("The file format is corrupt."));
-        default:
-            ASSERT(false);
-            return std::string(_("Unknown error code."));
-        }
-    }
-
-public:
-    /* constructor */ FileError(ErrorCode error)
-        : runtime_error(getErrString(error, errno))
-        , m_error(error)
-        , m_sysError(errno)
-    {
-    }
-
-    // Get's the error code that was raised.
-    ErrorCode Code() const { return m_error; }
-
-    // Get's the errno value for this exception.
-    int ErrNo() const { return m_sysError; }
-};
+    return path.substr(idx);
+}
 
 /*************************************************************************/
+/**
+ * @brief Extract the extension of a file or path.
+ */
+std::string file::getExtension(const std::string &path)
+{
+    std::string filename = getFilename(path);
 
-#endif /* EXCEPT_6502_H__ */
+    size_t idx = filename.find_last_of('.');
+
+    if (idx != std::string::npos)
+        return filename.substr(idx);
+
+    return str::empty;
+}
 
 /*************************************************************************/

@@ -76,7 +76,6 @@ class CContext : public ContextBase
 
 public:
     
-
     enum Flags
     {
         NEGATIVE  = 0x80,

@@ -70,6 +70,13 @@ public:
         return m_data[addr];
     }
 
+    std::span<uint8_t> GetSpan(size_t from, size_t to)
+    {
+        ASSERT(from < m_size);
+        to = std::min(to, m_size);
+        return std::span(&m_data[from], to - from);
+    }
+
     uint16_t GetWord(size_t addr) const
     {
         ASSERT(addr < (m_size - 1));

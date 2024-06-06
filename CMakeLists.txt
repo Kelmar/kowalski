@@ -1,15 +1,24 @@
 cmake_minimum_required(VERSION 3.20)
 
+include(FetchContent)
+
 SET (CMAKE_CXX_STANDARD 20)
 SET (CMAKE_CXX_STANDARD_REQUIRED ON)
 SET (CMAKE_CXX_EXTENSIONS OFF)
 
 project (6502 C CXX)
 
-if (WIN32)
-  include(FetchContent)
+SET (FETCHCONTENT_QUIET FALSE)
 
-  SET (FETCHCONTENT_QUIET FALSE)
+FetchContent_Declare(fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 10.2.1
+    GIT_SHALLOW ON
+)
+
+FetchContent_MakeAvailable(fmt)
+
+if (WIN32)
   SET (wxBUILD_SHARED OFF  CACHE BOOL "Build wx libraries as shared libs")
 
   FetchContent_Declare(wxWidgets
@@ -61,7 +70,7 @@ target_include_directories(6502
     PRIVATE ${wxWidgets_SOURCE_DIR}/include
 )
 
-target_link_libraries(6502 PRIVATE ${wxLibs})
+target_link_libraries(6502 PRIVATE ${wxLibs} fmt::fmt)
 
 if (MSVC)
   target_precompile_headers(6502 PRIVATE include/StdAfx.h)

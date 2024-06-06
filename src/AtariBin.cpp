@@ -25,17 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "AtariBin.h"
 
-#ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
-#endif
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
 CAtariBin::CAtariBin()
+    : CodeTemplate()
 {
 }
 
@@ -43,60 +38,46 @@ CAtariBin::~CAtariBin()
 {
 }
 
-bool CAtariBin::LoadAtaBinFormat(CArchive &ar, COutputMem &mem, CMarkArea &area, int &prog_start)
+void CAtariBin::Read(Archive &ar, LoadCodeState *state)
 {
-    UNUSED(ar);
-    UNUSED(mem);
-    UNUSED(area);
-    UNUSED(prog_start);
+    UNUSED(state);
 
-    return false;
+    uint16_t header;
+    ar & header;
 
-    // TODO: Write replacement for CArchive class.
-
-#if 0
-    uint16_t temp;
-
-    ar >> temp;
-
-    if (temp != 0xFFFF)
-        return false;
+    if (header != 0xFFFF)
+        throw new FileError(FileError::Corrupt);
 
     uint16_t begin = 0;
 
-    for (;;)
+    while (!ar.eof())
     {
         uint16_t from, to;
 
-        ar >> from;
-        ar >> to;
+        ar & from;
+        ar & to;
 
         if (to < from)
-            return false;
+            throw new FileError(FileError::Corrupt);
 
         if (begin == 0)
             begin = from;
 
-        area.SetStart(from);
-        area.SetEnd(to);
+        state->Marks.SetStart(from);
+        state->Marks.SetEnd(to);
 
-        mem.Load(ar, from, to);
-
-        if (ar.GetFile()->GetLength() >= ar.GetFile()->GetPosition() && ar.IsBufferEmpty())
-            break;
+        ar.read(state->Memory->GetSpan(from, to));
     }
 
-    int start = mem[0x2e0] + mem[0x2e1] * 256; // run address
+    int start = (*state->Memory)[0x2e0] + (*state->Memory)[0x2e1] * 256; // run address
 
     if (start == 0)
-        start = mem[0x2e2] + mem[0x2e3] * 256; // init address
+        start = (*state->Memory)[0x2e2] + (*state->Memory)[0x2e3] * 256; // init address
 
     if (start == 0)
         start = begin; // beginning of first block
 
     if (start != 0)
-        prog_start = start;
-
-    return true;
-#endif
+        state->StartAddress = start;
 }
+

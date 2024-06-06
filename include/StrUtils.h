@@ -188,7 +188,8 @@ namespace str
     /**
      * @brief Convert a container of items into a single string separated by separator.
      */
-    inline std::string join(const std::string &separator, auto &&container)
+    template <std::ranges::forward_range TRange>
+    inline std::string join(const std::string &separator, TRange &&container)
     {
         std::stringstream rval;
         bool first = true;
@@ -215,6 +216,26 @@ namespace str
     {
         { a.ToString() } -> std::convertible_to<std::string>;
     };
+
+    const std::string empty;
+}
+
+namespace file
+{
+    /**
+     * @brief Extract the directory information from a path.
+     */
+    std::string getDirectory(const std::string &path);
+
+    /**
+     * @brief Extract the filename from a path.
+     */
+    std::string getFilename(const std::string &path);
+
+    /**
+     * @brief Extract the extension of a file or path.
+     */
+    std::string getExtension(const std::string &path);
 }
 
 /**

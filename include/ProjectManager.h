@@ -28,6 +28,8 @@
 /*************************************************************************/
 
 #include "StdAfx.h"
+#include "Archive.h"
+#include "LoadCodeOptions.h"
 
 // ATARI- archive, mem, area, prog_start
 // Intel- archive, mem, area, prog_start
@@ -45,6 +47,9 @@ class CodeTemplate
 protected:
     /* constructor */ CodeTemplate() { }
 
+    virtual void Read(Archive &ar, LoadCodeState *state) = 0;
+    virtual void Write(Archive &ar, LoadCodeState *state) = 0;
+
 public:
     virtual ~CodeTemplate() { }
 
@@ -52,6 +57,7 @@ public:
     virtual bool CanRead() const = 0;
 
     /// Checks if we can write this format to disk
+    
     virtual bool CanWrite() const = 0;
 
     /// Returns if this format is in binary or not.
@@ -66,8 +72,8 @@ public:
     /// Checks to see if this code template supports the supplied file extension.
     virtual bool SupportsExt(const std::string &ext) const;
 
-    virtual void Read(const std::string &path, const CMemoryPtr &memory) = 0;
-    virtual void Write(const std::string &path, const CMemoryPtr &memory) = 0;
+    virtual void Read(const std::string &path, LoadCodeState *state);
+    virtual void Write(const std::string &path, LoadCodeState *state);
 
     virtual std::string ToString() const;
 };
@@ -101,7 +107,7 @@ public:
     void AddTemplate()
         requires(std::is_base_of_v<CodeTemplate, T>)
     {
-        AddTemplate(new T());
+        AddTemplate(std::shared_ptr<CodeTemplate>(new T()));
     }
 
     void AddTemplate(const std::shared_ptr<CodeTemplate> &codeTemplate);

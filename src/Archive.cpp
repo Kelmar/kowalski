@@ -22,76 +22,56 @@
  */
 /*************************************************************************/
 
-#ifndef EXCEPT_6502_H__
-#define EXCEPT_6502_H__
+#include "StdAfx.h"
+
+#include <iostream>
+#include <fstream>
+
+#include "Archive.h"
 
 /*************************************************************************/
 
-#include <cerrno>
-#include <stdexcept>
-
-/*************************************************************************/
-
-class ResourceError : public std::runtime_error
+Archive::Archive(
+    const std::string &filename,
+    Archive::Mode mode,
+    Archive::Endianess endianess /* = Archive::Endianess::Platform */,
+    CheckFn checkFn /* = noChecksum */)
+    : m_filename(filename)
+    , m_file(nullptr)
+    , m_mode(mode)
+    , m_endianess(endianess)
+    , m_checkFn(checkFn ? checkFn : noCheck)
+    , m_swapFn(noSwap)
 {
-public:
-    /* constructor */ ResourceError()
-        : runtime_error(_("Unable to load resource"))
-    {
-    }
-};
+    m_file = std::fopen(m_filename.c_str(), m_mode == Mode::Read ? "rb" : "wb");
 
-/*************************************************************************/
+#if WORDS_BIGENDIAN
+    if (m_endianess == Archive::Endianess::Little)
+        m_swapFn = byteSwap;
+#else
+    if (m_endianess == Archive::Endianess::Big)
+        m_swapFn = byteSwap;
+#endif
+}
 
-class FileError : public std::runtime_error
+Archive::~Archive()
 {
-public:
-    enum ErrorCode
-    {
-        // There was no error
-        NoError = 0,
+    if (m_mode == Mode::Write)
+        std::fflush(m_file);
 
-        // Check errno for error
-        SysError,
-
-        // File format is corrupt
-        Corrupt
-    };
-
-private:
-    ErrorCode m_error;
-    int m_sysError;
-
-    std::string getErrString(ErrorCode error, int sysError)
-    {
-        switch (error)
-        {
-        case NoError: return std::string(_("No error."));
-        case SysError: return std::string(std::strerror(sysError));
-        case Corrupt: return std::string(_("The file format is corrupt."));
-        default:
-            ASSERT(false);
-            return std::string(_("Unknown error code."));
-        }
-    }
-
-public:
-    /* constructor */ FileError(ErrorCode error)
-        : runtime_error(getErrString(error, errno))
-        , m_error(error)
-        , m_sysError(errno)
-    {
-    }
-
-    // Get's the error code that was raised.
-    ErrorCode Code() const { return m_error; }
-
-    // Get's the errno value for this exception.
-    int ErrNo() const { return m_sysError; }
-};
+    std::fclose(m_file);
+}
 
 /*************************************************************************/
 
-#endif /* EXCEPT_6502_H__ */
+size_t Archive::read(std::span<uint8_t> buffer)
+{
+    return std::fread(buffer.data(), 1, buffer.size(), m_file);
+}
+
+void Archive::write(const std::span<uint8_t> &buffer)
+{
+    std::fwrite(buffer.data(), 1, buffer.size(), m_file);
+}
 
 /*************************************************************************/

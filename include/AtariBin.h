@@ -20,16 +20,38 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifndef ATARI_BIN_H__
 #define ATARI_BIN_H__
+
+#include "Archive.h"
+#include "LoadCodeOptions.h"
+#include "ProjectManager.h"
+
 /**
  * @brief Loads Atari binary files (xex) into simulator memory.
  */
-class CAtariBin
+class CAtariBin : public CodeTemplate
 {
+protected:
+    virtual void Read(Archive &ar, LoadCodeState *state);
+    virtual void Write(Archive &ar, LoadCodeState *state)
+    { 
+	UNUSED(ar);
+	UNUSED(state);
+	ASSERT(false); 
+    }
+
 public:
     CAtariBin();
     virtual ~CAtariBin();
 
-    bool LoadAtaBinFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
+    virtual bool CanRead() const { return true; }
+
+    virtual bool CanWrite() const { return false; }
+
+    virtual bool IsBinary() const { return true; }
+
+    virtual std::string GetDescription() const { return std::string(_("Atari Binary Files")); }
+
+    virtual std::vector<std::string> GetExtensions() const { return { "xex" }; }
 };
 
 #endif /* ATARI_BIN_H__ */
