@@ -56,23 +56,25 @@ std::string CodeTemplate::ToString() const
         | std::views::transform(str::toLower)
         | std::views::transform([](auto s) -> std::string { return "*." + s; });
 
-    return fmt::format("{} ({})", GetDescription(), str::join(";", filters));
+    return fmt::format("{0} ({1})|{1}", GetDescription(), str::join(";", filters));
 }
 
 /*************************************************************************/
 
 void CodeTemplate::Read(const std::string &filename, LoadCodeState *state)
 {
-    UNUSED(filename);
-    UNUSED(state);
+    Archive archive(filename, Archive::Mode::Read, Archive::Endianess::Little);
+
+    Read(_In_ archive, state);
 }
 
 /*************************************************************************/
 
 void CodeTemplate::Write(const std::string &filename, LoadCodeState *state)
 {
-    UNUSED(filename);
-    UNUSED(state);
+    Archive archive(filename, Archive::Mode::Write, Archive::Endianess::Little);
+
+    Write(_In_ archive, state);
 }
 
 /*************************************************************************/
@@ -142,7 +144,9 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     // TODO: Remove static qualifier from this, and save values to registry.
     /*static LoadCodeState options =
     {
-        0, false, 0
+        0,      // Start address
+        false,  // clear memory
+        0       // Fill byte
     };*/
 
     LoadCodeState state;
@@ -150,9 +154,20 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     event.Skip();
 
     wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->CanRead(); });
-    std::string foo = exts.ToStdString();
 
-    std::unique_ptr<wxFileDialog> fileDlg(new wxFileDialog());
+    // Add ability to select any file type.
+    //exts += "|All Files (*.*)|*.*";
+    
+    // Would be better to just implement an "Any" file type loader.
+
+    std::unique_ptr<wxFileDialog> fileDlg(new wxFileDialog(
+        nullptr, 
+        _("Load Binary Code"),
+        "",
+        "",
+        exts,
+        wxFD_OPEN | wxFD_FILE_MUST_EXIST)
+    );
 
     if (fileDlg->ShowModal() != wxID_OK)
         return;
@@ -179,7 +194,7 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     {
         // TODO: In the future we might be able to do this with some magic bytes.
 
-        wxString err = "Unable to find supported file type for filename: " + path;
+        wxString err = _("Unable to find supported file type for filename: ") + path;
 
         wxLogWarning(err);
         wxMessageBox(err);

@@ -40,8 +40,6 @@ CAtariBin::~CAtariBin()
 
 void CAtariBin::Read(Archive &ar, LoadCodeState *state)
 {
-    UNUSED(state);
-
     uint16_t header;
     ar & header;
 
