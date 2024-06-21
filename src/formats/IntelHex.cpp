@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Odczyt i zapis kodu wynikowego w postaci Intel-HEX
 
 #include "StdAfx.h"
-#include "IntelHex.h"
+#include "formats/IntelHex.h"
 #include "resource.h"
 #include "MarkArea.h"
 #include "Sym6502.h"

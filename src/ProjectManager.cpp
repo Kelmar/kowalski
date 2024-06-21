@@ -30,8 +30,8 @@
 #include "MainFrm.h"
 #include "ProjectManager.h"
 
-#include "AtariBin.h"
-#include "MotorolaSRecord.h"
+#include "formats/AtariBin.h"
+#include "formats/MotorolaSRecord.h"
 
 /*************************************************************************/
 /*************************************************************************/

@@ -20,10 +20,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 #include "Deasm6502Doc.h"
+
+#if 0
 #include "IntelHex.h"
 #include "MotorolaSRecord.h"
 #include "AtariBin.h"
 #include "Code65p.h"
+#endif
 
 CAsm::Breakpoint CGlobal::SetBreakpoint(int line, const std::string &doc_title)
 {

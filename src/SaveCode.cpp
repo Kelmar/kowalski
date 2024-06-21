@@ -26,7 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "SaveCode.h"
 #include "SaveCodeOptions.h"
 #include "SaveCodeBlockOptions.h"
-#include "IntelHex.h"
+
+//#include "IntelHex.h"
 
 UINT CSaveCode::m_uStart= 0;
 UINT CSaveCode::m_uEnd= 0xFFFF;
