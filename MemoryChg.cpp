@@ -52,7 +52,7 @@ void CMemoryChg::DoDataExchange(CDataExchange* pDX)
 {
   CDialog::DoDataExchange(pDX);
   DDX_HexDec(pDX, IDC_MEMORY_ADDR, m_uAddr);
-  if (theApp.m_global.m_bProc6502==2)   // 65816
+  if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
 	DDV_MinMaxUInt(pDX, m_uAddr, 0, 0xFFFFFF);
   else
     DDV_MinMaxUInt(pDX, m_uAddr, 0, 65535);

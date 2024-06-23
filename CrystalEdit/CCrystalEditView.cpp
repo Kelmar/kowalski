@@ -27,7 +27,7 @@
 //	+	FIX: ResetView() was overriden to provide cleanup
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "../stdafx.h"
 #include "editcmd.h"
 #include "editreg.h"
 #include "CCrystalEditView.h"

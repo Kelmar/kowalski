@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Bezpieczny przydzielacz pamiêci
 
 
-template<class T> class MemPtr : class CObject
+template<class T> class MemPtr : public CObject
 {
   T* ptr;
 

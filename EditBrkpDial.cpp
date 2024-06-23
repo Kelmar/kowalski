@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -35,34 +35,34 @@ static char THIS_FILE[] = __FILE__;
 // CDialEditBreakpoint dialog
 
 
-CDialEditBreakpoint::CDialEditBreakpoint(Breakpoint bp, CWnd* pParent /*=NULL*/)
-  : CDialog(CDialEditBreakpoint::IDD, pParent)
+CDialEditBreakpoint::CDialEditBreakpoint(Breakpoint bp, CWnd *pParent /*=NULL*/)
+    : CDialog(CDialEditBreakpoint::IDD, pParent)
 {
-  //{{AFX_DATA_INIT(CDialEditBreakpoint)
-  //}}AFX_DATA_INIT
-  m_Execute = (bp & BPT_EXEC) != 0;
-  m_Read = (bp & BPT_READ) != 0;
-  m_Write = (bp & BPT_WRITE) != 0;
-  m_Disabled = (bp & BPT_DISABLED) != 0;
+    //{{AFX_DATA_INIT(CDialEditBreakpoint)
+    //}}AFX_DATA_INIT
+    m_Execute = (bp & BPT_EXECUTE) != 0;
+    m_Read = (bp & BPT_READ) != 0;
+    m_Write = (bp & BPT_WRITE) != 0;
+    m_Disabled = (bp & BPT_DISABLED) != 0;
 }
 
 
-void CDialEditBreakpoint::DoDataExchange(CDataExchange* pDX)
+void CDialEditBreakpoint::DoDataExchange(CDataExchange *pDX)
 {
-  CDialog::DoDataExchange(pDX);
-  //{{AFX_DATA_MAP(CDialEditBreakpoint)
-  DDX_Check(pDX, IDC_EDIT_BP_DISABLED, m_Disabled);
-  DDX_Check(pDX, IDC_EDIT_BP_EXEC, m_Execute);
-  DDX_Check(pDX, IDC_EDIT_BP_READ, m_Read);
-  DDX_Check(pDX, IDC_EDIT_BP_WRITE, m_Write);
-  //}}AFX_DATA_MAP
+    CDialog::DoDataExchange(pDX);
+    //{{AFX_DATA_MAP(CDialEditBreakpoint)
+    DDX_Check(pDX, IDC_EDIT_BP_DISABLED, m_Disabled);
+    DDX_Check(pDX, IDC_EDIT_BP_EXEC, m_Execute);
+    DDX_Check(pDX, IDC_EDIT_BP_READ, m_Read);
+    DDX_Check(pDX, IDC_EDIT_BP_WRITE, m_Write);
+    //}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CDialEditBreakpoint, CDialog)
-//{{AFX_MSG_MAP(CDialEditBreakpoint)
-// NOTE: the ClassWizard will add message map macros here
-//}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CDialEditBreakpoint)
+    // NOTE: the ClassWizard will add message map macros here
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

@@ -47,13 +47,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "../stdafx.h"
 #include "editcmd.h"
 #include "editreg.h"
 #include "CCrystalTextView.h"
 #include "CCrystalTextBuffer.h"
 #include "CFindTextDlg.h"
-#include "resource.h"
+#include "../resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

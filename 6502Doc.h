@@ -22,9 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 /////////////////////////////////////////////////////////////////////////////
 #ifdef USE_CRYSTAL_EDIT
-	#include "CCrystalTextBuffer.h"
+# include "CCrystalTextBuffer.h"
 #endif
-
 
 class CSrc6502Doc : public CDocument
 {

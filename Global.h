@@ -18,12 +18,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#pragma once
+
 #include "Broadcast.h"
 #include "M6502.h"
 #include "Sym6502.h"
 #include "MarkArea.h"
 #include "IntGenerator.h"
-
 
 class CGlobal : public CObject, CAsm, virtual CBroadcast
 {
@@ -36,7 +37,7 @@ class CGlobal : public CObject, CAsm, virtual CBroadcast
 	Finish m_SymFinish;				// sposób koñczenia programu przez symulator
 	CMarkArea m_MarkArea;			// oznaczenie fragmentów pamiêci zawieraj¹cej kod wynikowy
 public:
-	UINT8 m_bProc6502;				// typ procesora
+	ProcessorType m_procType;   // Type of processor
 	UINT8 m_bHelpFile;              // ^^ help file type
 	COutputMem m_Mem;				// pamiêæ dla kodu wynikowego i symulatora
 	bool m_bGenerateListing;		// generowaæ listing przy asemblacji?
@@ -143,11 +144,11 @@ public:
 
 	//---------------------------------------------------------------------------
 
-	UINT8 GetProcType()
-	{ return m_bProc6502; }
+	ProcessorType GetProcType()
+	{ return m_procType; }
 
-	void SetProcType(UINT8 b6502)
-	{ m_bProc6502 = b6502; }
+	void SetProcType(ProcessorType procType)
+	{ m_procType = procType; }
 
     UINT8 GetHelpType()               //^^ Help
 	{ return m_bHelpFile; }

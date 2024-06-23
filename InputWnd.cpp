@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -20,43 +20,43 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
 #include "stdafx.h"
+#include "Asm.h"
 #include "M6502.h"
 #include "DialAsmStat.h"
 
-
 class CInputWnd : CWnd
 {
-  void open(const CString &fname);
-  void close();
-  void seek_to_begin();
-  LPTSTR read_line(LPTSTR str, UINT max_len);
-  int get_line_no();
-  const CString &get_file_name();
+    void open(const CString &fname);
+    void close();
+    void seek_to_begin();
+    LPTSTR read_line(LPTSTR str, UINT max_len);
+    int get_line_no();
+    const CString &get_file_name();
 };
 
 
 LPTSTR CInputWnd::read_line(LPTSTR str, UINT max_len)
 {
-  int ret= SendMessage(WM_USER_GET_NEXT_LINE, WPARAM(max_len), LPARAM(str));
-  ASSERT(ret);
-  return str;
+    int ret = SendMessage(CAsm::WM_USER_GET_NEXT_LINE, WPARAM(max_len), LPARAM(str));
+    ASSERT(ret);
+    return str;
 }
 
 
 int CInputWnd::get_line_no()
 {
-  int no;
-  int ret= SendMessage(WM_USER_GET_LINE_NO, 0, LPARAM(&no));
-  ASSERT(ret);
-  return no;
+    int no;
+    int ret = SendMessage(CAsm::WM_USER_GET_LINE_NO, 0, LPARAM(&no));
+    ASSERT(ret);
+    return no;
 }
 
 
 const CString &CInputWnd::get_file_name()
 {
-  CString fname;
-  int ret= SendMessage(WM_USER_GET_TITLE, WPARAM(_MAX_PATH), LPARAM(fname.GetBuffer(_MAX_PATH+1)));
-  fname.ReleaseBuffer();
-  ASSERT(ret);
-  return fname;
+    CString fname;
+    int ret = SendMessage(CAsm::WM_USER_GET_TITLE, WPARAM(_MAX_PATH), LPARAM(fname.GetBuffer(_MAX_PATH + 1)));
+    fname.ReleaseBuffer();
+    ASSERT(ret);
+    return fname;
 }

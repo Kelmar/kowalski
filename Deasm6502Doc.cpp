@@ -235,7 +235,7 @@ void CDeasm6502Doc::DeassembleSave(CArchive &ar, const CContext &ctx, UINT32 sta
     ar.WriteString(strFormat);
     //  ar.WriteString("\r\n; oznaczenia etykiet:\r\n;   znn - adresy na str. zerowej\r\n"
     //    ";   annnn - adresy absolutne\r\n;   ennnn - adresy u¿ywane w rozkazach skoków wzglêdnych\r\n\r\n");
-    if (theApp.m_global.m_bProc6502==2)  // 1.3.3 support for 24-bit addressing
+    if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)  // 1.3.3 support for 24-bit addressing
 	  str.Format("\t.ORG $%06X\r\n",(int)start);
 	else
 	  str.Format("\t.ORG $%04X\r\n",(int)start);
@@ -282,7 +282,7 @@ void CDeasm6502Doc::DeassembleSave(CArchive &ar, const CContext &ctx, UINT32 sta
     {
       if (info[ptr] & TXT)
       {
-        if (theApp.m_global.m_bProc6502==2)  // 1.3.3 support for 24-bit addressing
+        if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)  // 1.3.3 support for 24-bit addressing
 		  str.Format("e%06X:\r\n", (int)ptr);
 		else
 		  str.Format("e%04X:\r\n", (int)ptr);

@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -22,8 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
 #include "StdAfx.h"
-//#include "6502.h"
-//#include "EditDisplay.h"
+#include "6502.h"
+#include "6502View.h"
+#include "EditDisplay.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -44,45 +45,44 @@ CEditDisplay::~CEditDisplay()
 
 
 BEGIN_MESSAGE_MAP(CEditDisplay, CEdit)
-  //{{AFX_MSG_MAP(CEditDisplay)
-  ON_WM_PAINT()
-  ON_WM_CHAR()
-  ON_WM_KEYUP()
-  //}}AFX_MSG_MAP
+    //{{AFX_MSG_MAP(CEditDisplay)
+    ON_WM_PAINT()
+    ON_WM_CHAR()
+    ON_WM_KEYUP()
+    //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
 void CEditDisplay::Subclass(CSrc6502View *pView)
 {
-  m_pView = pView;
-  SubclassWindow(pView->GetEditCtrl().m_hWnd);
+    m_pView = pView;
+    SubclassWindow(pView->GetEditCtrl().m_hWnd);
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CEditDisplay message handlers
 
-void CEditDisplay::OnPaint() 
+void CEditDisplay::OnPaint()
 {
-//  CPaintDC dc(this); // device context for painting
-  
-  // TODO: Add your message handler code here
-  
-  // Do not call CEdit::OnPaint() for painting messages
+    //  CPaintDC dc(this); // device context for painting
+
+      // TODO: Add your message handler code here
+
+      // Do not call CEdit::OnPaint() for painting messages
 }
 
-void CEditDisplay::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void CEditDisplay::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-  // TODO: Add your message handler code here and/or call default
-  
-//  CEdit::OnChar(nChar, nRepCnt, nFlags);
+    // TODO: Add your message handler code here and/or call default
+
+  //  CEdit::OnChar(nChar, nRepCnt, nFlags);
 }
 
-void CEditDisplay::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void CEditDisplay::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-  // TODO: Add your message handler code here and/or call default
-  
-//  CEdit::OnKeyUp(nChar, nRepCnt, nFlags);
+    // TODO: Add your message handler code here and/or call default
+
+  //  CEdit::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
 //-----------------------------------------------------------------------------

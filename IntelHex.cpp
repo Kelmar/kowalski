@@ -202,7 +202,7 @@ void CIntelHex::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &are
       case 0:		// kod programu
        {
 	     if (cnt)
-           if (theApp.m_global.m_bProc6502==2)
+           if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
 	         area.SetStart(((bank&0xff)<<16) + addr);
 		   else 
              area.SetStart(addr);
@@ -211,7 +211,7 @@ void CIntelHex::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &are
 	     {
 	       if (addr > 0xFFFF)
 	         throw CIntelHexException(CIntelHexException::E_FORMAT,row);	// za du¿y adres
-		   if (theApp.m_global.m_bProc6502==2)   // 1.3.3 added support to store 24-bit address range
+		   if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)   // 1.3.3 added support to store 24-bit address range
 	         mem[((bank&0xff)<<16) + addr++] = (UINT8)geth(ptr,sum);
 		   else
 			 mem[addr++] = (UINT8)geth(ptr,sum);
@@ -220,7 +220,7 @@ void CIntelHex::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &are
 	     if (sum)		// b³¹d sumy kontrolnej
 	       throw CIntelHexException(CIntelHexException::E_CHKSUM,row);
 	     if (cnt)
-           if (theApp.m_global.m_bProc6502==2)  // 1.3.3 added support for 24-bit addressing
+           if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)  // 1.3.3 added support for 24-bit addressing
 	         area.SetEnd((bank<<16)&0xff+addr-1);
 		   else 
              area.SetEnd(addr-1);
@@ -240,7 +240,7 @@ void CIntelHex::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &are
 	    break;
 
 	  case 4:  // 1.3.3 used to set new address bank
-        if (theApp.m_global.m_bProc6502!=2)
+        if (theApp.m_global.GetProcType() != ProcessorType::WDC65816)
           throw CIntelHexException(CIntelHexException::E_FORMAT,row);	// nieoczekiwane dane 
 		if (cnt != 2)
           throw CIntelHexException(CIntelHexException::E_FORMAT,row);	// nieoczekiwane dane
@@ -258,7 +258,7 @@ void CIntelHex::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &are
 		break;
 
 	  case 5:  // 1.3.3 used to set new prog start for 24 bit addresses
-        if (theApp.m_global.m_bProc6502!=2)
+        if (theApp.m_global.GetProcType() != ProcessorType::WDC65816)
           throw CIntelHexException(CIntelHexException::E_FORMAT,row);	// nieoczekiwane dane 
         if (cnt != 4)
           throw CIntelHexException(CIntelHexException::E_FORMAT,row);	// nieoczekiwane dane

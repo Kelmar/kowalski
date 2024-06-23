@@ -110,7 +110,7 @@ void CMemoryView::OnDraw(CDC* pDC)
 
   for (int i= 0, y= 0; i <= m_nCy; i++, y += m_nChrH)
   {
-    if (theApp.m_global.m_bProc6502==2)	
+    if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
       line.Format(_T("%06X "), int(addr));
     else
       line.Format(_T("%04X "), int(addr));
@@ -432,7 +432,7 @@ int CMemoryView::set_scroll_range()
     return -1;
 
   max_mem = 0x10000;
-  if (theApp.m_global.m_bProc6502 == 2)  // 65816
+  if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
 	  max_mem = 0x1000000;
 
 

@@ -15,7 +15,7 @@
 //	- LEAVE THIS HEADER INTACT
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "../stdafx.h"
 #include "CFindTextDlg.h"
 #include "CCrystalTextView.h"
 

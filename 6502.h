@@ -21,11 +21,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // 6502.h : main header file for the 6502 application
 //
 
+#pragma once
+
 #include "resource.h"
 #include "Global.h"
 
 #ifndef __AFXWIN_H__
-	#error include 'stdafx.h' before including this file for PCH
+# error include 'stdafx.h' before including this file for PCH
 #endif
 
 //#include "resource.h"       // main symbols

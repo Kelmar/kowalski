@@ -208,7 +208,7 @@ LRESULT (CALLBACK *CSrc6502View::m_pfnOldProc)(HWND,UINT,WPARAM,LPARAM) = NULL;
 void CSrc6502View::check_line(const TCHAR* buf, CAsm::Stat &stat, int &start, int &fin, CString &msg)
 {
   CAsm6502 xasm;
-  xasm.bProc6502 = theApp.m_global.GetProcType();
+  xasm.m_procType = theApp.m_global.GetProcType();
   stat= xasm.CheckLine(buf,start,fin);
   if (stat) 
 	  msg = xasm.GetErrMsg(stat);

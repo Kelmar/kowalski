@@ -37,7 +37,7 @@ public:
 	CString DeasmInstr(const CmdInfo& ci, DeasmFmt flags);
 	CString ArgumentValue(const CContext &ctx, int ptr= -1);
 
-	CString Mnemonic(UINT8 code, UINT8 bUse6502, bool bUseBrk= false);
+	CString Mnemonic(UINT8 code, ProcessorType procType, bool bUseBrk = false);
 	CString Argument(UINT8 cmd, CodeAdr mode, UINT32 addr, UINT8 arg1, UINT8 arg2, UINT8 arg3, bool bLabel= false, bool bHelp= false);
 	CString Binary(UINT8 val);
 	int FindPrevAddr(UINT32 &addr, const CContext &ctx, int cnt= 1);

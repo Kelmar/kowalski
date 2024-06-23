@@ -578,65 +578,85 @@ const UINT8 CAsm::code_cycles_8[256]=
 
 extern C6502App theApp;
 
-const UINT8 (&CAsm::TransformTable(const UINT8 bProc6502))[C_ILL][A_NO_OF_MODES]
+const UINT8 (&CAsm::TransformTable(const ProcessorType procType))[C_ILL][A_NO_OF_MODES]
 {
-  if (bProc6502==0)
-    return trans_table;
-  else if (bProc6502==1)
-    return trans_table_c;
-  else
+    switch (procType)
+    {
+    case ProcessorType::M6502:
+	return trans_table;
+
+    case ProcessorType::WDC65C02:
+	return trans_table_c;
+
+    case ProcessorType::WDC65816:
 	return trans_table_8;
+    }
 }
 
 
 const UINT8 (&CAsm::CodeToCommand())[0x100]
 {
-  return CodeToCommand(theApp.m_global.m_bProc6502);
+  return CodeToCommand(theApp.m_global.GetProcType());
 }
 
-const UINT8 (&CAsm::CodeToCommand(const UINT8 bProc6502))[0x100]
+const UINT8 (&CAsm::CodeToCommand(const ProcessorType procType))[0x100]
 {
-  if (bProc6502==0)
-    return code_to_command;
-  else if (bProc6502==1)
-    return code_to_command_c;
-  else
+   
+    switch (procType)
+    {
+    case ProcessorType::M6502:
+	return code_to_command;
+
+    case ProcessorType::WDC65C02:
+	return code_to_command_c;
+
+    case ProcessorType::WDC65816:
 	return code_to_command_8;
+    }
 }
 
 
 const UINT8 (&CAsm::CodeToMode())[0x100]
 {
-  return CodeToMode(theApp.m_global.m_bProc6502);
+  return CodeToMode(theApp.m_global.GetProcType());
 }
-const UINT8 (&CAsm::CodeToMode(const UINT8 bProc6502))[0x100]
+const UINT8 (&CAsm::CodeToMode(const ProcessorType procType))[0x100]
 {
-  if (bProc6502==0)
-    return code_to_mode;
-  else if (bProc6502==1)
-    return code_to_mode_c;
-  else
+    switch (procType)
+    {
+    case ProcessorType::M6502:
+	return code_to_mode;
+
+    case ProcessorType::WDC65C02:
+	return code_to_mode_c;
+
+    case ProcessorType::WDC65816:
 	return code_to_mode_8;
+    }
 }
 
 
-inline UINT8 CAsm::ProcType()
+inline ProcessorType CAsm::ProcType()
 { 
-  return theApp.m_global.m_bProc6502;
+  return theApp.m_global.GetProcType();
 }
-
 
 const UINT8 (&CAsm::CodeToCycles())[0x100]
 {
- 	return CodeToCycles(theApp.m_global.m_bProc6502);
+    return CodeToCycles(theApp.m_global.GetProcType());
 }
 
-const UINT8 (&CAsm::CodeToCycles(const UINT8 bProc6502))[0x100]
+const UINT8 (&CAsm::CodeToCycles(const ProcessorType procType))[0x100]
 {
-  if (bProc6502==0)
-    return code_cycles;
-  else if (bProc6502==1)
-    return code_cycles_c;
-  else
-  return code_cycles_8;
+    switch (procType)
+    {
+    case ProcessorType::M6502:
+	return code_cycles;
+
+    case ProcessorType::WDC65C02:
+	return code_cycles_c;
+
+    case ProcessorType::WDC65816:
+	return code_cycles_8;
+    }
 }

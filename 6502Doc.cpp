@@ -47,7 +47,7 @@ END_MESSAGE_MAP()
 
 CSrc6502Doc::CSrc6502Doc()
 {
-	m_TextBuffer.m_pOwnerDoc = this;
+    m_TextBuffer.m_pOwnerDoc = this;
 }
 
 CSrc6502Doc::~CSrc6502Doc()

@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debig|Win32">
+      <Configuration>Debig</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Static En|Win32">
+      <Configuration>Static En</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Static Pl|Win32">
+      <Configuration>Static Pl</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Static|Win32">
+      <Configuration>Static</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{C674658E-28D3-4C71-A44A-8F7E3DD66D94}</ProjectGuid>
+    <Keyword>MFCProj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static En|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debig|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static Pl|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Static En|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debig|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Static Pl|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>17.0.35004.147</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">
+    <IntDir>$(Configuration)\Out</IntDir>
+    <OutDir>$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static En|Win32'">
+    <IntDir>$(Configuration)\Out</IntDir>
+    <OutDir>$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(Configuration)\Out</IntDir>
+    <OutDir>$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debig|Win32'">
+    <IntDir>$(Configuration)\Out</IntDir>
+    <OutDir>$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static Pl|Win32'">
+    <IntDir>$(Configuration)\Out</IntDir>
+    <OutDir>$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>USE_CRYSTAL_EDIT</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Static En|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>USE_CRYSTAL_EDIT</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>USE_CRYSTAL_EDIT</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debig|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>USE_CRYSTAL_EDIT</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Static Pl|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>USE_CRYSTAL_EDIT</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="ResDll\ResDll.vcxproj">
+      <Project>{967e928a-eb03-48c7-b310-245d0aed200f}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="6502.h" />
+    <ClInclude Include="6502Doc.h" />
+    <ClInclude Include="6502View.h" />
+    <ClInclude Include="About.h" />
+    <ClInclude Include="Asm.h" />
+    <ClInclude Include="AtariBin.h" />
+    <ClInclude Include="Broadcast.h" />
+    <ClInclude Include="ChildFrm.h" />
+    <ClInclude Include="ChildFrmDeAsm.h" />
+    <ClInclude Include="Code65p.h" />
+    <ClInclude Include="ColorButton.h" />
+    <ClInclude Include="ConfigSettings.h" />
+    <ClInclude Include="CrystalEdit\CCrystalEditView.h" />
+    <ClInclude Include="CrystalEdit\CCrystalTextBuffer.h" />
+    <ClInclude Include="CrystalEdit\CCrystalTextView.h" />
+    <ClInclude Include="CrystalEdit\cedefs.h" />
+    <ClInclude Include="CrystalEdit\CEditReplaceDlg.h" />
+    <ClInclude Include="CrystalEdit\CFindTextDlg.h" />
+    <ClInclude Include="CrystalEdit\editcmd.h" />
+    <ClInclude Include="CrystalEdit\editreg.h" />
+    <ClInclude Include="CXMultiDocTemplate.h" />
+    <ClInclude Include="Deasm.h" />
+    <ClInclude Include="Deasm6502Doc.h" />
+    <ClInclude Include="Deasm6502View.h" />
+    <ClInclude Include="DeasmGoto.h" />
+    <ClInclude Include="DeasmSaveOptions.h" />
+    <ClInclude Include="DebugInfo.h" />
+    <ClInclude Include="DialAsmStat.h" />
+    <ClInclude Include="dialbar.h" />
+    <ClInclude Include="dialeditbrkp.h" />
+    <ClInclude Include="DockBarEx.h" />
+    <ClInclude Include="DrawMarks.h" />
+    <ClInclude Include="DynamicHelp.h" />
+    <ClInclude Include="EditBrkpDial.h" />
+    <ClInclude Include="EditDisplay.h" />
+    <ClInclude Include="FlatBar.h" />
+    <ClInclude Include="FormatNums.h" />
+    <ClInclude Include="Global.h" />
+    <ClInclude Include="GotoLineNumber.h" />
+    <ClInclude Include="HyperLink.h" />
+    <ClInclude Include="Ident.h" />
+    <ClInclude Include="identinfo.h" />
+    <ClInclude Include="IdentInfoDoc.h" />
+    <ClInclude Include="IdentInfoFrame.h" />
+    <ClInclude Include="IdentInfoView.h" />
+    <ClInclude Include="IntelHex.h" />
+    <ClInclude Include="IntGenerator.h" />
+    <ClInclude Include="IntRequestGeneratorDlg.h" />
+    <ClInclude Include="IOWindow.h" />
+    <ClInclude Include="LeftBar.h" />
+    <ClInclude Include="LoadCode.h" />
+    <ClInclude Include="LoadCodeOptions.h" />
+    <ClInclude Include="LogBuffer.h" />
+    <ClInclude Include="LogWindow.h" />
+    <ClInclude Include="M6502.h" />
+    <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MapFile.h" />
+    <ClInclude Include="MarkArea.h" />
+    <ClInclude Include="MemoryChg.h" />
+    <ClInclude Include="MemoryDC.h" />
+    <ClInclude Include="MemoryDoc.h" />
+    <ClInclude Include="MemoryGoto.h" />
+    <ClInclude Include="MemoryInfo.h" />
+    <ClInclude Include="MemoryView.h" />
+    <ClInclude Include="Messages.h" />
+    <ClInclude Include="MotorolaSRecord.h" />
+    <ClInclude Include="Options.h" />
+    <ClInclude Include="OptionsViewPage.h" />
+    <ClInclude Include="OutputMem.h" />
+    <ClInclude Include="RegisterBar.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SaveCode.h" />
+    <ClInclude Include="SaveCodeBlockOptions.h" />
+    <ClInclude Include="SaveCodeOptions.h" />
+    <ClInclude Include="Splash.h" />
+    <ClInclude Include="StackTemplate.h" />
+    <ClInclude Include="StackView.h" />
+    <ClInclude Include="StaticLink.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="Sym6502.h" />
+    <ClInclude Include="SyntaxExample.h" />
+    <ClInclude Include="ToolBox.h" />
+    <ClInclude Include="ZeroPageView.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="6502.cpp" />
+    <ClCompile Include="6502Doc.cpp" />
+    <ClCompile Include="6502View.cpp" />
+    <ClCompile Include="About.cpp" />
+    <ClCompile Include="AllocMem.cpp" />
+    <ClCompile Include="Asm.cpp" />
+    <ClCompile Include="AtariBin.cpp" />
+    <ClCompile Include="Broadcast.cpp" />
+    <ClCompile Include="ChildFrm.cpp" />
+    <ClCompile Include="ChildFrmDeAsm.cpp" />
+    <ClCompile Include="Code65p.cpp" />
+    <ClCompile Include="ColorButton.cpp" />
+    <ClCompile Include="ConfigSettings.cpp" />
+    <ClCompile Include="CrystalEdit\CCrystalEditView.cpp" />
+    <ClCompile Include="CrystalEdit\CCrystalTextBuffer.cpp" />
+    <ClCompile Include="CrystalEdit\CCrystalTextBuffer1.cpp" />
+    <ClCompile Include="CrystalEdit\CCrystalTextView.cpp" />
+    <ClCompile Include="CrystalEdit\CCrystalTextView1.cpp" />
+    <ClCompile Include="CrystalEdit\CEditReplaceDlg.cpp" />
+    <ClCompile Include="CrystalEdit\CFindTextDlg.cpp" />
+    <ClCompile Include="CrystalEdit\Parse6502.cpp" />
+    <ClCompile Include="CXMultiDocTemplate.cpp" />
+    <ClCompile Include="Deasm.cpp" />
+    <ClCompile Include="Deasm6502Doc.cpp" />
+    <ClCompile Include="Deasm6502View.cpp" />
+    <ClCompile Include="DeasmGoto.cpp" />
+    <ClCompile Include="DeasmSaveOptions.cpp" />
+    <ClCompile Include="DebugInfo.cpp" />
+    <ClCompile Include="DialAsmStat.cpp" />
+    <ClCompile Include="DialBar.cpp" />
+    <ClCompile Include="dialeditbrkp.cpp" />
+    <ClCompile Include="DockBarEx.cpp" />
+    <ClCompile Include="DrawMarks.cpp" />
+    <ClCompile Include="DynamicHelp.cpp" />
+    <ClCompile Include="EditBrkpDial.cpp" />
+    <ClCompile Include="EditDisplay.cpp" />
+    <ClCompile Include="FlatBar.cpp" />
+    <ClCompile Include="FormatNums.cpp" />
+    <ClCompile Include="Global.cpp" />
+    <ClCompile Include="GotoLineNumber.cpp" />
+    <ClCompile Include="HyperLink.cpp" />
+    <ClCompile Include="identinfo.cpp" />
+    <ClCompile Include="IdentInfoDoc.cpp" />
+    <ClCompile Include="IdentInfoFrame.cpp" />
+    <ClCompile Include="IdentInfoView.cpp" />
+    <ClCompile Include="InputWnd.cpp" />
+    <ClCompile Include="IntelHex.cpp" />
+    <ClCompile Include="IntGenerator.cpp" />
+    <ClCompile Include="IntRequestGeneratorDlg.cpp" />
+    <ClCompile Include="IOWindow.cpp" />
+    <ClCompile Include="LeftBar.cpp" />
+    <ClCompile Include="LoadCode.cpp" />
+    <ClCompile Include="LoadCodeOptions.cpp" />
+    <ClCompile Include="LogBuffer.cpp" />
+    <ClCompile Include="LogWindow.cpp" />
+    <ClCompile Include="M6502.cpp" />
+    <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MapFile.cpp" />
+    <ClCompile Include="MarkArea.cpp" />
+    <ClCompile Include="MemoryChg.cpp" />
+    <ClCompile Include="MemoryDC.cpp" />
+    <ClCompile Include="MemoryDoc.cpp" />
+    <ClCompile Include="MemoryGoto.cpp" />
+    <ClCompile Include="MemoryInfo.cpp" />
+    <ClCompile Include="MemoryView.cpp" />
+    <ClCompile Include="MotorolaSRecord.cpp" />
+    <ClCompile Include="Options.cpp" />
+    <ClCompile Include="OptionsViewPage.cpp" />
+    <ClCompile Include="RegisterBar.cpp" />
+    <ClCompile Include="SaveCode.cpp" />
+    <ClCompile Include="SaveCodeBlockOptions.cpp" />
+    <ClCompile Include="SaveCodeOptions.cpp" />
+    <ClCompile Include="Splash.cpp" />
+    <ClCompile Include="StackView.cpp" />
+    <ClCompile Include="StaticLink.cpp" />
+    <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="Sym6502.cpp" />
+    <ClCompile Include="SyntaxExample.cpp" />
+    <ClCompile Include="ToolBox.cpp" />
+    <ClCompile Include="ZeroPageView.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

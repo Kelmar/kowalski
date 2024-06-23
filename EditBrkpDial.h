@@ -33,10 +33,10 @@ public:
   // Dialog Data
   //{{AFX_DATA(CDialEditBreakpoint)
   enum { IDD = IDD_EDIT_BREAKPOINT };
-  bool	m_Disabled;
-  bool	m_Execute;
-  bool	m_Read;
-  bool	m_Write;
+  int m_Disabled;
+  int m_Execute;
+  int m_Read;
+  int m_Write;
   //}}AFX_DATA
 
 
