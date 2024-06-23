@@ -142,7 +142,7 @@ UINT16 CSym6502::get_argument_address(bool bWrite)
 
 	case A_ABSI:						// only JMP(xxxx) supports this addr mode
 		addr = ctx.mem.GetWord(ctx.pc);
-		if (theApp.m_global.GetProcType() && (addr & 0xFF) == 0xFF)	// LSB == 0xFF?
+		if (!theApp.m_global.GetProcType() && (addr & 0xFF) == 0xFF)	// LSB == 0xFF?
 			addr = ctx.mem.GetWord(addr, addr - 0xFF);	// erroneously just as 6502 would do
 		else
 			addr = ctx.mem.GetWord(addr);
