@@ -76,12 +76,6 @@
     <ClInclude Include="DynamicHelp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EditBrkpDial.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EditDisplay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FlatBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -338,12 +332,6 @@
     <ClCompile Include="DynamicHelp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EditBrkpDial.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EditDisplay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="FlatBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -482,13 +470,7 @@
     <ClCompile Include="CrystalEdit\CCrystalTextBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CrystalEdit\CCrystalTextBuffer1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CrystalEdit\CCrystalTextView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CrystalEdit\CCrystalTextView1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CrystalEdit\CEditReplaceDlg.cpp">

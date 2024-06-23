@@ -98,6 +98,9 @@
       <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Static En|Win32'">
     <ClCompile>
@@ -106,6 +109,9 @@
       <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -114,6 +120,9 @@
       <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debig|Win32'">
     <ClCompile>
@@ -122,6 +131,9 @@
       <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Static Pl|Win32'">
     <ClCompile>
@@ -130,6 +142,9 @@
       <AdditionalIncludeDirectories>./CrystalEdit</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="ResDll\ResDll.vcxproj">
@@ -170,8 +185,6 @@
     <ClInclude Include="DockBarEx.h" />
     <ClInclude Include="DrawMarks.h" />
     <ClInclude Include="DynamicHelp.h" />
-    <ClInclude Include="EditBrkpDial.h" />
-    <ClInclude Include="EditDisplay.h" />
     <ClInclude Include="FlatBar.h" />
     <ClInclude Include="FormatNums.h" />
     <ClInclude Include="Global.h" />
@@ -237,9 +250,7 @@
     <ClCompile Include="ConfigSettings.cpp" />
     <ClCompile Include="CrystalEdit\CCrystalEditView.cpp" />
     <ClCompile Include="CrystalEdit\CCrystalTextBuffer.cpp" />
-    <ClCompile Include="CrystalEdit\CCrystalTextBuffer1.cpp" />
     <ClCompile Include="CrystalEdit\CCrystalTextView.cpp" />
-    <ClCompile Include="CrystalEdit\CCrystalTextView1.cpp" />
     <ClCompile Include="CrystalEdit\CEditReplaceDlg.cpp" />
     <ClCompile Include="CrystalEdit\CFindTextDlg.cpp" />
     <ClCompile Include="CrystalEdit\Parse6502.cpp" />
@@ -256,8 +267,6 @@
     <ClCompile Include="DockBarEx.cpp" />
     <ClCompile Include="DrawMarks.cpp" />
     <ClCompile Include="DynamicHelp.cpp" />
-    <ClCompile Include="EditBrkpDial.cpp" />
-    <ClCompile Include="EditDisplay.cpp" />
     <ClCompile Include="FlatBar.cpp" />
     <ClCompile Include="FormatNums.cpp" />
     <ClCompile Include="Global.cpp" />

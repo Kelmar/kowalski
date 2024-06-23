@@ -31,7 +31,7 @@ class CInputWnd : CWnd
     void seek_to_begin();
     LPTSTR read_line(LPTSTR str, UINT max_len);
     int get_line_no();
-    const CString &get_file_name();
+    CString get_file_name();
 };
 
 
@@ -52,7 +52,7 @@ int CInputWnd::get_line_no()
 }
 
 
-const CString &CInputWnd::get_file_name()
+CString CInputWnd::get_file_name()
 {
     CString fname;
     int ret = SendMessage(CAsm::WM_USER_GET_TITLE, WPARAM(_MAX_PATH), LPARAM(fname.GetBuffer(_MAX_PATH + 1)));
