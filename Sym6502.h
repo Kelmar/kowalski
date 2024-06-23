@@ -62,7 +62,7 @@ public:
 		CARRY     = 0x01,
 		NONE      = 0x00,
 		ALL       = 0xFF,
-		// numery bitów
+		// numery bitï¿½w
 		N_NEGATIVE  = 7,
 		N_OVERFLOW  = 6,
 		N_RESERVED  = 5,
@@ -75,12 +75,12 @@ public:
 
 	COutputMem &mem;
 
-	UINT32 mem_mask;		// maska pamiêci - zale¿na od szerokoœci szyny adresowej,
-							// zawiera jedynki w miejscu wa¿nych bitów adresów
+	UINT32 mem_mask;		// maska pamiï¿½ci - zaleï¿½na od szerokoï¿½ci szyny adresowej,
+							// zawiera jedynki w miejscu waï¿½nych bitï¿½w adresï¿½w
 	bool io;
 	UINT16 io_from, io_to;
 
-	// funkcje zmieniaj¹ce zawartoœæ rejestru flagowego
+	// funkcje zmieniajï¿½ce zawartoï¿½ï¿½ rejestru flagowego
 	void set_status_reg_VZNC(bool v, bool z, bool n, bool c)
 	{ negative=!!n; overflow=!!v; zero=!!z; carry=!!c; }
 	void set_status_reg_ZNC(bool z, bool n, bool c)
@@ -177,13 +177,13 @@ class CSym6502 : public CAsm
 	CommandLog m_Log;
 public:
 	static int bus_width;
-	static UINT16 io_addr;	// pocz¹tek obszaru we/wy symulatora
+	static UINT16 io_addr;	// poczï¿½tek obszaru we/wy symulatora
 	static bool io_enabled;
 	static bool s_bWriteProtectArea;
 	static UINT16 s_uProtectFromAddr;
 	static UINT16 s_uProtectToAddr;
 
-	enum IOFunc			// funkcje kolejnych bajtów z obszaru we/wy symulatora
+	enum IOFunc			// funkcje kolejnych bajtï¿½w z obszaru we/wy symulatora
 	{ 
 		IO_NONE      = -1,
 		TERMINAL_CLS = 0,
@@ -214,7 +214,7 @@ private:
 	int m_nInterruptTrigger;
 
 	SymStat perform_cmd();
-	SymStat skip_cmd();		// ominiêcie bie¿¹cej instrukcji
+	SymStat skip_cmd();		// ominiï¿½cie bieï¿½ï¿½cej instrukcji
 	SymStat step_over();
 	SymStat run_till_ret();
 	SymStat run(bool animate= false);
@@ -252,15 +252,15 @@ private:
 	static UINT start_run_till_ret_thread(LPVOID ptr);
 	HANDLE hThread;
 
-	void SetPointer(const CLine &line, UINT32 addr);	// ustawienie strza³ki (->) przed aktualnym wierszem
+	void SetPointer(const CLine &line, UINT32 addr);	// ustawienie strzaï¿½ki (->) przed aktualnym wierszem
 	void SetPointer(CSrc6502View* pView, int nLine, bool bScroll); // helper fn
-	void ResetPointer();			// schowanie strza³ki
+	void ResetPointer();			// schowanie strzaï¿½ki
 	CSrc6502View *FindDocView(FileUID fuid);	// odszukanie okna dokumentu
-	FileUID m_fuidLastView;			// zapamiêtanie okna, w którym narysowana jest strza³ka
+	FileUID m_fuidLastView;			// zapamiï¿½tanie okna, w ktï¿½rym narysowana jest strzaï¿½ka
 	HWND m_hwndLastView;				// j.w.
 	void AddBranchCycles(UINT8 arg);
 
-	CEvent eventRedraw;			// synchronizacja odœwie¿ania okna przy animacji
+	CEvent eventRedraw;			// synchronizacja odï¿½wieï¿½ania okna przy animacji
 
 	void init();
 	void set_translation_tables();
@@ -276,7 +276,7 @@ private:
 	const UINT8* m_vCodeToMode;
 
 public:
-	Finish finish;		// okreœlenie sposobu zakoñczenia wykonania programu
+	Finish finish;		// okreï¿½lenie sposobu zakoï¿½czenia wykonania programu
 	UINT16 get_rst_addr();
 	UINT16 get_nmi_addr();
 	void Update(SymStat stat, bool no_ok= false);
