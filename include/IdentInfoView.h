@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // IdentInfoView.h : header file
 //
 
+#ifndef IDENT_INFO_VIEW_H__
+#define IDENT_INFO_VIEW_H__
+
 /////////////////////////////////////////////////////////////////////////////
 // CIdentInfoView view
 
@@ -45,3 +48,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+#endif /* IDENT_INFO_VIEW_H__ */

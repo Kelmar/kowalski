@@ -36,7 +36,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ConfigSettings.h"
 #include "Broadcast.h"
 #include "FlatBar.h"
-#include "LogWindow.h"
 #include "DynamicHelp.h"
 
 class CSrc6502Doc;
@@ -84,8 +83,6 @@ public:
     CSrc6502View *GetCurrentView();
     CSrc6502Doc *GetCurrentDocument();
 
-    void SetStatusText(int col, const std::string &text);
-
 public:
     CRegisterBar m_wndRegisterBar;
     CIOWindow m_IOWindow;
@@ -93,7 +90,6 @@ public:
     CMemoryInfo m_ZeroPage;
     CMemoryInfo m_Stack;
     CIdentInfo m_Idents;
-    CLogWindow m_wndLog;
     CDynamicHelp m_wndHelpBar;
 
     void UpdateAll();
@@ -185,10 +181,10 @@ protected:
     afx_msg void OnHtmlHelp();  //% Bug fix 1.2.14.1 - convert to HTML help
     afx_msg void OnSymGenIntDlg();
     afx_msg void OnUpdateSymGenIntDlg(CCmdUI* pCmdUI);
-    afx_msg void OnViewLog();
-    afx_msg void OnUpdateViewLog(CCmdUI* pCmdUI);
     afx_msg void OnHelpDynamic();
     afx_msg void OnUpdateHelpDynamic(CCmdUI* pCmdUI);
+
+    
 
     afx_msg void OnSymDebugStop();
     afx_msg LRESULT OnStartDebugger(WPARAM wParam, LPARAM lParam);
@@ -197,8 +193,12 @@ protected:
 
 private: // Event handlers
     void OnExit(wxCommandEvent &);
+    void OnShowLog(wxCommandEvent &);
     void OnAbout(wxCommandEvent &);
 
+private: // UI Updaters
+    void OnUpdateShowLog(wxUpdateUIEvent &);
+    
 private:
     void EnableDockingEx(uint32_t dwDockStyle);
     static const uint32_t dwDockBarMapEx[4][2];

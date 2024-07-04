@@ -247,20 +247,12 @@ void CMainFrame::ConfigSettings(bool load)
         m_Stack.m_WndRect.bottom      += m_Stack.m_WndRect.top;
         m_Stack.m_WndRect.right       += m_Stack.m_WndRect.left;
 
-        m_wndLog.m_WndRect.left        = pApp->GetProfileInt(ENTRY_VIEW, VIEW_LOG_X, 280);
-        m_wndLog.m_WndRect.top         = pApp->GetProfileInt(ENTRY_VIEW, VIEW_LOG_Y, 280);
-        m_wndLog.m_WndRect.right       = pApp->GetProfileInt(ENTRY_VIEW, VIEW_LOG_W, 300);
-        m_wndLog.m_WndRect.bottom      = pApp->GetProfileInt(ENTRY_VIEW, VIEW_LOG_H, 400);
-        m_wndLog.m_WndRect.right       += m_wndLog.m_WndRect.left;
-        m_wndLog.m_WndRect.bottom      += m_wndLog.m_WndRect.top;
-
         CIOWindow::m_bHidden           = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IO_HID, 0);
         CRegisterBar::m_bHidden        = pApp->GetProfileInt(ENTRY_VIEW, VIEW_REGS_HID, 0);
 
         m_Memory.m_bHidden             = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_HID, false) != 0;
         m_ZeroPage.m_bHidden           = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_HID, false) != 0;
         m_Stack.m_bHidden              = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_HID, false) != 0;
-        m_wndLog.m_bHidden             = !!pApp->GetProfileInt(ENTRY_VIEW, VIEW_LOG_HID, false) != 0;
 
 //    CMemoryInfo::m_bHidden = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_HID, false) != 0;
 
@@ -546,7 +538,10 @@ void CMainFrame::BindEvents()
 {
     // Bind events after everything was created okay.
     Bind(wxEVT_MENU, &CMainFrame::OnExit, this, wxID_EXIT);
+    Bind(wxEVT_MENU, &CMainFrame::OnShowLog, this, evID_SHOW_LOG);
     Bind(wxEVT_MENU, &CMainFrame::OnAbout, this, wxID_ABOUT);
+
+    Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateShowLog, this, evID_SHOW_LOG);
 }
 
 /*************************************************************************/
@@ -560,9 +555,27 @@ void CMainFrame::OnExit(wxCommandEvent &)
 
 /*************************************************************************/
 
+void CMainFrame::OnShowLog(wxCommandEvent &)
+{
+    auto logFrame = wxGetApp().logFrame()->GetFrame();
+
+    logFrame->Show(!logFrame->IsVisible());
+}
+
+/*************************************************************************/
+
 void CMainFrame::OnAbout(wxCommandEvent &)
 {
     wxMessageBox("Testing");
+}
+
+/*************************************************************************/
+
+void CMainFrame::OnUpdateShowLog(wxUpdateUIEvent &event)
+{
+    auto logFrame = wxGetApp().logFrame()->GetFrame();
+
+    event.Check(logFrame->IsVisible());
 }
 
 /*************************************************************************/
@@ -656,6 +669,7 @@ void CMainFrame::InitMenu()
     edit->Append(wxID_PASTE);
 
     wxMenu *view = new wxMenu();
+    view->AppendCheckItem(evID_SHOW_LOG, _("Log"));
     view->Append(evID_SHOW_DISASM, _("Disassembler\tAlt+0"));
     view->AppendSeparator();
     view->Append(evID_SHOW_REGS, _("Registers\tAlt+1"));
@@ -2213,26 +2227,6 @@ void CMainFrame::OnViewZeropage()
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnViewLog()
-{
-    if (wxGetApp().m_global.IsDebugger()) // is simulator present?
-        m_wndLog.Show(!m_wndLog.IsShown());
-    else // There is no program
-        m_wndLog.Hide();
-}
-
-void CMainFrame::OnUpdateViewLog(CCmdUI* pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger()); // is simulator present?
-    pCmdUI->SetCheck(m_wndLog.IsShown());
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
 void CMainFrame::OnViewStack()
 {
     if (wxGetApp().m_global.IsCodePresent()) // Is there a program?
@@ -2294,11 +2288,12 @@ bool CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 
 void CMainFrame::UpdateAll()
 {
+    this->Refresh();
+
     m_IOWindow.Refresh();
     m_Memory.Refresh();
     m_ZeroPage.Refresh();
     m_Stack.Refresh();
-    m_wndLog.Refresh();
 }
 
 void CMainFrame::DelayedUpdateAll()

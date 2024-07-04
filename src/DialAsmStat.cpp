@@ -409,8 +409,8 @@ void CDialAsmStat::OnCancel()
         {
             m_pView->SetErrMark(m_nCurrLine - 1); // Select the line containing the error
 
-            // This probably should be handled with the logging system. -- B.Simonds (April 27, 2024)
-            wxGetApp().SetStatusText(0, m_pAsm6502->GetErrMsg(m_stAsmRetCode));
+            std::string err = m_pAsm6502->GetErrMsg(m_stAsmRetCode);
+            wxLogError(err.c_str());
         }
 
         EndModal(wxID_OK);

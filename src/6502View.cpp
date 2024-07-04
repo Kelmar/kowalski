@@ -226,7 +226,7 @@ void CSrc6502View::disp_warning(int line, const std::string &msg) // debugging m
     // TODO: Use logging. -- B.Simonds (April 27, 2024)
 
     SetErrMark(line); // Select the line containing the error
-    wxGetApp().SetStatusText(0, msg);
+    wxLogWarning(msg.c_str());
 }
 
 //-----------------------------------------------------------------------------

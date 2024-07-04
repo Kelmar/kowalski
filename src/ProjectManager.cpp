@@ -20,14 +20,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+ /*************************************************************************/
 
 #include "StdAfx.h"
 
 #include "LoadCodeOptions.h"
 
 #include "Events.h"
-#include "MainFrm.h"
 #include "ProjectManager.h"
 
 #include "formats/AtariBin.h"
@@ -140,8 +139,8 @@ wxString ProjectManager::GetSupportedFileTypes(
 /*************************************************************************/
 
 wxBEGIN_EVENT_TABLE(ProjectManager, wxEvtHandler)
-    EVT_MENU(evID_LOAD_CODE, ProjectManager::OnLoadCode)
-    EVT_MENU(evID_SAVE_CODE, ProjectManager::OnSaveCode)
+EVT_MENU(evID_LOAD_CODE, ProjectManager::OnLoadCode)
+EVT_MENU(evID_SAVE_CODE, ProjectManager::OnSaveCode)
 wxEND_EVENT_TABLE()
 
 /*************************************************************************/
@@ -163,7 +162,7 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->canRead(); });
 
     std::unique_ptr<wxFileDialog> fileDlg(new wxFileDialog(
-        nullptr, 
+        nullptr,
         _("Load Binary Code"),
         "",
         "",
@@ -198,14 +197,13 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
 
         wxString err = _("Unable to find supported file type for filename: ") + path;
 
-        wxLogWarning(err);
-        wxMessageBox(err);
+        wxLogError(err);
 
         return;
     }
 
     codeTmp->read(path, &state);
-    
+
     std::unique_ptr<LoadCodeOptionsDlg> optDlg(new LoadCodeOptionsDlg(&state));
 
     int res = optDlg->ShowModal();

@@ -65,13 +65,7 @@ wxIMPLEMENT_APP(C6502App);
 
 bool C6502App::OnInit()
 {
-#ifdef _DEBUG
     wxLog::EnableLogging();
-
-    wxLogStderr *logOutput = new wxLogStderr();
-    logOutput->SetLogLevel(wxLogLevelValues::wxLOG_Debug);
-    wxLog::SetActiveTarget(logOutput);
-#endif
 
     wxLogStatus("Application initializing");
 
@@ -117,7 +111,6 @@ bool C6502App::OnInit()
 
     m_mainFrame->Show();
 
-    SetStatusText(0, "Application loaded!");
     wxLogStatus("Application loaded!");
 
     return true;
@@ -128,6 +121,9 @@ bool C6502App::InitFrame()
     wxDocManager *docManager = wxDocManager::GetDocumentManager();
 
     m_mainFrame = new CMainFrame(docManager);
+
+    m_logFrame = new wxLogWindow(m_mainFrame, _("Log"), false);
+    wxLog::SetActiveTarget(m_logFrame);
 
     return true;
 }
@@ -259,12 +255,6 @@ void C6502App::AddToRecentFileList(const std::string &pathName)
         return;
 
     //CWinApp::AddToRecentFileList(pathName);
-}
-
-void C6502App::SetStatusText(int col, const std::string &message)
-{
-    if (m_mainFrame)
-        m_mainFrame->SetStatusText(message, col);
 }
 
 wxFrame *C6502App::CreateChildFrame(wxView *view)

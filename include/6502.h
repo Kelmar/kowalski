@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
 #include "Global.h"
+#include "MainFrm.h"
 
 class CIOWindow;
 
@@ -40,7 +41,8 @@ class CIOWindow;
 class C6502App : public wxApp
 {
 private:
-    wxFrame *m_mainFrame;
+    CMainFrame *m_mainFrame;
+    wxLogWindow *m_logFrame;
 
     wxConfig *m_config;
 
@@ -60,11 +62,12 @@ public:
 
     bool OnInit() override;
 
+    const CMainFrame *mainFrame() const { return m_mainFrame; }
+    const wxLogWindow *logFrame() const { return m_logFrame; }
+
     wxConfig &Config() { return *m_config; }
 
     CIOWindow *ioWindow() { return nullptr; }// m_ioWindow; }
-
-    virtual void SetStatusText(int col, const std::string &message);
 
     virtual void AddToRecentFileList(const std::string &pathName);
 

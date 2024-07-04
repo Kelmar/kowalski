@@ -81,7 +81,7 @@ bool CSrc6502Doc::DoSaveDocument(const wxString &filename)
     wxString str;
     str.Printf("Saved: %s", filename);
 
-    wxGetApp().SetStatusText(0, str.ToStdString());
+    wxLogStatus(str.c_str());
 
     return true;
 }
