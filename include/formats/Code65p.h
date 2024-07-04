@@ -25,16 +25,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef CODE_65P_H__
 #define CODE_65P_H__
 
-class COutputMem;
-class CMarkArea;
+#include "Archive.h"
+#include "ProjectManager.h"
 
-class CCode65p
+class CCode65p : public BinaryCodeTemplate
 {
+protected:
+    virtual void read(BinaryArchive &archive, LoadCodeState *state);
+    virtual void write(BinaryArchive &archive, LoadCodeState *state);
+    
 public:
-    bool SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start = -1);
-    bool SaveCode65p(CArchive &archive, COutputMem &mem, uint32_t start, uint32_t end);
+    /* constructor */ CCode65p();
+    virtual	     ~CCode65p();
 
-    void LoadCode65p(CArchive &archve, COutputMem &mem);
+    virtual bool canRead() const { return true; }
+
+    virtual bool canWrite() const { return false; }
+
+    virtual std::string getDescription() const { return std::string(_("Binary Program")); }
+
+    virtual std::vector<std::string> getExtensions() const { return { "65p" }; }
 };
 
 #endif /* CODE_65P_H__ */

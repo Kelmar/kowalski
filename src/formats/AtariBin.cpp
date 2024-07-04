@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //////////////////////////////////////////////////////////////////////
 
 CAtariBin::CAtariBin()
-    : CodeTemplate()
+    : BinaryCodeTemplate()
 {
 }
 
@@ -38,7 +38,7 @@ CAtariBin::~CAtariBin()
 {
 }
 
-void CAtariBin::Read(Archive &ar, LoadCodeState *state)
+void CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
 {
     uint16_t header;
     ar & header;
@@ -64,7 +64,7 @@ void CAtariBin::Read(Archive &ar, LoadCodeState *state)
         state->Marks.SetStart(from);
         state->Marks.SetEnd(to);
 
-        ar.read(state->Memory->GetSpan(from, to));
+        ar.read(state->Memory->getSpan(from, to));
     }
 
     int start = (*state->Memory)[0x2e0] + (*state->Memory)[0x2e1] * 256; // run address

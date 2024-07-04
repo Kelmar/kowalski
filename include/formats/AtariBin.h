@@ -28,30 +28,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /**
  * @brief Loads Atari binary files (xex) into simulator memory.
  */
-class CAtariBin : public CodeTemplate
+class CAtariBin : public BinaryCodeTemplate
 {
 protected:
-    virtual void Read(Archive &ar, LoadCodeState *state);
-    virtual void Write(Archive &ar, LoadCodeState *state)
+    virtual void read(BinaryArchive &archive, LoadCodeState *state);
+    virtual void write(BinaryArchive &archive, LoadCodeState *state)
     { 
-	UNUSED(ar);
+	UNUSED(archive);
 	UNUSED(state);
 	ASSERT(false); 
     }
 
 public:
-    CAtariBin();
-    virtual ~CAtariBin();
+    /* constructor */ CAtariBin();
+    virtual	     ~CAtariBin();
 
-    virtual bool CanRead() const { return true; }
+    virtual bool canRead() const { return true; }
 
-    virtual bool CanWrite() const { return false; }
+    virtual bool canWrite() const { return false; }
 
-    virtual bool IsBinary() const { return true; }
+    virtual std::string getDescription() const { return std::string(_("Atari Binary Files")); }
 
-    virtual std::string GetDescription() const { return std::string(_("Atari Binary Files")); }
-
-    virtual std::vector<std::string> GetExtensions() const { return { "xex" }; }
+    virtual std::vector<std::string> getExtensions() const { return { "xex" }; }
 };
 
 #endif /* ATARI_BIN_H__ */

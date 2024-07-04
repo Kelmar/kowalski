@@ -33,25 +33,22 @@
 
 Archive::Archive(
     const std::string &filename,
-    Archive::Mode mode,
-    Archive::Endianess endianess /* = Archive::Endianess::Platform */,
-    CheckFn checkFn /* = noChecksum */)
+    Archive::Mode mode)
     : m_filename(filename)
     , m_file(nullptr)
+    , m_size(0)
     , m_mode(mode)
-    , m_endianess(endianess)
-    , m_checkFn(checkFn ? checkFn : noCheck)
-    , m_swapFn(noSwap)
 {
+    // Note that we open as binary, we'll process the line endings ourselves.
     m_file = std::fopen(m_filename.c_str(), m_mode == Mode::Read ? "rb" : "wb");
 
-#if WORDS_BIGENDIAN
-    if (m_endianess == Archive::Endianess::Little)
-        m_swapFn = byteSwap;
-#else
-    if (m_endianess == Archive::Endianess::Big)
-        m_swapFn = byteSwap;
-#endif
+    if (m_mode == Mode::Read)
+    {
+        // Find size of file.
+        std::fseek(m_file, 0, SEEK_END);
+        m_size = std::ftell(m_file);
+        std::fseek(m_file, 0, SEEK_SET);
+    }
 }
 
 Archive::~Archive()
@@ -71,7 +68,50 @@ size_t Archive::read(std::span<uint8_t> buffer)
 
 void Archive::write(const std::span<uint8_t> &buffer)
 {
-    std::fwrite(buffer.data(), 1, buffer.size(), m_file);
+    m_size += std::fwrite(buffer.data(), 1, buffer.size(), m_file);
 }
 
 /*************************************************************************/
+/*************************************************************************/
+
+TextArchive::TextArchive(const std::string &filename,
+    Archive::Mode mode,
+    LineEnding lineEnding)
+    : Archive(filename, mode)
+    , m_lineEnding(lineEnding)
+{
+}
+
+/*************************************************************************/
+
+std::string TextArchive::readLine()
+{
+    return "";
+}
+
+void TextArchive::writeLine(const std::string &str)
+{
+    UNUSED(str);
+}
+
+/*************************************************************************/
+/*************************************************************************/
+
+BinaryArchive::BinaryArchive(const std::string &filename,
+    Archive::Mode mode,
+    BinaryArchive::Endianess endianess /* = Endianess::None */)
+    : Archive(filename, mode)
+    , m_endianess(endianess)
+    , m_swapFn(noSwap)
+{
+#if WORDS_BIGENDIAN
+    if (m_endianess == Endianess::Little)
+        m_swapFn = byteSwap;
+#else
+    if (m_endianess == Endianess::Big)
+        m_swapFn = byteSwap;
+#endif
+}
+
+/*************************************************************************/
+

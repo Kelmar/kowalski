@@ -28,34 +28,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "MarkArea.h"
 #include "Sym6502.h"
 
-bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, uint32_t start, uint32_t end)
+CCode65p::CCode65p()
+    : BinaryCodeTemplate()
 {
-    UNUSED(archive);
-    UNUSED(mem);
-    UNUSED(start);
-    UNUSED(end);
-
-#if 0
-    if (start > 0xFFFF) // 1.3.3 support for 24-bit addressing
-    {
-        CString cs;
-        cs.Format("The Program File format does not support memory above 65,535");
-        MessageBoxA(NULL, cs, "Error", MB_OK );
-    }
-    else
-    {
-        int header = 0xFFFF;
-
-        archive.Write(&header, 2);
-        archive.Write(&start, 2);
-        archive.Write(&end, 2);
-        archive.Write(&mem[start], end - start + 1);
-    }
-#endif
-
-    return true;
 }
 
+CCode65p::~CCode65p()
+{
+}
+
+void CCode65p::write(BinaryArchive &archive, LoadCodeState *state)
+{
+    UNUSED(archive);
+    UNUSED(state);
+
+    if (state->StartAddress > 0xFFFF) // 1.3.3 support for 24-bit addressing
+        throw new FileError(FileError::Unsupported);
+
+    uint16_t header = 0xFFFF;
+    archive & header;
+
+    header = static_cast<uint16_t>(state->StartAddress & 0xFFFF);
+    archive & header;
+
+    header = 0; // static_cast<uint16_t>(state->EndAddress & 0xFFFF);
+    archive & header;
+
+    //archive.write(state->Memory->getSpan(state->StartAddress, state->EndAddress));
+}
+
+#if 0
 bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start)
 {
     UNUSED(archive);
@@ -63,8 +65,7 @@ bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, 
     UNUSED(area);
     UNUSED(prog_start);
 
-#if 0
-    int header = 0xFFFF;
+    uint16_t header = 0xFFFF;
     archive.Write(&header, 2);
 
     for (UINT part = 0; part<area.GetSize(); part++)
@@ -96,46 +97,42 @@ bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, 
             archive.Write(&mem[start], end - start + 1);
         }
     }
-#endif
 
     return true;
 }
 
-void CCode65p::LoadCode65p(CArchive &archive, COutputMem &mem)
-{
-    UNUSED(archive);
-    UNUSED(mem);
+#endif
 
-#if 0
+void CCode65p::read(BinaryArchive &archive, LoadCodeState *state)
+{
     uint16_t wTemp;
-    archive >> wTemp;
+    archive & wTemp;
 
     if (wTemp != 0xFFFF)
-        throw new CFileException(CFileException::invalidFile);
+        throw new FileError(FileError::Corrupt);
 
-    int nLen = static_cast<int>(archive.GetFile()->GetLength() - 2);
+    size_t nLen = archive.size() - 2;
 
     do
     {
         uint16_t from, to;
-        archive >> from;
+        archive & from;
 
         if (from == 0xFFFF)
         {
             nLen -= 2;
-            archive >> from;
+            archive & from;
         }
 
-        archive >> to;
+        archive & to;
         nLen -= 4;
 
         if (to < from)
-            throw new CFileException(CFileException::invalidFile);
+            throw new FileError(FileError::Corrupt);
 
-        mem.Load(archive, from, to);
+        archive.read(state->Memory->getSpan(from, to));
+
         nLen -= to - from + 1;
     } while (nLen > 0);
-    //while (archive.GetFile()->GetLength() > archive.GetFile()->GetPosition());
-#endif
 }
 

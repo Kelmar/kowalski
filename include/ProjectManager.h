@@ -31,11 +31,11 @@
 #include "Archive.h"
 #include "LoadCodeOptions.h"
 
-// ATARI- archive, mem, area, prog_start
-// Intel- archive, mem, area, prog_start
-// Moto - archive, mem, area, prog_start
-// Bin  - archive, start, end (raw bin)
-// 65p  - archive, from, to (some header)
+// Atari - archive, mem, area, prog_start
+// Intel - archive, mem, area, prog_start
+// Moto  - archive, mem, area, prog_start
+// Bin   - archive, start, end (raw bin)
+// 65p   - archive, from, to (some header)
 
 /*************************************************************************/
 
@@ -47,35 +47,53 @@ class CodeTemplate
 protected:
     /* constructor */ CodeTemplate() { }
 
-    virtual void Read(Archive &ar, LoadCodeState *state) = 0;
-    virtual void Write(Archive &ar, LoadCodeState *state) = 0;
-
 public:
     virtual ~CodeTemplate() { }
 
     /// Check if we can read this format from disk
-    virtual bool CanRead() const = 0;
+    virtual bool canRead() const = 0;
 
     /// Checks if we can write this format to disk
     
-    virtual bool CanWrite() const = 0;
+    virtual bool canWrite() const = 0;
 
     /// Returns if this format is in binary or not.
-    virtual bool IsBinary() const = 0;
+    virtual bool isBinary() const = 0;
 
     /// Returns a human readable description of the file type.
-    virtual std::string GetDescription() const = 0;
+    virtual std::string getDescription() const = 0;
 
     /// Returns a list of file extensions supported by this template.
-    virtual std::vector<std::string> GetExtensions() const = 0;
+    virtual std::vector<std::string> getExtensions() const = 0;
 
     /// Checks to see if this code template supports the supplied file extension.
-    virtual bool SupportsExt(const std::string &ext) const;
+    virtual bool supportsExt(const std::string &ext) const;
 
-    virtual void Read(const std::string &path, LoadCodeState *state);
-    virtual void Write(const std::string &path, LoadCodeState *state);
+    virtual void read(const std::string &path, LoadCodeState *state) = 0;
+    virtual void write(const std::string &path, LoadCodeState *state) = 0;
 
-    virtual std::string ToString() const;
+    virtual std::string toString() const;
+};
+
+/*************************************************************************/
+
+
+
+/*************************************************************************/
+
+class BinaryCodeTemplate : public CodeTemplate
+{
+protected:
+    /* constructor */ BinaryCodeTemplate() { }
+
+    virtual void read(BinaryArchive &ar, LoadCodeState *state) = 0;
+    virtual void write(BinaryArchive &ar, LoadCodeState *state) = 0;
+
+public:
+    virtual bool isBinary() const { return true; }
+
+    virtual void read(const std::string &path, LoadCodeState *state);
+    virtual void write(const std::string &path, LoadCodeState *state);
 };
 
 /*************************************************************************/

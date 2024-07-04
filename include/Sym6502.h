@@ -303,7 +303,7 @@ private:
 
     uint16_t get_word(uint32_t addr)
     {
-        return ctx.mem.GetWord(addr);
+        return ctx.mem.getWord(addr);
     }
 
     void push_on_stack(uint8_t arg)

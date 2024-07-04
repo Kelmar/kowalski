@@ -208,13 +208,13 @@ namespace str
     }
 
     /**
-     * Constraint that requires class to define a ToString() method that 
+     * Constraint that requires class to define a toString() method that 
      * returns a string of the object.
      */
     template <typename T>
     concept str_convertable = requires(T a)
     {
-        { a.ToString() } -> std::convertible_to<std::string>;
+        { a.toString() } -> std::convertible_to<std::string>;
     };
 
     const std::string empty;
@@ -243,12 +243,12 @@ namespace file
  * 
  * Operator that will convert and object to a string and send it to the stream.
  * 
- * This function requires that the object's class define a ToString() method.
+ * This function requires that the object's class define a toString() method.
  */
 template <str::str_convertable T>
 std::ostream &operator <<(std::ostream &stream, const T &item)
 {
-    stream << item.ToString();
+    stream << item.toString();
     return stream;
 }
 

@@ -31,15 +31,16 @@
 #include "ProjectManager.h"
 
 #include "formats/AtariBin.h"
+#include "formats/Code65p.h"
 #include "formats/MotorolaSRecord.h"
 
 /*************************************************************************/
 /*************************************************************************/
 
-bool CodeTemplate::SupportsExt(const std::string &ext) const
+bool CodeTemplate::supportsExt(const std::string &ext) const
 {
     // GCC 11 makes us assign to a useless temp variable first. >_<
-    auto exts = GetExtensions();
+    auto exts = getExtensions();
     auto e = exts | std::views::transform(str::toLower);
 
     return std::ranges::find(e, ext | str::trim | str::toLower) != e.end();
@@ -47,34 +48,35 @@ bool CodeTemplate::SupportsExt(const std::string &ext) const
 
 /*************************************************************************/
 
-std::string CodeTemplate::ToString() const
+std::string CodeTemplate::toString() const
 {
     // GCC 11 makes us assign to a useless temp variable first. >_<
-    auto exts = GetExtensions();
+    auto exts = getExtensions();
 
     auto filters = exts
         | std::views::transform(str::toLower)
         | std::views::transform([](auto s) -> std::string { return "*." + s; });
 
-    return fmt::format("{0} ({1})|{1}", GetDescription(), str::join(";", filters));
+    return fmt::format("{0} ({1})|{1}", getDescription(), str::join(";", filters));
+}
+
+/*************************************************************************/
+/*************************************************************************/
+
+void BinaryCodeTemplate::read(const std::string &filename, LoadCodeState *state)
+{
+    BinaryArchive archive(filename, Archive::Mode::Read, BinaryArchive::Endianess::Little);
+
+    read(_In_ archive, state);
 }
 
 /*************************************************************************/
 
-void CodeTemplate::Read(const std::string &filename, LoadCodeState *state)
+void BinaryCodeTemplate::write(const std::string &filename, LoadCodeState *state)
 {
-    Archive archive(filename, Archive::Mode::Read, Archive::Endianess::Little);
+    BinaryArchive archive(filename, Archive::Mode::Write, BinaryArchive::Endianess::Little);
 
-    Read(_In_ archive, state);
-}
-
-/*************************************************************************/
-
-void CodeTemplate::Write(const std::string &filename, LoadCodeState *state)
-{
-    Archive archive(filename, Archive::Mode::Write, Archive::Endianess::Little);
-
-    Write(_In_ archive, state);
+    write(_In_ archive, state);
 }
 
 /*************************************************************************/
@@ -107,6 +109,7 @@ void ProjectManager::InitCodeTemplates()
 
     //AddTemplate<CMotorolaSRecord>();
     AddTemplate<CAtariBin>();
+    AddTemplate<CCode65p>();
 }
 
 /*************************************************************************/
@@ -126,7 +129,7 @@ wxString ProjectManager::GetSupportedFileTypes(
     return str::join("|",
         m_templates
         | std::views::filter(predicate)
-        | std::ranges::views::transform([](auto ptr) -> std::string { return ptr->ToString(); })
+        | std::ranges::views::transform([](auto ptr) -> std::string { return ptr->toString(); })
     );
 }
 
@@ -153,7 +156,7 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
 
     event.Skip();
 
-    wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->CanRead(); });
+    wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->canRead(); });
 
     // Add ability to select any file type.
     //exts += "|All Files (*.*)|*.*";
@@ -186,7 +189,7 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     }
     else
     {
-        auto supportsExt = [&ext](std::shared_ptr<CodeTemplate> t) { return t->SupportsExt(ext); };
+        auto supportsExt = [&ext](std::shared_ptr<CodeTemplate> t) { return t->supportsExt(ext); };
         codeTmp = *std::ranges::find_if(m_templates, supportsExt);
     }
 
@@ -202,7 +205,7 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
         return;
     }
 
-    codeTmp->Read(path, &state);
+    codeTmp->read(path, &state);
     
     std::unique_ptr<LoadCodeOptionsDlg> optDlg(new LoadCodeOptionsDlg(&state));
 
@@ -218,7 +221,7 @@ void ProjectManager::OnSaveCode(wxCommandEvent &event)
 {
     event.Skip();
 
-    wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->CanWrite(); });
+    wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->canWrite(); });
 }
 
 /*************************************************************************/

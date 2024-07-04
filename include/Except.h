@@ -55,7 +55,10 @@ public:
         SysError,
 
         // File format is corrupt
-        Corrupt
+        Corrupt,
+
+        // Request to save in an unsupported format.
+        Unsupported
     };
 
 private:
