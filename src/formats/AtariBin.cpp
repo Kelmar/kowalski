@@ -42,7 +42,7 @@ CAtariBin::~CAtariBin()
 
 void CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
 {
-    uint16_t header;
+    uint16_t header = 0;
     ar & header;
 
     if (header != 0xFFFF)

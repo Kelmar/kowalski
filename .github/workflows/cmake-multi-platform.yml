@@ -45,6 +45,7 @@ jobs:
     - name: Install WX Widgets
       id: apt
       shell: bash
+      if: runner.os == 'Ubuntu'
       run: |
         sudo apt-get install -y libwxgtk3.0-gtk3-dev
 
