@@ -105,7 +105,7 @@ bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, 
 
 void CCode65p::read(BinaryArchive &archive, LoadCodeState *state)
 {
-    uint16_t wTemp;
+    uint16_t wTemp = 0;
     archive & wTemp;
 
     if (wTemp != 0xFFFF)

@@ -1,13 +1,18 @@
-# 6502
+# 6502/65816
 
 Integrated macro assembler, simulator and debugger for 650x microprocessor family. Allows you to write, test, and run 6502/65c02 programs.
+
+# Status
+![Build Status](https://github.com/kelmar/kowalski/actions/workflows/cmake-multi-platform.yml/badge.svg?branch=wx_port)
+
+# Building
 
 Can be built with free Community Edition Visual Studio 2022.
 
 This branch is currently being ported to wxWidgets and CMake so it can be built on multiple platforms.
 
 Build works now for Linux and Windows:
-```base
+```bash
 mkdir build
 cd build
 cmake ../kowalski/CMakeFiles.txt
