@@ -16,4 +16,4 @@ cmake --build
 
 If you are using Visual Studio 2022 Community edition, you can also open the folder from the IDE.
 It will pick up the cmake configs and set everything up accordingly.  Once it's done you should
-be able to build and run strate from Visual Studio!
+be able to build and run straight from Visual Studio!
