@@ -1131,7 +1131,9 @@ bool CCrystalTextBuffer::Undo(wxPoint &ptCursorPos)
         }
         else
         {
+#ifdef _DEBUG
             int nEndLine, nEndChar;
+#endif
             VERIFY(InternalInsertText(NULL, ur.m_ptStartPos.y, ur.m_ptStartPos.x, ur.GetText(), nEndLine, nEndChar));
 #ifdef _ADVANCED_BUGCHECK
             ASSERT(ur.m_ptEndPos.y == nEndLine);
@@ -1166,7 +1168,9 @@ bool CCrystalTextBuffer::Redo(wxPoint &ptCursorPos)
 
         if (ur.m_flags & UNDO_INSERT)
         {
+#ifdef _DEBUG
             int nEndLine, nEndChar;
+#endif
             VERIFY(InternalInsertText(NULL, ur.m_ptStartPos.y, ur.m_ptStartPos.x, ur.GetText(), nEndLine, nEndChar));
 #ifdef _ADVANCED_BUGCHECK
             ASSERT(ur.m_ptEndPos.y == nEndLine);

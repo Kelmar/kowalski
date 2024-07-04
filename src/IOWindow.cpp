@@ -585,6 +585,8 @@ afx_msg LRESULT CIOWindow::OnCls(WPARAM /*wParam*/, LPARAM /* lParam */)
 
 afx_msg LRESULT CIOWindow::OnPutC(WPARAM wParam, LPARAM lParam)
 {
+    UNUSED(wParam);
+
     if (lParam == 0)
         VERIFY(PutC(int(uint8_t(wParam))) == 0);
     else if (lParam == 1)
