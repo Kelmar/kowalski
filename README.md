@@ -11,7 +11,7 @@ Can be built with free Community Edition Visual Studio 2022.
 
 This branch is currently being ported to wxWidgets and CMake so it can be built on multiple platforms.
 
-## Unbuntu
+## Ubuntu
 You need to make sure you have wxWidgets installed with the development libraries:
 ```bash
 sudo apt install -y libwxgtk3.0-gtk3-dev
