@@ -20,54 +20,49 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+ /*************************************************************************/
 
 #include "StdAfx.h"
-
-#include "File.h"
-
-/*************************************************************************/
-
-File::File(const std::string &name)
-    : m_file(nullptr)
-    , m_eof(false)
-{
-    UNUSED(name);
-}
-
-File::~File(void)
-{
-    if (m_file)
-        std::fclose(m_file);
-}
+#include "formats/RawBin.h"
 
 /*************************************************************************/
 
-void File::Flush(void)
+// TODO: This should get moved into a processor specific defintion later
+#define START_ADDRESS 0x0000FFFD
+
+/*************************************************************************/
+
+CRawBin::CRawBin()
+    : BinaryCodeTemplate()
 {
-    std::fflush(m_file);
+}
+
+CRawBin::~CRawBin()
+{
 }
 
 /*************************************************************************/
 
-std::string File::ReadLine()
+void CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
 {
-    char buf[512];
-    return std::fgets(buf, sizeof(buf), m_file);
+    ProcessorType procType = wxGetApp().m_global.GetProcType();
+    size_t maxSize = procType == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
+
+    size_t sz = std::min(ar.size(), maxSize);
+
+    ar.read(state->Memory->getSpan(0, sz));
+
+    state->StartAddress = state->Memory->getWord(START_ADDRESS);
 }
 
 /*************************************************************************/
 
-char File::ReadChar()
+void CRawBin::write(BinaryArchive &ar, LoadCodeState *state)
 {
-    return 0;
-}
+    ProcessorType procType = wxGetApp().m_global.GetProcType();
+    size_t sz = procType == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
 
-/*************************************************************************/
-
-void File::WriteLine(const std::string &line)
-{
-    std::fputs(line.c_str(), m_file);
+    ar.write(state->Memory->getSpan(0, sz));
 }
 
 /*************************************************************************/

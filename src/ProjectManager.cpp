@@ -33,6 +33,7 @@
 #include "formats/AtariBin.h"
 #include "formats/Code65p.h"
 #include "formats/MotorolaSRecord.h"
+#include "formats/RawBin.h"
 
 /*************************************************************************/
 /*************************************************************************/
@@ -110,6 +111,9 @@ void ProjectManager::InitCodeTemplates()
     //AddTemplate<CMotorolaSRecord>();
     AddTemplate<CAtariBin>();
     AddTemplate<CCode65p>();
+
+    // Keep RawBin last so it shows up as the last option in the drop down.
+    AddTemplate<CRawBin>();
 }
 
 /*************************************************************************/
@@ -157,11 +161,6 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     event.Skip();
 
     wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->canRead(); });
-
-    // Add ability to select any file type.
-    //exts += "|All Files (*.*)|*.*";
-    
-    // Would be better to just implement an "Any" file type loader.
 
     std::unique_ptr<wxFileDialog> fileDlg(new wxFileDialog(
         nullptr, 

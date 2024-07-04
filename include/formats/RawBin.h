@@ -22,42 +22,39 @@
  */
 /*************************************************************************/
 
-#ifndef FILE_H__
-#define FILE_H__
+#ifndef RAWBIN_H__
+#define RAWBIN_H__
 
-/*************************************************************************/
+#include "StdAfx.h"
+#include "Archive.h"
+#include "LoadCodeOptions.h"
+#include "ProjectManager.h"
 
-#include <cstdio>
-#include <string>
-
-/*************************************************************************/
-
-class File
+/**
+ * @brief Loads raw binary files into simulator memory.
+ * 
+ * This class does not make an attempt to interpret the data in anyway.
+ * It just raw loads/dumps the memory.
+ */
+class CRawBin : public BinaryCodeTemplate
 {
-private:
-    std::FILE *m_file;
-    bool m_eof;
+protected:
+    virtual void read(BinaryArchive &archive, LoadCodeState *state);
+    virtual void write(BinaryArchive& archive, LoadCodeState *state);
 
 public:
-    /* constructor */ File(const std::string &name);
-    virtual          ~File();
+    /* constructor */ CRawBin();
+    virtual          ~CRawBin();
 
-    bool Eof() const { return m_eof; }
+    virtual bool canRead() const { return true; }
 
-    void Flush(void);
+    virtual bool canWrite() const { return true; }
 
-    std::string ReadLine();
+    virtual std::string getDescription() const { return std::string(_("Raw binary files")); }
 
-    char ReadChar();
-
-    void WriteLine(const std::string &str);
-
-    inline
-    void WriteLine(const wxString &str) { WriteLine(str.ToStdString()); }
+    virtual std::vector<std::string> getExtensions() const { return { "*" }; }
 };
 
-/*************************************************************************/
-
-#endif /* FILE_H__ */
+#endif /* RAWBIN_H__ */
 
 /*************************************************************************/

@@ -38,6 +38,8 @@ CAtariBin::~CAtariBin()
 {
 }
 
+/*************************************************************************/
+
 void CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
 {
     uint16_t header;
@@ -79,3 +81,4 @@ void CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
         state->StartAddress = start;
 }
 
+/*************************************************************************/
