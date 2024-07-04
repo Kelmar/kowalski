@@ -11,7 +11,13 @@ Can be built with free Community Edition Visual Studio 2022.
 
 This branch is currently being ported to wxWidgets and CMake so it can be built on multiple platforms.
 
-Build works now for Linux and Windows:
+## Unbuntu
+You need to make sure you have wxWidgets installed with the development libraries:
+```bash
+sudo apt install -y libwxgtk3.0-gtk3-dev
+```
+
+You can then build once that is installed:
 ```bash
 mkdir build
 cd build
@@ -19,6 +25,7 @@ cmake ../kowalski/CMakeFiles.txt
 cmake --build
 ```
 
-If you are using Visual Studio 2022 Community edition, you can also open the folder from the IDE.
-It will pick up the cmake configs and set everything up accordingly.  Once it's done you should
-be able to build and run straight from Visual Studio!
+# Windows
+For Windows it is easist to just open the folder with the Visual Studio 2022 IDE and let it run CMake for you.
+
+wxWidgets will be downloaded and compiled as part of the build.
