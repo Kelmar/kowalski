@@ -202,6 +202,29 @@ void CGlobal::SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info
 #endif
 }
 
+void CGlobal::LoadCode(const LoadCodeState &state)
+{
+    m_ProgMem = *state.Memory;
+
+    SetCodePresence(true);
+
+    uint32_t start = state.StartAddress;
+
+    if (start == CSym6502::INVALID_ADDRESS)
+    {
+        // TODO: This should be in the simulator and not here. -- B.Simonds (July 4, 2024)
+        uint32_t vector = m_pSym6502->getVectorAddress(CSym6502::Vector::RESET);
+        start = m_ProgMem.getWord(vector);
+    }
+
+    SetStart(start);
+
+    StartDebug();
+
+    Broadcast::ToViews(EVT_PROG_MEM_CHANGED, (WPARAM)start, 0);
+    Broadcast::ToPopups(EVT_PROG_MEM_CHANGED, (WPARAM)start, 0);
+}
+
 void CGlobal::LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info, int nClear/*= 0*/)
 {
     UNUSED(archive);

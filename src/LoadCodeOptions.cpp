@@ -35,24 +35,33 @@ LoadCodeOptionsDlg::LoadCodeOptionsDlg(LoadCodeState *state)
     if (!wxXmlResource::Get()->LoadDialog(this, nullptr, "CodeLoadOptionsDlg"))
         throw ResourceError();
 
-    HexValidator addrValidate(&m_state->StartAddress);
+    HexValidator startAddrValidate(&m_state->StartAddress);
+    HexValidator loadAddrValidate(&m_state->LoadAddress);
     HexValidator byteValidate(&m_state->FillByte, NumberFormat::DollarHex, 2);
 
     if (wxGetApp().m_global.m_procType == ProcessorType::WDC65816)
-        addrValidate.SetMaxValue(0x00FF'FFFF); // 1.3.3 support for 24-bit addressing
+    {
+        startAddrValidate.SetMaxValue(0x00FF'FFFF); // 1.3.3 support for 24-bit addressing
+        loadAddrValidate.SetMaxValue(0x00FF'FFFF);
+    }
     else
-        addrValidate.SetMaxValue(0x0000'FFFF);
+    {
+        startAddrValidate.SetMaxValue(0x0000'FFFF);
+        loadAddrValidate.SetMaxValue(0x0000'FFFF);
+    }
 
     //byteValidate.SetMaxValue(255);
 
-    wxTextCtrl *addrTxt = FindChild<wxTextCtrl>("m_addressTxt");
+    wxTextCtrl *startAddrTxt = FindChild<wxTextCtrl>("m_startAddrTxt");
+    wxTextCtrl *loadAddrTxt = FindChild<wxTextCtrl>("m_loadAddrTxt");
     wxCheckBox *clearChk = FindChild<wxCheckBox>("m_memClearChk");
     //wxTextCtrl *byteTxt = FindChild<wxTextCtrl>("m_memByteTxt");
     wxSpinCtrl *byteVal = FindChild<wxSpinCtrl>("m_byteSpin");
 
     byteVal->SetBase(16); // Display in Hex
 
-    addrTxt->SetValidator(addrValidate);
+    startAddrTxt->SetValidator(startAddrValidate);
+    loadAddrTxt->SetValidator(loadAddrValidate);
 
     clearChk->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, [=,this](wxCommandEvent &) {
         m_state->ClearMemory = clearChk->IsChecked();
@@ -60,7 +69,7 @@ LoadCodeOptionsDlg::LoadCodeOptionsDlg(LoadCodeState *state)
 
     //byteTxt->SetValidator(byteValidate);
 
-    addrTxt->SetFocus();
+    startAddrTxt->SetFocus();
 }
 
 /////////////////////////////////////////////////////////////////////////////

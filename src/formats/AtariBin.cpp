@@ -40,7 +40,7 @@ CAtariBin::~CAtariBin()
 
 /*************************************************************************/
 
-void CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
+bool CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
 {
     uint16_t header = 0;
     ar & header;
@@ -79,6 +79,8 @@ void CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
 
     if (start != 0)
         state->StartAddress = start;
+
+    return true;
 }
 
 /*************************************************************************/

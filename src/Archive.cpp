@@ -42,6 +42,9 @@ Archive::Archive(
     // Note that we open as binary, we'll process the line endings ourselves.
     m_file = std::fopen(m_filename.c_str(), m_mode == Mode::Read ? "rb" : "wb");
 
+    if (m_file == nullptr)
+        throw FileError(FileError::ErrorCode::SysError);
+
     if (m_mode == Mode::Read)
     {
         // Find size of file.

@@ -39,44 +39,63 @@
 
 bool CodeTemplate::supportsExt(const std::string &ext) const
 {
+    if (m_exprCache.empty())
+    {
+        for (auto pattern : getWildCards())
+            m_exprCache.push_back(std::regex(pattern | str::filePatToRegex));
+    }
+
+    return std::ranges::any_of(m_exprCache, str::matches(ext));
+}
+
+/*************************************************************************/
+
+std::vector<std::string> CodeTemplate::getWildCards() const
+{
     // GCC 11 makes us assign to a useless temp variable first. >_<
     auto exts = getExtensions();
-    auto e = exts | std::views::transform(str::toLower);
 
-    return std::ranges::find(e, ext | str::trim | str::toLower) != e.end();
+    auto r = exts
+        | std::views::transform(str::toLower)
+        | std::views::transform([](auto s) -> std::string { return "*." + s; })
+        ;
+
+    std::vector<std::string> rval(r.begin(), r.end());
+
+    return rval;
 }
 
 /*************************************************************************/
 
 std::string CodeTemplate::toString() const
 {
-    // GCC 11 makes us assign to a useless temp variable first. >_<
-    auto exts = getExtensions();
+    if (m_toStringCache.empty())
+    {
+        auto filters = getWildCards();
 
-    auto filters = exts
-        | std::views::transform(str::toLower)
-        | std::views::transform([](auto s) -> std::string { return "*." + s; });
+        m_toStringCache = fmt::format("{0} ({1})|{1}", getDescription(), str::join(";", filters));
+    }
 
-    return fmt::format("{0} ({1})|{1}", getDescription(), str::join(";", filters));
+    return m_toStringCache;
 }
 
 /*************************************************************************/
 /*************************************************************************/
 
-void BinaryCodeTemplate::read(const std::string &filename, LoadCodeState *state)
+bool BinaryCodeTemplate::read(const std::string &filename, LoadCodeState *state)
 {
     BinaryArchive archive(filename, Archive::Mode::Read, BinaryArchive::Endianess::Little);
 
-    read(_In_ archive, state);
+    return read(_In_ archive, state);
 }
 
 /*************************************************************************/
 
-void BinaryCodeTemplate::write(const std::string &filename, LoadCodeState *state)
+bool BinaryCodeTemplate::write(const std::string &filename, LoadCodeState *state)
 {
     BinaryArchive archive(filename, Archive::Mode::Write, BinaryArchive::Endianess::Little);
 
-    write(_In_ archive, state);
+    return write(_In_ archive, state);
 }
 
 /*************************************************************************/
@@ -147,6 +166,8 @@ wxEND_EVENT_TABLE()
 
 void ProjectManager::OnLoadCode(wxCommandEvent &event)
 {
+    event.Skip();
+
     // TODO: Remove static qualifier from this, and save values to registry.
     /*static LoadCodeState options =
     {
@@ -156,8 +177,6 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     };*/
 
     LoadCodeState state;
-
-    event.Skip();
 
     wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->canRead(); });
 
@@ -173,7 +192,7 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     if (fileDlg->ShowModal() != wxID_OK)
         return;
 
-    std::string path = fileDlg->GetFilename().ToStdString();
+    std::string path = fileDlg->GetPath().ToStdString();
 
     std::string ext = file::getExtension(path);
     std::shared_ptr<CodeTemplate> codeTmp;
@@ -188,7 +207,9 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     else
     {
         auto supportsExt = [&ext](std::shared_ptr<CodeTemplate> t) { return t->supportsExt(ext); };
-        codeTmp = *std::ranges::find_if(m_templates, supportsExt);
+        auto found = std::ranges::find_if(m_templates, supportsExt);
+
+        codeTmp = found != m_templates.end() ? *found : nullptr;
     }
 
     if (!codeTmp)
@@ -202,14 +223,24 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
         return;
     }
 
-    codeTmp->read(path, &state);
+    try
+    {
+        if (!codeTmp->read(path, &state))
+        {
+            wxLogDebug(_("User aborted load"));
+            return;
+        }
+    }
+    catch (const std::exception &ex)
+    {
+        std::string err(_("Error: "));
+        err += ex.what();
 
-    std::unique_ptr<LoadCodeOptionsDlg> optDlg(new LoadCodeOptionsDlg(&state));
-
-    int res = optDlg->ShowModal();
-
-    if (res != wxID_OK)
+        wxLogError(err.c_str());
         return;
+    }
+
+    wxGetApp().m_global.LoadCode(state);
 }
 
 /*************************************************************************/

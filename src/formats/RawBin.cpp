@@ -27,11 +27,6 @@
 
 /*************************************************************************/
 
-// TODO: This should get moved into a processor specific defintion later
-#define START_ADDRESS 0x0000FFFD
-
-/*************************************************************************/
-
 CRawBin::CRawBin()
     : BinaryCodeTemplate()
 {
@@ -43,26 +38,47 @@ CRawBin::~CRawBin()
 
 /*************************************************************************/
 
-void CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
+bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
 {
     ProcessorType procType = wxGetApp().m_global.GetProcType();
     size_t maxSize = procType == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
 
     size_t sz = std::min(ar.size(), maxSize);
 
-    ar.read(state->Memory->getSpan(0, sz));
+    if (sz <= 0xFFFF)
+    {
+        /*
+         * We're making an assumption here that we're loading some sort of ROM with a start vector in it.
+         * 
+         * In which case we're going to load it into the upper part of the 64K address space.
+         */
+        state->LoadAddress = 0x10000 - sz;
+    }
 
-    state->StartAddress = state->Memory->getWord(START_ADDRESS);
+    // Anything larger than 64K is probably a dump of a 65816, we'll load from the begining.
+
+    std::unique_ptr<LoadCodeOptionsDlg> optDlg(new LoadCodeOptionsDlg(state));
+
+    int res = optDlg->ShowModal();
+
+    if (res != wxID_OK)
+        return false;
+    
+    ar.read(state->Memory->getSpan(state->StartAddress, sz));
+
+    return true;
 }
 
 /*************************************************************************/
 
-void CRawBin::write(BinaryArchive &ar, LoadCodeState *state)
+bool CRawBin::write(BinaryArchive &ar, LoadCodeState *state)
 {
     ProcessorType procType = wxGetApp().m_global.GetProcType();
     size_t sz = procType == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
 
     ar.write(state->Memory->getSpan(0, sz));
+
+    return true;
 }
 
 /*************************************************************************/

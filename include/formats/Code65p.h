@@ -31,8 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CCode65p : public BinaryCodeTemplate
 {
 protected:
-    virtual void read(BinaryArchive &archive, LoadCodeState *state);
-    virtual void write(BinaryArchive &archive, LoadCodeState *state);
+    virtual bool read(BinaryArchive &archive, LoadCodeState *state);
+    virtual bool write(BinaryArchive &archive, LoadCodeState *state);
     
 public:
     /* constructor */ CCode65p();

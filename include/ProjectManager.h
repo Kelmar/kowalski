@@ -44,6 +44,12 @@
  */
 class CodeTemplate
 {
+private:
+    mutable std::string m_toStringCache;
+    mutable std::vector<std::regex> m_exprCache;
+
+    std::vector<std::string> getWildCards() const;
+
 protected:
     /* constructor */ CodeTemplate() { }
 
@@ -69,8 +75,8 @@ public:
     /// Checks to see if this code template supports the supplied file extension.
     virtual bool supportsExt(const std::string &ext) const;
 
-    virtual void read(const std::string &path, LoadCodeState *state) = 0;
-    virtual void write(const std::string &path, LoadCodeState *state) = 0;
+    virtual bool read(const std::string &path, LoadCodeState *state) = 0;
+    virtual bool write(const std::string &path, LoadCodeState *state) = 0;
 
     virtual std::string toString() const;
 };
@@ -86,14 +92,14 @@ class BinaryCodeTemplate : public CodeTemplate
 protected:
     /* constructor */ BinaryCodeTemplate() { }
 
-    virtual void read(BinaryArchive &ar, LoadCodeState *state) = 0;
-    virtual void write(BinaryArchive &ar, LoadCodeState *state) = 0;
+    virtual bool read(BinaryArchive &ar, LoadCodeState *state) = 0;
+    virtual bool write(BinaryArchive &ar, LoadCodeState *state) = 0;
 
 public:
     virtual bool isBinary() const { return true; }
 
-    virtual void read(const std::string &path, LoadCodeState *state);
-    virtual void write(const std::string &path, LoadCodeState *state);
+    virtual bool read(const std::string &path, LoadCodeState *state);
+    virtual bool write(const std::string &path, LoadCodeState *state);
 };
 
 /*************************************************************************/

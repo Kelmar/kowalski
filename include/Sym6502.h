@@ -231,11 +231,31 @@ typedef CLogBuffer<CmdInfo> CommandLog;
 
 //=============================================================================
 
-class CSym6502 //: public CAsm::
+class CSym6502
 {
     CContext ctx, pre, old; //% bug Fix 1.2.13.18 - command log assembly not lined up with registers (added pre)
     CDebugInfo *debug;
     CommandLog m_Log;
+
+public:
+    static const uint32_t INVALID_ADDRESS = 0xFFFF'FFFF;
+
+    enum class Vector
+    {
+        IRQ   = 0,
+        BRK   = 1,
+        RESET = 2,
+        NMI   = 3,
+        ABORT = 4,
+        COP   = 5
+    };
+
+    /**
+     * @brief Get the address for the supplied vector.
+     * @param v The vector to get the address of.
+     * @return Returns a location in memory that will hold the location of the requested vector.
+     */
+    virtual uint32_t getVectorAddress(Vector v);
 
 public:
     static int bus_width;
@@ -410,6 +430,8 @@ public:
     {
         init();
     }
+
+    virtual ~CSym6502() { }
 
     void Restart(const COutputMem &mem);
     void SymStart(uint32_t org);

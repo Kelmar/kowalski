@@ -68,6 +68,33 @@ void CContext::set_status_reg_bits(uint8_t reg)
     interrupt = !!(reg & INTERRUPT);
 }
 
+uint32_t CSym6502::getVectorAddress(Vector v)
+{
+    switch (v)
+    {
+    case Vector::IRQ:
+    case Vector::BRK:
+        return 0x0000'FFFE;
+
+    case Vector::RESET:
+        return 0x0000'FFFC;
+
+    case Vector::NMI:
+        return 0x0000'FFFA;
+
+    case Vector::ABORT:
+        return 0x0000'FFF8;
+
+    case Vector::COP:
+        return 0x0000'FFF4;
+
+    default:
+        ASSERT(false);
+        wxLogWarning(_("Invalid vector request"));
+        return INVALID_ADDRESS;
+    }
+}
+
 //=============================================================================
 
 uint16_t CSym6502::get_argument_address(bool bWrite)

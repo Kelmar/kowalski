@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Sym6502.h"
 #include "MarkArea.h"
 #include "IntGenerator.h"
+#include "LoadCodeOptions.h"
 
 // Temporary place holder for now
 class CArchive;
@@ -225,6 +226,8 @@ public:
 
     void SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info);
     void LoadCode(CArchive &archive, uint32_t start, uint32_t end, int info, int nClear = 0);
+
+    void LoadCode(const LoadCodeState &state);
 };
 
 #endif /* GLOBAL_H__ */

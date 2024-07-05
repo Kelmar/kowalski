@@ -37,7 +37,7 @@ CCode65p::~CCode65p()
 {
 }
 
-void CCode65p::write(BinaryArchive &archive, LoadCodeState *state)
+bool CCode65p::write(BinaryArchive &archive, LoadCodeState *state)
 {
     UNUSED(archive);
     UNUSED(state);
@@ -55,6 +55,7 @@ void CCode65p::write(BinaryArchive &archive, LoadCodeState *state)
     archive & header;
 
     //archive.write(state->Memory->getSpan(state->StartAddress, state->EndAddress));
+    return true;
 }
 
 #if 0
@@ -103,7 +104,7 @@ bool CCode65p::SaveCode65p(CArchive &archive, COutputMem &mem, CMarkArea &area, 
 
 #endif
 
-void CCode65p::read(BinaryArchive &archive, LoadCodeState *state)
+bool CCode65p::read(BinaryArchive &archive, LoadCodeState *state)
 {
     uint16_t wTemp = 0;
     archive & wTemp;
@@ -134,5 +135,7 @@ void CCode65p::read(BinaryArchive &archive, LoadCodeState *state)
 
         nLen -= to - from + 1;
     } while (nLen > 0);
+
+    return true;
 }
 

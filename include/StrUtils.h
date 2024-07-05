@@ -43,6 +43,26 @@ namespace chr
     inline char toLower(char c) { return std::tolower(c); }
     inline char toUpper(char c) { return std::toupper(c); }
 
+    // Convert file match pattern character to regular expression.
+    inline std::string filePatToRegex(char c)
+    {
+        if ((c >= '0' && c <= '9') ||
+            (c >= 'A' && c <= 'Z') ||
+            (c >= 'a' && c <= 'z')
+           )
+        {
+            return std::string("") + c;
+        }
+
+        if (c == '*')
+            return std::string(".*");
+
+        if (c == '?')
+            return std::string(".?");
+
+        return std::string("\\") + c;
+    }
+
     inline bool isAlpha(char c) { return std::isalpha(c); }
     inline bool isDigit(char c) { return std::isdigit(c); }
     inline bool isAlNum(char c) { return std::isalnum(c); }
@@ -186,6 +206,33 @@ namespace str
     const transform_t toUpper(chr::toUpper);
 
     /**
+     * @brief Convert a file pattern to a regular expression
+     * @param filePattern The file pattern we're matching against
+     * @return The regular expression pattern
+     */
+    struct filepat_transform_t : public basic_operator
+    {
+    public:
+        std::string operator()(const std::string &s) const override
+        {
+            std::string rval;
+            rval.reserve(s.size() * 2);
+
+            for (auto c : s)
+                rval += chr::filePatToRegex(c);
+
+            return rval;
+        }
+    };
+
+    /**
+     * @brief Convert a file pattern to a regular expression
+     * @param filePattern The file pattern we're matching against
+     * @return The regular expression pattern
+     */
+    const filepat_transform_t filePatToRegex;
+
+    /**
      * @brief Convert a container of items into a single string separated by separator.
      */
     template <std::ranges::forward_range TRange>
@@ -218,6 +265,17 @@ namespace str
     };
 
     const std::string empty;
+
+    /**
+     * @brief Matches a string to a regular expression pattern.
+     * @param s The string to check
+     * @return A function that will compare the string to a regular expression.
+     */
+    inline 
+    auto matches(const std::string &s)
+    {
+        return [&s](const std::regex &pattern) { return std::regex_match(s, pattern); };
+    }
 }
 
 namespace file

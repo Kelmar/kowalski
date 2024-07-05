@@ -39,8 +39,8 @@
 class CRawBin : public BinaryCodeTemplate
 {
 protected:
-    virtual void read(BinaryArchive &archive, LoadCodeState *state);
-    virtual void write(BinaryArchive& archive, LoadCodeState *state);
+    virtual bool read(BinaryArchive &archive, LoadCodeState *state);
+    virtual bool write(BinaryArchive& archive, LoadCodeState *state);
 
 public:
     /* constructor */ CRawBin();

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LOAD_CODE_OPTIONS_H__
 
 #include "HexValidator.h"
+#include "Sym6502.h"
 
 /*************************************************************************/
 /**
@@ -30,7 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 struct LoadCodeState
 {
     LoadCodeState()
-	: StartAddress(0)
+	: StartAddress(CSym6502::INVALID_ADDRESS)
+	, LoadAddress(0)
 	, ClearMemory(false)
 	, FillByte(0)
 	, Memory(new COutputMem())
@@ -40,6 +42,9 @@ struct LoadCodeState
 
     // Address where simulator should jump to, to begin execution.
     uint32_t StartAddress;
+
+    // Address where we should load the block of memory to.
+    uint32_t LoadAddress;
 
     // Set if the memory should be cleared with FillByte
     bool ClearMemory;

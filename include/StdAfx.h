@@ -61,6 +61,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <list>
 #include <memory>
 #include <ranges>
+#include <regex>
 #include <span>
 #include <string>
 #include <type_traits>
