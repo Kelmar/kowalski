@@ -32,9 +32,9 @@ class CContext;
 
 class CDeasm6502Doc : public CDocument, CAsm
 {
-  UINT m_uStart;		// zmienne wykorzystane przy zapisie
-  UINT m_uEnd;			// deasemblowanego programu
-  UINT m_uLength;
+  UINT32 m_uStart;		// zmienne wykorzystane przy zapisie
+  UINT32 m_uEnd;			// deasemblowanego programu
+  UINT32 m_uLength;
   bool m_bSaveAsData;
 
 protected:
@@ -43,7 +43,7 @@ protected:
 
   const CContext *m_pCtx;
   UINT32 m_uStartAddr;
-  int m_nPointerAddr;		//  adres wsk. przez strza³kê (->) lub -1
+  UINT32 m_nPointerAddr;		//  adres wsk. przez strza³kê (->) lub -1
 
   virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bReplace = TRUE);
   void DeassembleSave(CArchive &ar, const CContext &ctx, UINT32 start, UINT32 end, int opt);
@@ -54,7 +54,7 @@ public:
   
   // Operations
 public:
-  void SetPointer(int addr, bool scroll= FALSE);
+  void SetPointer(UINT32 addr, bool scroll= FALSE);
   
   // Overrides
   // ClassWizard generated virtual function overrides

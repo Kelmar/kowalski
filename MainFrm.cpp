@@ -118,7 +118,7 @@ void CMainFrame::ConfigSettings(bool load)
     static const TCHAR ENTRY_GEN[] = _T("General");
     static const TCHAR GEN_PROC[] = _T("ProcType");
     static const TCHAR GEN_HELP[] = _T("HelpType");       //^^ Help
-    static const TCHAR GEN_BUS_WIDTH[] = _T("BusWidth");
+    //	static const TCHAR GEN_BUS_WIDTH[] = _T("BusWidth");
     static const TCHAR GEN_PTR[] = _T("PointerColor");
     static const TCHAR GEN_BRKP[] = _T("BreakpointColor");
     static const TCHAR GEN_ERR[] = _T("ErrorColor");
@@ -208,7 +208,11 @@ void CMainFrame::ConfigSettings(bool load)
         CMarks::m_rgbBreakpoint = COLORREF(pApp->GetProfileInt(ENTRY_GEN, GEN_BRKP, (int)RGB(0, 0, 160)));
         CMarks::m_rgbError = COLORREF(pApp->GetProfileInt(ENTRY_GEN, GEN_ERR, (int)RGB(255, 0, 0)));
 
-        int procType = pApp->GetProfileInt(ENTRY_GEN, GEN_PROC, 1);
+        //		CSym6502::bus_width            = pApp->GetProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, 16);
+        theApp.m_global.m_bGenerateListing = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_LST, false);
+        theApp.m_global.m_strListingFile = pApp->GetProfileString(ENTRY_ASM, ASM_LST_FILE, NULL);
+        CAsm6502::generateBRKExtraByte = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_BYTE, 1);
+        CAsm6502::BRKExtraByte = (UINT8)pApp->GetProfileInt(ENTRY_ASM, ASM_BRK_BYTE, 0);
 
         theApp.m_global.SetProcType(static_cast<ProcessorType>(procType));
 
@@ -329,7 +333,7 @@ void CMainFrame::ConfigSettings(bool load)
 
         pApp->WriteProfileInt(ENTRY_GEN, GEN_PROC, (int)theApp.m_global.GetProcType());
         pApp->WriteProfileInt(ENTRY_GEN, GEN_HELP, (int)theApp.m_global.GetHelpType());    //^^ Help
-        pApp->WriteProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, CSym6502::bus_width);
+        //	  pApp->WriteProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, CSym6502::bus_width);
         pApp->WriteProfileInt(ENTRY_GEN, GEN_PTR, (int)CMarks::m_rgbPointer);
         pApp->WriteProfileInt(ENTRY_GEN, GEN_BRKP, (int)CMarks::m_rgbBreakpoint);
         pApp->WriteProfileInt(ENTRY_GEN, GEN_ERR, (int)CMarks::m_rgbError);
@@ -1034,15 +1038,15 @@ void CMainFrame::OnSymDebug()		// uruchomienie debuggera
         if (!theApp.m_global.IsCodePresent())
             return;
 
-        if (theApp.m_global.GetProcType() == ProcessorType::WDC65816) // 1.3 65816 mode - disable simulator mode
-        {
-            CString cs;
-            cs.Format("The debugger does not currently support the 65816 processor.  Please go to the program options and selected a different processor to use the debugger.");
-            MessageBoxA(cs, "Reminder", MB_OK);
-            return;
-        }
+        //                if (theApp.m_global.GetProcType() == ProcessorType::WDC65816) // 1.3 65816 mode - disable simulator mode
+        //                {
+        //                    CString cs;
+        //                    cs.Format("The debugger does not currently support the 65816 processor.  Please go to the program options and selected a different processor to use the debugger.");
+        //                    MessageBoxA( cs, "Reminder", MB_OK );
+        //                    return;
+        //                }
         theApp.m_global.StartDebug();
-        //		m_wndToolBar.OnInitialUpdate();
+        //                m_wndToolBar.OnInitialUpdate();
         DelayedUpdateAll();
         StartIntGenerator();
     }
@@ -1051,16 +1055,16 @@ void CMainFrame::OnSymDebug()		// uruchomienie debuggera
         return;
       m_wndRegisterBar.Update( theApp.m_global.GetSimulator()->GetContext(), theApp.m_global.GetStatMsg() );
 
-      if (m_IOWindow.m_hWnd != 0)
-      {
-        m_IOWindow.SendMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
-        m_IOWindow.SendMessage(CIOWindow::CMD_CLS);
-      }
-      if (m_wndRegisterBar.m_hWnd != 0)
-        m_wndRegisterBar.PostMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
-      if (m_Idents.m_hWnd != 0)
-        m_Idents.PostMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
-    */
+          if (m_IOWindow.m_hWnd != 0)
+          {
+            m_IOWindow.SendMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
+            m_IOWindow.SendMessage(CIOWindow::CMD_CLS);
+          }
+          if (m_wndRegisterBar.m_hWnd != 0)
+            m_wndRegisterBar.PostMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
+          if (m_Idents.m_hWnd != 0)
+            m_Idents.PostMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
+        */
 }
 
 //-----------------------------------------------------------------------------
@@ -1475,7 +1479,7 @@ int CMainFrame::Options(int page)
     dial.m_MarksPage.m_nProc6502 = static_cast<int>(theApp.m_global.GetProcType());
     dial.m_MarksPage.m_nHelpFile = theApp.m_global.GetHelpType();
 
-    dial.m_MarksPage.m_uBusWidth = CSym6502::bus_width;
+    //    dial.m_MarksPage.m_uBusWidth = CSym6502::bus_width;
     dial.m_MarksPage.m_rgbPointer = CMarks::m_rgbPointer;
     dial.m_MarksPage.m_rgbBreakpoint = CMarks::m_rgbBreakpoint;
     dial.m_MarksPage.m_rgbError = CMarks::m_rgbError;
@@ -1530,7 +1534,7 @@ int CMainFrame::Options(int page)
     //theApp.m_global.SetProcType(!dial.m_MarksPage.m_nProc6502);
     theApp.m_global.SetProcType(static_cast<ProcessorType>(dial.m_MarksPage.m_nProc6502));
     theApp.m_global.SetHelpType(dial.m_MarksPage.m_nHelpFile);
-    CSym6502::bus_width = dial.m_MarksPage.m_uBusWidth;
+    //    CSym6502::bus_width     = dial.m_MarksPage.m_uBusWidth;
     CMarks::m_rgbPointer = dial.m_MarksPage.m_rgbPointer;
     CMarks::m_rgbBreakpoint = dial.m_MarksPage.m_rgbBreakpoint;
     CMarks::m_rgbError = dial.m_MarksPage.m_rgbError;
@@ -1997,15 +2001,20 @@ void CMainFrame::UpdateAll()
     if (m_Stack.m_hWnd)
     {
         if (CSym6502 *pSimulator = theApp.m_global.GetSimulator())
-            m_Stack.InvalidateView(pSimulator->GetContext()->s + 0x100);
+            if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
+                m_Stack.InvalidateView(pSimulator->GetContext()->s); // + 0x100);  //***
+            else
+                m_Stack.InvalidateView(pSimulator->GetContext()->s + 0x100);  //***
         else
             m_Stack.Invalidate();
     }
     if (m_wndLog.m_hWnd)
+    {
         if (CSym6502 *pSimulator = theApp.m_global.GetSimulator())
             m_wndLog.SetText(pSimulator->GetLog());
         else
             m_wndLog.Invalidate();
+    }
 }
 
 void CMainFrame::DelayedUpdateAll()

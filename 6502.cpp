@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static char THIS_FILE[] = __FILE__;
 #endif
 
-const TCHAR C6502App::REGISTRY_KEY[] = _T("MiKSoft");
-const TCHAR C6502App::PROFILE_NAME[] = _T("6502 Simulator\\1.3");
+const TCHAR C6502App::REGISTRY_KEY[]= _T("MiKSoft");
+const TCHAR C6502App::PROFILE_NAME[]= _T("6502 Simulator\\1.4");
 
 /////////////////////////////////////////////////////////////////////////////
 // C6502App
@@ -91,7 +91,7 @@ BOOL C6502App::InitInstance()
     m_pszHelpFilePath = _tcsdup(strHelpFile);
 
     //-------------------------------------------------------------------------------------
-    // wczytanie zasobów
+    // wczytanie zasobï¿½w
     m_hInstRes = LoadLibrary("Res.dll");
     if (m_hInstRes == NULL)
     {
@@ -187,7 +187,7 @@ BOOL C6502App::InitInstance()
     // The main window has been initialized, so show and update it.
     pMainFrame->ShowWindow(m_nCmdShow);
     pMainFrame->UpdateWindow();
-    pMainFrame->SetFocus();	// przywracamy fokus - zamiast na DialBar, do g³ównego okna
+    pMainFrame->SetFocus();	// przywracamy fokus - zamiast na DialBar, do gï¿½ï¿½wnego okna
 
     return true;
 }

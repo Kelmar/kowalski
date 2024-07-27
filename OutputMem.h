@@ -73,10 +73,22 @@ public:
     ASSERT(m_uMask > 0);
     return GetAt(uAddr & m_uMask) + (UINT32(GetAt((uAddr + 1) & m_uMask)) << 8);
   }
-  UINT16 GetWordInd(UINT8 uZpAddr) const
+  UINT32 GetLWord(UINT32 uAddr) const
+  {
+    ASSERT(m_uMask > 0);
+    return GetAt(uAddr & m_uMask) + (UINT32(GetAt((uAddr + 1) & m_uMask)) << 8)+ (UINT32(GetAt((uAddr + 2) & m_uMask)) << 16);
+  }
+  UINT16 GetWordInd(UINT16 uZpAddr) const
   {
     ASSERT(m_uMask > 0);
     return GetAt(uZpAddr) + (GetAt(uZpAddr + UINT8(1)) << 8);
+//    UINT8 uAddr= GetAt(uZpAddr);
+//    return GetAt(uZpAddr) + UINT16(GetAt(uZpAddr + UINT8(1)) << 8);
+  }
+  UINT32 GetLWordInd(UINT16 uZpAddr) const
+  {
+    ASSERT(m_uMask > 0);
+    return GetAt(uZpAddr) + (GetAt(uZpAddr + 1) << 8)+ (GetAt(uZpAddr + 2) << 16);
 //    UINT8 uAddr= GetAt(uZpAddr);
 //    return GetAt(uZpAddr) + UINT16(GetAt(uZpAddr + UINT8(1)) << 8);
   }

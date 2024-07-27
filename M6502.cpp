@@ -4331,7 +4331,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
     else
         byte = trans[code][mode];
 
-    if (m_procType == ProcessorType::WDC65816 && code == C_WDM && mode == A_IMM) // allow WDM in 65816 mode
+    if (m_procType == ProcessorType::WDC65816 && code == C_WDM && mode == A_ACC) // allow WDM in 65816 mode
     {
         length = 1 + 1;
         return OK;

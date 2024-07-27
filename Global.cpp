@@ -57,15 +57,15 @@ CAsm::DbgFlag CGlobal::GetLineDebugFlags(int line, CString doc_title)
 {
     FileUID fuid = m_Debug.GetFileUID(doc_title);	// ID pliku
     CDebugLine dl;
-    m_Debug.GetAddress(dl, line, fuid);	// znalezienie adresu odpowiadaj¹cego wierszowi
-    return (DbgFlag)dl.flags;		// flagi opisuj¹ce wiersz programu
+    m_Debug.GetAddress(dl, line, fuid);	// znalezienie adresu odpowiadajï¿½cego wierszowi
+    return (DbgFlag)dl.flags;		// flagi opisujï¿½ce wiersz programu
 }
 
 UINT32 CGlobal::GetLineCodeAddr(int line, CString doc_title)
 {
     FileUID fuid = m_Debug.GetFileUID(doc_title);	// ID pliku
     CDebugLine dl;
-    m_Debug.GetAddress(dl, line, fuid);	// znalezienie adresu odpowiadaj¹cego wierszowi
+    m_Debug.GetAddress(dl, line, fuid);	// znalezienie adresu odpowiadajï¿½cego wierszowi
     return dl.addr;
 }
 
@@ -73,7 +73,7 @@ bool CGlobal::SetTempExecBreakpoint(int line, CString doc_title)
 {
     FileUID fuid = m_Debug.GetFileUID(doc_title);	// ID pliku
     CDebugLine dl;
-    m_Debug.GetAddress(dl, line, fuid);	// znalezienie adresu odpowiadaj¹cego wierszowi
+    m_Debug.GetAddress(dl, line, fuid);	// znalezienie adresu odpowiadajï¿½cego wierszowi
     if (dl.flags == DBG_EMPTY || (dl.flags & DBG_MACRO))
         return FALSE;		// nie ma kodu w wierszu 'line'
     m_Debug.SetTemporaryExecBreakpoint(dl.addr);
@@ -85,14 +85,15 @@ bool CGlobal::CreateDeasm()
 {
     ASSERT(m_pSym6502 != NULL);
 
-    CDeasm6502Doc *pDoc = (CDeasm6502Doc *)theApp.m_pDocDeasmTemplate->OpenDocumentFile(NULL);
+    CDeasm6502Doc *pDoc = (CDeasm6502Doc*) theApp.m_pDocDeasmTemplate->OpenDocumentFile(NULL);
+
     if (pDoc == NULL)
         return FALSE;
-    /*
-      pDoc->SetContext( m_pSym6502->GetContext() );
-      pDoc->SetStart( m_pSym6502->get_pc() );
-    */
-    pDoc->SetPointer(m_pSym6502->get_pc());
+
+    if (m_bBank)
+        pDoc->SetPointer(m_pSym6502->get_pc() + (m_bPBR << 16));
+    else
+        pDoc->SetPointer(m_pSym6502->get_pc());
 
     return TRUE;
 }
@@ -101,26 +102,34 @@ bool CGlobal::CreateDeasm()
 
 void CGlobal::StartDebug()
 {
-    if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)  // 1.3.3 disable debugger for 65816
-        return;
-
+//  if (theApp.m_global.GetProcType() == ProcessorType::WDC65C816)  // 1.3.3 disable debugger for 65816
+//	  return;
+	
     GetMemForSym();
     bool restart;
+
     if (m_pSym6502 == NULL)
-        restart = FALSE, m_pSym6502 = new CSym6502(m_Mem, &m_Debug, m_uAddrBusWidth);
+    {
+        restart = FALSE;
+        m_pSym6502 = new CSym6502(m_Mem, &m_Debug, m_uAddrBusWidth);
+    }
     else
-        restart = TRUE, m_pSym6502->Restart(m_Mem);
+    {
+        restart = TRUE;
+        m_pSym6502->Restart(m_Mem);
+    }
+
     m_pSym6502->finish = m_SymFinish;
     m_pSym6502->SymStart(m_uOrigin);
-    m_pSym6502->Update(CAsm::SYM_OK, TRUE);
+    m_pSym6502->Update(CAsm::SYM_OK,TRUE);
     /*
-      struct { const CString *pStr, const CContext *pCtx } data;
-      CString str= m_pSym6502->GetStatMsg(stat);
-      data.pStr = &str;
-      data.pCtx = m_pSym6502->GetContext();
+    struct { const CString *pStr, const CContext *pCtx } data;
+    CString str= m_pSym6502->GetStatMsg(stat);
+    data.pStr = &str;
+    data.pCtx = m_pSym6502->GetContext();
     */
     SendMessageToViews(WM_USER_START_DEBUGGER);
-    SendMessageToPopups(WM_USER_START_DEBUGGER, (WPARAM)restart);
+    SendMessageToPopups(WM_USER_START_DEBUGGER,(WPARAM)restart);
 }
 
 
@@ -174,7 +183,7 @@ void CGlobal::SaveCode(CArchive &archive, UINT32 start, UINT32 end, int info)
 
 void CGlobal::LoadCode(CArchive &archive, UINT32 start, UINT32 end, int info, int nClear/*= 0*/)
 {
-    COutputMem mem;	// pamiêæ na ³adowany program
+    COutputMem mem;	// pamiï¿½ï¿½ na ï¿½adowany program
     int prog_start = -1;
 
     if (nClear != -1)
@@ -245,7 +254,7 @@ void CGlobal::LoadCode(CArchive &archive, UINT32 start, UINT32 end, int info, in
         ASSERT(false);
     }
 
-    m_ProgMem = mem;	// uda³o siê za³adowaæ program
+    m_ProgMem = mem;	// udaï¿½o siï¿½ zaï¿½adowaï¿½ program
     SetCodePresence(TRUE);
     SetStart(prog_start != -1 ? prog_start : start);
     StartDebug();

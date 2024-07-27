@@ -28,24 +28,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CGlobal : public CObject, CAsm, virtual CBroadcast
 {
-	UINT m_uAddrBusWidth;			// szerokoœæ szyny adresowej
+	UINT m_uAddrBusWidth;			// szerokoï¿½ï¿½ szyny adresowej
 	bool m_bCodePresent;			// true -> po udanej asemblacji
-	COutputMem m_ProgMem;			// pamiêæ zapisywana w procesie asemblacji
+	COutputMem m_ProgMem;			// pamiï¿½ï¿½ zapisywana w procesie asemblacji
 	CDebugInfo m_Debug;				// informacja uruchomieniowa dla symulatora
-	UINT32 m_uOrigin;				// pocz¹tek programu 6502
+	UINT32 m_uOrigin;				// poczï¿½tek programu 6502
 	CSym6502 *m_pSym6502;			// symulator
-	Finish m_SymFinish;				// sposób koñczenia programu przez symulator
-	CMarkArea m_MarkArea;			// oznaczenie fragmentów pamiêci zawieraj¹cej kod wynikowy
+	Finish m_SymFinish;				// sposï¿½b koï¿½czenia programu przez symulator
+	CMarkArea m_MarkArea;			// oznaczenie fragmentï¿½w pamiï¿½ci zawierajï¿½cej kod wynikowy
 public:
-	ProcessorType m_procType;   // Type of processor
+    ProcessorType m_procType;       // Type of processor
+    bool m_bBank;					// flag for memory above bank 0 for deasm view
+    UINT8 m_bPBR;                   // PBR register for deasm view
+    UINT16 m_bSRef;                 // stack pointer reference
 	UINT8 m_bHelpFile;              // ^^ help file type
-	COutputMem m_Mem;				// pamiêæ dla kodu wynikowego i symulatora
-	bool m_bGenerateListing;		// generowaæ listing przy asemblacji?
+	COutputMem m_Mem;				// pamiï¿½ï¿½ dla kodu wynikowego i symulatora
+	bool m_bGenerateListing;		// generowaï¿½ listing przy asemblacji?
 	CString m_strListingFile;		// plik z listingiem
 	CIntGenerator m_IntGenerator;	// interrupt request generator data
 
 	CGlobal() : m_pSym6502(NULL), m_bCodePresent(false)
-	{ SetAddrBusWidth(16); }
+	{ SetAddrBusWidth(24); } //**memfix
 
 	~CGlobal()
 	{ if (m_pSym6502) delete m_pSym6502; }
@@ -60,13 +63,13 @@ public:
 	CDebugInfo *GetDebug()
 	{ return &m_Debug; }
 
-	COutputMem *GetMemForAsm()	// pamiêæ na kod wynikowy (asemblacja)
+	COutputMem *GetMemForAsm()	// pamiï¿½ï¿½ na kod wynikowy (asemblacja)
 	{ 
 		m_ProgMem.ClearMem();
 		return &m_ProgMem;
 	}
 
-	COutputMem *GetMemForSym()	// pamiêæ z kodem wynikowym (symulator)
+	COutputMem *GetMemForSym()	// pamiï¿½ï¿½ z kodem wynikowym (symulator)
 	{
 		if (m_bCodePresent)
 		{
@@ -79,9 +82,9 @@ public:
 	CMarkArea *GetMarkArea()
 	{ return &m_MarkArea; }
 
-	COutputMem *GetMem()		// pamiêæ z kodem wynikowym
+	COutputMem *GetMem()		// pamiï¿½ï¿½ z kodem wynikowym
 	{ return &m_Mem; }
-	UINT32 GetStartAddr()		// pocz¹tek programu
+	UINT32 GetStartAddr()		// poczï¿½tek programu
 	{ return m_uOrigin; }
 
 	bool IsCodePresent()

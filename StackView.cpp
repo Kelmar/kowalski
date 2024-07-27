@@ -74,7 +74,7 @@ void CStackView::OnDraw(CDC* pDC)
   CMemoryDoc* pDoc= (CMemoryDoc *)GetDocument();
   ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CMemoryDoc)));
   CString line(_T(' '), 1 + max(m_nCx, 8));
-  UINT16 addr= 0x1ff - pDoc->m_uAddress;
+  UINT16 addr= theApp.m_global.m_bSRef - pDoc->m_uAddress;
   TCHAR hex[8];
   int lim= bytes_in_line();	// iloœæ wyœwietlanych w jednym wierszu bajtów
   COutputMem& mem= *pDoc->m_pMem;
@@ -86,10 +86,12 @@ void CStackView::OnDraw(CDC* pDC)
   for (int i=0, y=0; i <= m_nCy; i++, y += m_nChrH)
   {
     int nLo= mem[addr];
-    int nHi= mem[((addr + 1) & 0xFF) + 0x100];
+    int nHi=  mem[addr+1];
+		//mem[((addr + 1) & 0xFF) + 0x100];
     int nPtr= nLo + (nHi << 8);
     ASSERT(nPtr >= 0 && nPtr <= 0xFFFF);
-    line.Format(_T("%03X  %02X '%c'  %04X "), int(addr), nLo, nLo > 0 ? nLo : ' ', nPtr);
+	if (i==9) nPtr= pDoc->m_uStackPtr;
+    line.Format(_T("%04X  %02X '%c'  %04X "), int(addr), nLo, nLo > 0 ? nLo : ' ', nPtr);
     int j;
     for (j= 0; j < lim; j++)
     {

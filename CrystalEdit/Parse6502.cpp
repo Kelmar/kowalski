@@ -1064,7 +1064,7 @@ public:
 CString Instructions::AddMode(UINT8 cmd, OpCode inst, CodeAdr mode, ProcessorType procType)
 {
     CString cs;
-    cs = CDeasm::Mnemonic(cmd, procType, false);
+    cs = CDeasm::Mnemonic(cmd, procType, true);
     cs += CDeasm::Argument(cmd, mode, 0x8000, 0x34, 0x12, 0x00, false, true);
     cs += "\n";
     return cs;
@@ -1149,822 +1149,821 @@ extern CString GetInstructionDesc(const CString &strInstruction)
     Instructions inst;
     CString strDesc;
 
-    if (strInstruction.CompareNoCase(_T("ADC")) == 0)
-    {
-        strDesc = "#title#ADC#text#\nAdd Memory to Accumulator with Carry."
-            "#flags#NVZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_ADC);
-        strDesc += "#desc#ADC adds memory to the accumulator. If D (decimal) flag bit is set ADC operates"
-            " in BCD (packed Binary Coded Decimal) mode, where only decimal digits are allowed. If D flag is clear"
-            " ADC operates in binary two's complement mode.\n"
-            "#exmpl#"
-            " ; add 5 to 'data' word\n"
-            " CLD        ; binary mode\n"
-            " CLC        ; clear carry\n"
-            " LDA data   ; load data\n"
-            " ADC #5     ; add 5\n"
-            " STA data   ; store low byte\n"
-            " BCC .skip  ; no carry over?\n"
-            " INC data+1 ; inc hi byte\n"
-            ".skip:\n"
-            "\n"
-            " ; add $0395 to 'data' word\n"
-            " CLC        ; clear carry\n"
-            " LDA data   ; load data\n"
-            " ADC #$95\n"
-            " STA data   ; store low byte\n"
-            " LDA data+1\n"
-            " ADC #$03   ; add with carry\n"
-            " STA data+1 ; store hi byte\n"
-            "\n<small> (in BCD mode flags N & Z are only set by 65c02 and undefined in case of 6502)\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("AND")) == 0)
-    {
-        strDesc = "#title#AND#text#\n\"AND\" Memory with Accumulator."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_AND);
-        //		strDesc += "#desc#opis blah blah";
-        strDesc +=
-            "#exmpl#"
-            " ; extract bits 0-3\n"
-            " LDA data,X\n"
-            " AND #$0F ; mask four bits\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("ASL")) == 0)
-    {
-        strDesc = "#title#ASL#text#\nShift One Bit Left."
-            "#flags#NZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_ASL);
-        strDesc += "#desc#ASL shifts all bits left one position. Bit 0 is cleared and original bit 7 is moved into the Carry.\n"
-            "#exmpl#"
-            " ; extract bits 4-7\n"
-            " LDA data,X\n"
-            " ASL\n"
-            " ASL\n"
-            " ASL\n"
-            " ASL\n"
-            " ; bits 4-7 are in 0-3 position\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("BBR")) == 0)
-    {
-        strDesc = "#title#BBR#text#\nBranch on Bit Reset."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BBR);
-        //		strDesc += "#desc#opis blah blah";
-    }
-    else if (strInstruction.CompareNoCase(_T("BBS")) == 0)
-    {
-        strDesc = "#title#BBS#text#\nBranch on Bit Set."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BBS);
-    }
-    else if (strInstruction.CompareNoCase(_T("BCC")) == 0)
-    {
-        strDesc = "#title#BCC#text#\nBranch on Carry Clear."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BCC);
-        strDesc += "#exmpl#"
-            " LDA data  ; load data\n"
-            " CMP #10\n"
-            " BCC .less ; jump if data < 10\n";
-        strDesc += "#desc#" + inst.GetBranchInfo();
-    }
-    else if (strInstruction.CompareNoCase(_T("BCS")) == 0)
-    {
-        strDesc = "#title#BCS#text#\nBranch on Carry Set."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BCS);
-        strDesc += "#exmpl#"
-            " LDA data  ; load data\n"
-            " CMP #10\n"
-            " BCS .gt_eq ; jump if data >= 10\n";
-        strDesc += "#desc#" + inst.GetBranchInfo();
-    }
-    else if (strInstruction.CompareNoCase(_T("BEQ")) == 0)
-    {
-        strDesc = "#title#BEQ#text#\nBranch on Result Zero."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BEQ);
-        strDesc += "#exmpl#"
-            " LDA flag  ; load data\n"
-            " BEQ .zero ; jump if flag == 0\n"
-            " CMP #5\n"
-            " BEQ .five ; jump if flag == 5\n";
-        strDesc += "#desc#" + inst.GetBranchInfo();
-    }
-    else if (strInstruction.CompareNoCase(_T("BIT")) == 0)
-    {
-        strDesc = "#title#BIT#text#\nTest Memory Bits with Accumulator."
-            "#flags#NVZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_BIT);
-        strDesc += "#desc#BIT performs \"AND\" operation on its argument and accumulator."
-            " Result is not stored but Z(ero) flag is set accordingly. Flags N and V become"
-            " copies of 7-th (oldest) and 6-th bits of BIT argument.\n"
-            "#exmpl#"
-            " LDA #@1010 ; bits to test\n"
-            " BIT port   ; test port's bits\n"
-            " BEQ .zero  ; both bits clear\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("BMI")) == 0)
-    {
-        strDesc = "#title#BMI#text#\nBranch on Result Minus."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BMI);
-        strDesc += "#exmpl#"
-            " BIT flag  ; flag to test\n"
-            " BMI .neg  ; jump if flag negative\n";
-        strDesc += "#desc#" + inst.GetBranchInfo();
-    }
-    else if (strInstruction.CompareNoCase(_T("BNE")) == 0)
-    {
-        strDesc = "#title#BNE#text#\nBranch on Result Not Zero."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BNE);
-        strDesc += "#exmpl#"
-            " LDA flag      ; load data\n"
-            " BNE .not_zero ; jump if flag != 0\n"
-            " CMP #2\n"
-            " BNE .not_two  ; jump if flag != 2\n";
-        strDesc += "#desc#" + inst.GetBranchInfo();
-    }
-    else if (strInstruction.CompareNoCase(_T("BPL")) == 0)
-    {
-        strDesc = "#title#BPL#text#\nBranch on Result Plus."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BPL);
-        strDesc += "#exmpl#"
-            " LDX #10    ; load counter\n"
-            ".delay:\n"
-            " DEX\n"
-            " BPL .delay ; jump if X >= 0\n";
-        strDesc += "#desc#" + inst.GetBranchInfo();
-    }
-    else if (strInstruction.CompareNoCase(_T("BRA")) == 0)
-    {
-        strDesc = "#title#BRA#text#\nBranch Always."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BRA);
-        strDesc += "#desc#" + inst.GetBranchInfo(false);
-    }
-    else if (strInstruction.CompareNoCase(_T("BRK")) == 0)
-    {
-        strDesc = "#title#BRK#text#\nForce Break."
-            "#flags#B¹DI#modes#";
-        strDesc += inst.GetModes(CAsm::C_BRK);
-        strDesc += "#desc#BRK forces interrupt. CPU fetches interrupt vector ($FFFE/F)"
-            " and jumps to the interrupt handler routine. Bits I and B are set.\n"
-            "Simulator can use this instruction to stop execution of your program.\n"
-            "\n¹<small> (D flag cleared only by 65c02 CPU)\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("BRL")) == 0)
-    {
-        strDesc = "#title#BRL#text#\nBranch Long."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BRL);
-        strDesc += "#desc#BRL jumps relative to the PC (current location--program counter)."
-            " It can jump forward or backward but are limited to local range (+/- 32767 bytes)."
-            " Jump is always effective regardless of flags set in status register."
-            " It does not cross bank boundaries.";
-    }
-    else if (strInstruction.CompareNoCase(_T("BVC")) == 0)
-    {
-        strDesc = "#title#BVC#text#\nBranch on Overflow Clear."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BVC);
-        strDesc += "#desc#" + inst.GetBranchInfo();
-    }
-    else if (strInstruction.CompareNoCase(_T("BVS")) == 0)
-    {
-        strDesc = "#title#BVS#text#\nBranch on Overflow Set."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_BVS);
-        strDesc += "#desc#" + inst.GetBranchInfo();
-    }
-    else if (strInstruction.CompareNoCase(_T("CLC")) == 0)
-    {
-        strDesc = "#title#CLC#text#\nClear Carry Flag."
-            "#flags#C#modes#";
-        strDesc += inst.GetModes(CAsm::C_CLC);
-    }
-    else if (strInstruction.CompareNoCase(_T("CLD")) == 0)
-    {
-        strDesc = "#title#CLD#text#\nClear Decimal Mode."
-            "#flags#D#modes#";
-        strDesc += inst.GetModes(CAsm::C_CLD);
-    }
-    else if (strInstruction.CompareNoCase(_T("CLI")) == 0)
-    {
-        strDesc = "#title#CLI#text#\nClear Interrupt Disable Bit."
-            "#flags#I#modes#";
-        strDesc += inst.GetModes(CAsm::C_CLI);
-    }
-    else if (strInstruction.CompareNoCase(_T("CLV")) == 0)
-    {
-        strDesc = "#title#CLV#text#\nClear Overflow Flag."
-            "#flags#V#modes#";
-        strDesc += inst.GetModes(CAsm::C_CLV);
-    }
-    else if (strInstruction.CompareNoCase(_T("CMP")) == 0)
-    {
-        strDesc = "#title#CMP#text#\nCompare Memory and Accumulator."
-            "#flags#NZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_CMP);
-    }
-    else if (strInstruction.CompareNoCase(_T("COP")) == 0)
-    {
-        strDesc = "#title#COP#text#\nCo-processor interrupt."
-            "#flags#NZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_COP);
-        strDesc += "#desc#COP forces an interrupt. CPU fetches COP vector ($FFF4/$FFE4)"
-            " and jumps to the COP handler routine. Bits I and D in the flag register are set."
-            "Like BRK, the return address from COP is 2 bytes after the COP opcode. There is "
-            "a signature byte following the COP opcode\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("CPX")) == 0)
-    {
-        strDesc = "#title#CPX#text#\nCompare Memory and Index X."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_CPX);
-    }
-    else if (strInstruction.CompareNoCase(_T("CPY")) == 0)
-    {
-        strDesc = "#title#CPY#text#\nCompare Memory and Index Y."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_CPY);
-    }
-    else if (strInstruction.CompareNoCase(_T("DEA")) == 0)
-    {
-        strDesc = "#title#DEA#text#\n.Decrement Accumulator by One"
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_DEA);
-    }
-    else if (strInstruction.CompareNoCase(_T("DEC")) == 0)
-    {
-        strDesc = "#title#DEC#text#\nDecrement by One."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_DEC);
-        strDesc += "#exmpl#"
-            " ; subtract 1 from 6 conecutive bytes\n"
-            " LDX #5      ; counter\n"
-            ".dec:\n"
-            " DEC data,X  ; decrement\n"
-            " DEX\n"
-            " BPL .dec    ; loop\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("DEX")) == 0)
-    {
-        strDesc = "#title#DEX#text#\nDecrement Index X by One."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_DEX);
-        strDesc += "#exmpl#"
-            " ; clear buf[0..31]\n"
-            " LDX #31   ; counter\n"
-            " LDA #0\n"
-            ".clr:\n"
-            " STA buf,X ; clear buffer\n"
-            " DEX\n"
-            " BPL .clr  ; loop\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("DEY")) == 0)
-    {
-        strDesc = "#title#DEY#text#\nDecrement Index Y by One."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_DEY);
-        strDesc += "#exmpl#"
-            " ; copy 200 bytes\n"
-            " LDY #200\n"
-            ".copy\n"
-            " LDA (src),Y\n"
-            " STA (dst),Y\n"
-            " DEY\n"
-            " BNE .copy\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("EOR")) == 0)
-    {
-        strDesc = "#title#EOR#text#\n\"Exclusive-or\" Memory with Accumulator."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_EOR);
-    }
-    else if (strInstruction.CompareNoCase(_T("INA")) == 0)
-    {
-        strDesc = "#title#INA#text#\nIncrement Accumulator by One."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_INA);
-    }
-    else if (strInstruction.CompareNoCase(_T("INC")) == 0)
-    {
-        strDesc = "#title#INC#text#\nIncrement by One."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_INC);
-        strDesc += "#exmpl#"
-            " ; add 1 to 'data' word\n"
-            " INC data   ; inc low byte\n"
-            " BNE .skip\n"
-            " INC data+1 ; inc hi byte\n"
-            ".skip:\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("INX")) == 0)
-    {
-        strDesc = "#title#INX#text#\nIncrement Index X by One."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_INX);
-    }
-    else if (strInstruction.CompareNoCase(_T("INY")) == 0)
-    {
-        strDesc = "#title#INY#text#\n.Increment Index Y by One"
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_INY);
-    }
-    else if (strInstruction.CompareNoCase(_T("JML")) == 0)
-    {
-        strDesc = "#title#JML#text#\nLong Jump to New Location using absolute indirect long addressing."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_JML);
-        strDesc += "#desc#JML looks up the 3 bytes starting at the absolute address provided and moves them into the"
-            "PBR and PC registers.";
-
-    }
-    else if (strInstruction.CompareNoCase(_T("JMP")) == 0)
-    {
-        strDesc = "#title#JMP#text#\nJump to New Location."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_JMP);
-    }
-    else if (strInstruction.CompareNoCase(_T("JSL")) == 0)
-    {
-        strDesc = "#title#JSL#text#\nLong Jump to Subroutine."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_JSL);
-        strDesc += "#desc#JSR calls subroutine: it jumps to the new location saving return address on the stack,"
-            "including the PBR register, so program execution can be resumed when subroutine ends with RTL.\n"
-            "Due to the peculiarity of 6502 return address pushed on the stack is one less then an address of the"
-            " instruction following JSL (i.e. addr - 1 is stored instead of addr).";
-    }
-    else if (strInstruction.CompareNoCase(_T("JSR")) == 0)
-    {
-        strDesc = "#title#JSR#text#\nJump to Subroutine."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_JSR);
-        strDesc += "#desc#JSR calls subroutine: it jumps to the new location saving return address on the stack,"
-            " so program execution can be resumed when subroutine ends with RTS.\n"
-            "Due to the peculiarity of 6502 return address pushed on the stack is one less then an address of the"
-            " instruction following JSR (i.e. addr - 1 is stored instead of addr).";
-    }
-    else if (strInstruction.CompareNoCase(_T("LDA")) == 0)
-    {
-        strDesc = "#title#LDA#text#\nLoad Accumulator with Memory."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_LDA);
-    }
-    else if (strInstruction.CompareNoCase(_T("LDX")) == 0)
-    {
-        strDesc = "#title#LDX#text#\nLoad Index X with Memory."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_LDX);
-    }
-    else if (strInstruction.CompareNoCase(_T("LDY")) == 0)
-    {
-        strDesc = "#title#LDY#text#\nLoad Index Y with Memory."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_LDY);
-    }
-    else if (strInstruction.CompareNoCase(_T("LSR")) == 0)
-    {
-        strDesc = "#title#LSR#text#\nShift One Bit Right."
-            "#flags#NZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_LSR);
-        strDesc += "#desc#LSR shifts all bits right one position. Bit 7 is cleared and original bit 0 is moved into the Carry.\n"
-            "#exmpl#"
-            " ; fast multiply by 4\n"
-            " LDA data ; load data\n"
-            " LSR      ; times 2\n"
-            " LSR      ; times 2\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("NOP")) == 0)
-    {
-        strDesc = "#title#NOP#text#\nNo Operation."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_NOP);
-    }
-    else if (strInstruction.CompareNoCase(_T("MVN")) == 0)
-    {
-        strDesc = "#title#MVN#text#\nBlock move descending."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_MVN);
-        strDesc += "#desc#MVN moves a block of data from a higher source to a lower destination.\n"
-            "#exmpl#"
-            " MVN #00, #01;  Move a block of data from Bank 0 to Bank 1\n"
-            " MVN #source>>16, #dest>>16; Move data from the bank byte in source to the bank byte in dest\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("MVP")) == 0)
-    {
-        strDesc = "#title#MVP#text#\nBlock move ascending."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_MVP);
-        strDesc += "#desc#MVP moves a block of data from a lower source to a higher destination..\n"
-            "#exmpl#"
-            " MVP #00, #01;  Move a block of data from Bank 0 to Bank 1\n"
-            " MVP #source>>16, #dest>>16; Move data from the bank byte in source to the bank byte in dest\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("ORA")) == 0)
-    {
-        strDesc = "#title#ORA#text#\n\"OR\" Memory with Accumulator."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_ORA);
-    }
-    else if (strInstruction.CompareNoCase(_T("PEA")) == 0)
-    {
-        strDesc = "#title#PEA#text#\nPush Effective address Immediate."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PEA);
-        strDesc += "#desc#PEA stores a 16bit immediate value on the stack. RTS could be used to retrieve it.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("PEI")) == 0)
-    {
-        strDesc = "#title#PEI#text#\nPush Effective indirect address."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PEI);
-        strDesc += "#desc#PEI stores a 16 bit value from a direct page address on the stack. RTS could be used to retrieve it.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("PER")) == 0)
-    {
-        strDesc = "#title#PER#text#\nPush Effective relative address."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PER);
-        strDesc += "#desc#PER stores a 16 bit value relative to its location on the stack. RTS could be used to retrieve it.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("PHA")) == 0)
-    {
-        strDesc = "#title#PHA#text#\nPush Accumulator on the Stack."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PHA);
-        strDesc += "#desc#PHA stores accumulator on the stack. PLA could be used to restore it.\n"
-            "#exmpl#"
-            " PHA      ; push A\n"
-            " JSR putC\n"
-            " PLA      ; pull A\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("PHB")) == 0)
-    {
-        strDesc = "#title#PHB#text#\nPush Data Bank Register (DB) on Stack."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PHB);
-        strDesc += "#desc#PHB stores the Data Bank Register (DB) on the stack. PLB could be used to restore it.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("PHD")) == 0)
-    {
-        strDesc = "#title#PHD#text#\nPush the direct page register (DP) on the Stack."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PHD);
-        strDesc += "#desc#PHD stores the direct page register (DP) on the stack. PLD could be used to restore it.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("PHK")) == 0)
-    {
-        strDesc = "#title#PHK#text#\nPush the program bank register on the Stack."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PHK);
-        strDesc += "#desc#PHK stores the program bank register on the stack.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("PHP")) == 0)
-    {
-        strDesc = "#title#PHP#text#\nPush Processor Status on Stack."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PHP);
-    }
-    else if (strInstruction.CompareNoCase(_T("PHX")) == 0)
-    {
-        strDesc = "#title#PHX#text#\nPush Index X on Stack."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PHX);
-    }
-    else if (strInstruction.CompareNoCase(_T("PHY")) == 0)
-    {
-        strDesc = "#title#PHY#text#\nPush Index Y on Stack."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_PHY);
-    }
-    else if (strInstruction.CompareNoCase(_T("PLA")) == 0)
-    {
-        strDesc = "#title#PLA#text#\nPull Accumulator from Stack."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_PLA);
-    }
-    else if (strInstruction.CompareNoCase(_T("PLB")) == 0)
-    {
-        strDesc = "#title#PLB#text#\nPull Data Bank Register (DB) from Stack."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_PLB);
-    }
-    else if (strInstruction.CompareNoCase(_T("PLD")) == 0)
-    {
-        strDesc = "#title#PLD#text#\nPull Direct Page Register (DP) from Stack."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_PLD);
-    }
-    else if (strInstruction.CompareNoCase(_T("PLP")) == 0)
-    {
-        strDesc = "#title#PLP#text#\nPull Process Status from Stack."
-            "#flags#all#modes#";
-        strDesc += inst.GetModes(CAsm::C_PLP);
-    }
-    else if (strInstruction.CompareNoCase(_T("PLX")) == 0)
-    {
-        strDesc = "#title#PLX#text#\nPull Index X from Stack."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_PLX);
-    }
-    else if (strInstruction.CompareNoCase(_T("PLY")) == 0)
-    {
-        strDesc = "#title#PLY#text#\nPull Index Y from Stack."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_PLY);
-    }
-    else if (strInstruction.CompareNoCase(_T("REP")) == 0)
-    {
-        strDesc = "#title#REP#text#\nReset bits in Status Register (P)."
-            "#flags#NVMXDZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_REP);
-    }
-    else if (strInstruction.CompareNoCase(_T("RMB")) == 0)
-    {
-        strDesc = "#title#RMB#text#\nReset Memory Bit."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_RMB);
-    }
-    else if (strInstruction.CompareNoCase(_T("ROL")) == 0)
-    {
-        strDesc = "#title#ROL#text#\nRotate One Bit Left."
-            "#flags#NZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_ROL);
-        strDesc += "#desc#ROL shifts all bits left one position. Carry is copied to bit 0 and original bit 7 is moved into the Carry.\n"
-            "#exmpl#"
-            " ; shift left word data\n"
-            " ASL data   ; shift low byte\n"
-            " ; using Carry as temp bit\n"
-            " ROL data+1 ; shift hi byte\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("ROR")) == 0)
-    {
-        strDesc = "#title#ROR#text#\nRotate One Bit Right."
-            "#flags#NZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_ROR);
-        strDesc += "#desc#ROR shifts all bits right one position. Carry is copied to bit 7 and original bit 0 is moved into the Carry.\n"
-            "#exmpl#"
-            " ; shift right word data\n"
-            " LSR data+1 ; shift hi byte\n"
-            " ; using Carry as temp bit\n"
-            " ROR data   ; shift low byte\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("RTI")) == 0)
-    {
-        strDesc = "#title#RTI#text#\nReturn from Interrupt."
-            "#flags#NVDIZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_RTI);
-        strDesc += "#desc#RTI retrieves flags register from the stack, then it retrieves return address, so"
-            " program execution can be resumed after an interrupt.";
-    }
-    else if (strInstruction.CompareNoCase(_T("RTL")) == 0)
-    {
-        strDesc = "#title#RTL#text#\nLong Return from Subroutine."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_RTL);
-        strDesc += "#desc#RTL retrieves return address from the stack, including the Program Bank Register. RTL is used to return from subroutine invoked by JSL.\n"
-            "Note: because JSL places address-1 value on the stack, RTL modifies it by adding 1 before it's used.";
-    }
-    else if (strInstruction.CompareNoCase(_T("RTS")) == 0)
-    {
-        strDesc = "#title#RTS#text#\nReturn from Subroutine."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_RTS);
-        strDesc += "#desc#RTS retrieves return address from the stack. RTS is used to return from subroutine invoked by JSR.\n"
-            "Note: because JSR places address-1 value on the stack, RTS modifies it by adding 1 before it's used.";
-    }
-    else if (strInstruction.CompareNoCase(_T("SBC")) == 0)
-    {
-        strDesc = "#title#SBC#text#\nSubtract Memory from Accumulator with Borrow."
-            "#flags#NVZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_SBC);
-        strDesc += "#desc#SBC subtracts memory from the accumulator. If D (decimal) flag bit is set SBC operates"
-            " in BCD (packed Binary Coded Decimal) mode, where only decimal digits are allowed. If D flag is clear"
-            " SBC operates in binary two's complement mode.\n"
-            "#exmpl#"
-            " CLD       ; binary mode\n"
-            " SEC       ; clear borrow\n"
-            " LDA #$90  ; load $90\n"
-            " SBC #1    ; minus 1\n"
-            " STA data  ; data=$8F\n"
-            "\n"
-            " SED       ; decimal mode\n"
-            " SEC       ; clear borrow\n"
-            " LDA #$90  ; this is 90 in BCD\n"
-            " SBC #1    ; minus 1\n"
-            " STA data  ; data=89 in BCD\n"
-            "\n<small> (in BCD mode flags N & Z are only set by 65c02 and undefined in case of 6502)\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("SEC")) == 0)
-    {
-        strDesc = "#title#SEC#text#\nSet Carry Flag."
-            "#flags#C#modes#";
-        strDesc += inst.GetModes(CAsm::C_SEC);
-    }
-    else if (strInstruction.CompareNoCase(_T("SED")) == 0)
-    {
-        strDesc = "#title#SED#text#\nSet Decimal Mode."
-            "#flags#D#modes#";
-        strDesc += inst.GetModes(CAsm::C_SED);
-        strDesc += "#desc#SED sets decimal mode for ADC and SBC instructions. In BCD (packed Binary Coded Decimal)"
-            " mode addition and subtraction operates on packed BCD numbers.";
-    }
-    else if (strInstruction.CompareNoCase(_T("SEI")) == 0)
-    {
-        strDesc = "#title#SEI#text#\nSet Interrupt Disable Bit."
-            "#flags#I#modes#";
-        strDesc += inst.GetModes(CAsm::C_SEI);
-    }
-    else if (strInstruction.CompareNoCase(_T("SEP")) == 0)
-    {
-        strDesc = "#title#SEP#text#\nSet bits in Status Register (P)."
-            "#flags#NVMXDZC#modes#";
-        strDesc += inst.GetModes(CAsm::C_SEP);
-    }
-    else if (strInstruction.CompareNoCase(_T("SMB")) == 0)
-    {
-        strDesc = "#title#SMB#text#\nSet Memory Bit."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_SMB);
-    }
-    else if (strInstruction.CompareNoCase(_T("STA")) == 0)
-    {
-        strDesc = "#title#STA#text#\nStore Accumulator in Memory."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_STA);
-        strDesc += "#exmpl#"
-            " LDA #$FF\n"
-            " STA flag ; flag = $FF\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("STP")) == 0)
-    {
-        strDesc = "#title#STP#text#\nStop the clock."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_STP);
-        strDesc += "#desc#STP will stop the clock and the processor will wait for a hard reset via the /RES pin.";
-    }
-    else if (strInstruction.CompareNoCase(_T("STX")) == 0)
-    {
-        strDesc = "#title#STX#text#\nStore Index X in Memory."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_STX);
-    }
-    else if (strInstruction.CompareNoCase(_T("STY")) == 0)
-    {
-        strDesc = "#title#STY#text#\nStore Index Y in Memory."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_STY);
-    }
-    else if (strInstruction.CompareNoCase(_T("STZ")) == 0)
-    {
-        strDesc = "#title#STZ#text#\nStore Zero in Memory."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_STZ);
-        strDesc += "#exmpl#"
-            " STZ data  ; clear data byte\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TAX")) == 0)
-    {
-        strDesc = "#title#TAX#text#\nTransfer Accumulator in Index X."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_TAX);
-        strDesc += "#desc#TAX copies accumulator into the X register.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TAY")) == 0)
-    {
-        strDesc = "#title#TAY#text#\nTransfer Accumulator in Index Y."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_TAY);
-        strDesc += "#desc#TAY copies accumulator into the Y register.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TCD")) == 0)
-    {
-        strDesc = "#title#TCD#text#\nTransfer 16 bit Accumulator (C) to the Direct Register (D)."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_TCD);
-        strDesc += "#desc#TCD copies 16 bit accumulator into the Direct register.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TCS")) == 0)
-    {
-        strDesc = "#title#TCS#text#\nTransfer 16 bit Accumulator (C) to the Stack Register (S)."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_TCS);
-        strDesc += "#desc#TCS copies 16 bit accumulator into the Stack register.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TDC")) == 0)
-    {
-        strDesc = "#title#TDC#text#\nTransfer Direct Register (D) to the 16 bit Accumulator (C)."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_TDC);
-        strDesc += "#desc#TDC copies Direct register into the 16 bit accumulator (C).\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TRB")) == 0)
-    {
-        strDesc = "#title#TRB#text#\nTest and Reset Memory Bits with Accumulator."
-            "#flags#Z#modes#";
-        strDesc += inst.GetModes(CAsm::C_TRB);
-    }
-    else if (strInstruction.CompareNoCase(_T("TSB")) == 0)
-    {
-        strDesc = "#title#TSB#text#\nTest and Set Memory Bits with Accumulator."
-            "#flags#Z#modes#";
-        strDesc += inst.GetModes(CAsm::C_TSB);
-    }
-    else if (strInstruction.CompareNoCase(_T("TSC")) == 0)
-    {
-        strDesc = "#title#TSC#text#\nTransfer Stack register (S) to the 16 bit Accumulator (C)."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_TSC);
-        strDesc += "#desc#TSC copies the Stack register to the 16 bit accumulator.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TSX")) == 0)
-    {
-        strDesc = "#title#TSX#text#\nTransfer Stack Pointer to Index X."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_TSX);
-        strDesc += "#desc#TSX copies stack pointer register S into the X register.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TXA")) == 0)
-    {
-        strDesc = "#title#TXA#text#\nTransfer Index X to Accumulator."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_TXA);
-        strDesc += "#desc#TXA copies X register into the accumulator.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TXS")) == 0)
-    {
-        strDesc = "#title#TXS#text#\nTransfer Index X to Stack Pointer."
-            "#flags##modes#";
-        strDesc += inst.GetModes(CAsm::C_TXS);
-        strDesc += "#desc#TXS copies X register into the stack pointer register S.\n"
-            "#exmpl#"
-            " LDX #$FF\n"
-            " TXS ; empty the stack\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TXY")) == 0)
-    {
-        strDesc = "#title#TXY#text#\nTransfer Index X to Index Y."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_TXY);
-        strDesc += "#desc#TXY copies X register to the Y register.\n"
-            "#exmpl#"
-            " LDX #$FF\n"
-            " TXY ; move to Y register.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TYA")) == 0)
-    {
-        strDesc = "#title#TYA#text#\nTransfer Index Y to Accumulator."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_TYA);
-        strDesc += "#desc#TYA copies Y register into the accumulator.\n"
-            "#exmpl#"
-            " PHA ; store accumulator\n"
-            " TYA\n"
-            " PHA ; and store Y\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("TYX")) == 0)
-    {
-        strDesc = "#title#TYX#text#\nTransfer Index Y to Index X."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_TYX);
-        strDesc += "#desc#TYX copies Y register to the X register.\n"
-            "#exmpl#"
-            " LDY #$FF\n"
-            " TYX ; move to X register.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("WAI")) == 0)
-    {
-        strDesc = "#title#WAI#text#\nWiat for Interrupt."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_WAI);
-        strDesc += "#desc#WAI Stops execution and waits for an Interrupt to occur.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("WDM")) == 0)
-    {
-        strDesc = "#title#WDM#text#\nReserved for future use.  Executes as a NOP."
-            "#flags#-#modes#";
-        strDesc += inst.GetModes(CAsm::C_WDM);
-        strDesc += "#desc#WDM Reserved for future use.  Executes as a NOP.\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("XBA")) == 0)
-    {
-        strDesc = "#title#XBA#text#\nSwaps 8 bit Accumulator (A) with upper 8 bits of 16 bit accumulator (B)."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_XBA);
-        strDesc += "\n";
-    }
-    else if (strInstruction.CompareNoCase(_T("XCE")) == 0)
-    {
-        strDesc = "#title#XCE#text#\nExchange carry bit C with Emulation bit E in the Status Register P."
-            "#flags#NZ#modes#";
-        strDesc += inst.GetModes(CAsm::C_XCE);
-        strDesc += "\n";
-    }
-    return strDesc;
+	if (strInstruction.CompareNoCase(_T("ADC")) == 0)
+	{
+		strDesc = "#title#ADC#text#\nAdd Memory to Accumulator with Carry."
+		"#flags#NVZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_ADC);
+		strDesc += "#desc#ADC adds memory to the accumulator. If D (decimal) flag bit is set ADC operates"
+			" in BCD (packed Binary Coded Decimal) mode, where only decimal digits are allowed. If D flag is clear"
+			" ADC operates in binary two's complement mode.\n"
+		"#exmpl#"
+			" ; add 5 to 'data' word\n"
+			" CLD        ; binary mode\n"
+			" CLC        ; clear carry\n"
+			" LDA data   ; load data\n"
+			" ADC #5     ; add 5\n"
+			" STA data   ; store low byte\n"
+			" BCC .skip  ; no carry over?\n"
+			" INC data+1 ; inc hi byte\n"
+			".skip:\n"
+			"\n"
+			" ; add $0395 to 'data' word\n"
+			" CLC        ; clear carry\n"
+			" LDA data   ; load data\n"
+			" ADC #$95\n"
+			" STA data   ; store low byte\n"
+			" LDA data+1\n"
+			" ADC #$03   ; add with carry\n"
+			" STA data+1 ; store hi byte\n"
+		"\n<small> (in BCD mode flags N & Z are only set by 65c02 and undefined in case of 6502)\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("AND")) == 0)
+	{
+		strDesc = "#title#AND#text#\n\"AND\" Memory with Accumulator."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_AND);
+//		strDesc += "#desc#opis blah blah";
+		strDesc +=
+		"#exmpl#"
+			" ; extract bits 0-3\n"
+			" LDA data,X\n"
+			" AND #$0F ; mask four bits\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("ASL")) == 0)
+	{
+		strDesc = "#title#ASL#text#\nShift One Bit Left."
+		"#flags#NZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_ASL);
+		strDesc += "#desc#ASL shifts all bits left one position. Bit 0 is cleared and original bit 7 is moved into the Carry.\n"
+		"#exmpl#"
+			" ; extract bits 4-7\n"
+			" LDA data,X\n"
+			" ASL\n"
+			" ASL\n"
+			" ASL\n"
+			" ASL\n"
+			" ; bits 4-7 are in 0-3 position\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("BBR")) == 0)
+	{
+		strDesc = "#title#BBR#text#\nBranch on Bit Reset."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BBR);
+//		strDesc += "#desc#opis blah blah";
+	}
+	else if (strInstruction.CompareNoCase(_T("BBS")) == 0)
+	{
+		strDesc = "#title#BBS#text#\nBranch on Bit Set."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BBS);
+	}
+	else if (strInstruction.CompareNoCase(_T("BCC")) == 0)
+	{
+		strDesc = "#title#BCC#text#\nBranch on Carry Clear."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BCC);
+		strDesc += "#exmpl#"
+			" LDA data  ; load data\n"
+			" CMP #10\n"
+			" BCC .less ; jump if data < 10\n";
+		strDesc += "#desc#" + inst.GetBranchInfo();
+	}
+	else if (strInstruction.CompareNoCase(_T("BCS")) == 0)
+	{
+		strDesc = "#title#BCS#text#\nBranch on Carry Set."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BCS);
+		strDesc += "#exmpl#"
+			" LDA data  ; load data\n"
+			" CMP #10\n"
+			" BCS .gt_eq ; jump if data >= 10\n";
+		strDesc += "#desc#" + inst.GetBranchInfo();
+	}
+	else if (strInstruction.CompareNoCase(_T("BEQ")) == 0)
+	{
+		strDesc = "#title#BEQ#text#\nBranch on Result Zero."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BEQ);
+		strDesc += "#exmpl#"
+			" LDA flag  ; load data\n"
+			" BEQ .zero ; jump if flag == 0\n"
+			" CMP #5\n"
+			" BEQ .five ; jump if flag == 5\n";
+		strDesc += "#desc#" + inst.GetBranchInfo();
+	}
+	else if (strInstruction.CompareNoCase(_T("BIT")) == 0)
+	{
+		strDesc = "#title#BIT#text#\nTest Memory Bits with Accumulator."
+		"#flags#NVZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_BIT);
+		strDesc += "#desc#BIT performs \"AND\" operation on its argument and accumulator."
+			" Result is not stored but Z(ero) flag is set accordingly. Flags N and V become"
+			" copies of 7-th (oldest) and 6-th bits of BIT argument.\n"
+		"#exmpl#"
+			" LDA #@1010 ; bits to test\n"
+			" BIT port   ; test port's bits\n"
+			" BEQ .zero  ; both bits clear\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("BMI")) == 0)
+	{
+		strDesc = "#title#BMI#text#\nBranch on Result Minus."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BMI);
+		strDesc += "#exmpl#"
+			" BIT flag  ; flag to test\n"
+			" BMI .neg  ; jump if flag negative\n";
+		strDesc += "#desc#" + inst.GetBranchInfo();
+	}
+	else if (strInstruction.CompareNoCase(_T("BNE")) == 0)
+	{
+		strDesc = "#title#BNE#text#\nBranch on Result Not Zero."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BNE);
+		strDesc += "#exmpl#"
+			" LDA flag      ; load data\n"
+			" BNE .not_zero ; jump if flag != 0\n"
+			" CMP #2\n"
+			" BNE .not_two  ; jump if flag != 2\n";
+		strDesc += "#desc#" + inst.GetBranchInfo();
+	}
+	else if (strInstruction.CompareNoCase(_T("BPL")) == 0)
+	{
+		strDesc = "#title#BPL#text#\nBranch on Result Plus."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BPL);
+		strDesc += "#exmpl#"
+			" LDX #10    ; load counter\n"
+			".delay:\n"
+			" DEX\n"
+			" BPL .delay ; jump if X >= 0\n";
+		strDesc += "#desc#" + inst.GetBranchInfo();
+	}
+	else if (strInstruction.CompareNoCase(_T("BRA")) == 0)
+	{
+		strDesc = "#title#BRA#text#\nBranch Always."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BRA);
+		strDesc += "#desc#" + inst.GetBranchInfo(false);
+	}
+	else if (strInstruction.CompareNoCase(_T("BRK")) == 0)
+	{
+		strDesc = "#title#BRK#text#\nForce Break."
+		"#flags#B¹DI#modes#";
+		strDesc += inst.GetModes(CAsm::C_BRK);
+		strDesc += "#desc#BRK forces interrupt. CPU fetches interrupt vector"
+			" and jumps to the interrupt handler routine. 6502 and 65c02 sets bits I and B.\n"
+			"6502/65c02/65816 (emmulation mode) Vector is at $FFFE/F.  65816 (native mode)"
+			" is at $FFE6,7.  65816 (native mode) only sets bit I.\n"
+			"Simulator can use this instruction to stop execution of your program.\n"
+			"\n¹<small> (D flag cleared only by 65c02 and 65816 CPU)\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("BRL")) == 0)
+	{
+		strDesc = "#title#BRL#text#\nBranch Long."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BRL);
+		strDesc += "#desc#BRL jumps relative to the PC (current location--program counter)."
+		" It can jump forward or backward but are limited to local range (+/- 32767 bytes)."
+		" Jump is always effective regardless of flags set in status register."
+		" It does not cross bank boundaries.";
+	}
+	else if (strInstruction.CompareNoCase(_T("BVC")) == 0)
+	{
+		strDesc = "#title#BVC#text#\nBranch on Overflow Clear."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BVC);
+		strDesc += "#desc#" + inst.GetBranchInfo();
+	}
+	else if (strInstruction.CompareNoCase(_T("BVS")) == 0)
+	{
+		strDesc = "#title#BVS#text#\nBranch on Overflow Set."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_BVS);
+		strDesc += "#desc#" + inst.GetBranchInfo();
+	}
+	else if (strInstruction.CompareNoCase(_T("CLC")) == 0)
+	{
+		strDesc = "#title#CLC#text#\nClear Carry Flag."
+		"#flags#C#modes#";
+		strDesc += inst.GetModes(CAsm::C_CLC);
+	}
+	else if (strInstruction.CompareNoCase(_T("CLD")) == 0)
+	{
+		strDesc = "#title#CLD#text#\nClear Decimal Mode."
+		"#flags#D#modes#";
+		strDesc += inst.GetModes(CAsm::C_CLD);
+	}
+	else if (strInstruction.CompareNoCase(_T("CLI")) == 0)
+	{
+		strDesc = "#title#CLI#text#\nClear Interrupt Disable Bit."
+		"#flags#I#modes#";
+		strDesc += inst.GetModes(CAsm::C_CLI);
+	}
+	else if (strInstruction.CompareNoCase(_T("CLV")) == 0)
+	{
+		strDesc = "#title#CLV#text#\nClear Overflow Flag."
+		"#flags#V#modes#";
+		strDesc += inst.GetModes(CAsm::C_CLV);
+	}
+	else if (strInstruction.CompareNoCase(_T("CMP")) == 0)
+	{
+		strDesc = "#title#CMP#text#\nCompare Memory and Accumulator."
+		"#flags#NZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_CMP);
+	}else if (strInstruction.CompareNoCase(_T("COP")) == 0)
+	{
+		strDesc = "#title#COP#text#\nCo-processor interrupt."
+		"#flags#NZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_COP);
+		strDesc += "#desc#COP forces an interrupt. CPU fetches COP vector ($FFF4,5 / $FFE4,5)"
+			" and jumps to the COP handler routine. Bit I is set and D is cleared in the flag register."
+			"Like BRK, the return address from COP is 2 bytes after the COP opcode. There is "
+			"a signature byte following the COP opcode\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("CPX")) == 0)
+	{
+		strDesc = "#title#CPX#text#\nCompare Memory and Index X."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_CPX);
+	}
+	else if (strInstruction.CompareNoCase(_T("CPY")) == 0)
+	{
+		strDesc = "#title#CPY#text#\nCompare Memory and Index Y."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_CPY);
+	}
+	else if (strInstruction.CompareNoCase(_T("DEA")) == 0)
+	{
+		strDesc = "#title#DEA#text#\n.Decrement Accumulator by One"
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_DEA);
+	}
+	else if (strInstruction.CompareNoCase(_T("DEC")) == 0)
+	{
+		strDesc = "#title#DEC#text#\nDecrement by One."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_DEC);
+		strDesc += "#exmpl#"
+			" ; subtract 1 from 6 conecutive bytes\n"
+			" LDX #5      ; counter\n"
+			".dec:\n"
+			" DEC data,X  ; decrement\n"
+			" DEX\n"
+			" BPL .dec    ; loop\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("DEX")) == 0)
+	{
+		strDesc = "#title#DEX#text#\nDecrement Index X by One."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_DEX);
+		strDesc += "#exmpl#"
+			" ; clear buf[0..31]\n"
+			" LDX #31   ; counter\n"
+			" LDA #0\n"
+			".clr:\n"
+			" STA buf,X ; clear buffer\n"
+			" DEX\n"
+			" BPL .clr  ; loop\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("DEY")) == 0)
+	{
+		strDesc = "#title#DEY#text#\nDecrement Index Y by One."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_DEY);
+		strDesc += "#exmpl#"
+			" ; copy 200 bytes\n"
+			" LDY #200\n"
+			".copy\n"
+			" LDA (src),Y\n"
+			" STA (dst),Y\n"
+			" DEY\n"
+			" BNE .copy\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("EOR")) == 0)
+	{
+		strDesc = "#title#EOR#text#\n\"Exclusive-or\" Memory with Accumulator."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_EOR);
+	}
+	else if (strInstruction.CompareNoCase(_T("INA")) == 0)
+	{
+		strDesc = "#title#INA#text#\nIncrement Accumulator by One."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_INA);
+	}
+	else if (strInstruction.CompareNoCase(_T("INC")) == 0)
+	{
+		strDesc = "#title#INC#text#\nIncrement by One."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_INC);
+		strDesc += "#exmpl#"
+			" ; add 1 to 'data' word\n"
+			" INC data   ; inc low byte\n"
+			" BNE .skip\n"
+			" INC data+1 ; inc hi byte\n"
+			".skip:\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("INX")) == 0)
+	{
+		strDesc = "#title#INX#text#\nIncrement Index X by One."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_INX);
+	}
+	else if (strInstruction.CompareNoCase(_T("INY")) == 0)
+	{
+		strDesc = "#title#INY#text#\n.Increment Index Y by One"
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_INY);
+	}
+	else if (strInstruction.CompareNoCase(_T("JML")) == 0)
+	{
+		strDesc = "#title#JML#text#\nLong Jump to New Location using absolute indirect long addressing."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_JML);
+		strDesc += "#desc#JML looks up the 3 bytes starting at the absolute address provided and moves them into the"
+		"PBR and PC registers.";
+		
+	}else if (strInstruction.CompareNoCase(_T("JMP")) == 0)
+	{
+		strDesc = "#title#JMP#text#\nJump to New Location."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_JMP);
+	}
+	else if (strInstruction.CompareNoCase(_T("JSL")) == 0)
+	{
+		strDesc = "#title#JSL#text#\nLong Jump to Subroutine."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_JSL);
+		strDesc += "#desc#JSR calls subroutine: it jumps to the new location saving return address on the stack,"
+		"including the PBR register, so program execution can be resumed when subroutine ends with RTL.\n"
+		"Due to the peculiarity of 6502 return address pushed on the stack is one less then an address of the"
+		" instruction following JSL (i.e. addr - 1 is stored instead of addr).";
+	}
+	else if (strInstruction.CompareNoCase(_T("JSR")) == 0)
+	{
+		strDesc = "#title#JSR#text#\nJump to Subroutine."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_JSR);
+		strDesc += "#desc#JSR calls subroutine: it jumps to the new location saving return address on the stack,"
+		" so program execution can be resumed when subroutine ends with RTS.\n"
+		"Due to the peculiarity of 6502 return address pushed on the stack is one less then an address of the"
+		" instruction following JSR (i.e. addr - 1 is stored instead of addr).";
+	}
+	else if (strInstruction.CompareNoCase(_T("LDA")) == 0)
+	{
+		strDesc = "#title#LDA#text#\nLoad Accumulator with Memory."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_LDA);
+	}
+	else if (strInstruction.CompareNoCase(_T("LDX")) == 0)
+	{
+		strDesc = "#title#LDX#text#\nLoad Index X with Memory."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_LDX);
+	}
+	else if (strInstruction.CompareNoCase(_T("LDY")) == 0)
+	{
+		strDesc = "#title#LDY#text#\nLoad Index Y with Memory."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_LDY);
+	}
+	else if (strInstruction.CompareNoCase(_T("LSR")) == 0)
+	{
+		strDesc = "#title#LSR#text#\nShift One Bit Right."
+		"#flags#NZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_LSR);
+		strDesc += "#desc#LSR shifts all bits right one position. Bit 7 is cleared and original bit 0 is moved into the Carry.\n"
+		"#exmpl#"
+			" ; fast multiply by 4\n"
+			" LDA data ; load data\n"
+			" LSR      ; times 2\n"
+			" LSR      ; times 2\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("NOP")) == 0)
+	{
+		strDesc = "#title#NOP#text#\nNo Operation."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_NOP);
+	}
+	else if (strInstruction.CompareNoCase(_T("MVN")) == 0)
+	{
+		strDesc = "#title#MVN#text#\nBlock move descending."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_MVN);
+		strDesc += "#desc#MVN moves a block of data from a higher source to a lower destination.\n"
+		"#exmpl#"
+			" MVN #00, #01;  Move a block of data from Bank 0 to Bank 1\n"
+			" MVN #source>>16, #dest>>16; Move data from the bank byte in source to the bank byte in dest\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("MVP")) == 0)
+	{
+		strDesc = "#title#MVP#text#\nBlock move ascending."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_MVP);
+		strDesc += "#desc#MVP moves a block of data from a lower source to a higher destination..\n"
+		"#exmpl#"
+			" MVP #00, #01;  Move a block of data from Bank 0 to Bank 1\n"
+			" MVP #source>>16, #dest>>16; Move data from the bank byte in source to the bank byte in dest\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("ORA")) == 0)
+	{
+		strDesc = "#title#ORA#text#\n\"OR\" Memory with Accumulator."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_ORA);
+	}
+	else if (strInstruction.CompareNoCase(_T("PEA")) == 0)
+	{
+		strDesc = "#title#PEA#text#\nPush Effective address Immediate."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PEA);
+		strDesc += "#desc#PEA stores a 16bit immediate value on the stack. RTS could be used to retrieve it.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("PEI")) == 0)
+	{
+		strDesc = "#title#PEI#text#\nPush Effective indirect address."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PEI);
+		strDesc += "#desc#PEI stores a 16 bit value from a direct page address on the stack. RTS could be used to retrieve it.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("PER")) == 0)
+	{
+		strDesc = "#title#PER#text#\nPush Effective relative address."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PER);
+		strDesc += "#desc#PER stores a 16 bit value relative to its location on the stack. RTS could be used to retrieve it.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("PHA")) == 0)
+	{
+		strDesc = "#title#PHA#text#\nPush Accumulator on the Stack."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PHA);
+		strDesc += "#desc#PHA stores accumulator on the stack. PLA could be used to restore it.\n"
+		"#exmpl#"
+			" PHA      ; push A\n"
+			" JSR putC\n"
+			" PLA      ; pull A\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("PHB")) == 0)
+	{
+		strDesc = "#title#PHB#text#\nPush Data Bank Register (DB) on Stack."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PHB);
+		strDesc += "#desc#PHB stores the Data Bank Register (DB) on the stack. PLB could be used to restore it.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("PHD")) == 0)
+	{
+		strDesc = "#title#PHD#text#\nPush the direct page register (DP) on the Stack."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PHD);
+		strDesc += "#desc#PHD stores the direct page register (DP) on the stack. PLD could be used to restore it.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("PHK")) == 0)
+	{
+		strDesc = "#title#PHK#text#\nPush the program bank register on the Stack."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PHK);
+		strDesc += "#desc#PHK stores the program bank register on the stack.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("PHP")) == 0)
+	{
+		strDesc = "#title#PHP#text#\nPush Processor Status on Stack."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PHP);
+	}
+	else if (strInstruction.CompareNoCase(_T("PHX")) == 0)
+	{
+		strDesc = "#title#PHX#text#\nPush Index X on Stack."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PHX);
+	}
+	else if (strInstruction.CompareNoCase(_T("PHY")) == 0)
+	{
+		strDesc = "#title#PHY#text#\nPush Index Y on Stack."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_PHY);
+	}
+	else if (strInstruction.CompareNoCase(_T("PLA")) == 0)
+	{
+		strDesc = "#title#PLA#text#\nPull Accumulator from Stack."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_PLA);
+	}
+	else if (strInstruction.CompareNoCase(_T("PLB")) == 0)
+	{
+		strDesc = "#title#PLB#text#\nPull Data Bank Register (DB) from Stack."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_PLB);
+	}
+	else if (strInstruction.CompareNoCase(_T("PLD")) == 0)
+	{
+		strDesc = "#title#PLD#text#\nPull Direct Page Register (DP) from Stack."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_PLD);
+	}
+	else if (strInstruction.CompareNoCase(_T("PLP")) == 0)
+	{
+		strDesc = "#title#PLP#text#\nPull Process Status from Stack."
+		"#flags#all#modes#";
+		strDesc += inst.GetModes(CAsm::C_PLP);
+	}
+	else if (strInstruction.CompareNoCase(_T("PLX")) == 0)
+	{
+		strDesc = "#title#PLX#text#\nPull Index X from Stack."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_PLX);
+	}
+	else if (strInstruction.CompareNoCase(_T("PLY")) == 0)
+	{
+		strDesc = "#title#PLY#text#\nPull Index Y from Stack."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_PLY);
+	}
+	else if (strInstruction.CompareNoCase(_T("REP")) == 0)
+	{
+		strDesc = "#title#REP#text#\nReset bits in Status Register (P)."
+		"#flags#NVMXDZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_REP);
+	}
+	else if (strInstruction.CompareNoCase(_T("RMB")) == 0)
+	{
+		strDesc = "#title#RMB#text#\nReset Memory Bit."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_RMB);
+	}
+	else if (strInstruction.CompareNoCase(_T("ROL")) == 0)
+	{
+		strDesc = "#title#ROL#text#\nRotate One Bit Left."
+		"#flags#NZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_ROL);
+		strDesc += "#desc#ROL shifts all bits left one position. Carry is copied to bit 0 and original bit 7 is moved into the Carry.\n"
+		"#exmpl#"
+			" ; shift left word data\n"
+			" ASL data   ; shift low byte\n"
+			" ; using Carry as temp bit\n"
+			" ROL data+1 ; shift hi byte\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("ROR")) == 0)
+	{
+		strDesc = "#title#ROR#text#\nRotate One Bit Right."
+		"#flags#NZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_ROR);
+		strDesc += "#desc#ROR shifts all bits right one position. Carry is copied to bit 7 and original bit 0 is moved into the Carry.\n"
+		"#exmpl#"
+			" ; shift right word data\n"
+			" LSR data+1 ; shift hi byte\n"
+			" ; using Carry as temp bit\n"
+			" ROR data   ; shift low byte\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("RTI")) == 0)
+	{
+		strDesc = "#title#RTI#text#\nReturn from Interrupt."
+		"#flags#NVDIZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_RTI);
+		strDesc += "#desc#RTI retrieves flags register from the stack, then it retrieves return address, so"
+			" program execution can be resumed after an interrupt.";
+	}
+	else if (strInstruction.CompareNoCase(_T("RTL")) == 0)
+	{
+		strDesc = "#title#RTL#text#\nLong Return from Subroutine."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_RTL);
+		strDesc += "#desc#RTL retrieves return address from the stack, including the Program Bank Register. RTL is used to return from subroutine invoked by JSL.\n"
+			"Note: because JSL places address-1 value on the stack, RTL modifies it by adding 1 before it's used.";
+	}
+	else if (strInstruction.CompareNoCase(_T("RTS")) == 0)
+	{
+		strDesc = "#title#RTS#text#\nReturn from Subroutine."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_RTS);
+		strDesc += "#desc#RTS retrieves return address from the stack. RTS is used to return from subroutine invoked by JSR.\n"
+			"Note: because JSR places address-1 value on the stack, RTS modifies it by adding 1 before it's used.";
+	}
+	else if (strInstruction.CompareNoCase(_T("SBC")) == 0)
+	{
+		strDesc = "#title#SBC#text#\nSubtract Memory from Accumulator with Borrow."
+		"#flags#NVZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_SBC);
+		strDesc += "#desc#SBC subtracts memory from the accumulator. If D (decimal) flag bit is set SBC operates"
+			" in BCD (packed Binary Coded Decimal) mode, where only decimal digits are allowed. If D flag is clear"
+			" SBC operates in binary two's complement mode.\n"
+		"#exmpl#"
+			" CLD       ; binary mode\n"
+			" SEC       ; clear borrow\n"
+			" LDA #$90  ; load $90\n"
+			" SBC #1    ; minus 1\n"
+			" STA data  ; data=$8F\n"
+			"\n"
+			" SED       ; decimal mode\n"
+			" SEC       ; clear borrow\n"
+			" LDA #$90  ; this is 90 in BCD\n"
+			" SBC #1    ; minus 1\n"
+			" STA data  ; data=89 in BCD\n"
+		"\n<small> (in BCD mode flags N & Z are only set by 65c02 and undefined in case of 6502)\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("SEC")) == 0)
+	{
+		strDesc = "#title#SEC#text#\nSet Carry Flag."
+		"#flags#C#modes#";
+		strDesc += inst.GetModes(CAsm::C_SEC);
+	}
+	else if (strInstruction.CompareNoCase(_T("SED")) == 0)
+	{
+		strDesc = "#title#SED#text#\nSet Decimal Mode."
+		"#flags#D#modes#";
+		strDesc += inst.GetModes(CAsm::C_SED);
+		strDesc += "#desc#SED sets decimal mode for ADC and SBC instructions. In BCD (packed Binary Coded Decimal)"
+			" mode addition and subtraction operates on packed BCD numbers.";
+	}
+	else if (strInstruction.CompareNoCase(_T("SEI")) == 0)
+	{
+		strDesc = "#title#SEI#text#\nSet Interrupt Disable Bit."
+		"#flags#I#modes#";
+		strDesc += inst.GetModes(CAsm::C_SEI);
+	}
+	else if (strInstruction.CompareNoCase(_T("SEP")) == 0)
+	{
+		strDesc = "#title#SEP#text#\nSet bits in Status Register (P)."
+		"#flags#NVMXDZC#modes#";
+		strDesc += inst.GetModes(CAsm::C_SEP);
+	}
+	else if (strInstruction.CompareNoCase(_T("SMB")) == 0)
+	{
+		strDesc = "#title#SMB#text#\nSet Memory Bit."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_SMB);
+	}
+	else if (strInstruction.CompareNoCase(_T("STA")) == 0)
+	{
+		strDesc = "#title#STA#text#\nStore Accumulator in Memory."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_STA);
+		strDesc += "#exmpl#"
+			" LDA #$FF\n"
+			" STA flag ; flag = $FF\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("STP")) == 0)
+	{
+		strDesc = "#title#STP#text#\nStop the clock."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_STP);
+		strDesc += "#desc#STP will stop the clock and the processor will wait for a hard reset via the /RES pin.";
+	}
+	else if (strInstruction.CompareNoCase(_T("STX")) == 0)
+	{
+		strDesc = "#title#STX#text#\nStore Index X in Memory."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_STX);
+	}
+	else if (strInstruction.CompareNoCase(_T("STY")) == 0)
+	{
+		strDesc = "#title#STY#text#\nStore Index Y in Memory."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_STY);
+	}
+	else if (strInstruction.CompareNoCase(_T("STZ")) == 0)
+	{
+		strDesc = "#title#STZ#text#\nStore Zero in Memory."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_STZ);
+		strDesc += "#exmpl#"
+			" STZ data  ; clear data byte\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TAX")) == 0)
+	{
+		strDesc = "#title#TAX#text#\nTransfer Accumulator in Index X."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_TAX);
+		strDesc += "#desc#TAX copies accumulator into the X register.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TAY")) == 0)
+	{
+		strDesc = "#title#TAY#text#\nTransfer Accumulator in Index Y."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_TAY);
+		strDesc += "#desc#TAY copies accumulator into the Y register.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TCD")) == 0)
+	{
+		strDesc = "#title#TCD#text#\nTransfer 16 bit Accumulator (C) to the Direct Register (D)."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_TCD);
+		strDesc += "#desc#TCD copies 16 bit accumulator into the Direct register.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TCS")) == 0)
+	{
+		strDesc = "#title#TCS#text#\nTransfer 16 bit Accumulator (C) to the Stack Register (S)."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_TCS);
+		strDesc += "#desc#TCS copies 16 bit accumulator into the Stack register.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TDC")) == 0)
+	{
+		strDesc = "#title#TDC#text#\nTransfer Direct Register (D) to the 16 bit Accumulator (C)."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_TDC);
+		strDesc += "#desc#TDC copies Direct register into the 16 bit accumulator (C).\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TRB")) == 0)
+	{
+		strDesc = "#title#TRB#text#\nTest and Reset Memory Bits with Accumulator."
+		"#flags#Z#modes#";
+		strDesc += inst.GetModes(CAsm::C_TRB);
+	}
+	else if (strInstruction.CompareNoCase(_T("TSB")) == 0)
+	{
+		strDesc = "#title#TSB#text#\nTest and Set Memory Bits with Accumulator."
+		"#flags#Z#modes#";
+		strDesc += inst.GetModes(CAsm::C_TSB);
+	}
+	else if (strInstruction.CompareNoCase(_T("TSC")) == 0)
+	{
+		strDesc = "#title#TSC#text#\nTransfer Stack register (S) to the 16 bit Accumulator (C)."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_TSC);
+		strDesc += "#desc#TSC copies the Stack register to the 16 bit accumulator.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TSX")) == 0)
+	{
+		strDesc = "#title#TSX#text#\nTransfer Stack Pointer to Index X."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_TSX);
+		strDesc += "#desc#TSX copies stack pointer register S into the X register.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TXA")) == 0)
+	{
+		strDesc = "#title#TXA#text#\nTransfer Index X to Accumulator."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_TXA);
+		strDesc += "#desc#TXA copies X register into the accumulator.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TXS")) == 0)
+	{
+		strDesc = "#title#TXS#text#\nTransfer Index X to Stack Pointer."
+		"#flags##modes#";
+		strDesc += inst.GetModes(CAsm::C_TXS);
+		strDesc += "#desc#TXS copies X register into the stack pointer register S.\n"
+		"#exmpl#"
+			" LDX #$FF\n"
+			" TXS ; empty the stack\n";
+	}else if (strInstruction.CompareNoCase(_T("TXY")) == 0)
+	{
+		strDesc = "#title#TXY#text#\nTransfer Index X to Index Y."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_TXY);
+		strDesc += "#desc#TXY copies X register to the Y register.\n"
+		"#exmpl#"
+			" LDX #$FF\n"
+			" TXY ; move to Y register.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TYA")) == 0)
+	{
+		strDesc = "#title#TYA#text#\nTransfer Index Y to Accumulator."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_TYA);
+		strDesc += "#desc#TYA copies Y register into the accumulator.\n"
+		"#exmpl#"
+			" PHA ; store accumulator\n"
+			" TYA\n"
+			" PHA ; and store Y\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("TYX")) == 0)
+	{
+		strDesc = "#title#TYX#text#\nTransfer Index Y to Index X."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_TYX);
+		strDesc += "#desc#TYX copies Y register to the X register.\n"
+		"#exmpl#"
+			" LDY #$FF\n"
+			" TYX ; move to X register.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("WAI")) == 0)
+	{
+		strDesc = "#title#WAI#text#\nWiat for Interrupt."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_WAI);
+		strDesc += "#desc#WAI Stops execution and waits for an Interrupt to occur.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("WDM")) == 0)
+	{
+		strDesc = "#title#WDM#text#\nReserved for future use.  Executes as a NOP."
+		"#flags#-#modes#";
+		strDesc += inst.GetModes(CAsm::C_WDM);
+		strDesc += "#desc#WDM Reserved for future use.  Executes as a NOP.\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("XBA")) == 0)
+	{
+		strDesc = "#title#XBA#text#\nSwaps 8 bit Accumulator (A) with upper 8 bits of 16 bit accumulator (B)."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_XBA);
+		strDesc += "\n";
+	}
+	else if (strInstruction.CompareNoCase(_T("XCE")) == 0)
+	{
+		strDesc = "#title#XCE#text#\nExchange carry bit C with Emulation bit E in the Status Register P."
+		"#flags#NZ#modes#";
+		strDesc += inst.GetModes(CAsm::C_XCE);
+		strDesc += "\n";
+	}
+	return strDesc;
 }

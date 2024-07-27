@@ -64,6 +64,7 @@ CDeasm6502View::~CDeasm6502View()
 
 BEGIN_MESSAGE_MAP(CDeasm6502View, CView)
   ON_WM_CONTEXTMENU()
+//{{AFX_MSG_MAP(CDeasm6502View)
   ON_WM_VSCROLL()
   ON_WM_MOUSEWHEEL()  // 1.3.2 added mouse scroll wheel support
   ON_WM_KEYDOWN()
@@ -71,7 +72,8 @@ BEGIN_MESSAGE_MAP(CDeasm6502View, CView)
   ON_COMMAND(ID_DEASM_GOTO, OnDeasmGoto)
   ON_UPDATE_COMMAND_UI(ID_DEASM_GOTO, OnUpdateDeasmGoto)
   ON_WM_CONTEXTMENU()
-  ON_WM_SIZE()
+	ON_WM_SIZE()
+	//}}AFX_MSG_MAP
   ON_MESSAGE(CBroadcast::WM_USER_EXIT_DEBUGGER, OnExitDebugger)
 END_MESSAGE_MAP()
 
@@ -82,7 +84,7 @@ END_MESSAGE_MAP()
 int CDeasm6502View::no_of_lines(RECT &rect)	// obl. iloœci wierszy w oknie
 {
 	if (m_nFontHeight == 0)
-		return 1;	// return 1 row
+		return 1;	// not yet ready
 
 	int h= rect.bottom - rect.top;
 	if (h >= m_nFontHeight)
@@ -96,55 +98,56 @@ void CDeasm6502View::OnDraw(CDC* pDC)	// deasemblowany program - wyœwietlanie in
 {
   CDeasm6502Doc *pDoc = (CDeasm6502Doc*)GetDocument();
   if (pDoc == NULL)
-	return;
+    return;
 
   RECT rect;
   GetClientRect(&rect);
   int lines= no_of_lines(rect);
 
   rect.bottom = rect.top + m_nFontHeight;
-  RECT mark= rect;			// space for indicators
+  RECT mark= rect;			// miejsce na wskaŸniki
 
-  rect.left += m_nFontHeight;		// left margin
+  rect.left += m_nFontHeight;		// margines lewy
   if (rect.left >= rect.right)
-	rect.right = rect.left;
+    rect.right = rect.left;
 
   CDeasm deasm;
-  INT32 ptr= pDoc->m_uStartAddr;
-  INT32 ptr1 = ptr;
+  UINT32 ptr;
+  ptr = pDoc->m_uStartAddr;
 
   for (int i=0; i<=lines; i++)
   {
-	if (ptr < ptr1) break;
-	if (pDC->RectVisible(&mark))	// pointer fields to refresh?
+    if (pDC->RectVisible(&mark))	// pola wskaŸnika do odœwie¿enia?
     {
-		Breakpoint bp= theApp.m_global.GetBreakpoint(UINT16(ptr));
-		if (bp & BPT_MASK)		// jest miejsce przerwania?
-			draw_breakpoint(*pDC,mark.left,mark.top,m_nFontHeight,bp & BPT_DISABLED ? FALSE : TRUE);
-
-		if (pDoc->m_nPointerAddr == ptr)	// w tym wierszu strza³ka?
-			draw_pointer(*pDC,mark.left,mark.top,m_nFontHeight);
+      Breakpoint bp= theApp.m_global.GetBreakpoint(UINT32(ptr));
+      if (bp & BPT_MASK)		// jest miejsce przerwania?
+        draw_breakpoint(*pDC,mark.left,mark.top,m_nFontHeight,bp & BPT_DISABLED ? FALSE : TRUE);
+      if (pDoc->m_nPointerAddr == ptr)	// w tym wierszu strza³ka?
+	draw_pointer(*pDC,mark.left,mark.top,m_nFontHeight);
     }
-    ptr1 = ptr;
-	const CString &str= deasm.DeasmInstr(*pDoc->m_pCtx,CDeasm::DeasmFmt(CDeasm::DF_ADDRESS|CDeasm::DF_CODE_BYTES),ptr);
+
+	const CString &str= 
+      deasm.DeasmInstr(*pDoc->m_pCtx,CDeasm::DeasmFmt(CDeasm::DF_ADDRESS|CDeasm::DF_CODE_BYTES),ptr);
 
 	if (pDC->RectVisible(&rect))	// wiersz instrukcji do odœwie¿enia?
     {
-		pDC->SetTextColor(m_rgbAddress);
-		pDC->TextOut(rect.left,rect.top,LPCTSTR(str),6); //65816
-		if (m_bDrawCode)
-		{
-			pDC->SetTextColor(m_rgbCode);
-			pDC->TextOut(rect.left+m_nFontWidth*6,rect.top,LPCTSTR(str)+6,14); //65816
-		}
-		pDC->SetTextColor(m_rgbInstr);
-		pDC->TextOut(rect.left+m_nFontWidth*19,rect.top,LPCTSTR(str)+19,str.GetLength()-19); //65816
-	}
+      pDC->SetTextColor(m_rgbAddress);
+//      pDC->TextOut(rect.left,rect.top,LPCTSTR(str),4);
+      pDC->TextOut(rect.left,rect.top,LPCTSTR(str),6); //65816
+      if (m_bDrawCode)
+      {
+		pDC->SetTextColor(m_rgbCode);
+		pDC->TextOut(rect.left+m_nFontWidth*6,rect.top,LPCTSTR(str)+6,14); //65816
+      }
+      pDC->SetTextColor(m_rgbInstr);
+      pDC->TextOut(rect.left+m_nFontWidth*19,rect.top,LPCTSTR(str)+19,str.GetLength()-19); //65816
+    }
     rect.top += m_nFontHeight;
     rect.bottom += m_nFontHeight;
     mark.top += m_nFontHeight;
     mark.bottom += m_nFontHeight;
   }
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -202,31 +205,38 @@ void CDeasm6502View::ScrollToLine(UINT32 addr)
   if (pDoc->m_uStartAddr == addr)	// ¿¹dany adres jest aktualnym pocz¹tkiem?
     return;
 
-  if (pDoc->m_uStartAddr > addr)	// move up
+  if (pDoc->m_uStartAddr > addr)	// ¿¹dany adres przed aktualnym pocz¹tkiem
   {
     RECT rect;
     GetClientRect(&rect);
     int lines= no_of_lines(rect);
     CDeasm deasm;
-    UINT32 start= addr;  // start at addr
+    UINT32 start= addr;
     bool redraw= TRUE;
     for (int i=0; i<lines; i++)	// idziemy od 'addr' w dó³, a¿ spotkamy 'm_uStartAddr'
     {				// lub skoñczy siê iloœæ dostêpnych wierszy
       if (deasm.FindNextAddr(start,*pDoc->m_pCtx) == 0)
         break;		// "przewiniêcie siê" adresu
       if (start > pDoc->m_uStartAddr)
-		break;		// rozkazy "nie trafiaj¹" w siebie, przerysowujemy wszystko
+	break;		// rozkazy "nie trafiaj¹" w siebie, przerysowujemy wszystko
       if (start == pDoc->m_uStartAddr)
       {
-		RECT rect;
-		get_view_rect(rect);
-		int y= (i+1) * m_nFontHeight;
-		UpdateWindow();		// dla unikniêcia problemów z odœwie¿aniem
-		pDoc->m_uStartAddr = addr;
-		ScrollWindow(0,y,&rect,&rect);
-		UpdateWindow();
-		redraw = FALSE;
-		break;
+	RECT rect;
+	get_view_rect(rect);
+	int y= (i+1) * m_nFontHeight;
+/*
+	if ( (rect.bottom -= y) <= 0 )
+	{
+	  ASSERT(FALSE);
+	  break;
+	}
+*/
+	UpdateWindow();		// dla unikniêcia problemów z odœwie¿aniem
+	pDoc->m_uStartAddr = addr;
+        ScrollWindow(0,y,&rect,&rect);
+	UpdateWindow();
+	redraw = FALSE;
+	break;
       }
     }
     if (redraw)
@@ -236,7 +246,7 @@ void CDeasm6502View::ScrollToLine(UINT32 addr)
       UpdateWindow();
     }
   }
-  else				// move down
+  else				// ¿¹dany adres jest za aktualnym pocz¹tkiem
   {
     RECT rect;
     GetClientRect(&rect);
@@ -244,37 +254,45 @@ void CDeasm6502View::ScrollToLine(UINT32 addr)
     CDeasm deasm;
     UINT32 start= pDoc->m_uStartAddr;
     bool redraw= TRUE;
+
 	int i;
     for (i= 1; i<lines; i++)	// idziemy od 'm_uStartAddr' w dó³, a¿ spotkamy 'addr'
     {				// lub skoñczy siê iloœæ dostêpnych wierszy
       if (deasm.FindNextAddr(start,*pDoc->m_pCtx) == 0)
         break;		// "przewiniêcie siê" adresu
       if (start > addr)
-		break;		// rozkazy "nie trafiaj¹" w siebie, przerysowujemy wszystko
+	break;		// rozkazy "nie trafiaj¹" w siebie, przerysowujemy wszystko
       if (start == addr)
-		return;		// strza³ka mieœci siê w oknie
+	return;		// strza³ka mieœci siê w oknie
     }
     if (i==lines)	// poprzednia pêtla zakoñczona normalnie (nie przez 'break') ?
     {
       for (int i=0; i<lines; i++)	// idziemy od 'start' w dó³, a¿ spotkamy 'addr'
       {				// lub skoñczy siê iloœæ dostêpnych wierszy
-		if (deasm.FindNextAddr(start,*pDoc->m_pCtx) == 0)
-		  break;		// "przewiniêcie siê" adresu
-		if (start > addr)
-		break;		// rozkazy "nie trafiaj¹" w siebie, przerysowujemy wszystko
-		if (start == addr)
-		{
-		  RECT rect;
-		  get_view_rect(rect);
-		  int y= (i+1) * m_nFontHeight;
-		  UpdateWindow();		// dla unikniêcia problemów z odœwie¿aniem
-		  for (int j=0; j<=i; j++)	// wyznaczenie nowego adresu pocz¹tku okna
-			deasm.FindNextAddr(pDoc->m_uStartAddr,*pDoc->m_pCtx);
-		  ScrollWindow(0,-y,&rect,&rect);
-	      UpdateWindow();
-		  redraw = FALSE;
-		  break;
-	    }
+	if (deasm.FindNextAddr(start,*pDoc->m_pCtx) == 0)
+	  break;		// "przewiniêcie siê" adresu
+	if (start > addr)
+	  break;		// rozkazy "nie trafiaj¹" w siebie, przerysowujemy wszystko
+	if (start == addr)
+	{
+	  RECT rect;
+	  get_view_rect(rect);
+	  int y= (i+1) * m_nFontHeight;
+/*
+	  if ( (rect.top += y) >= rect.bottom )
+	  {
+	    ASSERT(FALSE);
+	    break;
+	  }
+*/
+	  UpdateWindow();		// dla unikniêcia problemów z odœwie¿aniem
+	  for (int j=0; j<=i; j++)	// wyznaczenie nowego adresu pocz¹tku okna
+	    deasm.FindNextAddr(pDoc->m_uStartAddr,*pDoc->m_pCtx);
+	  ScrollWindow(0,-y,&rect,&rect);
+	  UpdateWindow();
+	  redraw = FALSE;
+	  break;
+	}
       }
     }
     if (redraw)
@@ -284,6 +302,7 @@ void CDeasm6502View::ScrollToLine(UINT32 addr)
       UpdateWindow();
     }
   }
+
   return;
 }
 
@@ -327,6 +346,7 @@ void CDeasm6502View::scroll(UINT nSBCode, int nPos, int nRepeat)
   CDeasm6502Doc *pDoc = (CDeasm6502Doc*)GetDocument();
   if (pDoc == NULL)
     return;
+//  UINT8 cmd;
   CDeasm deasm;
 
   switch (nSBCode)
@@ -335,36 +355,39 @@ void CDeasm6502View::scroll(UINT nSBCode, int nPos, int nRepeat)
       break;
 
     case SB_LINEDOWN:	// Scroll one line down
-	  switch (deasm.FindNextAddr(pDoc->m_uStartAddr, *pDoc->m_pCtx))
+      switch (deasm.FindNextAddr(pDoc->m_uStartAddr, *pDoc->m_pCtx))
       {
         case 0:
-			break;	// dalej ju¿ siê nie da
-		case 1:
-			RECT rect;
-			GetClientRect(&rect);
-			ScrollWindow(0, -m_nFontHeight, &rect, &rect);
-			UpdateWindow();
-			break;
+	  break;	// dalej ju¿ siê nie da
+	case 1:
+	  RECT rect;
+          GetClientRect(&rect);
+	  ScrollWindow(0, -m_nFontHeight, &rect, &rect);
+	  UpdateWindow();
+	  break;
       }
       break;
-
-	case SB_LINEUP:	// Scroll one line up
+    case SB_LINEUP:	// Scroll one line up
       switch (deasm.FindPrevAddr(pDoc->m_uStartAddr, *pDoc->m_pCtx))
       {
         case 0:
-			break;	// jesteœmy ju¿ na pocz¹tku
+		break;	// jesteœmy ju¿ na pocz¹tku
 		case 1:
-			RECT rect;
-			GetClientRect(&rect);
-			ScrollWindow(0,m_nFontHeight, &rect, &rect);
-			UpdateWindow();
-			break;
-		case -1:
-			InvalidateRect(NULL);	// przerysowanie ca³ego okna - zmieni³o siê kilka rozkazów
-			break;
-		default:
-			ASSERT(FALSE);
-			break;
+	  RECT rect;
+          GetClientRect(&rect);
+//	  get_view_rect(rect);
+//	  if ( (rect.bottom -= m_nFontHeight) <= 0)
+//	    break;
+//	  UpdateWindow();	// dla unikniêcia problemów z odœwie¿aniem
+          ScrollWindow(0,m_nFontHeight, &rect, &rect);
+	  UpdateWindow();
+	  break;
+	case -1:
+	  InvalidateRect(NULL);	// przerysowanie ca³ego okna - zmieni³o siê kilka rozkazów
+	  break;
+	default:
+	  ASSERT(FALSE);
+	  break;
       }
       break;
 
@@ -374,11 +397,11 @@ void CDeasm6502View::scroll(UINT nSBCode, int nPos, int nRepeat)
       get_view_rect(rect);
       switch (deasm.FindNextAddr(pDoc->m_uStartAddr, *pDoc->m_pCtx, no_of_lines(rect)))
       {
-		case 0:
-			break;	// dalej ju¿ siê nie da
-		case 1:
-			InvalidateRect(NULL);	// przerysowanie ca³ego okna
-			break;
+        case 0:
+	  break;	// dalej ju¿ siê nie da
+	case 1:
+	  InvalidateRect(NULL);	// przerysowanie ca³ego okna
+	  break;
       }
       break;
     }
@@ -387,18 +410,17 @@ void CDeasm6502View::scroll(UINT nSBCode, int nPos, int nRepeat)
     {
       RECT rect;
       get_view_rect(rect);
-	  
-	  switch (deasm.FindPrevAddr(pDoc->m_uStartAddr, *pDoc->m_pCtx, no_of_lines(rect)))
+      switch (deasm.FindPrevAddr(pDoc->m_uStartAddr, *pDoc->m_pCtx, no_of_lines(rect)))
       {
         case 0:
-		  break;	// jesteœmy ju¿ na pocz¹tku
-		case 1:
-		case -1:
-			InvalidateRect(NULL);	// przerysowanie ca³ego okna - zmieni³o siê kilka rozkazów
-			break;
-		default:
-			ASSERT(FALSE);
-			break;
+	  break;	// jesteœmy ju¿ na pocz¹tku
+	case 1:
+	case -1:
+	  InvalidateRect(NULL);	// przerysowanie ca³ego okna - zmieni³o siê kilka rozkazów
+	  break;
+	default:
+	  ASSERT(FALSE);
+	  break;
       }
       break;
     }
@@ -408,17 +430,16 @@ void CDeasm6502View::scroll(UINT nSBCode, int nPos, int nRepeat)
       RECT rect;
       get_view_rect(rect);
       int dy= no_of_lines(rect);	// iloœæ wierszy w oknie
-	  int lines;	  
-	  lines = deasm.FindDelta(pDoc->m_uStartAddr,0, *pDoc->m_pCtx, dy);
-
+      int lines= deasm.FindDelta(pDoc->m_uStartAddr, 0, *pDoc->m_pCtx, dy);
       if (lines < 0)
-		InvalidateRect(NULL);	// przerysowanie ca³ego okna
+	InvalidateRect(NULL);	// przerysowanie ca³ego okna
       else if (lines > 0)
       {
-		if (lines >= dy)
-			InvalidateRect(NULL);	// przerysowanie ca³ego okna
-		else
-	        ScrollWindow(0,lines * m_nFontHeight,&rect,&rect);
+	if (lines >= dy)
+	  InvalidateRect(NULL);	// przerysowanie ca³ego okna
+	else
+//	  InvalidateRect(NULL);	// przerysowanie ca³ego okna
+          ScrollWindow(0,lines * m_nFontHeight,&rect,&rect);
       }
       break;
     }
@@ -428,19 +449,21 @@ void CDeasm6502View::scroll(UINT nSBCode, int nPos, int nRepeat)
       RECT rect;
       get_view_rect(rect);
       int dy= no_of_lines(rect);	// iloœæ wierszy w oknie
-      int lines;
-	  if (theApp.m_global.m_bProc6502==2)
-		  lines = deasm.FindDelta(pDoc->m_uStartAddr, 0xFFFFF0, *pDoc->m_pCtx, dy);
-	  else
+	  int lines;
+      if (theApp.m_global.m_bBank)
 		  lines = deasm.FindDelta(pDoc->m_uStartAddr, 0xFFF0, *pDoc->m_pCtx, dy);
-      if (lines < 0)
-		InvalidateRect(NULL);	// przerysowanie ca³ego okna
+	  else
+		  lines= deasm.FindDelta(pDoc->m_uStartAddr, 0xFFF0, *pDoc->m_pCtx, dy);
+
+	  if (lines < 0)
+	InvalidateRect(NULL);	// przerysowanie ca³ego okna
       else if (lines > 0)
       {
-		if (lines >= dy)
-			InvalidateRect(NULL);	// przerysowanie ca³ego okna
-		else
-			ScrollWindow(0, -lines * m_nFontHeight, &rect, &rect);
+	if (lines >= dy)
+	  InvalidateRect(NULL);	// przerysowanie ca³ego okna
+	else
+//	  InvalidateRect(NULL);	// przerysowanie ca³ego okna
+          ScrollWindow(0, -lines * m_nFontHeight, &rect, &rect);
       }
       break;
     }
@@ -453,42 +476,47 @@ void CDeasm6502View::scroll(UINT nSBCode, int nPos, int nRepeat)
       get_view_rect(rect);
       int dy= no_of_lines(rect);	// iloœæ wierszy w oknie
 	  int lines;
-	  int maxmem = 0xffff;
-	  if (theApp.m_global.m_bProc6502==2) maxmem = 0xffffff;
-
-      SCROLLINFO si;		// 1.3.3 added si structure to get 32 bit resolution on the scrollbar
-      ZeroMemory(&si, sizeof(si));
-      si.cbSize = sizeof si;
-      si.fMask = SIF_TRACKPOS;
-      if (!(GetScrollInfo(SB_VERT, &si)))
-		break;
-      int pos = (si.nTrackPos);
-	  if (nRepeat==2) pos = (nPos); // 1.3.3 for goto memory cmd use passed value
-	  
-	  lines = deasm.FindDelta(pDoc->m_uStartAddr,pos, *pDoc->m_pCtx, dy);
-
-	  if (lines !=0) InvalidateRect(NULL);	// przerysowanie ca³ego okna
+	  if (theApp.m_global.m_bBank)
+		  lines = deasm.FindDelta(pDoc->m_uStartAddr,UINT32(nPos+0x8000),*pDoc->m_pCtx,dy); // 65816 fix
+	  else
+		  lines = deasm.FindDelta(pDoc->m_uStartAddr,UINT16(nPos+0x8000),*pDoc->m_pCtx,dy); // 65816 fix
+      if (lines < 0)
+	InvalidateRect(NULL);	// przerysowanie ca³ego okna
+      else if (lines > 0)
+      {
+	if (lines >= dy)
+	  InvalidateRect(NULL);	// przerysowanie ca³ego okna
+	else
+	  InvalidateRect(NULL);	// przerysowanie ca³ego okna
+//          ScrollWindow(0,dir * lines * m_nFontHeight,&rect,&rect);
+      }
       break;
     }
     default:
       break;
   }
-  SetScrollPos(SB_VERT,(int)pDoc->m_uStartAddr);
-
+  if (theApp.m_global.m_bBank)
+	  SetScrollPos(SB_VERT,(int)pDoc->m_uStartAddr - 0x800000);
+  else
+	  SetScrollPos(SB_VERT,(int)pDoc->m_uStartAddr - 0x8000);
 }
 
 
 void CDeasm6502View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
   scroll(nSBCode, nPos);
+
+// int SetScrollPos( int nBar, int nPos);
+
+//  CView::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
 BOOL CDeasm6502View::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) // 1.3.2 addes Mouse scroll wheel support
 {
 	if (zDelta > 0)
-		scroll(SB_LINEUP,0,0);
+			scroll(SB_LINEUP,0,0);
 	else	
-		scroll(SB_LINEDOWN,0,0);
+			scroll(SB_LINEDOWN,0,0);
 	return true; 	
 }
 
@@ -577,7 +605,10 @@ void CDeasm6502View::OnDeasmGoto()
   if (dlg.DoModal() == IDOK)
   {
     addr = dlg.m_uAddress;
-    scroll(SB_THUMBTRACK,addr,2);
+	if (theApp.m_global.m_bBank)
+      scroll(SB_THUMBTRACK,dlg.m_uAddress-0x8000,1);
+	else
+	  scroll(SB_THUMBTRACK,dlg.m_uAddress-0x8000,1);
   }
 }
 
@@ -596,7 +627,11 @@ void CDeasm6502View::OnContextMenu(CWnd* pWnd, CPoint point)
 
   CMenu* pPopup = menu.GetSubMenu(0);
   ASSERT(pPopup != NULL);
-
+/*
+  CWnd* pWndPopupOwner = this;
+  while (pWndPopupOwner->GetStyle() & WS_CHILD)
+    pWndPopupOwner = pWndPopupOwner->GetParent();
+*/
   if (point.x == -1 && point.y == -1)     // menu wywo³ane przy pomocy klawiatury?
   {
     CRect rect;
@@ -610,13 +645,14 @@ void CDeasm6502View::OnContextMenu(CWnd* pWnd, CPoint point)
   }
 
   pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
-
+//    pWndPopupOwner);
 }
 
 
 void CDeasm6502View::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
+
 	set_scroll_range();
 }
 
@@ -629,15 +665,14 @@ void CDeasm6502View::set_scroll_range()  //65816 fix
 
   SCROLLINFO si;
   si.cbSize = sizeof si;
-  si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-  if (theApp.m_global.m_bProc6502==2) {
-	si.nMin = 0x0;
-	si.nMax = 0xffffff;
+  si.fMask = SIF_RANGE | SIF_PAGE;
+  if (theApp.m_global.m_bBank) {
+	  si.nMin = -0x8000;
+	  si.nMax = 0x7fff;
   } else {
-	si.nMin = 0x0;
-	si.nMax = 0xffff;
+	  si.nMin = -0x8000;
+	  si.nMax = 0x7fff;
   }
   si.nPage = lines; // estimate only
   SetScrollInfo(SB_VERT, &si, FALSE);
-
 }

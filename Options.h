@@ -44,8 +44,8 @@ public:
 	int	m_nWndWidth;
 	int	m_nWndHeight;
 	BOOL	m_bProtectMemory;
-	UINT	m_nProtFromAddr;
-	UINT	m_nProtToAddr;
+	UINT32	m_nProtFromAddr;
+	UINT32	m_nProtToAddr;
 	//}}AFX_DATA
 
 // Overrides

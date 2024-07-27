@@ -26,6 +26,7 @@ class CDeasm : public CAsm, public CObject
 	CString SetMemZPGInfo(UINT8 addr, UINT8 val);	// opis komórki strony zerowej pamiêci
 	CString SetMemInfo(UINT32 addr, UINT8 val);	// opis komórki pamiêci
 	CString SetValInfo(UINT8 val);		// opis wartoœci 'val'
+	CString SetWordInfo(UINT16 word);		// opis wartoœci 'val'
 
 public:
 	CDeasm()
@@ -33,13 +34,14 @@ public:
 	~CDeasm()
 	{ }
 
-	CString DeasmInstr(const CContext& ctx, DeasmFmt flags, int& ptr);
+	CString DeasmInstr(const CContext& ctx, DeasmFmt flags, INT32& ptr);
 	CString DeasmInstr(const CmdInfo& ci, DeasmFmt flags);
-	CString ArgumentValue(const CContext &ctx, int ptr= -1);
+	CString ArgumentValue(const CContext &ctx, UINT32 ptr= -1);
 
 	CString Mnemonic(UINT8 code, ProcessorType procType, bool bUseBrk = false);
 	CString Argument(UINT8 cmd, CodeAdr mode, UINT32 addr, UINT8 arg1, UINT8 arg2, UINT8 arg3, bool bLabel= false, bool bHelp= false);
 	CString Binary(UINT8 val);
+	CString Binary2(UINT16 val);
 	int FindPrevAddr(UINT32 &addr, const CContext &ctx, int cnt= 1);
 	int FindNextAddr(UINT32 &addr, const CContext &ctx, int cnt= 1);
 	int FindDelta(UINT32 &addr, UINT32 dest, const CContext &ctx, int max_lines);
