@@ -29,12 +29,12 @@ IDR_SRC65TYPE           ICON    DISCARDABLE     "res\\6502_source.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version
+// Version info for 6502.exe
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,5,3                      // file version that gets saved to details
- PRODUCTVERSION 1,3,5,3                   // used in help about version
+ FILEVERSION FVERSION                      // file version that gets saved to details
+ PRODUCTVERSION FVERSION                   // used in help about version
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -59,7 +59,7 @@ BEGIN
             VALUE "OriginalFilename", "6502.exe\0"           // file details
 //            VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "6502\0"                     // file details
-            VALUE "ProductVersion", "1.3.5.3\0"               // gets saved to file details
+            VALUE "ProductVersion", PVERSION                 // gets saved to file details
 //            VALUE "SpecialBuild", "\0"
         END
     END

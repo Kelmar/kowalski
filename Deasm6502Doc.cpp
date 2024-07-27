@@ -45,8 +45,8 @@ CDeasm6502Doc::CDeasm6502Doc()
   m_nPointerAddr = -1;
 
   m_uStart  = 0x0000;
-  m_uEnd    = 0xFFFF;
-  m_uLength = 0x10000;
+  m_uEnd    = 0xFFFFFF;
+  m_uLength = 0x1000000;
   m_bSaveAsData = false;
 }
 
@@ -142,11 +142,12 @@ void CDeasm6502Doc::SetContext(const CContext *pCtx)
 
 
   // narysowanie/zmazanie strza³ki w wierszu
-void CDeasm6502Doc::SetPointer(int addr, bool scroll/*= FALSE*/)
+void CDeasm6502Doc::SetPointer(UINT32 addr, bool scroll/*= FALSE*/)
 {
   if (scroll && addr != -1)
     UpdateAllViews(NULL,MAKELONG(2,addr));	// przesuniêcie zawartoœci aktywnego okna
-//  if (m_nPointerAddr != -1)
+
+  //  if (m_nPointerAddr != -1)
   ASSERT(addr==-1 || addr>=0 && addr<=0xFFFF);
   m_nPointerAddr = addr;
 //  RECT rect;
@@ -175,6 +176,7 @@ void CDeasm6502Doc::DeassembleSave(CArchive &ar, const CContext &ctx, UINT32 sta
       case A_ILL:	// illegal
 	break;
       case A_IMM:	// immediate
+      case A_IMM2:	// immediate
 	break;
       case A_ZPG:	// zero page
       case A_ZPG_X:	// zero page indexed X
@@ -296,7 +298,7 @@ void CDeasm6502Doc::DeassembleSave(CArchive &ar, const CContext &ctx, UINT32 sta
       }
       else
       {
-        int p= ptr;
+        INT32 p= ptr;
         str = '\t';
         str += deasm.DeasmInstr(ctx,CAsm::DF_LABELS,p);
         ar.WriteString(str + "\r\n");

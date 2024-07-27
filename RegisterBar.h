@@ -41,6 +41,8 @@ class CRegisterBar : public CDialogBar, public CAsm
   void UpdateRegP(const CContext *pCtx, const CContext *pOld= NULL);
   void UpdateRegS(const CContext *pCtx, const CContext *pOld= NULL);
   void UpdateRegPC(const CContext *pCtx, const CContext *pOld= NULL);
+  void UpdateRegB(const CContext *pCtx, const CContext *pOld= NULL);
+
   void UpdateCycles(ULONG uCycles);
   void ChangeRegister(int ID, int reg_no);
   void ChangeFlags(int flag_bit, bool set);	// zmiana bitu rej. flagowego
@@ -87,15 +89,21 @@ protected:
   afx_msg void OnRegFlagOver();
   afx_msg void OnRegFlagZero();
   afx_msg void OnRegFlagBrk();
+  afx_msg void OnRegFlagM16();
+  afx_msg void OnRegFlagX16();
+  afx_msg void OnRegFlagEmm();
+
   afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
   afx_msg void OnRegsCyclesClr();
   //}}AFX_MSG
   DECLARE_MESSAGE_MAP()
 private:
-  CString Binary(UINT8 val);
-  void SetDlgItemInf(int nID, UINT8 val);
+  CString Binary(UINT16 val, bool word);
+  void SetDlgItemInf(int nID, UINT16 val, bool word);
   void SetDlgItemMem(int nID, int nBytes, UINT16 ptr, const CContext *pCtx);
   void SetDlgItemWordHex(int nID, UINT16 val);
+    void SetDlgItemLWordHex(int nID, UINT32 val);
   void SetDlgItemByteHex(int nID, UINT8 val);
+  void SetDlgItemBlank(int nID);
 
 };

@@ -32,44 +32,65 @@ class CContext
 	void reset()
 	{
 		pc = 0;
-		a = x = y = s = 0;
+		b = a = x = y = s = 0;
 		io = false;
 		negative = overflow = zero = carry = false;
 		break_bit = decimal = interrupt = false;
 		reserved = true;
+		emm = true;
+		mem16 = true;
+		xy16 = true;
+		dbr = 0x00;
+		pbr = 0x00;
+		dir = 0x0000;
 		uCycles = 0;
 	}
 
 public:
-	UINT8 a, x, y, s;
-//	UINT16 pc;
-	UINT32 pc;
+	UINT8 b;
+	UINT16 a, x, y;
+	UINT16 s;
+	UINT16 pc;
+//	UINT32 pc;
 	ULONG uCycles;
 	bool intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
 
 	bool negative, overflow, zero, carry;
 	bool reserved, break_bit, decimal, interrupt;
 
+	bool emm; // emmulation mode
+	bool mem16;  // 8 bit mode
+	bool xy16;   // 8 bit mode
+	UINT8 dbr;	// data bank register
+	UINT8 pbr;   // program bank register
+	UINT16 dir;   // direct register
+
 	enum Flags
 	{
 		NEGATIVE  = 0x80,
 		OVERFLOW  = 0x40,
+		MEMORY    = 0x20,
 		RESERVED  = 0x20,
+		INDEX     = 0x10,
 		BREAK     = 0x10,
 		DECIMAL   = 0x08,
 		INTERRUPT = 0x04,
 		ZERO      = 0x02,
+		EMULATION = 0x01,
 		CARRY     = 0x01,
 		NONE      = 0x00,
 		ALL       = 0xFF,
 		// numery bitów
 		N_NEGATIVE  = 7,
 		N_OVERFLOW  = 6,
+        N_MEMORY    = 5,
 		N_RESERVED  = 5,
+		N_INDEX     = 4,
 		N_BREAK     = 4,
 		N_DECIMAL   = 3,
 		N_INTERRUPT = 2,
 		N_ZERO      = 1,
+		N_EMULATION = 8,
 		N_CARRY     = 0
 	};
 
@@ -91,6 +112,8 @@ public:
 	{ negative=!!n; zero=!!z; }
 	void set_status_reg(UINT8 val)
 	{ zero = val==0;  negative = !!(val & 0x80); }
+	void set_status_reg16(UINT16 val)
+	{ zero = val==0;  negative = !!(val & 0x8000); }
 
 	UINT8 get_status_reg() const;
 	void set_status_reg_bits(UINT8 reg);
@@ -98,7 +121,7 @@ public:
 	{
 		mem_mask = UINT32((1 << w) - 1);
 		mem.SetMask(mem_mask);
-		ASSERT(w >= 10 && w <= 16);
+		ASSERT(w >= 10 && w <= 24);
 	}
 
 	CContext(COutputMem &mem, int addr_bus_width) : mem(mem)
@@ -141,7 +164,7 @@ struct CmdInfo	// single command info (for logging)
 	}
 
 	//% bug Fix 1.2.13.18 - command log assembly not lined up with registers
-	CmdInfo(UINT8 a, UINT8 x, UINT8 y, UINT8 s, UINT8 flags, UINT8 cmd, UINT8 arg1, UINT8 arg2, UINT32 pc)
+	CmdInfo(UINT16 a, UINT16 x, UINT16 y, UINT8 s, UINT8 flags, UINT8 cmd, UINT8 arg1, UINT8 arg2, UINT32 pc)
 		: a(a), x(x), y(y), s(s), flags(flags), pc(pc), cmd(cmd), arg1(arg1), arg2(arg2), arg3(arg3), uCycles(uCycles), intFlag(intFlag)
 	{
 		argVal = 0;
@@ -151,16 +174,17 @@ struct CmdInfo	// single command info (for logging)
 
 	CString Asm() const;
 
-	UINT8 a;
-	UINT8 x;
-	UINT8 y;
-	UINT8 s;
+	UINT16 a;
+	UINT8  b;
+	UINT16 x;
+	UINT16 y;
+	UINT16 s;
 	UINT8 flags;
 	UINT8 cmd;
 	UINT8 arg1;
 	UINT8 arg2;
 	UINT8 arg3;  //% 65816
-	UINT32 pc;
+	UINT16 pc;
 	ULONG uCycles;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
 	bool intFlag;
 	UINT16 argVal;
@@ -180,8 +204,8 @@ public:
 	static UINT16 io_addr;	// pocz¹tek obszaru we/wy symulatora
 	static bool io_enabled;
 	static bool s_bWriteProtectArea;
-	static UINT16 s_uProtectFromAddr;
-	static UINT16 s_uProtectToAddr;
+	static UINT32 s_uProtectFromAddr;
+	static UINT32 s_uProtectToAddr;
 
 	enum IOFunc			// funkcje kolejnych bajtów z obszaru we/wy symulatora
 	{ 
@@ -195,13 +219,24 @@ public:
 		TERMINAL_GET_Y_POS,
 		TERMINAL_SET_X_POS,
 		TERMINAL_SET_Y_POS,
-		IO_LAST_FUNC= TERMINAL_SET_X_POS
+		IO_LAST_FUNC= TERMINAL_SET_Y_POS
 	};
 
 	// interrupt types
 	enum IntType { NONE= 0, IRQ= 1, NMI= 2, RST= 4 };
 
 private:
+
+
+	bool cpu16;
+//	bool emm; // emmulation mode
+//	bool mem16;  // 8 bit mode
+//	bool xy16;   // 8 bit mode
+//	UINT8 dbr;	// data bank register
+//	UINT8 pbr;   // program bank register
+//	UINT16 dir;   // direct register
+	bool waiflag;
+
 	IOFunc io_func;
 	CWnd *io_window();		// odszukanie okna terminala
 	CWnd *io_open_window();	// otwarcie okna terminala
@@ -222,29 +257,83 @@ private:
 	SymStat perform_step(bool animate);
 	SymStat perform_command();
 
-	UINT16 get_argument_address(bool bWrite);	// get current cmd argument address
-	UINT8 get_argument_value();					// get current cmd argument value
+	UINT32 get_argument_address(bool bWrite);	// get current cmd argument address
+	UINT16 get_argument_value(bool rmask);					// get current cmd argument value
 
 	void push_on_stack(UINT8 arg)
-	{ ctx.mem[0x100 + ctx.s--] = arg; }
+	{
+		if (cpu16 && !ctx.emm)  {
+			if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
+				{
+					throw SYM_ILL_WRITE;
+				}
+			ctx.mem[ctx.s] = arg;
+			ctx.s = --ctx.s & 0xffff; 
+		}  else  {
+            ctx.mem[0x100 + (ctx.s&0xff)] = arg;
+			ctx.s = (--ctx.s & 0xff)+ 0x100; 
+		}
+	}
 
 	void push_addr_on_stack(UINT16 arg)
 	{
-		ctx.mem[0x100 + ctx.s--] = (arg>>8) & 0xFF;
-		ctx.mem[0x100 + ctx.s--] = arg & 0xFF;
+		if (cpu16 && !ctx.emm) {
+			if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
+				{
+					throw SYM_ILL_WRITE;
+				}
+			ctx.mem[ctx.s] = (arg>>8) & 0xFF;
+			ctx.s = --ctx.s & 0xffff; 
+			if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
+				{
+					throw SYM_ILL_WRITE;
+				}
+			ctx.mem[ctx.s] = arg & 0xFF;
+			ctx.s = --ctx.s & 0xffff; 
+		} else {
+			ctx.mem[0x100 + (ctx.s & 0xff)] = (arg>>8) & 0xFF;
+			ctx.s = (--ctx.s & 0xff)+ 0x100; 
+			ctx.mem[0x100 + (ctx.s & 0xff)] = arg & 0xFF;
+			ctx.s = (--ctx.s & 0xff)+ 0x100; 
+		}
 	}
 
 	UINT8 pull_from_stack()
-	{ return ctx.mem[0x100 + ++ctx.s]; }
+	{ 
+		if (cpu16) {
+			if (ctx.emm && ((ctx.s&0xff)==0xff)) {
+				ctx.s = 0x100;
+				return ctx.mem[ctx.s];
+			} else 
+				return ctx.mem[++ctx.s];
+		} else {
+			ctx.s = ++ctx.s;
+			return ctx.mem[0x100 + (ctx.s & 0xff)]; 
+		}
+	}
 
 	UINT16 pull_addr_from_stack()
 	{
-		UINT16 tmp= ctx.mem[0x100 + ++ctx.s];
-		tmp |= UINT16(ctx.mem[0x100 + ++ctx.s]) << UINT16(8);
-		return tmp;
+		if (cpu16) {
+			if (ctx.emm && ((ctx.s&0xff)==0xff)) {
+				UINT16 tmp = 0x100;
+				ctx.s = 0x101;
+				return ctx.mem.GetWord(tmp);
+			} else {
+				UINT16 tmp = ++ctx.s;
+				ctx.s = ++ctx.s;
+				return ctx.mem.GetWord(tmp);
+			}
+		} else {
+			UINT8 tmp = ++ctx.s&0xff;
+			ctx.s = ++ctx.s;
+			UINT16 tmp2= ctx.mem[0x100 + tmp];
+			tmp2 |= UINT16(ctx.mem[0x100 + (ctx.s&0xff)]) << UINT16(8);
+			return tmp2;
+		}
 	}
 
-	UINT16 get_irq_addr();
+//	UINT16 get_irq_addr();
 
 	static UINT start_step_over_thread(LPVOID ptr);
 	static UINT start_run_thread(LPVOID ptr);
@@ -265,8 +354,8 @@ private:
 	void init();
 	void set_translation_tables();
 
-	bool check_io_write(UINT16 addr);
-	bool check_io_read(UINT16 addr);
+	bool check_io_write(UINT32 addr);
+	bool check_io_read(UINT32 addr);
 
 	SymStat io_function(UINT8 arg);
 	UINT8 io_function();
@@ -277,8 +366,19 @@ private:
 
 public:
 	Finish finish;		// okreœlenie sposobu zakoñczenia wykonania programu
+
+	UINT16 get_irq_addr();
 	UINT16 get_rst_addr();
 	UINT16 get_nmi_addr();
+	UINT16 get_abort_addr();
+	UINT16 get_cop_addr();
+
+	UINT16 get_irq_addr16();
+	UINT16 get_nmi_addr16();
+	UINT16 get_abort_addr16();
+	UINT16 get_brk_addr16();
+	UINT16 get_cop_addr16();
+
 	void Update(SymStat stat, bool no_ok= false);
 	CString GetStatMsg(SymStat stat);
 	CString GetLastStatMsg();

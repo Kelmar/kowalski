@@ -33,7 +33,7 @@ public:
   // Dialog Data
   //{{AFX_DATA(CDeasmGoto)
   enum { IDD = IDD_DEASM_GOTO };
-  UINT m_uAddress;
+  UINT32 m_uAddress;
   //}}AFX_DATA
   
   

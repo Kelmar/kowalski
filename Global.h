@@ -37,6 +37,9 @@ class CGlobal : public CObject, CAsm, virtual CBroadcast
 	CMarkArea m_MarkArea;			// oznaczenie fragmentów pamiêci zawieraj¹cej kod wynikowy
 public:
 	UINT8 m_bProc6502;				// typ procesora
+	bool m_bBank;					// flag for memory above bank 0 for deasm view
+	UINT8 m_bPBR;                   // PBR register for deasm view
+	UINT16 m_bSRef;                 // stack pointer reference
 	UINT8 m_bHelpFile;              // ^^ help file type
 	COutputMem m_Mem;				// pamiêæ dla kodu wynikowego i symulatora
 	bool m_bGenerateListing;		// generowaæ listing przy asemblacji?
@@ -44,7 +47,7 @@ public:
 	CIntGenerator m_IntGenerator;	// interrupt request generator data
 
 	CGlobal() : m_pSym6502(NULL), m_bCodePresent(false)
-	{ SetAddrBusWidth(16); }
+	{ SetAddrBusWidth(24); } //**memfix
 
 	~CGlobal()
 	{ if (m_pSym6502) delete m_pSym6502; }

@@ -92,7 +92,10 @@ bool CGlobal::CreateDeasm()
   pDoc->SetContext( m_pSym6502->GetContext() );
   pDoc->SetStart( m_pSym6502->get_pc() );
 */
-  pDoc->SetPointer( m_pSym6502->get_pc() );
+  if (m_bBank)
+    pDoc->SetPointer( m_pSym6502->get_pc()+(m_bPBR<<16));
+  else
+    pDoc->SetPointer( m_pSym6502->get_pc() );
 
   return TRUE;
 }
@@ -101,8 +104,8 @@ bool CGlobal::CreateDeasm()
 
 void CGlobal::StartDebug()
 {
-  if (theApp.m_global.m_bProc6502==2)  // 1.3.3 disable debugger for 65816
-	  return;
+//  if (theApp.m_global.m_bProc6502==2)  // 1.3.3 disable debugger for 65816
+//	  return;
 	
   GetMemForSym();
   bool restart;

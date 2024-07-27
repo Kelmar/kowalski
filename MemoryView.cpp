@@ -326,8 +326,8 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
       if (!(GetScrollInfo(SB_VERT, &si)))
 		break;
 
-      UINT32 pos = (si.nTrackPos + max_mem/2);
-	  if (nRepeat==2) pos = (nPos + max_mem/2); // 1.3.3 for goto memory cmd use passed value
+      UINT32 pos = (si.nTrackPos);
+	  if (nRepeat==2) pos = (nPos); // 1.3.3 for goto memory cmd use passed value
       pos -= pos % bytes_in_line();
       int lines= find_delta(pDoc->m_uAddress, pos, *pDoc->m_pMem, m_nCy);
       if (lines == 9999999)     // 1.3.3 changed to be beyond scroll value from 999999
@@ -370,7 +370,7 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
       break;
   }
 //  set_scroll_range();
-  SetScrollPos(SB_VERT, ((int)pDoc->m_uAddress - (max_mem/2)) /* / bytes_in_line() */ );
+  SetScrollPos(SB_VERT, ((int)pDoc->m_uAddress) /* / bytes_in_line() */ );
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -443,19 +443,17 @@ int CMemoryView::set_scroll_range()
     SetScrollRange(SB_VERT,0,0);	// ca³oœæ mieœci siê w oknie
     return -1;
   }
-  int rng= max_mem/2;
+  
   SCROLLINFO si;
   si.cbSize = sizeof si;
   si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;   // 65816 added SIF_POS
-  si.nMin = -rng;
-  si.nMax = rng;
+  si.nMin = 0;
+  si.nMax = max_mem-1;
   si.nPage = scr;
-  int nPos= pDoc->m_uAddress - rng;
-  if (nPos > rng - scr)
-      nPos = rng - scr;
+  int nPos= pDoc->m_uAddress;
   si.nPos = nPos;							// 65816 save position also
   SetScrollInfo(SB_VERT, &si, FALSE);
-    scroll(SB_THUMBTRACK, nPos);
+  scroll(SB_THUMBTRACK, nPos);
   return ret;
 }
 
@@ -647,7 +645,7 @@ void CMemoryView::OnMemoryGoto()
   if (dlg.DoModal() == IDOK)
   {
     addr = dlg.m_uAddr;
-    scroll(SB_THUMBTRACK,dlg.m_uAddr-(max_mem/2),2);  //1.3.3 change ,1 to ,2 to allow passing nPos
+    scroll(SB_THUMBTRACK,dlg.m_uAddr,2);  //1.3.3 change ,1 to ,2 to allow passing nPos
   }
 }
 

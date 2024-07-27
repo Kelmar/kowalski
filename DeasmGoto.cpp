@@ -49,7 +49,10 @@ void CDeasmGoto::DoDataExchange(CDataExchange* pDX)
   CDialog::DoDataExchange(pDX);
   DDX_HexDec(pDX, IDC_DEASM_ADDR, m_uAddress);
   //{{AFX_DATA_MAP(CDeasmGoto)
-  DDV_MinMaxUInt(pDX, m_uAddress, 0, 65535);
+  if (theApp.m_global.m_bBank)
+    DDV_MinMaxUInt(pDX, m_uAddress, 0, 0xffffff);
+  else
+    DDV_MinMaxUInt(pDX, m_uAddress, 0, 0xffffff);
   //}}AFX_DATA_MAP
 }
 

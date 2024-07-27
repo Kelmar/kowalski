@@ -117,7 +117,7 @@ class CDebugBreakpoints : CAsm, CByteArray	// informacja o miejscach przerwañ
   UINT32 temp_bp_index;
 public:
   CDebugBreakpoints() : temp_bp_index(0)
-  { SetSize(0x10000); }
+  { SetSize(0x1000000); }
 
   Breakpoint Set(UINT32 addr, int bp= BPT_EXECUTE)	// ustawienie przerwania
   {

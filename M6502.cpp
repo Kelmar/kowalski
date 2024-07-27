@@ -2110,7 +2110,6 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 			}
 		}
 		break;
-
 	default:
 		ASSERT(false);
 	}
@@ -4315,7 +4314,7 @@ CAsm6502::Stat CAsm6502::chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, 
 	else
 		byte = trans[code][mode];
 
-	if (bProc6502==2 && code==C_WDM && mode==A_IMM) // allow WDM in 65816 mode
+	if (bProc6502==2 && code==C_WDM && mode==A_ACC) // allow WDM in 65816 mode
 	{
 		length = 1+1;
 		return OK;
@@ -4534,8 +4533,9 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
 		ASSERT(origin+1 <= mem_mask);
 		ASSERT(expr.inf == Expr::EX_BYTE);
 		(*out)[origin+1] = UINT8(expr.value & 0xFF);
-		if (listing.IsOpen())
+		if (listing.IsOpen()) 
 			listing.AddCodeBytes(origin,(*out)[origin],(*out)[origin+1]);
+		
 		break;
 
 	case A_REL:		// relative

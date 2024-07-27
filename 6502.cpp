@@ -40,7 +40,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 const TCHAR C6502App::REGISTRY_KEY[]= _T("MiKSoft");
-const TCHAR C6502App::PROFILE_NAME[]= _T("6502 Simulator\\1.3");
+const TCHAR C6502App::PROFILE_NAME[]= _T("6502 Simulator\\1.4");
 
 /////////////////////////////////////////////////////////////////////////////
 // C6502App

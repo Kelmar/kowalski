@@ -77,6 +77,13 @@
 #define IDC_REGS_CYCLES_CLR             1040
 #define IDC_REGS_CYCLES                 1041
 #define IDS_REGS_S_EMPTY                1042
+#define IDC_REGS_M16			1051
+#define IDC_REGS_X16			1052
+#define IDC_REGS_EMM			1053
+#define IDC_REGS_PBR			1054
+#define IDC_REGS_DBR			1055
+#define IDC_REGS_DIR			1056
+#define IDC_REGS_B				1057
 #define IDC_COM_DIAL                    0x045f
 #define IDC_OPT_HELP_CHM                1181
 #define IDC_OPT_HELP_HTM                1182 
