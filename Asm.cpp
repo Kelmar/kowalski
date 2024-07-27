@@ -616,7 +616,6 @@ const UINT8 (&CAsm::CodeToCommand(const ProcessorType procType))[0x100]
     }
 }
 
-
 const UINT8 (&CAsm::CodeToMode())[0x100]
 {
   return CodeToMode(theApp.m_global.GetProcType());

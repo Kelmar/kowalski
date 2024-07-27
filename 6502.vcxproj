@@ -72,23 +72,23 @@
     <_ProjectFileVersion>17.0.35004.147</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">
-    <IntDir>$(Configuration)\Out</IntDir>
+    <IntDir>$(Configuration)\Out\</IntDir>
     <OutDir>$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static En|Win32'">
-    <IntDir>$(Configuration)\Out</IntDir>
+    <IntDir>$(Configuration)\Out\</IntDir>
     <OutDir>$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(Configuration)\Out</IntDir>
+    <IntDir>$(Configuration)\Out\</IntDir>
     <OutDir>$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debig|Win32'">
-    <IntDir>$(Configuration)\Out</IntDir>
+    <IntDir>$(Configuration)\Out\</IntDir>
     <OutDir>$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static Pl|Win32'">
-    <IntDir>$(Configuration)\Out</IntDir>
+    <IntDir>$(Configuration)\Out\</IntDir>
     <OutDir>$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">

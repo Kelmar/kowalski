@@ -214,11 +214,12 @@ void CMainFrame::ConfigSettings(bool load)
         CAsm6502::generateBRKExtraByte = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_BYTE, 1);
         CAsm6502::BRKExtraByte = (UINT8)pApp->GetProfileInt(ENTRY_ASM, ASM_BRK_BYTE, 0);
 
+        int procType = pApp->GetProfileInt(ENTRY_GEN, GEN_PROC, 1);
         theApp.m_global.SetProcType(static_cast<ProcessorType>(procType));
 
         theApp.m_global.SetHelpType(pApp->GetProfileInt(ENTRY_GEN, GEN_HELP, 1));   //^^ Help
 
-        CSym6502::bus_width = pApp->GetProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, 16);
+        //CSym6502::bus_width = pApp->GetProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, 16);
         theApp.m_global.m_bGenerateListing = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_LST, false);
         theApp.m_global.m_strListingFile = pApp->GetProfileString(ENTRY_ASM, ASM_LST_FILE, NULL);
         CAsm6502::generateBRKExtraByte = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_BYTE, 1);

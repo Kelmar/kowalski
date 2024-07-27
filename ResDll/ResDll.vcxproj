@@ -275,6 +275,29 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">\data\6502;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\res\6502.ico" />
+    <Image Include="..\res\6502_source.ico" />
+    <Image Include="..\res\about.bmp" />
+    <Image Include="..\res\arrow.ico" />
+    <Image Include="..\res\close_tb.bmp" />
+    <Image Include="..\res\code.bmp" />
+    <Image Include="..\res\debug.bmp" />
+    <Image Include="..\res\disasm.ico" />
+    <Image Include="..\res\ident_info.ico" />
+    <Image Include="..\res\io_window.ico" />
+    <Image Include="..\res\memory_info.ico" />
+    <Image Include="..\res\mg_icons.bmp" />
+    <Image Include="..\res\splash16_en.bmp" />
+    <Image Include="..\res\splash16_pl.bmp" />
+    <Image Include="..\res\splash_en.bmp" />
+    <Image Include="..\res\splash_pl.bmp" />
+    <Image Include="..\res\Toolbar.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\res\link.cur" />
+    <None Include="..\res\mg_cur.cur" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -241,7 +241,7 @@ UINT32 CSym6502::get_argument_address(bool bWrite)  // always returns valid addr
             addr = ctx.mem.GetWord(ctx.pc + (ctx.pbr << 16));
         else
             addr = ctx.mem.GetWord(ctx.pc);
-        if (!theApp.m_global.GetProcType() && (addr & 0xFF) == 0xFF)
+        if ((theApp.m_global.GetProcType() != ProcessorType::M6502) && (addr & 0xFF) == 0xFF)
             addr = ctx.mem.GetWord(addr, addr - 0xFF);
         else
             addr = ctx.mem.GetWord(addr);
@@ -675,7 +675,7 @@ CAsm::SymStat CSym6502::perform_command()
 #define TOBCD(a) (((((a)/10) % 10) << 4) | ((a) % 10))
 #define TOBIN(a) (((a) >> 4)*10 + ((a) & 0x0F))
 
-    cpu16 = !!(theApp.m_global.m_bProc6502 == 2);
+    cpu16 = !!(theApp.m_global.GetProcType() == ProcessorType::WDC65816);
     theApp.m_global.m_bBank = (cpu16);
     theApp.m_global.m_bPBR = ctx.pbr;
     if (cpu16 && !ctx.emm && !ctx.mem16)
@@ -748,7 +748,8 @@ CAsm::SymStat CSym6502::perform_command()
                 if (((acc8 & 0x80) == (arg8 & 0x80)) && (acc & 0x80) != (acc8 & 0x80)) overflow = true; else overflow = false;
                 if (ctx.decimal && (acc & 0xff0) > 0x190) overflow = false;
                 ctx.a = (acc & 0xff);
-                if ((theApp.m_global.m_bProc6502 == 1))	//% bug Fix 1.2.12.1 - fix cycle timing
+
+                if ((theApp.m_global.GetProcType() == ProcessorType::WDC65C02))	//% bug Fix 1.2.12.1 - fix cycle timing
                     ctx.uCycles++;
             }
             else {
@@ -813,7 +814,7 @@ CAsm::SymStat CSym6502::perform_command()
                 if ((acc & 0xff) == 0) zero = true; else zero = false;
                 if (acc & 0x80) negative = true; else negative = false;
                 ctx.a = (acc & 0xff);
-                if ((theApp.m_global.m_bProc6502 == 1))	//% bug Fix 1.2.12.1 - fix cycle timing
+                if ((theApp.m_global.GetProcType() == ProcessorType::WDC65C02)) //% bug Fix 1.2.12.1 - fix cycle timing
                     ctx.uCycles++;
             }
             else {
@@ -948,7 +949,10 @@ CAsm::SymStat CSym6502::perform_command()
                 ctx.mem[addr] = acc & 0xff;
             }
         }
-        if (!(theApp.m_global.m_bProc6502 == 0) && extracycle) ctx.uCycles++;
+
+        if (!(theApp.m_global.GetProcType() == ProcessorType::M6502) && extracycle)
+            ctx.uCycles++;
+
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
@@ -1001,7 +1005,10 @@ CAsm::SymStat CSym6502::perform_command()
                 ctx.mem[addr] = acc & 0xff;
             }
         }
-        if (!(theApp.m_global.m_bProc6502 == 0) && extracycle) ctx.uCycles++;
+
+        if (!(theApp.m_global.GetProcType() == ProcessorType::M6502) && extracycle)
+            ctx.uCycles++;
+
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
@@ -1053,7 +1060,10 @@ CAsm::SymStat CSym6502::perform_command()
                 ctx.mem[addr] = acc & 0xff;
             }
         }
-        if (!(theApp.m_global.m_bProc6502 == 0) && extracycle) ctx.uCycles++;
+
+        if (!(theApp.m_global.GetProcType() == ProcessorType::M6502) && extracycle)
+            ctx.uCycles++;
+
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
@@ -1105,7 +1115,10 @@ CAsm::SymStat CSym6502::perform_command()
                 ctx.mem[addr] = acc & 0xff;
             }
         }
-        if (!(theApp.m_global.m_bProc6502 == 0) && extracycle) ctx.uCycles++;
+
+        if (!(theApp.m_global.GetProcType() == ProcessorType::M6502) && extracycle)
+            ctx.uCycles++;
+
         ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
@@ -1490,11 +1503,13 @@ CAsm::SymStat CSym6502::perform_command()
     case C_PLP:
         inc_prog_counter();
         ctx.set_status_reg_bits(pull_from_stack());
-        if (!theApp.m_global.GetProcType())              // not 6502
+
+        if (theApp.m_global.GetProcType() != ProcessorType::M6502) // not 6502
         {
             ctx.reserved = true;
             ctx.break_bit = true;
         }
+
         break;
 
     case C_JSR:
@@ -1681,8 +1696,10 @@ CAsm::SymStat CSym6502::perform_command()
             push_addr_on_stack(ctx.pc);
             ctx.break_bit = true;
             push_on_stack(ctx.get_status_reg() | CContext::RESERVED);
-            if (!(theApp.m_global.m_bProc6502 == 0))
+
+            if (!(theApp.m_global.GetProcType() == ProcessorType::M6502))
                 ctx.decimal = false;
+
             ctx.pc = get_irq_addr();
         }
         ctx.interrupt = true; // after pushing status
@@ -1693,7 +1710,8 @@ CAsm::SymStat CSym6502::perform_command()
         //---------- 65c02 --------------------------------------------------------
 
     case C_PHX:
-        if (cpu16 && !ctx.emm && !ctx.xy16) {
+        if (cpu16 && !ctx.emm && !ctx.xy16)
+        {
             push_addr_on_stack(ctx.x);
             ctx.uCycles++;
         }
@@ -1703,7 +1721,8 @@ CAsm::SymStat CSym6502::perform_command()
         break;
 
     case C_PLX:
-        if (cpu16 && !ctx.emm && !ctx.xy16) {
+        if (cpu16 && !ctx.emm && !ctx.xy16)
+        {
             ctx.x = pull_addr_from_stack();
             ctx.set_status_reg16(ctx.x);
             ctx.uCycles++;

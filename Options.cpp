@@ -188,13 +188,13 @@ void COptionsSymPage::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxUInt(pDX, m_nIOAddress, 0, 65535);
 	DDX_HexDec(pDX, IDC_OPT_SYM_PROT_FROM, m_nProtFromAddr);
 	
-	if (theApp.m_global.m_bProc6502==2)
+	if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
 		DDV_MinMaxUInt(pDX, m_nProtFromAddr, 0, 0xffffff);
 	else
 		DDV_MinMaxUInt(pDX, m_nProtFromAddr, 0, 0xffff);
 
 	DDX_HexDec(pDX, IDC_OPT_SYM_PROT_TO, m_nProtToAddr);
-	if (theApp.m_global.m_bProc6502==2)
+	if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
 		DDV_MinMaxUInt(pDX, m_nProtToAddr, 0, 0xffffff);
 	else
 		DDV_MinMaxUInt(pDX, m_nProtToAddr, 0, 0xffff);

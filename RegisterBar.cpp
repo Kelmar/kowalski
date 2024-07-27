@@ -128,7 +128,7 @@ void CRegisterBar::Update(const CContext *pCtx, const CString &stat, const CCont
         SetDlgItemByteHex(IDC_REGS_X, pCtx->x & 0xff);
     UpdateRegX(pCtx);
 
-    if (tprocType == ProcessorType::WDC65816 && !pCtx->xy16)
+    if (procType == ProcessorType::WDC65816 && !pCtx->xy16)
         SetDlgItemWordHex(IDC_REGS_Y, pCtx->y);
     else
         SetDlgItemByteHex(IDC_REGS_Y, pCtx->y & 0xff);
@@ -588,34 +588,42 @@ void CRegisterBar::OnRegFlagBrk()
 void CRegisterBar::OnRegFlagM16()
 {
     CButton *pBtn = (CButton *)GetDlgItem(IDC_REGS_M16);
+
     if (pBtn == NULL)
     {
         ASSERT(FALSE);
         return;
     }
-    if (theApp.m_global.m_bProc6502 == 2) ChangeFlags(CContext::N_MEMORY, pBtn->GetCheck());
+
+    if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
+        ChangeFlags(CContext::N_MEMORY, pBtn->GetCheck());
 }
 void CRegisterBar::OnRegFlagX16()
 {
     CButton *pBtn = (CButton *)GetDlgItem(IDC_REGS_X16);
+
     if (pBtn == NULL)
     {
         ASSERT(FALSE);
         return;
     }
-    if (theApp.m_global.m_bProc6502 == 2) ChangeFlags(CContext::N_INDEX, pBtn->GetCheck());
+
+    if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
+        ChangeFlags(CContext::N_INDEX, pBtn->GetCheck());
 }
 void CRegisterBar::OnRegFlagEmm()
 {
     CButton *pBtn = (CButton *)GetDlgItem(IDC_REGS_EMM);
+
     if (pBtn == NULL)
     {
         ASSERT(FALSE);
         return;
     }
-    if (theApp.m_global.m_bProc6502 == 2) ChangeFlags(CContext::N_EMULATION, pBtn->GetCheck());
-}
 
+    if (theApp.m_global.GetProcType() == ProcessorType::WDC65816)
+        ChangeFlags(CContext::N_EMULATION, pBtn->GetCheck());
+}
 
 void CRegisterBar::OnWindowPosChanging(WINDOWPOS FAR *lpwndpos)
 {

@@ -2,9 +2,6 @@
 //
 #include "resource.h"
 
-#define PVERSION "1.4.0.2\0"
-#define FVERSION 1,4,0,2
-
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -150,15 +147,8 @@ CAPTION "Og�lne"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Procesor",IDC_STATIC,8,4,131,52
-    CONTROL         "Podstawowy &6502",IDC_OPT_6502,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,15,74,10
-    CONTROL         "6&5C02, 6501",IDC_OPT_65C02,"Button",BS_AUTORADIOBUTTON,
-                    16,27,57,10
-//    LTEXT           "&Szeroko�� szyny adresowej:",IDC_STATIC,16,40,90,8
-//    EDITTEXT        IDC_OPT_BUS_WIDTH,108,38,25,12,ES_AUTOHSCROLL | WS_GROUP
-//    CONTROL         "Spin1",IDC_OPT_BUS_SPIN,"msctls_updown32",
-//                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-//                    UDS_ARROWKEYS,128,38,11,14
+    CONTROL         "Podstawowy &6502",IDC_OPT_6502,"Button",BS_AUTORADIOBUTTON | WS_GROUP,16,15,74,10
+    CONTROL         "6&5C02, 6501",IDC_OPT_65C02,"Button",BS_AUTORADIOBUTTON,16,27,57,10
     GROUPBOX        "Kolory wska�nik�w",IDC_STATIC,8,59,131,68
     LTEXT           "&Aktualnej instrukcji",IDC_STATIC,13,72,60,8
     PUSHBUTTON      "",IDC_OPT_MARK_PTR_COL,79,69,28,14
@@ -548,28 +538,28 @@ BEGIN
     POPUP "&Plik"
     BEGIN
         MENUITEM "&Nowy\tCtrl+N",               ID_FILE_NEW
-        MENUITEM "&Otw�rz...\tCtrl+O",          ID_FILE_OPEN
+        MENUITEM "&Otw�rz...\tCtrl+O",        ID_FILE_OPEN
         MENUITEM SEPARATOR
-        MENUITEM "O&tw�rz kod...\tCtrl+L",      ID_FILE_OPEN_CODE
+        MENUITEM "O&tw�rz kod...\tCtrl+L",    ID_FILE_OPEN_CODE
         MENUITEM "Zapi&sz kod...\tCtrl+K",      ID_FILE_SAVE_CODE
         MENUITEM SEPARATOR
         MENUITEM "&Ustawienia strony...",       ID_FILE_PRINT_SETUP
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "Za&ko�cz",                    ID_APP_EXIT
+        MENUITEM "Za&ko�cz",                  ID_APP_EXIT
     END
     POPUP "&Widok"
     BEGIN
         MENUITEM "&Deasembler\tAlt+0",          ID_VIEW_DEASM
         MENUITEM SEPARATOR
         MENUITEM "&Rejestry 6502\tAlt+1",       ID_VIEW_REGISTERBAR
-        MENUITEM "&Pami�� 6502\tAlt+2",         ID_VIEW_MEMORY
+        MENUITEM "&Pami�� 6502\tAlt+2",     ID_VIEW_MEMORY
         MENUITEM "Strona &zerowa\tAlt+3",       ID_VIEW_ZEROPAGEBAR
         MENUITEM "&Identyfikatory\tAlt+4",      ID_VIEW_IDENT
-        MENUITEM "&Wej�cie/wyj�cie\tAlt+5",     ID_VIEW_IO_WINDOW
+        MENUITEM "&Wej�cie/wyj�cie\tAlt+5", ID_VIEW_IO_WINDOW
         MENUITEM SEPARATOR
-        MENUITEM "Pasek &narz�dzi",             ID_VIEW_TOOLBAR
+        MENUITEM "Pasek &narz�dzi",           ID_VIEW_TOOLBAR
         MENUITEM "Pasek &stanu",                ID_VIEW_STATUS_BAR
     END
     POPUP "&Symulator"
@@ -603,7 +593,7 @@ BEGIN
     POPUP "&Okno"
     BEGIN
         MENUITEM "&Kaskada",                    ID_WINDOW_CASCADE
-        MENUITEM "&Rozmie��",                   ID_WINDOW_TILE_HORZ
+        MENUITEM "&Rozmie��",               ID_WINDOW_TILE_HORZ
         MENUITEM "&Ustaw",                      ID_WINDOW_ARRANGE
     END
     POPUP "Po&moc"
@@ -619,21 +609,21 @@ BEGIN
     POPUP "&Plik"
     BEGIN
         MENUITEM "&Nowy\tCtrl+N",               ID_FILE_NEW
-        MENUITEM "&Otw�rz...\tCtrl+O",          ID_FILE_OPEN
+        MENUITEM "&Otw�rz...\tCtrl+O",        ID_FILE_OPEN
         MENUITEM "Za&mknij\tCtrl+W",            ID_FILE_CLOSE
         MENUITEM "&Zapisz\tCtrl+S",             ID_FILE_SAVE
         MENUITEM "Z&apisz jako...",             ID_FILE_SAVE_AS
         MENUITEM SEPARATOR
-        MENUITEM "O&tw�rz kod...\tCtrl+L",      ID_FILE_OPEN_CODE
+        MENUITEM "O&tw�rz kod...\tCtrl+L",    ID_FILE_OPEN_CODE
         MENUITEM "Zapi&sz kod...\tCtrl+K",      ID_FILE_SAVE_CODE
         MENUITEM SEPARATOR
         MENUITEM "&Drukuj...\tCtrl+P",          ID_FILE_PRINT
-        MENUITEM "&Podgl�d wydruku",            ID_FILE_PRINT_PREVIEW
+        MENUITEM "&Podgl�d wydruku",          ID_FILE_PRINT_PREVIEW
         MENUITEM "&Ustawienia strony...",       ID_FILE_PRINT_SETUP
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "Za&ko�cz",                    ID_APP_EXIT
+        MENUITEM "Za&ko�cz",                  ID_APP_EXIT
     END
     POPUP "&Edycja"
     BEGIN
@@ -642,24 +632,24 @@ BEGIN
         MENUITEM "&Wytnij\tCtrl+X",             ID_EDIT_CUT
         MENUITEM "&Kopiuj\tCtrl+C",             ID_EDIT_COPY
         MENUITEM "Wkl&ej\tCtrl+V",              ID_EDIT_PASTE
-        MENUITEM "&Usu�\tDel",                  ID_EDIT_CLEAR
+        MENUITEM "&Usu�\tDel",                ID_EDIT_CLEAR
         MENUITEM "Z&aznacz wszystko\tCtrl+A",   ID_EDIT_SELECT_ALL
         MENUITEM SEPARATOR
-        MENUITEM "&Znajd�\tCtrl+F",             ID_EDIT_FIND
-        MENUITEM "Znajd� &nast�pny\tCtrl+G",    ID_EDIT_REPEAT
-        MENUITEM "Za&mie�\tCtrl+R",             ID_EDIT_REPLACE
+        MENUITEM "&Znajd�\tCtrl+F",           ID_EDIT_FIND
+        MENUITEM "Znajd� &nast�pny\tCtrl+G", ID_EDIT_REPEAT
+        MENUITEM "Za&mie�\tCtrl+R",           ID_EDIT_REPLACE
     END
     POPUP "&Widok"
     BEGIN
         MENUITEM "&Deasembler\tAlt+0",          ID_VIEW_DEASM
         MENUITEM SEPARATOR
         MENUITEM "&Rejestry 6502\tAlt+1",       ID_VIEW_REGISTERBAR
-        MENUITEM "&Pami�� 6502\tAlt+2",         ID_VIEW_MEMORY
+        MENUITEM "&Pami�� 6502\tAlt+2",     ID_VIEW_MEMORY
         MENUITEM "Strona &zerowa\tAlt+3",       ID_VIEW_ZEROPAGEBAR
         MENUITEM "&Identyfikatory\tAlt+4",      ID_VIEW_IDENT
-        MENUITEM "&Wej�cie/wyj�cie\tAlt+5",     ID_VIEW_IO_WINDOW
+        MENUITEM "&Wej�cie/wyj�cie\tAlt+5", ID_VIEW_IO_WINDOW
         MENUITEM SEPARATOR
-        MENUITEM "Pasek &narz�dzi",             ID_VIEW_TOOLBAR
+        MENUITEM "Pasek &narz�dzi",           ID_VIEW_TOOLBAR
         MENUITEM "Pasek &stanu",                ID_VIEW_STATUS_BAR
     END
     POPUP "&Symulator"
@@ -695,7 +685,7 @@ BEGIN
     POPUP "&Okno"
     BEGIN
         MENUITEM "&Kaskada",                    ID_WINDOW_CASCADE
-        MENUITEM "&Rozmie��",                   ID_WINDOW_TILE_HORZ
+        MENUITEM "&Rozmie��",               ID_WINDOW_TILE_HORZ
         MENUITEM "&Ustaw",                      ID_WINDOW_ARRANGE
     END
     POPUP "Po&moc"
@@ -714,7 +704,7 @@ BEGIN
         MENUITEM "&Kopiuj",                     ID_EDIT_COPY
         MENUITEM "Wkl&ej",                      ID_EDIT_PASTE
         MENUITEM SEPARATOR
-        MENUITEM "&Wstaw/usu� przerwanie",      ID_SYM_BREAKPOINT
+        MENUITEM "&Wstaw/usu� przerwanie",    ID_SYM_BREAKPOINT
         MENUITEM "&Parametry przerwania...",    ID_SYM_EDIT_BREAKPOINT
         MENUITEM SEPARATOR
         MENUITEM "&Opcje edytora...",           ID_EDITOR_OPT
@@ -726,21 +716,21 @@ BEGIN
     POPUP "&Plik"
     BEGIN
         MENUITEM "&Nowy\tCtrl+N",               ID_FILE_NEW
-        MENUITEM "&Otw�rz...\tCtrl+O",          ID_FILE_OPEN
+        MENUITEM "&Otw�rz...\tCtrl+O",        ID_FILE_OPEN
         MENUITEM "Za&mknij\tCtrl+W",            ID_FILE_CLOSE
         MENUITEM "&Zapisz\tCtrl+S",             ID_FILE_SAVE
         MENUITEM "Z&apisz jako...",             ID_FILE_SAVE_AS
         MENUITEM SEPARATOR
-        MENUITEM "O&tw�rz kod...\tCtrl+L",      ID_FILE_OPEN_CODE
+        MENUITEM "O&tw�rz kod...\tCtrl+L",    ID_FILE_OPEN_CODE
         MENUITEM "Zapi&sz kod...\tCtrl+K",      ID_FILE_SAVE_CODE
         MENUITEM SEPARATOR
         MENUITEM "&Drukuj...\tCtrl+P",          ID_FILE_PRINT
-        MENUITEM "&Podgl�d wydruku",            ID_FILE_PRINT_PREVIEW
+        MENUITEM "&Podgl�d wydruku",          ID_FILE_PRINT_PREVIEW
         MENUITEM "&Ustawienia strony...",       ID_FILE_PRINT_SETUP
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "Za&ko�cz",                    ID_APP_EXIT
+        MENUITEM "Za&ko�cz",                  ID_APP_EXIT
     END
     POPUP "&Edycja"
     BEGIN
@@ -749,24 +739,24 @@ BEGIN
         MENUITEM "&Wytnij\tCtrl+X",             ID_EDIT_CUT
         MENUITEM "&Kopiuj\tCtrl+C",             ID_EDIT_COPY
         MENUITEM "Wkl&ej\tCtrl+V",              ID_EDIT_PASTE
-        MENUITEM "&Usu�\tDel",                  ID_EDIT_CLEAR
+        MENUITEM "&Usu�\tDel",                ID_EDIT_CLEAR
         MENUITEM "Z&aznacz wszystko\tCtrl+A",   ID_EDIT_SELECT_ALL
         MENUITEM SEPARATOR
-        MENUITEM "&Znajd�\tCtrl+F",             ID_EDIT_FIND
-        MENUITEM "Znajd� &nast�pny\tCtrl+G",    ID_EDIT_REPEAT
-        MENUITEM "Za&mie�\tCtrl+R",             ID_EDIT_REPLACE
+        MENUITEM "&Znajd�\tCtrl+F",           ID_EDIT_FIND
+        MENUITEM "Znajd� &nast�pny\tCtrl+G", ID_EDIT_REPEAT
+        MENUITEM "Za&mie�\tCtrl+R",           ID_EDIT_REPLACE
     END
     POPUP "&Widok"
     BEGIN
         MENUITEM "&Deasembler\tAlt+0",          ID_VIEW_DEASM
         MENUITEM SEPARATOR
         MENUITEM "&Rejestry 6502\tAlt+1",       ID_VIEW_REGISTERBAR
-        MENUITEM "&Pami�� 6502\tAlt+2",         ID_VIEW_MEMORY
+        MENUITEM "&Pami�� 6502\tAlt+2",     ID_VIEW_MEMORY
         MENUITEM "Strona &zerowa\tAlt+3",       ID_VIEW_ZEROPAGEBAR
         MENUITEM "&Identyfikatory\tAlt+4",      ID_VIEW_IDENT
-        MENUITEM "&Wej�cie/wyj�cie\tAlt+5",     ID_VIEW_IO_WINDOW
+        MENUITEM "&Wej�cie/wyj�cie\tAlt+5", ID_VIEW_IO_WINDOW
         MENUITEM SEPARATOR
-        MENUITEM "Pasek &narz�dzi",             ID_VIEW_TOOLBAR
+        MENUITEM "Pasek &narz�dzi",           ID_VIEW_TOOLBAR
         MENUITEM "Pasek &stanu",                ID_VIEW_STATUS_BAR
     END
     POPUP "&Symulator"
@@ -802,7 +792,7 @@ BEGIN
     POPUP "&Okno"
     BEGIN
         MENUITEM "&Kaskada",                    ID_WINDOW_CASCADE
-        MENUITEM "&Rozmie��",                   ID_WINDOW_TILE_HORZ
+        MENUITEM "&Rozmie��",               ID_WINDOW_TILE_HORZ
         MENUITEM "&Ustaw",                      ID_WINDOW_ARRANGE
     END
     POPUP "Po&moc"
@@ -817,7 +807,7 @@ IDR_POPUP_DEASM6502 MENU
 BEGIN
     POPUP "_POPUP_"
     BEGIN
-        MENUITEM "&Wy�wietlanie od adresu...",  ID_DEASM_GOTO
+        MENUITEM "&Wy�wietlanie od adresu...", ID_DEASM_GOTO
         MENUITEM SEPARATOR
         MENUITEM "&Zapisz program...",          ID_FILE_SAVE
         MENUITEM SEPARATOR
@@ -829,14 +819,14 @@ IDR_POPUP_MEMORY MENU
 BEGIN
     POPUP "_POPUP_"
     BEGIN
-        MENUITEM "&Wy�wietlanie od adresu...",  ID_MEMORY_GOTO
-        MENUITEM "&Modyfikacja pami�ci...",     ID_MEMORY_CHG
+        MENUITEM "&Wy�wietlanie od adresu...", ID_MEMORY_GOTO
+        MENUITEM "&Modyfikacja pami�ci...",   ID_MEMORY_CHG
         MENUITEM SEPARATOR
-        MENUITEM "Op&cje okna pami�ci...",      ID_MEMORY_OPTIONS
+        MENUITEM "Op&cje okna pami�ci...",    ID_MEMORY_OPTIONS
         MENUITEM SEPARATOR
         MENUITEM "Wy�w&ietlaj szesnastkowo i znakowo", ID_MEMORY_FULL
-        MENUITEM "Wy�wietlaj &szesnastkowo",    ID_MEMORY_HEX
-        MENUITEM "Wy�wietlaj &znakowo",         ID_MEMORY_TEXT
+        MENUITEM "Wy�wietlaj &szesnastkowo",  ID_MEMORY_HEX
+        MENUITEM "Wy�wietlaj &znakowo",       ID_MEMORY_TEXT
     END
 END
 
@@ -844,10 +834,10 @@ IDR_POPUP_ZPMEMORY MENU
 BEGIN
     POPUP "_POPUP_"
     BEGIN
-        MENUITEM "&Wy�wietlanie od adresu...",  ID_MEMORY_GOTO
-        MENUITEM "&Modyfikacja pami�ci...",     ID_MEMORY_CHG
+        MENUITEM "&Wy�wietlanie od adresu...", ID_MEMORY_GOTO
+        MENUITEM "&Modyfikacja pami�ci...",   ID_MEMORY_CHG
         MENUITEM SEPARATOR
-        MENUITEM "Op&cje okna pami�ci...",      ID_MEMORY_OPTIONS
+        MENUITEM "Op&cje okna pami�ci...",    ID_MEMORY_OPTIONS
     END
 END
 
@@ -1286,63 +1276,34 @@ IDD_REGISTERBAR DIALOGEX 0, 0, 243, 106
 STYLE DS_SETFONT | WS_CHILD | WS_CLIPSIBLINGS
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    EDITTEXT        IDC_REGS_A,15,4,27,11,ES_UPPERCASE | NOT WS_BORDER | 
-                    WS_GROUP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_X,15,17,27,11,ES_UPPERCASE | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_Y,15,30,27,11,ES_UPPERCASE | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_S,15,47,27,11,ES_UPPERCASE | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_PC,19,63,27,11,ES_UPPERCASE | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_P,156,33,20,11,ES_UPPERCASE | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_PBR,25,77,20,11,ES_UPPERCASE | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_DBR,70,77,20,11,ES_UPPERCASE | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_DIR,112,77,27,11,ES_UPPERCASE | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_B,152,77,20,11,ES_UPPERCASE | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
-    CONTROL         "N",IDC_REGS_NEG,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,158,20,16,10
-    CONTROL         "Z",IDC_REGS_ZERO,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,178,20,16,10
-    CONTROL         "V",IDC_REGS_OVER,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,198,20,16,10
-    CONTROL         "C",IDC_REGS_CARRY,"Button",BS_AUTOCHECKBOX | 
-                    BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,217,20,16,
-                    10
-    CONTROL         "I",IDC_REGS_INT,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,180,33,14,10
-    CONTROL         "B",IDC_REGS_BRK,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,198,33,16,10
-    CONTROL         "D",IDC_REGS_DEC,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,217,33,16,10
-    CONTROL         "M",IDC_REGS_M16,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,178,77,16,10
-    CONTROL         "X",IDC_REGS_X16,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,198,77,16,10
-    CONTROL         "E",IDC_REGS_EMM,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,218,77,16,10
+    EDITTEXT        IDC_REGS_A,15,4,27,11,ES_UPPERCASE | NOT WS_BORDER | WS_GROUP,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_X,15,17,27,11,ES_UPPERCASE | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_Y,15,30,27,11,ES_UPPERCASE | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_S,15,47,27,11,ES_UPPERCASE | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_PC,19,63,27,11,ES_UPPERCASE | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_P,156,33,20,11,ES_UPPERCASE | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_PBR,25,77,20,11,ES_UPPERCASE | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_DBR,70,77,20,11,ES_UPPERCASE | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_DIR,112,77,27,11,ES_UPPERCASE | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_B,152,77,20,11,ES_UPPERCASE | NOT WS_BORDER,WS_EX_STATICEDGE
+    CONTROL         "N",IDC_REGS_NEG,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,158,20,16,10
+    CONTROL         "Z",IDC_REGS_ZERO,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,178,20,16,10
+    CONTROL         "V",IDC_REGS_OVER,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,198,20,16,10
+    CONTROL         "C",IDC_REGS_CARRY,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,217,20,16,10
+    CONTROL         "I",IDC_REGS_INT,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,180,33,14,10
+    CONTROL         "B",IDC_REGS_BRK,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,198,33,16,10
+    CONTROL         "D",IDC_REGS_DEC,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,217,33,16,10
+    CONTROL         "M",IDC_REGS_M16,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,178,77,16,10
+    CONTROL         "X",IDC_REGS_X16,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,198,77,16,10
+    CONTROL         "E",IDC_REGS_EMM,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,218,77,16,10
     PUSHBUTTON      "<- zero",IDC_REGS_CYCLES_CLR,211,4,28,12
-    EDITTEXT        IDC_REGS_A_MEM,42,4,100,11,ES_MULTILINE | ES_READONLY | 
-                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_X_MEM,42,17,100,11,ES_MULTILINE | ES_READONLY | 
-                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_Y_MEM,42,30,100,11,ES_MULTILINE | ES_READONLY | 
-                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_S_MEM,49,47,190,11,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_INSTR,49,63,52,11,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_INSTR_ARG,117,63,122,11,ES_AUTOHSCROLL | 
-                    ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,
-                    WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_CYCLES,168,4,37,11,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_A_MEM,42,4,100,11,ES_MULTILINE | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_X_MEM,42,17,100,11,ES_MULTILINE | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_Y_MEM,42,30,100,11,ES_MULTILINE | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_S_MEM,49,47,190,11,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_INSTR,49,63,52,11,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_INSTR_ARG,117,63,122,11,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_CYCLES,168,4,37,11,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
     LTEXT           "A=",IDC_STATIC,4,5,10,8
     LTEXT           "X=",IDC_STATIC,4,18,10,10
     LTEXT           "Y=",IDC_STATIC,4,31,10,10
@@ -1356,8 +1317,7 @@ BEGIN
     LTEXT           "DIR=",IDC_STATIC,92,78,20,10
     LTEXT           "B=",IDC_STATIC,141,78,10,10
     LTEXT           "Stat:",IDC_STATIC,4,95,16,8
-    CONTROL         "",IDC_REGS_STAT,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX,27,95,188,10
+    CONTROL         "",IDC_REGS_STAT,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX,27,95,188,10
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,91,242,1
 END
 
@@ -1379,6 +1339,7 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1517,18 +1478,9 @@ CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Processor",IDC_STATIC,8,4,131,52
-    CONTROL         "Basic &6502",IDC_OPT_6502,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,16,15,51,10
-    CONTROL         "6&5C02, 6501",IDC_OPT_65C02,"Button",BS_AUTORADIOBUTTON,
-                    16,27,57,10
-    CONTROL         "6&5816",IDC_OPT_65816,"Button",BS_AUTORADIOBUTTON,
-                    87,15,34,10
-//    LTEXT           "&Address bus width:",IDC_STATIC,16,40,60,8
-//    EDITTEXT        IDC_OPT_BUS_WIDTH,87,38,25,12,ES_AUTOHSCROLL | WS_GROUP
-//    CONTROL         "Spin1",IDC_OPT_BUS_SPIN,"msctls_updown32",
-//                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-//                    UDS_ARROWKEYS,107,38,11,14
-
+    CONTROL         "Basic &6502",IDC_OPT_6502,"Button",BS_AUTORADIOBUTTON | WS_GROUP,16,15,51,10
+    CONTROL         "6&5C02, 6501",IDC_OPT_65C02,"Button",BS_AUTORADIOBUTTON,16,27,57,10
+    CONTROL         "6&5816",IDC_OPT_65816,"Button",BS_AUTORADIOBUTTON,87,15,34,10
     GROUPBOX        "Help File Source",IDC_STATIC,147,4,90,40,WS_GROUP
     CONTROL         "6502.C&HM",IDC_OPT_HELP_CHM,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,155,16,60,10
     CONTROL         "6502.H&TM",IDC_OPT_HELP_HTM,"Button",BS_AUTORADIOBUTTON,155,28,60,10
@@ -2507,12 +2459,12 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version for res.dll
+// Version
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION FVERSION                 // res.dll file version                          
-// PRODUCTVERSION 2,3,4,1
+ FILEVERSION 1,4,90,0
+ PRODUCTVERSION 0,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -2527,18 +2479,12 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-//            VALUE "Comments", "6502.exe english resources\0"
-//            VALUE "CompanyName", "MiKSoft\0"
-            VALUE "FileDescription", "resources\0"          // res.dll file 
-//            VALUE "FileVersion", "1, 0, 0, 6\0"
-//            VALUE "InternalName", "res.dll\0"
-            VALUE "LegalCopyright", "Copyright � 1996-2017 Michal Kowalski\0"   // res.dll file
-//            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "res.dll\0"               // res.dll file
-//            VALUE "PrivateBuild", "\0"                        // res.dll file 
-            VALUE "ProductName", "res\0"
-            VALUE "ProductVersion", PVERSION                  // res.dll file version
-//            VALUE "SpecialBuild", "\0"
+            VALUE "FileDescription", "resources"
+            VALUE "FileVersion", "1.4.90.0"
+            VALUE "LegalCopyright", "Copyright � 1996-2017 Michal Kowalski"
+            VALUE "OriginalFilename", "res.dll"
+            VALUE "ProductName", "res"
+            VALUE "ProductVersion", "1.4.0.2"
         END
     END
     BLOCK "VarFileInfo"
