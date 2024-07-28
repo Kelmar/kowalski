@@ -1281,7 +1281,8 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 			return ret;
 
 //		if ((bProc6502==2) && ((expr.inf==Expr::EX_WORD) || (expr.inf==Expr::EX_UNDEF) || longImm))
-		if ((bProc6502==2) && ((expr.inf==Expr::EX_WORD) || longImm))
+//		if ((bProc6502==2) && ((expr.inf==Expr::EX_WORD) || longImm)) //****
+		if ((bProc6502==2) && longImm) //****
 			mode = A_IMM2;
 		else if (expr.inf!=Expr::EX_BYTE && expr.inf!=Expr::EX_UNDEF)
 			return ERR_NUM_NOT_BYTE;	// za du¿a liczba, max $FF

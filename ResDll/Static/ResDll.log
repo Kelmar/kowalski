@@ -1,0 +1,5 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1392,5): warning MSB8012: TargetPath(E:\Source\Outside\kowalski\ResDll\Static\ResDll.dll) does not match the Linker's OutputFile property value (E:\Source\Outside\kowalski\Static\Res.dll). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1394,5): warning MSB8012: TargetName(ResDll) does not match the Linker's OutputFile property value (Res). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+  ResDll.vcxproj -> E:\Source\Outside\kowalski\ResDll\Static\ResDll.dll
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

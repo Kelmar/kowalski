@@ -1,0 +1,93 @@
+﻿  6502.cpp
+  6502Doc.cpp
+  6502View.cpp
+  About.cpp
+  AllocMem.cpp
+  Asm.cpp
+  AtariBin.cpp
+  Broadcast.cpp
+  ChildFrm.cpp
+  ChildFrmDeAsm.cpp
+  Code65p.cpp
+  ColorButton.cpp
+  ConfigSettings.cpp
+  CCrystalEditView.cpp
+  CCrystalTextBuffer.cpp
+  CCrystalTextView.cpp
+  CEditReplaceDlg.cpp
+  CFindTextDlg.cpp
+  Parse6502.cpp
+  CXMultiDocTemplate.cpp
+  Generating Code...
+E:\Source\Outside\kowalski\Asm.cpp(617,1): warning C4715: 'CAsm::CodeToCommand': not all control paths return a value
+E:\Source\Outside\kowalski\Asm.cpp(595,1): warning C4715: 'CAsm::TransformTable': not all control paths return a value
+E:\Source\Outside\kowalski\Asm.cpp(637,1): warning C4715: 'CAsm::CodeToMode': not all control paths return a value
+E:\Source\Outside\kowalski\Asm.cpp(663,1): warning C4715: 'CAsm::CodeToCycles': not all control paths return a value
+  Compiling...
+  Deasm.cpp
+  Deasm6502Doc.cpp
+  Deasm6502View.cpp
+  DeasmGoto.cpp
+  DeasmSaveOptions.cpp
+  DebugInfo.cpp
+  DialAsmStat.cpp
+  DialBar.cpp
+  dialeditbrkp.cpp
+  DockBarEx.cpp
+  DrawMarks.cpp
+  DynamicHelp.cpp
+  FlatBar.cpp
+  FormatNums.cpp
+  Global.cpp
+  GotoLineNumber.cpp
+  HyperLink.cpp
+  identinfo.cpp
+  IdentInfoDoc.cpp
+  IdentInfoFrame.cpp
+  Generating Code...
+  Compiling...
+  IdentInfoView.cpp
+  InputWnd.cpp
+  IntelHex.cpp
+  IntGenerator.cpp
+  IntRequestGeneratorDlg.cpp
+  IOWindow.cpp
+E:\Source\Outside\kowalski\IOWindow.cpp(552,7): warning C4838: conversion from 'LONG' to 'UINT' requires a narrowing conversion
+E:\Source\Outside\kowalski\IOWindow.cpp(560,7): warning C4838: conversion from 'LONG' to 'UINT' requires a narrowing conversion
+E:\Source\Outside\kowalski\IOWindow.cpp(712,46): warning C4838: conversion from 'UINT8' to 'char' requires a narrowing conversion
+  LeftBar.cpp
+  LoadCode.cpp
+  LoadCodeOptions.cpp
+  LogBuffer.cpp
+  LogWindow.cpp
+  M6502.cpp
+  MainFrm.cpp
+  MapFile.cpp
+  MarkArea.cpp
+  MemoryChg.cpp
+  MemoryDC.cpp
+  MemoryDoc.cpp
+  MemoryGoto.cpp
+  MemoryInfo.cpp
+  Generating Code...
+  Compiling...
+  MemoryView.cpp
+  MotorolaSRecord.cpp
+  Options.cpp
+  OptionsViewPage.cpp
+  RegisterBar.cpp
+  SaveCode.cpp
+  SaveCodeBlockOptions.cpp
+  SaveCodeOptions.cpp
+  Splash.cpp
+  StackView.cpp
+  StaticLink.cpp
+  StdAfx.cpp
+  Sym6502.cpp
+  SyntaxExample.cpp
+  ToolBox.cpp
+  ZeroPageView.cpp
+  Generating Code...
+  6502.vcxproj -> E:\Source\Outside\kowalski\Static\6502.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.
