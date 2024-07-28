@@ -28,6 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CSrc6502View;
 #undef OVERFLOW
 
+bool cpu16();
+
 struct ContextBase
 {
     uint8_t b;
@@ -309,7 +311,6 @@ public:
     enum IntType { NONE = 0, IRQ = 1, NMI = 2, RST = 4 };
 
 private:
-    bool cpu16;
     bool waiFlag;
 
     IOFunc io_func;
@@ -341,7 +342,7 @@ private:
 
     uint16_t get_word_indirect(uint16_t zp)
     {
-        ASSERT(zp <= ((cpu16 && !ctx.emm) ? 0xFF : 0xFFFF));
+        ASSERT(zp <= ((cpu16() && !ctx.emm) ? 0xFF : 0xFFFF));
 
         uint16_t lo = ctx.mem[zp];
         uint16_t hi = ctx.mem[zp + 1];
@@ -356,7 +357,7 @@ private:
 
     uint32_t get_Lword_indirect(uint16_t zp)
     {
-        ASSERT(zp <= ((cpu16 && !ctx.emm) ? 0xFF : 0xFFFF));
+        ASSERT(zp <= ((cpu16() && !ctx.emm) ? 0xFF : 0xFFFF));
 
         uint32_t lo = ctx.mem[zp];
         uint32_t mid = ctx.mem[zp + 1];
@@ -372,7 +373,7 @@ private:
 
     void push_on_stack(uint8_t arg)
     {
-        if (cpu16 && !ctx.emm)
+        if (cpu16() && !ctx.emm)
         {
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
                 throw CAsm::SYM_ILL_WRITE;
@@ -391,7 +392,7 @@ private:
 
     void push_addr_on_stack(uint16_t arg)
     {
-        if (cpu16 && !ctx.emm)
+        if (cpu16() && !ctx.emm)
         {
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
                 throw CAsm::SYM_ILL_WRITE;
@@ -420,7 +421,7 @@ private:
 
     uint8_t pull_from_stack()
     {
-        if (cpu16)
+        if (cpu16())
         {
             if (ctx.emm && ((ctx.s & 0xFF) == 0xFF))
             {
@@ -439,7 +440,7 @@ private:
 
     uint16_t pull_addr_from_stack()
     {
-        if (cpu16)
+        if (cpu16())
         {
             if (ctx.emm && ((ctx.s & 0xFF) == 0xFF))
             {
