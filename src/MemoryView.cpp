@@ -334,10 +334,10 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         if (!(GetScrollInfo(SB_VERT, &si)))
             break;
 
-        uint32_t pos = (si.nTrackPos + max_mem / 2);
+        uint32_t pos = si.nTrackPos;
 
         if (nRepeat == 2)
-            pos = (nPos + max_mem / 2); // 1.3.3 for goto memory cmd use passed value
+            pos = nPos; // 1.3.3 for goto memory cmd use passed value
 
         pos -= pos % bytes_in_line();
         int lines = find_delta(pDoc->m_uAddress, pos, *pDoc->m_pMem, m_nCy);
@@ -388,7 +388,7 @@ void CMemoryView::scroll(UINT nSBCode, int nPos, int nRepeat)
         break;
     }
     //  set_scroll_range();
-    SetScrollPos(SB_VERT, ((int)pDoc->m_uAddress - (max_mem / 2)) /* / bytes_in_line() */);
+    SetScrollPos(SB_VERT, (int)pDoc->m_uAddress /* / bytes_in_line() */);
 
 #endif
 }
@@ -479,22 +479,17 @@ int CMemoryView::set_scroll_range()
         return -1;
     }
 
-    int rng = max_mem / 2;
-
     SCROLLINFO si;
     memset(&si, 0, sizeof(SCROLLINFO));
 
     si.cbSize = sizeof(si);
 
     si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS; // 65816 added SIF_POS
-    si.nMin = -rng;
-    si.nMax = rng;
+    si.nMin = 0;
+    si.nMax = max_mem - 1;
     si.nPage = scr;
+
     int nPos = pDoc->m_uAddress - rng;
-
-    if (nPos > rng - scr)
-        nPos = rng - scr;
-
     si.nPos = nPos; // 65816 save position also
 
     SetScrollInfo(SB_VERT, &si, FALSE);
@@ -743,7 +738,7 @@ void CMemoryView::OnUpdateMemoryGoto(CCmdUI *pCmdUI)
 
 void CMemoryView::OnMemoryGoto()
 {
-    static UINT addr = 0;
+    static uint32_t addr = 0; // TODO: Remove static variable
     CMemoryGoto dlg;
     dlg.m_uAddr = addr;
 
@@ -751,7 +746,7 @@ void CMemoryView::OnMemoryGoto()
     {
         addr = dlg.m_uAddr;
 #if REWRITE_TO_WX_WIDGET
-        scroll(SB_THUMBTRACK, dlg.m_uAddr - (max_mem / 2), 2);  //1.3.3 change ,1 to ,2 to allow passing nPos
+        scroll(SB_THUMBTRACK, addr, 2);  //1.3.3 change ,1 to ,2 to allow passing nPos
 #endif
 }
 }

@@ -86,6 +86,17 @@ public:
 
         return lo | (hi << 8);
     }
+
+    uint32_t getLWord(size_t addr) const
+    {
+        ASSERT(addr < (m_size - 1));
+
+        uint16_t lo = m_data[addr];
+        uint16_t mid = m_data[addr + 1];
+        uint16_t hi = m_data[addr + 2];
+
+        return lo | (mid << 8) | (hi << 16);
+    }
 };
 
 typedef std::shared_ptr<COutputMem> CMemoryPtr;

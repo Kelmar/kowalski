@@ -205,7 +205,7 @@ public:
 class CDebugBreakpoints
 {
 private:
-    const size_t NUM_ELEMENTS = 0x10000;
+    const size_t NUM_ELEMENTS = 0x1000000;
 
     uint8_t *m_data;
 

@@ -96,7 +96,10 @@ bool CGlobal::CreateDeasm()
       pDoc->SetContext(m_pSym6502->GetContext());
       pDoc->SetStart(m_pSym6502->get_pc());
     */
-    pDoc->SetPointer(m_pSym6502->get_pc());
+    if (m_bBank)
+        pDoc->SetPointer(m_pSym6502->get_pc() + (m_bPBR << 16));
+    else
+        pDoc->SetPointer(m_pSym6502->get_pc());
 
 #endif
 
@@ -107,8 +110,8 @@ bool CGlobal::CreateDeasm()
 
 void CGlobal::StartDebug()
 {
-    if (wxGetApp().m_global.m_procType == ProcessorType::WDC65816) // 1.3.3 disable debugger for 65816
-        return;
+    //if (wxGetApp().m_global.m_procType == ProcessorType::WDC65816) // 1.3.3 disable debugger for 65816
+    //    return;
 
     GetMemForSym();
     bool restart;
@@ -210,7 +213,7 @@ void CGlobal::LoadCode(const LoadCodeState &state)
 
     uint32_t start = state.StartAddress;
 
-    if (start == CSym6502::INVALID_ADDRESS)
+    if (start == CAsm::INVALID_ADDRESS)
     {
         // TODO: This should be in the simulator and not here. -- B.Simonds (July 4, 2024)
         uint32_t vector = m_pSym6502->getVectorAddress(CSym6502::Vector::RESET);

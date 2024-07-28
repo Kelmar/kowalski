@@ -33,14 +33,14 @@ public:
     /* constructor */ COptionsSymPage();
     virtual ~COptionsSymPage();
 
-    UINT m_nIOAddress;
+    uint32_t m_nIOAddress;
     bool m_bIOEnable;
     int m_nFinish;
     int m_nWndWidth;
     int m_nWndHeight;
     bool m_bProtectMemory;
-    UINT m_nProtFromAddr;
-    UINT m_nProtToAddr;
+    uint32_t m_nProtFromAddr;
+    uint32_t m_nProtToAddr;
 
 protected:
     //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

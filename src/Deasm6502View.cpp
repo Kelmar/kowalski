@@ -53,7 +53,6 @@ CDeasm6502View::~CDeasm6502View()
 #if 0
 BEGIN_MESSAGE_MAP(CDeasm6502View, CView)
     ON_WM_CONTEXTMENU()
-//{{AFX_MSG_MAP(CDeasm6502View)
     ON_WM_VSCROLL()
     ON_WM_MOUSEWHEEL()  // 1.3.2 added mouse scroll wheel support
     ON_WM_KEYDOWN()
@@ -62,7 +61,6 @@ BEGIN_MESSAGE_MAP(CDeasm6502View, CView)
     ON_UPDATE_COMMAND_UI(ID_DEASM_GOTO, OnUpdateDeasmGoto)
     ON_WM_CONTEXTMENU()
     ON_WM_SIZE()
-    //}}AFX_MSG_MAP
     ON_MESSAGE(CBroadcast::WM_USER_EXIT_DEBUGGER, OnExitDebugger)
 END_MESSAGE_MAP()
 #endif
@@ -73,7 +71,7 @@ END_MESSAGE_MAP()
 int CDeasm6502View::CalcLineCount(const wxRect &rect) // calc. number of lines in a rect
 {
     if (m_nFontHeight == 0)
-        return 1;	// not yet ready
+        return 1; // return 1 row
 
     int h = rect.GetHeight();
 
@@ -106,10 +104,14 @@ void CDeasm6502View::OnDraw(wxDC *dc) // Disassembled program -display instructi
 
     CDeasm deasm;
 
-    int ptr = pDoc->m_uStartAddr;
+    int32_t ptr = pDoc->m_uStartAddr;
+    int32_t ptr1 = ptr;
 
     for (int i = 0; i <= lines; i++)
     {
+        if (ptr < ptr1)
+            break;
+
         if (dc->RectVisible(&mark)) // Refresh pointer fields?
         {
             Breakpoint bp = wxGetApp().m_global.GetBreakpoint(uint16_t(ptr));
@@ -120,6 +122,7 @@ void CDeasm6502View::OnDraw(wxDC *dc) // Disassembled program -display instructi
             if (pDoc->m_nPointerAddr == ptr) // Arrow in this line?
                 draw_pointer(*dc, mark.left, mark.top, m_nFontHeight);
         }
+        ptr1 = ptr;
 
         const std::string &str =
             deasm.DeasmInstr(*pDoc->m_pCtx, CDeasm::DeasmFmt(CDeasm::DF_ADDRESS | CDeasm::DF_CODE_BYTES), ptr);
@@ -127,7 +130,6 @@ void CDeasm6502View::OnDraw(wxDC *dc) // Disassembled program -display instructi
         if (dc->RectVisible(&rect)) // Statement line to refresh?
         {
             dc->SetTextColor(m_rgbAddress);
-            //pDC->TextOut(rect.left, rect.top, LPCTSTR(str), 4);
             dc->TextOut(rect.left, rect.top, LPCTSTR(str), 6); // 65816
             
             if (m_bDrawCode)
@@ -188,14 +190,14 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
     if (pDoc->m_uStartAddr == addr) // Is the given address at the current start?
         return;
 
-    if (pDoc->m_uStartAddr > addr) // The desired address is before the current start
+    if (pDoc->m_uStartAddr > addr) // move up
     {
         wxRect rect = GetViewRect();
         int lines = CalcLineCount(rect);
 
         CDeasm deasm;
 
-        uint32_t start = addr;
+        uint32_t start = addr; // Start at addr
         bool redraw = true;
         
         for (int i = 0; i < lines; i++) // We go down from 'addr' until we meet 'm_uStartAddr'
@@ -209,19 +211,12 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
 
             if (start == pDoc->m_uStartAddr)
             {
-                //int y = (i + 1) * m_nFontHeight;
-                /*
-                	if ((rect.bottom -= y) <= 0)
-                	{
-                	  ASSERT(false);
-                	  break;
-                	}
-                */
-                UpdateWindow(); // To avoid problems with refreshing the anime
+                rect = GetViewRect();
+                UpdateWindow(); // To avoid problems with refreshing the animate
                 pDoc->m_uStartAddr = addr;
                 //ScrollWindow(0, y, &rect, &rect);
                 UpdateWindow();
-                redraw = false;
+                redraw = FALSE;
                 break;
             }
         }
@@ -233,7 +228,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
             UpdateWindow();
         }
     }
-    else // The requested address is after the current start
+    else // move down
     {
         wxRect rect = GetViewRect();
         int lines = CalcLineCount(rect);
@@ -270,14 +265,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
 
                 if (start == addr)
                 {
-                    //int y = (i + 1) * m_nFontHeight;
-                    /*
-                    	  if ((rect.top += y) >= rect.bottom)
-                    	  {
-                    	    ASSERT(false);
-                    	    break;
-                    	  }
-                    */
+                    rect = GetViewRect();
                     UpdateWindow(); // To avoid refreshing problems
 
                     for (int j = 0; j <= i; j++) // Designating a new address for the start of the window
@@ -354,7 +342,7 @@ void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
     CDeasm6502Doc *pDoc = (CDeasm6502Doc*)GetDocument();
     if (pDoc == NULL)
         return;
-//  UINT8 cmd;
+
     CDeasm deasm;
 
     switch (nSBCode)
@@ -370,18 +358,10 @@ void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
 
         case 1:
             wxRect rect = GetViewRect();
-            //UpdateWindow(); // To avoid refreshing problems
             ScrollWindow(0, -m_nFontHeight, &rect, &rect);
             UpdateWindow();
             break;
         }
-        /*
-              cmd = pDoc->m_pCtx->mem[pDoc->m_uStartAddr];	// pierwszy rozkaz w oknie
-              pDoc->m_uStartAddr = (pDoc->m_uStartAddr + mode_to_len[code_to_mode[cmd]]) & pDoc->m_pCtx->mem_mask;
-              wxRect rect = GetViewRect();
-              UpdateWindow(); // To avoid refreshing problems
-              ScrollWindow(0, -m_nFontHeight, &rect, &rect);
-        */
         break;
 
     case SB_LINEUP:	// Scroll one line up
@@ -392,9 +372,6 @@ void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
 
         case 1:
             wxRect rect = GetViewRect();
-            //if ((rect.bottom -= m_nFontHeight) <= 0)
-            //  break;
-            //UpdateWindow(); // To avoid refreshing problems
             ScrollWindow(0, m_nFontHeight, &rect, &rect);
             UpdateWindow();
             break;
@@ -460,10 +437,7 @@ void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
             if (lines >= dy)
                 Refresh(); // Redraw the entire window
             else
-            {
-                //Refresh(); // Redraw the entire window
                 ScrollWindow(0,lines * m_nFontHeight,&rect,&rect);
-            }
         }
         break;
     }
@@ -473,7 +447,12 @@ void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
         wxRect rect = GetViewRect();
         int dy = CalcLineCount(rect); // Number of lines in the window
 
-        int lines = deasm.FindDelta(pDoc->m_uStartAddr, 0xFFF0, *pDoc->m_pCtx, dy);
+        int lines;
+
+        if (wxGetApp()->m_global.GetProcType() == ProcessorType::WDC65816)
+            lines = deasm.FindDelta(pDoc->m_uStartAddr, 0xFFFFFF, *pDoc->m_pCtx, dy);
+        else
+            lines = deasm.FindDelta(pDoc->m_uStartAddr, 0xFFF0, *pDoc->m_pCtx, dy);
 
         if (lines < 0)
             Refresh(); // Redraw the entire window
@@ -482,10 +461,7 @@ void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
             if (lines >= dy)
                 Refresh(); // Redraw the entire window
             else
-            {
-                //Refresh(); // Redraw the entire window
                 ScrollWindow(0, -lines * m_nFontHeight, &rect, &rect);
-            }
         }
         break;
     }
@@ -498,20 +474,25 @@ void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
         wxRect rect = GetViewRect();
         int dy = CalcLineCount(rect); // Number of lines in the window
 
-        int lines = deasm.FindDelta(pDoc->m_uStartAddr, uint16_t(nPos + 0x8000), *pDoc->m_pCtx, d); // 65816 fix
+        uint32_t maxmem = wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
 
-        if (lines < 0)
+        SCROLLINFO si; // 1.3.3 added si structure to get 32 bit resolution on the scrollbar
+        ZeroMemory(&si, sizeof(si));
+        si.cbSize = sizeof(si);
+        si.fMask = SIF_TRACKPOS;
+
+        if (!GetScrollInfo(SB_VERT, &si))
+            break;
+
+        int pos = si.nTrackPos;
+        if (nRepeat == 2)
+            pos = nPos; // 1.3.3 for goto memory cmd use passed value
+
+        int lines = deasm.FindDelta(pDoc->m_uStartAddr, pos, *pDoc->m_pCtx, d);
+
+        if (lines != 0)
             Refresh(); // Redraw the entire window
-        else if (lines > 0)
-        {
-            if (lines >= dy)
-                Refresh(); // Redraw the entire window
-            else
-            {
-                Refresh(); // Redraw the entire window
-                //ScrollWindow(0, dir * lines *m_nFontHeight, &rect, &rect);
-            }
-        }
+
         break;
     }
 
@@ -519,7 +500,7 @@ void CDeasm6502View::Scroll(UINT nSBCode, int nPos, int nRepeat)
         break;
     }
 
-    SetScrollPos(SB_VERT, (int)pDoc->m_uStartAddr - 0x8000);
+    SetScrollPos(SB_VERT, (int)pDoc->m_uStartAddr);
 #endif
 }
 
@@ -528,10 +509,6 @@ void CDeasm6502View::OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar)
     UNUSED(pScrollBar);
 
     Scroll(nSBCode, nPos);
-
-    //int SetScrollPos(int nBar, int nPos);
-
-    //CView::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
 bool CDeasm6502View::OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt) // 1.3.2 addes Mouse scroll wheel support
@@ -611,8 +588,10 @@ void CDeasm6502View::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
     }
 
     case 2: // Move the contents of the window?
-        //ScrollToLine(uint16_t(HIWORD(lHint)));
-        ScrollToLine(static_cast<uint32_t>(-1));
+        if (wxGetApp().m_global.m_bBank)
+            ScrollToLine(HIWORD(lHint) + (wxGetApp().m_global.m_bPBR << 16));
+        else
+            ScrollToLine(static_cast<uint16_t>(HIWORD(lHint)));
         break;
 
     case 0: // Redraw the contents of the window?
@@ -643,7 +622,7 @@ bool CDeasm6502View::OnEraseBkgnd(wxDC* dc)
 
 void CDeasm6502View::OnDeasmGoto()
 {
-    static UINT addr = 0;
+    static uint32_t addr = 0;
 
     CDeasmGoto dlg;
     dlg.m_uAddress = addr;
@@ -651,7 +630,7 @@ void CDeasm6502View::OnDeasmGoto()
     if (dlg.ShowModal() == wxID_OK)
     {
         addr = dlg.m_uAddress;
-        //scroll(SB_THUMBTRACK, dlg.m_uAddress - 0x8000, 1);
+        //scroll(SB_THUMBTRACK, dlg.m_uAddress, 2);
     }
 }
 
@@ -675,11 +654,7 @@ void CDeasm6502View::OnContextMenu(wxWindow* pWnd, wxPoint point)
 
     CMenu* pPopup = menu.GetSubMenu(0);
     ASSERT(pPopup != NULL);
-    /*
-      CWnd* pWndPopupOwner = this;
-      while (pWndPopupOwner->GetStyle() & WS_CHILD)
-        pWndPopupOwner = pWndPopupOwner->GetParent();
-    */
+
     if (point.x == -1 && point.y == -1) // menu accessed via keyboard?
     {
         CRect rect = GetViewRect();
@@ -692,7 +667,6 @@ void CDeasm6502View::OnContextMenu(wxWindow* pWnd, wxPoint point)
     }
 
     pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
-//    pWndPopupOwner);
 #endif
 }
 

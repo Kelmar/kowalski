@@ -113,7 +113,7 @@ void CMainFrame::ConfigSettings(bool load)
     static const char ENTRY_GEN[] = "General";
     static const char GEN_PROC[] = "ProcType";
     static const char GEN_HELP[] = "HelpType";       //^^ Help
-    static const char GEN_BUS_WIDTH[] = "BusWidth";
+    //static const char GEN_BUS_WIDTH[] = "BusWidth";
     static const char GEN_PTR[] = "PointerColor";
     static const char GEN_BRKP[] = "BreakpointColor";
     static const char GEN_ERR[] = "ErrorColor";
@@ -207,7 +207,7 @@ void CMainFrame::ConfigSettings(bool load)
         theApp.m_global.SetProcType( pApp->GetProfileInt(ENTRY_GEN, GEN_PROC, 1));
         theApp.m_global.SetHelpType( pApp->GetProfileInt(ENTRY_GEN, GEN_HELP, 1));    //^^ Help
 
-        CSym6502::bus_width            = pApp->GetProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, 16);
+        //CSym6502::bus_width            = pApp->GetProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, 16);
         theApp.m_global.m_bGenerateListing = (bool) pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_LST, false);
         theApp.m_global.m_strListingFile   = pApp->GetProfileString(ENTRY_ASM, ASM_LST_FILE, NULL);
         CAsm6502::generateBRKExtraByte = (bool) pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_BYTE, 1);
@@ -315,7 +315,7 @@ void CMainFrame::ConfigSettings(bool load)
 
         pApp->WriteProfileInt(ENTRY_GEN, GEN_PROC, (int)theApp.m_global.GetProcType());
         pApp->WriteProfileInt(ENTRY_GEN, GEN_HELP, (int)theApp.m_global.GetHelpType());    //^^ Help
-        pApp->WriteProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, CSym6502::bus_width);
+        //pApp->WriteProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, CSym6502::bus_width);
         pApp->WriteProfileInt(ENTRY_GEN, GEN_PTR, (int)CMarks::m_rgbPointer);
         pApp->WriteProfileInt(ENTRY_GEN, GEN_BRKP, (int)CMarks::m_rgbBreakpoint);
         pApp->WriteProfileInt(ENTRY_GEN, GEN_ERR, (int)CMarks::m_rgbError);
@@ -1206,13 +1206,13 @@ void CMainFrame::OnSymDebug() // Start the debugger
         if (!theApp.m_global.IsCodePresent())
             return;
 
-        if (wxGetApp().m_global.m_bProc6502 == 2) // 1.3 65816 mode - disable simulator mode
-        {
-            std::string cs;
-            cs.Format("The debugger does not currently support the 65816 processor.  Please go to the program options and selected a different processor to use the debugger.");
-            MessageBoxA(cs, "Reminder", MB_OK );
-            return;
-        }
+        //if (wxGetApp().m_global.m_bProc6502 == 2) // 1.3 65816 mode - disable simulator mode
+        //{
+        //    std::string cs;
+        //    cs.Format("The debugger does not currently support the 65816 processor.  Please go to the program options and selected a different processor to use the debugger.");
+        //    MessageBoxA(cs, "Reminder", MB_OK );
+        //    return;
+        //}
         wxGetApp().m_global.StartDebug();
 //		m_wndToolBar.OnInitialUpdate();
         DelayedUpdateAll();
@@ -1773,7 +1773,7 @@ int CMainFrame::Options(int page)
     dial.m_MarksPage.m_nProc6502 = wxGetApp().m_global.GetProcType();
     dial.m_MarksPage.m_nHelpFile = wxGetApp().m_global.GetHelpType();
 
-    dial.m_MarksPage.m_uBusWidth = CSym6502::bus_width;
+    //dial.m_MarksPage.m_uBusWidth = CSym6502::bus_width;
     dial.m_MarksPage.m_rgbPointer = CMarks::m_rgbPointer;
     dial.m_MarksPage.m_rgbBreakpoint = CMarks::m_rgbBreakpoint;
     dial.m_MarksPage.m_rgbError = CMarks::m_rgbError;
@@ -1832,7 +1832,7 @@ int CMainFrame::Options(int page)
     wxGetApp().m_global.SetProcType(dial.m_MarksPage.m_nProc6502);
     wxGetApp().m_global.SetHelpType(dial.m_MarksPage.m_nHelpFile);
 
-    CSym6502::bus_width     = dial.m_MarksPage.m_uBusWidth;
+    //CSym6502::bus_width     = dial.m_MarksPage.m_uBusWidth;
     CMarks::m_rgbPointer    = dial.m_MarksPage.m_rgbPointer;
     CMarks::m_rgbBreakpoint = dial.m_MarksPage.m_rgbBreakpoint;
     CMarks::m_rgbError      = dial.m_MarksPage.m_rgbError;
@@ -2293,7 +2293,18 @@ void CMainFrame::UpdateAll()
     m_IOWindow.Refresh();
     m_Memory.Refresh();
     m_ZeroPage.Refresh();
-    m_Stack.Refresh();
+
+    CSym6502 *pSimulator = wxGetApp().m_global.GetSimulator();
+
+    if (pSimulator)
+    {
+        if (wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816)
+            m_Stack.InvalidateView(pSimulator->GetContext()->s);
+        else
+            m_Stack.InvalidateView(pSimulator->GetContext()->s + 0x100);  //***
+    }
+    else
+        m_Stack.Refresh();
 }
 
 void CMainFrame::DelayedUpdateAll()

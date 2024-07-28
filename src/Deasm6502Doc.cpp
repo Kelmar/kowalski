@@ -34,11 +34,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 CDeasm6502Doc::CDeasm6502Doc()
 {
     m_pCtx = NULL;
-    m_nPointerAddr = -1;
+    m_nPointerAddr = CAsm::INVALID_ADDRESS;
 
     m_uStart  = 0x0000;
-    m_uEnd    = 0xFFFF;
-    m_uLength = 0x10000;
+    m_uEnd    = 0xFFFFFF;
+    m_uLength = 0x1000000;
     m_bSaveAsData = false;
 }
 
@@ -105,9 +105,9 @@ void CDeasm6502Doc::SetContext(const CContext *pCtx)
 }
 
 // Drawing/erasing an arrow in the line
-void CDeasm6502Doc::SetPointer(int addr, bool scroll/*= FALSE*/)
+void CDeasm6502Doc::SetPointer(uint32_t addr, bool scroll/*= FALSE*/)
 {
-    ASSERT((addr == -1) || ((addr >= 0) && (addr <= 0xFFFF)));
+    ASSERT((addr == CAsm::INVALID_ADDRESS) || (addr <= 0xFFFF));
     UNUSED(scroll);
 
     m_nPointerAddr = addr;
@@ -145,6 +145,7 @@ void CDeasm6502Doc::DeassembleSave(std::ostream &stream, const CContext &ctx, ui
             break;
 
         case A_IMM:   // immediate
+        case A_IMM2:  // immediate
             break;
 
         case A_ZPG:    // zero page
@@ -283,7 +284,7 @@ void CDeasm6502Doc::DeassembleSave(std::ostream &stream, const CContext &ctx, ui
             }
             else
             {
-                int p = ptr;
+                uint32_t p = ptr;
                 str = '\t';
                 str += deasm.DeasmInstr(ctx, CAsm::DF_LABELS, p);
                 ar.WriteString(str + "\r\n");

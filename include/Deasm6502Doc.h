@@ -34,9 +34,9 @@ class CDeasm6502Doc : public wxDocument //, CAsm
 {
 private:
     // Variables used when saving program disassembly
-    UINT m_uStart;
-    UINT m_uEnd; 
-    UINT m_uLength;
+    uint32_t m_uStart;
+    uint32_t m_uEnd; 
+    uint32_t m_uLength;
     bool m_bSaveAsData;
 
 public:
@@ -48,14 +48,14 @@ protected:
 public:
     const CContext *m_pCtx;
     uint32_t m_uStartAddr;
-    int m_nPointerAddr; // pointer address by arrow (->) or -1
+    uint32_t m_nPointerAddr; // pointer address by arrow (->) or CAsm::INVALID_ADDRESS
 
     bool GetSaveOptions();
     void DeassembleSave(std::ostream &stream, const CContext &ctx, uint32_t start, uint32_t end, int opt);
     
     void SetContext(const CContext *pCtx);
     void SetStart(uint32_t addr, bool draw = true);
-    void SetPointer(int addr, bool scroll = false);
+    void SetPointer(uint32_t addr, bool scroll = false);
 
     bool OnNewDocument() override;
     std::ostream &SaveObject(std::ostream &stream) override;

@@ -38,6 +38,7 @@ enum class ProcessorType
 class CAsm // base class - type definitions
 {
 public:
+    static const uint32_t INVALID_ADDRESS = 0xFFFF'FFFF;
 
     enum Stat
     {

@@ -105,6 +105,16 @@ typedef wxOutputStream DocOStream;
 # define strcasecmp _stricmp
 #endif
 
+#ifndef HIWORD
+inline
+constexpr uint16_t HIWORD(uint32_t v) { return static_cast<uint16_t>((v >> 16) & 0x0000'FFFF); }
+#endif
+
+#ifndef LOWORD
+inline
+constexpr uint16_t LOWORD(uint32_t v) { return static_cast<uint16_t>(v & 0x0000'FFFF); }
+#endif
+
 // Some Win32/MFC temp place holders
 
 #define afx_msg

@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -25,6 +25,7 @@ class CDeasm
     std::string SetMemZPGInfo(uint8_t addr, uint8_t val);   // Cell description of page zero of memory
     std::string SetMemInfo(uint32_t addr, uint8_t val);     // Memory cell description
     std::string SetValInfo(uint8_t val);                    // Value description 'val'
+    std::string SetWordInfo(uint16_t val);                   // Value description 'val'
 
 public:
     /* constructor */ CDeasm()
@@ -33,13 +34,16 @@ public:
     virtual ~CDeasm()
     { }
 
-    std::string DeasmInstr(const CContext& ctx, CAsm::DeasmFmt flags, int& ptr);
-    std::string DeasmInstr(const CmdInfo& ci, CAsm::DeasmFmt flags);
-    std::string ArgumentValue(const CContext &ctx, int ptr= -1);
+    std::string DeasmInstr(const CContext &ctx, CAsm::DeasmFmt flags, int32_t &ptr);
+    std::string DeasmInstr(const CmdInfo &ci, CAsm::DeasmFmt flags);
+    std::string ArgumentValue(const CContext &ctx, uint32_t ptr = CAsm::INVALID_ADDRESS);
 
     std::string Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk = false);
     std::string Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel = false, bool bHelp = false);
+
+    // TODO: Move Binary() and Binary2() into string utilities
     std::string Binary(uint8_t val);
+    std::string Binary2(uint16_t val);
 
     int FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt = 1);
     int FindNextAddr(uint32_t &addr, const CContext &ctx, int cnt = 1);

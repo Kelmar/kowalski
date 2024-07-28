@@ -39,12 +39,14 @@ private:
 
     bool UpdateItem(int itemID);
 
-    void UpdateRegA(const CContext *pCtx, const CContext *pOld = NULL);
-    void UpdateRegX(const CContext *pCtx, const CContext *pOld = NULL);
-    void UpdateRegY(const CContext *pCtx, const CContext *pOld = NULL);
-    void UpdateRegP(const CContext *pCtx, const CContext *pOld = NULL);
-    void UpdateRegS(const CContext *pCtx, const CContext *pOld = NULL);
-    void UpdateRegPC(const CContext *pCtx, const CContext *pOld = NULL);
+    void UpdateRegA(const CContext *pCtx, const CContext *pOld = nullptr);
+    void UpdateRegX(const CContext *pCtx, const CContext *pOld = nullptr);
+    void UpdateRegY(const CContext *pCtx, const CContext *pOld = nullptr);
+    void UpdateRegP(const CContext *pCtx, const CContext *pOld = nullptr);
+    void UpdateRegS(const CContext *pCtx, const CContext *pOld = nullptr);
+    void UpdateRegPC(const CContext *pCtx, const CContext *pOld = nullptr);
+    void UpdateRegB(const CContext *pCtx, const CContext *pOld = nullptr);
+
     void UpdateCycles(ULONG uCycles);
     void ChangeRegister(int ID, int reg_no);
     void ChangeFlags(int flag_bit, bool set); // Change the flag register bit
@@ -81,14 +83,20 @@ protected:
     afx_msg void OnRegFlagOver();
     afx_msg void OnRegFlagZero();
     afx_msg void OnRegFlagBrk();
+    afx_msg void OnRegFlagM16();
+    afx_msg void OnRegFlagX16();
+    afx_msg void OnRegFlagEmm();
+
     afx_msg void OnRegsCyclesClr();
 
 private:
-    std::string Binary(uint8_t val);
-    void SetDlgItemInf(int nID, uint8_t val);
+    std::string Binary(uint16_t val, bool word);
+    void SetDlgItemInf(int nID, uint16_t val, bool word);
     void SetDlgItemMem(int nID, int nBytes, uint16_t ptr, const CContext *pCtx);
+    //void SetDlgItemLWordHex(int nID, uint32_t val);
     void SetDlgItemWordHex(int nID, uint16_t val);
     void SetDlgItemByteHex(int nID, uint8_t val);
+    void SetDlgItemBlank(int nID);
 };
 
 #endif /* REGISTER_BAR_H__ */

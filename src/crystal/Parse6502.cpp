@@ -1094,7 +1094,7 @@ std::string Instructions::AddMode(uint8_t cmd, CAsm::OpCode inst, CAsm::CodeAdr 
     UNUSED(inst);
 
     std::string cs;
-    cs = CDeasm::Mnemonic(cmd, procType, false);
+    cs = CDeasm::Mnemonic(cmd, procType, true);
     cs += CDeasm::Argument(cmd, mode, 0x8000, 0x34, 0x12, 0x00, false, true);
     cs += "\n";
     return cs;
@@ -1347,10 +1347,12 @@ extern std::string GetInstructionDesc(const std::string& instruction)
         desc = "#title#BRK#text#\nForce Break."
                "#flags#B�DI#modes#";
         desc += inst.GetModes(CAsm::C_BRK);
-        desc += "#desc#BRK forces interrupt. CPU fetches interrupt vector ($FFFE/F)"
-                " and jumps to the interrupt handler routine. Bits I and B are set.\n"
-                "Simulator can use this instruction to stop execution of your program.\n"
-                "\n�<small> (D flag cleared only by 65c02 CPU)\n";
+        desc += "#desc#BRK forces interrupt. CPU fetches interrupt vector"
+            " and jumps to the interrupt handler routine. 6502 and 65c02 sets bits I and B.\n"
+            "6502/65c02/65816 (emmulation mode) Vector is at $FFFE/F.  65816 (native mode)"
+            " is at $FFE6,7.  65816 (native mode) only sets bit I.\n"
+            "Simulator can use this instruction to stop execution of your program.\n"
+            "\n�<small> (D flag cleared only by 65c02 and 65816 CPU)\n";
     }
     else if (instUpper == "BRL")
     {
@@ -1411,8 +1413,8 @@ extern std::string GetInstructionDesc(const std::string& instruction)
         desc = "#title#COP#text#\nCo-processor interrupt."
                "#flags#NZC#modes#";
         desc += inst.GetModes(CAsm::C_COP);
-        desc += "#desc#COP forces an interrupt. CPU fetches COP vector ($FFF4/$FFE4)"
-                " and jumps to the COP handler routine. Bits I and D in the flag register are set."
+        desc += "#desc#COP forces an interrupt. CPU fetches COP vector ($FFF4,5 / $FFE4,5)"
+                " and jumps to the COP handler routine. Bit I is set and D is cleared in the flag register."
                 "Like BRK, the return address from COP is 2 bytes after the COP opcode. There is "
                 "a signature byte following the COP opcode\n";
     }

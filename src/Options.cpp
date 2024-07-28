@@ -195,9 +195,20 @@ void COptionsSymPage::DoDataExchange(CDataExchange* pDX)
     DDX_HexDec(pDX, IDC_OPT_SYM_IO_ADDR, m_nIOAddress);
     DDV_MinMaxUInt(pDX, m_nIOAddress, 0, 65535);
     DDX_HexDec(pDX, IDC_OPT_SYM_PROT_FROM, m_nProtFromAddr);
-    DDV_MinMaxUInt(pDX, m_nProtFromAddr, 0, 0xffff);
+
+    ProcessorType procType = wxGetApp().m_global.GetProcType();
+
+    if (procType == ProcessorType::WDC65816)
+        DDV_MinMaxUInt(pDX, m_nProtFromAddr, 0, 0x00FFFFFF);
+    else
+        DDV_MinMaxUInt(pDX, m_nProtFromAddr, 0, 0x0000FFFF);
+
     DDX_HexDec(pDX, IDC_OPT_SYM_PROT_TO, m_nProtToAddr);
-    DDV_MinMaxUInt(pDX, m_nProtToAddr, 0, 0xffff);
+
+    if (procType == ProcessorType::WDC65816)
+        DDV_MinMaxUInt(pDX, m_nProtToAddr, 0, 0x00FFFFFF);
+    else
+        DDV_MinMaxUInt(pDX, m_nProtToAddr, 0, 0x0000FFFF);
 }
 
 BEGIN_MESSAGE_MAP(COptionsSymPage, CPropertyPage)
@@ -544,23 +555,23 @@ COptionsMarksPage::~COptionsMarksPage()
 
 void COptionsMarksPage::DoDataExchange(CDataExchange* pDX)
 {
-    if (!pDX->m_bSaveAndValidate)
-    {
-        CSpinButtonCtrl *pTab;
-        pTab = (CSpinButtonCtrl *) GetDlgItem(IDC_OPT_BUS_SPIN);
-        ASSERT(pTab != NULL);
-        pTab->SetRange(10,24);		// wielko�� szyny adresowej
-    }
+    //if (!pDX->m_bSaveAndValidate)
+    //{
+    //    CSpinButtonCtrl *pTab;
+    //    pTab = (CSpinButtonCtrl *) GetDlgItem(IDC_OPT_BUS_SPIN);
+    //    ASSERT(pTab != NULL);
+    //    pTab->SetRange(10,24);		// wielko�� szyny adresowej
+    //}
 
     CPropertyPage::DoDataExchange(pDX);
 
     DDX_Radio(pDX, IDC_OPT_6502, m_nProc6502);
     DDX_Radio(pDX, IDC_OPT_HELP_CHM, m_nHelpFile);  //^^help
-    DDX_Text(pDX, IDC_OPT_BUS_WIDTH, m_uBusWidth);
-    if (m_nProc6502==2)
-        DDV_MinMaxUInt(pDX, m_uBusWidth, 10, 24);
-    else
-        DDV_MinMaxUInt(pDX, m_uBusWidth, 10, 16);
+    //DDX_Text(pDX, IDC_OPT_BUS_WIDTH, m_uBusWidth);
+    //if (m_nProc6502==2)
+    //    DDV_MinMaxUInt(pDX, m_uBusWidth, 10, 24);
+    //else
+    //    DDV_MinMaxUInt(pDX, m_uBusWidth, 10, 16);
 
 }
 

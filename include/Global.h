@@ -47,6 +47,10 @@ public:
 
     /// Selected processor type
     ProcessorType m_procType;
+
+    bool m_bBank; // Flag for member above bank 0 for deasm biew
+    uint8_t m_bPBR; // PBR register for deasm view
+    uint16_t m_bSRef; // Stack pointer reference
     
     uint8_t m_bHelpFile;            // ^^ help file type
     COutputMem m_Mem;               // memory for the object code and the simulator
@@ -58,7 +62,7 @@ public:
         : m_bCodePresent(false)
         , m_pSym6502(nullptr)
     {
-        SetAddrBusWidth(16);
+        SetAddrBusWidth(24); //**memfix
     }
 
     ~CGlobal()
