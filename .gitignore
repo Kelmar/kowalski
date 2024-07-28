@@ -1,14 +1,22 @@
 # Prerequisites
 *.d
 
+# Visual Studio user files
+*.user
+*.suo
+*.ncb
+.vs/*
+.vscode/
+
 # Compiled Object files
 *.slo
 *.lo
 *.o
 *.obj
+Static/
+Static En/
 out/
 build/
-Static/
 winbuild/
 
 # CMake files to ignore
@@ -23,13 +31,6 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.ccmake
 _deps
-
-# Visual Studio generated files
-*.user
-*.suo
-*.ncb
-.vs/
-.vscode/
 
 # Precompiled Headers
 *.gch
@@ -54,3 +55,5 @@ _deps
 *.exe
 *.out
 *.app
+
+
