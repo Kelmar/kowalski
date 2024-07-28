@@ -2,6 +2,9 @@
 //
 #include "resource.h"
 
+#define PVERSION "1.4.0.2\0"
+#define FVERSION 1,4,0,2
+
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -182,11 +185,11 @@ BEGIN
                     BS_AUTORADIOBUTTON | WS_GROUP,16,15,74,10
     CONTROL         "6&5C02, 6501",IDC_OPT_65C02,"Button",BS_AUTORADIOBUTTON,
                     16,27,57,10
-    LTEXT           "&Szerokoœæ szyny adresowej:",IDC_STATIC,16,40,90,8
-    EDITTEXT        IDC_OPT_BUS_WIDTH,108,38,25,12,ES_AUTOHSCROLL | WS_GROUP
-    CONTROL         "Spin1",IDC_OPT_BUS_SPIN,"msctls_updown32",
-                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS,128,38,11,14
+//    LTEXT           "&Szerokoœæ szyny adresowej:",IDC_STATIC,16,40,90,8
+//    EDITTEXT        IDC_OPT_BUS_WIDTH,108,38,25,12,ES_AUTOHSCROLL | WS_GROUP
+//    CONTROL         "Spin1",IDC_OPT_BUS_SPIN,"msctls_updown32",
+//                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+//                    UDS_ARROWKEYS,128,38,11,14
     GROUPBOX        "Kolory wskaŸników",IDC_STATIC,8,59,131,68
     LTEXT           "&Aktualnej instrukcji",IDC_STATIC,13,72,60,8
     PUSHBUTTON      "",IDC_OPT_MARK_PTR_COL,79,69,28,14
@@ -1341,66 +1344,83 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 //
 // Dialog
 //
-
-IDD_REGISTERBAR DIALOGEX 0, 0, 220, 93
+IDD_REGISTERBAR DIALOGEX 0, 0, 243, 106
 STYLE WS_CHILD | WS_CLIPSIBLINGS
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    EDITTEXT        IDC_REGS_A,15,4,20,11,ES_UPPERCASE | NOT WS_BORDER | 
+    EDITTEXT        IDC_REGS_A,15,4,27,11,ES_UPPERCASE | NOT WS_BORDER | 
                     WS_GROUP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_X,15,17,20,11,ES_UPPERCASE | NOT WS_BORDER,
+    EDITTEXT        IDC_REGS_X,15,17,27,11,ES_UPPERCASE | NOT WS_BORDER,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_Y,15,30,20,11,ES_UPPERCASE | NOT WS_BORDER,
+    EDITTEXT        IDC_REGS_Y,15,30,27,11,ES_UPPERCASE | NOT WS_BORDER,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_S,26,47,20,11,ES_UPPERCASE | NOT WS_BORDER,
+    EDITTEXT        IDC_REGS_S,15,47,27,11,ES_UPPERCASE | NOT WS_BORDER,
                     WS_EX_STATICEDGE
     EDITTEXT        IDC_REGS_PC,19,63,27,11,ES_UPPERCASE | NOT WS_BORDER,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_P,133,33,20,11,ES_UPPERCASE | NOT WS_BORDER,
+    EDITTEXT        IDC_REGS_P,156,33,20,11,ES_UPPERCASE | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_PBR,25,77,20,11,ES_UPPERCASE | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_DBR,70,77,20,11,ES_UPPERCASE | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_DIR,112,77,27,11,ES_UPPERCASE | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    EDITTEXT        IDC_REGS_B,152,77,20,11,ES_UPPERCASE | NOT WS_BORDER,
                     WS_EX_STATICEDGE
     CONTROL         "N",IDC_REGS_NEG,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,135,20,16,10
+                    BS_LEFT | BS_FLAT | WS_TABSTOP,158,20,16,10
     CONTROL         "Z",IDC_REGS_ZERO,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,155,20,16,10
+                    BS_LEFT | BS_FLAT | WS_TABSTOP,178,20,16,10
     CONTROL         "V",IDC_REGS_OVER,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,175,20,16,10
+                    BS_LEFT | BS_FLAT | WS_TABSTOP,198,20,16,10
     CONTROL         "C",IDC_REGS_CARRY,"Button",BS_AUTOCHECKBOX | 
-                    BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,194,20,16,
+                    BS_LEFTTEXT | BS_LEFT | BS_FLAT | WS_TABSTOP,217,20,16,
                     10
     CONTROL         "I",IDC_REGS_INT,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,157,33,14,10
+                    BS_LEFT | BS_FLAT | WS_TABSTOP,180,33,14,10
     CONTROL         "B",IDC_REGS_BRK,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,175,33,16,10
+                    BS_LEFT | BS_FLAT | WS_TABSTOP,198,33,16,10
     CONTROL         "D",IDC_REGS_DEC,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
-                    BS_LEFT | BS_FLAT | WS_TABSTOP,194,33,16,10
-    PUSHBUTTON      "<- zero",IDC_REGS_CYCLES_CLR,188,4,28,12
-    EDITTEXT        IDC_REGS_A_MEM,39,4,77,11,ES_MULTILINE | ES_READONLY | 
+                    BS_LEFT | BS_FLAT | WS_TABSTOP,217,33,16,10
+    CONTROL         "M",IDC_REGS_M16,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    BS_LEFT | BS_FLAT | WS_TABSTOP,178,77,16,10
+    CONTROL         "X",IDC_REGS_X16,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    BS_LEFT | BS_FLAT | WS_TABSTOP,198,77,16,10
+    CONTROL         "E",IDC_REGS_EMM,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    BS_LEFT | BS_FLAT | WS_TABSTOP,218,77,16,10
+    PUSHBUTTON      "<- zero",IDC_REGS_CYCLES_CLR,211,4,28,12
+    EDITTEXT        IDC_REGS_A_MEM,42,4,100,11,ES_MULTILINE | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_X_MEM,39,17,77,11,ES_MULTILINE | ES_READONLY | 
+    EDITTEXT        IDC_REGS_X_MEM,42,17,100,11,ES_MULTILINE | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_Y_MEM,39,30,77,11,ES_MULTILINE | ES_READONLY | 
+    EDITTEXT        IDC_REGS_Y_MEM,42,30,100,11,ES_MULTILINE | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_S_MEM,49,47,167,11,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_REGS_S_MEM,49,47,190,11,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
     EDITTEXT        IDC_REGS_INSTR,49,63,52,11,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_INSTR_ARG,117,63,99,11,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_REGS_INSTR_ARG,117,63,122,11,ES_AUTOHSCROLL | 
                     ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_REGS_CYCLES,145,4,37,11,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_REGS_CYCLES,168,4,37,11,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
     LTEXT           "A=",IDC_STATIC,4,5,10,8
     LTEXT           "X=",IDC_STATIC,4,18,10,10
     LTEXT           "Y=",IDC_STATIC,4,31,10,10
     LTEXT           "S=",IDC_STATIC,4,48,10,9
-    LTEXT           "P=",IDC_STATIC,122,34,10,10
+    LTEXT           "P=",IDC_STATIC,145,34,10,10
     LTEXT           "PC=",IDC_STATIC,4,64,15,9
     LTEXT           "Arg:",IDC_STATIC,103,64,13,8
-    LTEXT           "CLK:",IDC_STATIC,125,5,16,8
-    LTEXT           "Stat:",IDC_STATIC,4,82,16,8
+    LTEXT           "CLK:",IDC_STATIC,148,5,16,8
+    LTEXT           "PBR=",IDC_STATIC,4,78,20,10
+    LTEXT           "DBR=",IDC_STATIC,48,78,20,10
+    LTEXT           "DIR=",IDC_STATIC,92,78,20,10
+    LTEXT           "B=",IDC_STATIC,141,78,10,10
+    LTEXT           "Stat:",IDC_STATIC,4,95,16,8
     CONTROL         "",IDC_REGS_STAT,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX,27,82,188,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,78,219,1
+                    SS_NOPREFIX,27,95,188,10
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,91,242,1
 END
 
 
@@ -1415,13 +1435,12 @@ BEGIN
     IDD_REGISTERBAR, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 213
+        RIGHTMARGIN, 236
         TOPMARGIN, 7
-        BOTTOMMARGIN, 85
+        BOTTOMMARGIN, 98
     END
 END
 #endif    // APSTUDIO_INVOKED
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1583,11 +1602,11 @@ BEGIN
                     16,27,57,10
     CONTROL         "6&5816",IDC_OPT_65816,"Button",BS_AUTORADIOBUTTON,
                     87,15,34,10
-    LTEXT           "&Address bus width:",IDC_STATIC,16,40,60,8
-    EDITTEXT        IDC_OPT_BUS_WIDTH,87,38,25,12,ES_AUTOHSCROLL | WS_GROUP
-    CONTROL         "Spin1",IDC_OPT_BUS_SPIN,"msctls_updown32",
-                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS,107,38,11,14
+//    LTEXT           "&Address bus width:",IDC_STATIC,16,40,60,8
+//    EDITTEXT        IDC_OPT_BUS_WIDTH,87,38,25,12,ES_AUTOHSCROLL | WS_GROUP
+//    CONTROL         "Spin1",IDC_OPT_BUS_SPIN,"msctls_updown32",
+//                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+//                    UDS_ARROWKEYS,107,38,11,14
 
     GROUPBOX        "Help File Source",IDC_STATIC,147,4,90,40,WS_GROUP
     CONTROL         "6502.C&HM",IDC_OPT_HELP_CHM,"Button",
@@ -2632,11 +2651,11 @@ END
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version
+// Version for res.dll
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,5,2                 // res.dll file version                          
+ FILEVERSION FVERSION                 // res.dll file version                          
 // PRODUCTVERSION 2,3,4,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -2662,7 +2681,7 @@ BEGIN
             VALUE "OriginalFilename", "res.dll\0"               // res.dll file
 //            VALUE "PrivateBuild", "\0"                        // res.dll file 
             VALUE "ProductName", "res\0"
-            VALUE "ProductVersion", "1.3.5.2\0"                  // res.dll file version
+            VALUE "ProductVersion", PVERSION                  // res.dll file version
 //            VALUE "SpecialBuild", "\0"
         END
     END
