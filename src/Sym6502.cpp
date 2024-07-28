@@ -29,7 +29,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //-----------------------------------------------------------------------------
 
-bool cpu16 = wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816;
+//bool cpu16 = wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816;
+
+// TODO: Replace this
+#define cpu16 !!(wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816)
+
 bool waiFlag = false;
 
 uint32_t CSym6502::io_addr = 0xE000; // Beginning of the simulator I/O area
@@ -883,7 +887,7 @@ CAsm::SymStat CSym6502::perform_command()
 #define TOBCD(a) (((((a) / 10) % 10) << 4) | ((a) % 10))
 #define TOBIN(a) (((a) >> 4) * 10 + ((a) & 0x0F))
 
-    cpu16 = !!(wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816);
+    //cpu16 = !!(wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816);
     wxGetApp().m_global.m_bBank = cpu16;
     wxGetApp().m_global.m_bPBR = ctx.pbr;
 
