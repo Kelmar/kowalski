@@ -4,13 +4,20 @@
 # Visual Studio user files
 *.user
 *.suo
+*.ncb
 .vs/*
+.vscode/
 
 # Compiled Object files
 *.slo
 *.lo
 *.o
 *.obj
+Static/
+Static En/
+out/
+build/
+winbuild/
 
 # Precompiled Headers
 *.gch
@@ -35,3 +42,5 @@
 *.exe
 *.out
 *.app
+
+
