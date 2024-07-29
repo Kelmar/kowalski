@@ -44,3 +44,5 @@ winbuild/
 *.app
 
 
+/ResDll
+/Static
