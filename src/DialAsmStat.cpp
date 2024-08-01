@@ -454,13 +454,13 @@ UINT CDialAsmStat::StartAsm()
         CMainFrame::ProjName = title.Left(x); // save project name for saving code
     }
 #endif
-    
+ 
 #if 0
     if (path.HasName())
         CMainFrame::ProjName = path.GetName();
 #endif
-    
-    m_stAsmRetCode = (CAsm::Stat)(m_pAsm6502->Assemble());
+
+    m_stAsmRetCode = (CAsm::Stat)(m_pAsm6502->assemble());
     //PostMessage(WM_USER_FIN, WPARAM(m_stAsmRetCode));
 
     return 0;

@@ -123,7 +123,7 @@ public:
         return m_bCodePresent; // to improve
     }
 
-    bool IsDebugger()
+    bool IsDebugging()
     {
         return m_pSym6502 != NULL;
     }

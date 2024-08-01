@@ -22,34 +22,28 @@
  */
 /*************************************************************************/
 
-#ifndef EVENT_6502_H__
-#define EVENT_6502_H__
+#ifndef CONSOLE_FRAME_H__
+#define CONSOLE_FRAME_H__
 
 /*************************************************************************/
 
-#include "StdAfx.h"
+/**
+ * @brief Frame that displays the output of a console source.
+ */
+class ConsoleFrame : public wxPanel
+{
+private:
+    wxTextCtrl *m_text;
 
-// List of application defined events.
-wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
-wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
+public:
+    /* constructor */ ConsoleFrame(wxFrame *parent);
+    virtual          ~ConsoleFrame();
 
-wxDECLARE_EVENT(evID_SHOW_LOG, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_REGS, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_ASSEMBLE, wxCommandEvent);
-wxDECLARE_EVENT(evID_DEBUG, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN, wxCommandEvent);
-wxDECLARE_EVENT(evID_RESET, wxCommandEvent);
-wxDECLARE_EVENT(evID_BREAK, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_INTO, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
+    void AppendText(const char *txt);
+};
 
 /*************************************************************************/
 
-#endif /* EVENT_6502_H__ */
+#endif /* CONSOLE_FRAME_H__ */
 
 /*************************************************************************/

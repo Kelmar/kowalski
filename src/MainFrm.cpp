@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -40,6 +40,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "IntRequestGeneratorDlg.h"
 #include "editcmd.h"
 #include "DockBarEx.h"
+
+#include "M6502.h"
 
 /*************************************************************************/
 
@@ -164,15 +166,15 @@ void CMainFrame::ConfigSettings(bool load)
     static const char VIEW_STACK_TCOL[] = "StackTextColor";
     static const char VIEW_STACK_BCOL[] = "StackBkgndColor";
 
-    static const char * const idents[] =
+    static const char *const idents[] =
     { VIEW_FONT_ED, VIEW_FONT_SYM, VIEW_FONT_DEASM, VIEW_FONT_MEMO, VIEW_FONT_ZERO, VIEW_FONT_STACK };
-    static const char * const tcolors[] =
+    static const char *const tcolors[] =
     { VIEW_ED_TCOL, VIEW_SYM_TCOL, VIEW_DEASM_TCOL, VIEW_MEMO_TCOL, VIEW_ZERO_TCOL, VIEW_STACK_TCOL };
-    static const char * const bcolors[] =
+    static const char *const bcolors[] =
     { VIEW_ED_BCOL, VIEW_SYM_BCOL, VIEW_DEASM_BCOL, VIEW_MEMO_BCOL, VIEW_ZERO_BCOL, VIEW_STACK_BCOL };
-    static const char * const syntax_colors[] =
+    static const char *const syntax_colors[] =
     { "ColorInstruction", "ColorDirective", "ColorComment", "ColorNumber", "ColorString", "ColorSelection", 0 };
-    static const char * const syntax_font[] =
+    static const char *const syntax_font[] =
     { "FontInstruction", "FontDirective", "FontComment", "FontNumber", "FontString", 0 };
 #endif
 
@@ -181,8 +183,8 @@ void CMainFrame::ConfigSettings(bool load)
 
     if (load)		// reading?
     {
-        theApp.m_global.SetSymFinish( (CAsm::Finish)(pApp->GetProfileInt(ENTRY_SYM, SYM_FIN, 0)) );
-        CSym6502::io_addr    = pApp->GetProfileInt(ENTRY_SYM, SYM_IO_ADDR, 0xE000);
+        theApp.m_global.SetSymFinish((CAsm::Finish)(pApp->GetProfileInt(ENTRY_SYM, SYM_FIN, 0)));
+        CSym6502::io_addr = pApp->GetProfileInt(ENTRY_SYM, SYM_IO_ADDR, 0xE000);
         CSym6502::io_enabled = pApp->GetProfileInt(ENTRY_SYM, SYM_IO_ENABLED, 1);
         CSym6502::s_bWriteProtectArea = !!pApp->GetProfileInt(ENTRY_SYM, SYM_PROT_MEM, 0);
         CSym6502::s_uProtectFromAddr = pApp->GetProfileInt(ENTRY_SYM, SYM_PROT_MEM_FROM, 0xC000);
@@ -191,97 +193,97 @@ void CMainFrame::ConfigSettings(bool load)
         pos.x = pApp->GetProfileInt(ENTRY_SYM, SYM_WND_X, 200);
         pos.y = pApp->GetProfileInt(ENTRY_SYM, SYM_WND_Y, 200);
         m_IOWindow.SetWndPos(pos);
-        m_IOWindow.SetSize( pApp->GetProfileInt(ENTRY_SYM, SYM_WND_W, 40),
-                            pApp->GetProfileInt(ENTRY_SYM, SYM_WND_H, 12) );
-//    m_IOWindow.SetColors( (COLORREF)pApp->GetProfileInt(ENTRY_SYM, SYM_WND_TEXT_COL, int(RGB(0, 0, 0))),
-//      pApp->GetProfileInt(ENTRY_SYM, SYM_WND_BK_COL, int(RGB(255,255,255))) );
+        m_IOWindow.SetSize(pApp->GetProfileInt(ENTRY_SYM, SYM_WND_W, 40),
+            pApp->GetProfileInt(ENTRY_SYM, SYM_WND_H, 12));
+        //    m_IOWindow.SetColors( (COLORREF)pApp->GetProfileInt(ENTRY_SYM, SYM_WND_TEXT_COL, int(RGB(0, 0, 0))),
+        //      pApp->GetProfileInt(ENTRY_SYM, SYM_WND_BK_COL, int(RGB(255,255,255))) );
 
-        CDeasm6502View::m_rgbAddress   = COLORREF(pApp->GetProfileInt(ENTRY_DEASM, DEASM_ADDR_COLOR, (int)RGB(127,127,127)));
-        CDeasm6502View::m_rgbCode      = COLORREF(pApp->GetProfileInt(ENTRY_DEASM, DEASM_CODE_COLOR, (int)RGB(191,191,191)));
+        CDeasm6502View::m_rgbAddress = COLORREF(pApp->GetProfileInt(ENTRY_DEASM, DEASM_ADDR_COLOR, (int)RGB(127, 127, 127)));
+        CDeasm6502View::m_rgbCode = COLORREF(pApp->GetProfileInt(ENTRY_DEASM, DEASM_CODE_COLOR, (int)RGB(191, 191, 191)));
         //    CDeasm6502View::m_rgbInstr   = COLORREF(pApp->GetProfileInt(ENTRY_DEASM, DEASM_INSTR_COLOR, (int)RGB(0,0,0)));
-        CDeasm6502View::m_bDrawCode    = pApp->GetProfileInt(ENTRY_DEASM, DEASM_SHOW_CODE, 1);
+        CDeasm6502View::m_bDrawCode = pApp->GetProfileInt(ENTRY_DEASM, DEASM_SHOW_CODE, 1);
 
-        CMarks::m_rgbPointer           = COLORREF(pApp->GetProfileInt(ENTRY_GEN, GEN_PTR, (int)RGB(255,255,0)));
-        CMarks::m_rgbBreakpoint        = COLORREF(pApp->GetProfileInt(ENTRY_GEN, GEN_BRKP, (int)RGB(0,0,160)));
-        CMarks::m_rgbError             = COLORREF(pApp->GetProfileInt(ENTRY_GEN, GEN_ERR, (int)RGB(255,0,0)));
-        theApp.m_global.SetProcType( pApp->GetProfileInt(ENTRY_GEN, GEN_PROC, 1));
-        theApp.m_global.SetHelpType( pApp->GetProfileInt(ENTRY_GEN, GEN_HELP, 1));    //^^ Help
+        CMarks::m_rgbPointer = COLORREF(pApp->GetProfileInt(ENTRY_GEN, GEN_PTR, (int)RGB(255, 255, 0)));
+        CMarks::m_rgbBreakpoint = COLORREF(pApp->GetProfileInt(ENTRY_GEN, GEN_BRKP, (int)RGB(0, 0, 160)));
+        CMarks::m_rgbError = COLORREF(pApp->GetProfileInt(ENTRY_GEN, GEN_ERR, (int)RGB(255, 0, 0)));
+        theApp.m_global.SetProcType(pApp->GetProfileInt(ENTRY_GEN, GEN_PROC, 1));
+        theApp.m_global.SetHelpType(pApp->GetProfileInt(ENTRY_GEN, GEN_HELP, 1));    //^^ Help
 
         //CSym6502::bus_width            = pApp->GetProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, 16);
-        theApp.m_global.m_bGenerateListing = (bool) pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_LST, false);
-        theApp.m_global.m_strListingFile   = pApp->GetProfileString(ENTRY_ASM, ASM_LST_FILE, NULL);
-        CAsm6502::generateBRKExtraByte = (bool) pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_BYTE, 1);
-        CAsm6502::BRKExtraByte         = (UINT8)pApp->GetProfileInt(ENTRY_ASM, ASM_BRK_BYTE, 0);
+        theApp.m_global.m_bGenerateListing = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_LST, false);
+        theApp.m_global.m_strListingFile = pApp->GetProfileString(ENTRY_ASM, ASM_LST_FILE, NULL);
+        CAsm6502::generateBRKExtraByte = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_BYTE, 1);
+        CAsm6502::BRKExtraByte = (UINT8)pApp->GetProfileInt(ENTRY_ASM, ASM_BRK_BYTE, 0);
 
-        CSrc6502View::m_nTabStep       = pApp->GetProfileInt(ENTRY_EDIT, EDIT_TAB_STEP, 8);
-        CSrc6502View::m_bAutoIndent    = pApp->GetProfileInt(ENTRY_EDIT, EDIT_AUTO_INDENT, 1);
-        CSrc6502View::m_bAutoSyntax    = pApp->GetProfileInt(ENTRY_EDIT, EDIT_SYNTAX_CHECK, 1);
+        CSrc6502View::m_nTabStep = pApp->GetProfileInt(ENTRY_EDIT, EDIT_TAB_STEP, 8);
+        CSrc6502View::m_bAutoIndent = pApp->GetProfileInt(ENTRY_EDIT, EDIT_AUTO_INDENT, 1);
+        CSrc6502View::m_bAutoSyntax = pApp->GetProfileInt(ENTRY_EDIT, EDIT_SYNTAX_CHECK, 1);
         CSrc6502View::m_bAutoUppercase = pApp->GetProfileInt(ENTRY_EDIT, EDIT_CAPITALS, 1);
-        C6502App::m_bFileNew           = pApp->GetProfileInt(ENTRY_EDIT, EDIT_FILENEW, 0);
+        C6502App::m_bFileNew = pApp->GetProfileInt(ENTRY_EDIT, EDIT_FILENEW, 0);
 
-        CIdentInfo::m_WndRect.left     = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IDENTS_X, 200);
-        CIdentInfo::m_WndRect.top      = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IDENTS_Y, 200);
-        CIdentInfo::m_WndRect.right    = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IDENTS_W, 400);
-        CIdentInfo::m_WndRect.bottom   = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IDENTS_H, 400);
-        CIdentInfo::m_WndRect.bottom  += CIdentInfo::m_WndRect.top;
-        CIdentInfo::m_WndRect.right   += CIdentInfo::m_WndRect.left;
+        CIdentInfo::m_WndRect.left = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IDENTS_X, 200);
+        CIdentInfo::m_WndRect.top = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IDENTS_Y, 200);
+        CIdentInfo::m_WndRect.right = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IDENTS_W, 400);
+        CIdentInfo::m_WndRect.bottom = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IDENTS_H, 400);
+        CIdentInfo::m_WndRect.bottom += CIdentInfo::m_WndRect.top;
+        CIdentInfo::m_WndRect.right += CIdentInfo::m_WndRect.left;
 
-        m_Memory.m_WndRect.left        = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_X, 220);
-        m_Memory.m_WndRect.top         = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_Y, 220);
-        m_Memory.m_WndRect.right       = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_W, 400);
-        m_Memory.m_WndRect.bottom      = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_H, 400);
-        m_Memory.m_WndRect.bottom     += m_Memory.m_WndRect.top;
-        m_Memory.m_WndRect.right      += m_Memory.m_WndRect.left;
+        m_Memory.m_WndRect.left = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_X, 220);
+        m_Memory.m_WndRect.top = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_Y, 220);
+        m_Memory.m_WndRect.right = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_W, 400);
+        m_Memory.m_WndRect.bottom = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_H, 400);
+        m_Memory.m_WndRect.bottom += m_Memory.m_WndRect.top;
+        m_Memory.m_WndRect.right += m_Memory.m_WndRect.left;
 
-        m_ZeroPage.m_WndRect.left      = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_X, 240);
-        m_ZeroPage.m_WndRect.top       = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_Y, 240);
-        m_ZeroPage.m_WndRect.right     = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_W, 400);
-        m_ZeroPage.m_WndRect.bottom    = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_H, 400);
-        m_ZeroPage.m_WndRect.bottom   += m_ZeroPage.m_WndRect.top;
-        m_ZeroPage.m_WndRect.right    += m_ZeroPage.m_WndRect.left;
+        m_ZeroPage.m_WndRect.left = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_X, 240);
+        m_ZeroPage.m_WndRect.top = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_Y, 240);
+        m_ZeroPage.m_WndRect.right = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_W, 400);
+        m_ZeroPage.m_WndRect.bottom = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_H, 400);
+        m_ZeroPage.m_WndRect.bottom += m_ZeroPage.m_WndRect.top;
+        m_ZeroPage.m_WndRect.right += m_ZeroPage.m_WndRect.left;
 
-        m_Stack.m_WndRect.left         = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_X, 260);
-        m_Stack.m_WndRect.top          = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_Y, 260);
-        m_Stack.m_WndRect.right        = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_W, 300);
-        m_Stack.m_WndRect.bottom       = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_H, 400);
-        m_Stack.m_WndRect.bottom      += m_Stack.m_WndRect.top;
-        m_Stack.m_WndRect.right       += m_Stack.m_WndRect.left;
+        m_Stack.m_WndRect.left = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_X, 260);
+        m_Stack.m_WndRect.top = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_Y, 260);
+        m_Stack.m_WndRect.right = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_W, 300);
+        m_Stack.m_WndRect.bottom = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_H, 400);
+        m_Stack.m_WndRect.bottom += m_Stack.m_WndRect.top;
+        m_Stack.m_WndRect.right += m_Stack.m_WndRect.left;
 
-        CIOWindow::m_bHidden           = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IO_HID, 0);
-        CRegisterBar::m_bHidden        = pApp->GetProfileInt(ENTRY_VIEW, VIEW_REGS_HID, 0);
+        CIOWindow::m_bHidden = pApp->GetProfileInt(ENTRY_VIEW, VIEW_IO_HID, 0);
+        CRegisterBar::m_bHidden = pApp->GetProfileInt(ENTRY_VIEW, VIEW_REGS_HID, 0);
 
-        m_Memory.m_bHidden             = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_HID, false) != 0;
-        m_ZeroPage.m_bHidden           = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_HID, false) != 0;
-        m_Stack.m_bHidden              = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_HID, false) != 0;
+        m_Memory.m_bHidden = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_HID, false) != 0;
+        m_ZeroPage.m_bHidden = pApp->GetProfileInt(ENTRY_VIEW, VIEW_ZMEM_HID, false) != 0;
+        m_Stack.m_bHidden = pApp->GetProfileInt(ENTRY_VIEW, VIEW_STACK_HID, false) != 0;
 
-//    CMemoryInfo::m_bHidden = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_HID, false) != 0;
+        //    CMemoryInfo::m_bHidden = pApp->GetProfileInt(ENTRY_VIEW, VIEW_MEMO_HID, false) != 0;
 
-        for (int i=0; fonts[i]; i++)	// reading info about fonts in the program
+        for (int i = 0; fonts[i]; i++)	// reading info about fonts in the program
         {
             *fonts[i] = LogFont;	// default font
-            LPBYTE ptr= NULL;
-            UINT bytes= sizeof *fonts[i];
+            LPBYTE ptr = NULL;
+            UINT bytes = sizeof * fonts[i];
             pApp->GetProfileBinary(ENTRY_VIEW, idents[i], &ptr, &bytes);
             if (ptr)
             {
-                if (bytes == sizeof *fonts[i])
-                    memcpy(fonts[i], ptr, sizeof *fonts[i]);
-                delete [] ptr;
+                if (bytes == sizeof * fonts[i])
+                    memcpy(fonts[i], ptr, sizeof * fonts[i]);
+                delete[] ptr;
             }
-            static const COLORREF defaults[]=	      // default background colors for windows
+            static const COLORREF defaults[] =	      // default background colors for windows
             {
                 // VIEW_ED_BCOL, VIEW_SYM_BCOL, VIEW_DEASM_BCOL, VIEW_MEMO_BCOL, VIEW_ZERO_BCOL
                 RGB(255,255,255), RGB(255,255,224), RGB(255,255,255),
                 RGB(240,255,240), RGB(255,240,240), RGB(255,255,255), RGB(240,240,240)
             };
-            *text_color[i] = COLORREF(pApp->GetProfileInt(ENTRY_VIEW, tcolors[i], RGB(0,0,0)));
+            *text_color[i] = COLORREF(pApp->GetProfileInt(ENTRY_VIEW, tcolors[i], RGB(0, 0, 0)));
             *bkgnd_color[i] = COLORREF(pApp->GetProfileInt(ENTRY_VIEW, bcolors[i], defaults[i]));
         }
 
-        for (int clr= 0; syntax_colors[clr]; ++clr)
+        for (int clr = 0; syntax_colors[clr]; ++clr)
             *color_syntax[clr] = pApp->GetProfileInt(ENTRY_VIEW, syntax_colors[clr], *color_syntax[clr]);
 
-        for (int style= 0; syntax_font[style]; ++style)
+        for (int style = 0; syntax_font[style]; ++style)
             *syntax_font_style[style] = pApp->GetProfileInt(ENTRY_VIEW, syntax_font[style], *syntax_font_style[style]);
 
         //    pApp->GetProfileInt(ENTRY_ASM,ASM_CASE,1);
@@ -295,7 +297,7 @@ void CMainFrame::ConfigSettings(bool load)
         pApp->WriteProfileInt(ENTRY_SYM, SYM_PROT_MEM, CSym6502::s_bWriteProtectArea);
         pApp->WriteProfileInt(ENTRY_SYM, SYM_PROT_MEM_FROM, CSym6502::s_uProtectFromAddr);
         pApp->WriteProfileInt(ENTRY_SYM, SYM_PROT_MEM_TO, CSym6502::s_uProtectToAddr);
-        wxPoint pos= m_IOWindow.GetWndPos();
+        wxPoint pos = m_IOWindow.GetWndPos();
         pApp->WriteProfileInt(ENTRY_SYM, SYM_WND_X, pos.x);
         pApp->WriteProfileInt(ENTRY_SYM, SYM_WND_Y, pos.y);
         int w, h;
@@ -304,9 +306,9 @@ void CMainFrame::ConfigSettings(bool load)
         pApp->WriteProfileInt(ENTRY_SYM, SYM_WND_H, h);
         COLORREF txt, bk;
         m_IOWindow.GetColors(txt, bk);
-//    pApp->WriteProfileInt(ENTRY_SYM, SYM_WND_TEXT_COL, (int)txt);
-//    pApp->WriteProfileInt(ENTRY_SYM, SYM_WND_BK_COL, (int)bk);
-//    pApp->WriteProfileBinary(ENTRY_SYM, SYM_WND_FONT,  LPBYTE(&m_IOWindow.m_LogFont), UINT(sizeof m_IOWindow.m_LogFont));
+        //    pApp->WriteProfileInt(ENTRY_SYM, SYM_WND_TEXT_COL, (int)txt);
+        //    pApp->WriteProfileInt(ENTRY_SYM, SYM_WND_BK_COL, (int)bk);
+        //    pApp->WriteProfileBinary(ENTRY_SYM, SYM_WND_FONT,  LPBYTE(&m_IOWindow.m_LogFont), UINT(sizeof m_IOWindow.m_LogFont));
 
         pApp->WriteProfileInt(ENTRY_DEASM, DEASM_ADDR_COLOR, (int)CDeasm6502View::m_rgbAddress);
         pApp->WriteProfileInt(ENTRY_DEASM, DEASM_CODE_COLOR, (int)CDeasm6502View::m_rgbCode);
@@ -320,7 +322,7 @@ void CMainFrame::ConfigSettings(bool load)
         pApp->WriteProfileInt(ENTRY_GEN, GEN_BRKP, (int)CMarks::m_rgbBreakpoint);
         pApp->WriteProfileInt(ENTRY_GEN, GEN_ERR, (int)CMarks::m_rgbError);
 
-//    pApp->WriteProfileBinary(ENTRY_EDIT, EDIT_FONT,  LPBYTE(&CSrc6502View::m_LogFont), UINT(sizeof CSrc6502View::m_LogFont));
+        //    pApp->WriteProfileBinary(ENTRY_EDIT, EDIT_FONT,  LPBYTE(&CSrc6502View::m_LogFont), UINT(sizeof CSrc6502View::m_LogFont));
         pApp->WriteProfileInt(ENTRY_EDIT, EDIT_TAB_STEP, CSrc6502View::m_nTabStep);
         pApp->WriteProfileInt(ENTRY_EDIT, EDIT_AUTO_INDENT, CSrc6502View::m_bAutoIndent);
         pApp->WriteProfileInt(ENTRY_EDIT, EDIT_SYNTAX_CHECK, CSrc6502View::m_bAutoSyntax);
@@ -358,24 +360,24 @@ void CMainFrame::ConfigSettings(bool load)
         pApp->WriteProfileInt(ENTRY_VIEW, VIEW_LOG_W, m_wndLog.m_WndRect.Width());
         pApp->WriteProfileInt(ENTRY_VIEW, VIEW_LOG_H, m_wndLog.m_WndRect.Height());
 
-        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_IO_HID,    CIOWindow::m_bHidden);
-        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_REGS_HID,  CRegisterBar::m_bHidden);
-        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_MEMO_HID,  m_Memory.m_bHidden);
-        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_ZMEM_HID,  m_ZeroPage.m_bHidden);
+        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_IO_HID, CIOWindow::m_bHidden);
+        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_REGS_HID, CRegisterBar::m_bHidden);
+        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_MEMO_HID, m_Memory.m_bHidden);
+        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_ZMEM_HID, m_ZeroPage.m_bHidden);
         pApp->WriteProfileInt(ENTRY_VIEW, VIEW_STACK_HID, m_Stack.m_bHidden);
-        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_LOG_HID,   m_wndLog.m_bHidden);
+        pApp->WriteProfileInt(ENTRY_VIEW, VIEW_LOG_HID, m_wndLog.m_bHidden);
 
-        for (int i= 0; fonts[i]; i++)
+        for (int i = 0; fonts[i]; i++)
         {
-            pApp->WriteProfileBinary(ENTRY_VIEW, idents[i], LPBYTE(fonts[i]), UINT(sizeof *fonts[i]));
+            pApp->WriteProfileBinary(ENTRY_VIEW, idents[i], LPBYTE(fonts[i]), UINT(sizeof * fonts[i]));
             pApp->WriteProfileInt(ENTRY_VIEW, tcolors[i], int(*text_color[i]));
             pApp->WriteProfileInt(ENTRY_VIEW, bcolors[i], int(*bkgnd_color[i]));
         }
 
-        for (int clr= 0; syntax_colors[clr]; ++clr)
+        for (int clr = 0; syntax_colors[clr]; ++clr)
             pApp->WriteProfileInt(ENTRY_VIEW, syntax_colors[clr], int(*color_syntax[clr]));
 
-        for (int style= 0; syntax_font[style]; ++style)
+        for (int style = 0; syntax_font[style]; ++style)
             pApp->WriteProfileInt(ENTRY_VIEW, syntax_font[style], *syntax_font_style[style]);
     }
 #endif
@@ -460,7 +462,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_COMMAND(ID_HELP_FINDER, OnHtmlHelp)   //% Bug fix 1.2.14.1 - convert to HTML help
     ON_COMMAND(ID_HELP, OnHtmlHelp)          //% Bug fix 1.2.14.1 - convert to HTML help
     ON_COMMAND(ID_DEFAULT_HELP, OnHtmlHelp)  //% Bug fix 1.2.14.1 - convert to HTML help
-    ON_MESSAGE(WM_USER+9998, OnUpdateState)
+    ON_MESSAGE(WM_USER + 9998, OnUpdateState)
     ON_MESSAGE(CBroadcast::WM_USER_START_DEBUGGER, OnStartDebugger)
     ON_MESSAGE(CBroadcast::WM_USER_EXIT_DEBUGGER, OnExitDebugger)
     ON_MESSAGE(CBroadcast::WM_USER_PROG_MEM_CHANGED, OnChangeCode)
@@ -480,7 +482,7 @@ static UINT indicators[] =
 #endif
     ID_INDICATOR_CAPS,
     ID_INDICATOR_NUM,
-//	ID_INDICATOR_SCRL,
+    //	ID_INDICATOR_SCRL,
 };
 #endif
 
@@ -488,9 +490,12 @@ static UINT indicators[] =
 // CMainFrame construction/destruction
 
 CMainFrame::CMainFrame(wxDocManager *docManager)
-    : wxDocMDIParentFrame(docManager, nullptr, wxID_ANY, _(""), wxDefaultPosition, wxDefaultSize)
+    : MAIN_BASE(docManager, nullptr, wxID_ANY, _(""), wxDefaultPosition, wxDefaultSize)
+    , m_auiManager()
     , m_docManager(docManager)
 {
+    m_auiManager.SetManagedWindow(this);
+
     SetName(REG_ENTRY_MAINFRM);
     SetTitle(wxGetApp().GetAppDisplayName());
 
@@ -522,14 +527,31 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
 #endif
 
     m_uTimer = 0;
+
+    m_output = new ConsoleFrame(this);
+    m_output->AppendText("This is a test.\r\n");
+
+    m_outputInfo
+        .Name("output").Caption(_("Output"))
+        .Bottom().Layer(1).Position(1)
+        .Floatable().CloseButton()
+        //.PinButton()
+    ;
+
+    m_auiManager.AddPane(m_output, m_outputInfo);
+
+    m_auiManager.Update();
+    m_output->Update();
 }
 
 CMainFrame::~CMainFrame()
 {
+    m_auiManager.UnInit();
+
     PopEventHandler(ProjectManager::Ptr());
 
-//  if (m_Idents)
-//    delete m_Idents;
+    //  if (m_Idents)
+    //    delete m_Idents;
 }
 
 /*************************************************************************/
@@ -538,6 +560,8 @@ void CMainFrame::BindEvents()
 {
     // Bind events after everything was created okay.
     Bind(wxEVT_MENU, &CMainFrame::OnExit, this, wxID_EXIT);
+    Bind(wxEVT_MENU, &CMainFrame::OnAssemble, this, evID_ASSEMBLE);
+    Bind(wxEVT_MENU, &CMainFrame::OnShowOutput, this, evID_SHOW_OUTPUT);
     Bind(wxEVT_MENU, &CMainFrame::OnShowLog, this, evID_SHOW_LOG);
     Bind(wxEVT_MENU, &CMainFrame::OnAbout, this, wxID_ABOUT);
 
@@ -546,11 +570,19 @@ void CMainFrame::BindEvents()
 
 /*************************************************************************/
 /*************************************************************************/
-// Main Frame Events
+// File menu events
 
 void CMainFrame::OnExit(wxCommandEvent &)
 {
     wxGetApp().Exit();
+}
+
+/*************************************************************************/
+
+void CMainFrame::OnShowOutput(wxCommandEvent &)
+{
+    //m_output->Show(!m_output->IsVisible());
+    //m_outputInfo.Show(!m_outputInfo.IsShown());
 }
 
 /*************************************************************************/
@@ -603,18 +635,18 @@ void CMainFrame::EnableDockingEx(uint32_t dwDockStyle)
     {
         if (dwDockBarMapEx[i][1] & dwDockStyle & CBRS_ALIGN_ANY)
         {
-            CDockBar* pDock = (CDockBar*)GetControlBar(dwDockBarMapEx[i][0]);
+            CDockBar *pDock = (CDockBar *)GetControlBar(dwDockBarMapEx[i][0]);
             if (pDock == NULL)
             {
                 pDock = new CDockBarEx;
                 if (!pDock->Create(this,
-                                   WS_CLIPSIBLINGS|WS_CLIPCHILDREN|WS_CHILD|WS_VISIBLE |
-                                   dwDockBarMapEx[i][1], dwDockBarMapEx[i][0]))
+                    WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CHILD | WS_VISIBLE |
+                    dwDockBarMapEx[i][1], dwDockBarMapEx[i][0]))
                 {
                     AfxThrowResourceException();
                 }
             }
-        }
+}
     }
 #endif
 }
@@ -652,7 +684,7 @@ void CMainFrame::InitMenu()
         file->AppendSubMenu(recentFiles, _("Recent &Files"));
 
         docManager->FileHistoryUseMenu(recentFiles);
-    }
+}
 #endif
 
     file->AppendSeparator();
@@ -671,8 +703,10 @@ void CMainFrame::InitMenu()
     wxMenu *view = new wxMenu();
     view->AppendCheckItem(evID_SHOW_LOG, _("Log"));
     view->Append(evID_SHOW_DISASM, _("Disassembler\tAlt+0"));
+    
     view->AppendSeparator();
     view->Append(evID_SHOW_REGS, _("Registers\tAlt+1"));
+    view->Append(evID_SHOW_OUTPUT, _("&Output\tAlt+2"));
 
     wxMenu *sim = new wxMenu();
     sim->Append(evID_ASSEMBLE, _("Assemble\tF7"));
@@ -711,7 +745,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
         return -1;
 
     if (!m_wndToolBar.Create(this) ||
-            !m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
+        !m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
     {
         TRACE0("Failed to create toolbar\n");
         return -1; // fail to create
@@ -732,12 +766,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
         UINT uID;
         UINT uStyle;
         int nWidth;
-        wxRect rectArea(0,0,0,0);
+        wxRect rectArea(0, 0, 0, 0);
 
         if (m_strFormat.LoadString(IDS_ROW_COLUMN))
         {
             std::string str;
-            str.Format(m_strFormat,99999,999);
+            str.Format(m_strFormat, 99999, 999);
             m_statusBar.GetPaneInfo(1, uID, uStyle, nWidth);
 #ifdef USE_CRYSTAL_EDIT
             m_statusBar.SetPaneInfo(1, uID, SBPS_NOBORDERS | SBPS_DISABLED, 1);
@@ -755,7 +789,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
         m_bmpCode.LoadMappedBitmap(IDB_CODE);
         m_bmpDebug.LoadMappedBitmap(IDB_DEBUG);
 
-        m_pfnOldProc = (WNDPROC)::SetWindowLong(m_statusBar.m_hWnd,GWL_WNDPROC,(LONG)StatusBarWndProc);
+        m_pfnOldProc = (WNDPROC)::SetWindowLong(m_statusBar.m_hWnd, GWL_WNDPROC, (LONG)StatusBarWndProc);
     }
 
     // TODO: Remove this if you don't want tool tips or a resizeable toolbar
@@ -765,7 +799,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
     // TODO: Delete these three lines if you don't want the toolbar to be dockable
     m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
-//	EnableDocking(CBRS_ALIGN_ANY);
+    //	EnableDocking(CBRS_ALIGN_ANY);
     DockControlBar(&m_wndToolBar);
 
 
@@ -779,7 +813,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
     {
         // Initialize dialog bar m_wndRegisterBar
         if (!m_wndRegisterBar.Create(this,
-                                     CBRS_RIGHT | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE | CBRS_SIZE_FIXED, ID_VIEW_REGISTERBAR))
+            CBRS_RIGHT | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE | CBRS_SIZE_FIXED, ID_VIEW_REGISTERBAR))
         {
             TRACE0("Failed to create dialog bar m_wndRegisterBar\n");
             return -1;		// fail to create
@@ -788,9 +822,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
         m_wndRegisterBar.EnableDocking(0); //CBRS_ALIGN_ANY);
         DockControlBar(&m_wndRegisterBar);
         FloatControlBar(&m_wndRegisterBar, wxPoint(100, 100));
-//		EnableDocking(0); //CBRS_ALIGN_ANY);
-        //    DockControlBar(&m_wndRegisterBar);
-        //    FloatControlBar(&m_wndRegisterBar,wxPoint(10,10));
+        //		EnableDocking(0); //CBRS_ALIGN_ANY);
+                //    DockControlBar(&m_wndRegisterBar);
+                //    FloatControlBar(&m_wndRegisterBar,wxPoint(10,10));
     }
 
     if (!m_wndHelpBar.Create(this, AFX_IDW_CONTROLBAR_LAST))
@@ -803,15 +837,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
     DockControlBar(&m_wndHelpBar);
 
 
-//	LoadBarState(REG_ENTRY_LAYOUT);
-    bool bEmptyInfo= true;
+    //	LoadBarState(REG_ENTRY_LAYOUT);
+    bool bEmptyInfo = true;
     {
         CDockState state;
         state.LoadState(REG_ENTRY_LAYOUT);
 
-        for (int i=0; i < state.m_arrBarInfo.GetSize(); i++)
+        for (int i = 0; i < state.m_arrBarInfo.GetSize(); i++)
         {
-            CControlBarInfo* pInfo= (CControlBarInfo*)(state.m_arrBarInfo[i]);
+            CControlBarInfo *pInfo = (CControlBarInfo *)(state.m_arrBarInfo[i]);
             if (pInfo->m_nBarID == ID_VIEW_REGISTERBAR)
                 pInfo->m_bVisible = false;	// registerBar always hidden after application start
         }
@@ -820,15 +854,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
     }
     if (bEmptyInfo)		// first launch of the application in the system?
     {
-        wxPoint point(32,32);	// original position
-        CMiniDockFrameWnd* pDockFrame = CreateFloatingFrame(CBRS_ALIGN_TOP);
+        wxPoint point(32, 32);	// original position
+        CMiniDockFrameWnd *pDockFrame = CreateFloatingFrame(CBRS_ALIGN_TOP);
         ASSERT(pDockFrame != NULL);
         pDockFrame->SetWindowPos(NULL, point.x, point.y, 0, 0,
-                                 SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+            SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
         if (pDockFrame->m_hWndOwner == NULL)
             pDockFrame->m_hWndOwner = m_wndRegisterBar.m_hWnd;
 
-        CDockBar* pDockBar = (CDockBar*)pDockFrame->GetDlgItem(AFX_IDW_DOCKBAR_FLOAT);
+        CDockBar *pDockBar = (CDockBar *)pDockFrame->GetDlgItem(AFX_IDW_DOCKBAR_FLOAT);
         ASSERT(pDockBar != NULL);
         ASSERT_KINDOF(CDockBar, pDockBar);
 
@@ -842,10 +876,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
         pDockFrame->RecalcLayout(true);
         pDockFrame->ShowWindow(SW_HIDE);
         //    pDockFrame->UpdateWindow();
-        m_wndRegisterBar.ModifyStyle(WS_VISIBLE,0);
+        m_wndRegisterBar.ModifyStyle(WS_VISIBLE, 0);
     }
 
-    for (int i =0; cfonts[i]; i++)	// creating fonts
+    for (int i = 0; cfonts[i]; i++)	// creating fonts
     {
         //    cfonts[i]->DeleteObject();
         cfonts[i]->CreateFontIndirect(fonts[i]);
@@ -866,7 +900,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 LRESULT CALLBACK CMainFrame::StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     wxWindow *pWnd = FromHandlePermanent(hWnd);
-//  ASSERT (pWnd->IsKindOf(RUNTIME_CLASS(CStatusBar)));
+    //  ASSERT (pWnd->IsKindOf(RUNTIME_CLASS(CStatusBar)));
 
     switch (msg)
     {
@@ -899,8 +933,8 @@ LRESULT CALLBACK CMainFrame::StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam
 
                 if (memDC)
                 {
-                    wxBitmap *pOldBmp= memDC.SelectObject(bCode ? &m_bmpCode : &m_bmpDebug);
-                    dc.BitBlt(rect.left+2, rect.top, rect.Width(), rect.Height(), &memDC, 0, 0, SRCCOPY);
+                    wxBitmap *pOldBmp = memDC.SelectObject(bCode ? &m_bmpCode : &m_bmpDebug);
+                    dc.BitBlt(rect.left + 2, rect.top, rect.Width(), rect.Height(), &memDC, 0, 0, SRCCOPY);
                     memDC.SelectObject(pOldBmp);
                 }
             }
@@ -953,7 +987,7 @@ afx_msg LRESULT CMainFrame::OnChangeCode(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 #if REWRITE_TO_WX_WIDGET
 
-BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
+BOOL CMainFrame::PreCreateWindow(CREATESTRUCT &cs)
 {
     CWinApp *pApp = AfxGetApp();
 
@@ -1004,20 +1038,20 @@ HMENU CMainFrame::GetWindowMenuPopup(HMENU hMenuBar)
       int iItemMax = ::GetMenuItemCount(hMenuPop);
       for (int iItemPop = 0; iItemPop < iItemMax; iItemPop++)
       {
-	UINT nID = GetMenuItemID(hMenuPop, iItemPop);
-	if (nID >= AFX_IDM_WINDOW_FIRST && nID <= AFX_IDM_WINDOW_LAST)
-	  return hMenuPop;
+        UINT nID = GetMenuItemID(hMenuPop, iItemPop);
+        if (nID >= AFX_IDM_WINDOW_FIRST && nID <= AFX_IDM_WINDOW_LAST)
+          return hMenuPop;
         HMENU hMenuSubPop = ::GetSubMenu(hMenuPop, iItemPop);
         if (hMenuSubPop != NULL)
-	{
-	  int iItemSubMax = ::GetMenuItemCount(hMenuSubPop);
-	  for (int iItemSubPop = 0; iItemSubPop < iItemSubMax; iItemSubPop++)
-	  {
-	    UINT nID = GetMenuItemID(hMenuSubPop, iItemSubPop);
-	    if (nID >= AFX_IDM_WINDOW_FIRST && nID <= AFX_IDM_WINDOW_LAST)
-	      return hMenuSubPop;
-	  }
-	}
+        {
+          int iItemSubMax = ::GetMenuItemCount(hMenuSubPop);
+          for (int iItemSubPop = 0; iItemSubPop < iItemSubMax; iItemSubPop++)
+          {
+            UINT nID = GetMenuItemID(hMenuSubPop, iItemSubPop);
+            if (nID >= AFX_IDM_WINDOW_FIRST && nID <= AFX_IDM_WINDOW_LAST)
+              return hMenuSubPop;
+          }
+        }
       }
     }
   }
@@ -1041,7 +1075,7 @@ void CMainFrame::OnClose()
             m_IOWindow.ExitModalLoop();
             return;
         }
-        if (AfxMessageBox(IDS_MAINFRM_PROG_RUNNING,MB_YESNO) == IDYES)
+        if (AfxMessageBox(IDS_MAINFRM_PROG_RUNNING, MB_YESNO) == IDYES)
         {
             wxGetApp().m_global.AbortProg();
 
@@ -1053,7 +1087,7 @@ void CMainFrame::OnClose()
             return;
     }
 
-    CWinApp* pApp = &wxGetApp();
+    CWinApp *pApp = &wxGetApp();
 
     SaveBarState(REG_ENTRY_LAYOUT); // Save the location of the toolbars
 
@@ -1062,12 +1096,12 @@ void CMainFrame::OnClose()
     {
         // Save the location of the main window
         wxRect wnd(wp.rcNormalPosition);
-        
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_POSX, wnd.left);
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_POSY, wnd.top);
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_SIZX, wnd.Width());
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_SIZY, wnd.Height());
-        pApp->WriteProfileInt(REG_ENTRY_MAINFRM,REG_STATE, wp.showCmd == SW_SHOWMAXIMIZED ? 1 : 0);
+
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM, REG_POSX, wnd.left);
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM, REG_POSY, wnd.top);
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM, REG_SIZX, wnd.Width());
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM, REG_SIZY, wnd.Height());
+        pApp->WriteProfileInt(REG_ENTRY_MAINFRM, REG_STATE, wp.showCmd == SW_SHOWMAXIMIZED ? 1 : 0);
     }
 
     CMDIFrameWnd::OnClose();
@@ -1084,63 +1118,87 @@ void CMainFrame::OnDestroy()
     ConfigSettings::Save(false);
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
+/*************************************************************************/
+// Simulator menu events
 
-void CMainFrame::OnAssemble()
+void CMainFrame::OnAssemble(wxCommandEvent &)
 {
-#if REWRITE_TO_WX_WIDGET
     CSrc6502View *pView = GetCurrentView();
-    
+
     if (pView == nullptr)
         return;
 
-    if (m_IOWindow.IsWaiting())
+    CSrc6502Doc *doc = pView->GetDocument();
+
+    if (doc == nullptr)
+        return;
+
+    /*if (m_IOWindow.IsWaiting())
     {
         m_IOWindow.SetFocus();
         return;
-    }
+    }*/
 
-    SendMessageToViews(WM_USER_REMOVE_ERR_MARK);
+    //SendMessageToViews(WM_USER_REMOVE_ERR_MARK);
 
-    if (wxGetApp().m_global.IsDebugger()) // Is the debugger running?
+    if (wxGetApp().m_global.IsDebugging())
     {
-        if (AfxMessageBox(IDS_STOP_DEBUG, MB_OKCANCEL) != IDOK)
+        auto res = wxMessageBox(
+            _("Assemble stops running simulator.\nExit debugger to assemble the program?"),
+            _("Stop debugging?"),
+            wxYES_NO | wxICON_QUESTION);
+
+        if (res != wxOK)
             return;
 
         ExitDebugMode();
     }
 
-    if (CDocument* pDocument = pView->GetDocument())
+    // TODO: Remove this, the assembler should be able to find the includes itself. -- B.Simonds (July 28, 2024)
+
+    // before assembly start set current dir to the document directory,
+    // so include directive will find included files
+    //
+
+    const std::string &path = doc->GetFilename().ToStdString();
+
+    const std::string &dirName = file::getDirectory(path);
+
+    if (!dirName.empty())
+        (void)chdir(dirName.c_str());
+
+    CAsm::Stat res;
+
+    // TODO: Prior version spun this off into a thread.
+
+    try
     {
-        // before assembly start set current dir to the document directory,
-        // so include directive will find included files
-        //
-        const std::string& strPath = pDocument->GetPathName();
-        if (!strPath.IsEmpty())
-        {
-            std::string strDir = strPath.Left(strPath.ReverseFind('\\'));
-            ::SetCurrentDirectory(strDir);
-        }
+        std::unique_ptr<CAsm6502> assembler(new CAsm6502(path.c_str()));
+
+        res = assembler->assemble();
+    }
+    catch (const std::exception &e)
+    {
+        wxLogError("ERROR: %s", e.what());
+        return;
     }
 
-    CDialAsmStat dial(pView);
+    // TODO: Give better output of what the assembler is doing.
 
-    dial.ShowModal();
-
-//  dial.Create();
-
-//  for (int i=0; i<1000; i++)
-//    dial.SetValues(i,1);
-#endif
+    if (res != CAsm::OK)
+        m_output->AppendText("Error from assembler!\r\n");
+    else
+        m_output->AppendText("Assemble OK\r\n");
 }
 
-void CMainFrame::OnUpdateAssemble(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateAssemble(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(GetCurrentDocument() != nullptr && // Is the document active?
-                   !m_IOWindow.IsWaiting());
+        !m_IOWindow.IsWaiting());
 #endif
 }
 
@@ -1153,11 +1211,11 @@ CSrc6502Doc *CMainFrame::GetCurrentDocument()
         return nullptr;
 
     CDocument *pDoc = pWnd->GetActiveDocument(); // Active document
-    
+
     if (pDoc == nullptr || !pDoc->IsKindOf(RUNTIME_CLASS(CSrc6502Doc)))
         return nullptr;
 
-    return static_cast<CSrc6502Doc*>(pDoc);
+    return static_cast<CSrc6502Doc *>(pDoc);
 #endif
 
     return nullptr;
@@ -1165,26 +1223,12 @@ CSrc6502Doc *CMainFrame::GetCurrentDocument()
 
 CSrc6502View *CMainFrame::GetCurrentView()
 {
-#if REWRITE_TO_WX_WIDGET
-    CMDIChildWnd *pWnd = MDIGetActive();
-
-    if (pWnd == nullptr)
-        return nullptr;
-
-    CView *pView = pWnd->GetActiveView(); // Active window 'view'
-
-    if (pView == nullptr || !pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)))
-        return nullptr;
-
-    return static_cast<CSrc6502View*>(pView);
-#endif
-
-    return nullptr;
+    return dynamic_cast<CSrc6502View *>(m_docManager->GetCurrentView());
 }
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnUpdateSymDebug(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymDebug(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -1214,7 +1258,7 @@ void CMainFrame::OnSymDebug() // Start the debugger
         //    return;
         //}
         wxGetApp().m_global.StartDebug();
-//		m_wndToolBar.OnInitialUpdate();
+        //		m_wndToolBar.OnInitialUpdate();
         DelayedUpdateAll();
         StartIntGenerator();
     }
@@ -1271,7 +1315,7 @@ void CMainFrame::OnSymBreakpoint()
 {
 #if REWRITE_TO_WX_WIDGET
     CSrc6502View *pView = (CSrc6502View *)(GetActiveFrame()->GetActiveView());
-//  ASSERT(pView==NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
+    //  ASSERT(pView==NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
 
     if (!wxGetApp().m_global.IsDebugger() || pView == NULL)
         return;
@@ -1303,17 +1347,17 @@ void CMainFrame::OnSymBreakpoint()
 #endif
 }
 
-void CMainFrame::OnUpdateSymBreakpoint(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymBreakpoint(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // is there a working debugger
-                   GetActiveFrame()->GetActiveView()); // and an active document?
+        GetActiveFrame()->GetActiveView()); // and an active document?
 #endif
 }
 
-void CMainFrame::AddBreakpoint(CSrc6502View* pView, int nLine, CAsm::Breakpoint bp)
+void CMainFrame::AddBreakpoint(CSrc6502View *pView, int nLine, CAsm::Breakpoint bp)
 {
     UNUSED(pView);
     UNUSED(nLine);
@@ -1323,20 +1367,20 @@ void CMainFrame::AddBreakpoint(CSrc6502View* pView, int nLine, CAsm::Breakpoint 
     if (pView == 0)
         return;
 
-    CDocument* pDoc = pView->GetDocument();
+    CDocument *pDoc = pView->GetDocument();
     POSITION pos = pDoc->GetFirstViewPosition();
 
     while (pos != NULL)
     {
-        CSrc6502View* pSrcView= dynamic_cast<CSrc6502View*>(pDoc->GetNextView(pos));
+        CSrc6502View *pSrcView = dynamic_cast<CSrc6502View *>(pDoc->GetNextView(pos));
 
         if (pSrcView)
             pSrcView->AddBreakpoint(nLine, bp);
-    }
+}
 #endif
 }
 
-void CMainFrame::RemoveBreakpoint(CSrc6502View* pView, int nLine)
+void CMainFrame::RemoveBreakpoint(CSrc6502View *pView, int nLine)
 {
     UNUSED(pView);
     UNUSED(nLine);
@@ -1345,16 +1389,16 @@ void CMainFrame::RemoveBreakpoint(CSrc6502View* pView, int nLine)
     if (pView == 0)
         return;
 
-    CDocument* pDoc = pView->GetDocument();
+    CDocument *pDoc = pView->GetDocument();
     POSITION pos = pDoc->GetFirstViewPosition();
 
     while (pos != NULL)
     {
-        CSrc6502View* pSrcView = dynamic_cast<CSrc6502View*>(pDoc->GetNextView(pos));
+        CSrc6502View *pSrcView = dynamic_cast<CSrc6502View *>(pDoc->GetNextView(pos));
 
         if (pSrcView)
             pSrcView->RemoveBreakpoint(nLine);
-    }
+}
 #endif
 }
 
@@ -1397,13 +1441,13 @@ void CMainFrame::OnSymEditBreakpoint()
 #endif
 }
 
-void CMainFrame::OnUpdateSymEditBreakpoint(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymEditBreakpoint(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // is there a working debugger
-                   GetActiveFrame()->GetActiveView()); // and an active document?
+        GetActiveFrame()->GetActiveView()); // and an active document?
 #endif
 }
 
@@ -1423,7 +1467,7 @@ void CMainFrame::OnSymBreak()
 #endif
 }
 
-void CMainFrame::OnUpdateSymBreak(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymBreak(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -1436,7 +1480,7 @@ void CMainFrame::OnUpdateSymBreak(CCmdUI* pCmdUI)
 
 void CMainFrame::OnSymSkipInstr()	// Skip the current statement
 {
-    if (!wxGetApp().m_global.IsDebugger() ||
+    if (!wxGetApp().m_global.IsDebugging() ||
         wxGetApp().m_global.IsProgramRunning() ||
         wxGetApp().m_global.IsProgramFinished())
     {
@@ -1446,14 +1490,14 @@ void CMainFrame::OnSymSkipInstr()	// Skip the current statement
     wxGetApp().m_global.GetSimulator()->SkipInstr();
 }
 
-void CMainFrame::OnUpdateSymSkipInstr(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymSkipInstr(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&        // is there a running debugger
-                   !wxGetApp().m_global.IsProgramRunning() && // and a stopped
-                   !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
+        !wxGetApp().m_global.IsProgramRunning() && // and a stopped
+        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
 #endif
 }
 
@@ -1461,7 +1505,7 @@ void CMainFrame::OnUpdateSymSkipInstr(CCmdUI* pCmdUI)
 
 void CMainFrame::OnSymGo()		// uruchomienie programu
 {
-    if (!wxGetApp().m_global.IsDebugger() ||
+    if (!wxGetApp().m_global.IsDebugging() ||
         wxGetApp().m_global.IsProgramRunning() ||
         wxGetApp().m_global.IsProgramFinished())
     {
@@ -1471,14 +1515,14 @@ void CMainFrame::OnSymGo()		// uruchomienie programu
     wxGetApp().m_global.GetSimulator()->Run();
 }
 
-void CMainFrame::OnUpdateSymGo(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymGo(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&        // is there a running debugger
-                   !wxGetApp().m_global.IsProgramRunning() && // and a stopped
-                   !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
+        !wxGetApp().m_global.IsProgramRunning() && // and a stopped
+        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
 #endif
 }
 
@@ -1499,7 +1543,7 @@ void CMainFrame::OnSymGoToLine() // Run to line
     }
 
     int line = pView->GetCurrLineNo();
-    CAsm::DbgFlag flg = wxGetApp().m_global.GetLineDebugFlags(line,pView->GetDocument()->GetPathName());
+    CAsm::DbgFlag flg = wxGetApp().m_global.GetLineDebugFlags(line, pView->GetDocument()->GetPathName());
 
     if (flg == CAsm::DBG_EMPTY || (flg & CAsm::DBG_MACRO)) // Line without result code?
     {
@@ -1508,7 +1552,7 @@ void CMainFrame::OnSymGoToLine() // Run to line
     }
     else if (flg & CAsm::DBG_DATA) // Line with data instead of commands?
     {
-        if (AfxMessageBox(IDS_SRC_DATA,MB_YESNO) != IDYES)
+        if (AfxMessageBox(IDS_SRC_DATA, MB_YESNO) != IDYES)
             return;
     }
 
@@ -1517,16 +1561,16 @@ void CMainFrame::OnSymGoToLine() // Run to line
 #endif
 }
 
-void CMainFrame::OnUpdateSymGoToLine(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymGoToLine(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&          // Is there a running debugger 
-                   !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
-                   !wxGetApp().m_global.IsProgramFinished() &&  // unfinished program
-                   GetActiveFrame()->GetActiveView() &&         // and an active document?
-                   GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
+        !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
+        !wxGetApp().m_global.IsProgramFinished() &&  // unfinished program
+        GetActiveFrame()->GetActiveView() &&         // and an active document?
+        GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
 #endif
 }
 
@@ -1547,7 +1591,7 @@ void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bie��cy wiersz
     }
 
     int line = pView->GetCurrLineNo();
-    CAsm::DbgFlag flg = wxGetApp().m_global.GetLineDebugFlags(line,pView->GetDocument()->GetPathName());
+    CAsm::DbgFlag flg = wxGetApp().m_global.GetLineDebugFlags(line, pView->GetDocument()->GetPathName());
 
     if (flg == CAsm::DBG_EMPTY || (flg & CAsm::DBG_MACRO)) // Line without result code?
     {
@@ -1556,7 +1600,7 @@ void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bie��cy wiersz
     }
     else if (flg & CAsm::DBG_DATA) // Line with data instead of commands?
     {
-        if (AfxMessageBox(IDS_SRC_DATA,MB_YESNO) != IDYES)
+        if (AfxMessageBox(IDS_SRC_DATA, MB_YESNO) != IDYES)
             return;
     }
 
@@ -1565,16 +1609,16 @@ void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bie��cy wiersz
 #endif
 }
 
-void CMainFrame::OnUpdateSymSkipToLine(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymSkipToLine(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&          // Is there a running debugger 
-                   !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
-                   !wxGetApp().m_global.IsProgramFinished() &&  // unfinished program
-                   GetActiveFrame()->GetActiveView() &&         // and an active document?
-                   GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
+        !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
+        !wxGetApp().m_global.IsProgramFinished() &&  // unfinished program
+        GetActiveFrame()->GetActiveView() &&         // and an active document?
+        GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
 #endif
 }
 
@@ -1582,8 +1626,8 @@ void CMainFrame::OnUpdateSymSkipToLine(CCmdUI* pCmdUI)
 
 void CMainFrame::OnSymGoToRts() // Run to return from the subroutine
 {
-    if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished() )
+    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning() ||
+        wxGetApp().m_global.IsProgramFinished())
     {
         return;
     }
@@ -1591,14 +1635,14 @@ void CMainFrame::OnSymGoToRts() // Run to return from the subroutine
     wxGetApp().m_global.GetSimulator()->RunTillRet();
 }
 
-void CMainFrame::OnUpdateSymGoToRts(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymGoToRts(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-                   !wxGetApp().m_global.IsProgramRunning() && // and stopped
-                   !wxGetApp().m_global.IsProgramFinished() ); // and unfinished program?
+        !wxGetApp().m_global.IsProgramRunning() && // and stopped
+        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
 #endif
 }
 
@@ -1606,8 +1650,8 @@ void CMainFrame::OnUpdateSymGoToRts(CCmdUI* pCmdUI)
 
 void CMainFrame::OnSymStepInto()	// wykonanie bie��cej instrukcji
 {
-    if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished() )
+    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning() ||
+        wxGetApp().m_global.IsProgramFinished())
     {
         return;
     }
@@ -1616,14 +1660,14 @@ void CMainFrame::OnSymStepInto()	// wykonanie bie��cej instrukcji
     DelayedUpdateAll();
 }
 
-void CMainFrame::OnUpdateSymStepInto(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymStepInto(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-                   !wxGetApp().m_global.IsProgramRunning() && // and stopped
-                   !wxGetApp().m_global.IsProgramFinished() ); // and unfinished program?
+        !wxGetApp().m_global.IsProgramRunning() && // and stopped
+        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
 #endif
 }
 
@@ -1631,8 +1675,8 @@ void CMainFrame::OnUpdateSymStepInto(CCmdUI* pCmdUI)
 
 void CMainFrame::OnSymStepOver()
 {
-    if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished() )
+    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning() ||
+        wxGetApp().m_global.IsProgramFinished())
     {
         return;
     }
@@ -1640,14 +1684,14 @@ void CMainFrame::OnSymStepOver()
     wxGetApp().m_global.GetSimulator()->StepOver();
 }
 
-void CMainFrame::OnUpdateSymStepOver(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymStepOver(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-                   !wxGetApp().m_global.IsProgramRunning() && // and stopped
-                   !wxGetApp().m_global.IsProgramFinished() ); // and unfinished program?
+        !wxGetApp().m_global.IsProgramRunning() && // and stopped
+        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
 #endif
 }
 
@@ -1655,20 +1699,20 @@ void CMainFrame::OnUpdateSymStepOver(CCmdUI* pCmdUI)
 
 void CMainFrame::OnSymRestart()
 {
-    if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramRunning())
+    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning())
         return;
 
     wxGetApp().m_global.RestartProgram();
     DelayedUpdateAll();
 }
 
-void CMainFrame::OnUpdateSymRestart(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymRestart(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-                   !wxGetApp().m_global.IsProgramRunning() ); // and stopped program?
+        !wxGetApp().m_global.IsProgramRunning()); // and stopped program?
 #endif
 }
 
@@ -1676,8 +1720,8 @@ void CMainFrame::OnUpdateSymRestart(CCmdUI* pCmdUI)
 
 void CMainFrame::OnSymAnimate()
 {
-    if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished() )
+    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning() ||
+        wxGetApp().m_global.IsProgramFinished())
     {
         return;
     }
@@ -1685,14 +1729,14 @@ void CMainFrame::OnSymAnimate()
     wxGetApp().m_global.GetSimulator()->Animate();
 }
 
-void CMainFrame::OnUpdateSymAnimate(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymAnimate(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-                   !wxGetApp().m_global.IsProgramRunning() && // and stopped
-                   !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
+        !wxGetApp().m_global.IsProgramRunning() && // and stopped
+        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
 #endif
 }
 
@@ -1700,7 +1744,7 @@ void CMainFrame::OnUpdateSymAnimate(CCmdUI* pCmdUI)
 
 void CMainFrame::OnSymDebugStop()
 {
-    if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramRunning())
+    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning())
     {
         wxBell();
         return;
@@ -1747,21 +1791,21 @@ int CMainFrame::Options(int page)
     int i;
 
 #if REWRITE_TO_WX_WIDGET
-    dial.m_EditPage.m_bAutoIndent		= CSrc6502View::m_bAutoIndent;
-    dial.m_EditPage.m_nTabStep			= CSrc6502View::m_nTabStep;
-    dial.m_EditPage.m_bAutoSyntax		= CSrc6502View::m_bAutoSyntax;
-    dial.m_EditPage.m_bAutoUppercase	= CSrc6502View::m_bAutoUppercase;
-    dial.m_EditPage.m_bFileNew			= C6502App::m_bFileNew;
+    dial.m_EditPage.m_bAutoIndent = CSrc6502View::m_bAutoIndent;
+    dial.m_EditPage.m_nTabStep = CSrc6502View::m_nTabStep;
+    dial.m_EditPage.m_bAutoSyntax = CSrc6502View::m_bAutoSyntax;
+    dial.m_EditPage.m_bAutoUppercase = CSrc6502View::m_bAutoUppercase;
+    dial.m_EditPage.m_bFileNew = C6502App::m_bFileNew;
 
-    dial.m_SymPage.m_nIOAddress			= CSym6502::io_addr;
-    dial.m_SymPage.m_bIOEnable			= CSym6502::io_enabled;
-    dial.m_SymPage.m_nFinish			= wxGetApp().m_global.GetSymFinish();
+    dial.m_SymPage.m_nIOAddress = CSym6502::io_addr;
+    dial.m_SymPage.m_bIOEnable = CSym6502::io_enabled;
+    dial.m_SymPage.m_nFinish = wxGetApp().m_global.GetSymFinish();
 
     m_IOWindow.GetSize(dial.m_SymPage.m_nWndWidth, dial.m_SymPage.m_nWndHeight);
 
-    dial.m_SymPage.m_bProtectMemory		= CSym6502::s_bWriteProtectArea;
-    dial.m_SymPage.m_nProtFromAddr		= CSym6502::s_uProtectFromAddr;
-    dial.m_SymPage.m_nProtToAddr		= CSym6502::s_uProtectToAddr;
+    dial.m_SymPage.m_bProtectMemory = CSym6502::s_bWriteProtectArea;
+    dial.m_SymPage.m_nProtFromAddr = CSym6502::s_uProtectFromAddr;
+    dial.m_SymPage.m_nProtToAddr = CSym6502::s_uProtectToAddr;
     //  m_IOWindow.GetColors(dial.m_SymPage.m_rgbTextColor,dial.m_SymPage.m_rgbBackgndColor);
 
     dial.m_DeasmPage.m_rgbAddress = CDeasm6502View::m_rgbAddress;
@@ -1808,15 +1852,15 @@ int CMainFrame::Options(int page)
             CSrc6502View::m_vbyFontStyle[nStyle] = *dial.m_EditPage.GetFontStyle(nStyle);
     }
 
-    CSym6502::io_addr    = dial.m_SymPage.m_nIOAddress;
+    CSym6502::io_addr = dial.m_SymPage.m_nIOAddress;
     CSym6502::io_enabled = dial.m_SymPage.m_bIOEnable;
 
     wxGetApp().m_global.SetSymFinish((CAsm::Finish)dial.m_SymPage.m_nFinish);
     m_IOWindow.SetSize(dial.m_SymPage.m_nWndWidth, dial.m_SymPage.m_nWndHeight, -1);
 
-    CSym6502::s_bWriteProtectArea	= !!dial.m_SymPage.m_bProtectMemory;
-    CSym6502::s_uProtectFromAddr	= dial.m_SymPage.m_nProtFromAddr;
-    CSym6502::s_uProtectToAddr		= dial.m_SymPage.m_nProtToAddr;
+    CSym6502::s_bWriteProtectArea = !!dial.m_SymPage.m_bProtectMemory;
+    CSym6502::s_uProtectFromAddr = dial.m_SymPage.m_nProtFromAddr;
+    CSym6502::s_uProtectToAddr = dial.m_SymPage.m_nProtToAddr;
 
     if (CSym6502::s_uProtectFromAddr > CSym6502::s_uProtectToAddr)
         std::swap(CSym6502::s_uProtectToAddr, CSym6502::s_uProtectFromAddr);
@@ -1824,25 +1868,25 @@ int CMainFrame::Options(int page)
     //_IOWindow.SetColors(dial.m_SymPage.m_rgbTextColor, dial.m_SymPage.m_rgbBackgndColor);
 
     CDeasm6502View::m_rgbAddress = dial.m_DeasmPage.m_rgbAddress;
-    CDeasm6502View::m_rgbCode    = dial.m_DeasmPage.m_rgbCode;
+    CDeasm6502View::m_rgbCode = dial.m_DeasmPage.m_rgbCode;
     //CDeasm6502View::m_rgbInstr = dial.m_DeasmPage.m_rgbInstr;
-    CDeasm6502View::m_bDrawCode  = dial.m_DeasmPage.m_ShowCode;
+    CDeasm6502View::m_bDrawCode = dial.m_DeasmPage.m_ShowCode;
 
     //wxGetApp().m_global.SetProcType(!dial.m_MarksPage.m_nProc6502);
     wxGetApp().m_global.SetProcType(dial.m_MarksPage.m_nProc6502);
     wxGetApp().m_global.SetHelpType(dial.m_MarksPage.m_nHelpFile);
 
     //CSym6502::bus_width     = dial.m_MarksPage.m_uBusWidth;
-    CMarks::m_rgbPointer    = dial.m_MarksPage.m_rgbPointer;
+    CMarks::m_rgbPointer = dial.m_MarksPage.m_rgbPointer;
     CMarks::m_rgbBreakpoint = dial.m_MarksPage.m_rgbBreakpoint;
-    CMarks::m_rgbError      = dial.m_MarksPage.m_rgbError;
+    CMarks::m_rgbError = dial.m_MarksPage.m_rgbError;
 
     wxGetApp().m_global.m_bGenerateListing = dial.m_AsmPage.m_bGenerateListing;
-    wxGetApp().m_global.m_strListingFile   = dial.m_AsmPage.m_strListingFile;
+    wxGetApp().m_global.m_strListingFile = dial.m_AsmPage.m_strListingFile;
 
-    CAsm6502::generateBRKExtraByte     = dial.m_AsmPage.m_bGenerateBRKExtraByte;
-    CAsm6502::BRKExtraByte             = dial.m_AsmPage.m_uBrkExtraByte;
-    CAsm6502::case_insensitive         = dial.m_AsmPage.m_nCaseSensitive;
+    CAsm6502::generateBRKExtraByte = dial.m_AsmPage.m_bGenerateBRKExtraByte;
+    CAsm6502::BRKExtraByte = dial.m_AsmPage.m_uBrkExtraByte;
+    CAsm6502::case_insensitive = dial.m_AsmPage.m_nCaseSensitive;
 
     if (dial.m_EditPage.m_nTabStep != CSrc6502View::m_nTabStep ||
         dial.m_EditPage.m_bColorChanged ||
@@ -1851,7 +1895,7 @@ int CMainFrame::Options(int page)
         CSrc6502View::m_nTabStep = dial.m_EditPage.m_nTabStep;
         CSrc6502View::m_bAutoIndent = dial.m_EditPage.m_bAutoIndent;
         RedrawAllViews();
-    }
+}
 #endif
     /*
       if (dial.m_EditPage.m_bFontChanged || dial.m_EditPage.m_nTabStep != CSrc6502View::m_nTabStep ||
@@ -1861,7 +1905,7 @@ int CMainFrame::Options(int page)
         RedrawAllViews(dial.m_EditPage.m_bFontChanged);
       }
     */
-    
+
     for (i = 0; ConfigSettings::text_color[i]; i++) // Adjust/Save colors
     {
 #if REWRITE_TO_WX_WIDGET
@@ -1886,7 +1930,7 @@ int CMainFrame::Options(int page)
             case 0: // Editor
                 RedrawAllViews(dial.m_ViewPage.m_Text[i].changed & 2);
                 break;
-                
+
             case 1: // Simulator
                 m_IOWindow.Resize();
                 break;
@@ -1912,27 +1956,27 @@ int CMainFrame::Options(int page)
                 break;
             }
         }
-    }
+        }
 
     // Redraw disassembler windows
 #if REWRITE_TO_WX_WIDGET
     POSITION posDoc = wxGetApp().m_pDocDeasmTemplate->GetFirstDocPosition();
     while (posDoc != NULL) // Are the windows from the disassembler?
     {
-        CDocument* pDoc = wxGetApp().m_pDocDeasmTemplate->GetNextDoc(posDoc);
+        CDocument *pDoc = wxGetApp().m_pDocDeasmTemplate->GetNextDoc(posDoc);
         pDoc->UpdateAllViews(NULL);
     }
 #endif
 
     return dial.GetLastActivePage();
-}
+    }
 
 void CMainFrame::OnOptions()
 {
     m_nLastPage = Options(m_nLastPage);
 }
 
-void CMainFrame::OnUpdateOptions(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateOptions(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -1958,10 +2002,10 @@ int CMainFrame::RedrawAllViews(int chgHint) // 'Invalidate' all windows
             POSITION posView = pDoc->GetFirstViewPosition();
             while (posView != NULL)
             {
-                CView* pView = pDoc->GetNextView(posView);
+                CView *pView = pDoc->GetNextView(posView);
                 if (pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)))
                 {
-                    CSrc6502View* pSrcView = static_cast<CSrc6502View*>(pView);
+                    CSrc6502View *pSrcView = static_cast<CSrc6502View *>(pView);
 #ifdef USE_CRYSTAL_EDIT
                     pSrcView->SetTabSize(CSrc6502View::m_nTabStep);
                     pSrcView->SetAutoIndent(CSrc6502View::m_bAutoIndent);
@@ -1976,7 +2020,7 @@ int CMainFrame::RedrawAllViews(int chgHint) // 'Invalidate' all windows
             }
         }
         //GetNextDoc(posDoc)->UpdateAllViews(NULL);
-    }
+}
 #endif
 
     return 0;
@@ -1998,7 +2042,7 @@ void CMainFrame::OnViewRegisterWnd()
     */
 }
 
-void CMainFrame::OnUpdateIdViewRegisterbar(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateIdViewRegisterbar(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2032,7 +2076,7 @@ void CMainFrame::OnFileSaveCode() //@@
 #endif
 }
 
-void CMainFrame::OnUpdateFileSaveCode(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateFileSaveCode(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2045,13 +2089,13 @@ void CMainFrame::OnUpdateFileSaveCode(CCmdUI* pCmdUI)
 
 void CMainFrame::OnViewDeasm()
 {
-    if (!wxGetApp().m_global.IsDebugger())
+    if (!wxGetApp().m_global.IsDebugging())
         return; // No debugger running.
 
     wxGetApp().m_global.CreateDeasm();
 }
 
-void CMainFrame::OnUpdateViewDeasm(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateViewDeasm(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2070,7 +2114,7 @@ void CMainFrame::OnViewIdents()
         m_Idents.Hide();
 }
 
-void CMainFrame::OnUpdateViewIdents(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateViewIdents(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2090,7 +2134,7 @@ void CMainFrame::OnViewMemory()
         m_Memory.Hide();
 }
 
-void CMainFrame::OnUpdateViewMemory(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateViewMemory(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2107,7 +2151,7 @@ void CMainFrame::OnEditorOpt()
     m_nLastPage = Options(2); // Editor options
 }
 
-void CMainFrame::OnUpdateEditorOpt(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateEditorOpt(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2120,13 +2164,13 @@ void CMainFrame::OnUpdateEditorOpt(CCmdUI* pCmdUI)
 
 void CMainFrame::OnViewIOWindow()
 {
-    if (!wxGetApp().m_global.IsDebugger()) // No working debugger?
+    if (!wxGetApp().m_global.IsDebugging()) // No working debugger?
         return;
 
     m_IOWindow.Show(!m_IOWindow.IsShown());
 }
 
-void CMainFrame::OnUpdateViewIOWindow(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateViewIOWindow(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2144,19 +2188,19 @@ void CMainFrame::OnFileLoadCode()
     std::string filter;
     filter.LoadString(IDS_LOAD_CODE);
 
-    CLoadCode dlg("",filter,this);
+    CLoadCode dlg("", filter, this);
 
     if (dlg.ShowModal() == wxID_OK)
         dlg.LoadCode();
 #endif
 }
 
-void CMainFrame::OnUpdateFileLoadCode(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateFileLoadCode(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
 #if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable( true );
+    pCmdUI->Enable(true);
 #endif
 }
 
@@ -2168,7 +2212,7 @@ void CMainFrame::ExitDebugMode()
     {
         if (m_IOWindow.IsWaiting())
             m_IOWindow.ExitModalLoop();
-            
+
         wxGetApp().m_global.GetSimulator()->AbortProg(); // Interrupt the running program
     }
 
@@ -2182,7 +2226,7 @@ void CMainFrame::OnDeasmOptions()
     m_nLastPage = Options(3); // Disassembler options
 }
 
-void CMainFrame::OnUpdateDeasmOptions(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateDeasmOptions(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2207,7 +2251,7 @@ void CMainFrame::OnSysColorChange()
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnUpdateViewZeropage(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateViewZeropage(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2235,7 +2279,7 @@ void CMainFrame::OnViewStack()
         m_Stack.Hide();
 }
 
-void CMainFrame::OnUpdateViewStack(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateViewStack(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2247,7 +2291,7 @@ void CMainFrame::OnUpdateViewStack(CCmdUI* pCmdUI)
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnUpdateMemoryOptions(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateMemoryOptions(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2264,7 +2308,7 @@ void CMainFrame::OnMemoryOptions()
 //-----------------------------------------------------------------------------
 
 #if REWRITE_TO_WX_WIDGET
-bool CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
+bool CMainFrame::OnCmdMsg(UINT nID, int nCode, void *pExtra, AFX_CMDHANDLERINFO *pHandlerInfo)
 {
     if (m_Stack.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
         return true;
@@ -2309,7 +2353,7 @@ void CMainFrame::UpdateAll()
 
 void CMainFrame::DelayedUpdateAll()
 {
-//	if (m_uTimer == 0)
+    //	if (m_uTimer == 0)
 #if REWRITE_TO_WX_WIDGET
     m_uTimer = SetTimer(100, 200, NULL);
 
@@ -2328,18 +2372,18 @@ void CMainFrame::OnTimer(UINT nIDEvent)
     UpdateAll();
 #endif
 
-//  CMDIFrameWnd::OnTimer(nIDEvent);
+    //  CMDIFrameWnd::OnTimer(nIDEvent);
 }
 
 void CMainFrame::SymGenInterrupt(CSym6502::IntType eInt)
 {
-    if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramFinished())
+    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramFinished())
         return;
 
     wxGetApp().m_global.GetSimulator()->Interrupt(eInt);
 }
 
-void CMainFrame::UpdateSymGenInterrupt(CCmdUI* pCmdUI)
+void CMainFrame::UpdateSymGenInterrupt(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2353,7 +2397,7 @@ void CMainFrame::OnSymGenIRQ()
     SymGenInterrupt(CSym6502::IRQ);
 }
 
-void CMainFrame::OnUpdateSymGenIRG(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymGenIRG(CCmdUI *pCmdUI)
 {
     UpdateSymGenInterrupt(pCmdUI);
 }
@@ -2363,7 +2407,7 @@ void CMainFrame::OnSymGenNMI()
     SymGenInterrupt(CSym6502::NMI);
 }
 
-void CMainFrame::OnUpdateSymGenNMI(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymGenNMI(CCmdUI *pCmdUI)
 {
     UpdateSymGenInterrupt(pCmdUI);
 }
@@ -2373,7 +2417,7 @@ void CMainFrame::OnSymGenReset()
     SymGenInterrupt(CSym6502::RST);
 }
 
-void CMainFrame::OnUpdateSymGenReset(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymGenReset(CCmdUI *pCmdUI)
 {
     UpdateSymGenInterrupt(pCmdUI);
 }
@@ -2453,7 +2497,7 @@ void CMainFrame::OnSymGenIntDlg()
     StartIntGenerator();
 }
 
-void CMainFrame::OnUpdateSymGenIntDlg(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateSymGenIntDlg(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -2472,7 +2516,7 @@ void CMainFrame::StopIntGenerator()
 
 void CMainFrame::StartIntGenerator()
 {
-    if (!wxGetApp().m_global.IsDebugger() || wxGetApp().m_global.IsProgramFinished())
+    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramFinished())
         return;
 
 #if REWRITE_TO_WX_WIDGET
@@ -2486,11 +2530,11 @@ void CMainFrame::StartIntGenerator()
     {
         int nId = SetTimer(CSym6502::NMI, wxGetApp().m_global.m_IntGenerator.m_nNMITimeLapse, &TimerProc);
         ASSERT(nId);
-    }
+}
 #endif
 }
 
-void CMainFrame::ShowDynamicHelp(const std::string& strLine, int nWordStart, int nWordEnd)
+void CMainFrame::ShowDynamicHelp(const std::string &strLine, int nWordStart, int nWordEnd)
 {
     m_wndHelpBar.DisplayHelp(strLine, nWordStart, nWordEnd);
 }
@@ -2502,7 +2546,7 @@ void CMainFrame::OnHelpDynamic()
 #endif
 }
 
-void CMainFrame::OnUpdateHelpDynamic(CCmdUI* pCmdUI)
+void CMainFrame::OnUpdateHelpDynamic(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 

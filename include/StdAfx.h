@@ -103,6 +103,7 @@ typedef wxOutputStream DocOStream;
 
 #ifdef _MSC_VER
 # define strcasecmp _stricmp
+# define chdir _chdir
 #endif
 
 #ifndef HIWORD
@@ -129,14 +130,6 @@ typedef int POSITION;
 // Couple of class stubs from MFC that we need to convert.
 
 class CCmdUI;
-
-// Stub for now, need full exception system; wxWidgets doesn't provide one.
-class CFileException
-{
-public:
-    CFileException(int err) { UNUSED(err); }
-    virtual ~CFileException() { }
-};
 
 // Another stub
 class CMemoryException

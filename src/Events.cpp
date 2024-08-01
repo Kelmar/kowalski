@@ -32,6 +32,7 @@
 wxDEFINE_EVENT(evID_LOAD_CODE, wxCommandEvent);
 wxDEFINE_EVENT(evID_SAVE_CODE, wxCommandEvent);
 
+wxDEFINE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_LOG, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_REGS, wxCommandEvent);

@@ -18,12 +18,43 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-//#include <ctime>
 #include "StdAfx.h"
 
-#include "InputBase.h"
 #include "InputStack.h"
-#include "InputWin.h"
+
+/*************************************************************************/
+
+void CInputFile::open()
+{
+    ASSERT(!m_file); // File is already open
+    ASSERT(!m_path.empty()); // Must have a file name!
+
+    m_file = std::fopen(m_path.c_str(), "r");
+
+    if (m_file == nullptr)
+        throw FileError(FileError::SysError);
+}
+
+/*************************************************************************/
+
+void CInputFile::close()
+{
+    if (!m_file)
+        return;
+
+    std::fclose(m_file);
+    m_file = nullptr;
+}
+
+/*************************************************************************/
+
+void CInputFile::seek_to_begin()
+{
+    ASSERT(m_file); // The file must be opened
+
+    std::fseek(m_file, 0, SEEK_SET);
+    m_lineNo = 0;
+}
 
 /*************************************************************************/
 
@@ -60,7 +91,7 @@ CAsm::FileUID CInputStack::CalcIndex()
 
 /*************************************************************************/
 
-void CInputStack::SetCurrent(FileInfo *newFile)
+void CInputStack::SetCurrent(CInputFile *newFile)
 {
     if (m_current)
         m_stack.push_back(m_current);
@@ -72,18 +103,7 @@ void CInputStack::SetCurrent(FileInfo *newFile)
 
 void CInputStack::OpenFile(const std::string &fname)
 {
-    auto file = new FileInfo();
-    file->m_file = new CInputFile(fname);
-    file->m_id = CalcIndex();
-
-    SetCurrent(file);
-}
-
-void CInputStack::OpenFile(wxWindow *window)
-{
-    auto file = new FileInfo();
-    file->m_file = new CInputWin(window);
-    file->m_id = CalcIndex();
+    auto file = new CInputFile(fname, CalcIndex());
 
     SetCurrent(file);
 }
@@ -95,7 +115,6 @@ bool CInputStack::CloseFile()
     if (!m_current)
         return false; // All files closed!
 
-    delete m_current->m_file;
     delete m_current;
 
     if (m_stack.empty())

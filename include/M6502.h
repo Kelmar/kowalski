@@ -26,7 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "DebugInfo.h"
 #include "OutputMem.h"
 
-#include "InputBase.h"
 #include "InputStack.h"
 
 #include "ConditionalAsm.h"
@@ -261,7 +260,7 @@ typedef std::unordered_map<std::string, CIdent> CIdentTable;
 /**
  * @brief A class to describe an arithmetic/logical/text expression
  */
-struct Expr		 
+struct Expr
 {
     int32_t value;
     std::string string;
@@ -471,10 +470,6 @@ public:
         : input(fileName)
     {}
 
-    CSourceText(wxWindow* window)
-        : input(window)
-    {}
-
     CSourceText()
     {}
 
@@ -514,9 +509,15 @@ public:
             input.SetFileUID(pDebugInfo->GetFileUID(fname));
     }
 
-    bool TextFin() // Current file finished
+    bool TextFin() // current file finished
     {
-        return input.CloseFile();
+        if (input.GetCount() > 1) // nested read (.include)?
+        {
+            input.CloseFile();
+            return true;
+        }
+        else
+            return false; // end of source files
     }
 
     /*
@@ -533,7 +534,7 @@ public:
 //-----------------------------------------------------------------------------
 
 // Stack of objects that are the source of the rows
-class CSourceStack 
+class CSourceStack
 {
 private:
     std::vector<CSource *> m_items;
@@ -542,9 +543,9 @@ private:
     template <typename T>
     T *ReverseFind()
     {
-        for (int i = m_items.size(); i >= 0; i--)
+        for (auto &i : std::views::reverse(m_items))
         {
-            T* source = dynamic_cast<T*>(m_items[i]);
+            T *source = dynamic_cast<T *>(i);
             if (source)
                 return source;
         }
@@ -554,6 +555,8 @@ private:
 
 public:
     CSourceStack()
+        : m_items()
+        , m_nIndex(0)
     {
     }
 
@@ -602,6 +605,7 @@ class CMarkArea;
 
 class CAsm6502 : public CAsm /*, public CObject */
 {
+private:
     friend class CMacroDef;
 
     std::string current_line;
@@ -613,7 +617,7 @@ class CAsm6502 : public CAsm /*, public CObject */
     bool check_line;                // flag: true - Analysis of one line, false - Program
     uint32_t origin;
     bool originWrapped;             // true - if the command counter "wrapped"
-    uint32_t program_start;         // Beginning of the program
+    uint32_t m_progStart;         // Beginning of the program
     uint32_t mem_mask;              // Processor memory limit (mask), normally $FFFF
     int local_area;                 // Local label area number
     int proc_area;                  // Local label area number
@@ -712,7 +716,6 @@ class CAsm6502 : public CAsm /*, public CObject */
     Stat expression(CToken &leks, Expr &expr, bool str= false); // Expression expansion
     bool is_expression(const CToken &leks);
     Stat assemble_line();           // Line interpretation
-    Stat assemble();
 
     const char *get_next_line();    // Load the next line into the assembly
     const char *play_macro();       // Reading the next line of the macro
@@ -838,22 +841,6 @@ public:
         init();
     }
 
-    CAsm6502(wxWindow *pWnd, 
-             COutputMem *out = NULL,
-             CDebugInfo *debug = NULL,
-             CMarkArea *area = NULL,
-             ProcessorType procType = ProcessorType::M6502,
-             const char *listing_file = NULL)
-        : entire_text(pWnd)
-        , out(out)
-        , markArea(area)
-        , debug(debug)
-        , listing(listing_file)
-        , m_procType(procType)
-    {
-        init();
-    }
-
     CAsm6502()
     {
         m_procType = ProcessorType::M6502;
@@ -890,14 +877,11 @@ public:
 
     std::string GetErrMsg(Stat stat); // Error description
 
-    Stat Assemble() // Assembly
-    {
-        return assemble();
-    }
+    Stat assemble(); // Assembly
 
-    uint32_t GetProgramStart() // Beginning of the program
+    uint32_t GetProgramStart() const // Beginning of the program
     {
-        return program_start;
+        return m_progStart;
     }
 };
 

@@ -36,8 +36,6 @@ uint8_t CAsm6502::forcelong = 0;
 bool CAsm6502::generateBRKExtraByte = false; // generate extra byte after BRK command?
 uint8_t CAsm6502::BRKExtraByte = 0x0; // value of extra byte generated after BRK command
 
-
-
 /*************************************************************************/
 
 void CAsm6502::init_members()
@@ -48,7 +46,7 @@ void CAsm6502::init_members()
         mem_mask = 0xFFFF; // memory limit mask 6502
 
     abort_asm = false;
-    program_start = ~0u;
+    m_progStart = ~0u;
     check_line = false;
     in_macro = NULL;
     expanding_macro = NULL;
@@ -2502,7 +2500,8 @@ void CAsm6502::asm_start_pass()
     text->Start(0);
     origin = ~0u;
     originWrapped = false;
-    if (pass == 2)
+
+    if (pass == 2 && debug)
         debug->Empty();
 }
 
@@ -2659,11 +2658,11 @@ CAsm6502::Stat CAsm6502::assemble() // Program translation
                     text->Start(&conditional_asm);
                     break;
 
-                case STAT_FIN:		// koniec pliku
+                case STAT_FIN: // end of file
                     ASSERT(dynamic_cast<CSourceText *>(text) != nullptr);
                     //ASSERT( typeid(text) != typeid(CMacroDef) && typeid(text) != typeid(CRepeatDef));
                     //ASSERT(!text->IsMacro() && !text->IsRepeat());
-                    if (!static_cast<CSourceText *>(text)->TextFin()) // koniec zagnie�d�onego odczytu (.include) ?
+                    if (!static_cast<CSourceText *>(text)->TextFin()) // end of nested read (.include)?
                     {
                         if (conditional_asm.in_cond())	// w �rodku dyrektywy .IF ?
                             return ERR_ENDIF_REQUIRED;
@@ -2691,13 +2690,13 @@ CAsm6502::Stat CAsm6502::assemble() // Program translation
         asm_fin();
 
     }
+    catch (const FileError &)
+    {
+        return ERR_FILE_READ;
+    }
     catch (CMemoryException *)
     {
         return ERR_OUT_OF_MEM;
-    }
-    catch (CFileException *)
-    {
-        return ERR_FILE_READ;
     }
 
     ASSERT(ret != Stat::ERR_LAST);

@@ -140,19 +140,20 @@ struct CDebugLine
     }
 };
 
-class CDebugLines : std::vector<CDebugLine>
+class CDebugLines
 {
 private:
     // Associative arrays for quick finding an address or line
+    std::vector<CDebugLine> m_lines;
     std::unordered_map<uint32_t, int> addr_to_idx;
     std::unordered_map<CLine, int> line_to_idx;
 
 public:
     CDebugLines() 
-        : addr_to_idx(50)
+        : m_lines(50)
+        , addr_to_idx(50)
         , line_to_idx(50)
     {
-        reserve(50);
     }
 
     // Finding the line corresponding to the address
@@ -163,7 +164,7 @@ public:
         auto search = addr_to_idx.find(addr);
 
         if (search != addr_to_idx.end())
-            ret = at(search->second);
+            ret = m_lines.at(search->second);
 
         ret = empty;
     }
@@ -176,7 +177,7 @@ public:
         auto search = line_to_idx.find(CLine(ln, file));
 
         if (search != line_to_idx.end())
-            ret = at(search->second);
+            ret = m_lines.at(search->second);
 
         ret = empty;
     }
@@ -185,8 +186,8 @@ public:
     {
         ASSERT(dl.flags != CAsm::DBG_EMPTY); // Unfilled line description
 
-        int idx = size();
-        push_back(dl); // Adding information about the line, remembering the index
+        int idx = m_lines.size();
+        m_lines.push_back(dl); // Adding information about the line, remembering the index
 
         addr_to_idx[dl.addr] = idx; // Saving the index
         line_to_idx[dl.line] = idx; // As above
@@ -194,7 +195,7 @@ public:
 
     void Empty()
     {
-        clear();
+        m_lines.clear();
 
         addr_to_idx.clear();
         line_to_idx.clear();

@@ -57,9 +57,9 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
         if (m_procType == ProcessorType::WDC65816)
             originWrapped = false;
 
-        if (program_start == ~0u) // Beginning of program not defined yet?
+        if (m_progStart == ~0u) // Beginning of program not defined yet?
         {
-            program_start = origin = expr.value & mem_mask;
+            m_progStart = origin = expr.value & mem_mask;
 
             if (markArea && pass == 2)
                 markArea->SetStart(origin);
@@ -99,10 +99,10 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
         if (expr.inf == Expr::EX_LONG) // Value too large
             return ERR_NUM_LONG;
 
-        program_start = expr.value & mem_mask;
+        m_progStart = expr.value & mem_mask;
 
         if (listing.IsOpen())
-            listing.AddValue(uint32_t(program_start));
+            listing.AddValue(uint32_t(m_progStart));
 
         break;
     }
@@ -384,7 +384,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
         if (expr.inf == Expr::EX_LONG) // Value too large
             return ERR_NUM_LONG;
 
-        program_start = expr.value & mem_mask;
+        m_progStart = expr.value & mem_mask;
         return STAT_FIN;
     }
 

@@ -38,14 +38,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "FlatBar.h"
 #include "DynamicHelp.h"
 
+#include "ConsoleFrm.h"
+
 class CSrc6502Doc;
 class CSrc6502View;
 
-class CMainFrame : public wxDocMDIParentFrame
+#if wxUSE_MDI_ARCHITECTURE
+# define MAIN_BASE wxDocMDIParentFrame
+#else
+# define MAIN_BASE wxDocParentFrameAny<wxAuiMDIParentFrame>
+#endif
+
+class CMainFrame : public MAIN_BASE
 {
 private:
     static constexpr char REG_ENTRY_MAINFRM[] = "MainFrame";
 
+    ConsoleFrame *m_output;
+    wxAuiPaneInfo m_outputInfo;
+
+    wxAuiManager m_auiManager;
     wxDocManager *m_docManager;
 
     // TODO: Move into a project document
@@ -115,7 +127,7 @@ protected: // control bar embedded members
 // Generated message map functions
 protected:
     afx_msg void OnClose();
-    afx_msg void OnAssemble();
+    
     afx_msg void OnUpdateAssemble(CCmdUI* pCmdUI);
     afx_msg void OnUpdateSymDebug(CCmdUI* pCmdUI);
     afx_msg void OnSymDebug();
@@ -193,8 +205,11 @@ protected:
 
 private: // Event handlers
     void OnExit(wxCommandEvent &);
+    void OnShowOutput(wxCommandEvent &);
     void OnShowLog(wxCommandEvent &);
     void OnAbout(wxCommandEvent &);
+
+    void OnAssemble(wxCommandEvent &);
 
 private: // UI Updaters
     void OnUpdateShowLog(wxUpdateUIEvent &);

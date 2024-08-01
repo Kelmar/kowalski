@@ -22,58 +22,42 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define INPUT_H__
 
 #include "StdAfx.h"
-#include "InputBase.h"
 
 /*************************************************************************/
 
-class CInputFile : public CInputBase
+class CInputFile
 {
 private:
+    std::string m_path;
+    CAsm::FileUID m_id;
     std::FILE *m_file;
 
+    int m_lineNo;
+
+    virtual void open();
+    virtual void close();
+
 public:
-    CInputFile(const std::string &str) 
-        : CInputBase(str.c_str())
+    CInputFile(const std::string &path, CAsm::FileUID id)
+        : m_path(path)
+        , m_id(id)
         , m_file(nullptr)
     {
+        open();
     }
 
-    ~CInputFile()
-    {
-    }
+    virtual ~CInputFile() { close(); }
 
-    virtual void open()
-    {
-        ASSERT(m_bOpened == false); // File is already open
+    CAsm::FileUID id(void) const { return m_id; }
+    void id(CAsm::FileUID newID) { m_id = newID; }
 
-        m_file = std::fopen(m_strFileName.c_str(), "r");
+    void seek_to_begin();
 
-        if (m_file == nullptr)
-            throw new CFileException(errno);
+    bool read_line(std::string &buffer);
 
-        m_bOpened = true;
-    }
+    int lineNumber(void) const { return m_lineNo; }
 
-    virtual void close()
-    {
-        ASSERT(m_bOpened == true);	    // The file must be opened
-
-        std::fclose(m_file);
-        m_file = nullptr;
-        m_bOpened = false;
-    }
-
-    virtual void seek_to_begin()
-    {
-        std::fseek(m_file, 0, SEEK_SET);
-        m_nLine = 0;
-    }
-
-    virtual bool read_line(std::string &buffer);
-
-//  virtual int get_line_no()
-
-//  virtual const std::string &get_file_name()
+    std::string path(void) const { return m_path; }
 };
 
 //-----------------------------------------------------------------------------
@@ -81,20 +65,14 @@ public:
 class CInputStack
 {
 private:
-    struct FileInfo
-    {
-        CInputBase *m_file;
-        CAsm::FileUID m_id;
-    };
-
-    std::vector<FileInfo*> m_stack;
-    FileInfo *m_current;
+    std::vector<CInputFile*> m_stack;
+    CInputFile *m_current;
 
     int m_lastId;
 
     CAsm::FileUID CalcIndex();
 
-    void SetCurrent(FileInfo *newFile);
+    void SetCurrent(CInputFile *newFile);
 
 public:
     CInputStack(const std::string& fname)
@@ -104,45 +82,34 @@ public:
         OpenFile(fname);
     }
 
-    CInputStack(wxWindow* window)
-        : m_current(nullptr)
-        , m_lastId(0)
-    {
-        OpenFile(window);
-    }
-
     CInputStack()
         : m_current(nullptr)
         , m_lastId(0)
     {}
 
-    ~CInputStack();
+    virtual ~CInputStack();
 
     void OpenFile(const std::string& fname);
-    void OpenFile(wxWindow* pWin);
     bool CloseFile();
 
     bool ReadLine(std::string &buffer)
     {
-        return m_current->m_file->read_line(buffer);
+        return m_current->read_line(buffer);
     }
 
     void SeekToBegin()
     {
-        m_current->m_file->seek_to_begin();
+        m_current->seek_to_begin();
     }
 
-    int GetLineNumber() const
-    {
-        return m_current->m_file->get_line_no();
-    }
+    int GetLineNumber() const { return m_current->lineNumber(); }
 
     int GetCount() const { return m_stack.size() + (m_current ? 1 : 0); }
 
-    const std::string& GetFileName() const { return m_current->m_file->get_file_name(); }
+    std::string GetFileName() const { return m_current->path(); }
 
-    CAsm::FileUID GetFileUID() const { return m_current->m_id; }
-    void SetFileUID(CAsm::FileUID fuid) { m_current->m_id = fuid; }
+    CAsm::FileUID GetFileUID() const { return m_current->id(); }
+    void SetFileUID(CAsm::FileUID fuid) { m_current->id(fuid); }
 
     bool IsPresent() const { return m_current != nullptr; }
 };

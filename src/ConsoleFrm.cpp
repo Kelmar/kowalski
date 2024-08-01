@@ -22,34 +22,50 @@
  */
 /*************************************************************************/
 
-#ifndef EVENT_6502_H__
-#define EVENT_6502_H__
-
-/*************************************************************************/
-
 #include "StdAfx.h"
-
-// List of application defined events.
-wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
-wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_SHOW_LOG, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_REGS, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_ASSEMBLE, wxCommandEvent);
-wxDECLARE_EVENT(evID_DEBUG, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN, wxCommandEvent);
-wxDECLARE_EVENT(evID_RESET, wxCommandEvent);
-wxDECLARE_EVENT(evID_BREAK, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_INTO, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
+#include "ConsoleFrm.h"
 
 /*************************************************************************/
 
-#endif /* EVENT_6502_H__ */
+ConsoleFrame::ConsoleFrame(wxFrame *parent)
+    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize)
+    , m_text(nullptr)
+{
+    auto font = new wxFont(11, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+
+    auto horzSz = new wxBoxSizer(wxHORIZONTAL);
+
+    SetSizer(horzSz);
+
+    m_text = new wxTextCtrl(
+        this,
+        wxID_ANY,
+        wxEmptyString,
+        wxDefaultPosition,
+        wxDefaultSize,
+        wxTE_MULTILINE |
+        wxVSCROLL      |
+        wxHSCROLL      |
+        wxTE_READONLY
+    );
+
+    m_text->SetEditable(false);
+    m_text->SetFont(*font);
+
+    horzSz->Add(m_text, 1, (int)wxALL | (int)wxEXPAND);
+
+    GetSizer()->SetSizeHints(this);
+}
+
+ConsoleFrame::~ConsoleFrame()
+{
+}
+
+/*************************************************************************/
+
+void ConsoleFrame::AppendText(const char *txt)
+{
+    m_text->AppendText(txt);
+}
 
 /*************************************************************************/
