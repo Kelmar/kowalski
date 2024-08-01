@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
 #include "StdAfx.h"
+#include "Except.h"
 
 #include "6502.h"
 #include "Events.h"
@@ -1166,7 +1167,10 @@ void CMainFrame::OnAssemble(wxCommandEvent &)
     const std::string &dirName = file::getDirectory(path);
 
     if (!dirName.empty())
-        (void)chdir(dirName.c_str());
+    {
+        if (chdir(dirName.c_str()))
+            throw FileError(FileError::CannotChangeDir);
+    }
 
     CAsm::Stat res;
 
