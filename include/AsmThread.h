@@ -22,38 +22,33 @@
  */
 /*************************************************************************/
 
-#ifndef EVENT_6502_H__
-#define EVENT_6502_H__
+#ifndef ASM_THREAD_H__
+#define ASM_THREAD_H__
 
 /*************************************************************************/
 
-#include "StdAfx.h"
+/**
+ * Class that spins off the assembler into a background thread.
+ */
+class AsmThread : public wxThread
+{
+private:
+    CMainFrame *m_mainFrm;
+    std::string m_path;
 
-// List of application defined events.
-wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
-wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
+public:
+    AsmThread(CMainFrame *mainFrm, const std::string &path)
+        : wxThread(wxTHREAD_JOINABLE)
+        , m_mainFrm(mainFrm)
+        , m_path(path)
+    {
+    }
 
-wxDECLARE_EVENT(evID_SHOW_LOG, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_REGS, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_ASSEMBLE, wxCommandEvent);
-wxDECLARE_EVENT(evID_DEBUG, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN, wxCommandEvent);
-wxDECLARE_EVENT(evID_RESET, wxCommandEvent);
-wxDECLARE_EVENT(evID_BREAK, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_INTO, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
-
-//wxDECLARE_EVENT(evTHD_ASM_COMPLETE, wxThreadEvent);
-
-static const int evTHD_ASM_COMPLETE = wxID_HIGHEST + 1;
+    virtual ExitCode Entry();
+};
 
 /*************************************************************************/
 
-#endif /* EVENT_6502_H__ */
+#endif /* ASM_THREAD_H__ */
 
 /*************************************************************************/

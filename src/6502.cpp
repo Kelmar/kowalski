@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502Doc.h"
 #include "6502View.h"
 
+#include "Events.h"
+
 //#include "ChildFrm.h"
 //#include "ChildFrmDeAsm.h"
 //#include "Deasm6502Doc.h"
@@ -126,6 +128,17 @@ bool C6502App::InitFrame()
     wxLog::SetActiveTarget(m_logFrame);
 
     return true;
+}
+
+// This is always the first to handle an event!
+int C6502App::FilterEvent(wxEvent &event)
+{
+    if (event.GetId() == evTHD_ASM_COMPLETE)
+    {
+        wxLogDebug("Got thread event!");
+    }
+
+    return wxApp::FilterEvent(event);
 }
 
 #if 0
@@ -246,6 +259,39 @@ BOOL C6502App::InitInstance()
 }
 
 #endif /* 0 */
+
+bool C6502App::OnExceptionInMainLoop()
+{
+    std::string error;
+    bool terminate = true;
+
+    try
+    {
+        throw;
+    }
+    catch (const FileError &ex)
+    {
+        error = ex.what();
+        terminate = false;
+    }
+    catch (const std::exception &ex)
+    {
+        error = ex.what();
+    }
+    catch (...)
+    {
+        error = _("UNKNOWN ERROR");
+    }
+
+    wxString errMsg = _("ERROR: ") + error;
+
+    if (terminate)
+        errMsg += _("\r\n\r\nThe application will now terminate.");
+
+    wxLogError(errMsg);
+
+    return !terminate;
+}
 
 void C6502App::AddToRecentFileList(const std::string &pathName)
 {

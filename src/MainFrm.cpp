@@ -494,6 +494,7 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
     : MAIN_BASE(docManager, nullptr, wxID_ANY, _(""), wxDefaultPosition, wxDefaultSize)
     , m_auiManager()
     , m_docManager(docManager)
+    , m_asmThread()
 {
     m_auiManager.SetManagedWindow(this);
 
@@ -559,6 +560,8 @@ CMainFrame::~CMainFrame()
 
 void CMainFrame::BindEvents()
 {
+    Bind(wxEVT_THREAD, &CMainFrame::OnAsmComplete, this, evTHD_ASM_COMPLETE);
+
     // Bind events after everything was created okay.
     Bind(wxEVT_MENU, &CMainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &CMainFrame::OnAssemble, this, evID_ASSEMBLE);
@@ -1125,6 +1128,9 @@ void CMainFrame::OnDestroy()
 
 void CMainFrame::OnAssemble(wxCommandEvent &)
 {
+    if (m_asmThread)
+        return; // Currently assembling code, wait for completion.
+
     CSrc6502View *pView = GetCurrentView();
 
     if (pView == nullptr)
@@ -1172,28 +1178,57 @@ void CMainFrame::OnAssemble(wxCommandEvent &)
             throw FileError(FileError::CannotChangeDir);
     }
 
-    CAsm::Stat res;
+    wxCriticalSectionLocker enter(m_critSect);
 
-    // TODO: Prior version spun this off into a thread.
+    m_asmThread = new AsmThread(this, path);
 
-    try
+    if (m_asmThread->Create() != wxTHREAD_NO_ERROR)
     {
-        std::unique_ptr<CAsm6502> assembler(new CAsm6502(path.c_str()));
-
-        res = assembler->assemble();
-    }
-    catch (const std::exception &e)
-    {
-        wxLogError("ERROR: %s", e.what());
+        wxLogError("Can't create background thread!");
+        delete m_asmThread;
+        m_asmThread = nullptr;
         return;
     }
 
+    if (m_asmThread->Run() != wxTHREAD_NO_ERROR)
+    {
+        wxLogError("Can't start background thread!");
+        delete m_asmThread;
+        m_asmThread = nullptr;
+    }
+    else
+        wxLogStatus("Assembler started");
+}
+
+void CMainFrame::OnAsmComplete(wxThreadEvent &)
+{
+    wxLogDebug("OnAsmComplete() enter");
+
+    wxCriticalSectionLocker enter(m_critSect);
+
+    if (!m_asmThread)
+        return;
+
+    wxThread::ExitCode exit = m_asmThread->Wait();
+
+    //CAsm::Stat res = reinterpret_cast<CAsm::Stat>(exit);
+
+    delete m_asmThread;
+    m_asmThread = nullptr;
+
     // TODO: Give better output of what the assembler is doing.
 
-    if (res != CAsm::OK)
+    //if (res != CAsm::OK)
+    if (exit != nullptr)
+    {
+        wxLogStatus("Assembly failed");
         m_output->AppendText("Error from assembler!\r\n");
+    }
     else
+    {
+        wxLogStatus("Assembly completed");
         m_output->AppendText("Assemble OK\r\n");
+    }
 }
 
 void CMainFrame::OnUpdateAssemble(CCmdUI *pCmdUI)

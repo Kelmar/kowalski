@@ -38,10 +38,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "FlatBar.h"
 #include "DynamicHelp.h"
 
-#include "ConsoleFrm.h"
-
+class CMainFrame;
 class CSrc6502Doc;
 class CSrc6502View;
+
+#include "ConsoleFrm.h"
+#include "AsmThread.h"
 
 #if wxUSE_MDI_ARCHITECTURE
 # define MAIN_BASE wxDocMDIParentFrame
@@ -59,6 +61,12 @@ private:
 
     wxAuiManager m_auiManager;
     wxDocManager *m_docManager;
+
+    wxCriticalSection m_critSect;
+
+    wxSemaphore m_semaphore;
+
+    AsmThread* m_asmThread;
 
     // TODO: Move into a project document
     static std::string ProjName;
@@ -196,8 +204,6 @@ protected:
     afx_msg void OnHelpDynamic();
     afx_msg void OnUpdateHelpDynamic(CCmdUI* pCmdUI);
 
-    
-
     afx_msg void OnSymDebugStop();
     afx_msg LRESULT OnStartDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebugger(WPARAM wParam, LPARAM lParam);
@@ -210,11 +216,15 @@ private: // Event handlers
     void OnAbout(wxCommandEvent &);
 
     void OnAssemble(wxCommandEvent &);
-
+    
 private: // UI Updaters
     void OnUpdateShowLog(wxUpdateUIEvent &);
+
+private: // Thread events
+    void OnAsmComplete(wxThreadEvent &);
     
 private:
+
     void EnableDockingEx(uint32_t dwDockStyle);
     static const uint32_t dwDockBarMapEx[4][2];
 

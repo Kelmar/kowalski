@@ -22,38 +22,26 @@
  */
 /*************************************************************************/
 
-#ifndef EVENT_6502_H__
-#define EVENT_6502_H__
-
-/*************************************************************************/
-
 #include "StdAfx.h"
+#include "Events.h"
+#include "MainFrm.h"
+#include "M6502.h"
 
-// List of application defined events.
-wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
-wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_SHOW_LOG, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_REGS, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
-
-wxDECLARE_EVENT(evID_ASSEMBLE, wxCommandEvent);
-wxDECLARE_EVENT(evID_DEBUG, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN, wxCommandEvent);
-wxDECLARE_EVENT(evID_RESET, wxCommandEvent);
-wxDECLARE_EVENT(evID_BREAK, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_INTO, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
-
-//wxDECLARE_EVENT(evTHD_ASM_COMPLETE, wxThreadEvent);
-
-static const int evTHD_ASM_COMPLETE = wxID_HIGHEST + 1;
+#include "AsmThread.h"
 
 /*************************************************************************/
 
-#endif /* EVENT_6502_H__ */
+wxThread::ExitCode AsmThread::Entry()
+{
+    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str()));
+
+    CAsm::Stat res = assembler->assemble();
+
+    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
+
+    wxQueueEvent(m_mainFrm, event.Clone());
+
+    return reinterpret_cast<wxThread::ExitCode>(res);
+}
 
 /*************************************************************************/

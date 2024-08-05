@@ -94,7 +94,9 @@ private:
 
         default:
             ASSERT(false);
-            rval = _("Unknown error code:");
+            rval = _("Unknown error code: ");
+            rval += (int)error;
+
             includeSysError = true;
             break;
         }
