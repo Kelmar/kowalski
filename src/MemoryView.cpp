@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "MemoryView.h"
 #include "MemoryGoto.h"
+#include "MemoryChg.h"
 
 wxFont CMemoryView::m_Font;
 wxFontInfo CMemoryView::m_LogFont;
@@ -760,7 +761,7 @@ void CMemoryView::OnUpdateMemoryChg(CCmdUI *pCmdUI)
 #endif
 }
 
-#include "MemoryChg.h"
+
 
 void CMemoryView::OnMemoryChg()
 {

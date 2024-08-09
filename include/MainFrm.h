@@ -45,11 +45,7 @@ class CSrc6502View;
 #include "ConsoleFrm.h"
 #include "AsmThread.h"
 
-#if wxUSE_MDI_ARCHITECTURE
-# define MAIN_BASE wxDocMDIParentFrame
-#else
-# define MAIN_BASE wxDocParentFrameAny<wxAuiMDIParentFrame>
-#endif
+#include "mdi65.h"
 
 class CMainFrame : public MAIN_BASE
 {
@@ -213,6 +209,8 @@ private: // Event handlers
     void OnExit(wxCommandEvent &);
     void OnShowOutput(wxCommandEvent &);
     void OnShowLog(wxCommandEvent &);
+    void OnShowTest(wxCommandEvent &);
+
     void OnAbout(wxCommandEvent &);
 
     void OnAssemble(wxCommandEvent &);

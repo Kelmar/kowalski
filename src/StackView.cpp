@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "StackView.h"
 #include "MemoryGoto.h"
+#include "MemoryChg.h"
 
 wxFont CStackView::m_Font;
 wxFontInfo CStackView::m_LogFont;
@@ -654,7 +655,7 @@ void CStackView::OnUpdateMemoryChg(CCmdUI* pCmdUI)
 #endif
 }
 
-#include "MemoryChg.h"
+
 
 void CStackView::OnMemoryChg()
 {

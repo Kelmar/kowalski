@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "MainFrm.h"
 #include "ProjectManager.h"
 
+#include "ChildFrm.h"
+
 #include "DialAsmStat.h"
 #include "Options.h"
 #include "DialEditBrkp.h"
@@ -565,8 +567,11 @@ void CMainFrame::BindEvents()
     // Bind events after everything was created okay.
     Bind(wxEVT_MENU, &CMainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &CMainFrame::OnAssemble, this, evID_ASSEMBLE);
+
     Bind(wxEVT_MENU, &CMainFrame::OnShowOutput, this, evID_SHOW_OUTPUT);
     Bind(wxEVT_MENU, &CMainFrame::OnShowLog, this, evID_SHOW_LOG);
+    Bind(wxEVT_MENU, &CMainFrame::OnShowTest, this, evID_SHOW_TEST);
+
     Bind(wxEVT_MENU, &CMainFrame::OnAbout, this, wxID_ABOUT);
 
     Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateShowLog, this, evID_SHOW_LOG);
@@ -596,6 +601,12 @@ void CMainFrame::OnShowLog(wxCommandEvent &)
     auto logFrame = wxGetApp().logFrame()->GetFrame();
 
     logFrame->Show(!logFrame->IsVisible());
+}
+
+void CMainFrame::OnShowTest(wxCommandEvent &)
+{
+    auto child = new CChildFrame(this, wxID_ANY, "Test Window");
+    child->Show();
 }
 
 /*************************************************************************/
@@ -711,6 +722,7 @@ void CMainFrame::InitMenu()
     view->AppendSeparator();
     view->Append(evID_SHOW_REGS, _("Registers\tAlt+1"));
     view->Append(evID_SHOW_OUTPUT, _("&Output\tAlt+2"));
+    view->Append(evID_SHOW_TEST, _("Test Window"));
 
     wxMenu *sim = new wxMenu();
     sim->Append(evID_ASSEMBLE, _("Assemble\tF7"));

@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "ZeroPageView.h"
 #include "MemoryGoto.h"
+#include "MemoryChg.h"
 
 wxFont CZeroPageView::m_Font;
 wxFontInfo CZeroPageView::m_LogFont;
@@ -656,7 +657,7 @@ void CZeroPageView::OnUpdateMemoryChg(CCmdUI* pCmdUI)
 #endif
 }
 
-#include "MemoryChg.h"
+
 
 void CZeroPageView::OnMemoryChg()
 {

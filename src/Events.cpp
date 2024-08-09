@@ -36,6 +36,7 @@ wxDEFINE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_LOG, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_REGS, wxCommandEvent);
+wxDEFINE_EVENT(evID_SHOW_TEST, wxCommandEvent);
 
 wxDEFINE_EVENT(evID_ASSEMBLE, wxCommandEvent);
 wxDEFINE_EVENT(evID_DEBUG, wxCommandEvent);

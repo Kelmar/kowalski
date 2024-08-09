@@ -25,12 +25,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef CHILD_FRAME_H__
 #define CHILD_FRAME_H__
 
-class CChildFrame : public wxMDIChildFrame //CMDIChildWnd
+#include "mdi65.h"
+#include "HexView.h"
+
+class CChildFrame : public CHILD_BASE
 {
+private:
+    HexView *m_hexView;
+    uint8_t m_data[1024 * 64]; // Dummy data
+
 public:
     //CSplitterWnd m_wndSplitter;
 
-    /* constructor */ CChildFrame();
+    /* constructor */ CChildFrame(MAIN_BASE *parent, wxWindowID id, const wxString &title);
     virtual          ~CChildFrame() { }
 
 protected:
