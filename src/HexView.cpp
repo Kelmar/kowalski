@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+ /*************************************************************************/
 
 #include "StdAfx.h"
 #include "HexView.h"
@@ -28,25 +28,35 @@
 /*************************************************************************/
 
 HexView::HexView()
-    : wxControl()
+    : wxScrolled()
     , m_span()
-    , m_groupBy(0)
+    , m_fontSize(0, 0)
+    , m_virtualSize(0, 0)
     , m_pageSize(0)
-    , m_fontDirty(false)
+    , m_fontDirty(true)
     , m_digitFont(nullptr)
 {
     LoadFonts();
+    SetBackgroundColour(*wxWHITE);
+    UpdateScrollInfo();
+
+    Bind(wxEVT_PAINT, &HexView::OnPaint, this);
 }
 
-HexView::HexView(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style, const wxString &name)
-    : wxControl(parent, id, pos, size, style, wxDefaultValidator, name)
+HexView::HexView(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name)
+    : wxScrolled(parent, id, pos, size, wxVSCROLL, name)
     , m_span()
-    , m_groupBy(0)
+    , m_fontSize(0, 0)
+    , m_virtualSize(0, 0)
     , m_pageSize(0)
-    , m_fontDirty(false)
+    , m_fontDirty(true)
     , m_digitFont(nullptr)
 {
     LoadFonts();
+    SetBackgroundColour(*wxWHITE);
+    UpdateScrollInfo();
+
+    Bind(wxEVT_PAINT, &HexView::OnPaint, this);
 }
 
 HexView::~HexView()
@@ -54,53 +64,57 @@ HexView::~HexView()
     delete m_digitFont;
 }
 
-wxIMPLEMENT_DYNAMIC_CLASS(HexView, wxControl);
-
 /*************************************************************************/
 
-wxBEGIN_EVENT_TABLE(HexView, wxControl)
-    EVT_PAINT(HexView::OnPaint)
-wxEND_EVENT_TABLE()
-
-/*************************************************************************/
-
-int HexView::GetLineCount() const
+void HexView::CalculateScrollInfo()
 {
-    if (m_span.empty())
-        return 0; // Memory not set, no lines
+    LoadFonts();
 
     size_t sz = m_span.size();
-    int groups = m_groupBy; // Assume fixed width of bytes
-    int lines;
 
-    if (groups == 0)
-    {
-        // Attempt to fill as much of the control's client area as possible
-        wxRect rect = GetClientRect();
+    if (sz == 0)
+        m_virtualSize.Set(0, 0);
 
-        // TODO: We need three sections, the address, the data and then the character display.
-
-        //wxSize fontSz = m_digitFont->GetPixelSize();
-
-        // Faking a font width for now
-
-        groups = rect.width / 8; // fontSz.GetWidth();
-    }
-
-    lines = sz / groups;
-    lines += ((sz % groups) != 0 ? 1 : 0);
+    // Compute the virtual height.
+    int lines = sz / LINE_WIDTH;
+    lines += ((sz % LINE_WIDTH) != 0 ? 1 : 0);
 
     if (m_pageSize > 0)
-        lines += (sz / m_pageSize); // Add lines for page boundary markers.
+        lines += (sz / m_pageSize);
 
-    return lines;
+    // Compute the virtual width.
+
+    // Compute the number of characters in a line
+    wxString txt;
+
+    int width = m_span.size() - 1;
+    width = txt.Printf("%X", width);
+
+    width += 3; // Buffer between address and digits
+    width += (3 * LINE_WIDTH); // Each hex digit
+    width += 3; // Buffer between hex digits and characters
+    width += LINE_WIDTH;
+
+    m_virtualSize.Set(width * m_fontSize.GetWidth(), lines * m_fontSize.GetHeight());
+}
+
+/*************************************************************************/
+
+void HexView::UpdateScrollInfo()
+{
+    CalculateScrollInfo();
+
+    SetScrollRate(0, m_fontSize.GetHeight());
+    SetVirtualSize(m_virtualSize.GetWidth(), m_virtualSize.GetHeight());
+
+    Refresh();
 }
 
 /*************************************************************************/
 
 void HexView::LoadFonts()
 {
-    if (m_digitFont && !m_fontDirty)
+    if (!m_fontDirty)
         return;
 
     wxFontInfo info;
@@ -110,6 +124,14 @@ void HexView::LoadFonts()
 
     delete m_digitFont;
     m_digitFont = new wxFont(info);
+
+    // Premeasure font.
+    wxMemoryDC dc;
+    dc.SetFont(*m_digitFont);
+
+    m_fontSize = dc.GetTextExtent(" ");
+
+    m_fontDirty = false;
 }
 
 /*************************************************************************/
@@ -132,8 +154,9 @@ std::string HexView::GetAddressFormat() const
 
 void HexView::OnPaint(wxPaintEvent &)
 {
-    wxClientDC dc(this);
+    wxPaintDC dc(this);
     LoadFonts();
+    PrepareDC(dc);
     Draw(dc);
 }
 
@@ -141,26 +164,24 @@ void HexView::Draw(wxDC &dc)
 {
     wxRect rect = GetClientRect();
 
-    wxColor c("white");
-
-    dc.FloodFill(wxPoint(0, 0), c);
     dc.SetFont(*m_digitFont);
-
-    //int lines = GetLineCount();
-
-    wxSize fontSz = m_digitFont->GetPixelSize();
 
     wxCoord x;
     wxCoord y;
 
     dc.GetTextExtent(" ", &x, &y);
 
-    fontSz.SetWidth(x);
+    int start;
+    GetViewStart(nullptr, &start); // Returns in logical units, not pixels.
 
-    uint32_t addr = 0;
+    // Get the starting offset from within memory we should draw at.
+    uint32_t addr = start * LINE_WIDTH;
     wxString addrFmt = GetAddressFormat();
     wxString charDisp;
     wxString txt;
+
+    // Figure out the virtual y offset to start drawing at.
+    int y_off = start *m_fontSize.GetHeight();
 
     x = 0;
     y = 0;
@@ -168,11 +189,12 @@ void HexView::Draw(wxDC &dc)
     for (int l = 0; y < rect.GetHeight() && addr < m_span.size(); ++l)
     {
         int w = txt.Printf(addrFmt, addr);
-        dc.DrawText(txt, x, y);
-        x += w * fontSz.GetWidth();
+
+        dc.DrawText(txt, x, y + y_off);
+        x += w * m_fontSize.GetWidth();
 
         // Add gap for line
-        x += 2 * fontSz.GetWidth();
+        x += 2 * m_fontSize.GetWidth();
 
         charDisp = "";
 
@@ -184,10 +206,12 @@ void HexView::Draw(wxDC &dc)
 
             if (val < 32)
                 charDisp += ".";
-            else if (val < 128)
+            else if (val < 127)
                 charDisp += (char)val;
             else
             {
+                // Char 127 is non-printing delete character in UTF-8
+
                 // TODO: Handle other character maps
                 //charDisp += (char)val;
                 charDisp += ".";
@@ -195,30 +219,30 @@ void HexView::Draw(wxDC &dc)
 
             w = txt.Printf("%02X ", val);
 
-            dc.DrawText(txt, x, y);
-            x += w * fontSz.GetWidth();
+            dc.DrawText(txt, x, y + y_off);
+            x += w * m_fontSize.GetWidth();
         }
 
         // Add gap for line
-        x += 2 * fontSz.GetWidth();
+        x += 2 * m_fontSize.GetWidth();
 
-        dc.DrawText(charDisp, x, y);
+        dc.DrawText(charDisp, x, y + y_off);
 
-        y += fontSz.GetHeight();
+        y += m_fontSize.GetHeight();
         x = 0;
     }
 
     // Find location of first line
 
     int w = txt.Printf(addrFmt, 0);
-    x = (int)((w + 0.5) * fontSz.GetWidth());
+    x = (int)((w + 0.5) * m_fontSize.GetWidth());
 
-    dc.DrawLine(x, 0, x, rect.GetHeight());
+    dc.DrawLine(x, y_off, x, rect.GetHeight() + y_off);
 
     // Find location of second line
-    x += (int)(fontSz.GetWidth() * ((16 * 3) + 2));
+    x += (int)(m_fontSize.GetWidth() * ((16 * 3) + 2));
 
-    dc.DrawLine(x, 0, x, rect.GetHeight());
+    dc.DrawLine(x, y_off, x, rect.GetHeight() + y_off);
 }
 
 /*************************************************************************/

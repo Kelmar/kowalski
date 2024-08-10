@@ -27,21 +27,25 @@
 
 /*************************************************************************/
 
-class HexView : public wxControl
+class HexView : public wxScrolled<wxWindow>
 {
 private:
     static const int LINE_WIDTH = 16;
 
+    /**
+     * @brief View into memory to dump.
+     */
     std::span<uint8_t> m_span;
 
     /**
-     * @brief Defines how bytes should be grouped in the display.
-     * 
-     * @remarks This defines the number of bytes per line shown.
-     * If left to 0, then the control will attempt to fit as many
-     * bytes as it can within it's client area.
+     * @brief Set to the size of a single character cell in our control.
      */
-    unsigned int m_groupBy;
+    wxSize m_fontSize;
+
+    /**
+     * @brief The overall "virtual" size of our control.
+     */
+    wxSize m_virtualSize;
 
     /**
      * @brief Defines how memory page boundaries should shown.
@@ -51,44 +55,6 @@ private:
      */
     unsigned int m_pageSize;
 
-public:
-    /* constructor */ HexView();
-
-    /* constructor */ HexView(wxWindow *parent, wxWindowID id,
-        const wxPoint &pos = wxDefaultPosition,
-        const wxSize &size = wxDefaultSize,
-        long sytle = 0,
-        const wxString &name = wxControlNameStr);
-
-    virtual ~HexView();
-
-    std::span<uint8_t> GetSpan(void) const { return m_span; }
-
-    void SetSpan(const std::span<uint8_t> &span)
-    {
-        m_span = span;
-        Refresh();
-    }
-
-    unsigned int GetGroupBy(void) const { return m_groupBy; }
-
-    void SetGroupBy(unsigned int groupBy)
-    {
-        m_groupBy = groupBy;
-        Refresh();
-    }
-
-    unsigned int GetPageSize(void) const { return m_pageSize; }
-
-    void SetPageSize(unsigned int pageSize)
-    {
-        m_pageSize = pageSize;
-        Refresh();
-    }
-
-    int GetLineCount() const;
-
-protected:
     bool m_fontDirty; //< Flag indicating a change in font settings.
 
     wxFont *m_digitFont; //< Font for drawing Hexidecimal digits.
@@ -99,11 +65,36 @@ protected:
 
     void Draw(wxDC &dc);
 
+    void CalculateScrollInfo();
+    void UpdateScrollInfo();
+
     void LoadFonts();
 
-private:
-    wxDECLARE_DYNAMIC_CLASS(HexView);
-    wxDECLARE_EVENT_TABLE();
+public:
+    /* constructor */ HexView();
+
+    /* constructor */ HexView(wxWindow *parent, wxWindowID id,
+        const wxPoint &pos = wxDefaultPosition,
+        const wxSize &size = wxDefaultSize,
+        const wxString &name = wxControlNameStr);
+
+    virtual ~HexView();
+
+    std::span<uint8_t> GetSpan(void) const { return m_span; }
+
+    void SetSpan(const std::span<uint8_t> &span)
+    {
+        m_span = span;
+        UpdateScrollInfo();
+    }
+
+    unsigned int GetPageSize(void) const { return m_pageSize; }
+
+    void SetPageSize(unsigned int pageSize)
+    {
+        m_pageSize = pageSize;
+        UpdateScrollInfo();
+    }
 };
 
 /*************************************************************************/
