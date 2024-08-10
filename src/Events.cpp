@@ -28,16 +28,19 @@
 
 /*************************************************************************/
 
-// List of application defined events.
+// File menu events
 wxDEFINE_EVENT(evID_LOAD_CODE, wxCommandEvent);
 wxDEFINE_EVENT(evID_SAVE_CODE, wxCommandEvent);
 
+// View menu events
 wxDEFINE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_LOG, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_REGS, wxCommandEvent);
+wxDEFINE_EVENT(evID_SHOW_MEMORY, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_TEST, wxCommandEvent);
 
+// Simulator menu events
 wxDEFINE_EVENT(evID_ASSEMBLE, wxCommandEvent);
 wxDEFINE_EVENT(evID_DEBUG, wxCommandEvent);
 wxDEFINE_EVENT(evID_RUN, wxCommandEvent);

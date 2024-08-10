@@ -535,17 +535,30 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
     m_output = new ConsoleFrame(this);
     m_output->AppendText("This is a test.\r\n");
 
-    m_outputInfo
+    wxAuiPaneInfo outputInfo;
+    outputInfo
         .Name("output").Caption(_("Output"))
         .Bottom().Layer(1).Position(1)
         .Floatable().CloseButton()
         //.PinButton()
     ;
 
-    m_auiManager.AddPane(m_output, m_outputInfo);
+    m_memory = new MemoryFrame(this);
+
+    wxAuiPaneInfo memoryInfo;
+    memoryInfo
+        .Name("memory").Caption(_("6502 Memory"))
+        .Left().Layer(1).Position(1)
+        .Floatable().CloseButton()
+        //.PinButton()
+    ;
+
+    m_auiManager.AddPane(m_output, outputInfo);
+    m_auiManager.AddPane(m_memory, memoryInfo);
 
     m_auiManager.Update();
     m_output->Update();
+    m_memory->Update();
 }
 
 CMainFrame::~CMainFrame()
@@ -560,21 +573,36 @@ CMainFrame::~CMainFrame()
 
 /*************************************************************************/
 
+void CMainFrame::BindPaneToggle(int id, const wxString &name)
+{
+    Bind(wxEVT_MENU, [this, name] (wxCommandEvent &) { this->OnTogglePane(name); }, id);
+}
+
+/*************************************************************************/
+
 void CMainFrame::BindEvents()
 {
-    Bind(wxEVT_THREAD, &CMainFrame::OnAsmComplete, this, evTHD_ASM_COMPLETE);
-
-    // Bind events after everything was created okay.
+    // File menu bindings
     Bind(wxEVT_MENU, &CMainFrame::OnExit, this, wxID_EXIT);
-    Bind(wxEVT_MENU, &CMainFrame::OnAssemble, this, evID_ASSEMBLE);
 
-    Bind(wxEVT_MENU, &CMainFrame::OnShowOutput, this, evID_SHOW_OUTPUT);
+    // View menu bindings
+    BindPaneToggle(evID_SHOW_MEMORY, "memory");
+    BindPaneToggle(evID_SHOW_OUTPUT, "output");
+
     Bind(wxEVT_MENU, &CMainFrame::OnShowLog, this, evID_SHOW_LOG);
     Bind(wxEVT_MENU, &CMainFrame::OnShowTest, this, evID_SHOW_TEST);
 
+    // Simulator menu bindings
+    Bind(wxEVT_MENU, &CMainFrame::OnAssemble, this, evID_ASSEMBLE);
+
+    // Help menu bindings
     Bind(wxEVT_MENU, &CMainFrame::OnAbout, this, wxID_ABOUT);
 
+    // UI update bindings
     Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateShowLog, this, evID_SHOW_LOG);
+
+    // Thread event bindings
+    Bind(wxEVT_THREAD, &CMainFrame::OnAsmComplete, this, evTHD_ASM_COMPLETE);
 }
 
 /*************************************************************************/
@@ -588,10 +616,16 @@ void CMainFrame::OnExit(wxCommandEvent &)
 
 /*************************************************************************/
 
-void CMainFrame::OnShowOutput(wxCommandEvent &)
+void CMainFrame::OnTogglePane(const wxString &name)
 {
-    //m_output->Show(!m_output->IsVisible());
-    //m_outputInfo.Show(!m_outputInfo.IsShown());
+    wxAuiPaneInfo &info = m_auiManager.GetPane(name);
+
+    ASSERT(info.IsValid());
+
+    bool isShown = info.IsShown();
+    info.Show(!isShown);
+
+    m_auiManager.Update();
 }
 
 /*************************************************************************/
@@ -715,15 +749,18 @@ void CMainFrame::InitMenu()
     edit->Append(wxID_COPY);
     edit->Append(wxID_PASTE);
 
+    // View Menu
     wxMenu *view = new wxMenu();
     view->AppendCheckItem(evID_SHOW_LOG, _("Log"));
     view->Append(evID_SHOW_DISASM, _("Disassembler\tAlt+0"));
     
     view->AppendSeparator();
     view->Append(evID_SHOW_REGS, _("Registers\tAlt+1"));
-    view->Append(evID_SHOW_OUTPUT, _("&Output\tAlt+2"));
+    view->Append(evID_SHOW_MEMORY, _("&Memory\tAlt+2"));
+    view->Append(evID_SHOW_OUTPUT, _("&Output"));
     view->Append(evID_SHOW_TEST, _("Test Window"));
 
+    // Simulator Menu
     wxMenu *sim = new wxMenu();
     sim->Append(evID_ASSEMBLE, _("Assemble\tF7"));
     sim->AppendSeparator();

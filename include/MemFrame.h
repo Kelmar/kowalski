@@ -22,40 +22,27 @@
  */
 /*************************************************************************/
 
-#ifndef EVENT_6502_H__
-#define EVENT_6502_H__
+#ifndef MEMORY_FRAME_H__
+#define MEMORY_FRAME_H__
 
 /*************************************************************************/
 
-#include "StdAfx.h"
-
-// File menu events
-wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
-wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
-
-// View menu events
-wxDECLARE_EVENT(evID_SHOW_LOG, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_REGS, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_MEMORY, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
-wxDECLARE_EVENT(evID_SHOW_TEST, wxCommandEvent);
-
-// Simulator menu events
-wxDECLARE_EVENT(evID_ASSEMBLE, wxCommandEvent);
-wxDECLARE_EVENT(evID_DEBUG, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN, wxCommandEvent);
-wxDECLARE_EVENT(evID_RESET, wxCommandEvent);
-wxDECLARE_EVENT(evID_BREAK, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_INTO, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
-wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
-wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
-
-static const int evTHD_ASM_COMPLETE = wxID_HIGHEST + 1;
+#include "HexView.h"
 
 /*************************************************************************/
 
-#endif /* EVENT_6502_H__ */
+class MemoryFrame : public wxPanel
+{
+private:
+    HexView *m_hexView;
+
+public:
+    MemoryFrame(wxWindow *parent);
+    virtual ~MemoryFrame();
+};
+
+/*************************************************************************/
+
+#endif /* MEMORY_FRAME_H__ */
 
 /*************************************************************************/

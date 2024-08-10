@@ -38,6 +38,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "FlatBar.h"
 #include "DynamicHelp.h"
 
+#include "MemFrame.h"
+
 class CMainFrame;
 class CSrc6502Doc;
 class CSrc6502View;
@@ -53,7 +55,8 @@ private:
     static constexpr char REG_ENTRY_MAINFRM[] = "MainFrame";
 
     ConsoleFrame *m_output;
-    wxAuiPaneInfo m_outputInfo;
+
+    MemoryFrame *m_memory;
 
     wxAuiManager m_auiManager;
     wxDocManager *m_docManager;
@@ -86,6 +89,8 @@ private:
     // Control setup
     void InitMenu();
     void BindEvents();
+
+    void BindPaneToggle(int id, const wxString &name);
 
 public:
     /* constructor */ CMainFrame(wxDocManager *docManager);
@@ -206,8 +211,12 @@ protected:
     afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
 
 private: // Event handlers
+    // File menu events
     void OnExit(wxCommandEvent &);
-    void OnShowOutput(wxCommandEvent &);
+
+    // View menu events
+    void OnTogglePane(const wxString &name);
+
     void OnShowLog(wxCommandEvent &);
     void OnShowTest(wxCommandEvent &);
 
