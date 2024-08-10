@@ -37,13 +37,10 @@ HexView::HexView()
     , m_pageSize(0)
     , m_fontDirty(true)
     , m_digitFont(nullptr)
+    , m_selStart(0)
+    , m_selLen(0)
 {
-    LoadFonts();
-    SetBackgroundStyle(wxBG_STYLE_PAINT);
-    SetBackgroundColour(*wxWHITE);
-    UpdateScrollInfo();
-
-    Bind(wxEVT_PAINT, &HexView::OnPaint, this);
+    Init();
 }
 
 HexView::HexView(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name)
@@ -54,18 +51,33 @@ HexView::HexView(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSi
     , m_pageSize(0)
     , m_fontDirty(true)
     , m_digitFont(nullptr)
+    , m_selStart(0)
+    , m_selLen(0)
 {
-    LoadFonts();
-    SetBackgroundStyle(wxBG_STYLE_PAINT);
-    SetBackgroundColour(*wxWHITE);    
-    UpdateScrollInfo();
-
-    Bind(wxEVT_PAINT, &HexView::OnPaint, this);
+    Init();
 }
 
 HexView::~HexView()
 {
     delete m_digitFont;
+}
+
+/*************************************************************************/
+
+void HexView::Init()
+{
+    LoadFonts();
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
+    SetBackgroundColour(*wxWHITE);
+
+    wxColor winColor = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+    SetBackgroundColour(winColor);
+
+    UpdateScrollInfo();
+
+    Bind(wxEVT_PAINT, &HexView::OnPaint, this);
+    Bind(wxEVT_LEFT_DOWN, &HexView::OnMouseDown, this);
+    Bind(wxEVT_LEFT_UP, &HexView::OnMouseUp, this);
 }
 
 /*************************************************************************/
@@ -107,6 +119,7 @@ void HexView::CalculateScrollInfo()
 void HexView::UpdateScrollInfo()
 {
     CalculateScrollInfo();
+    CalcAddressFormat();
 
     SetScrollRate(0, m_fontSize.GetHeight());
     SetVirtualSize(m_virtualSize.GetWidth(), m_virtualSize.GetHeight());
@@ -140,18 +153,110 @@ void HexView::LoadFonts()
 
 /*************************************************************************/
 
-std::string HexView::GetAddressFormat() const
+int HexView::CalcAddressChars() const
+{
+    wxString txt;
+
+    // Compute the number of digits in the address
+    int sz = m_span.size() - 1;
+    return txt.Printf("%X", sz);
+}
+
+/*************************************************************************/
+
+void HexView::CalcAddressFormat()
 {
     std::stringstream out;
     wxString txt;
 
     // Compute the number of digits in the address
-    int sz = m_span.size() - 1;
-    sz = txt.Printf("%X", sz);
+    int sz = CalcAddressChars();
 
     // Build the format string
     out << "%0" << sz << "X ";
-    return out.str();
+    m_addrFmt = out.str();
+}
+
+/*************************************************************************/
+
+wxPoint HexView::GetHitCell(const wxPoint &p) const
+{
+    int row = p.y / m_fontSize.GetHeight();
+
+    int leftMargin = CalcAddressChars() + 3;
+    leftMargin *= m_fontSize.GetWidth();
+
+    int rightMargin = leftMargin + LINE_WIDTH * 3 * m_fontSize.GetWidth();
+
+    if ((p.x < leftMargin) || (p.x >= rightMargin))
+        return wxPoint(-1, row); // Clicked in margin
+
+    int col = ((p.x - leftMargin) / 3) / m_fontSize.GetWidth();
+
+    return wxPoint(col, row);
+}
+
+/*************************************************************************/
+
+void HexView::OnMouseDown(wxMouseEvent &e)
+{
+    //OutputDebugStringA("Down\r\n");
+
+    UNUSED(e);
+
+    auto where = e.GetPosition();
+    where = this->CalcUnscrolledPosition(where);
+    m_mouseDn = GetHitCell(where);
+
+    if ((m_mouseDn.x < 0) || (m_mouseDn.y < 0))
+        return;
+
+    CaptureMouse();
+}
+
+/*************************************************************************/
+
+void HexView::OnMouseUp(wxMouseEvent &e)
+{
+    if (HasCapture())
+        ReleaseMouse(); // Ensure mouse is always released.
+
+    if ((m_mouseDn.x < 0) || (m_mouseDn.y < 0))
+    {
+        // Mouse down originated out of bounds.
+        m_selStart = 0;
+        m_selLen = 0;
+        Refresh();
+        return; 
+    }
+
+    auto where = e.GetPosition();
+    where = this->CalcUnscrolledPosition(where);
+    where = GetHitCell(where);
+
+    if ((where.x < 0) || (where.y < 0))
+    {
+        m_selStart = 0;
+        m_selLen = 0;
+    }
+    else
+    {
+        int downPos = CalcAddressFromCell(m_mouseDn);;
+        int upPos = CalcAddressFromCell(where);
+
+        if (downPos > upPos)
+        {
+            m_selStart = upPos;
+            m_selLen = (downPos - upPos) + 1;
+        }
+        else
+        {
+            m_selStart = downPos;
+            m_selLen = (upPos - downPos) + 1;
+        }
+    }
+
+    Refresh();
 }
 
 /*************************************************************************/
@@ -167,6 +272,8 @@ void HexView::OnPaint(wxPaintEvent &)
 
 void HexView::Draw(wxDC &dc)
 {
+    wxDCTextColourChanger txtColor(dc);
+
     wxRect rect = GetClientRect();
 
     dc.SetBackground(*wxWHITE_BRUSH);
@@ -184,7 +291,6 @@ void HexView::Draw(wxDC &dc)
 
     // Get the starting offset from within memory we should draw at.
     uint32_t addr = start * LINE_WIDTH;
-    wxString addrFmt = GetAddressFormat();
     wxString charDisp;
     wxString txt;
 
@@ -194,9 +300,25 @@ void HexView::Draw(wxDC &dc)
     x = 0;
     y = 0;
 
+    wxColor fontClr = wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_WINDOWTEXT);
+    wxColor selClr = wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_HIGHLIGHTTEXT);
+    wxColor winBg = wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_WINDOW);
+    wxColor highBg = wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_HIGHLIGHT);
+
+    wxBrush winBrush(winBg);
+    wxBrush highBrush(highBg);
+
+    dc.SetPen(*wxTRANSPARENT_PEN);
+    dc.SetBrush(winBrush);
+
+    dc.SetBackgroundMode(wxBRUSHSTYLE_TRANSPARENT);
+
+    const int CELL_WIDTH = m_fontSize.GetWidth() * 3;
+    const int HALF_CHAR = (m_fontSize.GetWidth() / 2);
+
     for (int l = 0; y < rect.GetHeight() && addr < m_span.size(); ++l)
     {
-        int w = txt.Printf(addrFmt, addr);
+        int w = txt.Printf(m_addrFmt, addr);
 
         dc.DrawText(txt, x, y + y_off);
         x += w * m_fontSize.GetWidth();
@@ -227,12 +349,31 @@ void HexView::Draw(wxDC &dc)
 
             w = txt.Printf("%02X ", val);
 
+            if (m_selLen > 0)
+            {
+                if ((addr >= m_selStart) && (addr < (m_selStart + m_selLen)))
+                {
+                    txtColor.Set(selClr);
+                    dc.SetBrush(highBrush);
+                }
+                else
+                {
+                    txtColor.Set(fontClr);
+                    dc.SetBrush(winBrush);
+                }
+
+                dc.DrawRectangle(x - HALF_CHAR, y + y_off, CELL_WIDTH, m_fontSize.GetHeight());
+            }
+
             dc.DrawText(txt, x, y + y_off);
             x += w * m_fontSize.GetWidth();
         }
 
         // Add gap for line
         x += 2 * m_fontSize.GetWidth();
+
+        txtColor.Set(fontClr);
+        dc.SetBrush(winBrush);
 
         dc.DrawText(charDisp, x, y + y_off);
 
@@ -242,7 +383,10 @@ void HexView::Draw(wxDC &dc)
 
     // Find location of first line
 
-    int w = txt.Printf(addrFmt, 0);
+    wxColor frameClr = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWFRAME);
+    dc.SetPen(wxPen(frameClr));
+
+    int w = txt.Printf(m_addrFmt, 0);
     x = (int)((w + 0.5) * m_fontSize.GetWidth());
 
     dc.DrawLine(x, y_off, x, rect.GetHeight() + y_off);

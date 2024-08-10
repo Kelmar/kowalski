@@ -59,8 +59,25 @@ private:
 
     wxFont *m_digitFont; //< Font for drawing Hexidecimal digits.
 
-    std::string GetAddressFormat() const;
+    uint32_t m_selStart;
+    uint32_t m_selLen;
 
+    wxPoint m_mouseDn; //< Save's where the mouse was first pressed down.
+    wxString m_addrFmt;
+
+    int CalcAddressChars() const;
+
+    void CalcAddressFormat();
+
+    int CalcAddressFromCell(wxPoint &p) const
+    {
+        return p.x + p.y * LINE_WIDTH;
+    }
+
+    wxPoint GetHitCell(const wxPoint &p) const;
+
+    void OnMouseDown(wxMouseEvent &);
+    void OnMouseUp(wxMouseEvent &);
     void OnPaint(wxPaintEvent &);
 
     void Draw(wxDC &dc);
@@ -69,6 +86,8 @@ private:
     void UpdateScrollInfo();
 
     void LoadFonts();
+
+    void Init();
 
 public:
     /* constructor */ HexView();
