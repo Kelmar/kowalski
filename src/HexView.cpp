@@ -23,6 +23,8 @@
  /*************************************************************************/
 
 #include "StdAfx.h"
+#include <wx/dcbuffer.h>
+
 #include "HexView.h"
 
 /*************************************************************************/
@@ -37,6 +39,7 @@ HexView::HexView()
     , m_digitFont(nullptr)
 {
     LoadFonts();
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
     SetBackgroundColour(*wxWHITE);
     UpdateScrollInfo();
 
@@ -53,7 +56,8 @@ HexView::HexView(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSi
     , m_digitFont(nullptr)
 {
     LoadFonts();
-    SetBackgroundColour(*wxWHITE);
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
+    SetBackgroundColour(*wxWHITE);    
     UpdateScrollInfo();
 
     Bind(wxEVT_PAINT, &HexView::OnPaint, this);
@@ -154,8 +158,9 @@ std::string HexView::GetAddressFormat() const
 
 void HexView::OnPaint(wxPaintEvent &)
 {
-    wxPaintDC dc(this);
+    wxAutoBufferedPaintDC dc(this);
     LoadFonts();
+
     PrepareDC(dc);
     Draw(dc);
 }
@@ -163,6 +168,9 @@ void HexView::OnPaint(wxPaintEvent &)
 void HexView::Draw(wxDC &dc)
 {
     wxRect rect = GetClientRect();
+
+    dc.SetBackground(*wxWHITE_BRUSH);
+    dc.Clear();
 
     dc.SetFont(*m_digitFont);
 
@@ -181,7 +189,7 @@ void HexView::Draw(wxDC &dc)
     wxString txt;
 
     // Figure out the virtual y offset to start drawing at.
-    int y_off = start *m_fontSize.GetHeight();
+    int y_off = start * m_fontSize.GetHeight();
 
     x = 0;
     y = 0;
