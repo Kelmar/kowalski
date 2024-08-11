@@ -78,7 +78,9 @@ bool C6502App::OnInit()
     SetAppName(APP_NAME);
 
     // Load up resources
+    //wxXmlResource::Get()->AddHandler(hexViewHandler);
     wxXmlResource::Get()->InitAllHandlers();
+    
 
     wxLogDebug("Loading resource file....");
     if (!wxXmlResource::Get()->Load("res6502.xrc"))

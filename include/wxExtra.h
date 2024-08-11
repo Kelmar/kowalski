@@ -42,7 +42,8 @@ public:
     typename std::enable_if<std::is_base_of_v<wxWindow, T>, T *>::type
     FindChild(const wxString &name)
     {
-        T *rval = dynamic_cast<T *>(m_self->FindWindow(name));
+        wxWindow *win = m_self->FindWindow(name);
+        T *rval = dynamic_cast<T *>(win);
         ASSERT(rval != nullptr);
         return rval;
     }

@@ -82,6 +82,17 @@ void HexView::Init()
 
 /*************************************************************************/
 
+void HexView::JumpTo(uint32_t address)
+{
+    if (address < m_span.size())
+    {
+        int line = address / LINE_WIDTH;
+        Scroll(-1, line);
+    }
+}
+
+/*************************************************************************/
+
 void HexView::CalculateScrollInfo()
 {
     LoadFonts();

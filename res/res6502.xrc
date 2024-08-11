@@ -118,4 +118,52 @@
       </object>
     </object>
   </object>
+  <object class="wxPanel" name="MemoryFrame">
+    <size>500,300</size>
+    <style>wxTAB_TRAVERSAL</style>
+    <object class="wxBoxSizer" name="m_mainSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxBoxSizer" name="m_topSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxStaticText" name="m_staticText3">
+              <label>Jump To:</label>
+              <wrap>-1</wrap>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+            <border>5</border>
+            <option>1</option>
+            <object class="wxComboBox" name="m_jumpEdit">
+              <style>wxTE_PROCESS_ENTER</style>
+              <value>Combo!</value>
+              <content/>
+            </object>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxBoxSizer" name="m_memSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+            <option>1</option>
+            <object class="unknown" name="m_hexView"/>
+          </object>
+        </object>
+      </object>
+    </object>
+  </object>
 </resource>

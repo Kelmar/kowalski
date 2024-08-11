@@ -25,18 +25,81 @@
 #include "StdAfx.h"
 
 #include "MemFrame.h"
+#include "FormatNums.h"
 
 /*************************************************************************/
 
 MemoryFrame::MemoryFrame(wxWindow *parent)
-    : wxPanel(parent)
+    : wxPanel()
+    , wxExtra(this)
     , m_hexView(nullptr)
 {
+    if (!wxXmlResource::Get()->LoadPanel(this, parent, "MemoryFrame"))
+        throw ResourceError();
+
+    m_jumpEdit = FindChild<wxComboBox>("m_jumpEdit");
+
     m_hexView = new HexView(this, wxID_ANY);
+
+    wxXmlResource::Get()->AttachUnknownControl("m_hexView", m_hexView);
+
+    m_hexView->SetSpan(m_dummy);
+
+    m_jumpEdit->SetValue("");
+
+    BindEvents();
 }
 
 MemoryFrame::~MemoryFrame()
 {
+}
+
+/*************************************************************************/
+
+void MemoryFrame::BindEvents()
+{
+    m_jumpEdit->Bind(wxEVT_TEXT_ENTER, &MemoryFrame::OnJumpTo, this);
+}
+
+/*************************************************************************/
+
+void MemoryFrame::OnJumpTo(wxCommandEvent &)
+{
+    std::string val = m_jumpEdit->GetValue().ToStdString();
+
+    val = val | str::toUpper;
+    uint32_t addr = CAsm::INVALID_ADDRESS;
+
+    // TODO: Needs adjusting for 65816
+
+    if ((val == "ZP") || (val == "ZEROPAGE"))
+    {
+        addr = 0;
+    }
+    else if ((val == "SP") || (val == "STACK") || (val == "STACKPOINTER"))
+    {
+        addr = 0x0100;
+    }
+    else
+    {
+        // Try to parse an actual address
+
+        uint32_t res;
+        NumberFormat status = NumberFormats::FromString(val, _Out_ res);
+
+        if (status != NumberFormat::Error)
+            addr = res;
+        else
+        {
+            wxLogStatus(_("Unknown address format in Jump To command."));
+        }
+    }
+
+    if (addr != CAsm::INVALID_ADDRESS)
+    {
+        m_hexView->JumpTo(addr);
+        m_jumpEdit->SetValue("");
+    }
 }
 
 /*************************************************************************/

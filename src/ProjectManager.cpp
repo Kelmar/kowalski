@@ -223,20 +223,10 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
         return;
     }
 
-    try
-    {
-        if (!codeTmp->read(path, &state))
-        {
-            wxLogDebug(_("User aborted load"));
-            return;
-        }
-    }
-    catch (const std::exception &ex)
-    {
-        std::string err(_("Error: "));
-        err += ex.what();
 
-        wxLogError(err.c_str());
+    if (!codeTmp->read(path, &state))
+    {
+        wxLogDebug(_("User aborted load"));
         return;
     }
 

@@ -99,6 +99,8 @@ public:
 
     virtual ~HexView();
 
+    void JumpTo(uint32_t address);
+
     std::span<uint8_t> GetSpan(void) const { return m_span; }
 
     void SetSpan(const std::span<uint8_t> &span)
