@@ -44,7 +44,7 @@ public:
     bool m_bFirstCodeLine; // Flag for reading the first line of the macro containing the instruction. 6502
 
     CMacroDef()
-        : param_names(2)
+        : param_names()
         , m_nParams(0)
         , m_nLineNo(0)
         , m_nFirstLineNo(-1)
@@ -63,12 +63,12 @@ public:
             return 1; // end of parameter list
         }
 
-        auto intr = param_names.find(strParam);
+        CIdent intr;
 
-        if (intr != param_names.end())
+        if (param_names.contains(strParam))
             return -1; // Repeated parameter name!
 
-        param_names[strParam] = CIdent(CIdent::I_VALUE, m_nParams);
+        param_names.set(strParam, CIdent(CIdent::I_VALUE, m_nParams));
 
         ++m_nParams;
         return 0;

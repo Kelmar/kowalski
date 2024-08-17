@@ -29,7 +29,7 @@
 /**
  * @brief Inserts or replaces a value.
  * 
- * @returns true if value was replaced.
+ * @returns true if value is new.
  */
 template <typename TKey, typename TItem>
 bool TryReplace(_In_ std::unordered_map<TKey, TItem> &map,
@@ -38,7 +38,7 @@ bool TryReplace(_In_ std::unordered_map<TKey, TItem> &map,
 {
     auto itr = map.find(key);
     map[key] = item;
-    return itr != map.end();
+    return itr == map.end();
 }
 
 template <typename TKey, typename TItem>

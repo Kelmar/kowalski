@@ -253,9 +253,92 @@ public:
     }
 };
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
-typedef std::unordered_map<std::string, CIdent> CIdentTable;
+class CIdentTable
+{
+private:
+    std::unordered_map<std::string, CIdent> m_map;
+
+public:
+    /* constructor */ CIdentTable() { }
+    virtual          ~CIdentTable() { }
+
+    void set(const std::string &str, const CIdent &ident)
+    {
+        m_map[str] = ident;
+    }
+
+    bool insert(const std::string &str, _Inout_ CIdent &ident)
+    {
+        auto itr = m_map.find(str);
+
+        if (itr == m_map.end())
+        {
+            // New element
+            set(str, ident);
+            return true;
+        }
+
+        ident = itr->second;
+        return false;
+    }
+
+    bool replace(const std::string &str, const CIdent &ident)
+    {
+        auto itr = m_map.find(str);
+
+        if (itr == m_map.end())
+        {
+            // New element
+            m_map[str] = ident;
+        }
+        else
+        {
+            CIdent &val = itr->second;
+
+            if ((val.variable || val.info == CIdent::I_UNDEF) && ident.variable)
+            {
+                // replace the old variable value with a new element
+                m_map[str] = ident;
+                return true;
+            }
+            else if (val.variable || ident.variable) // check here either, or
+            {
+                // redefinition not allowed (changing type from constant to variable or vice versa)
+                return false;
+            }
+            else if (val.info != CIdent::I_UNDEF) // old element already defined?
+            {
+                m_map[str] = ident; // replacing an old one with a new element
+                return false; // redefinition notification
+            }
+
+            m_map[str] = ident; // replacing an old, undefined element with a new element
+        }
+
+        return true; // OK
+    }
+
+    bool contains(const std::string &str)
+    {
+        auto itr = m_map.find(str);
+        return itr != m_map.end();
+    }
+
+    bool lookup(const std::string &str, _Out_ CIdent &ident)
+    {
+        auto itr = m_map.find(str);
+
+        if (itr != m_map.end())
+        {
+            ident = itr->second;
+            return true;
+        }
+
+        return false;
+    }
+};
 
 /*************************************************************************/
 
@@ -846,8 +929,8 @@ public:
 
     CAsm6502(const std::string &file_in_name,
              io::output &console,
-             COutputMem *out = NULL,
-             CDebugInfo *debug = NULL,
+             COutputMem *out,
+             CDebugInfo *debug,
              CMarkArea *area = NULL,
              ProcessorType procType = ProcessorType::M6502,
              const char *listing_file = NULL)

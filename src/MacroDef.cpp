@@ -155,7 +155,7 @@ CAsm::Stat CMacroDef::ParamType(const std::string &param_name, _Out_ bool &found
 {
     CIdent ident;
 
-    if (!TryLookup(param_names, param_name, ident)) // Find a parameter with a given name
+    if (!param_names.lookup(param_name, _Out_ ident)) // Find a parameter with a given name
     {
         found = false;
         return CAsm::OK;
@@ -199,7 +199,7 @@ CAsm::Stat CMacroDef::ParamLookup(CToken &leks, const std::string& param_name, E
 {
     CIdent ident;
 
-    if (!TryLookup(param_names, param_name, _Out_ ident)) // Find a parameter with a given name
+    if (!param_names.lookup(param_name, _Out_ ident)) // Find a parameter with a given name
     {
         found = false;
         return CAsm::OK;

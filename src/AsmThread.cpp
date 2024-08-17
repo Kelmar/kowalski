@@ -35,8 +35,9 @@ wxThread::ExitCode AsmThread::Entry()
 {
     io::output &out = m_mainFrm->console()->GetOutput("assembler");
     COutputMem *mem = wxGetApp().m_global.GetMem();
+    CDebugInfo *debug = wxGetApp().m_global.GetDebug();
 
-    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, mem));
+    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, mem, debug));
 
     CAsm::Stat res = assembler->assemble();
 

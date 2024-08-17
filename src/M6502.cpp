@@ -457,7 +457,7 @@ std::string *CAsm6502::get_ident()
         return nullptr;  //CLeksem(CLeksem::ERR_BAD_CHR);
     }
 
-    while (isalnum(*ptr) || *ptr == '.') // Letter, digit or '_'
+    while (isalnum(*ptr) || *ptr == '_' || *ptr == '.') // Letter, digit or '_'
         ptr++;
 
     std::string *pstr = new std::string(start, ptr - start);
@@ -937,7 +937,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                 }
                 CIdent macro;
 
-                if (!TryLookup(macro_name, label, _Out_ macro)) // if the label is not in the array
+                if (!macro_name.lookup(label, _Out_ macro)) // if the label is not in the array
                     return ERR_UNKNOWN_INSTR;
 
                 ASSERT((macros.size() > static_cast<std::size_t>(macro.val)) && (macro.val >= 0));
@@ -1237,7 +1237,7 @@ CAsm6502::Stat CAsm6502::predef_function(CToken &leks, Expr &expr, bool &fn)
 
         if (hit == 1) // .DEF?
         {
-            if (TryLookup(global_ident, label, _Out_ ident) && ident.info != CIdent::I_UNDEF)
+            if (global_ident.lookup(label, _Out_ ident) && ident.info != CIdent::I_UNDEF)
             {
                 ASSERT(ident.info != CIdent::I_INIT);
                 expr.value = 1; // 1 -label defined
@@ -1247,11 +1247,11 @@ CAsm6502::Stat CAsm6502::predef_function(CToken &leks, Expr &expr, bool &fn)
         }
         else if (hit == 2) // .REF?
         {
-            expr.value = TryLookup(global_ident, label, _Out_ ident) ? 1 : 0; // 1 -if the label is in the array
+            expr.value = global_ident.lookup(label, _Out_ ident) ? 1 : 0; // 1 -if the label is in the array
         }
         else if (hit == 3) // .PASSDEF?
         {
-            if (TryLookup(global_ident, label, _Out_ ident) && ident.info != CIdent::I_UNDEF)
+            if (global_ident.lookup(label, _Out_ ident) && ident.info != CIdent::I_UNDEF)
             {
                 ASSERT(ident.info != CIdent::I_INIT);
 
@@ -1392,8 +1392,8 @@ CAsm6502::Stat CAsm6502::constant_value(CToken &leks, Expr &expr, bool nospace)
             if (found)
                 return OK;
         }
-        CIdent id(CIdent::I_UNDEF); // niezdefiniowany identyfikator
-        if (!add_ident(*leks.GetString(), id) && id.info != CIdent::I_UNDEF)	// ju� zdefiniowany?
+        CIdent id(CIdent::I_UNDEF); // undefined identifier
+        if (!add_ident(*leks.GetString(), id) && id.info != CIdent::I_UNDEF) // already defined?
             expr.value = id.val;		// odczytana warto�� etykiety
         else
         {
@@ -2117,14 +2117,14 @@ bool CAsm6502::add_ident(const std::string &id, CIdent &inf)
     if (ident[0] == LOCAL_LABEL_CHAR) // Local label?
     {
         if (expanding_macro) // Local label in macro extension?
-            return !TryReplace(macro_ident, format_local_label(ident, macro_local_area), inf);
+            return macro_ident.insert(format_local_label(ident, macro_local_area), inf);
         else if (ident[1] == LOCAL_LABEL_CHAR) // file local?
-            return !TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf);
+            return proc_local_ident.insert(format_local_label(ident, proc_area), inf);
         else
-            return !TryReplace(local_ident, format_local_label(ident, local_area), inf);
+            return local_ident.insert(format_local_label(ident, local_area), inf);
     }
     else // Global label
-        return !TryReplace(global_ident, ident, inf);
+        return global_ident.insert(ident, inf);
 }
 
 // Entering the label definition (1st assembly run)
@@ -2151,7 +2151,7 @@ CAsm6502::Stat CAsm6502::def_ident(const std::string &id, const CIdent &inf)
     {
         if (expanding_macro)
         {
-            if (!TryReplace(macro_ident, format_local_label(ident, macro_local_area), inf))
+            if (!macro_ident.replace(format_local_label(ident, macro_local_area), inf))
             {
                 // Already defined
                 err_ident = ident;
@@ -2160,13 +2160,13 @@ CAsm6502::Stat CAsm6502::def_ident(const std::string &id, const CIdent &inf)
         }
         //% Bug Fix 1.2.13.1 - fix local labels causing duplicate label errors
         //else if (!TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf))
-        else if ((ident[1] == LOCAL_LABEL_CHAR) && !TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf))
+        else if ((ident[1] == LOCAL_LABEL_CHAR) && !proc_local_ident.replace(format_local_label(ident, proc_area), inf))
         {
             // Already defined
             err_ident = ident;
             return ERR_LABEL_REDEF;
         }
-        else if (!TryReplace(local_ident, format_local_label(ident, local_area), inf))
+        else if (!local_ident.replace(format_local_label(ident, local_area), inf))
         {
             // Already defined
             err_ident = ident;
@@ -2175,7 +2175,7 @@ CAsm6502::Stat CAsm6502::def_ident(const std::string &id, const CIdent &inf)
     }
     else // Global label
     {
-        if (!TryReplace(global_ident, ident, inf))
+        if (!global_ident.replace(ident, inf))
         {
             // Already defined
             err_ident = ident;
@@ -2208,15 +2208,15 @@ CAsm6502::Stat CAsm6502::chk_ident(const std::string &id, _Inout_ CIdent &inf)
     if (ident[0] == LOCAL_LABEL_CHAR) // local label?
     {
         if (expanding_macro) // Local label in macro extension?
-            exist = TryLookup(macro_ident, format_local_label(ident, macro_local_area), _Out_ info);
+            exist = macro_ident.lookup(format_local_label(ident, macro_local_area), _Out_ info);
         else if (ident[1] == LOCAL_LABEL_CHAR) // file local?
-            exist = TryLookup(proc_local_ident, format_local_label(ident, proc_area), _Out_ info);
+            exist = proc_local_ident.lookup(format_local_label(ident, proc_area), _Out_ info);
         else
-            exist = TryLookup(local_ident, format_local_label(ident, local_area), _Out_ info);
+            exist = local_ident.lookup(format_local_label(ident, local_area), _Out_ info);
     }
     else // Global label
     {
-        exist = TryLookup(global_ident, ident, _Out_ info);
+        exist = global_ident.lookup(ident, _Out_ info);
         local_area++; // New local area
     }
 
@@ -2272,21 +2272,21 @@ CAsm6502::Stat CAsm6502::chk_ident_def(const std::string &id, _Inout_ CIdent &in
         if (ident[0] == LOCAL_LABEL_CHAR) // local label?
         {
             if (expanding_macro) // Local label in macro extension?
-                replaced = TryReplace(macro_ident, format_local_label(ident, macro_local_area), inf);
+                replaced = macro_ident.replace(format_local_label(ident, macro_local_area), inf);
             else if (ident[1] == LOCAL_LABEL_CHAR) // file local?
-                replaced = TryReplace(proc_local_ident, format_local_label(ident, proc_area), inf);
+                replaced = proc_local_ident.replace(format_local_label(ident, proc_area), inf);
             else
-                replaced = TryReplace(local_ident, format_local_label(ident, local_area), inf);
+                replaced = local_ident.replace(format_local_label(ident, local_area), inf);
         }
         else
-            replaced = TryReplace(global_ident, ident, inf);
+            replaced = global_ident.replace(ident, inf);
         ASSERT(replaced); // The label must be redefined
     }
     else if (ident[0] != LOCAL_LABEL_CHAR) // Global constant label?
     {
         ASSERT(!inf.checked);
         inf.checked = true; // Confirm the definition in the second assembly pass
-        bool replaced = TryReplace(global_ident, ident, inf);
+        bool replaced = global_ident.replace(ident, inf);
         ASSERT((!replaced && (inf.info == CIdent::I_ADDRESS)) || (ret == CAsm::OK)); // The label must be redefined
     }
 
@@ -2301,15 +2301,13 @@ CAsm6502::Stat CAsm6502::def_macro_name(const std::string &id, _Out_ CIdent &inf
     if (case_insensitive)
         ident.MakeLower();
 
-    auto info = macro_name.find(ident.ToStdString());
-
-    if (info != macro_name.end())
+    if (macro_name.contains(id))
     {
         err_ident = ident;
         return ERR_LABEL_REDEF; // Name already defined
     }
 
-    macro_name[ident.ToStdString()] = inf;
+    macro_name.set(ident.ToStdString(), inf);
 
     return OK;
 }
@@ -2322,12 +2320,12 @@ CAsm6502::Stat CAsm6502::chk_macro_name(const std::string &id)
     if (case_insensitive)
         ident.MakeLower();
 
-    auto info = macro_name.find(ident.ToStdString());
+    CIdent info;
 
-    if (info != macro_name.end())
+    if (macro_name.lookup(ident.ToStdString(), _Out_ info))
     {
         // Checked label found in the array
-        ASSERT(info->second.info == CIdent::I_MACRONAME);
+        ASSERT(info.info == CIdent::I_MACRONAME);
         return OK;
 
         //if (info->val != inf.val)
@@ -3265,6 +3263,7 @@ CAsm::Stat CAsm6502::generate_debug(InstrType it, int line_no, FileUID file_UID)
 
 void CAsm6502::generate_debug()
 {
+#if 0
     int index = 0;
 
     debug->SetIdentArrSize(global_ident.size() + local_ident.size() + proc_local_ident.size());
@@ -3277,6 +3276,7 @@ void CAsm6502::generate_debug()
 
     for (auto item : local_ident)
         debug->SetIdent(index++, item.first, item.second);
+#endif
 }
 
 /*************************************************************************/
