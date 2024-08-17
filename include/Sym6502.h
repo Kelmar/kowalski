@@ -378,13 +378,13 @@ private:
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
                 throw CAsm::SYM_ILL_WRITE;
 
-            ctx.mem[ctx.s] = arg;
+            ctx.mem.set(ctx.s, arg);
             --ctx.s;
             ctx.s &= 0xFFFF;
         }
         else
         {
-            ctx.mem[0x100 + ctx.s--] = arg;
+            ctx.mem.set(0x100 + ctx.s--, arg);
             --ctx.s;
             ctx.s = (ctx.s & 0xFF) + 0x100;
         }        
@@ -397,23 +397,23 @@ private:
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
                 throw CAsm::SYM_ILL_WRITE;
 
-            ctx.mem[ctx.s] = (arg >> 8) & 0xFF;
+            ctx.mem.set(ctx.s, (arg >> 8) & 0xFF);
             --ctx.s;
             ctx.s &= 0xFFFF;
 
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
                 throw CAsm::SYM_ILL_WRITE;
 
-            ctx.mem[ctx.s] = arg & 0xFF;
+            ctx.mem.set(ctx.s, arg & 0xFF);
             --ctx.s;
             ctx.s &= 0xFFFF;
         }
         else
         {
-            ctx.mem[0x100 + (ctx.s & 0xFF)] = (arg >> 8) & 0xFF;
+            ctx.mem.set(0x100 + (ctx.s & 0xFF), (arg >> 8) & 0xFF);
             --ctx.s;
             ctx.s = (ctx.s & 0xFF) + 0x100;
-            ctx.mem[0x100 + (ctx.s & 0xFF)] = arg & 0xFF;
+            ctx.mem.set(0x100 + (ctx.s & 0xFF), arg & 0xFF);
             --ctx.s;
             ctx.s = (ctx.s & 0xFF) + 0x100;
         }

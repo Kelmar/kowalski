@@ -1248,8 +1248,7 @@ CAsm::SymStat CSym6502::perform_command()
                 zero = !!((acc32 & 0xffff) == 0);
                 negative = !!(acc32 & 0x8000);
 
-                ctx.mem[addr] = acc32 & 0xff;
-                ctx.mem[addr + 1] = (acc32 >> 8) & 0xff;
+                ctx.mem.setWord(addr, acc32);
                 ctx.uCycles += 2; // add 2 cycles for 16 bit operations
             }
         }
@@ -1277,7 +1276,7 @@ CAsm::SymStat CSym6502::perform_command()
                 zero = (acc & 0xFF) == 0;
                 negative = acc & 0x80;
 
-                ctx.mem[addr] = static_cast<uint8_t>(acc & 0xFF);
+                ctx.mem.set(addr, acc & 0xFF);
             }
         }
 
@@ -1308,8 +1307,8 @@ CAsm::SymStat CSym6502::perform_command()
                 carry = !!(arg & 0x01);
                 zero = !!((acc & 0xffff) == 0);
                 negative = !!(acc & 0x8000);
-                ctx.mem[addr++] = acc & 0xff;
-                ctx.mem[addr] = (acc >> 8) & 0xff;
+                ctx.mem.setWord(addr, acc & 0xff);
+                ++addr;
                 ctx.uCycles += 2; // add 2 cycles for 16 bit operations
             }
         }
@@ -1337,7 +1336,7 @@ CAsm::SymStat CSym6502::perform_command()
                 zero = acc == 0;
                 negative = acc & 0x80;
 
-                ctx.mem[addr] = acc;
+                ctx.mem.set(addr, acc);
             }
         }
 
@@ -1369,8 +1368,8 @@ CAsm::SymStat CSym6502::perform_command()
                 carry = !!(arg & 0x8000);
                 zero = !!((acc & 0xffff) == 0);
                 negative = !!(acc & 0x8000);
-                ctx.mem[addr++] = acc & 0xff;
-                ctx.mem[addr] = (acc >> 8) & 0xff;
+                ctx.mem.setWord(addr, acc);
+                ++addr;
                 ctx.uCycles += 2; // add 2 cycles for 16 bit operations
             }
         }
@@ -1412,7 +1411,7 @@ CAsm::SymStat CSym6502::perform_command()
                 zero = acc == 0;
                 negative = acc & 0x80;
 
-                ctx.mem[addr] = acc;
+                ctx.mem.set(addr, acc);
             }
         }
 
@@ -1444,8 +1443,8 @@ CAsm::SymStat CSym6502::perform_command()
                 carry = !!(arg & 0x01);
                 zero = !!((acc & 0xffff) == 0);
                 negative = !!(acc & 0x8000);
-                ctx.mem[addr++] = acc & 0xff;
-                ctx.mem[addr] = (acc >> 8) & 0xff;
+                ctx.mem.setWord(addr, acc);
+                ++addr;
                 ctx.uCycles += 2; // add 2 cycles for 16 bit operations
             }
         }
@@ -1491,7 +1490,7 @@ CAsm::SymStat CSym6502::perform_command()
                     negative = false;
                 }
 
-                ctx.mem[addr] = acc;
+                ctx.mem.set(addr, acc);
             }
             zero = acc == 0;
         }
@@ -1588,14 +1587,14 @@ CAsm::SymStat CSym6502::perform_command()
                 tmp = get_word(addr);
                 ++tmp;
                 ctx.set_status_reg16(tmp);
-                ctx.mem[addr] = tmp & 0xFF;
-                ctx.mem[addr + 1] = (tmp >> 8) & 0xFF;
+                ctx.mem.setWord(addr, tmp);
                 ctx.uCycles += 2; // 16 bit operation adds 2 cycles
             }
             else
             {
-                ctx.mem[addr]++;
-                ctx.set_status_reg(ctx.mem[addr]);
+                uint8_t v = ctx.mem[addr] + 1;
+                ctx.mem.set(addr, v);
+                ctx.set_status_reg(v);
             }
 
             if (cpu16() && extracycle)
@@ -1626,14 +1625,14 @@ CAsm::SymStat CSym6502::perform_command()
                 tmp = get_word(addr);
                 --tmp;
                 ctx.set_status_reg16(tmp);
-                ctx.mem[addr] = tmp & 0xFF;
-                ctx.mem[addr + 1] = (tmp >> 8) & 0xFF;
+                ctx.mem.setWord(addr, tmp);
                 ctx.uCycles += 2; // 16 bit operation adds 2 cycles;
             }
             else
             {
-                ctx.mem[addr]--;
-                ctx.set_status_reg(ctx.mem[addr]);
+                uint8_t v = ctx.mem[addr] - 1;
+                ctx.mem.set(addr, v);
+                ctx.set_status_reg(v);
             }
 
             if (cpu16() && extracycle)
@@ -1775,16 +1774,16 @@ CAsm::SymStat CSym6502::perform_command()
                 if (check_io_write(addr + 1))
                     io_function((ctx.a >> 8) & 0xFF);
                 else
-                    ctx.mem[addr + 1] = (ctx.a >> 8) & 0xFF;
+                    ctx.mem.set(addr + 1, (ctx.a >> 8) & 0xFF);
             }
             else
             {
-                ctx.mem[addr] = ctx.a & 0xFF;
+                ctx.mem.set(addr, ctx.a & 0xFF);
 
                 if (check_io_write(addr + 1))
                     io_function((ctx.a >> 8) & 0xFF);
                 else
-                    ctx.mem[addr + 1] = (ctx.a >> 8) & 0xFF;
+                    ctx.mem.set(addr + 1, (ctx.a >> 8) & 0xFF);
             }
 
             ctx.uCycles++;  // add 1 cycle for 16 bit operation 
@@ -1794,7 +1793,7 @@ CAsm::SymStat CSym6502::perform_command()
             if (check_io_write(addr))
                 io_function(ctx.a & 0xFF);
             else
-                ctx.mem[addr] = ctx.a & 0xFF;
+                ctx.mem.set(addr, ctx.a & 0xFF);
         }
 
         if (cpu16() && extracycle)
@@ -1814,16 +1813,16 @@ CAsm::SymStat CSym6502::perform_command()
                 if (check_io_write(addr + 1))
                     io_function((ctx.x >> 8) & 0xFF);
                 else
-                    ctx.mem[addr + 1] = (ctx.x >> 8) & 0xFF;
+                    ctx.mem.set(addr + 1, (ctx.x >> 8) & 0xFF);
             }
             else
             {
-                ctx.mem[addr] = ctx.x & 0xFF;
+                ctx.mem.set(addr, ctx.x & 0xFF);
 
                 if (check_io_write(addr + 1))
                     io_function((ctx.x >> 8) & 0xFF);
                 else
-                    ctx.mem[addr + 1] = (ctx.x >> 8) & 0xFF;
+                    ctx.mem.set(addr + 1, (ctx.x >> 8) & 0xFF);
             }
 
             ctx.uCycles++;  // add 1 cycle for 16 bit operation 
@@ -1833,7 +1832,7 @@ CAsm::SymStat CSym6502::perform_command()
             if (check_io_write(addr))
                 io_function(ctx.x & 0xFF);
             else
-                ctx.mem[addr] = ctx.x & 0xFF;
+                ctx.mem.set(addr, ctx.x & 0xFF);
         }
 
         if (cpu16() && extracycle)
@@ -1852,16 +1851,16 @@ CAsm::SymStat CSym6502::perform_command()
                 if (check_io_write(addr + 1))
                     io_function((ctx.y >> 8) & 0xFF);
                 else
-                    ctx.mem[addr + 1] = (ctx.y >> 8) & 0xFF;
+                    ctx.mem.set(addr + 1, (ctx.y >> 8) & 0xFF);
             }
             else
             {
-                ctx.mem[addr] = ctx.y & 0xFF;
+                ctx.mem.set(addr, ctx.y & 0xFF);
 
                 if (check_io_write(addr + 1))
                     io_function((ctx.y >> 8) & 0xFF);
                 else
-                    ctx.mem[addr + 1] = (ctx.y >> 8) & 0xFF;
+                    ctx.mem.set(addr + 1, (ctx.y >> 8) & 0xFF);
             }
 
             ctx.uCycles++;  // add 1 cycle for 16 bit operation 
@@ -1871,7 +1870,7 @@ CAsm::SymStat CSym6502::perform_command()
             if (check_io_write(addr))
                 io_function(ctx.y & 0xFF);
             else
-                ctx.mem[addr] = ctx.y & 0xFF;
+                ctx.mem.set(addr, ctx.y & 0xFF);
         }
 
         if (cpu16() && extracycle)
@@ -2294,7 +2293,7 @@ CAsm::SymStat CSym6502::perform_command()
             io_function(a);
         }
         else
-            ctx.mem[addr] = 0;
+            ctx.mem.set(addr, 0);
 
         if (cpu16() && !ctx.emm && !ctx.mem16)
         {
@@ -2302,7 +2301,7 @@ CAsm::SymStat CSym6502::perform_command()
             if (check_io_write(addr))
                 io_function(0);
             else
-                ctx.mem[addr] = 0;
+                ctx.mem.set(addr, 0);
         }
 
         break;
@@ -2313,15 +2312,14 @@ CAsm::SymStat CSym6502::perform_command()
         if (cpu16() && !ctx.emm && !ctx.mem16)
         {
             arg = get_word(addr);
-            ctx.mem[addr] = (arg & ~ctx.a) & 0xFF;
-            ctx.mem[addr + 1] = ((arg & ~ctx.a) >> 8) & 0xFF;
+            ctx.mem.setWord(addr, (arg & ~ctx.a));
             ctx.zero = (arg & ctx.a) == 0;
             ctx.uCycles += 2;   // 16 bit operation adds 2 cycle
         }
         else
         {
             arg = ctx.mem[addr];
-            ctx.mem[addr] = (arg & 0xFF) & ~(ctx.a & 0xFF);
+            ctx.mem.set(addr, (arg & 0xFF) & ~(ctx.a & 0xFF));
             ctx.zero = ((arg & 0xFF) & (ctx.a & 0xFF)) == 0;
         }
 
@@ -2336,15 +2334,14 @@ CAsm::SymStat CSym6502::perform_command()
         if (cpu16() && !ctx.emm && !ctx.mem16)
         {
             arg = get_word(addr);
-            ctx.mem[addr] = (arg | ctx.a) & 0xFF;
-            ctx.mem[addr + 1] = ((arg | ctx.a) >> 8) & 0xFF;
+            ctx.mem.setWord(addr, arg | ctx.a);
             ctx.zero = (arg & ctx.a) == 0;
             ctx.uCycles += 2;   // 16 bit operation adds 2 cycle
         }
         else
         {
             arg = ctx.mem[addr];
-            ctx.mem[addr] = (arg & 0xFF) | (ctx.a & 0xFF);
+            ctx.mem.set(addr, (arg & 0xFF) | (ctx.a & 0xFF));
             ctx.zero = ((arg & 0xFF) & (ctx.a & 0xFF)) == 0;
         }
 
@@ -2377,14 +2374,20 @@ CAsm::SymStat CSym6502::perform_command()
         break;
 
     case CAsm::C_RMB:
+    {
         addr = get_argument_address(s_bWriteProtectArea);
-        ctx.mem[addr] &= uint8_t(~(1 << ((cmd >> 4) & 0x07)));
+        uint8_t v = ctx.mem[addr] & uint8_t(~(1 << ((cmd >> 4) & 0x07)));
+        ctx.mem.set(addr, v);
         break;
+    }
 
     case CAsm::C_SMB:
+    {
         addr = get_argument_address(s_bWriteProtectArea);
-        ctx.mem[addr] |= uint8_t(1 << ((cmd >> 4) & 0x07));
+        uint8_t v = ctx.mem[addr] | uint8_t(1 << ((cmd >> 4) & 0x07));
+        ctx.mem.set(addr, v);
         break;
+    }
 
         //------------65816--------------------------------------------------------
     case CAsm::C_TXY:
@@ -2497,8 +2500,8 @@ CAsm::SymStat CSym6502::perform_command()
         if (s_bWriteProtectArea && ptr >= s_uProtectFromAddr && ptr <= s_uProtectToAddr)
             throw CAsm::SYM_ILL_WRITE;
 
-        ctx.mem[(ctx.dbr << 16) + (ctx.xy16 ? (ctx.y++ & 0xFF) : ctx.y++)] =
-            ctx.mem[(arg << 16) + (ctx.xy16 ? (ctx.x++ & 0xFF) : ctx.x++)];
+        uint8_t v = ctx.mem[(arg << 16) + (ctx.xy16 ? (ctx.x++ & 0xFF) : ctx.x++)];
+        ctx.mem.set((ctx.dbr << 16) + (ctx.xy16 ? (ctx.y++ & 0xFF) : ctx.y++), v);
         //}
         if (((--ctx.a) & 0xFFFF) == 0xFFFF)
             inc_prog_counter(3);  // repeat opcode until A = 0xFFFF
@@ -2517,8 +2520,8 @@ CAsm::SymStat CSym6502::perform_command()
         if (s_bWriteProtectArea && ptr >= s_uProtectFromAddr && ptr <= s_uProtectToAddr)
             throw CAsm::SYM_ILL_WRITE;
 
-        ctx.mem[(ctx.dbr << 16) + (ctx.xy16 ? (ctx.y-- & 0xFF) : ctx.y--)] =
-            ctx.mem[(arg << 16) + (ctx.xy16 ? (ctx.x-- & 0xFF) : ctx.x--)];
+        uint8_t v = ctx.mem[(arg << 16) + (ctx.xy16 ? (ctx.x-- & 0xFF) : ctx.x--)];
+        ctx.mem.set((ctx.dbr << 16) + (ctx.xy16 ? (ctx.y-- & 0xFF) : ctx.y--), v);
         //}
 
         if (((--ctx.a) & 0xFFFF) == 0xFFFF)
@@ -2594,8 +2597,8 @@ CAsm::SymStat CSym6502::perform_command()
     case CAsm::C_PHD:
         if (ctx.emm && (ctx.s == 0x0100))
         {
-            ctx.mem[0xFF] = ctx.dir & 0xFF;
-            ctx.mem[0x100] = (ctx.dir >> 8) & 0xFF;
+            ctx.mem.set(0xFF, ctx.dir & 0xFF);
+            ctx.mem.set(0x100, (ctx.dir >> 8) & 0xFF);
             ctx.s = 0x01FE;
         }
         else

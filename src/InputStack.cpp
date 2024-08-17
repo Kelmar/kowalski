@@ -60,14 +60,13 @@ void CInputFile::seek_to_begin()
 
 bool CInputFile::read_line(std::string &buf)
 {
-    UNUSED(buf);
+    char *res = ::fgets(buf.data(), buf.capacity(), m_file);
 
-#if 0
-    LPTSTR ptr = ReadString(buf);
-
-    if (ptr)
-        m_nLine++;
-#endif
+    if (res)
+    {
+        m_lineNo++;
+        return true;
+    }
 
     return false;
 }

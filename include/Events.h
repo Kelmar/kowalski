@@ -29,6 +29,31 @@
 
 #include "StdAfx.h"
 
+/*************************************************************************/
+
+class MessageEvent : public wxThreadEvent
+{
+private:
+    wxString m_target;
+
+public:
+    /* constructor */ MessageEvent(const MessageEvent &other)
+        : wxThreadEvent(other)
+        , m_target(other.m_target)
+    { }
+
+    /* constructor */ MessageEvent(wxEventType eventType, int id, const char *target)
+        : wxThreadEvent(eventType, id)
+        , m_target(target)
+    { }
+
+    wxString GetTarget() const { return m_target; }
+
+    virtual wxEvent *Clone() const { return new MessageEvent(*this); }
+};
+
+/*************************************************************************/
+
 // File menu events
 wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
 wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
@@ -53,6 +78,9 @@ wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
 wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
 
 static const int evTHD_ASM_COMPLETE = wxID_HIGHEST + 1;
+static const int evTHD_OUTPUT_ID = wxID_HIGHEST + 2;
+
+wxDECLARE_EVENT(evTHD_OUTPUT, MessageEvent);
 
 /*************************************************************************/
 

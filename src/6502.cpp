@@ -262,6 +262,8 @@ BOOL C6502App::InitInstance()
 
 #endif /* 0 */
 
+/*************************************************************************/
+
 bool C6502App::OnExceptionInMainLoop()
 {
     std::string error;

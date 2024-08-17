@@ -65,6 +65,7 @@ bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
         return false;
     
     ar.read(state->Memory->getSpan(state->StartAddress, sz));
+    state->Memory->invalidate();
 
     return true;
 }

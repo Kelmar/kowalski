@@ -31,14 +31,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 CChildFrame::CChildFrame(MAIN_BASE *parent, wxWindowID id, const wxString &title)
     : CHILD_BASE(parent, id, title)
-    , m_hexView(nullptr)
 {
     // TODO: Create splitter here.
     //return m_wndSplitter.Create(this, 2, 1, CSize(30, 30), pContext);
 
     //memset(m_data, 0, sizeof(m_data));
-
-    m_hexView = new HexView(this, wxID_ANY);
-    m_hexView->SetSpan(m_data);
 }
 

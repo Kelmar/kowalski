@@ -33,9 +33,15 @@
 
 wxThread::ExitCode AsmThread::Entry()
 {
-    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str()));
+    io::output &out = m_mainFrm->console()->GetOutput("assembler");
+    COutputMem *mem = wxGetApp().m_global.GetMem();
+
+    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, mem));
 
     CAsm::Stat res = assembler->assemble();
+
+    if (res != CAsm::Stat::OK)
+        assembler->report_error(res);
 
     wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
 

@@ -3003,9 +3003,9 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
     ASSERT(origin <= 0xFFFF);
 
     if ((mode == A_IMP2) && (code == C_BRK))
-        (*out)[origin] = 0;
+        out->set(origin, 0);
     else
-        (*out)[origin] = TransformTable(m_procType)[code][mode]; // command
+        out->set(origin, TransformTable(m_procType)[code][mode]); // command
 
     switch (mode) // Command argument
     {
@@ -3019,7 +3019,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
         ASSERT(origin + 1 <= mem_mask);
 
         if (generateBRKExtraByte)
-            (*out)[origin + 1] = BRKExtraByte;
+            out->set(origin + 1, BRKExtraByte);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], generateBRKExtraByte ? (*out)[origin + 1] : -1);
@@ -3034,7 +3034,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
     case A_IMM:    // immediate
         ASSERT(origin + 1 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_BYTE);
-        (*out)[origin + 1] = uint8_t(expr.value & 0xFF);
+        out->set(origin + 1, expr.value & 0xFF);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1]);
@@ -3046,7 +3046,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
         //ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
         int32_t dist = expr.value - (int32_t(origin & mem_mask) + 2); // 65816
         //ASSERT(dist < 128 && dist > -129);
-        (*out)[origin + 1] = uint8_t(dist & 0xFF);
+        out->set(origin + 1, dist & 0xFF);
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1]);
         break;
@@ -3060,8 +3060,8 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
     case A_INDL:   // Indirect Long
         ASSERT(origin + 2 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
-        (*out)[origin + 1] = uint8_t(expr.value & 0xFF);
-        (*out)[origin + 2] = uint8_t((expr.value >> 8) & 0xFF);
+
+        out->setWord(origin + 1, expr.value);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1], (*out)[origin + 2]);
@@ -3069,13 +3069,17 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
 
     case A_ZPG2: // zeropage for SMB and RMB
     {
-        (*out)[origin] = TransformTable(m_procType)[code][mode]; // SMB or RMB command
+        uint8_t val = TransformTable(m_procType)[code][mode]; // SMB or RMB command
+
         ASSERT(expr_bit.inf == Expr::EX_BYTE && abs(expr_bit.value) < 8);
-        (*out)[origin] += uint8_t(expr_bit.value << 4); // Response bit number for the SMBn or RMBn instruction
+        val += uint8_t(expr_bit.value << 4); // Response bit number for the SMBn or RMBn instruction
+        
+        out->set(origin, val);
+
         ASSERT(origin + 1 <= mem_mask);
 
         ASSERT(expr_zpg.inf == Expr::EX_BYTE); // Argument address (on zeropage)
-        (*out)[origin + 1] = uint8_t(expr_zpg.value & 0xFF);
+        out->set(origin + 1, expr_zpg.value & 0xFF);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1]);
@@ -3084,19 +3088,24 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
 
     case A_ZREL: // zeropage / relative
     {
-        (*out)[origin] = TransformTable(m_procType)[code][mode]; // BBS or BBR command
+        uint8_t val = TransformTable(m_procType)[code][mode]; // BBS or BBR command
+        
         ASSERT(expr_bit.inf == Expr::EX_BYTE && abs(expr_bit.value) < 8);
-        (*out)[origin] += uint8_t(expr_bit.value << 4); // Response bit number for the BBSn or BBRn instruction
+
+        val += uint8_t(expr_bit.value << 4); // Response bit number for the BBSn or BBRn instruction
+        out->set(origin, val);
+
         ASSERT(origin + 2 <= mem_mask);
 
         ASSERT(expr_zpg.inf == Expr::EX_BYTE); // Argument address (on zeropage)
-        (*out)[origin + 1] = uint8_t(expr_zpg.value & 0xFF);
+
+        out->set(origin + 1, expr_zpg.value & 0xFF);
 
         ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
         int32_t dist = expr.value - (int32_t(origin & 0xFFFF) + 3);
 
         ASSERT(dist < 128 && dist > -129);
-        (*out)[origin + 2] = uint8_t(dist & 0xFF);
+        out->set(origin + 2, dist & 0xFF);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1], (*out)[origin + 2]);
@@ -3104,12 +3113,9 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
     }
     case A_ABSL:   // absolute Long
     case A_ABSL_X: // absolute Long indexed X
-        ASSERT(origin + 2 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
 
-        (*out)[origin + 1] = uint8_t(expr.value & 0xFF);
-        (*out)[origin + 2] = uint8_t((expr.value >> 8) & 0xFF);
-        (*out)[origin + 3] = uint8_t((expr.value >> 16) & 0xFF);
+        out->setLWord(origin + 1, expr.value);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1], (*out)[origin + 2], (*out)[origin + 3]);
@@ -3122,7 +3128,7 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
         ASSERT(origin + 1 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_BYTE);
 
-        (*out)[origin + 1] = uint8_t(expr.value & 0xFF);
+        out->set(origin + 1, expr.value & 0xFF);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1]);
@@ -3130,13 +3136,11 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
 
     case A_RELL:
     {
-        ASSERT(origin + 1 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
         int32_t dist = expr.value - (int32_t(origin & mem_mask) + 3);
         ASSERT(dist < 128 && dist > -129);
 
-        (*out)[origin + 1] = uint8_t(dist & 0xFF);
-        (*out)[origin + 2] = uint8_t((dist >> 8) & 0xFF);
+        out->setWord(origin + 1, dist);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1], (*out)[origin + 2]);
@@ -3144,22 +3148,18 @@ void CAsm6502::generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit
     }
 
     case A_XYC:
-        ASSERT(origin + 1 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_BYTE);
 
-        (*out)[origin + 1] = uint8_t(expr.value & 0xFF);
-        (*out)[origin + 2] = uint8_t((expr.value >> 8) & 0xFF);
+        out->set(origin + 1, expr.value);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1], (*out)[origin + 2]);
         break;
 
     case A_IMM2:
-        ASSERT(origin + 1 <= mem_mask);
         ASSERT(expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE);
 
-        (*out)[origin + 1] = uint8_t(expr.value & 0xFF);
-        (*out)[origin + 2] = uint8_t((expr.value >> 8) & 0xFF);
+        out->setWord(origin + 1, expr.value);
 
         if (listing.IsOpen())
             listing.AddCodeBytes(origin, (*out)[origin], (*out)[origin + 1], (*out)[origin + 2]);
@@ -3283,14 +3283,16 @@ void CAsm6502::generate_debug()
 
 std::string CAsm6502::GetErrMsg(Stat stat)
 {
-    UNUSED(stat);
-
-#if 0
     if ((stat < OK || stat >= ERR_LAST) && stat != STAT_USER_DEF_ERR)
     {
         ASSERT(false); // Invalid value 'stat'
-        return std::string("???");
+        return std::string(_("UNKNOWN ERROR CODE"));
     }
+
+    return std::string("TODO: IMPLEMENT ERROR MESSAGE LOOKUP");
+
+#if 0
+    std::string filename = text->GetFileName();
 
     wxString msg, form, txt;
 
@@ -3359,8 +3361,6 @@ std::string CAsm6502::GetErrMsg(Stat stat)
 
     return msg;
 #endif
-
-    return "";
 }
 
 /*************************************************************************/

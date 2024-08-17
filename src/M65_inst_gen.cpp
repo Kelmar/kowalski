@@ -173,7 +173,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
                 if (pass == 2 && out)
                 {
                     for (int i = 0; org < origin; org++, i++)
-                        (*out)[org] = uint8_t(str[i]);
+                        out->set(org, str[i]);
                 }
                 //leks = next_leks();
             }
@@ -216,30 +216,24 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
 
                     case -2: // .ascis
                     case 0: // .db
-                        (*out)[org] = (UINT)(expr.value & 0xFF);
+                        out->set(org, (UINT)(expr.value & 0xFF));
                         break;
 
                     case 1: // .dw
-                        (*out)[org] = (UINT)(expr.value & 0xFF);
-                        (*out)[org + 1] = (UINT)((expr.value >> 8) & 0xFF);
+                        out->setWord(org, expr.value);
                         break;
 
                     case 2: // .dd
-                        (*out)[org] = (UINT)((expr.value >> 8) & 0xFF);
-                        (*out)[org + 1] = (UINT)(expr.value & 0xFF);
+                        out->set(org, (expr.value >> 8) & 0xFF);
+                        out->set(org + 1, expr.value & 0xFF);
                         break;
 
                     case 3: // .dl
-                        (*out)[org] = (UINT)(expr.value & 0xFF);
-                        (*out)[org + 1] = (UINT)((expr.value >> 8) & 0xFF);
-                        (*out)[org + 2] = (UINT)((expr.value >> 16) & 0xFF);
+                        out->setLWord(org, expr.value);
                         break;
 
                     case 4: // .dbl
-                        (*out)[org] = (UINT)(expr.value & 0xFF);
-                        (*out)[org + 1] = (UINT)((expr.value >> 8) & 0xFF);
-                        (*out)[org + 2] = (UINT)((expr.value >> 16) & 0xFF);
-                        (*out)[org + 3] = (UINT)((expr.value >> 24) & 0xFF);
+                        out->setDWord(org, expr.value);
                         break;
                     }
                 }
@@ -255,18 +249,18 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
                     if ((pass == 2) && out)
                     {
                         if (it == I_LS)
-                        {
-                            (*out)[cnt_org] = (UINT)(cnt & 0xFF);
-                            (*out)[cnt_org + 1] = (UINT)((cnt >> 8) & 0xFF);
-                        }
+                            out->setWord(cnt_org, cnt);
                         else
-                            (*out)[cnt_org] = uint8_t(cnt);
+                            out->set(cnt_org, cnt);
                     }
                 }
                 else if (def == -2) // .ASCIS ?
                 {
                     if (pass == 2 && out)
-                        (*out)[origin - 1] ^= uint8_t(0x80);
+                    {
+                        uint8_t v = (*out)[origin - 1] ^ 0x80;
+                        out->set(origin - 1, v);
+                    }
                 }
                 return OK; // There is no comma -end of data
             }
@@ -325,7 +319,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
             int len = origin - org;
 
             for (int i = 0; org < origin; org++, i++)
-                (*out)[org] = uint8_t(init.value);
+                out->set(org, init.value);
 
             if (len && listing.IsOpen())
                 listing.AddBytes(uint32_t(org - len), mem_mask, out->Mem(), len);
@@ -810,7 +804,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
         if (pass == 2 && out)
         {
             for (int i = 0; org < origin; org++, i++)
-                (*out)[org] = uint8_t(cs[i]);
+                out->set(org, cs[i]);
         }
     }
     break;
@@ -862,7 +856,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
         if (pass == 2 && out)
         {
             for (int i = 0; org < origin; org++, i++)
-                (*out)[org] = uint8_t(cs[i]);
+                out->set(org, cs[i]);
         }
     }
     break;

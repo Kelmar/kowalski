@@ -67,6 +67,7 @@ bool CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
         state->Marks.SetEnd(to);
 
         ar.read(state->Memory->getSpan(from, to));
+        state->Memory->invalidate();
     }
 
     int start = (*state->Memory)[0x2e0] + (*state->Memory)[0x2e1] * 256; // run address

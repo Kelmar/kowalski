@@ -27,6 +27,10 @@
 
 /*************************************************************************/
 
+#include <sigslot/signal.hpp>
+
+/*************************************************************************/
+
 class HexView : public wxScrolled<wxWindow>
 {
 private:
@@ -35,7 +39,7 @@ private:
     /**
      * @brief View into memory to dump.
      */
-    std::span<uint8_t> m_span;
+    COutputMem *m_memory;
 
     /**
      * @brief Set to the size of a single character cell in our control.
@@ -89,6 +93,8 @@ private:
 
     void Init();
 
+    void MemoryUpdated();
+
 public:
     /* constructor */ HexView();
 
@@ -101,11 +107,15 @@ public:
 
     void JumpTo(uint32_t address);
 
-    std::span<uint8_t> GetSpan(void) const { return m_span; }
-
-    void SetSpan(const std::span<uint8_t> &span)
+    void SetMemory(COutputMem *mem)
     {
-        m_span = span;
+        if (m_memory)
+            m_memory->onUpdate.disconnect(&HexView::MemoryUpdated, this);
+
+        m_memory = mem;
+        if (m_memory)
+            m_memory->onUpdate.connect(&HexView::MemoryUpdated, this);
+
         UpdateScrollInfo();
     }
 

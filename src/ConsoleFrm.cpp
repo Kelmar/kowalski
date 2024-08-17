@@ -23,6 +23,7 @@
 /*************************************************************************/
 
 #include "StdAfx.h"
+#include "Events.h"
 #include "ConsoleFrm.h"
 
 /*************************************************************************/
@@ -30,6 +31,7 @@
 ConsoleFrame::ConsoleFrame(wxFrame *parent)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize)
     , m_text(nullptr)
+    , m_output(this, "")
 {
     auto font = new wxFont(11, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 
@@ -55,6 +57,8 @@ ConsoleFrame::ConsoleFrame(wxFrame *parent)
     horzSz->Add(m_text, 1, (int)wxALL | (int)wxEXPAND);
 
     GetSizer()->SetSizeHints(this);
+
+    Bind(evTHD_OUTPUT, &ConsoleFrame::OnMessage, this, evTHD_OUTPUT_ID);
 }
 
 ConsoleFrame::~ConsoleFrame()
@@ -66,6 +70,15 @@ ConsoleFrame::~ConsoleFrame()
 void ConsoleFrame::AppendText(const char *txt)
 {
     m_text->AppendText(txt);
+}
+
+/*************************************************************************/
+
+void ConsoleFrame::OnMessage(MessageEvent &ev)
+{
+    //wxString target = ev.GetTarget();
+    wxString msg = ev.GetString();
+    AppendText(msg);
 }
 
 /*************************************************************************/

@@ -18,6 +18,14 @@ FetchContent_Declare(fmt
 
 FetchContent_MakeAvailable(fmt)
 
+FetchContent_Declare(
+    sigslot
+    GIT_REPOSITORY https://github.com/palacaze/sigslot
+    GIT_TAG        19a6f0f5ea11fc121fe67f81fd5e491f2d7a4637 # v1.2.0
+)
+
+FetchContent_MakeAvailable(sigslot)
+
 if (WIN32)
   SET (wxBUILD_SHARED OFF  CACHE BOOL "Build wx libraries as shared libs")
 
@@ -70,7 +78,7 @@ target_include_directories(6502
     PRIVATE ${wxWidgets_SOURCE_DIR}/include
 )
 
-target_link_libraries(6502 PRIVATE ${wxLibs} fmt::fmt)
+target_link_libraries(6502 PRIVATE ${wxLibs} fmt::fmt Pal::Sigslot)
 
 if (MSVC)
   target_precompile_headers(6502 PRIVATE include/StdAfx.h)

@@ -118,6 +118,8 @@ public:
 
     void ShowDynamicHelp(const std::string& strLine, int nWordStart, int nWordEnd);
 
+    ConsoleFrame *console() const { return m_output; }
+
 #if 0
     virtual bool PreCreateWindow(CREATESTRUCT& cs);
     virtual bool OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);

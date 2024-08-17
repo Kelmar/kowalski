@@ -132,6 +132,7 @@ bool CCode65p::read(BinaryArchive &archive, LoadCodeState *state)
             throw new FileError(FileError::Corrupt);
 
         archive.read(state->Memory->getSpan(from, to));
+        state->Memory->invalidate();
 
         nLen -= to - from + 1;
     } while (nLen > 0);

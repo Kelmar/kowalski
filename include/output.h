@@ -22,73 +22,65 @@
  */
 /*************************************************************************/
 
-#ifndef CONSOLE_FRAME_H__
-#define CONSOLE_FRAME_H__
+#ifndef OUTPUT_65_H__
+#define OUTPUT_65_H__
 
 /*************************************************************************/
 
-#include "Events.h"
-#include "output.h"
+#include "StrUtils.h"
 
 /*************************************************************************/
 
-/**
- * @brief Frame that displays the output of a console source.
- */
-class ConsoleFrame : public wxPanel
+namespace io
 {
-public:
-    class ConsoleOutput : public io::output
+    /**
+     * @brief Abstract class for writing to an output target.
+     * @remarks This is usually a console.
+     */
+    class output
     {
-        friend class ConsoleFrame;
+    private:
+        // Remove copy construction
+
+        /* constructor */ output(const output &) = delete;
+        /* constructor */ output(output &&) = delete;
 
     protected:
-        ConsoleFrame *m_parent;
-        std::string m_target;
-
-        /* constructor */ ConsoleOutput(ConsoleFrame *frame, const std::string &target)
-            : m_parent(frame)
-            , m_target(target)
-        {
-        }
+        /* constructor */ output() { }
 
     public:
-        virtual ~ConsoleOutput()
-        {
-        }
+        virtual ~output() { }
 
-        virtual void write(const char *str)
-        {
-            MessageEvent event(evTHD_OUTPUT, evTHD_OUTPUT_ID, m_target.c_str());
-            event.SetString(str);
+        /**
+         * @brief Request to clear the output display.
+         * @remarks This may not to anything for some implementations.
+         */
+        virtual void clear() { };
 
-            //m_parent->GetEventHandler()->AddPendingEvent(event);
-            wxQueueEvent(m_parent, event.Clone());
-        }
+        /**
+         * @brief Writes the supplied string to the output display.
+         * @param str The string to write.
+         * @remarks New lines are interpreted on \r\n pair.
+         */
+        virtual void write(const char *str) = 0;
     };
+}
 
-    void OnMessage(MessageEvent &);
+inline io::output &operator <<(io::output &target, const std::string &item)
+{
+    target.write(item.c_str());
+    return target;
+}
 
-private:
-    wxTextCtrl *m_text;
-
-    ConsoleOutput m_output;
-
-public:
-    /* constructor */ ConsoleFrame(wxFrame *parent);
-    virtual          ~ConsoleFrame();
-
-    void AppendText(const char *txt);
-
-    io::output &GetOutput(const char *target)
-    {
-        UNUSED(target); // We don't use targets (yet)
-        return m_output;
-    }
-};
+template <str::str_convertable T>
+inline io::output &operator <<(io::output &target, const T &item)
+{
+    target.write(item.toString());
+    return target;
+}
 
 /*************************************************************************/
 
-#endif /* CONSOLE_FRAME_H__ */
+#endif /* OUTPUT_65_H__ */
 
 /*************************************************************************/

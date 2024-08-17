@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef M6502_H__
 #define M6502_H__
 
+#include "output.h"
+
 #include "Asm.h"
 #include "Ident.h"
 #include "DebugInfo.h"
@@ -608,6 +610,8 @@ class CAsm6502 : public CAsm /*, public CObject */
 private:
     friend class CMacroDef;
 
+    io::output &m_console;
+
     std::string current_line;
     const char *ptr;                // To keep track of the current line
     const char *err_start;
@@ -803,6 +807,10 @@ private:
                 Close();
         }
 
+        const std::string &filename() const { return m_fileName; }
+
+        int lineNumber() const { return m_lineNumber; }
+
         void Remove();
         void NextLine();
         void AddCodeBytes(uint32_t addr, int code1 = -1, int code2 = -1, int code3 = -1, int code4 = -1);
@@ -817,6 +825,17 @@ private:
     void init_members();
 
 public:
+    // TODO: Make this method private later
+    Stat report_error(Stat err)
+    {
+        const std::string msg = GetErrMsg(err);
+        const std::string &file = text->GetFileName();
+        int lineNumber = text->GetLineNo();
+
+        m_console.write(fmt::format("{0}({1}): error {2}: {3}\r\n", file, lineNumber, (int)err, msg).c_str());
+        return err;
+    }
+
     ProcessorType m_procType;
 
     static bool case_insensitive; //true -> lowercase and uppercase letters in labels are not distinguished
@@ -826,12 +845,14 @@ public:
     static uint8_t BRKExtraByte;      // The value of the additional byte after the BRK instruction
 
     CAsm6502(const std::string &file_in_name,
+             io::output &console,
              COutputMem *out = NULL,
              CDebugInfo *debug = NULL,
              CMarkArea *area = NULL,
              ProcessorType procType = ProcessorType::M6502,
              const char *listing_file = NULL)
-        : entire_text(file_in_name)
+        : m_console(console)
+        , entire_text(file_in_name)
         , out(out)
         , markArea(area)
         , debug(debug)
@@ -841,7 +862,9 @@ public:
         init();
     }
 
-    CAsm6502()
+#if 0
+    CAsm6502(io::output &console)
+        : m_console(console)
     {
         m_procType = ProcessorType::M6502;
         swapbin = false;
@@ -852,6 +875,7 @@ public:
         text = NULL;
         pRept = NULL;
     }
+#endif
 
     ~CAsm6502()
     {

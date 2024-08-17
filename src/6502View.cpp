@@ -210,6 +210,15 @@ int CSrc6502View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CSrc6502View::check_line(const char *buf, CAsm::Stat &stat, int &start, int &fin, std::string &msg)
 {
+    UNUSED(buf);
+    UNUSED(stat);
+    UNUSED(start);
+    UNUSED(fin);
+    UNUSED(msg);
+
+    // TODO: Need to rethink how this should work; want to split the assembler from view.
+
+#if 0
     CAsm6502 xasm;
 
     xasm.m_procType = wxGetApp().m_global.GetProcType();
@@ -219,6 +228,7 @@ void CSrc6502View::check_line(const char *buf, CAsm::Stat &stat, int &start, int
         msg = xasm.GetErrMsg(stat);
     else
         msg.clear();
+#endif
 }
 
 void CSrc6502View::disp_warning(int line, const std::string &msg) // debugging message use?

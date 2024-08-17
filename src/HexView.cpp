@@ -31,7 +31,7 @@
 
 HexView::HexView()
     : wxScrolled()
-    , m_span()
+    , m_memory(nullptr)
     , m_fontSize(0, 0)
     , m_virtualSize(0, 0)
     , m_pageSize(0)
@@ -45,7 +45,7 @@ HexView::HexView()
 
 HexView::HexView(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name)
     : wxScrolled(parent, id, pos, size, wxVSCROLL, name)
-    , m_span()
+    , m_memory(nullptr)
     , m_fontSize(0, 0)
     , m_virtualSize(0, 0)
     , m_pageSize(0)
@@ -84,7 +84,10 @@ void HexView::Init()
 
 void HexView::JumpTo(uint32_t address)
 {
-    if (address < m_span.size())
+    if (!m_memory)
+        return;
+
+    if (address < m_memory->size())
     {
         int line = address / LINE_WIDTH;
         Scroll(-1, line);
@@ -93,11 +96,21 @@ void HexView::JumpTo(uint32_t address)
 
 /*************************************************************************/
 
+void HexView::MemoryUpdated()
+{
+    Refresh();
+}
+
+/*************************************************************************/
+
 void HexView::CalculateScrollInfo()
 {
     LoadFonts();
 
-    size_t sz = m_span.size();
+    if (!m_memory)
+        return;
+
+    size_t sz = m_memory->size();
 
     if (sz == 0)
         m_virtualSize.Set(0, 0);
@@ -114,7 +127,7 @@ void HexView::CalculateScrollInfo()
     // Compute the number of characters in a line
     wxString txt;
 
-    int width = m_span.size() - 1;
+    int width = m_memory->size() - 1;
     width = txt.Printf("%X", width);
 
     width += 3; // Buffer between address and digits
@@ -168,8 +181,11 @@ int HexView::CalcAddressChars() const
 {
     wxString txt;
 
+    if (!m_memory)
+        return 0;
+
     // Compute the number of digits in the address
-    int sz = m_span.size() - 1;
+    int sz = m_memory->size() - 1;
     return txt.Printf("%X", sz);
 }
 
@@ -327,7 +343,10 @@ void HexView::Draw(wxDC &dc)
     const int CELL_WIDTH = m_fontSize.GetWidth() * 3;
     const int HALF_CHAR = (m_fontSize.GetWidth() / 2);
 
-    for (int l = 0; y < rect.GetHeight() && addr < m_span.size(); ++l)
+    if (!m_memory)
+        return;
+
+    for (int l = 0; y < rect.GetHeight() && addr < m_memory->size(); ++l)
     {
         int w = txt.Printf(m_addrFmt, addr);
 
@@ -339,9 +358,9 @@ void HexView::Draw(wxDC &dc)
 
         charDisp = "";
 
-        for (int i = 0; i < LINE_WIDTH && addr < m_span.size(); ++i, ++addr)
+        for (int i = 0; i < LINE_WIDTH && addr < m_memory->size(); ++i, ++addr)
         {
-            uint8_t val = m_span[addr];
+            uint8_t val = m_memory->get(addr);
 
             // TODO: Allow map to other character sets.
 

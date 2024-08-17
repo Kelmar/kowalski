@@ -43,7 +43,7 @@ MemoryFrame::MemoryFrame(wxWindow *parent)
 
     wxXmlResource::Get()->AttachUnknownControl("m_hexView", m_hexView);
 
-    m_hexView->SetSpan(m_dummy);
+    m_hexView->SetMemory(wxGetApp().m_global.GetMem());
 
     m_jumpEdit->SetValue("");
 
