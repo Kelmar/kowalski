@@ -39,6 +39,7 @@ HexView::HexView()
     , m_digitFont(nullptr)
     , m_selStart(0)
     , m_selLen(0)
+    , m_mouseTrack(false)
 {
     Init();
 }
@@ -53,6 +54,7 @@ HexView::HexView(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSi
     , m_digitFont(nullptr)
     , m_selStart(0)
     , m_selLen(0)
+    , m_mouseTrack(false)
 {
     Init();
 }
@@ -76,8 +78,18 @@ void HexView::Init()
     UpdateScrollInfo();
 
     Bind(wxEVT_PAINT, &HexView::OnPaint, this);
+
     Bind(wxEVT_LEFT_DOWN, &HexView::OnMouseDown, this);
     Bind(wxEVT_LEFT_UP, &HexView::OnMouseUp, this);
+    Bind(wxEVT_MOTION, &HexView::OnMouseMove, this);
+}
+
+/*************************************************************************/
+
+uint32_t HexView::GetAddress() const
+{
+    int pos = GetScrollPos(wxVERTICAL);
+    return pos * LINE_WIDTH;
 }
 
 /*************************************************************************/
@@ -239,23 +251,15 @@ void HexView::OnMouseDown(wxMouseEvent &e)
         return;
 
     CaptureMouse();
+    m_mouseTrack = true;
 }
 
 /*************************************************************************/
 
-void HexView::OnMouseUp(wxMouseEvent &e)
+void HexView::UpdateSelection(wxMouseEvent &e)
 {
-    if (HasCapture())
-        ReleaseMouse(); // Ensure mouse is always released.
-
-    if ((m_mouseDn.x < 0) || (m_mouseDn.y < 0))
-    {
-        // Mouse down originated out of bounds.
-        m_selStart = 0;
-        m_selLen = 0;
-        Refresh();
-        return; 
-    }
+    if (!m_mouseTrack)
+        return;
 
     auto where = e.GetPosition();
     where = this->CalcUnscrolledPosition(where);
@@ -284,6 +288,33 @@ void HexView::OnMouseUp(wxMouseEvent &e)
     }
 
     Refresh();
+}
+
+/*************************************************************************/
+
+void HexView::OnMouseUp(wxMouseEvent &e)
+{
+    if (HasCapture())
+        ReleaseMouse(); // Ensure mouse is always released.
+
+    if ((m_mouseDn.x < 0) || (m_mouseDn.y < 0))
+    {
+        // Mouse down originated out of bounds.
+        m_selStart = 0;
+        m_selLen = 0;
+        Refresh();
+        return; 
+    }
+
+    UpdateSelection(e);
+    m_mouseTrack = false;
+}
+
+/*************************************************************************/
+
+void HexView::OnMouseMove(wxMouseEvent &e)
+{
+    UpdateSelection(e);
 }
 
 /*************************************************************************/

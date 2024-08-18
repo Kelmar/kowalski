@@ -68,6 +68,7 @@ private:
 
     wxPoint m_mouseDn; //< Save's where the mouse was first pressed down.
     wxString m_addrFmt;
+    bool m_mouseTrack;
 
     int CalcAddressChars() const;
 
@@ -80,10 +81,13 @@ private:
 
     wxPoint GetHitCell(const wxPoint &p) const;
 
+    void UpdateSelection(wxMouseEvent &);
+
     void OnMouseDown(wxMouseEvent &);
     void OnMouseUp(wxMouseEvent &);
-    void OnPaint(wxPaintEvent &);
+    void OnMouseMove(wxMouseEvent &);
 
+    void OnPaint(wxPaintEvent &);
     void Draw(wxDC &dc);
 
     void CalculateScrollInfo();
@@ -104,6 +108,8 @@ public:
         const wxString &name = wxControlNameStr);
 
     virtual ~HexView();
+
+    uint32_t GetAddress() const;
 
     void JumpTo(uint32_t address);
 

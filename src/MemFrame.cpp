@@ -67,7 +67,7 @@ void MemoryFrame::OnJumpTo(wxCommandEvent &)
 {
     std::string val = m_jumpEdit->GetValue().ToStdString();
 
-    val = val | str::toUpper;
+    val = val | str::toUpper | str::trim;
     uint32_t addr = CAsm::INVALID_ADDRESS;
 
     // TODO: Needs adjusting for 65816
@@ -82,13 +82,39 @@ void MemoryFrame::OnJumpTo(wxCommandEvent &)
     }
     else
     {
+        int relJump = 0;
+
+        // Check to see if user has requested a relative jump
+
+        if ((val[0] == '+') || (val[0] == '-'))
+        {
+            relJump = val[0] == '+' ? 1 : -1;
+            val = val.substr(1);
+        }
+
         // Try to parse an actual address
 
         uint32_t res;
         NumberFormat status = NumberFormats::FromString(val, _Out_ res);
 
         if (status != NumberFormat::Error)
-            addr = res;
+        {
+            switch (relJump)
+            {
+            case -1:
+                addr = m_hexView->GetAddress() - res;
+                break;
+
+            default:
+            case 0:
+                addr = res;
+                break;
+
+            case 1:
+                addr = m_hexView->GetAddress() + res;
+                break;
+            }
+        }
         else
         {
             wxLogStatus(_("Unknown address format in Jump To command."));
