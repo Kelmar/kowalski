@@ -80,7 +80,6 @@ bool C6502App::OnInit()
     // Load up resources
     //wxXmlResource::Get()->AddHandler(hexViewHandler);
     wxXmlResource::Get()->InitAllHandlers();
-    
 
     wxLogDebug("Loading resource file....");
     if (!wxXmlResource::Get()->Load("res6502.xrc"))
@@ -101,8 +100,13 @@ bool C6502App::OnInit()
     wxDocManager *docManager = new wxDocManager();
 
     new wxDocTemplate(docManager,
-        "Assembly", "*.s;*.asm", "", "s;asm",
+        "Assembly", "*.s;*.asm", "", "s;asm ",
         "Assembly Source", "Assembly View",
+        CLASSINFO(CSrc6502Doc), CLASSINFO(CSrc6502View));
+
+    new wxDocTemplate(docManager,
+        "Any", "*.*", "", "",
+        "Any File", "Assembly View",
         CLASSINFO(CSrc6502Doc), CLASSINFO(CSrc6502View));
 
     new ProjectManager();
@@ -135,10 +139,10 @@ bool C6502App::InitFrame()
 // This is always the first to handle an event!
 int C6502App::FilterEvent(wxEvent &event)
 {
-    if (event.GetId() == evTHD_ASM_COMPLETE)
-    {
-        wxLogDebug("Got thread event!");
-    }
+    //if (event.GetId() == evTHD_ASM_COMPLETE)
+    //{
+    //    wxLogDebug("Got thread event!");
+    //}
 
     return wxApp::FilterEvent(event);
 }

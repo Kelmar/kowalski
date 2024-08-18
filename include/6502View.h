@@ -38,6 +38,7 @@ private:
 
     wxFrame *m_frame;
     wxStyledTextCtrl *m_text;
+    wxStatusBar *m_status;
 
     std::unordered_map<int, uint8_t> m_mapBreakpoints; // TODO: move to the doc
 

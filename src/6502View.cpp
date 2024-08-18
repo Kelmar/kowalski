@@ -110,7 +110,26 @@ bool CSrc6502View::OnCreate(wxDocument *doc, long flags)
 
     m_text = new wxStyledTextCtrl(m_frame, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
-    UpdatePositionInfo();
+    // The underlying Scintilla control uses actual font names.
+
+#ifdef _WIN32
+    m_text->StyleSetFaceName(0, "Fixedsys");
+#endif
+
+    m_status = m_frame->CreateStatusBar(2);
+
+    if (m_status)
+    {
+        int statusStyles[] = { wxSB_NORMAL, wxSB_SUNKEN };
+        int statusWidths[] = { -1, 160 };
+
+        int cnt = sizeof(statusStyles) / sizeof(int);
+
+        m_status->SetFieldsCount(cnt, statusWidths);
+        m_status->SetStatusStyles(cnt, statusStyles);
+
+        UpdatePositionInfo();
+    }
 
     m_text->Bind(wxEVT_STC_UPDATEUI, &CSrc6502View::OnTextUpdate, this);
 
@@ -129,12 +148,17 @@ void CSrc6502View::OnDraw(wxDC *)
 
 void CSrc6502View::UpdatePositionInfo()
 {
+    if (!m_status)
+        return;
+
     wxString str;
 
     int line = m_text->GetCurrentLine() + 1;
     int pos = m_text->GetCurrentPos() + 1;
 
-    str.Printf("Ln: %d\tCh: %d", line, pos);
+    str.Printf("Ln: %d    Ch: %d", line, pos);
+
+    m_status->SetStatusText(str, 1);
 }
 
 /*************************************************************************/
