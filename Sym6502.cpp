@@ -1169,10 +1169,13 @@ CAsm::SymStat CSym6502::perform_command()
 	case C_INX:
 		inc_prog_counter();
 		ctx.x++;
+
 		if (cpu16 && !ctx.emm && !ctx.xy16) 
 			ctx.set_status_reg16( ctx.x );
-		else
+		else {
 			ctx.set_status_reg( ctx.x & 0xff);
+			ctx.x = ctx.x & 0xff;
+		}
 		break;
 
 	case C_DEX:
@@ -1180,8 +1183,10 @@ CAsm::SymStat CSym6502::perform_command()
 		ctx.x--;
 		if (cpu16 && !ctx.emm && !ctx.xy16) 
 			ctx.set_status_reg16( ctx.x );
-		else
+		else {
 			ctx.set_status_reg( ctx.x & 0xff );
+			ctx.x = ctx.x & 0xff;
+		}
 		break;
 
 	case C_INY:
@@ -1189,8 +1194,10 @@ CAsm::SymStat CSym6502::perform_command()
 		ctx.y++;
 		if (cpu16 && !ctx.emm && !ctx.xy16) 
 			ctx.set_status_reg16( ctx.y );
-		else
+		else {
 			ctx.set_status_reg( ctx.y & 0xff );
+			ctx.y = ctx.y & 0xff;
+		}
 		break;
 
 	case C_DEY:
@@ -1198,8 +1205,10 @@ CAsm::SymStat CSym6502::perform_command()
 		ctx.y--;
 		if (cpu16 && !ctx.emm && !ctx.xy16) 
 			ctx.set_status_reg16( ctx.y );
-		else
+		else {
 			ctx.set_status_reg( ctx.y & 0xff );
+			ctx.y = ctx.y & 0xff;
+		}
 		break;
 
 	case C_TAX:

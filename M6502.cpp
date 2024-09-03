@@ -31,8 +31,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define new DEBUG_NEW
 #endif
 
+bool CAsm6502::caseinsense= false;
 bool CAsm6502::case_insensitive= false;	// true -> small/capital letters in label names are treated as same
 bool CAsm6502::swapbin = false;
+bool CAsm6502::swap_bin = false; // used diring assembly
 UINT8 CAsm6502::forcelong = 0;
 bool CAsm6502::generateBRKExtraByte= false;	// generate extra byte after BRK command?
 UINT8 CAsm6502::BRKExtraByte= 0x0;			// value of extra byte generated after BRK command
@@ -381,10 +383,10 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
 	case '/':
 		return CLeksem(O_DIV);
 	case '%':
-		if (!swapbin) return CLeksem(O_MOD);
+		if (!swap_bin) return CLeksem(O_MOD);
 		break;
 	case '@':
-		if (swapbin) return CLeksem(O_MOD);
+		if (swap_bin) return CLeksem(O_MOD);
 		break;
 	case '~':
 		return CLeksem(O_B_NOT);
@@ -431,9 +433,10 @@ CLeksem CAsm6502::next_leks(bool nospace)		// pobranie kolejnego symbolu
 	}
 	else if (c=='$')		// number hex?
 		return get_hex_num();
-	else if (!swapbin && c=='@')		// number bin?
+	else if (!swap_bin && c=='@'){		// number bin?
 		return get_bin_num();
-	else if (swapbin && c=='%')		// number bin?
+	}
+	else if (swap_bin && c=='%')		// number bin?
 		return get_bin_num();
 	else if (_istalpha(c) || c=='_' || c=='.' || c=='?') // || c=='$') - this is dead, cannot get here due to 4 lines above
 	{
@@ -581,10 +584,8 @@ CLeksem CAsm6502::get_bin_num()		// interpretacja liczby dwójkowej
 			val++;
 
 	} while (*ptr=='0' || *ptr=='1');
-
 	return CLeksem(CLeksem::N_BIN,SINT32(val));
 }
-
 
 
 CLeksem CAsm6502::get_char_num()		// interpretacja sta³ej znakowej
@@ -1284,6 +1285,10 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 //		if ((bProc6502==2) && ((expr.inf==Expr::EX_WORD) || longImm)) //****
 		if ((bProc6502==2) && longImm) //****
 			mode = A_IMM2;
+		else if (expr_bit.inf == Expr::EX_WORD) {
+			mode = A_IMM2;   // for PEA
+			expr_bit.inf = Expr::EX_UNDEF;
+		}
 		else if (expr.inf!=Expr::EX_BYTE && expr.inf!=Expr::EX_UNDEF)
 			return ERR_NUM_NOT_BYTE;	// za du¿a liczba, max $FF
 		else
@@ -1912,7 +1917,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 					else if (leks.GetString()->CompareNoCase(opts[5]) == 0)
 						case_insensitive = true;
 					else if (leks.GetString()->CompareNoCase(opts[6]) == 0)
-						swapbin = true;
+						swap_bin = true;
 					else
 						return ERR_OPT_NAME_UNKNOWN;	// nierozpoznana nazwa opcji
 				}
@@ -2638,6 +2643,8 @@ CAsm6502::Stat CAsm6502::assemble_line()	// interpretacja wiersza
 					OpCode code= leks.GetCode();	// order no
 					CodeAdr mode;
 					Expr expr, expr_bit, expr_zpg;
+					expr_bit.inf = code==C_PEA ? Expr::EX_WORD : Expr::EX_UNDEF;
+
 					leks = next_leks();
 					ret = proc_instr_syntax(leks,mode,expr,expr_bit,expr_zpg);  // for 3 byte operands!
 					forcelong = 0;
@@ -3626,6 +3633,7 @@ CAsm6502::Stat CAsm6502::expression(CLeksem &leks, Expr &expr, bool str)
 	else if (expr.inf != Expr::EX_UNDEF)
 	{
 		SINT32 value= SINT32(expr.value);
+
 		if (value>-0x100 && value<0x100)
 			expr.inf = Expr::EX_BYTE;
 		else if (value>-0x10000 && value<0x10000)
@@ -4082,7 +4090,8 @@ void CAsm6502::asm_fin_pass()
 CAsm6502::Stat CAsm6502::assemble()	// translacja programu
 {
 	Stat ret;
-	swapbin=false;
+	case_insensitive = caseinsense;  // set assembler to match option
+	swap_bin = swapbin;  // set assembler to match option
 	bool skip= false;
 	bool skip_macro= false;
 //  CRepeatDef *pRept= NULL;

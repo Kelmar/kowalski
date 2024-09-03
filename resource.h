@@ -304,7 +304,6 @@
 #define IDC_OPT_6502                    2330
 #define IDC_OPT_65C02                   2331
 #define IDC_OPT_65816                   2332
-#define IDC_OPT_ASM_INSTR_DOT           2333
 #define IDC_OPT_ASM_GENERATE_LIST       2334
 #define IDC_OPT_ASM_FILE_LISTING        2335
 #define IDC_OPT_ASM_GENERATE_BYTE       2336
@@ -317,6 +316,8 @@
 #define IDC_OPT_VIEW_EXAMPLE            2343
 #define IDC_OPT_VIEW_FONT_BTN           2344
 #define IDC_OPT_VIEW_FONT_NAME          2345
+#define IDC_OPT_ASM_NO_SWAPBIN          2348
+#define IDC_OPT_ASM_SWAPBIN             2349
 #define ID_FILE_SAVE_CODE               2400
 #define ID_FILE_OPEN_CODE               2401
 #define ID_SYM_DEBUG                    2500

@@ -980,8 +980,10 @@ class CAsm6502 : public CAsm, public CObject
 
 public:
 	UINT8 bProc6502;						// 0=6502, 1=65C02 or 6501, 2=65816
-	static bool case_insensitive;		// true -> ma³e i du¿e litery w etykietach nie s¹ rozró¿niane
+	static bool caseinsense;
+	static bool case_insensitive;		// true -> lowercase and uppercase letters in labels are not distinguished
 	static bool swapbin;
+	static bool swap_bin;
 	static UINT8 forcelong;
 	static bool generateBRKExtraByte;	// generowaæ dodatkowy bajt za instrukcj¹ BRK?
 	static UINT8 BRKExtraByte;			// wartoœæ dodatkowego bajtu za instrukcj¹ BRK
@@ -997,7 +999,6 @@ public:
 	CAsm6502()
 	{
 		bProc6502 = 0;
-		swapbin = false;
 		forcelong = 0;
 		init_members();
 		temporary_out = false;

@@ -97,6 +97,7 @@ void CMainFrame::ConfigSettings(bool load)
 
 	static const TCHAR ENTRY_ASM[]= _T("Assembler");
 	static const TCHAR ASM_CASE[]= _T("CaseSensitive");
+	static const TCHAR ASM_SWAP[]= _T("SwapBin");
 	static const TCHAR ASM_GEN_LST[]= _T("GenerateListing");
 	static const TCHAR ASM_LST_FILE[]= _T("ListingFile");
 	static const TCHAR ASM_GEN_BYTE[]= _T("GenerateBRKExtraByte");
@@ -211,6 +212,8 @@ void CMainFrame::ConfigSettings(bool load)
         theApp.m_global.SetHelpType( pApp->GetProfileInt(ENTRY_GEN, GEN_HELP , 1));   //^^ Help
 
 //		CSym6502::bus_width            = pApp->GetProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, 16);
+		CAsm6502::caseinsense          = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_CASE, 0);
+		CAsm6502::swapbin              = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_SWAP, 0);
 		theApp.m_global.m_bGenerateListing = (bool) pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_LST, false);
 		theApp.m_global.m_strListingFile   = pApp->GetProfileString(ENTRY_ASM, ASM_LST_FILE, NULL);
 		CAsm6502::generateBRKExtraByte = (bool) pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_BYTE, 1);
@@ -337,7 +340,8 @@ void CMainFrame::ConfigSettings(bool load)
 		pApp->WriteProfileInt(ENTRY_EDIT, EDIT_CAPITALS, CSrc6502View::m_bAutoUppercase);
 		pApp->WriteProfileInt(ENTRY_EDIT, EDIT_FILENEW, C6502App::m_bFileNew);
 
-		pApp->WriteProfileInt(ENTRY_ASM, ASM_CASE, 1);
+		pApp->WriteProfileInt(ENTRY_ASM, ASM_CASE, CAsm6502::caseinsense);
+		pApp->WriteProfileInt(ENTRY_ASM, ASM_SWAP, CAsm6502::swapbin);
 		pApp->WriteProfileInt(ENTRY_ASM, ASM_GEN_LST, theApp.m_global.m_bGenerateListing);
 		pApp->WriteProfileString(ENTRY_ASM, ASM_LST_FILE, theApp.m_global.m_strListingFile);
 		pApp->WriteProfileInt(ENTRY_ASM, ASM_GEN_BYTE, CAsm6502::generateBRKExtraByte);
@@ -1475,8 +1479,8 @@ int CMainFrame::Options(int page)
 	dial.m_MarksPage.m_rgbBreakpoint = CMarks::m_rgbBreakpoint;
 	dial.m_MarksPage.m_rgbError = CMarks::m_rgbError;
 
-	dial.m_AsmPage.m_nCaseSensitive = CAsm6502::case_insensitive;
-	dial.m_AsmPage.m_nAsmInstrWithDot = 0;
+	dial.m_AsmPage.m_nCaseSensitive = CAsm6502::caseinsense;
+	dial.m_AsmPage.m_nSwapBin = CAsm6502::swapbin;
 	dial.m_AsmPage.m_bGenerateListing = theApp.m_global.m_bGenerateListing;
 	dial.m_AsmPage.m_strListingFile = theApp.m_global.m_strListingFile;
 	dial.m_AsmPage.m_bGenerateBRKExtraByte = CAsm6502::generateBRKExtraByte;
@@ -1534,7 +1538,8 @@ int CMainFrame::Options(int page)
 	theApp.m_global.m_strListingFile   = dial.m_AsmPage.m_strListingFile;
 	CAsm6502::generateBRKExtraByte     = dial.m_AsmPage.m_bGenerateBRKExtraByte;
 	CAsm6502::BRKExtraByte             = dial.m_AsmPage.m_uBrkExtraByte;
-	CAsm6502::case_insensitive         = dial.m_AsmPage.m_nCaseSensitive;
+	CAsm6502::caseinsense              = dial.m_AsmPage.m_nCaseSensitive;
+	CAsm6502::swapbin                  = dial.m_AsmPage.m_nSwapBin;
 
 	if (dial.m_EditPage.m_nTabStep != CSrc6502View::m_nTabStep ||
 		dial.m_EditPage.m_bColorChanged ||
