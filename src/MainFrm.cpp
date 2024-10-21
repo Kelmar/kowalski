@@ -97,6 +97,7 @@ void CMainFrame::ConfigSettings(bool load)
 
     static const char ENTRY_ASM[] = "Assembler";
     static const char ASM_CASE[] = "CaseSensitive";
+    static const char ASM_SWAP[] = "SwapBin";
     static const char ASM_GEN_LST[] = "GenerateListing";
     static const char ASM_LST_FILE[] = "ListingFile";
     static const char ASM_GEN_BYTE[] = "GenerateBRKExtraByte";
@@ -213,6 +214,8 @@ void CMainFrame::ConfigSettings(bool load)
         theApp.m_global.SetHelpType(pApp->GetProfileInt(ENTRY_GEN, GEN_HELP, 1));    //^^ Help
 
         //CSym6502::bus_width            = pApp->GetProfileInt(ENTRY_GEN, GEN_BUS_WIDTH, 16);
+        CSym6502::caseinsense = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_CASE, 0);
+        CSym6502::swapbin = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_SWAP, 0);
         theApp.m_global.m_bGenerateListing = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_LST, false);
         theApp.m_global.m_strListingFile = pApp->GetProfileString(ENTRY_ASM, ASM_LST_FILE, NULL);
         CAsm6502::generateBRKExtraByte = (bool)pApp->GetProfileInt(ENTRY_ASM, ASM_GEN_BYTE, 1);
@@ -332,7 +335,8 @@ void CMainFrame::ConfigSettings(bool load)
         pApp->WriteProfileInt(ENTRY_EDIT, EDIT_CAPITALS, CSrc6502View::m_bAutoUppercase);
         pApp->WriteProfileInt(ENTRY_EDIT, EDIT_FILENEW, C6502App::m_bFileNew);
 
-        pApp->WriteProfileInt(ENTRY_ASM, ASM_CASE, 1);
+        pApp->WriteProfileInt(ENTRY_ASM, ASM_CASE, CAsm6502::caseinsense);
+        pApp->WriteProfileInt(ENTRY_ASM, ASM_SWAP, CAsm6502::swapbin);
         pApp->WriteProfileInt(ENTRY_ASM, ASM_GEN_LST, theApp.m_global.m_bGenerateListing);
         pApp->WriteProfileString(ENTRY_ASM, ASM_LST_FILE, theApp.m_global.m_strListingFile);
         pApp->WriteProfileInt(ENTRY_ASM, ASM_GEN_BYTE, CAsm6502::generateBRKExtraByte);

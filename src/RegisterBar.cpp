@@ -395,6 +395,11 @@ void CRegisterBar::UpdateRegP(const CContext *pCtx, const CContext *pOld /*= NUL
     CheckDlgButton(IDC_REGS_M16, pCtx->mem16);
     CheckDlgButton(IDC_REGS_X16, pCtx->xy16);
     CheckDlgButton(IDC_REGS_EMM, pCtx->emm);
+
+    if (theApp.m_global.m_bProc6502 == ProcessorType::WDC65816 && !pCtx->emm)
+        CheckDlgButton(IDC_REGS_BRK, 0);
+    else
+        CheckDlgButton(IDC_REGS_BRK, pCtx->break_bit);
 #endif
 }
 

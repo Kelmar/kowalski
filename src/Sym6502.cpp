@@ -1647,7 +1647,10 @@ CAsm::SymStat CSym6502::perform_command()
         if (cpu16() && !ctx.emm && !ctx.xy16)
             ctx.set_status_reg16(ctx.x);
         else
+        {
             ctx.set_status_reg(ctx.x & 0xFF);
+            ctx.x = ctx.x & 0xFF;
+        }
 
         break;
 
@@ -1658,7 +1661,10 @@ CAsm::SymStat CSym6502::perform_command()
         if (cpu16() && !ctx.emm && !ctx.xy16)
             ctx.set_status_reg16(ctx.x);
         else
+        {
             ctx.set_status_reg(ctx.x & 0xFF);
+            ctx.x = ctx.x & 0xFF;
+        }
 
         break;
 
@@ -1669,7 +1675,10 @@ CAsm::SymStat CSym6502::perform_command()
         if (cpu16() && !ctx.emm && !ctx.xy16)
             ctx.set_status_reg16(ctx.y);
         else
+        {
             ctx.set_status_reg(ctx.y & 0xFF);
+            ctx.y = ctx.y & 0xFF;
+        }
 
         break;
 
@@ -1680,7 +1689,10 @@ CAsm::SymStat CSym6502::perform_command()
         if (cpu16() && !ctx.emm && !ctx.xy16)
             ctx.set_status_reg16(ctx.y);
         else
+        {
             ctx.set_status_reg(ctx.y & 0xFF);
+            ctx.y = ctx.y & 0xFF;
+        }
 
         break;
 
@@ -1758,7 +1770,7 @@ CAsm::SymStat CSym6502::perform_command()
         }
         else
         {
-            ctx.s = ctx.x & 0xff;
+            ctx.s = 0x100 + (ctx.x & 0xff); //****fix
             wxGetApp().m_global.m_bSRef = 0x1ff;
         }
         break;

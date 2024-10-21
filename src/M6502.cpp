@@ -30,8 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "ConditionalAsm.h"
 
+bool CAsm6502::caseinsense = false;
 bool CAsm6502::case_insensitive = false; // true -> small/capital letters in label names are treated as same
 bool CAsm6502::swapbin = false;
+bool CAsm6502::swap_bin = false; // used diring assembly
 uint8_t CAsm6502::forcelong = 0;
 bool CAsm6502::generateBRKExtraByte = false; // generate extra byte after BRK command?
 uint8_t CAsm6502::BRKExtraByte = 0x0; // value of extra byte generated after BRK command
@@ -209,11 +211,11 @@ CToken CAsm6502::next_leks(bool nospace) // Get the next symbol
         return CToken(O_DIV);
 
     case '%':
-        if (!swapbin) return CToken(O_MOD);
+        if (!swap_bin) return CToken(O_MOD);
         break;
 
     case '@':
-        if (swapbin) return CToken(O_MOD);
+        if (swap_bin) return CToken(O_MOD);
         break;
 
     case '~':
@@ -263,9 +265,9 @@ CToken CAsm6502::next_leks(bool nospace) // Get the next symbol
     }
     else if (c == '$') // number hex?
         return get_hex_num();
-    else if (!swapbin && c == '@') // number bin?
+    else if (!swap_bin && c == '@') // number bin?
         return get_bin_num();
-    else if (swapbin && c == '%') // number bin?
+    else if (swap_bin && c == '%') // number bin?
         return get_bin_num();
     else if (isalpha(c) || c == '_' || c == '.' || c == '?') // || c == '$') - this is dead, cannot get here due to 4 lines above
     {
@@ -867,6 +869,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                 OpCode code = leks.GetCode(); // order no
                 CodeAdr mode;
                 Expr expr, expr_bit, expr_zpg;
+                expr_bit.inf = code == C_PEA ? Expr::EX_WORD : Expr::EX_UNDEF;
 
                 leks = next_leks();
                 ret = proc_instr_syntax(leks, mode, expr, expr_bit, expr_zpg); // for 3 byte operands!
@@ -2513,6 +2516,8 @@ CAsm6502::Stat CAsm6502::assemble() // Program translation
 {
     Stat ret = Stat::ERR_LAST;
     swapbin = false;
+    case_insensitive = caseinsense; // set assembler to match option
+    swap_bin = swapbin; // set assembler to match option
     bool skip = false;
     bool skip_macro = false;
 

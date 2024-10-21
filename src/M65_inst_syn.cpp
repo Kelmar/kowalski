@@ -249,6 +249,11 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
         //if ((bProc6502 == 2) && ((expr.inf == Expr::EX_WORD) || (expr.inf == Expr::EX_UNDEF) || longImm))
         if ((m_procType == ProcessorType::WDC65816) && longImm)
             mode = A_IMM2;
+        else if (expr_bit.inf == Expr::EX_WORD)
+        {
+            mode = A_IMM2;
+            expr_bit.inf = Expr::EX_UNDEF;
+        }
         else if (expr.inf != Expr::EX_BYTE && expr.inf != Expr::EX_UNDEF)
             return ERR_NUM_NOT_BYTE; // Too large number, max $FF
         else

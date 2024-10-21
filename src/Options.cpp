@@ -431,7 +431,7 @@ COptionsAsmPage::COptionsAsmPage()
     : wxPanel()
 {
     m_nCaseSensitive = -1;
-    m_nAsmInstrWithDot = -1;
+    m_nSwapBin = true;
     m_bGenerateListing = false;
     m_strListingFile = "";
     m_bGenerateBRKExtraByte = false;
@@ -449,7 +449,7 @@ void COptionsAsmPage::DoDataExchange(CDataExchange* pDX)
     CPropertyPage::DoDataExchange(pDX);
 
     DDX_Radio(pDX, IDC_OPT_ASM_CASE_Y, m_nCaseSensitive);
-    DDX_Radio(pDX, IDC_OPT_ASM_INSTR_DOT, m_nAsmInstrWithDot);
+    DDX_Radio(pDX, IDC_OPT_NO_SWAPBIN, m_nSwapBin);
     DDX_Check(pDX, IDC_OPT_ASM_GENERATE_LIST, m_bGenerateListing);
     DDX_Text(pDX, IDC_OPT_ASM_FILE_LISTING, m_strListingFile);
     DDX_Check(pDX, IDC_OPT_ASM_GENERATE_BYTE, m_bGenerateBRKExtraByte);

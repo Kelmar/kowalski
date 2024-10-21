@@ -102,8 +102,8 @@ public:
     /* constructor */ COptionsAsmPage();
     virtual ~COptionsAsmPage();
 
-    int	m_nCaseSensitive;
-    int	m_nAsmInstrWithDot;
+    int m_nCaseSensitive;
+    bool m_nSwapBin;
     bool m_bGenerateListing;
     std::string m_strListingFile;
     bool m_bGenerateBRKExtraByte;

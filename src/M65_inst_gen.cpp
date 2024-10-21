@@ -632,7 +632,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
                 else if (strcasecmp(literal.c_str(), opts[5]) == 0)
                     case_insensitive = true;
                 else if (strcasecmp(literal.c_str(), opts[6]) == 0)
-                    swapbin = true;
+                    swap_bin = true;
                 else
                     return ERR_OPT_NAME_UNKNOWN; // Unrecognized option name
             }

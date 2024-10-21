@@ -921,8 +921,10 @@ public:
 
     ProcessorType m_procType;
 
+    static bool caseinsense;
     static bool case_insensitive; //true -> lowercase and uppercase letters in labels are not distinguished
     static bool swapbin;
+    static bool swap_bin;
     static uint8_t forcelong;
     static bool generateBRKExtraByte; // Generate an extra byte after the BRK instruction?
     static uint8_t BRKExtraByte;      // The value of the additional byte after the BRK instruction
