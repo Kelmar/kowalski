@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -34,8 +34,7 @@ public:
     CInputBuffer()
         : m_pHead(m_vchBuffer)
         , m_pTail(m_vchBuffer)
-    {
-    }
+    { }
 
     /**
      * get next available character (returns 0 if there are no chars)
@@ -50,14 +49,14 @@ public:
     /**
      * paste clipboard text into buffer
      */
-    void Paste(const char* pcText);
+    void Paste(const char *pcText);
 
 private:
     static constexpr size_t BUF_SIZE = 32 * 1024;
 
     char m_vchBuffer[BUF_SIZE];
-    char* m_pHead;
-    char* m_pTail;
+    char *m_pHead;
+    char *m_pTail;
 };
 
 /*************************************************************************/
@@ -84,76 +83,133 @@ private:
 
     /**
      * @brief Cursor on/off flag
+     * @remarks This is controlled externally.
      */
     bool m_showCursor;
 
-    int m_nCursorCount;    // Counter hide cursor
-    bool m_bCursorVisible; // flag: cursor currently visible
+    /**
+     * @brief Cursor blink state flag.
+     * @remarks This is updated by a timer.
+     */
+    bool m_cursorBlinkState;
 
-    UINT m_uTimer;
+    wxTimer m_timer;
 
     CInputBuffer m_InputBuffer; // keyboard input buffer
+
+    /**
+     * @brief Invalidate a single character cell in the IOWindow
+     * @param location The character location to invalidate
+     */
+    void Invalidate(const wxPoint &location);
+
 public:
     /* constructor */ CIOWindow(wxWindow *parent);
     virtual          ~CIOWindow();
 
-    int put(char chr, int x, int y);
-    int scroll(int dy); // shift the strings by 'dy' lines
+public: // Output functions
+    /**
+     * @brief Write a character directly to video memory at given location
+     * @param chr Character to write
+     * @param x, y Location to write to
+     */
+    void Put(char chr, int x, int y);
 
     /**
-     * @brief Invalidate a single character cell in the IOWindow
-     * @param x, y The character to invalidate
+     * @brief Scroll the display
+     * @param dy Number of lines to scroll the display by
      */
-    void Invalidate(int x, int y);
+    void Scroll(int dy);
+
+    /**
+     * @brief Write a single character at the current cursor location.
+     * @param chr The character to write.
+     * @remarks Currently only processes control codes for CR, LF, and BS
+     */
+    void PutChar(int chr);
+
+    /**
+     * @brief Write a single character at the current cursor location (verbatim)
+     * @param chr The character to write.
+     */
+    void RawChar(int chr);
+
+    /**
+     * @brief Print a string to the console at the cursor location.
+     * @param str The string to print.
+     * @param len
+     */
+    void PutStr(const wxString &str);
+
+    /**
+     * @brief Set the location of the cursor.
+     * @param location
+     * @return
+     */
+    void SetCursorPosition(const wxPoint &location);
+
+    /**
+     * @brief Get the current location of the cursor.
+     */
+    wxPoint GetCursorPosition() const { return m_cursorPos; }
+
+    /**
+     * @brief Clears the window and resets the cursor to the top left.
+     */
+    void Cls();
+
+public: // Input functions
+    /**
+     * @brief Dump contents of the clipboard to the IOWindow
+     */
+    void Paste();
+
+    /**
+     * @brief Read input from the IOWindow
+     * @return The key pressed, or 0 if no keys available.
+     */
+    int Input();
 
 public: // Attributes
     static wxColour m_rgbTextColor, m_rgbBackgndColor;
 
+    /**
+     * @brief Set the size of the display area in characters.
+     * @param w, h The width and height to size to.
+     * @param resize Set if the physical size fo the window should be changed as well.
+     */
     void SetSize(int w, int h, bool resize = true);
+
+    /**
+     * @brief Get the size of the display area in characters.
+     * @param w, h The width and height to return.
+     */
     void GetSize(int &w, int &h) const
     {
         w = m_charCnt.x;
         h = m_charCnt.y;
     }
 
-    void Paste();
-
     void SetColors(wxColour text, wxColour background);
     void GetColors(wxColour &text, wxColour &background);
 
-    int PutC(int chr);                       // Print the character
-    int PutChr(int chr);                     // Print character (verbatim)
-    int PutS(const char *str, int len = -1); // String of characters to print
-    int PutH(int n);                         // Print hex number (8 bits)
-    bool SetPosition(int x, int y);          // Set the position for the text
-    void GetPosition(int &x, int &y);        // Read position
-    bool Cls();                              // Clear the window
-    int Input();
-
-public:
-    //virtual bool PreTranslateMessage(MSG* pMsg);
-
 protected: // Event Processing
+    void InitEvents();
+
     void OnPaint(wxPaintEvent &);
     void Draw(wxDC &dc);
     void DrawCursor(wxDC &dc);
 
+    void BlinkCursor(wxTimerEvent &);
+
     void OnClose(wxCloseEvent &);
 
     // Generated message map functions
-    afx_msg void OnTimer(UINT nIDEvent);
-    afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
-    afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
-    afx_msg void OnPaste();
-    virtual bool ContinueModal();
+    void OnKeyDown(wxKeyEvent &);
+    void OnChar(wxKeyEvent &);
 
-    afx_msg LRESULT OnCls(WPARAM wParam, LPARAM lParam);
-    afx_msg LRESULT OnPutC(WPARAM wParam, LPARAM /* lParam */);
     afx_msg LRESULT OnStartDebug(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);
-    afx_msg LRESULT OnInput(WPARAM /*wParam*/, LPARAM /* lParam */);
-    afx_msg LRESULT OnPosition(WPARAM wParam, LPARAM lParam);
 };
 
 /*************************************************************************/

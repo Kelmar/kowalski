@@ -40,17 +40,14 @@ CIOWindow::CIOWindow(wxWindow *parent)
     , m_memory(nullptr)
     , m_charCnt(40, 25)
     , m_cursorPos()
+    , m_timer(this)
 {
     // We're going to override the saved size anyhow with our own calculations.
 
     wxPersistentRegisterAndRestore(this, REG_ENTRY_IOWINDOW);
 
-    m_nCursorCount = 0;    // Counter hide cursor
-
     m_showCursor = false;
-    m_bCursorVisible = false;
-
-    m_uTimer = 0;
+    m_cursorBlinkState = false;
 
     // Allocates our initial memory block
     size_t sz = m_charCnt.x * m_charCnt.y;
@@ -63,8 +60,9 @@ CIOWindow::CIOWindow(wxWindow *parent)
 
     SetBackgroundStyle(wxBG_STYLE_PAINT);
 
-    Bind(wxEVT_PAINT, &CIOWindow::OnPaint, this);
-    Bind(wxEVT_CLOSE_WINDOW, &CIOWindow::OnClose, this);
+    InitEvents();
+
+    m_timer.Start(250, false);
 }
 
 CIOWindow::~CIOWindow()
@@ -98,78 +96,48 @@ void CIOWindow::SetSize(int w, int h, bool resize/* = true*/)
 
 /*************************************************************************/
 
-int CIOWindow::put(char chr, int x, int y)
-{
-    if (x > m_charCnt.x || y > m_charCnt.y || x < 0 || y < 0)
-        return -2;
-
-    m_memory[x + y * m_charCnt.x] = (uint8_t)chr;
-    Refresh();
-    return 0;
-}
-
-/*************************************************************************/
-
-void CIOWindow::Invalidate(int x, int y) // the area of ​​the character under (x,y) to redraw
+void CIOWindow::Invalidate(const wxPoint &location)
 {
     wxSize cellSize = FontController::Get().getCellSize();
 
     // TODO: Redundant assertion? -- B.Simonds (Oct 20, 2024)
     ASSERT(cellSize.x > 0 && cellSize.y > 0);
 
-    wxRect area(x, y, cellSize.x, cellSize.y);
+    wxRect area(location, cellSize);
     RefreshRect(area);
 }
 
 /*************************************************************************/
 
-int CIOWindow::scroll(int dy) // shift the strings by 'dy' lines
+void CIOWindow::Put(char chr, int x, int y)
 {
-    if (dy > m_charCnt.y || dy < 0)
-        return -2;
+    if (x > m_charCnt.x || y > m_charCnt.y || x < 0 || y < 0)
+        return;
 
-    // Line offset
-    memmove(m_memory, m_memory + dy * m_charCnt.y, (m_charCnt.y - dy) * m_charCnt.x);
-
-    // To the uncovered zero position
-    memset(m_memory + (m_charCnt.y - dy) * m_charCnt.x, 0, dy * m_charCnt.x);
-
-    // Redraw entire window
-    Refresh();
-
-    return 0;
+    m_memory[x + y * m_charCnt.x] = (uint8_t)chr;
+    Invalidate(m_cursorPos);
 }
 
 /*************************************************************************/
 
-int CIOWindow::PutH(int chr) // Print hex number (8 bits)
+void CIOWindow::PutChar(int chr)
 {
-    int h1 = (chr >> 4) & 0x0f;
-    int h2 = chr & 0x0f;
-    char szBuf[4];
-    szBuf[0] = h1 > 9 ? h1 + 'A' - 10 : h1 + '0';
-    szBuf[1] = h2 > 9 ? h2 + 'A' - 10 : h2 + '0';
-    szBuf[2] = '\0';
-    return PutS(szBuf);
-}
-
-/*************************************************************************/
-
-int CIOWindow::PutC(int chr) // Print the character
-{
-    if (chr == 0x0a) // line feed?
+    switch (chr)
     {
+    case 0x0A: // Line Feed
         if (++m_cursorPos.y >= m_charCnt.y)
         {
             ASSERT(m_cursorPos.y == m_charCnt.y);
             m_cursorPos.y--;
-            scroll(1); // Shift the strings by one line
+            Scroll(1); // Shift the strings by one line
         }
-    }
-    else if (chr == 0x0d) // carriage return?
+        break;
+
+    case 0x0D: // Carriage return
         m_cursorPos.x = 0;
-    else if (chr == 0x08) // backspace?
-    {
+        break;
+
+    case 0x08: // Backspace
         if (--m_cursorPos.x < 0)
         {
             m_cursorPos.x = m_charCnt.x - 1;
@@ -177,29 +145,24 @@ int CIOWindow::PutC(int chr) // Print the character
             if (--m_cursorPos.y < 0)
             {
                 m_cursorPos.y = 0;
-                return 0;
+                return;
             }
         }
 
-        if (put(' ', m_cursorPos.x, m_cursorPos.y) < 0)
-            return -1;
+        Put(' ', m_cursorPos.x, m_cursorPos.y);
+        break;
 
-        Invalidate(m_cursorPos.x, m_cursorPos.y); // The area under the sign to be redrawn
+    default:
+        RawChar(chr);
+        break;
     }
-    else
-        return PutChr(chr);
-
-    return 0;
 }
 
 /*************************************************************************/
 
-int CIOWindow::PutChr(int chr) // print character (verbatim)
+void CIOWindow::RawChar(int chr) // print character (verbatim)
 {
-    if (put(chr, m_cursorPos.x, m_cursorPos.y) < 0)
-        return -1;
-
-    Invalidate(m_cursorPos.x, m_cursorPos.y); // The area under the sign to be redrawn
+    Put(chr, m_cursorPos.x, m_cursorPos.y);
 
     if (++m_cursorPos.x >= m_charCnt.x)
     {
@@ -209,69 +172,76 @@ int CIOWindow::PutChr(int chr) // print character (verbatim)
         {
             ASSERT(m_cursorPos.y == m_charCnt.y);
             m_cursorPos.y--;
-            scroll(1); // Shift the strings by one line
+            Scroll(1);
         }
     }
-
-    return 0;
 }
 
 /*************************************************************************/
 
-int CIOWindow::PutS(const char *str, int len/*= -1*/) // string of characters to print
+void CIOWindow::Scroll(int dy)
+{
+    if (dy > m_charCnt.y || dy < 0)
+        return;
+
+    // Line offset
+    memmove(m_memory, m_memory + dy * m_charCnt.y, (m_charCnt.y - dy) * m_charCnt.x);
+
+    // To the uncovered zero position
+    memset(m_memory + (m_charCnt.y - dy) * m_charCnt.x, 0, dy * m_charCnt.x);
+
+    // Redraw entire window
+    Refresh();
+}
+
+/*************************************************************************/
+
+void CIOWindow::PutStr(const wxString &str)
 {
     Freeze();
 
     // Ensure Thaw() is called when we exit.
-    auto _ = defer([this] (...) { Thaw(); });
+    auto _ = defer([this] () { Thaw(); });
 
-    for (int i = 0; i < len || len == -1; ++i)
-    {
-        if (str[i] == '\0')
-            break;
-
-        if (PutC(str[i]) < 0)
-            return -1;
-    }
-
-    return 0;
+    for (size_t i = 0; i < str.Length(); ++i)
+        PutChar(str[i]);
 }
 
 /*************************************************************************/
 
-bool CIOWindow::SetPosition(int x, int y) // Set the position for the text
+void CIOWindow::SetCursorPosition(const wxPoint &location)
 {
-    if (x > m_charCnt.x || y > m_charCnt.y || x < 0 || y < 0)
-        return false;
-
-    m_cursorPos.x = x;
-    m_cursorPos.y = y;
-
-    return true;
+    m_cursorPos.x = std::clamp(location.x, 0, m_charCnt.x - 1);
+    m_cursorPos.y = std::clamp(location.y, 0, m_charCnt.y - 1);
 }
 
 /*************************************************************************/
 
-void CIOWindow::GetPosition(int &x, int &y) // read position
-{
-    x = m_cursorPos.x;
-    y = m_cursorPos.y;
-}
-
-/*************************************************************************/
-
-bool CIOWindow::Cls() // clear the window
+void CIOWindow::Cls()
 {
     memset(m_memory, 0, m_charCnt.y * m_charCnt.x);
     m_cursorPos.x = m_cursorPos.y = 0;
     Refresh(); // Redraw the entire window
-
-    return true;
 }
 
 /*************************************************************************/
 
-int CIOWindow::Input() // input
+void CIOWindow::Paste()
+{
+    if (wxTheClipboard->Open())
+    {
+        // Ensure clipboard is closed when we exit.
+        auto _ = defer([this] () { wxTheClipboard->Close(); });
+
+        wxTextDataObject data;
+        wxTheClipboard->GetData(data);
+        m_InputBuffer.Paste(data.GetText());
+    }
+}
+
+/*************************************************************************/
+
+int CIOWindow::Input()
 {
     m_showCursor = true;
     //SetFocus();
@@ -280,40 +250,20 @@ int CIOWindow::Input() // input
 }
 
 /*************************************************************************/
+// CIOWindow message handlers
+/*************************************************************************/
 
-/*
-int CIOWindow::Input() // input
+void CIOWindow::InitEvents()
 {
-  if (theApp.m_global.GetSimulator()->IsBroken())	// execution broken?
-    return -1;
-
-  m_bCursorOn = true;
-  m_bCursorVisible = true;
-  m_uTimer = SetTimer(1, 250, 0);
-  DrawCursor();
-
-  SetFocus();
-
-  RunModalLoop();
-
-  KillTimer(m_uTimer);
-  m_uTimer = 0;
-  if (m_bCursorVisible)
-  {
-    m_bCursorVisible = false;
-    DrawCursor();
-  }
-  m_bCursorOn = false;
-
-  if (theApp.m_global.GetSimulator()->IsBroken())	// execution broken?
-    AfxGetMainWnd()->SetFocus();
-
-  return m_nModalResult;
+    Bind(wxEVT_PAINT, &CIOWindow::OnPaint, this);
+    Bind(wxEVT_CLOSE_WINDOW, &CIOWindow::OnClose, this);
+    Bind(wxEVT_TIMER, &CIOWindow::BlinkCursor, this);
+    Bind(wxEVT_KEY_DOWN, &CIOWindow::OnKeyDown, this);
+    Bind(wxEVT_CHAR, &CIOWindow::OnChar, this);
+    Bind(wxEVT_COMMAND_TEXT_PASTE, [this] (auto) { Paste(); });
 }
-*/
 
 /*************************************************************************/
-// CIOWindow message handlers
 
 void CIOWindow::OnPaint(wxPaintEvent &)
 {
@@ -322,6 +272,8 @@ void CIOWindow::OnPaint(wxPaintEvent &)
     PrepareDC(dc);
     Draw(dc);
 }
+
+/*************************************************************************/
 
 void CIOWindow::Draw(wxDC &dc)
 {
@@ -383,6 +335,17 @@ void CIOWindow::DrawCursor(wxDC &dc)
 
 /*************************************************************************/
 
+void CIOWindow::BlinkCursor(wxTimerEvent &)
+{
+    if (!m_showCursor)
+        return; // Nothing to do
+
+    m_cursorBlinkState = !m_cursorBlinkState;
+    Invalidate(m_cursorPos); // Force redraw of the cursor
+}
+
+/*************************************************************************/
+
 void CIOWindow::OnClose(wxCloseEvent &)
 {
     // Don't destroy, just hide.
@@ -410,7 +373,7 @@ void CIOWindow::GetColors(wxColour &text, wxColour &background)
 
 afx_msg LRESULT CIOWindow::OnStartDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
-    VERIFY(Cls());
+    Cls();
 
 #if false
 
@@ -440,151 +403,26 @@ afx_msg LRESULT CIOWindow::OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 
 /*************************************************************************/
 
-afx_msg LRESULT CIOWindow::OnCls(WPARAM /*wParam*/, LPARAM /* lParam */)
+void CIOWindow::OnKeyDown(wxKeyEvent &e)
 {
-    VERIFY(Cls());
-    return 1;
-}
-
-/*************************************************************************/
-
-afx_msg LRESULT CIOWindow::OnPutC(WPARAM wParam, LPARAM lParam)
-{
-    UNUSED(wParam);
-
-    if (lParam == 0)
-        VERIFY(PutC(int(uint8_t(wParam))) == 0);
-    else if (lParam == 1)
-        VERIFY(PutChr(int(uint8_t(wParam))) == 0);
-    else if (lParam == 2)
-        VERIFY(PutH(int(uint8_t(wParam))) == 0);
-    else
-        ASSERT(false);
-
-    return 1;
-}
-
-/*************************************************************************/
-
-afx_msg LRESULT CIOWindow::OnInput(WPARAM /*wParam*/, LPARAM /* lParam */)
-{
-    return Input();
-}
-
-/*************************************************************************/
-
-afx_msg LRESULT CIOWindow::OnPosition(WPARAM wParam, LPARAM lParam)
-{
-    bool bXPos = !!(wParam & 1);
-
-    if (wParam & 2) // get pos?
+    if (e.GetKeyCode() == wxKeyCode::WXK_INSERT)
     {
-        return bXPos ? m_cursorPos.x : m_cursorPos.y;
-    }
-    else // set pos
-    {
-        int x = m_cursorPos.x;
-        int y = m_cursorPos.y;
-
-        if (bXPos)
-            x = lParam;
-        else
-            y = lParam;
-
-        if (x >= m_charCnt.x)
-            x = m_charCnt.x - 1;
-
-        if (y >= m_charCnt.y)
-            y = m_charCnt.y - 1;
-
-        if (x != m_cursorPos.x || y != m_cursorPos.y)
-        {
-            if (m_bCursorVisible && m_showCursor)
-            {
-                Refresh();
-            }
-
-            m_cursorPos.x = x;
-            m_cursorPos.y = y;
-
-            if (m_bCursorVisible && m_showCursor)
-            {
-                Refresh();
-            }
-        }
-    }
-
-    return 0;
-}
-
-/*************************************************************************/
-
-void CIOWindow::OnTimer(UINT nIDEvent)
-{
-    UNUSED(nIDEvent);
-
-    m_bCursorVisible = !m_bCursorVisible;
-
-    Refresh();
-
-    if (!m_bCursorVisible)
-        m_showCursor = false;
-
-    //  CMiniFrameWnd::OnTimer(nIDEvent);
-}
-
-/*************************************************************************/
-
-void CIOWindow::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-    UNUSED(nChar);
-    UNUSED(nRepCnt);
-    UNUSED(nFlags);
-
-    char c = (char)nChar;
-
-    if (c)
-        m_InputBuffer.PutChar(c);
-
-    //  EndModalLoop(nChar);
-}
-
-/*************************************************************************/
-
-bool CIOWindow::ContinueModal()
-{
-    if (wxGetApp().m_global.GetSimulator()->IsBroken()) // execution broken?
-        return false;
-
-    //return CMiniFrameWnd::ContinueModal();
-    return true;
-}
-
-/*************************************************************************/
-
-void CIOWindow::Paste()
-{
-#if 0
-    if (!::IsClipboardFormatAvailable(CF_TEXT))
+        Paste();
         return;
-
-    if (!OpenClipboard())
-        return;
-
-    if (HANDLE hGlb = ::GetClipboardData(CF_TEXT))
-    {
-        if (VOID *pStr = ::GlobalLock(hGlb))
-        {
-            m_InputBuffer.Paste(reinterpret_cast<char *>(pStr));
-            GlobalUnlock(hGlb);
-        }
     }
 
-    CloseClipboard();
-#endif
+    e.Skip();
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
+
+void CIOWindow::OnChar(wxKeyEvent &e)
+{
+    m_InputBuffer.PutChar(e.GetKeyCode());
+}
+
+/*************************************************************************/
+/*************************************************************************/
 
 char CInputBuffer::GetChar() // get next available character (returns 0 if there are no chars)
 {
@@ -601,6 +439,8 @@ char CInputBuffer::GetChar() // get next available character (returns 0 if there
     return c;
 }
 
+/*************************************************************************/
+
 void CInputBuffer::PutChar(char c) // places char in the buffer (char is ignored if there is no space)
 {
     char *pNext = m_pHead + 1;
@@ -615,6 +455,8 @@ void CInputBuffer::PutChar(char c) // places char in the buffer (char is ignored
     }
 }
 
+/*************************************************************************/
+
 void CInputBuffer::Paste(const char *pcText)
 {
     int nMax = std::min(strlen(pcText), BUF_SIZE);
@@ -623,70 +465,4 @@ void CInputBuffer::Paste(const char *pcText)
         PutChar(pcText[i]);
 }
 
-void CIOWindow::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-    UNUSED(nChar);
-    UNUSED(nRepCnt);
-    UNUSED(nFlags);
-
-#if 0
-    if (nChar == VK_INSERT)
-        Paste();
-    else
-        CMiniFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);
-#endif
-}
-
-#if 0
-BOOL CIOWindow::PreTranslateMessage(MSG *pMsg)
-{
-    if (GetFocus() == this)
-    {
-        if (pMsg->message == WM_KEYDOWN || pMsg->message == WM_KEYUP)
-        {
-            if (pMsg->wParam >= VK_SPACE && pMsg->wParam <= 'Z')
-            {
-                if (::GetKeyState(VK_CONTROL) < 0 && ::GetKeyState(VK_SHIFT) >= 0)
-                {
-                    // skip the rest of PreTranslateMessage() functions, cause they will
-                    // eat some of those messages (as accel shortcuts); translate and
-                    // dispatch them now
-
-                    ::TranslateMessage(pMsg);
-                    ::DispatchMessage(pMsg);
-                    return true;
-                }
-            }
-        }
-    }
-
-    return CMiniFrameWnd::PreTranslateMessage(pMsg);
-}
-#endif
-
-#if 0
-void CIOWindow::OnContextMenu(CWnd *pWnd, CPoint point)
-{
-    CMenu menu;
-
-    if (!menu.LoadMenu(IDR_POPUP_TERMINAL))
-        return;
-
-    CMenu *pPopup = menu.GetSubMenu(0);
-    ASSERT(pPopup);
-
-    if (point.x == -1 && point.y == -1)		// menu wywo�ane przy pomocy klawiatury?
-    {
-        wxRect rect = GetClientRect();
-        ClientToScreen(rect);
-        point = rect.CenterPoint();
-    }
-
-    pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
-}
-#endif
-
-void CIOWindow::OnPaste()
-{
-    Paste();
-}
+/*************************************************************************/
