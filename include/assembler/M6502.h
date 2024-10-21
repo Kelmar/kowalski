@@ -912,10 +912,8 @@ public:
     Stat report_error(Stat err)
     {
         const std::string msg = GetErrMsg(err);
-        const std::string &file = text->GetFileName();
-        int lineNumber = text->GetLineNo();
-
-        m_console.write(fmt::format("{0}({1}): error {2}: {3}\r\n", file, lineNumber, (int)err, msg).c_str());
+        m_console.write(msg.c_str());
+        m_console.write("\r\n");
         return err;
     }
 

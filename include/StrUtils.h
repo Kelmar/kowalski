@@ -288,6 +288,15 @@ namespace str
     {
         return [&s](const std::regex &pattern) { return std::regex_match(s, pattern); };
     }
+
+    /**
+     * @brief Wrapper around fmt::format() for wxString
+     */
+    template <typename... T>
+    auto format(wxString f, T&&... args)
+    {
+        return fmt::vformat(f.ToStdString(), fmt::make_format_args(args...));
+    }
 }
 
 namespace file

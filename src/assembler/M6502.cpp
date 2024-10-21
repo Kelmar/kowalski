@@ -3288,84 +3288,62 @@ void CAsm6502::generate_debug()
 
 std::string CAsm6502::GetErrMsg(Stat stat)
 {
-    if ((stat < OK || stat >= ERR_LAST) && stat != STAT_USER_DEF_ERR)
+    size_t statVal = static_cast<int>(stat);
+
+    if ((statVal >= CAsm::ERROR_MESSAGES_COUNT) && (stat != STAT_USER_DEF_ERR))
     {
         ASSERT(false); // Invalid value 'stat'
-        return std::string(_("UNKNOWN ERROR CODE"));
+        return str::format(_("UNKNOWN ERROR CODE: %d"), (int)stat);
     }
 
-    return std::string("TODO: IMPLEMENT ERROR MESSAGE LOOKUP");
-
-#if 0
+    int lineNumber = text->GetLineNo();
     std::string filename = text->GetFileName();
 
-    wxString msg, form, txt;
+    CAsm::ErrorFormat errorFormat = CAsm::ErrorFormat::DefaultFull;
 
-    //if (!text->IsPresent()) // Line assembly?
-    if (check_line)
-    {
-        ASSERT(stat > 0);
-
-        if (form.LoadString(IDS_ASM_FORM3) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
-            msg.Printf(form, (int)stat, txt);
-
-        return msg.ToStdString();
-    }
+    std::string message = stat == STAT_USER_DEF_ERR ? "" : CAsm::ERROR_MESSAGES[statVal];
 
     switch (stat)
     {
-    case OK:
-        msg.LoadString(IDS_ASM_ERR_MSG_FIRST);
+    case CAsm::Stat::ERR_FILE_READ:
+        errorFormat = CAsm::ErrorFormat::NoLineNumber;
         break;
 
-    case ERR_OUT_OF_MEM:
-        if (form.LoadString(IDS_ASM_FORM3) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
-            msg.Printf(form, (int)stat, txt);
+    case CAsm::Stat::ERR_OUT_OF_MEM:
+        errorFormat = CAsm::ErrorFormat::NoFileNoLine;
         break;
 
-    case ERR_FILE_READ:
-        if (form.LoadString(IDS_ASM_FORM2) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
-            msg.Printf(form, (int)stat, txt, (LPCTSTR)text->GetFileName());
+    case CAsm::Stat::ERR_UNDEF_LABEL:
+    case CAsm::Stat::ERR_PHASE:
+    case CAsm::Stat::ERR_LABEL_REDEF:
+        errorFormat = CAsm::ErrorFormat::FullWithIdent;
         break;
 
-    case ERR_UNDEF_LABEL: // Undefined label
-    case ERR_PHASE:
-    case ERR_LABEL_REDEF: // Label already defined
-        if (form.LoadString(IDS_ASM_FORM4) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
-            msg.Printf(form, (int)stat, txt, (LPCTSTR)err_ident, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
-        break;
-
-    case STAT_USER_DEF_ERR:
-        if (!user_error_text.IsEmpty())
+    case CAsm::Stat::STAT_USER_DEF_ERR:
+        if (!user_error_text.empty())
         {
-            if (form.LoadString(IDS_ASM_FORM5))
-                msg.Printf(form, (LPCTSTR)user_error_text, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
+            message = user_error_text;
+            errorFormat = CAsm::ErrorFormat::UserError;
         }
         else
         {
-            if (form.LoadString(IDS_ASM_FORM6))
-                msg.Printf(form, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
+            errorFormat = CAsm::ErrorFormat::UnspecifiedUserError;
         }
         break;
 
     default:
-        if (form.LoadString(IDS_ASM_FORM1) && txt.LoadString(IDS_ASM_ERR_MSG_FIRST + stat))
-        {
-            try
-            {
-                msg.Printf(form, (int)stat, txt, text->GetLineNo() + 1, (LPCTSTR)text->GetFileName());
-            }
-            catch (CInvalidArgException *)
-            {
-                form.LoadString(IDS_ASM_FORM3);
-                msg.Printf(form, (int)stat, txt);
-            }
-        }
         break;
     }
 
-    return msg;
-#endif
+    wxString format = CAsm::ERROR_FORMATS[(int)errorFormat];
+
+    return str::format(_(format),
+        fmt::arg("file", filename),
+        fmt::arg("line_number", lineNumber),
+        fmt::arg("error_code", statVal),
+        fmt::arg("message", _(message).ToStdString()),
+        fmt::arg("ident", err_ident)
+    );
 }
 
 /*************************************************************************/

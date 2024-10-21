@@ -40,6 +40,21 @@ class CAsm // base class - type definitions
 public:
     static const uint32_t INVALID_ADDRESS = 0xFFFF'FFFF;
 
+    static const char *ERROR_MESSAGES[];
+    static const size_t ERROR_MESSAGES_COUNT;
+
+    static const char *ERROR_FORMATS[];
+
+    enum class ErrorFormat
+    {
+        DefaultFull = 0,
+        NoLineNumber = 1,
+        NoFileNoLine = 2,
+        FullWithIdent = 3,
+        UserError = 4,
+        UnspecifiedUserError = 5
+    };
+
     enum Stat
     {
         STAT_INCLUDE = -999,
