@@ -1266,7 +1266,7 @@ CAsm::SymStat CSym6502::perform_command()
 			ctx.s = ctx.x;
 			theApp.m_global.m_bSRef = ctx.s;
 		}else {
-			ctx.s = ctx.x & 0xff;  
+			ctx.s = 0x100 + (ctx.x & 0xff);  //****fix
 			theApp.m_global.m_bSRef = 0x1ff;
 		}
 
