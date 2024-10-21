@@ -18,19 +18,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-/*************************************************************************/
-
-#ifdef USE_CRYSTAL_EDIT
-#include "crystal/CCrystalTextBuffer.h"
-#endif
+#ifndef DOC_6502_ASM_H__
+#define DOC_6502_ASM_H__
 
 /*************************************************************************/
 
 class CSrc6502Doc : public wxDocument
 {
 private:
-    wxString m_text;
-
     void BindViews();
 
     CSrc6502View *GetSourceView();
@@ -41,7 +36,6 @@ protected:
     wxDECLARE_DYNAMIC_CLASS(CSrc6502Doc);
     wxDECLARE_NO_COPY_CLASS(CSrc6502Doc);
 
-// Attributes
 public:
     /* constructor */ CSrc6502Doc();
     virtual          ~CSrc6502Doc();
@@ -50,14 +44,11 @@ public:
 
     bool DoOpenDocument(const wxString &filename) override;
     bool DoSaveDocument(const wxString &filename) override;
-
-#if 0
-    virtual bool OnNewDocument();
-    virtual void Serialize(CArchive &ar);
-    virtual bool DeleteContents();
-    virtual bool OnOpenDocument(const char *pathName);
-    virtual bool OnSaveDocument(const char *pathName);
-#endif
 };
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
+
+#endif /* DOC_6502_ASM_H__ */
+
+/*************************************************************************/
+

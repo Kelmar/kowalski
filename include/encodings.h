@@ -22,37 +22,16 @@
  */
 /*************************************************************************/
 
-#include "StdAfx.h"
-#include "Events.h"
-#include "MainFrm.h"
-#include "M6502.h"
-
-#include "AsmThread.h"
+#ifndef ENCODINGS_6502_H__
+#define ENCODINGS_6502_H__
 
 /*************************************************************************/
 
-wxThread::ExitCode AsmThread::Entry()
-{
-    io::output &out = m_mainFrm->console()->GetOutput("assembler");
-    COutputMem &mainMem = wxGetApp().m_global.GetMemory();
-    CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().m_global.GetDebug();
+#include "encoding/CharEncoding.h"
+#include "encoding/CodePage437.h"
 
-    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, asmMem.get(), debug));
+/*************************************************************************/
 
-    CAsm::Stat res = assembler->assemble();
-
-    if (res != CAsm::Stat::OK)
-        assembler->report_error(res);
-
-    // Copy result to actual memory.
-    mainMem = *asmMem;
-
-    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
-
-    wxQueueEvent(m_mainFrm, event.Clone());
-
-    return reinterpret_cast<wxThread::ExitCode>(res);
-}
+#endif /* ENCODINGS_6502_H__ */
 
 /*************************************************************************/

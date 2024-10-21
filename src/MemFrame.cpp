@@ -24,9 +24,71 @@
 
 #include "StdAfx.h"
 
+#include "PersistEx.h"
+
 #include "MemFrame.h"
 #include "FormatNums.h"
 
+/*************************************************************************/
+
+#if false
+
+class PersistentMemoryFrame : public PersistentExtended
+{
+public:
+    PersistentMemoryFrame(MemoryFrame *frame)
+        : PersistentExtended(frame)
+    {
+    }
+
+    MemoryFrame *Get() const
+    {
+        return static_cast<MemoryFrame *>(GetObject());
+    }
+
+    virtual wxString GetName() const
+    {
+        return "MemoryFrame";
+    }
+
+    virtual wxString GetKind() const
+    {
+        return "MemoryFrame";
+    }
+
+    virtual void Save() const
+    {
+        MemoryFrame *frm = Get();
+
+        wxSize sz = frm->GetSize();
+
+        SaveSize("Size", sz);
+    }
+
+    virtual bool Restore()
+    {
+        MemoryFrame *frm = Get();
+
+        wxSize sz = wxDefaultSize;
+
+        RestoreSize("Size", &sz);
+
+        frm->SetSize(sz);
+
+        return true;
+    }
+};
+
+/*************************************************************************/
+
+wxPersistentObject *wxCreatePersistentObject(MemoryFrame *frame)
+{
+    return new PersistentMemoryFrame(frame);
+}
+
+#endif
+
+/*************************************************************************/
 /*************************************************************************/
 
 MemoryFrame::MemoryFrame(wxWindow *parent)
@@ -43,15 +105,18 @@ MemoryFrame::MemoryFrame(wxWindow *parent)
 
     wxXmlResource::Get()->AttachUnknownControl("m_hexView", m_hexView);
 
-    m_hexView->SetMemory(wxGetApp().m_global.GetMem());
+    m_hexView->SetMemory(&wxGetApp().m_global.GetMemory());
 
     m_jumpEdit->SetValue("");
 
     BindEvents();
+
+    //wxPersistenceManager::Get().RegisterAndRestore(this);
 }
 
 MemoryFrame::~MemoryFrame()
 {
+    //wxPersistenceManager::Get().SaveAndUnregister(this);
 }
 
 /*************************************************************************/

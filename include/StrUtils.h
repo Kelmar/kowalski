@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <string>
+#include <string_view>
 #include <sstream>
 #include <cctype>
 #include <stdexcept>
@@ -103,7 +104,7 @@ namespace str
     /**
      * @brief Convert string of 2 hex character into single byte.
      */
-    inline uint8_t tryByteFromHex(const std::string &s, _Out_ uint8_t &out)
+    inline bool tryByteFromHex(std::string_view s, _Out_ uint8_t &out)
     {
         out = 0;
 
@@ -125,18 +126,29 @@ namespace str
         return true;
     }
 
+    inline uint8_t parse_hex(std::string_view s)
+    {
+        uint8_t out;
+
+        if (tryByteFromHex(s, _Out_ out))
+            return out;
+
+        return 0;
+    }
+
     /**
      * @brief Base class for string manipulation operators.
      */
+    template <typename TRes = std::string>
     struct basic_operator
     {
-        virtual std::string operator()(const std::string &s) const = 0;
+        virtual TRes operator()(const std::string &s) const = 0;
     };
 
     /**
      * @brief Trims space on the left side of a string.
      */
-    struct ltrim_t : public basic_operator
+    struct ltrim_t : public basic_operator<>
     {
         std::string operator ()(const std::string &s) const override
         {
@@ -149,7 +161,7 @@ namespace str
     /**
      * @brief Trims space on the right side of a string.
      */
-    struct rtrim_t : public basic_operator
+    struct rtrim_t : public basic_operator<>
     {
         std::string operator ()(const std::string &s) const override
         {
@@ -168,7 +180,7 @@ namespace str
     /**
      * @brief Trims both sides of a string.
      */
-    struct trim_t : public basic_operator
+    struct trim_t : public basic_operator<>
     {
         std::string operator ()(const std::string &s) const override
         {
@@ -182,7 +194,7 @@ namespace str
     /**
      * @brief Runs a conversion function over a string and returns the result.
      */
-    struct transform_t : public basic_operator
+    struct transform_t : public basic_operator<>
     {
     private:
         std::function<char(char)> fn;
@@ -210,7 +222,7 @@ namespace str
      * @param filePattern The file pattern we're matching against
      * @return The regular expression pattern
      */
-    struct filepat_transform_t : public basic_operator
+    struct filepat_transform_t : public basic_operator<>
     {
     public:
         std::string operator()(const std::string &s) const override
@@ -236,7 +248,7 @@ namespace str
      * @brief Convert a container of items into a single string separated by separator.
      */
     template <std::ranges::forward_range TRange>
-    inline std::string join(const std::string &separator, TRange &&container)
+    inline std::string join(std::string_view separator, TRange &&container)
     {
         std::stringstream rval;
         bool first = true;
@@ -310,8 +322,14 @@ std::ostream &operator <<(std::ostream &stream, const T &item)
     return stream;
 }
 
+/**
+ * @brief Operator for allowing a chain of string operations.
+ * @param s The string to manipulate
+ * @param f The function to execute on the string
+ * @return The resulting mutated string
+ */
 inline
-std::string operator |(const std::string &s, const str::basic_operator &f)
+std::string operator |(const std::string &s, const str::basic_operator<> &f)
 { return f(s); }
 
 /*************************************************************************/

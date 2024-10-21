@@ -83,10 +83,6 @@ public:
 
 /*************************************************************************/
 
-
-
-/*************************************************************************/
-
 class BinaryCodeTemplate : public CodeTemplate
 {
 protected:
@@ -104,11 +100,9 @@ public:
 
 /*************************************************************************/
 
-class ProjectManager : public wxEvtHandler
+class ProjectManager : public wxEvtHandler, public Singleton<ProjectManager>
 {
 private:
-    static ProjectManager *s_self;
-
     std::vector<std::shared_ptr<CodeTemplate>> m_templates;
 
     void InitCodeTemplates();
@@ -118,14 +112,6 @@ private:
 public:
     /* constructor */ ProjectManager();
     virtual          ~ProjectManager();
-
-    static ProjectManager &Get()
-    {
-        ASSERT(s_self);
-        return *s_self;
-    }
-
-    static ProjectManager *Ptr() { return s_self; }
 
     template <typename T>
     void AddTemplate()

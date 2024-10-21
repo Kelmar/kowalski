@@ -49,7 +49,6 @@ private:
 
     void drawMark(wxDC &dc, int line, MarkType type, bool scroll);
     //void draw_breakpoints(HDC hDC = NULL);
-    int ScrollToLine(int line, int &height, bool scroll = false);
 
     //void DrawMark(int line, MarkType type, bool scroll = false, HDC hDC = NULL);
 
@@ -120,8 +119,6 @@ public:
 public:
     void OnDraw(wxDC *dc) override;
 
-    //virtual bool PreCreateWindow(CREATESTRUCT& cs);
-    virtual void OnInitialUpdate();
 protected:
 #if REWRITE_TO_WX_WIDGET
     virtual bool OnPreparePrinting(CPrintInfo *pInfo);

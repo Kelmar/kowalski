@@ -556,9 +556,12 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
     m_auiManager.AddPane(m_output, outputInfo);
     m_auiManager.AddPane(m_memory, memoryInfo);
 
+    m_ioWindow = new CIOWindow(this);
+
     m_auiManager.Update();
     m_output->Update();
     m_memory->Update();
+    m_ioWindow->Update();
 }
 
 CMainFrame::~CMainFrame()
@@ -587,10 +590,12 @@ void CMainFrame::BindEvents()
 
     // View menu bindings
     BindPaneToggle(evID_SHOW_MEMORY, "memory");
+    //BindPaneToggle(evID_SHOW_IOWINDOW, "iowindow");
     BindPaneToggle(evID_SHOW_OUTPUT, "output");
 
     Bind(wxEVT_MENU, &CMainFrame::OnShowLog, this, evID_SHOW_LOG);
     Bind(wxEVT_MENU, &CMainFrame::OnShowTest, this, evID_SHOW_TEST);
+    Bind(wxEVT_MENU, &CMainFrame::OnShowIO, this, evID_SHOW_IOWINDOW);
 
     // Simulator menu bindings
     Bind(wxEVT_MENU, &CMainFrame::OnAssemble, this, evID_ASSEMBLE);
@@ -641,6 +646,13 @@ void CMainFrame::OnShowTest(wxCommandEvent &)
 {
     auto child = new CChildFrame(this, wxID_ANY, "Test Window");
     child->Show();
+}
+
+/*************************************************************************/
+
+void CMainFrame::OnShowIO(wxCommandEvent &)
+{
+    m_ioWindow->Show(!m_ioWindow->IsVisible());
 }
 
 /*************************************************************************/
@@ -758,6 +770,7 @@ void CMainFrame::InitMenu()
     view->Append(evID_SHOW_REGS, _("Registers\tAlt+1"));
     view->Append(evID_SHOW_MEMORY, _("&Memory\tAlt+2"));
     view->Append(evID_SHOW_OUTPUT, _("&Output"));
+    view->Append(evID_SHOW_IOWINDOW, _("&IO Window"));
     view->Append(evID_SHOW_TEST, _("Test Window"));
 
     // Simulator Menu
@@ -2020,7 +2033,7 @@ int CMainFrame::Options(int page)
                 break;
 
             case 1: // Simulator
-                m_IOWindow.Resize();
+                //m_ioWindow->SetSize(0, 0);
                 break;
 
             case 2: // debugger
@@ -2250,14 +2263,6 @@ void CMainFrame::OnUpdateEditorOpt(CCmdUI *pCmdUI)
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnViewIOWindow()
-{
-    if (!wxGetApp().m_global.IsDebugging()) // No working debugger?
-        return;
-
-    m_IOWindow.Show(!m_IOWindow.IsShown());
-}
-
 void CMainFrame::OnUpdateViewIOWindow(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
@@ -2297,12 +2302,7 @@ void CMainFrame::OnUpdateFileLoadCode(CCmdUI *pCmdUI)
 void CMainFrame::ExitDebugMode()
 {
     if (wxGetApp().m_global.IsProgramRunning())
-    {
-        if (m_IOWindow.IsWaiting())
-            m_IOWindow.ExitModalLoop();
-
         wxGetApp().m_global.GetSimulator()->AbortProg(); // Interrupt the running program
-    }
 
     OnSymDebugStop();
 }
@@ -2420,9 +2420,9 @@ bool CMainFrame::OnCmdMsg(UINT nID, int nCode, void *pExtra, AFX_CMDHANDLERINFO 
 
 void CMainFrame::UpdateAll()
 {
-    this->Refresh();
+    Refresh();
 
-    m_IOWindow.Refresh();
+    m_ioWindow->Refresh();
     m_Memory.Refresh();
     m_ZeroPage.Refresh();
 

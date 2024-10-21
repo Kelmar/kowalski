@@ -23,6 +23,7 @@
 /*************************************************************************/
 
 #include "StdAfx.h"
+#include "StrUtils.h"
 
 #include <iostream>
 #include <fstream>
@@ -69,11 +70,6 @@ size_t Archive::read(std::span<uint8_t> buffer)
     return std::fread(buffer.data(), 1, buffer.size(), m_file);
 }
 
-void Archive::write(const std::span<uint8_t> &buffer)
-{
-    m_size += std::fwrite(buffer.data(), 1, buffer.size(), m_file);
-}
-
 /*************************************************************************/
 /*************************************************************************/
 
@@ -87,14 +83,94 @@ TextArchive::TextArchive(const std::string &filename,
 
 /*************************************************************************/
 
-std::string TextArchive::readLine()
+char TextArchive::getChar()
 {
-    return "";
+    if (m_buffer.empty())
+    {
+        uint8_t buf[1024];
+        std::span<uint8_t> b(buf, sizeof(buf));
+        size_t sz = read(b);
+
+        if (sz > 0)
+            m_buffer.enqueue(b.subspan(0, sz));
+    }
+
+    return static_cast<char>(m_buffer.dequeue());
 }
 
-void TextArchive::writeLine(const std::string &str)
+/*************************************************************************/
+
+char TextArchive::peek()
 {
-    UNUSED(str);
+    if (m_buffer.empty())
+    {
+        uint8_t buf[1024];
+        std::span<uint8_t> b(buf, sizeof(buf));
+        size_t sz = read(b);
+
+        if (sz > 0)
+            m_buffer.enqueue(b.subspan(0, sz));
+    }
+
+    return static_cast<char>(m_buffer.peek());
+}
+
+/*************************************************************************/
+
+std::string TextArchive::readLine()
+{
+    std::string rval;
+    rval.reserve(1024);
+
+    while (!eof())
+    {
+        char c = getChar();
+
+        if (c == '\0')
+            break;
+
+        rval += c;
+
+        if (c == '\r')
+        {
+            // Check for DOS line ending
+            c = peek();
+
+            if (c == '\n')
+                rval += getChar(); // Consume line feed as well.
+
+            break;
+        }
+
+        if (c == '\n')
+            break;
+    }
+
+    return rval;
+}
+
+/*************************************************************************/
+
+void TextArchive::writeLine(const std::string &s)
+{
+    std::string line = s | str::rtrim; // Make sure there is no extra line endings
+
+    switch (m_lineEnding)
+    {
+    case LineEnding::DOS:
+        line += "\r\n";
+        break;
+
+    case LineEnding::UNIX:
+        line += "\n";
+        break;
+
+    case LineEnding::MAC:
+        line += "\r";
+        break;
+    }
+
+    write(line);
 }
 
 /*************************************************************************/

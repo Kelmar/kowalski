@@ -36,7 +36,7 @@ class CGlobal
 private:
     UINT m_uAddrBusWidth;           // width of the address bus
     bool m_bCodePresent;            // true -> after successful assembly
-    COutputMem m_ProgMem;           // memory written in the assembly process
+    COutputMem m_memory;           // memory written in the assembly process
     CDebugInfo m_Debug;             // startup information for the simulator
     uint32_t m_uOrigin;             // start of program 6502
     CSym6502 *m_pSym6502;           // simulator
@@ -53,7 +53,6 @@ public:
     uint16_t m_bSRef; // Stack pointer reference
     
     uint8_t m_bHelpFile;            // ^^ help file type
-    COutputMem m_Mem;               // memory for the object code and the simulator
     bool m_bGenerateListing;        // generate listing during assembly?
     std::string m_strListingFile;   // listing file
     CIntGenerator m_IntGenerator;   // interrupt request generator data
@@ -82,31 +81,14 @@ public:
         return &m_Debug;
     }
 
-    COutputMem *GetMemForAsm() // Memory for the object code (assembly)
-    {
-        m_ProgMem.Clear();
-        return &m_ProgMem;
-    }
-
-    COutputMem *GetMemForSym() // Memory with object code (simulator)
-    {
-        if (m_bCodePresent)
-        {
-            m_Mem = m_ProgMem;
-            return &m_Mem;
-        }
-        return NULL;
-    }
-
     CMarkArea *GetMarkArea()
     {
         return &m_MarkArea;
     }
 
-    COutputMem *GetMem() // Memory with the result code
-    {
-        return &m_Mem;
-    }
+    COutputMem &GetMemory() { return m_memory; }
+
+    const COutputMem &GetMemory() const { return m_memory; }
 
     uint32_t GetStartAddr() // Beginning of the program
     {
@@ -140,8 +122,6 @@ public:
 
     void SetCodePresence(bool present)
     {
-        if (present)
-            m_Mem = m_ProgMem;
         m_bCodePresent = present;
     }
 

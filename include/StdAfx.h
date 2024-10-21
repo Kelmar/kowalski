@@ -96,6 +96,7 @@ typedef wxOutputStream DocOStream;
 #include "Except.h"
 #include "Utils.h"
 #include "StrUtils.h"
+#include "Singleton.h"
 
 #include "wxExtra.h"
 

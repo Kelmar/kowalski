@@ -26,6 +26,67 @@
 #define ARCHIVE_H__
 
 /*************************************************************************/
+
+class Buffer
+{
+private:
+    std::vector<uint8_t> m_inner;
+    size_t m_head;
+    size_t m_tail;
+
+public:
+    /* constructor */ Buffer()
+        : m_inner()
+        , m_head(0)
+        , m_tail(0)
+    {
+    }
+
+    virtual ~Buffer()
+    {
+    }
+
+    size_t size() const { return m_tail - m_head; }
+    bool empty() const { return size() == 0; }
+
+    void enqueue(std::ranges::input_range auto &&range)
+    {
+        if (m_head == m_tail)
+            m_head = m_tail = 0;
+
+        size_t needSz = m_tail + range.size();
+
+        if (m_inner.capacity() < needSz)
+            m_inner.reserve(needSz);
+
+        auto i = m_inner.begin() + m_tail;
+
+        m_inner.insert(i, range.begin(), range.end());
+        m_tail = needSz;
+    }
+
+    uint8_t peek() const 
+    {
+        if (m_head < m_tail)
+            return m_inner[m_head];
+
+        return 0;
+    }
+
+    uint8_t dequeue()
+    {
+        if (m_head < m_tail)
+        {
+            int id = m_head;
+            ++m_head;
+            return m_inner[id];
+        }
+
+        return 0;
+    }
+};
+
+/*************************************************************************/
 /**
  * @brief Class for working with files.
  */
@@ -67,7 +128,7 @@ public:
      * @brief Returns flag indicating if the end of the file has been reached.
      * @remarks Only valid if file is open for reading.
      */
-    bool eof() const { return std::feof(m_file); }
+    virtual bool eof() const { return std::feof(m_file); }
 
     /**
      * @brief Returns the size of the file in bytes.
@@ -79,8 +140,26 @@ public:
     // Read raw data into buffer
     size_t read(std::span<uint8_t> buffer);
 
-    // Write raw buffer data
-    void write(const std::span<uint8_t> &buffer);
+    // Write data from an interator pair.
+    template <class TItr>
+    void write(TItr begin, TItr end)
+    {
+        std::vector<uint8_t> buf;
+        std::ranges::copy(begin, end, std::back_inserter(buf));
+        m_size += std::fwrite(buf.data(), 1, buf.size(), m_file);
+    }
+
+    // https://devblogs.microsoft.com/oldnewthing/20190619-00/?p=102599
+
+    // Write data from a container of uint8_t values.
+    template<typename C,
+        typename T = std::decay_t<decltype(*begin(std::declval<C>()))>,
+        typename = std::enable_if_t<std::is_convertible_v<T, uint8_t>>
+    >
+    void write(C const &values)
+    {
+        write(values.begin(), values.end());
+    }
 };
 
 /*************************************************************************/
@@ -105,14 +184,34 @@ public:
 
 private:
     LineEnding m_lineEnding;
+    Buffer m_buffer;
+
+    char getChar();
+    char peek();
 
 public:
     TextArchive(const std::string &filename,
         Archive::Mode mode,
         LineEnding lineEnding = LE_DEFAULT);
 
+    virtual bool eof() const { return m_buffer.empty() && Archive::eof(); }
+
+    /**
+     * @brief Read a single line of text from the archive.
+     * @return The line read or an empty string.
+     * @remarks
+     * The line ending is left at the end of the string.
+     */
     std::string readLine();
 
+    /**
+     * @brief Writes a line of text to the archive.
+     * @param line The string to write.
+     * @remarks
+     * Line endings are added.  If the line already has a line ending then it
+     * is stripped and converted to the type  given in the lineEnding parameter
+     * of the constructor.
+     */
     void writeLine(const std::string &line);
 };
 

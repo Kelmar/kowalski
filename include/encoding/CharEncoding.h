@@ -22,37 +22,37 @@
  */
 /*************************************************************************/
 
-#include "StdAfx.h"
-#include "Events.h"
-#include "MainFrm.h"
-#include "M6502.h"
-
-#include "AsmThread.h"
+#ifndef CHAR_ENCODE_6502_H__
+#define CHAR_ENCODE_6502_H__
 
 /*************************************************************************/
 
-wxThread::ExitCode AsmThread::Entry()
+namespace encodings
 {
-    io::output &out = m_mainFrm->console()->GetOutput("assembler");
-    COutputMem &mainMem = wxGetApp().m_global.GetMemory();
-    CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().m_global.GetDebug();
+    class Encoding
+    {
+    protected:
+        /* constructor */ Encoding() { }
 
-    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, asmMem.get(), debug));
+    public:
+        virtual          ~Encoding() { }
 
-    CAsm::Stat res = assembler->assemble();
+        /**
+         * @brief Return the human readable name of this encoding.
+         */
+        virtual wxString name() const = 0;
 
-    if (res != CAsm::Stat::OK)
-        assembler->report_error(res);
-
-    // Copy result to actual memory.
-    mainMem = *asmMem;
-
-    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
-
-    wxQueueEvent(m_mainFrm, event.Clone());
-
-    return reinterpret_cast<wxThread::ExitCode>(res);
+        /**
+         * @brief Convert a character from this encoding into a unicode format.
+         * @param c Character to convert
+         * @return Single unicode character
+         */
+        virtual wxString toUnicode(uint8_t c) = 0;
+    };
 }
+
+/*************************************************************************/
+
+#endif /* CHAR_ENCODE_6502_H__ */
 
 /*************************************************************************/

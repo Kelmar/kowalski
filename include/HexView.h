@@ -34,17 +34,12 @@
 class HexView : public wxScrolled<wxWindow>
 {
 private:
-    static const int LINE_WIDTH = 16;
+    static const int LINE_WIDTH = 16; // Values per line
 
     /**
      * @brief View into memory to dump.
      */
     COutputMem *m_memory;
-
-    /**
-     * @brief Set to the size of a single character cell in our control.
-     */
-    wxSize m_fontSize;
 
     /**
      * @brief The overall "virtual" size of our control.
@@ -58,10 +53,6 @@ private:
      * boundary is shown every pageBoundary bytes.
      */
     unsigned int m_pageSize;
-
-    bool m_fontDirty; //< Flag indicating a change in font settings.
-
-    wxFont *m_digitFont; //< Font for drawing Hexidecimal digits.
 
     uint32_t m_selStart;
     uint32_t m_selLen;
@@ -93,11 +84,10 @@ private:
     void CalculateScrollInfo();
     void UpdateScrollInfo();
 
-    void LoadFonts();
-
     void Init();
 
-    void MemoryUpdated();
+    inline
+    void MemoryUpdated() { Refresh(); }
 
 public:
     /* constructor */ HexView();
@@ -119,6 +109,7 @@ public:
             m_memory->onUpdate.disconnect(&HexView::MemoryUpdated, this);
 
         m_memory = mem;
+
         if (m_memory)
             m_memory->onUpdate.connect(&HexView::MemoryUpdated, this);
 

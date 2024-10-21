@@ -62,23 +62,44 @@ bool TryLookup(_In_ const std::unordered_map<TKey, TItem> &map,
 /**
  * @brief Ensures run of code on function exit.
  */
-template <typename CallableType>
-class defer
+template <class F>
+class deferred_action
 {
 private:
-    CallableType m_block;
+    F m_call;
 
 public:
-    explicit defer(CallableType &&block) noexcept
-        : m_block(std::forward(block))
+    explicit deferred_action(F call) noexcept
+        : m_call(std::move(call))
     {
     }
 
-    ~defer() noexcept
+    deferred_action(deferred_action &&other) noexcept
+        : m_call(std::move(other.m_call))
     {
-        m_block();
+    }
+
+    // Prevent copy
+    deferred_action(const deferred_action &) = delete;
+    deferred_action &operator =(const deferred_action &) = delete;
+
+    ~deferred_action() noexcept
+    {
+        m_call();
     }
 };
+
+template <class F>
+inline deferred_action<F> defer(const F &f) noexcept
+{
+    return deferred_action<F>(f);
+}
+
+template <class F>
+inline deferred_action<F> defer(F &&f) noexcept
+{
+    return deferred_action<F>(std::forward<F>(f));
+}
 
 /*************************************************************************/
 /**

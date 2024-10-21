@@ -64,6 +64,7 @@ wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
 wxDECLARE_EVENT(evID_SHOW_REGS, wxCommandEvent);
 wxDECLARE_EVENT(evID_SHOW_MEMORY, wxCommandEvent);
 wxDECLARE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
+wxDECLARE_EVENT(evID_SHOW_IOWINDOW, wxCommandEvent);
 wxDECLARE_EVENT(evID_SHOW_TEST, wxCommandEvent);
 
 // Simulator menu events

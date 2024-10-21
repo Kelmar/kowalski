@@ -22,37 +22,43 @@
  */
 /*************************************************************************/
 
-#include "StdAfx.h"
-#include "Events.h"
-#include "MainFrm.h"
-#include "M6502.h"
-
-#include "AsmThread.h"
+#ifndef SINGLETON_6502_H__
+#define SINGLETON_6502_H__
 
 /*************************************************************************/
 
-wxThread::ExitCode AsmThread::Entry()
+template <typename TBase>
+class Singleton
 {
-    io::output &out = m_mainFrm->console()->GetOutput("assembler");
-    COutputMem &mainMem = wxGetApp().m_global.GetMemory();
-    CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().m_global.GetDebug();
+private:
+    static TBase *s_self;
 
-    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, asmMem.get(), debug));
+protected:
+    /* constructor */ Singleton()
+    {
+        ASSERT(s_self == nullptr);
+        s_self = static_cast<TBase *>(this);
+    }
 
-    CAsm::Stat res = assembler->assemble();
+public:
+    virtual ~Singleton()
+    {
+        s_self = nullptr;
+    }
 
-    if (res != CAsm::Stat::OK)
-        assembler->report_error(res);
+    static TBase &Get()
+    {
+        ASSERT(s_self);
+        return *s_self;
+    }
 
-    // Copy result to actual memory.
-    mainMem = *asmMem;
+    static TBase *Ptr() { return s_self; }
+};
 
-    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
+#define IMPLEMENT_SINGLETON(T_) template<> T_ *Singleton<T_>::s_self = nullptr
 
-    wxQueueEvent(m_mainFrm, event.Clone());
+/*************************************************************************/
 
-    return reinterpret_cast<wxThread::ExitCode>(res);
-}
+#endif /* SINGLETON_6502_H__ */
 
 /*************************************************************************/

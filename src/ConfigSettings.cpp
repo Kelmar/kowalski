@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 wxFontInfo* const ConfigSettings::fonts[] =
 {
     &CSrc6502View::s_logFont,
-    &CIOWindow::m_LogFont,
+    //&CIOWindow::m_LogFont,
     &CDeasm6502View::m_LogFont,
     &CMemoryView::m_LogFont,
     &CZeroPageView::m_LogFont,
@@ -44,7 +44,7 @@ wxFontInfo* const ConfigSettings::fonts[] =
 wxFont* const ConfigSettings::cfonts[] = // CFont structures throughout the program
 {
     &CSrc6502View::s_font,
-    &CIOWindow::m_Font,
+    //&CIOWindow::m_Font,
     &CDeasm6502View::m_Font,
     &CMemoryView::m_Font,
     &CZeroPageView::m_Font,

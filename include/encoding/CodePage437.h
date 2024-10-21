@@ -22,37 +22,46 @@
  */
 /*************************************************************************/
 
-#include "StdAfx.h"
-#include "Events.h"
-#include "MainFrm.h"
-#include "M6502.h"
-
-#include "AsmThread.h"
+#ifndef CODEPAGE437_6502_H__
+#define CODEPAGE437_6502_H__
 
 /*************************************************************************/
 
-wxThread::ExitCode AsmThread::Entry()
+namespace encodings
 {
-    io::output &out = m_mainFrm->console()->GetOutput("assembler");
-    COutputMem &mainMem = wxGetApp().m_global.GetMemory();
-    CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().m_global.GetDebug();
+    class CodePage437 : public Encoding
+    {
+    private:
+        static CodePage437 *s_self;
 
-    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, asmMem.get(), debug));
+        // Map from 8 bit value to UTF-8 value.
+        static uint8_t s_map[256][2];
 
-    CAsm::Stat res = assembler->assemble();
+    public:
+        /* constructor */ CodePage437()
+        {
+            ASSERT(s_self == nullptr);
+            s_self = this;
+        }
 
-    if (res != CAsm::Stat::OK)
-        assembler->report_error(res);
+        virtual ~CodePage437() { }
 
-    // Copy result to actual memory.
-    mainMem = *asmMem;
+        static CodePage437 &Get()
+        {
+            ASSERT(s_self);
+            return *s_self;
+        }
 
-    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
+        static CodePage437 *Ptr() { return s_self; }
 
-    wxQueueEvent(m_mainFrm, event.Clone());
+        virtual wxString name() const { return "Code Page 437"; }
 
-    return reinterpret_cast<wxThread::ExitCode>(res);
+        virtual wxString toUnicode(uint8_t c);
+    };
 }
+
+/*************************************************************************/
+
+#endif /* CODEPAGE437_6502_H__ */
 
 /*************************************************************************/

@@ -67,6 +67,8 @@ private:
 
     AsmThread* m_asmThread;
 
+    CIOWindow *m_ioWindow;
+
     // TODO: Move into a project document
     static std::string ProjName;
     
@@ -106,7 +108,6 @@ public:
 
 public:
     CRegisterBar m_wndRegisterBar;
-    CIOWindow m_IOWindow;
     CMemoryInfo m_Memory;
     CMemoryInfo m_ZeroPage;
     CMemoryInfo m_Stack;
@@ -179,7 +180,6 @@ protected:
     afx_msg void OnUpdateViewMemory(CCmdUI* pCmdUI);
     afx_msg void OnEditorOpt();
     afx_msg void OnUpdateEditorOpt(CCmdUI* pCmdUI);
-    afx_msg void OnViewIOWindow();
     afx_msg void OnUpdateViewIOWindow(CCmdUI* pCmdUI);
     afx_msg void OnDestroy();
     afx_msg void OnFileLoadCode();
@@ -221,6 +221,7 @@ private: // Event handlers
 
     void OnShowLog(wxCommandEvent &);
     void OnShowTest(wxCommandEvent &);
+    void OnShowIO(wxCommandEvent &);
 
     void OnAbout(wxCommandEvent &);
 

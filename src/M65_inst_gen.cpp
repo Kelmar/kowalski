@@ -751,9 +751,9 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
             if (width.value == 0 || height.value == 0)
                 return ERR_NUM_ZERO;
 
-            //TODO: potential problem if window exists
-            CIOWindow::m_nInitW = width.value;
-            CIOWindow::m_nInitH = height.value;
+            // TODO: potential problem if window exists
+            //CIOWindow::m_nInitW = width.value;
+            //CIOWindow::m_nInitH = height.value;
         }
     }
     break;

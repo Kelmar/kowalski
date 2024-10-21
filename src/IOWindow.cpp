@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -18,218 +18,121 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// IOWindow.cpp : implementation file
-//
-
 #include "StdAfx.h"
-#include "resource.h"
-#include "IOWindow.h"
+#include <wx/dcbuffer.h>
+
 #include <memory.h>
 
-//-----------------------------------------------------------------------------
+#include "FontController.h"
 
-bool CIOWindow::m_bHidden;
-wxFont CIOWindow::m_Font;
+#include "resource.h"
+#include "IOWindow.h"
 
+/*************************************************************************/
 
-wxFontInfo CIOWindow::m_LogFont 
-#if 0
-=
-{
-    13,	// LONG lfHeight;
-    0,	// LONG lfWidth;
-    0,	// LONG lfEscapement;
-    0,	// LONG lfOrientation;
-    0,	// LONG lfWeight;
-    0,	// BYTE lfItalic;
-    0,	// BYTE lfUnderline;
-    0,	// BYTE lfStrikeOut;
-    0,	// BYTE lfCharSet;
-    0,	// BYTE lfOutPrecision;
-    0,	// BYTE lfClipPrecision;
-    0,	// BYTE lfQuality;
-    FIXED_PITCH,	// BYTE lfPitchAndFamily;
-    "Courier"	// CHAR lfFaceName[LF_FACESIZE];
-}
-#endif
-;
-
-wxPoint CIOWindow::m_WndPos = wxPoint(0, 0); // window position
-int CIOWindow::m_nInitW = 40;
-int CIOWindow::m_nInitH = 25;
 wxColour CIOWindow::m_rgbTextColor = wxColour(0, 0, 0);
 wxColour CIOWindow::m_rgbBackgndColor = wxColour(255, 255, 255);
 
-//-----------------------------------------------------------------------------
-// Window class registration
+/*************************************************************************/
 
-/////////////////////////////////////////////////////////////////////////////
-// CIOWindow
-
-CIOWindow::CIOWindow()
-    : m_pData(nullptr)
+CIOWindow::CIOWindow(wxWindow *parent)
+    : wxFrame(parent, wxID_ANY, _("IO Window"))
+    , m_memory(nullptr)
+    , m_charCnt(40, 25)
+    , m_cursorPos()
 {
-    m_nWidth = m_nHeight = 0;
+    // We're going to override the saved size anyhow with our own calculations.
 
-    m_nPosX = m_nPosY = 0; // Location of the character to print (and cursor)
+    wxPersistentRegisterAndRestore(this, REG_ENTRY_IOWINDOW);
+
     m_nCursorCount = 0;    // Counter hide cursor
 
-    m_bHidden = false;
-
-    m_bCursorOn = false;
+    m_showCursor = false;
     m_bCursorVisible = false;
 
     m_uTimer = 0;
+
+    // Allocates our initial memory block
+    size_t sz = m_charCnt.x * m_charCnt.y;
+    m_memory = new uint8_t[sz];
+    memset(m_memory, 0, sz);
+
+    // Remove ability for user to resize us with the mouse.
+    int style = wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX);
+    SetWindowStyle(style);
+
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
+
+    Bind(wxEVT_PAINT, &CIOWindow::OnPaint, this);
+    Bind(wxEVT_CLOSE_WINDOW, &CIOWindow::OnClose, this);
 }
 
 CIOWindow::~CIOWindow()
 {
-    delete[] m_pData;
+    delete[] m_memory;
 }
 
-//-----------------------------------------------------------------------------
-// New window
+/*************************************************************************/
 
-bool CIOWindow::Create()
-{
-#if 0
-    ASSERT(m_hWnd == 0);
-    CString title;
-    title.LoadString(IDS_IO_WINDOW);
-
-    RECT rect= {0,0,100,100};
-    rect.left = m_WndPos.x;
-    rect.top = m_WndPos.y;
-    if (!CMiniFrameWnd::CreateEx(WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE, m_strClass, title,
-                                 WS_POPUP | WS_CAPTION | WS_SYSMENU | MFS_MOVEFRAME /*| MFS_SYNCACTIVE*/,
-                                 rect, AfxGetMainWnd(), 0))
-        return FALSE;
-
-    ModifyStyleEx(0,WS_EX_WINDOWEDGE|WS_EX_CLIENTEDGE);
-//  SetFont(m_Font,FALSE);
-//  CalcFontSize();
-    SetSize(m_nInitW,m_nInitH);
-
-    m_uTimer = SetTimer(101, 250, 0);
-
-    SetFocus();
-
-    return TRUE;
-#endif
-
-    return false;
-}
-
-void CIOWindow::CalcFontSize() // Calculate character size
-{
-#if 0
-    ASSERT(m_hWnd);
-    CClientDC dc(this);
-    dc.SelectObject(&m_Font);
-    TEXTMETRIC tm;
-    dc.GetTextMetrics(&tm);
-    m_nCharH = (int)tm.tmHeight + (int)tm.tmExternalLeading;
-    m_nCharW = (int)tm.tmAveCharWidth;
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CIOWindow::SetSize(int w, int h, int resize/* =1*/)
+void CIOWindow::SetSize(int w, int h, bool resize/* = true*/)
 {
     ASSERT(w > 0 && h > 0);
 
-    m_nInitW = w;
-    m_nInitH = h;
-
     int new_size = w * h;
-    int old_size = m_nWidth * m_nHeight;
-    bool change =  m_nWidth != w || m_nHeight != h;
+    int old_size = m_charCnt.x * m_charCnt.y;
+    bool change = m_charCnt.x != w || m_charCnt.y != h;
 
-    m_nWidth = w;
-    m_nHeight = h;
+    m_charCnt.Set(w, h);
 
-    if (m_pData == nullptr || new_size != old_size)
+    if (m_memory == nullptr || new_size != old_size)
     {
-        delete[] m_pData;
-        m_pData = new uint8_t[new_size];
+        delete[] m_memory;
+        m_memory = new uint8_t[new_size];
+        memset(m_memory, 0, new_size);
     }
 
     // without changing window dimensions?
-    if (resize == 0 || !change) 
+    if (!resize || !change)
         return;
-
-    Resize();
 }
 
-void CIOWindow::Resize()
-{
-    CalcFontSize();
-
-    wxRect size(0, 0, m_nCharW * m_nWidth, m_nCharH * m_nHeight);
-
-    //CalcWindowRect(&size, CWnd::adjustOutside);
-    //SetWindowPos(NULL, 0, 0, size.Width(), size.Height(), SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER);
-
-    Cls();
-}
-
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
 int CIOWindow::put(char chr, int x, int y)
 {
-    if (m_pData == nullptr)
-        return -1;
-
-    if (x > m_nWidth || y > m_nHeight || x < 0 || y < 0)
+    if (x > m_charCnt.x || y > m_charCnt.y || x < 0 || y < 0)
         return -2;
 
-    m_pData[x + y * m_nWidth] = (uint8_t)chr;
+    m_memory[x + y * m_charCnt.x] = (uint8_t)chr;
+    Refresh();
     return 0;
 }
 
-/*
-int CIOWindow::puts(const char *str, int len, int x, int y)
+/*************************************************************************/
+
+void CIOWindow::Invalidate(int x, int y) // the area of ​​the character under (x,y) to redraw
 {
-  if (m_pData == nullptr)
-    return -1;
+    wxSize cellSize = FontController::Get().getCellSize();
 
-  if (x > m_nWidth || y > m_nHeight || x < 0 || y < 0)
-    return -2;
+    // TODO: Redundant assertion? -- B.Simonds (Oct 20, 2024)
+    ASSERT(cellSize.x > 0 && cellSize.y > 0);
 
-  return 0;
+    wxRect area(x, y, cellSize.x, cellSize.y);
+    RefreshRect(area);
 }
-*/
 
-int CIOWindow::invalidate(int x, int y) // the area of ​​the character under (x,y) to redraw
-{
-    wxRect rect;
-
-    ASSERT(m_nCharH > 0 && m_nCharW > 0);
-
-    rect.x = x * m_nCharW;
-    rect.y = y * m_nCharH;
-    rect.width = m_nCharW;
-    rect.height = m_nCharH;
-
-    RefreshRect(rect);
-
-    return 0;
-}
+/*************************************************************************/
 
 int CIOWindow::scroll(int dy) // shift the strings by 'dy' lines
 {
-    if (m_pData == nullptr)
-        return -1;
-
-    if (dy > m_nHeight || dy < 0)
+    if (dy > m_charCnt.y || dy < 0)
         return -2;
 
     // Line offset
-    memmove(m_pData, m_pData + dy * m_nWidth, (m_nHeight - dy) * m_nWidth);
+    memmove(m_memory, m_memory + dy * m_charCnt.y, (m_charCnt.y - dy) * m_charCnt.x);
 
     // To the uncovered zero position
-    memset(m_pData + (m_nHeight - dy) * m_nWidth, 0, dy * m_nWidth);
+    memset(m_memory + (m_charCnt.y - dy) * m_charCnt.x, 0, dy * m_charCnt.x);
 
     // Redraw entire window
     Refresh();
@@ -237,7 +140,8 @@ int CIOWindow::scroll(int dy) // shift the strings by 'dy' lines
     return 0;
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
+
 int CIOWindow::PutH(int chr) // Print hex number (8 bits)
 {
     int h1 = (chr >> 4) & 0x0f;
@@ -249,62 +153,62 @@ int CIOWindow::PutH(int chr) // Print hex number (8 bits)
     return PutS(szBuf);
 }
 
+/*************************************************************************/
+
 int CIOWindow::PutC(int chr) // Print the character
 {
-    HideCursor();
-
     if (chr == 0x0a) // line feed?
     {
-        if (++m_nPosY >= m_nHeight)
+        if (++m_cursorPos.y >= m_charCnt.y)
         {
-            ASSERT(m_nPosY == m_nHeight);
-            m_nPosY--;
+            ASSERT(m_cursorPos.y == m_charCnt.y);
+            m_cursorPos.y--;
             scroll(1); // Shift the strings by one line
         }
     }
     else if (chr == 0x0d) // carriage return?
-        m_nPosX = 0;
+        m_cursorPos.x = 0;
     else if (chr == 0x08) // backspace?
     {
-        if (--m_nPosX < 0)
+        if (--m_cursorPos.x < 0)
         {
-            m_nPosX = m_nWidth - 1;
+            m_cursorPos.x = m_charCnt.x - 1;
 
-            if (--m_nPosY < 0)
+            if (--m_cursorPos.y < 0)
             {
-                m_nPosY = 0;
+                m_cursorPos.y = 0;
                 return 0;
             }
         }
 
-        if (put(' ', m_nPosX, m_nPosY) < 0)
+        if (put(' ', m_cursorPos.x, m_cursorPos.y) < 0)
             return -1;
 
-        invalidate(m_nPosX, m_nPosY); // The area under the sign to be redrawed
+        Invalidate(m_cursorPos.x, m_cursorPos.y); // The area under the sign to be redrawn
     }
     else
         return PutChr(chr);
-        
+
     return 0;
 }
 
+/*************************************************************************/
+
 int CIOWindow::PutChr(int chr) // print character (verbatim)
 {
-    HideCursor();
-
-    if (put(chr, m_nPosX, m_nPosY) < 0)
+    if (put(chr, m_cursorPos.x, m_cursorPos.y) < 0)
         return -1;
 
-    invalidate(m_nPosX, m_nPosY); // The area under the sign to be redrawed
+    Invalidate(m_cursorPos.x, m_cursorPos.y); // The area under the sign to be redrawn
 
-    if (++m_nPosX >= m_nWidth)
+    if (++m_cursorPos.x >= m_charCnt.x)
     {
-        m_nPosX = 0;
+        m_cursorPos.x = 0;
 
-        if (++m_nPosY >= m_nHeight)
+        if (++m_cursorPos.y >= m_charCnt.y)
         {
-            ASSERT(m_nPosY == m_nHeight);
-            m_nPosY--;
+            ASSERT(m_cursorPos.y == m_charCnt.y);
+            m_cursorPos.y--;
             scroll(1); // Shift the strings by one line
         }
     }
@@ -312,9 +216,16 @@ int CIOWindow::PutChr(int chr) // print character (verbatim)
     return 0;
 }
 
+/*************************************************************************/
+
 int CIOWindow::PutS(const char *str, int len/*= -1*/) // string of characters to print
 {
-    for (int i = 0; i < len || len == -1; i++)
+    Freeze();
+
+    // Ensure Thaw() is called when we exit.
+    auto _ = defer([this] (...) { Thaw(); });
+
+    for (int i = 0; i < len || len == -1; ++i)
     {
         if (str[i] == '\0')
             break;
@@ -322,46 +233,53 @@ int CIOWindow::PutS(const char *str, int len/*= -1*/) // string of characters to
         if (PutC(str[i]) < 0)
             return -1;
     }
-    
+
     return 0;
 }
 
+/*************************************************************************/
+
 bool CIOWindow::SetPosition(int x, int y) // Set the position for the text
 {
-    if (x > m_nWidth || y > m_nHeight || x < 0 || y < 0)
+    if (x > m_charCnt.x || y > m_charCnt.y || x < 0 || y < 0)
         return false;
 
-    m_nPosX = x;
-    m_nPosY = y;
-    
+    m_cursorPos.x = x;
+    m_cursorPos.y = y;
+
     return true;
 }
 
+/*************************************************************************/
+
 void CIOWindow::GetPosition(int &x, int &y) // read position
 {
-    x = m_nPosX;
-    y = m_nPosY;
+    x = m_cursorPos.x;
+    y = m_cursorPos.y;
 }
+
+/*************************************************************************/
 
 bool CIOWindow::Cls() // clear the window
 {
-    if (m_pData == nullptr)
-        return false;
-
-    memset(m_pData, 0, m_nHeight * m_nWidth);
-    m_nPosX = m_nPosY = 0;
+    memset(m_memory, 0, m_charCnt.y * m_charCnt.x);
+    m_cursorPos.x = m_cursorPos.y = 0;
     Refresh(); // Redraw the entire window
 
     return true;
 }
 
+/*************************************************************************/
+
 int CIOWindow::Input() // input
 {
-    m_bCursorOn = true;
-//	SetFocus();
+    m_showCursor = true;
+    //SetFocus();
 
     return m_InputBuffer.GetChar(); // returns available char or 0 if buffer is empty
 }
+
+/*************************************************************************/
 
 /*
 int CIOWindow::Input() // input
@@ -394,176 +312,120 @@ int CIOWindow::Input() // input
 }
 */
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
 // CIOWindow message handlers
 
-void CIOWindow::OnPaint()
+void CIOWindow::OnPaint(wxPaintEvent &)
 {
-#if 0
-    CPaintDC dc(this);	// device context for painting
+    wxAutoBufferedPaintDC dc(this);
 
-    if (m_pData == nullptr)
+    PrepareDC(dc);
+    Draw(dc);
+}
+
+void CIOWindow::Draw(wxDC &dc)
+{
+    dc.SetBackground(*wxWHITE_BRUSH);
+    dc.Clear();
+
+    if (m_memory == nullptr)
         return;
 
-    dc.SelectObject(&m_Font);
-    dc.SetBkMode(OPAQUE);
-    dc.SetTextColor(m_rgbTextColor);
-    dc.SetBkColor(m_rgbBackgndColor);
+    FontController &fontController = FontController::Get();
+    wxSize cellSize = fontController.getCellSize();
+    dc.SetFont(fontController.getMonoFont());
 
-    CString line;
-    uint8_t *src = m_pData;
-    for (int y = 0, pos_y = 0; y < m_nHeight; y++, pos_y += m_nCharH)
+    // TODO: Allow map to other character sets.
+    encodings::Encoding &encoding = encodings::CodePage437::Get();
+    wxString lineBuffer;
+
+    lineBuffer.reserve(m_charCnt.x + 1);
+    int offset = 0;
+
+    for (int y = 0, pos_y = 0; y < m_charCnt.y; ++y, pos_y += cellSize.y)
     {
-        char *dst = line.GetBuffer(m_nWidth);
+        lineBuffer.clear();
 
-        for (int i = 0; i < m_nWidth; i++) // Single line characters to 'line' buffer
+        for (int x = 0; x < m_charCnt.x; ++x, ++offset)
         {
-            if ((*dst++ = (char)*src++) == 0)
-                dst[-1] = ' '; // Replace '\0' with ' '
+            uint8_t c = m_memory[offset];
+            lineBuffer += encoding.toUnicode(c == 0 ? ' ' : c);
         }
-        
-        line.ReleaseBuffer(m_nWidth);
-        dc.TextOut(0, pos_y, line); // print the line
+
+        dc.DrawText(lineBuffer, 0, pos_y);
     }
 
-    DrawCursor();
-#endif
+    DrawCursor(dc);
 }
 
-//=============================================================================
+/*************************************************************************/
 
-void CIOWindow::OnDestroy()
+void CIOWindow::DrawCursor(wxDC &dc)
 {
-    wxRect rect = GetScreenRect();
+    if (!m_showCursor)
+        return;
 
-    m_WndPos = rect.GetTopLeft(); // Remember window position
+    wxSize cellSize = FontController::Get().getCellSize();
 
-#if 0
-    if (m_uTimer)
-        KillTimer(m_uTimer);
+    wxPoint loc(m_cursorPos.x * cellSize.x, m_cursorPos.y * cellSize.y);
+    wxRect area(loc, cellSize);
 
-    m_uTimer = 0;
-#endif
+    // BUG: Doesn't seem to be working under Linux.... - B.Simonds (Oct 20, 2024)
 
-    //CMiniFrameWnd::OnDestroy();
+    // Invert area for cursor.
+    auto oldFunc = dc.GetLogicalFunction();
+    dc.SetLogicalFunction(wxINVERT);
+    dc.SetBrush(*wxWHITE_BRUSH);
+    dc.DrawRectangle(area);
+
+    dc.SetLogicalFunction(oldFunc);
 }
 
-//=============================================================================
+/*************************************************************************/
 
-#if 0
-void CIOWindow::OnGetMinMaxInfo(MINMAXINFO* pMMI)
+void CIOWindow::OnClose(wxCloseEvent &)
 {
-    CMiniFrameWnd::OnGetMinMaxInfo(pMMI);
-
-    CRect size(0,0,m_nCharW*m_nWidth,m_nCharH*m_nHeight);
-    CalcWindowRect(&size,CWnd::adjustOutside);
-//TRACE("vert %d \thorz %d\n",!!(GetStyle() & WS_VSCROLL), !!(GetStyle() & WS_HSCROLL) );
-    int w= size.Width();
-    if (GetStyle() & WS_VSCROLL)
-        w += ::GetSystemMetrics(SM_CXVSCROLL);
-//  if (client.Width() < max_size.Width())	// jest suwak?
-    int h= size.Height();
-    if (GetStyle() & WS_HSCROLL)
-        h += ::GetSystemMetrics(SM_CYHSCROLL);
-//  if (client.Height() < max_size.Height())	// jest suwak?
-    /*
-      SCROLLINFO si;
-      if (GetScrollInfo(SB_HORZ,&si,SIF_PAGE|SIF_RANGE) && si.nMax-si.nMin > (int)si.nPage)
-        w += ::GetSystemMetrics(SM_CXVSCROLL);
-      if (GetScrollInfo(SB_VERT,&si,SIF_PAGE|SIF_RANGE) && si.nMax-si.nMin > (int)si.nPage)
-        h += ::GetSystemMetrics(SM_CYHSCROLL);
-    */
-    pMMI->ptMaxSize.x = w;
-    pMMI->ptMaxSize.y = h;
-    pMMI->ptMaxTrackSize.x = w;
-    pMMI->ptMaxTrackSize.y = h;
-//  pMMI->ptMinTrackSize.x = 1;
-//  pMMI->ptMinTrackSize.y = 1;
-//  pMMI->ptMaxPosition.x = 0;
-//  pMMI->ptMaxPosition.y = 0;
-
-//TRACE("mx %d \tmy %d \ttx %d \ty %d\n", pMMI->ptMaxSize.x, pMMI->ptMaxSize.y, pMMI->ptMaxTrackSize.x, pMMI->ptMaxTrackSize.y);
-
-//  CMiniFrameWnd::OnGetMinMaxInfo(pMMI);
-}
-#endif
-
-//=============================================================================
-
-void CIOWindow::OnSize(UINT nType, int cx, int cy)
-{
-    UNUSED(nType);
-    UNUSED(cx);
-    UNUSED(cy);
-
-#if 0
-    CMiniFrameWnd::OnSize(nType,cx,cy);
-
-    if (nType == SIZE_RESTORED)
-    {
-        int w = (GetStyle() & WS_VSCROLL) ? ::GetSystemMetrics(SM_CXVSCROLL) : 0;
-        int h = (GetStyle() & WS_HSCROLL) ? ::GetSystemMetrics(SM_CYHSCROLL) : 0;
-
-        wxSize size = wxSize(m_nCharW * m_nWidth, m_nCharH * m_nHeight);
-
-        bool remove = (cx + w >= size.cx && cy + h >= size.cy);
-
-        SCROLLINFO si_horz =
-        {
-            sizeof si_horz,
-            SIF_PAGE | SIF_RANGE,
-            0, size.cx - 1, // min i max
-            remove ? size.cx : cx,
-            0, 0
-        };
-
-        SCROLLINFO si_vert=
-        {
-            sizeof si_vert,
-            SIF_PAGE | SIF_RANGE,
-            0, size.cy - 1, // min i max
-            remove ? size.cy : cy,
-            0, 0
-        };
-
-        SetScrollInfo(SB_HORZ, &si_horz);
-        SetScrollInfo(SB_VERT, &si_vert);
-    }
-    else if (nType == SIZE_MAXIMIZED)
-        cx = 0;
-#endif
+    // Don't destroy, just hide.
+    Show(false);
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
-void CIOWindow::SetColors(wxColour text, wxColour backgnd)
+void CIOWindow::SetColors(wxColour text, wxColour background)
 {
-    m_rgbBackgndColor = backgnd;
+    m_rgbBackgndColor = background;
     m_rgbTextColor = text;
     Refresh();
 }
 
-void CIOWindow::GetColors(wxColour &text, wxColour &backgnd)
+/*************************************************************************/
+
+void CIOWindow::GetColors(wxColour &text, wxColour &background)
 {
     text = m_rgbTextColor;
-    backgnd = m_rgbBackgndColor;
+    background = m_rgbBackgndColor;
 }
 
-//=============================================================================
+/*************************************************************************/
 
 afx_msg LRESULT CIOWindow::OnStartDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
     VERIFY(Cls());
 
+#if false
+
     if (!m_bHidden) // Was the window visible?
         Show();
+#endif
 
     return 1;
 }
 
+/*************************************************************************/
 
 afx_msg LRESULT CIOWindow::OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
+#if false
     if (IsShown())
     {
         m_bHidden = false; // info -the window was displayed
@@ -571,17 +433,20 @@ afx_msg LRESULT CIOWindow::OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
     }
     else
         m_bHidden = true; // info -the window was hidden
-        
+#endif
+
     return 1;
 }
 
-//=============================================================================
+/*************************************************************************/
 
 afx_msg LRESULT CIOWindow::OnCls(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
     VERIFY(Cls());
     return 1;
 }
+
+/*************************************************************************/
 
 afx_msg LRESULT CIOWindow::OnPutC(WPARAM wParam, LPARAM lParam)
 {
@@ -599,10 +464,14 @@ afx_msg LRESULT CIOWindow::OnPutC(WPARAM wParam, LPARAM lParam)
     return 1;
 }
 
+/*************************************************************************/
+
 afx_msg LRESULT CIOWindow::OnInput(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
     return Input();
 }
+
+/*************************************************************************/
 
 afx_msg LRESULT CIOWindow::OnPosition(WPARAM wParam, LPARAM lParam)
 {
@@ -610,105 +479,45 @@ afx_msg LRESULT CIOWindow::OnPosition(WPARAM wParam, LPARAM lParam)
 
     if (wParam & 2) // get pos?
     {
-        return bXPos ? m_nPosX : m_nPosY;
+        return bXPos ? m_cursorPos.x : m_cursorPos.y;
     }
     else // set pos
     {
-        int x= m_nPosX;
-        int y= m_nPosY;
+        int x = m_cursorPos.x;
+        int y = m_cursorPos.y;
 
         if (bXPos)
             x = lParam;
         else
             y = lParam;
 
-        if (x >= m_nWidth)
-            x = m_nWidth - 1;
+        if (x >= m_charCnt.x)
+            x = m_charCnt.x - 1;
 
-        if (y >= m_nHeight)
-            y = m_nHeight - 1;
+        if (y >= m_charCnt.y)
+            y = m_charCnt.y - 1;
 
-        if (x != m_nPosX || y != m_nPosY)
+        if (x != m_cursorPos.x || y != m_cursorPos.y)
         {
-            if (m_bCursorVisible && m_bCursorOn)
-                DrawCursor(m_nPosX, m_nPosY, false);
+            if (m_bCursorVisible && m_showCursor)
+            {
+                Refresh();
+            }
 
-            m_nPosX = x;
-            m_nPosY = y;
+            m_cursorPos.x = x;
+            m_cursorPos.y = y;
 
-            if (m_bCursorVisible && m_bCursorOn)
-                DrawCursor(m_nPosX, m_nPosY, true);
+            if (m_bCursorVisible && m_showCursor)
+            {
+                Refresh();
+            }
         }
     }
 
     return 0;
 }
 
-//=============================================================================
-
-void CIOWindow::HideCursor()
-{
-    if (m_bCursorVisible)
-    {
-        DrawCursor(m_nPosX, m_nPosY, false);
-        m_bCursorVisible = false;
-    }
-    m_bCursorOn = false;
-}
-
-// draw cursor
-//
-void CIOWindow::DrawCursor()
-{
-    if (m_bCursorOn)
-        DrawCursor(m_nPosX, m_nPosY, m_bCursorVisible);
-}
-
-
-void CIOWindow::DrawCursor(int nX, int nY, bool bVisible)
-{
-    UNUSED(nX);
-    UNUSED(nY);
-    UNUSED(bVisible);
-
-#if 0
-    if (m_pData == nullptr)
-        return;
-
-    if (nX > m_nWidth || nY > m_nHeight || nX < 0 || nY < 0)
-    {
-        ASSERT(false);
-        return;
-    }
-
-    // character under the cursor
-    char szBuf[2]= { m_pData[nX + nY * m_nWidth], '\0' };
-    if (szBuf[0] == '\0')
-        szBuf[0] = ' ';
-
-    CClientDC dc(this);
-
-    dc.SelectObject(&m_Font);
-    dc.SetBkMode(OPAQUE);
-
-    if (bVisible)
-    {
-        dc.SetTextColor(m_rgbBackgndColor);
-        dc.SetBkColor(m_rgbTextColor);
-    }
-    else
-    {
-        dc.SetTextColor(m_rgbTextColor);
-        dc.SetBkColor(m_rgbBackgndColor);
-    }
-
-    // cursor pos & size
-    CPoint ptPos(nX * m_nCharW, nY * m_nCharH);
-    CRect rect(ptPos, CSize(m_nCharW, m_nCharH));
-
-    dc.DrawText(szBuf, 1, rect, DT_TOP | DT_LEFT | DT_NOPREFIX | DT_SINGLELINE);
-#endif
-}
+/*************************************************************************/
 
 void CIOWindow::OnTimer(UINT nIDEvent)
 {
@@ -716,13 +525,15 @@ void CIOWindow::OnTimer(UINT nIDEvent)
 
     m_bCursorVisible = !m_bCursorVisible;
 
-    DrawCursor();
+    Refresh();
 
     if (!m_bCursorVisible)
-        m_bCursorOn = false;
+        m_showCursor = false;
 
-//  CMiniFrameWnd::OnTimer(nIDEvent);
+    //  CMiniFrameWnd::OnTimer(nIDEvent);
 }
+
+/*************************************************************************/
 
 void CIOWindow::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
@@ -738,6 +549,8 @@ void CIOWindow::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
     //  EndModalLoop(nChar);
 }
 
+/*************************************************************************/
+
 bool CIOWindow::ContinueModal()
 {
     if (wxGetApp().m_global.GetSimulator()->IsBroken()) // execution broken?
@@ -747,31 +560,7 @@ bool CIOWindow::ContinueModal()
     return true;
 }
 
-void CIOWindow::OnClose()
-{
-    if (IsWaiting())
-    {
-        //EndModalLoop(-1); // break
-        return;
-    }
-
-    Show();
-//  CMiniFrameWnd::OnClose();
-}
-
-bool CIOWindow::IsWaiting() const
-{
-    return false;
-//  return (m_nFlags & WF_MODALLOOP) != 0;	// in modal loop waiting for input?
-}
-
-void CIOWindow::ExitModalLoop()
-{
-#if 0
-    if (IsWaiting())
-        EndModalLoop(-1);
-#endif
-}
+/*************************************************************************/
 
 void CIOWindow::Paste()
 {
@@ -784,9 +573,9 @@ void CIOWindow::Paste()
 
     if (HANDLE hGlb = ::GetClipboardData(CF_TEXT))
     {
-        if (VOID* pStr= ::GlobalLock(hGlb))
+        if (VOID *pStr = ::GlobalLock(hGlb))
         {
-            m_InputBuffer.Paste(reinterpret_cast<char*>(pStr));
+            m_InputBuffer.Paste(reinterpret_cast<char *>(pStr));
             GlobalUnlock(hGlb);
         }
     }
@@ -814,7 +603,7 @@ char CInputBuffer::GetChar() // get next available character (returns 0 if there
 
 void CInputBuffer::PutChar(char c) // places char in the buffer (char is ignored if there is no space)
 {
-    char* pNext = m_pHead + 1;
+    char *pNext = m_pHead + 1;
 
     if (pNext >= m_vchBuffer + BUF_SIZE)
         pNext = m_vchBuffer;
@@ -826,7 +615,7 @@ void CInputBuffer::PutChar(char c) // places char in the buffer (char is ignored
     }
 }
 
-void CInputBuffer::Paste(const char* pcText)
+void CInputBuffer::Paste(const char *pcText)
 {
     int nMax = std::min(strlen(pcText), BUF_SIZE);
 
@@ -849,7 +638,7 @@ void CIOWindow::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 }
 
 #if 0
-BOOL CIOWindow::PreTranslateMessage(MSG* pMsg)
+BOOL CIOWindow::PreTranslateMessage(MSG *pMsg)
 {
     if (GetFocus() == this)
     {
@@ -876,7 +665,7 @@ BOOL CIOWindow::PreTranslateMessage(MSG* pMsg)
 #endif
 
 #if 0
-void CIOWindow::OnContextMenu(CWnd* pWnd, CPoint point)
+void CIOWindow::OnContextMenu(CWnd *pWnd, CPoint point)
 {
     CMenu menu;
 

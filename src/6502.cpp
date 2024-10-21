@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "MainFrm.h"
 #include "ProjectManager.h"
+#include "FontController.h"
 
 #include "6502Doc.h"
 #include "6502View.h"
@@ -93,6 +94,8 @@ bool C6502App::OnInit()
         return false;
     }
 
+    loadEncodings();
+
     SetAppDisplayName(_("6502 Simulator"));
 
     m_config = new wxConfig();
@@ -110,6 +113,7 @@ bool C6502App::OnInit()
         CLASSINFO(CSrc6502Doc), CLASSINFO(CSrc6502View));
 
     new ProjectManager();
+    new FontController();
 
     if (!InitFrame())
         return false;
@@ -122,6 +126,11 @@ bool C6502App::OnInit()
     wxLogStatus("Application loaded!");
 
     return true;
+}
+
+void C6502App::loadEncodings()
+{
+    new encodings::CodePage437();
 }
 
 bool C6502App::InitFrame()

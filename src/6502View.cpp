@@ -59,19 +59,12 @@ uint8_t CSrc6502View::m_vbyFontStyle[6] =
 
 CSrc6502View::CSrc6502View()
     : wxView()
+    , m_frame(nullptr)
+    , m_text(nullptr)
+    , m_status(nullptr)
 {
-    // TODO: add construction code here
     m_nActualPointerLine = -1;
     m_nActualErrMarkLine = -1;
-
-    //  m_nBrkIndex = 0;
-        /*
-          memset(&m_logfont, 0, sizeof(m_logfont));
-          m_logfont.lfHeight = 9;
-          m_logfont.lfPitchAndFamily = FIXED_PITCH;
-          strcpy(m_logfont.lfFaceName, "Fixedsys");
-        */
-        //  m_Font.CreateFontIndirect(&m_LogFont);
 }
 
 CSrc6502View::~CSrc6502View()
@@ -79,23 +72,6 @@ CSrc6502View::~CSrc6502View()
 }
 
 wxIMPLEMENT_DYNAMIC_CLASS(CSrc6502View, wxView);
-
-#if REWRITE_TO_WX_WIDGET
-
-BOOL CSrc6502View::PreCreateWindow(CREATESTRUCT &cs)
-{
-    // TODO: Modify the Window class or styles here by modifying
-    //  the CREATESTRUCT cs
-
-    bool bPreCreated = CBaseView::PreCreateWindow(cs);
-    //  cs.style &= ~(ES_AUTOHSCROLL|WS_HSCROLL); // Enable word-wrapping
-
-    cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
-
-    return bPreCreated;
-}
-
-#endif
 
 /*************************************************************************/
 
@@ -118,10 +94,12 @@ bool CSrc6502View::OnCreate(wxDocument *doc, long flags)
 
     m_status = m_frame->CreateStatusBar(2);
 
+    // TODO: Fall back to main window if we can't have an independent status bar.
+
     if (m_status)
     {
         int statusStyles[] = { wxSB_NORMAL, wxSB_SUNKEN };
-        int statusWidths[] = { -1, 160 };
+        int statusWidths[] = { -1, 160 }; // 160 was picked arbitrarily, should be a better way to do this.
 
         int cnt = sizeof(statusStyles) / sizeof(int);
 
@@ -170,67 +148,6 @@ void CSrc6502View::OnTextUpdate(wxCommandEvent &)
 }
 
 /*************************************************************************/
-// CSrc6502View printing
-
-#if REWRITE_TO_WX_WIDGET
-
-bool CSrc6502View::OnPreparePrinting(CPrintInfo *pInfo)
-{
-    // default CBaseView preparation
-    return CBaseView::OnPreparePrinting(pInfo);
-}
-
-void CSrc6502View::OnBeginPrinting(CDC *pDC, CPrintInfo *pInfo)
-{
-    // Default CBaseView begin printing.
-    CBaseView::OnBeginPrinting(pDC, pInfo);
-}
-
-void CSrc6502View::OnEndPrinting(CDC *pDC, CPrintInfo *pInfo)
-{
-    // Default CBaseView end printing
-    CBaseView::OnEndPrinting(pDC, pInfo);
-}
-
-#endif /* REWRITE_TO_WX_WIDGET */
-
-/////////////////////////////////////////////////////////////////////////////
-// CSrc6502View message handlers
-
-void CSrc6502View::OnInitialUpdate()
-{
-    //CBaseView::OnInitialUpdate();
-
-    SelectEditFont();
-    /*
-      SetFont(&m_Font,FALSE);
-      CEdit &edit = GetEditCtrl();
-      uint32_t margins = edit.GetMargins();
-      edit.SetMargins(16u, UINT(HIWORD(margins)));  // ustawienie lewego marginesu
-    */
-
-    // Looks like this is a CrystalView thing. -- B.Simonds (April 26, 2024)
-    //SetAutoIndent(CSrc6502View::m_bAutoIndent);
-}
-
-#if REWRITE_TO_WX_WIDGET
-int CSrc6502View::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-    if (CBaseView::OnCreate(lpCreateStruct) == -1)
-        return -1;
-
-#ifndef USE_CRYSTAL_EDIT
-    m_pfnOldProc = (LRESULT(CALLBACK *)(HWND, UINT, WPARAM, LPARAM)) ::SetWindowLong(m_hWnd, GWL_WNDPROC, (LONG)EditWndProc);
-
-    m_wndLeftBar.Create(CWnd::FromHandlePermanent(lpCreateStruct->hwndParent), this);
-#endif
-    VERIFY(m_pMainFrame = dynamic_cast<CMainFrame *>(AfxGetMainWnd()));
-
-    return 0;
-}
-#endif /* REWRITE_TO_WX_WIDGET */
-
-//LRESULT (CALLBACK *CSrc6502View::m_pfnOldProc)(HWND, UINT, WPARAM, LPARAM) = NULL;
 
 void CSrc6502View::check_line(const char *buf, CAsm::Stat &stat, int &start, int &fin, std::string &msg)
 {
@@ -257,8 +174,6 @@ void CSrc6502View::check_line(const char *buf, CAsm::Stat &stat, int &start, int
 
 void CSrc6502View::disp_warning(int line, const std::string &msg) // debugging message use?
 {
-    // TODO: Use logging. -- B.Simonds (April 27, 2024)
-
     SetErrMark(line); // Select the line containing the error
     wxLogWarning(msg.c_str());
 }
@@ -429,76 +344,6 @@ void CSrc6502View::drawMark(CDC &dc, int line, MarkType type, bool scroll)
 }
 */
 
-int CSrc6502View::ScrollToLine(int line, int &height, bool scroll)
-{
-    ASSERT(line >= 0);
-
-    UNUSED(line);
-    UNUSED(height);
-    UNUSED(scroll);
-
-#ifdef USE_CRYSTAL_EDIT
-    GoToLine(line);
-    return 0;
-#else
-# if REWRITE_TO_WX_WIDGET
-    CEdit &edit = GetEditCtrl();
-
-    if (line > edit.GetLineCount() - 1)
-    {
-        ASSERT(FALSE); // line number too large
-        return -1;
-    }
-
-    int top_line = edit.GetFirstVisibleLine();
-
-    if (line < top_line)
-    {
-        if (!scroll)
-            return -2;
-
-        edit.LineScroll(line - top_line); // The line is not visible -window content shift
-        top_line = edit.GetFirstVisibleLine();
-        int top_char = edit.LineIndex(top_line);
-        edit.SendMessage(EM_SETSEL, top_char, top_char); // carriage to line 'top_line'
-    }
-
-    CClientDC dc(&edit);
-    CFont *pOld = dc.SelectObject(&s_Font);
-    TEXTMETRIC tm;
-    dc.GetTextMetrics(&tm);
-    dc.SelectObject(pOld);
-    int h = (int)tm.tmHeight + (int)tm.tmExternalLeading;
-    int y = (line - top_line) * h; // Vertical position of the line
-    CRect rect;
-    edit.GetClientRect(rect);
-
-    if (y + h - 1 >= rect.bottom)
-    {
-        if (!scroll)
-            return -2;
-        edit.LineScroll(1 + (y + h - 1 - rect.bottom) / h); // Number of rows to shift
-        //edit.SendMessage(EM_SCROLLCARET, 0, 0);
-        top_line = edit.GetFirstVisibleLine();
-        int bottom_char = edit.LineIndex(line);
-        edit.SendMessage(EM_SETSEL, bottom_char, bottom_char); // carriage move to line 'line'
-    }
-
-    y = (line - top_line) * h; // Vertical position of the line
-
-    if (y + h - 1 >= rect.bottom)
-    {
-        ASSERT(FALSE); // Incorrect shifts or calculations in this function
-        return -1;
-    }
-
-    height = h;
-    return y;
-# endif
-#endif
-
-    return 0;
-}
 
 // edit view info
 //
@@ -581,8 +426,7 @@ void CSrc6502View::SetPointer(int line, bool scroll) // draw/erase an arrow in t
 
     if (line != -1)
     {
-        int h;
-        ScrollToLine(line, h, TRUE);
+        m_text->ScrollToLine(line);
         //RedrawMarks(line);
     }
 }
@@ -599,8 +443,7 @@ void CSrc6502View::SetErrMark(int line) // draw/erase the pointer arrow error
 
     if (line != -1)
     {
-        int h;
-        ScrollToLine(line, h, TRUE);
+        m_text->ScrollToLine(line);
         //RedrawMarks(line);
 
 #ifdef USE_CRYSTAL_EDIT
@@ -625,8 +468,8 @@ void CSrc6502View::OnEnUpdate() // After changing the text
         CMainFrame *pMain = (CMainFrame *)AfxGetApp()->m_pMainWnd;
         pMain->m_wndStatusBar.SetPaneText(0, NULL); // and error message
 #endif
-}
     }
+}
 
 void CSrc6502View::SelectEditFont()
 {

@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Global.h"
 #include "MainFrm.h"
+#include "encodings.h"
 
 class CIOWindow;
 
@@ -61,6 +62,8 @@ public:
     virtual          ~C6502App();
 
     bool OnInit() override;
+
+    void loadEncodings();
 
     const CMainFrame *mainFrame() const { return m_mainFrame; }
     const wxLogWindow *logFrame() const { return m_logFrame; }

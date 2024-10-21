@@ -23,36 +23,49 @@
 /*************************************************************************/
 
 #include "StdAfx.h"
-#include "Events.h"
-#include "MainFrm.h"
-#include "M6502.h"
-
-#include "AsmThread.h"
+#include "FontController.h"
 
 /*************************************************************************/
 
-wxThread::ExitCode AsmThread::Entry()
+IMPLEMENT_SINGLETON(FontController);
+
+/*************************************************************************/
+
+FontController::FontController()
+    : Singleton()
+    , m_monoFont(nullptr)
+    , m_cellSize()
 {
-    io::output &out = m_mainFrm->console()->GetOutput("assembler");
-    COutputMem &mainMem = wxGetApp().m_global.GetMemory();
-    CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().m_global.GetDebug();
+    LoadFonts();
+    CalcCellSizes();
+}
 
-    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, asmMem.get(), debug));
+FontController::~FontController()
+{
+    delete m_monoFont;
+}
 
-    CAsm::Stat res = assembler->assemble();
+/*************************************************************************/
 
-    if (res != CAsm::Stat::OK)
-        assembler->report_error(res);
+void FontController::LoadFonts()
+{
+    wxFontInfo info;
+    info.Family(wxFONTFAMILY_TELETYPE);
+    info.AntiAliased(true);
 
-    // Copy result to actual memory.
-    mainMem = *asmMem;
+    delete m_monoFont;
+    m_monoFont = new wxFont(info);
+}
 
-    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
+/*************************************************************************/
 
-    wxQueueEvent(m_mainFrm, event.Clone());
+void FontController::CalcCellSizes()
+{
+    // Premeasure fonts.
+    wxMemoryDC dc;
+    dc.SetFont(*m_monoFont);
 
-    return reinterpret_cast<wxThread::ExitCode>(res);
+    m_cellSize = dc.GetTextExtent(" ");
 }
 
 /*************************************************************************/

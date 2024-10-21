@@ -113,18 +113,17 @@ void CGlobal::StartDebug()
     //if (wxGetApp().m_global.m_procType == ProcessorType::WDC65816) // 1.3.3 disable debugger for 65816
     //    return;
 
-    GetMemForSym();
     bool restart;
 
     if (m_pSym6502 == nullptr)
     {
         restart = false;
-        m_pSym6502 = new CSym6502(m_Mem, &m_Debug, m_uAddrBusWidth);
+        m_pSym6502 = new CSym6502(m_memory, &m_Debug, m_uAddrBusWidth);
     }
     else
     {
         restart = true;
-        m_pSym6502->Restart(m_Mem);
+        m_pSym6502->Restart(m_memory);
     }
 
     m_pSym6502->finish = m_SymFinish;
@@ -207,7 +206,7 @@ void CGlobal::SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info
 
 void CGlobal::LoadCode(const LoadCodeState &state)
 {
-    m_ProgMem = *state.Memory;
+    m_memory = *state.Memory;
 
     SetCodePresence(true);
 
@@ -217,7 +216,7 @@ void CGlobal::LoadCode(const LoadCodeState &state)
     {
         // TODO: This should be in the simulator and not here. -- B.Simonds (July 4, 2024)
         uint32_t vector = m_pSym6502->getVectorAddress(CSym6502::Vector::RESET);
-        start = m_ProgMem.getWord(vector);
+        start = m_memory.getWord(vector);
     }
 
     SetStart(start);

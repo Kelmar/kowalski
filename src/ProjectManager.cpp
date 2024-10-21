@@ -101,23 +101,19 @@ bool BinaryCodeTemplate::write(const std::string &filename, LoadCodeState *state
 /*************************************************************************/
 /*************************************************************************/
 
-ProjectManager *ProjectManager::s_self = nullptr;
+IMPLEMENT_SINGLETON(ProjectManager);
 
 /*************************************************************************/
 
 ProjectManager::ProjectManager()
-    : m_templates()
+    : Singleton()
+    , m_templates()
 {
-    ASSERT(s_self == nullptr);
-
-    s_self = this;
-
     InitCodeTemplates();
 }
 
 ProjectManager::~ProjectManager()
 {
-    s_self = nullptr;
 }
 
 /*************************************************************************/
@@ -222,7 +218,6 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
 
         return;
     }
-
 
     if (!codeTmp->read(path, &state))
     {

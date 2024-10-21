@@ -44,6 +44,16 @@ bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
     size_t maxSize = procType == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
 
     size_t sz = std::min(ar.size(), maxSize);
+    std::unique_ptr<uint8_t> data(new uint8_t[sz]);
+    std::span<uint8_t> span(data.get(), sz);
+
+    size_t rd = ar.read(span);
+
+    if (rd < sz)
+    {
+        // Should have been able to read the full block size.
+        throw FileError(FileError::ErrorCode::SysError);
+    }
 
     if (sz <= 0xFFFF)
     {
@@ -53,9 +63,12 @@ bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
          * In which case we're going to load it into the upper part of the 64K address space.
          */
         state->LoadAddress = 0x10000 - sz;
+
+        // Try reading start address from the reset vector.
+        state->StartAddress = span[sz - 3] << 8 | span[sz - 4];
     }
 
-    // Anything larger than 64K is probably a dump of a 65816, we'll load from the begining.
+    // Anything larger than 64K is probably a dump of a 65816, we'll load from the beginning.
 
     std::unique_ptr<LoadCodeOptionsDlg> optDlg(new LoadCodeOptionsDlg(state));
 
@@ -64,8 +77,7 @@ bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
     if (res != wxID_OK)
         return false;
     
-    ar.read(state->Memory->getSpan(state->StartAddress, sz));
-    state->Memory->invalidate();
+    state->Memory->copy(state->LoadAddress, span);
 
     return true;
 }

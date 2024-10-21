@@ -37,8 +37,6 @@ private:
     HexView *m_hexView;
     wxComboBox *m_jumpEdit;
 
-    uint8_t m_dummy[1024 * 64];
-
     void BindEvents();
 
 private: // Events

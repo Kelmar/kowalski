@@ -75,6 +75,7 @@ target_compile_options(6502 PRIVATE
 target_include_directories(6502
     PRIVATE include/
     PRIVATE include/crystal 
+    PRIVATE include/encoding
     PRIVATE ${wxWidgets_SOURCE_DIR}/include
 )
 

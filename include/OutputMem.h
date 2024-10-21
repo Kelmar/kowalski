@@ -97,10 +97,25 @@ public:
     {
         ASSERT(m_size == src.m_size); // Dimensions must be identical
         memcpy(m_data, src.m_data, m_size);
+        invalidate();
         return *this;
     }
 
     const uint8_t *Mem() const { return m_data; }
+
+    // Coppy from data block
+    void copy(size_t start, uint8_t *data, size_t sz)
+    {
+        ASSERT((start + sz) <= m_size);
+        memcpy(m_data + start, data, sz);
+        invalidate();
+    }
+
+    // Copy from a span
+    void copy(size_t start, const std::span<uint8_t> &span)
+    {
+        copy(start, span.data(), span.size());
+    }
 
     uint8_t get(size_t addr) const
     {
@@ -138,7 +153,7 @@ public:
     {
         ASSERT(from < m_size);
         to = std::min(to, m_size);
-        return std::span(&m_data[from], to - from);
+        return std::span(&m_data[from], to);
     }
 
     /**
