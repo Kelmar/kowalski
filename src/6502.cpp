@@ -94,7 +94,7 @@ bool C6502App::OnInit()
         return false;
     }
 
-    loadEncodings();
+    LoadEncodings();
 
     SetAppDisplayName(_("6502 Simulator"));
 
@@ -128,10 +128,14 @@ bool C6502App::OnInit()
     return true;
 }
 
-void C6502App::loadEncodings()
+/*************************************************************************/
+
+void C6502App::LoadEncodings()
 {
     new encodings::CodePage437();
 }
+
+/*************************************************************************/
 
 bool C6502App::InitFrame()
 {
@@ -145,6 +149,8 @@ bool C6502App::InitFrame()
     return true;
 }
 
+/*************************************************************************/
+
 // This is always the first to handle an event!
 int C6502App::FilterEvent(wxEvent &event)
 {
@@ -155,6 +161,8 @@ int C6502App::FilterEvent(wxEvent &event)
 
     return wxApp::FilterEvent(event);
 }
+
+/*************************************************************************/
 
 #if 0
 
@@ -310,6 +318,8 @@ bool C6502App::OnExceptionInMainLoop()
     return !terminate;
 }
 
+/*************************************************************************/
+
 void C6502App::AddToRecentFileList(const std::string &pathName)
 {
     UNUSED(pathName);
@@ -319,6 +329,8 @@ void C6502App::AddToRecentFileList(const std::string &pathName)
 
     //CWinApp::AddToRecentFileList(pathName);
 }
+
+/*************************************************************************/
 
 wxFrame *C6502App::CreateChildFrame(wxView *view)
 {

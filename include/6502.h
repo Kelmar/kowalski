@@ -63,7 +63,7 @@ public:
 
     bool OnInit() override;
 
-    void loadEncodings();
+    void LoadEncodings();
 
     const CMainFrame *mainFrame() const { return m_mainFrame; }
     const wxLogWindow *logFrame() const { return m_logFrame; }
