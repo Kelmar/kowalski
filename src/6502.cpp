@@ -363,7 +363,9 @@ wxFrame *C6502App::CreateChildFrame(wxView *view)
 
 int C6502App::OnExit()
 {
-    wxLogDebug("Application shutting down");
+   wxLogDebug("Application shutting down");
+
+    m_global.ExitDebugger();
 
     wxDocManager *const docManager = wxDocManager::GetDocumentManager();
 

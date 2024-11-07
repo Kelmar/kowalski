@@ -30,61 +30,61 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 CAsm::Breakpoint CGlobal::SetBreakpoint(int line, const std::string &doc_title)
 {
-    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title);
-    return m_Debug.ToggleBreakpoint(line, fuid); // set/delete breakpoint
+    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title);
+    return m_debugInfo.ToggleBreakpoint(line, fuid); // set/delete breakpoint
 }
 
 CAsm::Breakpoint CGlobal::GetBreakpoint(int line, const std::string &doc_title)
 {
-    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title);
-    return m_Debug.GetBreakpoint(line, fuid); // set/delete breakpoint
+    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title);
+    return m_debugInfo.GetBreakpoint(line, fuid); // set/delete breakpoint
 }
 
 CAsm::Breakpoint CGlobal::ModifyBreakpoint(int line, const std::string &doc_title, CAsm::Breakpoint bp)
 {
-    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title);
-    return m_Debug.ModifyBreakpoint(line, fuid, bp); // Breakpoint setting
+    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title);
+    return m_debugInfo.ModifyBreakpoint(line, fuid, bp); // Breakpoint setting
 }
 
 void CGlobal::ClrBreakpoint(int line, const std::string &doc_title)
 {
-    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title);
-    m_Debug.ClrBreakpoint(line, fuid); // Clear the breakpoint
+    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title);
+    m_debugInfo.ClrBreakpoint(line, fuid); // Clear the breakpoint
 }
 
 CAsm::DbgFlag CGlobal::GetLineDebugFlags(int line, const std::string &doc_title)
 {
-    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title); //File ID
+    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title); //File ID
     CDebugLine dl;
-    m_Debug.GetAddress(dl, line, fuid); // Find the address corresponding to the line
+    m_debugInfo.GetAddress(dl, line, fuid); // Find the address corresponding to the line
     return (CAsm::DbgFlag)dl.flags; // Flags describing the program line
 }
 
 uint32_t CGlobal::GetLineCodeAddr(int line, const std::string &doc_title)
 {
-    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title); // File ID
+    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title); // File ID
     CDebugLine dl;
-    m_Debug.GetAddress(dl, line, fuid); // Find the address corresponding to the line
+    m_debugInfo.GetAddress(dl, line, fuid); // Find the address corresponding to the line
     return dl.addr;
 }
 
 bool CGlobal::SetTempExecBreakpoint(int line, const std::string &doc_title)
 {
-    CAsm::FileUID fuid = m_Debug.GetFileUID(doc_title); // File ID
+    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title); // File ID
     CDebugLine dl;
-    m_Debug.GetAddress(dl, line, fuid); // Find the address corresponding to the line
+    m_debugInfo.GetAddress(dl, line, fuid); // Find the address corresponding to the line
 
     if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
         return false; // There is no code in line 'line'
 
-    m_Debug.SetTemporaryExecBreakpoint(dl.addr);
+    m_debugInfo.SetTemporaryExecBreakpoint(dl.addr);
 
     return true;
 }
 
 bool CGlobal::CreateDeasm()
 {
-    ASSERT(m_pSym6502 != nullptr);
+    ASSERT(m_simulator != nullptr);
 
 #if 0
 
@@ -115,20 +115,19 @@ void CGlobal::StartDebug()
 
     bool restart;
 
-    if (m_pSym6502 == nullptr)
+    if (m_simulator == nullptr)
     {
         restart = false;
-        m_pSym6502 = new CSym6502(m_memory, &m_Debug, m_uAddrBusWidth);
+        m_simulator = new CSym6502(m_memory, &m_debugInfo, m_busWidth);
     }
     else
     {
         restart = true;
-        m_pSym6502->Restart(m_memory);
+        m_simulator->Restart(m_memory);
     }
 
-    m_pSym6502->finish = m_SymFinish;
-    m_pSym6502->SymStart(m_uOrigin);
-    m_pSym6502->Update(CAsm::SYM_OK, true);
+    m_simulator->finish = m_simFinish;
+    m_simulator->SymStart(m_startAddress);
 
     /*
       struct { const std::wstring *pStr, const CContext *pCtx } data;
@@ -141,23 +140,21 @@ void CGlobal::StartDebug()
     Broadcast::ToPopups(EVT_START_DEBUGGER, (WPARAM)restart, 0);
 }
 
+/*************************************************************************/
+
 void CGlobal::ExitDebugger()
 {
-    if (m_pSym6502 == nullptr)
+    if (m_simulator == nullptr)
         return;
-
-    ASSERT(!m_pSym6502->IsRunning());
 
     Broadcast::ToViews(EVT_EXIT_DEBUGGER, 0, 0);
     Broadcast::ToPopups(EVT_EXIT_DEBUGGER, 0, 0);
 
-    m_pSym6502->ExitSym();
-    delete m_pSym6502;
-
-    m_pSym6502 = nullptr;
+    delete m_simulator;
+    m_simulator = nullptr;
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
 void CGlobal::SaveCode(CArchive &archive, uint32_t start, uint32_t end, int info)
 {
@@ -215,7 +212,7 @@ void CGlobal::LoadCode(const LoadCodeState &state)
     if (start == CAsm::INVALID_ADDRESS)
     {
         // TODO: This should be in the simulator and not here. -- B.Simonds (July 4, 2024)
-        uint32_t vector = m_pSym6502->getVectorAddress(CSym6502::Vector::RESET);
+        uint32_t vector = m_simulator->getVectorAddress(CSym6502::Vector::RESET);
         start = m_memory.getWord(vector);
     }
 

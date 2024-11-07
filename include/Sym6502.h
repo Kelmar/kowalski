@@ -262,11 +262,28 @@ typedef CLogBuffer<CmdInfo> CommandLog;
 
 class CSym6502
 {
+private:
     CContext ctx, pre, old; //% bug Fix 1.2.13.18 - command log assembly not lined up with registers (added pre)
     CDebugInfo *debug;
     CommandLog m_Log;
 
 public:
+    /// @brief Simulator Status
+    enum class Status
+    {
+        OK = 0,
+        BPT_EXECUTE,        // Interrupt during execution
+        BPT_READ,           // Interrupt on reading
+        BPT_WRITE,          // Interrupt on writing
+        BPT_TEMP,           // Interrupt during execution
+        BPT_ILLEGAL_CODE,   // Illegal statement encountered
+        STOP,               // Program stopped by user
+        FINISH,             // Program finished
+        RUN,                // Program started
+        INP_WAIT,           // Waiting for data input
+        ILL_WRITE           // Protected area writing attempt detected
+    };
+
     enum class Vector
     {
         IRQ   = 0,
@@ -323,19 +340,22 @@ private:
         ctx.pc = uint32_t(ctx.pc + step);
     }
 
-    bool running;
-    bool stop_prog;
-    CAsm::SymStat fin_stat;
+    bool running; // TODO: Make atomic?
+    bool stop_prog; // TODO: Make atomic?
+
     int m_nInterruptTrigger;
 
-    CAsm::SymStat perform_cmd();
-    CAsm::SymStat skip_cmd(); // Skip the current statement
-    CAsm::SymStat step_over();
-    CAsm::SymStat run_till_ret();
-    CAsm::SymStat run(bool animate= false);
+    void skip_cmd(); // Skip the current statement
+    void step_over();
+    void run_till_ret();
+
+    void run(std::stop_token stopToken);
+    void perform_step();
+
     void interrupt(int& nInterrupt);    // interrupt requested: load pc
-    CAsm::SymStat perform_step(bool animate);
-    CAsm::SymStat perform_command();
+
+    void PerformCommand();
+    void PerformCommandInner();
 
     uint32_t get_argument_address(bool bWrite); // get current cmd argument address
     uint16_t get_argument_value(bool rmask); // get current cmd argument value
@@ -376,7 +396,7 @@ private:
         if (cpu16() && !ctx.emm)
         {
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
-                throw CAsm::SYM_ILL_WRITE;
+                throw CSym6502::Status::ILL_WRITE;
 
             ctx.mem.set(ctx.s, arg);
             --ctx.s;
@@ -395,14 +415,14 @@ private:
         if (cpu16() && !ctx.emm)
         {
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
-                throw CAsm::SYM_ILL_WRITE;
+                throw CSym6502::Status::ILL_WRITE;
 
             ctx.mem.set(ctx.s, (arg >> 8) & 0xFF);
             --ctx.s;
             ctx.s &= 0xFFFF;
 
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
-                throw CAsm::SYM_ILL_WRITE;
+                throw CSym6502::Status::ILL_WRITE;
 
             ctx.mem.set(ctx.s, arg & 0xFF);
             --ctx.s;
@@ -466,11 +486,12 @@ private:
     }
 
     static UINT start_step_over_thread(void *ptr);
-    static UINT start_run_thread(void *ptr);
-    static UINT start_animate_thread(void *ptr);
+
+    void RunThread(std::stop_token stopToken);
+
     static UINT start_run_till_ret_thread(void *ptr);
 
-    //HANDLE hThread;
+    std::jthread m_thread;
 
     /*
      * Looks like drawing functions in here; thinking these need to be moved 
@@ -479,9 +500,10 @@ private:
      *          -- B.Simonds (April 25, 2024)
      */
 
-    void SetPointer(const CLine &line, uint32_t addr);	// Placing an arrow (->) in front of the current line
+    void SetPointer(const CLine &line, uint32_t addr); // Placing an arrow (->) in front of the current line
     void SetPointer(CSrc6502View* pView, int nLine, bool bScroll); // helper fn
-    void ResetPointer();			// Hiding the arrow
+    void ResetPointer(); // Hiding the arrow
+
     CSrc6502View *FindDocView(CAsm::FileUID fuid);	// Find the document window
     CAsm::FileUID m_fuidLastView;			// Remembering the window in which the arrow is drawn
     //HWND m_hwndLastView;				// j.w.
@@ -496,7 +518,7 @@ private:
     bool check_io_write(uint32_t addr);
     bool check_io_read(uint32_t addr);
 
-    CAsm::SymStat io_function(uint8_t arg);
+    Status io_function(uint8_t arg);
     uint8_t io_function();
 
     const uint8_t* m_vCodeToCommand;
@@ -518,12 +540,10 @@ public:
     uint16_t get_brk_addr16();
     uint16_t get_cop_addr16();
 
-    void Update(CAsm::SymStat stat, bool no_ok = false);
+    std::string GetStatMsg(Status stat) const;
+    std::string GetLastStatMsg() const { return GetStatMsg(CurrentStatus); }
 
-    std::string GetStatMsg(CAsm::SymStat stat);
-    std::string GetLastStatMsg();
-
-    CAsm::SymStat SkipInstr();
+    void SkipInstr();
     void SkipToAddr(uint16_t addr);
     void set_addr_bus_width(UINT w) { UNUSED(w); }
 
@@ -554,22 +574,26 @@ public:
         init();
     }
 
-    virtual ~CSym6502() { }
+    virtual ~CSym6502()
+    {
+    }
 
     void Restart(const COutputMem &mem);
     void SymStart(uint32_t org);
 
-    CAsm::SymStat StepInto();
-    CAsm::SymStat StepOver();
-    CAsm::SymStat RunTillRet();
-    CAsm::SymStat Run();
-    CAsm::SymStat Animate();
-    CAsm::SymStat Interrupt(IntType eInt);
+    void StepInto();
+    void StepOver();
+    void RunTillRet();
+    void Run();
+    void Interrupt(IntType eInt);
 
-    bool IsFinished() const
-    {
-        return fin_stat == CAsm::SYM_FIN;
-    }
+    property<Status> CurrentStatus;
+
+    inline
+    bool CanContinue() const { return (CurrentStatus == Status::OK) || (CurrentStatus == Status::RUN); }
+
+    inline
+    bool IsFinished() const { return (CurrentStatus == Status::FINISH); }
 
     bool IsRunning() const { return running; }
 

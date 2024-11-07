@@ -34,21 +34,23 @@ class CArchive;
 class CGlobal
 {
 private:
-    UINT m_uAddrBusWidth;           // width of the address bus
-    bool m_bCodePresent;            // true -> after successful assembly
-    COutputMem m_memory;           // memory written in the assembly process
-    CDebugInfo m_Debug;             // startup information for the simulator
-    uint32_t m_uOrigin;             // start of program 6502
-    CSym6502 *m_pSym6502;           // simulator
-    CAsm::Finish m_SymFinish;       // how the simulator ends the program
-    CMarkArea m_MarkArea;           // designation of fragments of memory containing the object code
+    UINT m_busWidth;          // width of the address bus (in bits)
+    bool m_isCodePresent;     // true -> after successful assembly
+    COutputMem m_memory;      // memory written in the assembly process
+    CDebugInfo m_debugInfo;   // startup information for the simulator
+
+    /// Start address override
+    uint32_t m_startAddress;
+    CSym6502 *m_simulator;    // simulator
+    CAsm::Finish m_simFinish; // how the simulator ends the program
+    CMarkArea m_markArea;     // designation of fragments of memory containing the object code
 
 public:
 
     /// Selected processor type
     ProcessorType m_procType;
 
-    bool m_bBank; // Flag for member above bank 0 for deasm biew
+    bool m_bBank; // Flag for member above bank 0 for deasm view
     uint8_t m_bPBR; // PBR register for deasm view
     uint16_t m_bSRef; // Stack pointer reference
     
@@ -58,32 +60,38 @@ public:
     CIntGenerator m_IntGenerator;   // interrupt request generator data
 
     CGlobal()
-        : m_bCodePresent(false)
-        , m_pSym6502(nullptr)
+        : m_busWidth(24) //**memfix
+        , m_isCodePresent(false)
+        , m_memory()
+        , m_debugInfo()
+        , m_startAddress((uint32_t)(-1))
+        , m_simulator(nullptr)
+        , m_simFinish(CAsm::Finish::FIN_BY_BRK)
+        , m_markArea()
+        , m_procType(ProcessorType::M6502)
     {
-        SetAddrBusWidth(24); //**memfix
     }
 
     ~CGlobal()
     {
-        delete m_pSym6502;
+        delete m_simulator;
     }
 
     void SetAddrBusWidth(UINT w)
     {
-        m_uAddrBusWidth = w;
-        if (m_pSym6502)
-            m_pSym6502->set_addr_bus_width(w);
+        m_busWidth = w;
+        if (m_simulator)
+            m_simulator->set_addr_bus_width(w);
     }
 
     CDebugInfo *GetDebug()
     {
-        return &m_Debug;
+        return &m_debugInfo;
     }
 
     CMarkArea *GetMarkArea()
     {
-        return &m_MarkArea;
+        return &m_markArea;
     }
 
     COutputMem &GetMemory() { return m_memory; }
@@ -92,37 +100,37 @@ public:
 
     uint32_t GetStartAddr() // Beginning of the program
     {
-        return m_uOrigin;
+        return m_startAddress;
     }
 
     bool IsCodePresent()
     {
-        return m_bCodePresent;
+        return m_isCodePresent;
     }
 
     bool IsDebugInfoPresent()
     {
-        return m_bCodePresent; // to improve
+        return m_isCodePresent; // to improve
     }
 
     bool IsDebugging()
     {
-        return m_pSym6502 != NULL;
+        return m_simulator != NULL;
     }
 
     bool IsProgramRunning()
     {
-        return m_pSym6502 ? m_pSym6502->IsRunning() : false;
+        return m_simulator ? m_simulator->IsRunning() : false;
     }
 
     bool IsProgramFinished()
     {
-        return m_pSym6502 ? m_pSym6502->IsFinished() : false;
+        return m_simulator ? m_simulator->IsFinished() : false;
     }
 
     void SetCodePresence(bool present)
     {
-        m_bCodePresent = present;
+        m_isCodePresent = present;
     }
 
     void StartDebug();
@@ -136,29 +144,29 @@ public:
 
     void SetStart(uint32_t prog_start)
     {
-        m_uOrigin = prog_start;
+        m_startAddress = prog_start;
     }
 
     CSym6502 *GetSimulator()
     {
-        return m_pSym6502;
+        return m_simulator;
     }
 
     std::string GetStatMsg()
     {
-        return m_pSym6502->GetLastStatMsg();
+        return m_simulator->GetLastStatMsg();
     }
 
     CAsm::Finish GetSymFinish()
     {
-        ASSERT(m_pSym6502 == NULL || m_pSym6502->finish == m_SymFinish);
-        return m_SymFinish;
+        ASSERT(m_simulator == NULL || m_simulator->finish == m_simFinish);
+        return m_simFinish;
     }
 
     void SetSymFinish(CAsm::Finish fin)
     {
-        m_SymFinish = fin;
-        if (m_pSym6502) m_pSym6502->finish = fin;
+        m_simFinish = fin;
+        if (m_simulator) m_simulator->finish = fin;
     }
 
     CAsm::Breakpoint SetBreakpoint(int line, const std::string &doc_title);
@@ -171,8 +179,8 @@ public:
 
     void AbortProg()
     {
-        if (m_pSym6502 != NULL)
-            m_pSym6502->AbortProg();
+        if (m_simulator != NULL)
+            m_simulator->AbortProg();
     }
 
     //---------------------------------------------------------------------------
@@ -203,7 +211,7 @@ public:
 
     CAsm::Breakpoint GetBreakpoint(uint32_t addr) // Get the interrupt at the given address
     {
-        return m_Debug.GetBreakpoint(addr);
+        return m_debugInfo.GetBreakpoint(addr);
     }
 
     //---------------------------------------------------------------------------

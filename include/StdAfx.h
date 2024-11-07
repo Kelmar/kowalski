@@ -57,6 +57,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 //#include <format> // Not on GNU yet....
 #include <functional>
 #include <list>
@@ -65,6 +66,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <regex>
 #include <span>
 #include <string>
+#include <thread>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -98,6 +100,7 @@ typedef wxOutputStream DocOStream;
 #include "Utils.h"
 #include "StrUtils.h"
 #include "Singleton.h"
+#include "property.h"
 
 #include "wxExtra.h"
 

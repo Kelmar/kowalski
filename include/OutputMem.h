@@ -103,7 +103,7 @@ public:
 
     const uint8_t *Mem() const { return m_data; }
 
-    // Coppy from data block
+    // Copy from data block
     void copy(size_t start, uint8_t *data, size_t sz)
     {
         ASSERT((start + sz) <= m_size);

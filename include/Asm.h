@@ -305,22 +305,6 @@ public:
     };
 #endif
 
-    /// @brief Simulator Status
-    enum SymStat
-    {
-        SYM_OK = 0,
-        SYM_BPT_EXECUTE,  // Interrupt during execution
-        SYM_BPT_READ,     // Interrupt on reading
-        SYM_BPT_WRITE,    // Interrupt on write
-        SYM_BPT_TEMP,     // Interrupt during execution
-        SYM_ILLEGAL_CODE, // Illegal statement encountered
-        SYM_STOP,         // Program stopped by user
-        SYM_FIN,          // Program finished
-        SYM_RUN,          // Program started
-        SYM_INP_WAIT,     // Waiting for data input
-        SYM_ILL_WRITE     // Protected area writing attempt detected
-    };
-
     enum Breakpoint
     {
         BPT_NONE      = 0x00, // there is no interrupt

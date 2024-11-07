@@ -415,7 +415,9 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
     if (bWrite && addr >= s_uProtectFromAddr && addr <= s_uProtectToAddr)
     {
         ctx.pc = pc; // restore original value
-        throw CAsm::SYM_ILL_WRITE;
+        CurrentStatus = CSym6502::Status::ILL_WRITE;
+        throw 0; // TODO: Rework to not use exceptions
+        //return INVALID_ADDR;
     }
 
     return addr;
@@ -859,21 +861,21 @@ uint16_t CSym6502::get_argument_value(bool rmask)
     }
 }
 
-// The function executes the instruction indicated by ctx.pc, changing the state accordingly
-// registers and memory (ctx.mem)
-CAsm::SymStat CSym6502::perform_cmd()
+// Temporary wrapper to catch/ignore exceptions on PerformCommandInner()
+void CSym6502::PerformCommand()
 {
     try
     {
-        return perform_command();
+        PerformCommandInner();
     }
-    catch (CAsm::SymStat s)
+    catch (...)
     {
-        return s;
     }
 }
 
-CAsm::SymStat CSym6502::perform_command()
+// The function executes the instruction indicated by ctx.pc, changing the state accordingly
+// registers and memory (ctx.mem)
+void CSym6502::PerformCommandInner()
 {
     uint8_t cmd;
     uint16_t arg, acc;
@@ -2032,7 +2034,11 @@ CAsm::SymStat CSym6502::perform_command()
 
     case CAsm::C_RTS:
         if ((finish == CAsm::FIN_BY_RTS) && ((ctx.s & 0xFF) == 0xFF)) // RTS on empty stack?
-            return CAsm::SYM_FIN;
+        {
+            CurrentStatus = CSym6502::Status::FINISH;
+            return;
+        }
+
         ctx.pc = (pull_addr_from_stack() + 1) & 0xFFFF;
         break;
 
@@ -2184,7 +2190,10 @@ CAsm::SymStat CSym6502::perform_command()
 
     case CAsm::C_BRK:
         if (finish == CAsm::FIN_BY_BRK) // BRK instruction terminates the program?
-            return CAsm::SYM_FIN;
+        {
+            CurrentStatus = CSym6502::Status::FINISH;
+            return;
+        }
 
         if (cpu16() && !ctx.emm)
         {
@@ -2432,7 +2441,8 @@ CAsm::SymStat CSym6502::perform_command()
 
     case CAsm::C_STP:
         inc_prog_counter();
-        return CAsm::SYM_STOP;
+        CurrentStatus = CSym6502::Status::STOP;
+        return;
 
     case CAsm::C_BRL:
         inc_prog_counter();
@@ -2510,7 +2520,10 @@ CAsm::SymStat CSym6502::perform_command()
         uint32_t ptr = (ctx.dbr << 16) + (ctx.xy16 ? (ctx.y & 0xFF) : ctx.y);
 
         if (s_bWriteProtectArea && ptr >= s_uProtectFromAddr && ptr <= s_uProtectToAddr)
-            throw CAsm::SYM_ILL_WRITE;
+        {
+            CurrentStatus = CSym6502::Status::ILL_WRITE;
+            return;
+        }
 
         uint8_t v = ctx.mem[(arg << 16) + (ctx.xy16 ? (ctx.x++ & 0xFF) : ctx.x++)];
         ctx.mem.set((ctx.dbr << 16) + (ctx.xy16 ? (ctx.y++ & 0xFF) : ctx.y++), v);
@@ -2530,7 +2543,10 @@ CAsm::SymStat CSym6502::perform_command()
         uint32_t ptr = (ctx.dbr << 16) + (ctx.xy16 ? (ctx.y & 0xFF) : ctx.y);
 
         if (s_bWriteProtectArea && ptr >= s_uProtectFromAddr && ptr <= s_uProtectToAddr)
-            throw CAsm::SYM_ILL_WRITE;
+        {
+            CurrentStatus = CSym6502::Status::ILL_WRITE;
+            return;
+        }
 
         uint8_t v = ctx.mem[(arg << 16) + (ctx.xy16 ? (ctx.x-- & 0xFF) : ctx.x--)];
         ctx.mem.set((ctx.dbr << 16) + (ctx.xy16 ? (ctx.y-- & 0xFF) : ctx.y--), v);
@@ -2761,7 +2777,10 @@ CAsm::SymStat CSym6502::perform_command()
 
     case CAsm::C_ILL:
         if (finish == CAsm::FIN_BY_DB && cmd == 0xDB) // DB is invalid for 6502 and 65C02 - STP for 65816
-            return CAsm::SYM_FIN;
+        {
+            CurrentStatus = CSym6502::Status::FINISH;
+            return;
+        }
 
         if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
         {
@@ -2771,7 +2790,8 @@ CAsm::SymStat CSym6502::perform_command()
             break;
         }
 
-        return CAsm::SYM_ILLEGAL_CODE;
+        CurrentStatus = CSym6502::Status::BPT_ILLEGAL_CODE;
+        return;
 
     default:
         ASSERT(false);
@@ -2794,13 +2814,12 @@ CAsm::SymStat CSym6502::perform_command()
     saveCycles = ctx.uCycles;
     // end bug fix
 
-    return CAsm::SYM_OK;
+    CurrentStatus = CSym6502::Status::OK;
 }
 
-CAsm::SymStat CSym6502::skip_cmd() // Skip the current statement
+void CSym6502::skip_cmd() // Skip the current statement
 {
     inc_prog_counter(CAsm::mode_to_len[m_vCodeToMode[ctx.mem[ctx.pc]]]);
-    return CAsm::SYM_OK;
 }
 
 uint16_t CSym6502::get_irq_addr()
@@ -2855,44 +2874,42 @@ uint16_t CSym6502::get_rst_addr()
 
 //=============================================================================
 
-CAsm::SymStat CSym6502::StepInto()
+void CSym6502::StepInto()
 {
-    ASSERT(fin_stat != CAsm::SYM_FIN);
+    ASSERT(CurrentStatus != CSym6502::Status::FINISH);
 
     if (running)
     {
         ASSERT(false);
-        return CAsm::SYM_OK;
+        return;
     }
 
     set_translation_tables();
+
+    old = ctx;
+
     stop_prog = false;
     running = true;
-    old = ctx;
-    fin_stat = perform_cmd();
+    PerformCommand();
     running = false;
-
-    Update(fin_stat);
-
-    return fin_stat;
 }
 
 //-----------------------------------------------------------------------------
 
-CAsm::SymStat CSym6502::StepOver()
+void CSym6502::StepOver()
 {
-    ASSERT(fin_stat != CAsm::SYM_FIN);
+    ASSERT(CurrentStatus != CSym6502::Status::FINISH);
 
     if (running)
     {
         ASSERT(false);
-        return CAsm::SYM_OK;
+        return;
     }
 
-    Update(CAsm::SYM_RUN);
     old = ctx;
     stop_prog = false;
     running = true;
+    CurrentStatus = CSym6502::Status::RUN;
 
 #if REWRITE_TO_WX_WIDGET
     CWinThread *thread = AfxBeginThread(CSym6502::start_step_over_thread, this, SIM_THREAD_PRIORITY, 0, CREATE_SUSPENDED);
@@ -2908,8 +2925,6 @@ CAsm::SymStat CSym6502::StepOver()
         thread->ResumeThread();
 }
 #endif
-
-    return CAsm::SYM_OK;
 }
 
 UINT CSym6502::start_step_over_thread(void *ptr)
@@ -2926,11 +2941,14 @@ UINT CSym6502::start_step_over_thread(void *ptr)
     return 0;
 }
 
-CAsm::SymStat CSym6502::step_over()
+void CSym6502::step_over()
 {
     uint32_t addr = ctx.pc;
     uint16_t stack = 0;
     bool jsr = false;
+
+    running = true;
+    CurrentStatus = CSym6502::Status::RUN;
 
     if (cpu16())
         addr += (ctx.pbr << 16);
@@ -2951,37 +2969,39 @@ CAsm::SymStat CSym6502::step_over()
 
         for (;;)
         {
-            CAsm::SymStat stat = perform_step(false);
+            perform_step();
 
-            if (stat != CAsm::SYM_OK)
-                return stat;
+            if (!CanContinue())
+                return;
 
             if (jsr && ctx.s == stack)
-                return CAsm::SYM_BPT_TEMP;
+            {
+                CurrentStatus = CSym6502::Status::BPT_TEMP;
+                return;
+            }
         }
         break;
 
     default:
-        return perform_cmd();
+        PerformCommand();
+        break;
     }
 }
 
 //-----------------------------------------------------------------------------
 
-CAsm::SymStat CSym6502::RunTillRet()
+void CSym6502::RunTillRet()
 {
-    ASSERT(fin_stat != CAsm::SYM_FIN);
+    ASSERT(IsFinished());
 
     if (running)
     {
         ASSERT(false);
-        return CAsm::SYM_OK;
+        return;
     }
 
-    Update(CAsm::SYM_RUN);
     old = ctx;
     stop_prog = false;
-    running = true;
 
 #if REWRITE_TO_WX_WIDGET
     CWinThread *thread = AfxBeginThread(CSym6502::start_run_till_ret_thread, this, SIM_THREAD_PRIORITY, 0, CREATE_SUSPENDED);
@@ -2995,11 +3015,9 @@ CAsm::SymStat CSym6502::RunTillRet()
         hThread = (HANDLE)*thread;
         ResetPointer();
         thread->ResumeThread();
-}
-#endif
-
-    return CAsm::SYM_OK;
     }
+#endif
+ }
 
 UINT CSym6502::start_run_till_ret_thread(void *ptr)
 {
@@ -3015,124 +3033,143 @@ UINT CSym6502::start_run_till_ret_thread(void *ptr)
     return 0;
 }
 
-CAsm::SymStat CSym6502::run_till_ret()
+void CSym6502::run_till_ret()
 {
     set_translation_tables();
 
     uint16_t stack = ctx.s + 2;
+
+    running = true;
+    CurrentStatus = CSym6502::Status::RUN;
+
     for (;;)
     {
-        CAsm::SymStat stat = perform_step(false);
-        if (stat != CAsm::SYM_OK)
-            return stat;
+        perform_step();
+
+        if (!CanContinue())
+            return;
 
         if (ctx.s == stack)
-            return CAsm::SYM_BPT_TEMP;
+        {
+            CurrentStatus = CSym6502::Status::BPT_TEMP;
+            return;
+        }
     }
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
-CAsm::SymStat CSym6502::Run()
+void CSym6502::Run()
 {
-    ASSERT(fin_stat != CAsm::SYM_FIN);
+    ASSERT(!IsFinished());
 
     if (running)
     {
         ASSERT(false);
-        return CAsm::SYM_OK;
+        return;
     }
 
-    Update(CAsm::SYM_RUN);
     old = ctx;
-    stop_prog = false;
-    running = true;
+    ResetPointer(); // TODO: Move to UI/Thread?
+    // More to the point, let the thread signal the start of the run, and let the UI update on that signal.
 
-#if REWRITE_TO_WX_WIDGET
-    CWinThread *thread = AfxBeginThread(CSym6502::start_run_thread, this, SIM_THREAD_PRIORITY, 0, CREATE_SUSPENDED);
-    if (thread == NULL)
+    try
+    {
+        m_thread = std::jthread([this] (std::stop_token stopToken) { RunThread(stopToken); });
+    }
+    catch (...)
     {
         running = false;
-        AfxMessageBox(IDS_ERR_SYM_THREAD);
+        throw; // Let UI figure out how to report this error.
     }
-    else
+}
+
+/*************************************************************************/
+
+void CSym6502::RunThread(std::stop_token stopToken)
+{
+    // Ensure that the status gets updated even if thread crashes.
+    deferred_action([this] ()
     {
-        hThread = (HANDLE)*thread;
-        ResetPointer();
-        thread->ResumeThread();
+        running = false; // TODO: Make atomic?
+        CurrentStatus = CSym6502::Status::FINISH;
+    });
+
+    stop_prog = false; // TODO: Make atomic?
+    running = true; // TODO: Make atomic?
+    CurrentStatus = CSym6502::Status::RUN;
+
+    run(stopToken);
 }
-#endif
 
-    return CAsm::SYM_OK;
-}
+/*************************************************************************/
 
-
-UINT CSym6502::start_run_thread(void *ptr)
+void CSym6502::perform_step()
 {
-    UNUSED(ptr);
-
-#if REWRITE_TO_WX_WIDGET
-    CSym6502 *pSym = (CSym6502 *)ptr;
-    pSym->fin_stat = pSym->run();
-    pSym->running = false;
-    wxGetApp()->GetMainWnd()->PostMessage(WM_USER + 9998, pSym->fin_stat, 0);
-#endif
-
-    return 0;
-}
-
-CAsm::SymStat CSym6502::perform_step(bool animate)
-{
-    UNUSED(animate);
-
     if (stop_prog) // stop executing?
-        return CAsm::SYM_STOP;
+    {
+        CurrentStatus = CSym6502::Status::STOP;
+        return;
+    }
 
     if (m_nInterruptTrigger != NONE) // interrupt requested?
         interrupt(m_nInterruptTrigger);
 
-    CAsm::SymStat stat = perform_cmd();
-    if (stat != CAsm::SYM_OK)
-        return stat;
+    PerformCommand();
 
-    CAsm::Breakpoint bp;
+    if (!CanContinue())
+        return;
+
     uint32_t addr = ctx.pc;
 
     if (cpu16())
         addr += (ctx.pbr << 16);
 
-    if (debug && (bp = debug->GetBreakpoint(addr)) != CAsm::BPT_NONE)
+    if (debug)
     {
-        if (bp & CAsm::BPT_EXECUTE)
-            return CAsm::SYM_BPT_EXECUTE;
+        CAsm::Breakpoint bp = debug->GetBreakpoint(addr);
 
-        if (bp & CAsm::BPT_TEMP_EXEC)
-            return CAsm::SYM_BPT_TEMP;
+        if (bp != CAsm::BPT_NONE)
+        {
+            if (bp & CAsm::BPT_EXECUTE)
+            {
+                CurrentStatus = CSym6502::Status::BPT_EXECUTE;
+                return;
+            }
+
+            if (bp & CAsm::BPT_TEMP_EXEC)
+            {
+                CurrentStatus = CSym6502::Status::BPT_TEMP;
+                return;
+            }
+        }
     }
 
-#if REWRITE_TO_WX_WIDGET
-    if (animate)
-    {
-        eventRedraw.ResetEvent();
-        wxGetApp()->GetMainWnd()->PostMessage(WM_USER + 9998, SYM_RUN, 1);
-        eventRedraw.Lock();
-}
-#endif
-
-    return CAsm::SYM_OK;
+    CurrentStatus = CSym6502::Status::RUN;
 }
 
-CAsm::SymStat CSym6502::run(bool animate /*= false*/)
+/*************************************************************************/
+
+void CSym6502::run(std::stop_token stopToken)
 {
     set_translation_tables();
 
     for (;;)
     {
-        CAsm::SymStat stat = perform_step(animate);
-        if (stat != CAsm::SYM_OK)
-            return stat;
+        if (stopToken.stop_requested())
+        {
+            CurrentStatus = CSym6502::Status::STOP;
+            return;
+        }
+
+        perform_step();
+
+        if (!CanContinue())
+            return;
     }
 }
+
+/*************************************************************************/
 
 void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
 {
@@ -3220,113 +3257,52 @@ void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
     }
 }
 
-//-----------------------------------------------------------------------------
-
-CAsm::SymStat CSym6502::Animate()
-{
-    ASSERT(fin_stat != CAsm::SYM_FIN);
-
-    if (running)
-    {
-        ASSERT(false);
-        return CAsm::SYM_OK;
-    }
-
-    Update(CAsm::SYM_RUN);
-    old = ctx;
-    stop_prog = false;
-    running = true;
-
-#if REWRITE_TO_WX_WIDGET
-    CWinThread *thread = AfxBeginThread(CSym6502::start_animate_thread, this, THREAD_PRIORITY_IDLE, 0, CREATE_SUSPENDED);
-    if (thread == NULL)
-    {
-        running = false;
-        AfxMessageBox(IDS_ERR_SYM_THREAD);
-    }
-    else
-    {
-        hThread = (HANDLE)*thread;
-        thread->ResumeThread();
-}
-#endif
-
-    return CAsm::SYM_OK;
-}
-
-
-UINT CSym6502::start_animate_thread(void *ptr)
-{
-    UNUSED(ptr);
-
-#if REWRITE_TO_WX_WIDGET
-    CSym6502 *pSym = (CSym6502 *)ptr;
-    pSym->fin_stat = pSym->run(true);
-    pSym->running = false;
-    wxGetApp()->GetMainWnd()->PostMessage(WM_USER + 9998, pSym->fin_stat, 0);
-#endif
-
-    return 0;
-}
-
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
 void CSym6502::SkipToAddr(uint16_t addr)
 {
-    ASSERT(fin_stat != CAsm::SYM_FIN);
+    ASSERT(!IsFinished());
 
     if (running)
         return;
 
     ctx.pc = addr;
-    Update(CAsm::SYM_OK);
+    CurrentStatus = CSym6502::Status::OK;
 }
 
-CAsm::SymStat CSym6502::SkipInstr()
+/*************************************************************************/
+
+void CSym6502::SkipInstr()
 {
-    ASSERT(fin_stat != CAsm::SYM_FIN);
+    ASSERT(!IsFinished());
 
     if (running)
-        return CAsm::SYM_OK;
+        return;
 
-    fin_stat = skip_cmd();
-
-    Update(fin_stat);
-
-    return fin_stat;
+    skip_cmd();
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
 void CSym6502::AbortProg()
 {
-    /*
-     * Not sure about this, it looks like they were attempting to override
-     * the main application loop with one that runs async (like for games)
-     * but ::GetMessage() blocks until it receives a message.  If they
-     * had intended for it to run as an animation they probably wanted
-     * ::PeekMessage() instead.
-     *
-     *                  -- B.Simonds (May 1, 2024)
-     */
+    if (!running)
+        return; // Not running return
 
-#if REWRITE_TO_WX_WIDGET
     stop_prog = true;
-    //::WaitForSingleObject(hThread, INFINITE); // synchronization
-    while (running)
+
+    if (m_thread.joinable())
     {
-        MSG msg;
+        m_thread.request_stop();
 
-        if (!::GetMessage(&msg, NULL, NULL, NULL))
-            break;
-
-        ::TranslateMessage(&msg);
-        ::DispatchMessage(&msg);
+        // TODO: Replace with signal to UI that thread has stopped.
+        m_thread.join();
     }
 
     ASSERT(!running);
-#endif
 }
+
+/*************************************************************************/
 
 void CSym6502::ExitSym()
 {
@@ -3334,114 +3310,61 @@ void CSym6502::ExitSym()
     ResetPointer();
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
-std::string CSym6502::GetLastStatMsg()
+std::string CSym6502::GetStatMsg(CSym6502::Status stat) const
 {
-    return GetStatMsg(fin_stat);
-}
+    wxString msg = _("Unknown Status");
 
-std::string CSym6502::GetStatMsg(CAsm::SymStat stat)
-{
-    UNUSED(stat);
-
-    std::string msg = "";
-
-#if REWRITE_TO_WX_WIDGET
     switch (stat)
     {
-    case SYM_OK:
-    case SYM_BPT_TEMP:
-        msg.LoadString(IDS_SYM_STAT_OK);
+    case CSym6502::Status::OK:
+    case CSym6502::Status::BPT_TEMP:
+        msg = _("OK");
         break;
 
-    case SYM_BPT_EXECUTE:
-        msg.LoadString(IDS_SYM_STAT_BPX);
+    case CSym6502::Status::BPT_EXECUTE:
+        msg = _("Execution stopped on breakpoint");
         break;
 
-    case SYM_BPT_READ:
-        msg.LoadString(IDS_SYM_STAT_BPR);
+    case CSym6502::Status::BPT_READ:
+        msg = _("Execution stopped on breakpoint (caused by reading)");
         break;
 
-    case SYM_BPT_WRITE:
-        msg.LoadString(IDS_SYM_STAT_BPW);
+    case CSym6502::Status::BPT_WRITE:
+        msg = _("Execution stopped on breakpoint (caused by writing)");
         break;
 
-    case SYM_ILLEGAL_CODE:
-        msg.LoadString(IDS_SYM_STAT_ILL);
+    case CSym6502::Status::BPT_ILLEGAL_CODE:
+        msg = _("Illegal byte code encountered");
         break;
 
-    case SYM_STOP:
-        msg.LoadString(IDS_SYM_STAT_STOP);
+    case CSym6502::Status::STOP:
+        msg = _("Program execution stopped");
         break;
 
-    case SYM_FIN:
-        msg.LoadString(IDS_SYM_STAT_FIN);
+    case CSym6502::Status::FINISH:
+        msg = _("Program finished");
         break;
 
-    case SYM_RUN:
-        msg.LoadString(IDS_SYM_STAT_RUN);
+    case CSym6502::Status::RUN:
+        msg = _("Program is running...");
         break;
 
-    case SYM_INP_WAIT:
-        msg.LoadString(IDS_SYM_STAT_INP_WAIT);
+    case CSym6502::Status::INP_WAIT:
+        msg = _("Program is waiting for input data...");
         break;
 
-    case SYM_ILL_WRITE:
-        msg.LoadString(IDS_SYM_ILL_WRITE);
+    case CSym6502::Status::ILL_WRITE:
+        msg = _("Protected area write attempt detected");
         break;
 
     default:
         ASSERT(false);
-}
-#endif
-
-    return msg;
-}
-
-//-----------------------------------------------------------------------------
-
-void CSym6502::Update(CAsm::SymStat stat, bool no_ok /*=false*/)
-{
-    UNUSED(stat);
-    UNUSED(no_ok);
-
-#if REWRITE_TO_WX_WIDGET
-    wxWindow *pMain = (wxWindow *)wxGetApp()->m_pMainWnd;
-
-    std::string reg = GetStatMsg(stat);
-
-    if (debug)
-    {
-        if (fin_stat == SYM_BPT_TEMP)
-            debug->RemoveTemporaryExecBreakpoint();
-
-        CDebugLine dl;
-
-        if (cpu16())
-            debug->GetLine(dl, ctx.pc + (ctx.pbr << 16));
-        else
-            debug->GetLine(dl, ctx.pc);
-
-        if (fin_stat == SYM_FIN)
-            ResetPointer();
-        else
-        {
-            if (cpu16())
-                SetPointer(dl.line, ctx.pc + (ctx.pbr << 16));
-            else
-                SetPointer(dl.line, ctx.pc);
-        }
+        break;
     }
 
-    pMain->m_wndRegisterBar.SendMessage(CBroadcast::WM_USER_UPDATE_REG_WND, (WPARAM)&reg, (LPARAM)&ctx);
-
-    if (stat == SYM_OK && !no_ok)
-        pMain->m_wndStatusBar.SetPaneText(0, reg);
-
-    if (running)
-        eventRedraw.SetEvent();
-#endif
+    return msg.ToStdString();
 }
 
 //-----------------------------------------------------------------------------
@@ -3450,7 +3373,7 @@ void CSym6502::Restart(const COutputMem &mem)
 {
     ctx.Reset(mem);
     old = ctx;
-    fin_stat = CAsm::SYM_OK;
+    CurrentStatus = CSym6502::Status::OK;
     m_Log.Clear();
     saveCycles = 0;
     ctx.set_status_reg_bits(0);
@@ -3458,6 +3381,13 @@ void CSym6502::Restart(const COutputMem &mem)
 
 void CSym6502::SymStart(uint32_t org)
 {
+    if (org == (uint32_t)(-1))
+    {
+        // Use reset vector for start
+        uint32_t addr = getVectorAddress(Vector::RESET);
+        org = get_word(addr);
+    }
+
     ctx.pc = org;
     ctx.s = 0x01FF;
     wxGetApp().m_global.m_bSRef = ctx.s;
@@ -3629,7 +3559,7 @@ uint8_t CSym6502::io_function()
     return uint8_t(arg);
 }
 
-CAsm::SymStat CSym6502::io_function(uint8_t arg)
+CSym6502::Status CSym6502::io_function(uint8_t arg)
 {
     UNUSED(arg);
 
@@ -3683,7 +3613,7 @@ CAsm::SymStat CSym6502::io_function(uint8_t arg)
     }
 
     io_func = IO_NONE;
-    return CAsm::SYM_OK;
+    return CSym6502::Status::OK;
 }
 
 void CSym6502::ClearCyclesCounter()
@@ -3743,11 +3673,9 @@ bool CSym6502::check_io_read(uint32_t addr)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CAsm::SymStat CSym6502::Interrupt(IntType eInt)
+void CSym6502::Interrupt(IntType eInt)
 {
     m_nInterruptTrigger |= eInt;
-
-    return CAsm::SYM_OK;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3757,7 +3685,7 @@ void CSym6502::init()
     running = false;
     m_fuidLastView = 0;
     finish = CAsm::FIN_BY_BRK;
-    fin_stat = CAsm::SYM_OK;
+    CurrentStatus = CSym6502::Status::OK;
     //hThread = 0;
     io_func = IO_NONE;
     m_nInterruptTrigger = NONE;

@@ -149,10 +149,7 @@ protected:
     afx_msg void OnUpdateSymSkipInstr(CCmdUI* pCmdUI);
     afx_msg void OnSymBreakpoint();
     afx_msg void OnUpdateSymBreakpoint(CCmdUI* pCmdUI);
-    afx_msg void OnSymBreak();
-    afx_msg void OnUpdateSymBreak(CCmdUI* pCmdUI);
-    afx_msg void OnSymGo();
-    afx_msg void OnUpdateSymGo(CCmdUI* pCmdUI);
+
     afx_msg void OnOptions();
     afx_msg void OnUpdateOptions(CCmdUI* pCmdUI);
     afx_msg void OnSymGoToLine();
@@ -225,8 +222,17 @@ private: // Event handlers
 
     void OnAbout(wxCommandEvent &);
 
+    // Simulator menu events
     void OnAssemble(wxCommandEvent &);
-    
+
+    void OnSymUpdate();
+
+    void OnSymGo(wxCommandEvent &);
+    void OnUpdateSymGo(wxUpdateUIEvent &);
+
+    void OnSymBreak(wxCommandEvent &);
+    void OnUpdateSymBreak(wxUpdateUIEvent &);
+
 private: // UI Updaters
     void OnUpdateShowLog(wxUpdateUIEvent &);
 

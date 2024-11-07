@@ -20,41 +20,38 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+ /*************************************************************************/
 
-#include "StdAfx.h"
-#include "Events.h"
-#include "MainFrm.h"
-#include "M6502.h"
-
-#include "AsmThread.h"
+#ifndef PROPERTY_6502_H__
+#define PROPERTY_6502_H__
 
 /*************************************************************************/
 
-wxThread::ExitCode AsmThread::Entry()
+#include <sigslot/signal.hpp>
+
+/*************************************************************************/
+
+template <typename T>
+class property
 {
-    io::output &out = m_mainFrm->console()->GetOutput("assembler");
-    COutputMem &mainMem = wxGetApp().m_global.GetMemory();
-    CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().m_global.GetDebug();
+private:
+    T m_value;
 
-    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, asmMem.get(), debug));
+public:
+    sigslot::signal<T> onChange;
 
-    CAsm::Stat res = assembler->assemble();
-
-    if (res == CAsm::Stat::OK)
+    property<T> &operator = (T value)
     {
-        // Copy result to actual memory.
-        mainMem = *asmMem;
+        m_value = value;
+        onChange(value);
+        return *this;
     }
-    else
-        assembler->report_error(res); // TODO: Don't call this from here.
 
-    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
+    operator T() const { return m_value; }
+};
 
-    wxQueueEvent(m_mainFrm, event.Clone());
+/*************************************************************************/
 
-    return reinterpret_cast<wxThread::ExitCode>(res);
-}
+#endif /* PROPERTY_6502_H__ */
 
 /*************************************************************************/

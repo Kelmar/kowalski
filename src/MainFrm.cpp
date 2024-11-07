@@ -589,6 +589,14 @@ void CMainFrame::BindPaneToggle(int id, const wxString &name)
 
 void CMainFrame::BindEvents()
 {
+    //CSym6502 *sim = wxGetApp().m_global.GetSimulator();
+
+    //// Setup notification updates from simulator
+    //sim->CurrentStatus.onChange.connect([this] (CSym6502::Status)
+    //{
+    //    OnSymUpdate();
+    //});
+
     // File menu bindings
     Bind(wxEVT_MENU, &CMainFrame::OnExit, this, wxID_EXIT);
 
@@ -603,12 +611,16 @@ void CMainFrame::BindEvents()
 
     // Simulator menu bindings
     Bind(wxEVT_MENU, &CMainFrame::OnAssemble, this, evID_ASSEMBLE);
+    Bind(wxEVT_MENU, &CMainFrame::OnSymGo, this, evID_SYM_GO);
+    Bind(wxEVT_MENU, &CMainFrame::OnSymBreak, this, evID_BREAK);
 
     // Help menu bindings
     Bind(wxEVT_MENU, &CMainFrame::OnAbout, this, wxID_ABOUT);
 
     // UI update bindings
     Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateShowLog, this, evID_SHOW_LOG);
+    Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateSymGo, this, evID_SYM_GO);
+    Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateSymBreak, this, evID_BREAK);
 
     // Thread event bindings
     Bind(wxEVT_THREAD, &CMainFrame::OnAsmComplete, this, evTHD_ASM_COMPLETE);
@@ -620,6 +632,7 @@ void CMainFrame::BindEvents()
 
 void CMainFrame::OnExit(wxCommandEvent &)
 {
+    wxGetApp().m_global.ExitDebugger();
     wxGetApp().Exit();
 }
 
@@ -783,7 +796,7 @@ void CMainFrame::InitMenu()
     sim->AppendSeparator();
     sim->Append(evID_DEBUG, _("Debug\tF6"));
     sim->AppendSeparator();
-    sim->Append(evID_RUN, _("Run\tF5"));
+    sim->Append(evID_SYM_GO, _("Run\tF5"));
     sim->Append(evID_RESET, _("Reset\tCtrl+Shift+F5"));
     sim->Append(evID_BREAK, _("Break\tCtrl+Break"));
     sim->AppendSeparator();
@@ -1266,6 +1279,8 @@ void CMainFrame::OnAssemble(wxCommandEvent &)
         wxLogStatus("Assembler started");
 }
 
+/*************************************************************************/
+
 void CMainFrame::OnAsmComplete(wxThreadEvent &)
 {
     wxLogDebug("OnAsmComplete() enter");
@@ -1297,6 +1312,8 @@ void CMainFrame::OnAsmComplete(wxThreadEvent &)
     }
 }
 
+/*************************************************************************/
+
 void CMainFrame::OnUpdateAssemble(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
@@ -1326,12 +1343,14 @@ CSrc6502Doc *CMainFrame::GetCurrentDocument()
     return nullptr;
 }
 
+/*************************************************************************/
+
 CSrc6502View *CMainFrame::GetCurrentView()
 {
     return dynamic_cast<CSrc6502View *>(m_docManager->GetCurrentView());
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
 void CMainFrame::OnUpdateSymDebug(CCmdUI *pCmdUI)
 {
@@ -1414,7 +1433,7 @@ void CMainFrame::SetRowColumn(CEdit &edit)
 }
 */
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
 void CMainFrame::OnSymBreakpoint()
 {
@@ -1462,6 +1481,8 @@ void CMainFrame::OnUpdateSymBreakpoint(CCmdUI *pCmdUI)
 #endif
 }
 
+/*************************************************************************/
+
 void CMainFrame::AddBreakpoint(CSrc6502View *pView, int nLine, CAsm::Breakpoint bp)
 {
     UNUSED(pView);
@@ -1506,6 +1527,8 @@ void CMainFrame::RemoveBreakpoint(CSrc6502View *pView, int nLine)
 }
 #endif
 }
+
+/*************************************************************************/
 
 void CMainFrame::OnSymEditBreakpoint()
 {
@@ -1556,9 +1579,9 @@ void CMainFrame::OnUpdateSymEditBreakpoint(CCmdUI *pCmdUI)
 #endif
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
-void CMainFrame::OnSymBreak()
+void CMainFrame::OnSymBreak(wxCommandEvent &)
 {
     if (!wxGetApp().m_global.IsProgramRunning())
         return;
@@ -1566,22 +1589,21 @@ void CMainFrame::OnSymBreak()
     wxGetApp().m_global.GetSimulator()->Break(); // Break the running program
     DelayedUpdateAll();
 
-#if REWRITE_TO_WX_WIDGET
-    // This should be for the main window.  (That's what this is, right?) -- B.Simonds (April 29, 2024)
-    SetFocus(); // restore focus (so it's not in i/o window)
-#endif
+    // Restore focus to main window.
+    if (m_ioWindow->HasFocus())
+    {
+        // But only if the focus is on the I/O window.
+        SetFocus(); 
+    }
 }
 
-void CMainFrame::OnUpdateSymBreak(CCmdUI *pCmdUI)
+void CMainFrame::OnUpdateSymBreak(wxUpdateUIEvent &e)
 {
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsProgramRunning()); // Is there a working program and debugger?
-#endif
+    // Is there a working program and debugger?
+    e.Enable(wxGetApp().m_global.IsProgramRunning());
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
 void CMainFrame::OnSymSkipInstr()	// Skip the current statement
 {
@@ -1606,32 +1628,35 @@ void CMainFrame::OnUpdateSymSkipInstr(CCmdUI *pCmdUI)
 #endif
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
-void CMainFrame::OnSymGo()		// uruchomienie programu
+void CMainFrame::OnSymUpdate()
 {
-    if (!wxGetApp().m_global.IsDebugging() ||
-        wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished())
-    {
+    // Force the window to recalculate it's menus.
+    UpdateWindowUI(wxUPDATE_UI_PROCESS_ALL);
+}
+
+/*************************************************************************/
+
+void CMainFrame::OnSymGo(wxCommandEvent &)
+{
+    C6502App &app = wxGetApp();
+
+    if (app.m_global.IsProgramRunning())
         return;
-    }
 
-    wxGetApp().m_global.GetSimulator()->Run();
+    app.m_global.StartDebug();
+    app.m_global.GetSimulator()->Run();
+
+    return;
 }
 
-void CMainFrame::OnUpdateSymGo(CCmdUI *pCmdUI)
+void CMainFrame::OnUpdateSymGo(wxUpdateUIEvent &e)
 {
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&        // is there a running debugger
-        !wxGetApp().m_global.IsProgramRunning() && // and a stopped
-        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
-#endif
+    e.Enable(!wxGetApp().m_global.IsProgramRunning()); // Enable while not running.
 }
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
 
 void CMainFrame::OnSymGoToLine() // Run to line
 {
@@ -1831,7 +1856,7 @@ void CMainFrame::OnSymAnimate()
         return;
     }
 
-    wxGetApp().m_global.GetSimulator()->Animate();
+    wxGetApp().m_global.GetSimulator()->Run();
 }
 
 void CMainFrame::OnUpdateSymAnimate(CCmdUI *pCmdUI)

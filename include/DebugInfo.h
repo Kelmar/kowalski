@@ -218,6 +218,7 @@ public:
         , temp_bp_index(0)
     {
         m_data = new uint8_t[NUM_ELEMENTS];
+        memset(m_data, 0, NUM_ELEMENTS * sizeof(uint8_t));
     }
 
     virtual ~CDebugBreakpoints()
