@@ -33,7 +33,7 @@ CToken::CToken(const CToken &leks)
     memcpy(block, leks.block, sizeof(block)); // copy whole union and type field
 
     if (leks.type == CTokenType::L_STR || leks.type == CTokenType::L_IDENT || leks.type == CTokenType::L_IDENT_N) // contains string?
-        str = new std::string(*leks.str); // duplicate string
+        str = leks.str; // duplicate string
 }
 
 CToken & CToken::operator = (const CToken &leks)
@@ -41,40 +41,20 @@ CToken & CToken::operator = (const CToken &leks)
 //  ASSERT(type == leks.type);
     if (type == CTokenType::L_STR || type == CTokenType::L_IDENT || type == CTokenType::L_IDENT_N) // the target lexeme contains the string?
     {
-        delete str;
-        str = NULL;
+        str = "";
     }
 
     type = leks.type;
     memcpy(block, leks.block, sizeof(block)); // copy the entire union and type field
 
     if (leks.type == CTokenType::L_STR || leks.type == CTokenType::L_IDENT || leks.type == CTokenType::L_IDENT_N) // the source lexeme contains a string of characters?
-        str = new std::string(*leks.str); // duplicate the string
+        str = leks.str; // duplicate the string
 
     return *this;
 }
 
 CToken::~CToken()
 {
-    switch (type)
-    {
-    case CTokenType::L_STR:
-    case CTokenType::L_IDENT:
-    case CTokenType::L_IDENT_N:
-        if (str)
-        {
-#ifdef _DEBUG
-            if (!str->empty())
-                str[0] = 'X'; // change text for possible hanging references
-#endif
-            delete str;
-        }
-        break;
-
-    default:
-        // Nothing to do
-        break;
-    }
 }
 
 /*************************************************************************/

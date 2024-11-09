@@ -54,7 +54,7 @@ CAsm::Stat CMacroDef::ParseArguments(CToken &leks, CAsm6502 &asmb)
             switch (leks.type)
             {
             case CTokenType::L_STR:
-                literal = *leks.GetString();
+                literal = leks.GetString();
 
                 m_strarrArgs.push_back(literal);
                 m_narrArgs.push_back(literal.size());

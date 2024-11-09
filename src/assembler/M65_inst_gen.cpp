@@ -515,7 +515,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
         {
             if (leks.type == CTokenType::L_IDENT) // Parameter name?
             {
-                if (pMacro->AddParam(*leks.GetString()) < 0)
+                if (pMacro->AddParam(leks.GetString()) < 0)
                     return ERR_PARAM_ID_REDEF; // Repeated parameter name
             }
             else if (leks.type == CTokenType::L_MULTI) // Ellipsis?
@@ -618,7 +618,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
         {
             if (leks.type == CTokenType::L_IDENT) // option name?
             {
-                std::string literal = *leks.GetString();
+                std::string literal = leks.GetString();
 
                 if (strcasecmp(literal.c_str(), opts[0]) == 0)
                     m_procType = ProcessorType::M6502;

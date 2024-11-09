@@ -116,7 +116,7 @@ void CIOWindow::Put(char chr, int x, int y)
         return;
 
     m_memory[x + y * m_charCnt.x] = (uint8_t)chr;
-    Invalidate(m_cursorPos);
+    Refresh();
 }
 
 /*************************************************************************/

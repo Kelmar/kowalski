@@ -318,9 +318,9 @@ CToken CAsm6502::next_leks(bool nospace) // Get the next symbol
         if (*ptr == '#') // '#' character at the end of the label?
         {
             ptr++;
-            return CToken(pStr, 1L); // Numbered identifier (expected number after '#')
+            return CToken(*pStr, 1L); // Numbered identifier (expected number after '#')
         }
-        return CToken(pStr, 1);	// L_IDENT
+        return CToken(*pStr, 1); // L_IDENT
     }
 
     return CToken(CTokenType::L_UNKNOWN); // Unknown character -error
@@ -485,9 +485,9 @@ CToken CAsm6502::get_string(char lim) // extracting a string of characters
 
     std::string *pstr = new std::string(ptr, fin - ptr);
 
-    ptr += *(fin + 1);
+    ptr = fin + 1;
 
-    return CToken(pstr);
+    return CToken(*pstr);
 }
 
 /*************************************************************************/
@@ -734,7 +734,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
             switch (leks.type)
             {
             case CTokenType::L_IDENT: // label
-                label = *leks.GetString(); // Remember the ID
+                label = leks.GetString(); // Remember the ID
                 state = AFTER_LABEL;
                 leks = next_leks();
                 break;
@@ -755,7 +755,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                         return ERR_UNDEF_EXPR;
 
                     ident.Format(expr.value); // Normalize the form of the label
-                    label = *ident.GetString(); // Remember the ID
+                    label = ident.GetString(); // Remember the ID
                 }
                 else
                     label = "x";
@@ -920,7 +920,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
             {
                 if (leks.type == CTokenType::L_IDENT)
                 {
-                    label = *leks.GetString(); // remembering the identifier
+                    label = leks.GetString(); // remembering the identifier
                     leks = next_leks();
                 }
                 else
@@ -937,7 +937,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                         return ERR_UNDEF_EXPR;
 
                     ident.Format(expr.value); // standardizing the form of the label
-                    label = *ident.GetString();	// remembering the identifier
+                    label = ident.GetString(); // remembering the identifier
                 }
                 CIdent macro;
 
@@ -1052,7 +1052,8 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
             {
             case CTokenType::L_SPACE:
                 ASSERT(false);
-                //	    break;
+                [[fallthrough]];
+
             case CTokenType::L_COMMENT:
                 return ret_stat;
 
@@ -1154,7 +1155,7 @@ CAsm6502::Stat CAsm6502::predef_function(CToken &leks, Expr &expr, bool &fn)
     static const char pdef[] = ".PASSDEF";        // predefined .PASSDEF function
     static const char paramtype[] = ".PARAMTYPE"; // predefined .PARAMTYPE function
 
-    const std::string &str = *leks.GetString();
+    const std::string &str = leks.GetString();
     bool LocParamNo = false;
 
     int hit = 0;
@@ -1182,7 +1183,7 @@ CAsm6502::Stat CAsm6502::predef_function(CToken &leks, Expr &expr, bool &fn)
 
         if (leks.type == CTokenType::L_IDENT)
         {
-            label = *leks.GetString();
+            label = leks.GetString();
             leks = next_leks();
         }
         else if (leks.type == CTokenType::L_IDENT_N)
@@ -1199,7 +1200,7 @@ CAsm6502::Stat CAsm6502::predef_function(CToken &leks, Expr &expr, bool &fn)
                 return ERR_UNDEF_EXPR;
 
             ident.Format(expr.value); // Normalize the form of the label
-            label = *ident.GetString(); // Remember the ID
+            label = ident.GetString(); // Remember the ID
         }
         else if (hit == 4 && leks.type == CTokenType::L_OPER && leks.GetOper() == O_MOD) //!! add code for numbered parameters
         {
@@ -1369,14 +1370,14 @@ CAsm6502::Stat CAsm6502::constant_value(CToken &leks, Expr &expr, bool nospace)
         break;
 
     case CTokenType::L_STR: // ci�g znak�w w cudzys�owach
-        expr.string = *leks.GetString();
+        expr.string = leks.GetString();
         expr.inf = Expr::EX_STRING;
         break;
 
     case CTokenType::L_IDENT: // Identifier
     {
         bool found = false;
-        Stat ret = predef_const(*leks.GetString(), expr, found);
+        Stat ret = predef_const(leks.GetString(), expr, found);
         if (ret)
             return ret;
         if (found)
@@ -1392,25 +1393,25 @@ CAsm6502::Stat CAsm6502::constant_value(CToken &leks, Expr &expr, bool nospace)
         if (expanding_macro)
         {
             // search the macro parameter array if a macro is being expanded
-            ret = expanding_macro->ParamLookup(leks, *leks.GetString(), expr, found, *this);
+            ret = expanding_macro->ParamLookup(leks, leks.GetString(), expr, found, *this);
             if (ret)
                 return ret;
             if (found)
                 return OK;
         }
         CIdent id(CIdent::I_UNDEF); // undefined identifier
-        if (!add_ident(*leks.GetString(), id) && id.info != CIdent::I_UNDEF) // already defined?
-            expr.value = id.val;		// odczytana warto�� etykiety
+        if (!add_ident(leks.GetString(), id) && id.info != CIdent::I_UNDEF) // already defined?
+            expr.value = id.val; // odczytana warto�� etykiety
         else
         {
             expr.inf = Expr::EX_UNDEF; // jeszcze bez warto�ci
             if (pass == 2)
-                return err_ident = *leks.GetString(), ERR_UNDEF_LABEL;	// niezdefiniowana etykieta w drugim przebiegu
+                return err_ident = leks.GetString(), ERR_UNDEF_LABEL; // niezdefiniowana etykieta w drugim przebiegu
         }
-        if (check_line)			// tryb sprawdzania jednego wiersza?
+        if (check_line) // tryb sprawdzania jednego wiersza?
         {
             leks = next_leks(false);
-            if (leks.type == CTokenType::L_STR_ARG)	// omini�cie znaku '$' na ko�cu etykiety
+            if (leks.type == CTokenType::L_STR_ARG) // omini�cie znaku '$' na ko�cu etykiety
                 leks = next_leks();
             if (leks.type == CTokenType::L_SPACE)
                 leks = next_leks();
@@ -1419,7 +1420,7 @@ CAsm6502::Stat CAsm6502::constant_value(CToken &leks, Expr &expr, bool nospace)
         break;
     }
 
-    case CTokenType::L_IDENT_N:		// identyfikator numerowany
+    case CTokenType::L_IDENT_N: // identyfikator numerowany
     {
         CToken ident(leks);
         Expr expr2(0);
@@ -1427,18 +1428,18 @@ CAsm6502::Stat CAsm6502::constant_value(CToken &leks, Expr &expr, bool nospace)
         Stat ret = factor(leks, expr2);
         if (ret)
             return ret;
-        if (expr2.inf == Expr::EX_UNDEF)	// nieokre�lona warto��
+        if (expr2.inf == Expr::EX_UNDEF) // nieokre�lona warto��
             return ERR_UNDEF_EXPR;
-        ident.Format(expr2.value);	// znormalizowanie postaci etykiety
+        ident.Format(expr2.value); // znormalizowanie postaci etykiety
 
-        CIdent id(CIdent::I_UNDEF);	// niezdefiniowany identyfikator
-        if (!add_ident(*ident.GetString(), id) && id.info != CIdent::I_UNDEF)	// ju� zdefiniowany?
-            expr.value = id.val;		// odczytana warto�� etykiety
+        CIdent id(CIdent::I_UNDEF); // niezdefiniowany identyfikator
+        if (!add_ident(ident.GetString(), id) && id.info != CIdent::I_UNDEF) // ju� zdefiniowany?
+            expr.value = id.val; // odczytana warto�� etykiety
         else
         {
-            expr.inf = Expr::EX_UNDEF;	// jeszcze bez warto�ci
+            expr.inf = Expr::EX_UNDEF; // jeszcze bez warto�ci
             if (pass == 2)
-                return err_ident = *ident.GetString(), ERR_UNDEF_LABEL;	// niezdefiniowana etykieta w drugim przebiegu
+                return err_ident = ident.GetString(), ERR_UNDEF_LABEL; // niezdefiniowana etykieta w drugim przebiegu
         }
         return OK;
     }

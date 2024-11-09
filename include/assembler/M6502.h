@@ -129,11 +129,13 @@ private:
         CAsm::OpCode code;     // Polynomial
         CAsm::InstrType instr; // Directive
         Num num;               // Numeric or character constant
-        std::string *str;      // Identifier or string
+        
         Error err;
 
         char block[32]; // Used for block copy
     };
+
+    std::string str; // Identifier or string
 
 public:
     CToken(const CToken &leks);
@@ -177,19 +179,19 @@ public:
         num.value = val;
     }
 
-    CToken(std::string *str) 
+    CToken(std::string str) 
         : type(CTokenType::L_STR)
         , str(str)
     {
     }
 
-    CToken(std::string *str, int) 
+    CToken(std::string str, int) 
         : type(CTokenType::L_IDENT)
         , str(str)
     {
     }
 
-    CToken(std::string *str, long) 
+    CToken(std::string str, long) 
         : type(CTokenType::L_IDENT_N)
         , str(str)
     {
@@ -200,7 +202,7 @@ public:
 
     CToken & operator =(const CToken &);
 
-    const std::string *GetIdent() const
+    const std::string GetIdent() const
     {
         ASSERT(type == CTokenType::L_IDENT);
         return str;
@@ -230,7 +232,7 @@ public:
         return num.value;
     }
 
-    const std::string* GetString() const
+    const std::string &GetString() const
     {
         ASSERT(type == CTokenType::L_STR || type == CTokenType::L_IDENT || type == CTokenType::L_IDENT_N);
         return str;
@@ -252,7 +254,7 @@ public:
         char tmp[64];
 
         snprintf(tmp, sizeof(tmp), "       #%08X%d", (int)val, num.value);
-        str = new std::string(tmp);
+        str = tmp;
     }
 };
 

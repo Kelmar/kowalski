@@ -93,7 +93,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
             if (leks.type != CTokenType::L_IDENT)
                 return ERR_IDX_REG_Y_EXPECTED;
 
-            val = *leks.GetString();
+            val = leks.GetString();
 
             if (strcasecmp(val.c_str(), y_idx_reg)) // Not register Y?
                 return ERR_IDX_REG_Y_EXPECTED;
@@ -136,7 +136,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
             if (leks.type != CTokenType::L_IDENT)
                 return ERR_IDX_REG_EXPECTED;
 
-            val = *leks.GetString();
+            val = leks.GetString();
 
             if (strcasecmp(val.c_str(), x_idx_reg) == 0) // Index register 'X'?
                 reg_x = true;
@@ -166,7 +166,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
 
                 leks = next_leks(); // Another non-empty lexeme
 
-                val = *leks.GetString();
+               val = leks.GetString();
 
                 if (leks.type != CTokenType::L_IDENT)
                     return ERR_IDX_REG_Y_EXPECTED;
@@ -216,7 +216,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
             if (leks.type != CTokenType::L_IDENT)
                 return ERR_IDX_REG_Y_EXPECTED;
 
-            val = *leks.GetString();
+            val = leks.GetString();
 
             if (strcasecmp(val.c_str(), y_idx_reg)) // Not register Y?
                 return ERR_IDX_REG_Y_EXPECTED;
@@ -365,7 +365,7 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
         if (leks.type != CTokenType::L_IDENT)
             return ERR_IDX_REG_EXPECTED;
 
-        val = *leks.GetString();
+        val = leks.GetString();
 
         if (strcasecmp(val.c_str(), s_idx_reg) == 0) // 'S'?
         {
