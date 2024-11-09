@@ -77,6 +77,7 @@ target_include_directories(6502
     PRIVATE include/crystal 
     PRIVATE include/encoding
     PRIVATE include/assembler
+    PRIVATE include/sim
     PRIVATE ${wxWidgets_SOURCE_DIR}/include
 )
 
