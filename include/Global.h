@@ -23,7 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Broadcast.h"
 #include "Asm.h"
-#include "Sym6502.h"
+#include "sim.h"
+
 #include "MarkArea.h"
 #include "IntGenerator.h"
 #include "LoadCodeOptions.h"
@@ -40,11 +41,20 @@ private:
     CDebugInfo m_debugInfo;   // startup information for the simulator
 
     /// Start address override
-    uint32_t m_startAddress;
+    sim_addr_t m_startAddress;
+    
+    /// I/O address override
+    sim_addr_t m_ioAddress;
 
     PSym6502 m_simulator;     // simulator
     CAsm::Finish m_simFinish; // how the simulator ends the program
     CMarkArea m_markArea;     // designation of fragments of memory containing the object code
+
+    /**
+     * @brief Factory method for creating a new simulator instance
+     * @remark If an instance already exists, it is replaced with a new one.
+     */
+    void CreateSimulator();
 
 public:
 
@@ -65,7 +75,8 @@ public:
         , m_isCodePresent(false)
         , m_memory()
         , m_debugInfo()
-        , m_startAddress((uint32_t)(-1))
+        , m_startAddress(sim::INVALID_ADDRESS)
+        , m_ioAddress(sim::INVALID_ADDRESS)
         , m_simulator(nullptr)
         , m_simFinish(CAsm::Finish::FIN_BY_BRK)
         , m_markArea()
@@ -101,6 +112,17 @@ public:
     uint32_t GetStartAddr() // Beginning of the program
     {
         return m_startAddress;
+    }
+
+    void ioAddress(sim_addr_t address)
+    {
+        m_ioAddress = address;
+    }
+
+    sim_addr_t ioAddress() const
+    {
+        // TODO: Load value from config
+        return (m_ioAddress == sim::INVALID_ADDRESS) ? 0xE000 : m_ioAddress;
     }
 
     bool IsCodePresent()
@@ -142,9 +164,9 @@ public:
 
     void ExitDebugger();
 
-    void SetStart(uint32_t prog_start)
+    void SetStart(sim_addr_t address)
     {
-        m_startAddress = prog_start;
+        m_startAddress = address;
     }
 
     PSym6502 GetSimulator() const { return m_simulator; }

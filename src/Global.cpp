@@ -19,6 +19,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
 #include "StdAfx.h"
+#include "6502.h"
+#include "sim.h"
+
 #include "Deasm6502Doc.h"
 
 #if 0
@@ -27,6 +30,43 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "AtariBin.h"
 #include "Code65p.h"
 #endif
+
+/*************************************************************************/
+
+void CGlobal::CreateSimulator()
+{
+    m_simulator.reset(new CSym6502(m_procType, &m_debugInfo));
+
+    CContext &ctx = m_simulator->GetContext();
+
+    // Build up device list
+    // For now hard coded to a RAM and IOWindow module.
+
+    // TODO: Read settings for IO later
+    //uint32_t CSym6502::io_addr = 0xE000; // Beginning of the simulator I/O area
+    //bool CSym6502::io_enabled = true;
+
+    sim_addr_t ioAddr = ioAddress();
+
+    sim::PDevice lowRam(new sim::dev::RAM(&m_memory, 0, ioAddr));
+
+    const CMainFrame *mainFrame = wxGetApp().mainFrame();
+    sim::PDevice simpleIO(new sim::dev::SimpleIO(mainFrame->ioWindow()));
+
+    sim_addr_t hiRamStart = ioAddr + simpleIO->AddressSize();
+    size_t hiRamSize = (ctx.bus.maxAddress() - hiRamStart) + 1;
+
+    sim::PDevice hiRam(new sim::dev::RAM(&m_memory, hiRamStart, hiRamSize));
+
+    ctx.bus.AddDevice(lowRam, 0);
+    ctx.bus.AddDevice(simpleIO, ioAddr);
+    ctx.bus.AddDevice(hiRam, hiRamStart);
+
+    m_simulator->finish = m_simFinish;
+    m_simulator->SetStart(m_startAddress);
+}
+
+/*************************************************************************/
 
 CAsm::Breakpoint CGlobal::SetBreakpoint(int line, const std::string &doc_title)
 {
@@ -84,11 +124,11 @@ bool CGlobal::SetTempExecBreakpoint(int line, const std::string &doc_title)
 
 bool CGlobal::CreateDeasm()
 {
-    ASSERT(m_simulator != nullptr);
+    ASSERT(m_simulator);
 
 #if 0
 
-    CDeasm6502Doc *pDoc= (CDeasm6502Doc*)wxGetApp().m_pDocDeasmTemplate->OpenDocumentFile(nullptr);
+    CDeasm6502Doc *pDoc = (CDeasm6502Doc*)wxGetApp().m_pDocDeasmTemplate->OpenDocumentFile(nullptr);
 
     if (pDoc == nullptr)
         return false;
@@ -115,23 +155,16 @@ void CGlobal::StartDebug()
     if (!m_simulator)
     {
         restart = false;
-        m_simulator.reset(new CSym6502(&m_debugInfo));
+        CreateSimulator();
     }
     else
     {
         restart = true;
         m_simulator->Restart();
+
+        m_simulator->finish = m_simFinish;
+        m_simulator->SetStart(m_startAddress);
     }
-
-    m_simulator->finish = m_simFinish;
-    m_simulator->SymStart(m_startAddress);
-
-    /*
-      struct { const std::wstring *pStr, const CContext *pCtx } data;
-      std::wstring str= m_pSym6502->GetStatMsg(stat);
-      data.pStr = &str;
-      data.pCtx = m_pSym6502->GetContext();
-    */
 
     Broadcast::ToViews(EVT_START_DEBUGGER, 0, 0);
     Broadcast::ToPopups(EVT_START_DEBUGGER, (WPARAM)restart, 0);
@@ -204,13 +237,6 @@ void CGlobal::LoadCode(const LoadCodeState &state)
     SetCodePresence(true);
 
     uint32_t start = state.StartAddress;
-
-    if (start == CAsm::INVALID_ADDRESS)
-    {
-        // TODO: This should be in the simulator and not here. -- B.Simonds (July 4, 2024)
-        uint32_t vector = m_simulator->getVectorAddress(CSym6502::Vector::RESET);
-        start = m_memory.getWord(vector);
-    }
 
     SetStart(start);
 

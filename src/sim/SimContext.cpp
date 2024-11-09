@@ -23,12 +23,12 @@
  /*************************************************************************/
 
 #include "StdAfx.h"
-#include "SimContext.h"
+#include "sim.h"
 
 /*************************************************************************/
 
-CContext::CContext()
-    : m_processor(wxGetApp().m_global.m_procType)
+CContext::CContext(ProcessorType processor)
+    : m_processor(processor)
     , bus(m_processor == ProcessorType::WDC65816 ? 24 : 16)
 {
     reset();
@@ -47,7 +47,7 @@ uint8_t CContext::get_status_reg() const
     ASSERT(decimal == false || decimal == true);
     ASSERT(interrupt == false || interrupt == true);
 
-    if (wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816)
+    if (m_processor == ProcessorType::WDC65816)
     {
         return
             negative << N_NEGATIVE |
@@ -84,7 +84,7 @@ void CContext::set_status_reg_bits(uint8_t reg)
     decimal = !!(reg & DECIMAL);
     interrupt = !!(reg & INTERRUPT);
 
-    if (wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816)
+    if (m_processor == ProcessorType::WDC65816)
     {
         mem16 = !!(reg & MEMORY);
         xy16 = !!(reg & INDEX);

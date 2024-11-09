@@ -23,7 +23,7 @@
 /*************************************************************************/
 
 #include "StdAfx.h"
-#include "Bus.h"
+#include "sim.h"
 
 /*************************************************************************/
 
@@ -82,7 +82,7 @@ void Bus::RunRange(sim_addr_t start, size_t sz, RangeOp operation) const
 
 /*************************************************************************/
 
-bool Bus::Contains(PDevice device) const
+bool Bus::Contains(sim::PDevice device) const
 {
     for (auto i : m_devices)
     {
@@ -95,17 +95,15 @@ bool Bus::Contains(PDevice device) const
 
 /*************************************************************************/
 
-Bus::MapError Bus::AddDevice(PDevice device, sim_addr_t start)
+Bus::MapError Bus::AddDevice(sim::PDevice device, sim_addr_t start)
 {
     ASSERT(device);
 
     if (Contains(device))
         return Bus::MapError::AlreadyMapped;
 
-    sim_addr_t cnt = 1 << device->AddressBits(); // Get number of addresses
-    sim_addr_t end = start + cnt;
-
-    sim_addr_t mask = cnt - 1; // Convert to actual mask
+    sim_addr_t cnt = device->AddressSize();
+    sim_addr_t end = start + (cnt - 1);
 
     if (!InRange(end) || (end < start))
         return Bus::MapError::OutOfRange;
@@ -115,7 +113,7 @@ Bus::MapError Bus::AddDevice(PDevice device, sim_addr_t start)
     if (node)
         return Bus::MapError::Overlap; // A device already exists at the given address
 
-    node = new Node(device, start, end, mask);
+    node = new Node(device, start, end);
     m_devices.push_back(node);
 
     return Bus::MapError::None;
@@ -134,7 +132,7 @@ void Bus::Reset()
 uint8_t Bus::PeekByte(sim_addr_t address) const
 {
     Node *node = RangeFind(address);
-    return node ? node->Peek(address & node->mask) : 0;
+    return node ? node->Peek(address) : 0;
 }
 
 /*************************************************************************/

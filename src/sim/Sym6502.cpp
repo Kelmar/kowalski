@@ -19,25 +19,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
 #include "StdAfx.h"
-#include "resource.h"
-//#include "6502.h"
+#include "sim.h"
+
 #include "MainFrm.h"
 #include "Deasm6502Doc.h"
 #include "6502View.h"
 #include "6502Doc.h"
 #include "Deasm.h"
 
-bool cpu16()
-{
-    return wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816;
-}
-
 /*************************************************************************/
 
 bool waiFlag = false;
-
-uint32_t CSym6502::io_addr = 0xE000; // Beginning of the simulator I/O area
-bool CSym6502::io_enabled = true;
 int CSym6502::bus_width = 16;
 //static const int SIM_THREAD_PRIORITY = THREAD_PRIORITY_BELOW_NORMAL; // Priority (except animate)
 bool CSym6502::s_bWriteProtectArea = false;
@@ -2668,7 +2660,7 @@ void CSym6502::PerformCommandInner()
     ci.intFlag = intFlag;
     ci.uCycles -= oldCycles; // this provides cycles used per instruction
 
-    m_Log.Record(ci);
+    m_log.Record(ci);
     m_saveCycles = ctx.uCycles;
 
     CurrentStatus = CSym6502::Status::OK;
@@ -2769,7 +2761,7 @@ void CSym6502::step_over()
 
     case CAsm::C_BRK:
         if (debug && !jsr)
-            debug->SetTemporaryExecBreakpoint((addr + 2) & ctx.bus.getMaxAddress());
+            debug->SetTemporaryExecBreakpoint((addr + 2) & ctx.bus.maxAddress());
 
         for (;;)
         {
@@ -3175,23 +3167,23 @@ void CSym6502::Restart()
 {
     ctx.Reset();
     CurrentStatus = CSym6502::Status::OK;
-    m_Log.Clear();
+    m_log.Clear();
     m_saveCycles = 0;
     ctx.set_status_reg_bits(0);
 }
 
 /*************************************************************************/
 
-void CSym6502::SymStart(uint32_t org)
+void CSym6502::SetStart(sim_addr_t address)
 {
-    if (org == (uint32_t)(-1))
+    if (address == sim::INVALID_ADDRESS)
     {
         // Use reset vector for start
         uint32_t addr = getVectorAddress(Vector::RESET);
-        org = get_word(addr);
+        address = get_word(addr);
     }
 
-    ctx.pc = org;
+    ctx.pc = address;
     ctx.s = 0x01FF;
     wxGetApp().m_global.m_bSRef = ctx.s;
     m_saveCycles = 0;
@@ -3200,8 +3192,8 @@ void CSym6502::SymStart(uint32_t org)
     if (debug)
     {
         CDebugLine dl;
-        debug->GetLine(dl, org);
-        SetPointer(dl.line, org);
+        debug->GetLine(dl, address);
+        SetPointer(dl.line, address);
     }
 }
 

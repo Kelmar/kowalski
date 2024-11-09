@@ -18,11 +18,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#ifndef _motorola_s_record_
-#define _motorola_s_record_
+#ifndef FMT_MOTOROLA_S_6502_H__
+#define FMT_MOTOROLA_S_6502_H__
 
 class COutputMem;
 class CMarkArea;
+
+#include "Archive.h"
 
 class CMotorolaSRecord
 {
@@ -30,9 +32,9 @@ class CMotorolaSRecord
     UINT row;
 
 public:
-    void SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start = -1);
+    void SaveHexFormat(Archive &archive, COutputMem &mem, CMarkArea &area, int prog_start = -1);
 
-    void LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
+    void LoadHexFormat(Archive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
 
     class CMotorolaSRecordException //: public CException
     {
@@ -56,5 +58,4 @@ public:
     };
 };
 
-
-#endif
+#endif /* FMT_MOTOROLA_S_6502_H__ */

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#include <ctime>
 #include "StdAfx.h"
+#include "6502.h"
 
 #include "M6502.h"
 
@@ -1001,8 +1002,10 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                         if (expr.inf == Expr::EX_WORD || expr.inf == Expr::EX_BYTE)
                         {
                             if (!check_line)
-                                //							if (pass == 2) // do it once (avoid first pass; it's called for line checking)
-                                CSym6502::io_addr = uint16_t(expr.value);
+                            {
+                                //if (pass == 2) // do it once (avoid first pass; it's called for line checking)
+                                wxGetApp().m_global.ioAddress(expr.value);
+                            }
                         }
                         else if (expr.inf == Expr::EX_LONG)
                             return ERR_NUM_LONG;
@@ -1017,7 +1020,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                         return ERR_CONST_LABEL_REDEF;
                     }
                 }
-                else if (pass == 1)		// first pass?
+                else if (pass == 1) // first pass?
                 {
                     if (expr.inf != Expr::EX_UNDEF)
                         ret = def_ident(label, CIdent(CIdent::I_VALUE, expr.value));
@@ -1133,7 +1136,7 @@ CAsm6502::Stat CAsm6502::predef_const(const std::string &str, Expr &expr, bool &
     }
     else if (nConstant == 1)
     {
-        expr.value = CSym6502::io_addr; // io simulator area
+        expr.value = wxGetApp().m_global.ioAddress(); // io simulator area
         found = true;
 
         return OK;

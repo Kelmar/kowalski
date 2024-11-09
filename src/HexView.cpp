@@ -25,6 +25,7 @@
 #include "StdAfx.h"
 #include <wx/dcbuffer.h>
 
+#include "encodings.h"
 #include "FontController.h"
 #include "HexView.h"
 

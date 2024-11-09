@@ -23,10 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //////////////////////////////////////////////////////////////////////
 
 #include "StdAfx.h"
+
 #include "formats/Code65p.h"
-#include "resource.h"
-#include "MarkArea.h"
-#include "Sym6502.h"
 
 CCode65p::CCode65p()
     : BinaryCodeTemplate()

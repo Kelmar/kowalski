@@ -22,7 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LOAD_CODE_OPTIONS_H__
 
 #include "HexValidator.h"
-#include "Sym6502.h"
+#include "sim.h"
+
+#include "MarkArea.h"
 
 /*************************************************************************/
 /**

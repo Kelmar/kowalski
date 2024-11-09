@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
 #include "StdAfx.h"
+#include "6502.h"
 #include "Deasm.h"
 #include "M6502.h"
 
@@ -791,7 +792,7 @@ int CDeasm::FindNextAddr(uint32_t &addr, int cnt/*= 1*/)
         else
             ret = 1; // next address found
 
-        if (address >= ctx.bus.getMaxAddress())
+        if (address >= ctx.bus.maxAddress())
             next = address;
     }
 

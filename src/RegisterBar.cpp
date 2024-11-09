@@ -22,9 +22,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
 #include "StdAfx.h"
-//#include "6502.h"
+#include "6502.h"
+#include "sim.h"
+
 #include "RegisterBar.h"
-#include "Sym6502.h"
 #include "Deasm.h"
 
 bool CRegisterBar::m_bHidden = false;

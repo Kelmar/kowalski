@@ -18,11 +18,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#ifndef _intel_hex_
-#define _intel_hex_
+#ifndef FMT_INTEL_HEX_6520_H__
+#define FMT_INTEL_HEX_6520_H__
 
 class COutputMem;
 class CMarkArea;
+
+#include "Archive.h"
 
 class CIntelHex
 {
@@ -30,9 +32,9 @@ class CIntelHex
     UINT row;
 
 public:
-    void SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start= -1);
+    void SaveHexFormat(Archive &archive, COutputMem &mem, CMarkArea &area, int prog_start= -1);
 
-    void LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
+    void LoadHexFormat(Archive &archive, COutputMem &mem, CMarkArea &area, int &prog_start);
 
     class CIntelHexException //: public CException
     {
@@ -56,4 +58,4 @@ public:
 };
 
 
-#endif
+#endif /* FMT_INTEL_HEX_6520_H__ */

@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#ifndef _asm_h_
-#define _asm_h_
+#ifndef CASM_6502_H__
+#define CASM_6502_H__
 
 /**
  * @brief Type of CPU we're emulating.
@@ -387,4 +387,4 @@ CAsm::DeasmFmt inline operator | (CAsm::DeasmFmt f1, CAsm::DeasmFmt f2)
     return static_cast<CAsm::DeasmFmt>(uint32_t(f1) | uint32_t(f2));
 }
 
-#endif
+#endif /* CASM_6502_H__ */

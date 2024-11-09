@@ -19,8 +19,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
 #include "StdAfx.h"
-#include <wx/dcbuffer.h>
+#include "encodings.h"
 
+#include <wx/dcbuffer.h>
 #include <memory.h>
 
 #include "FontController.h"
@@ -250,6 +251,13 @@ int CIOWindow::Input()
 }
 
 /*************************************************************************/
+
+int CIOWindow::PeekInput() const
+{
+    return m_InputBuffer.PeekChar(); // Return next character waiting.
+}
+
+/*************************************************************************/
 // CIOWindow message handlers
 /*************************************************************************/
 
@@ -435,6 +443,18 @@ char CInputBuffer::GetChar() // get next available character (returns 0 if there
         if (m_pTail >= m_vchBuffer + BUF_SIZE)
             m_pTail = m_vchBuffer;
     }
+
+    return c;
+}
+
+/*************************************************************************/
+
+char CInputBuffer::PeekChar() const
+{
+    char c = 0;
+
+    if (m_pHead != m_pTail)
+        c = *m_pTail;
 
     return c;
 }

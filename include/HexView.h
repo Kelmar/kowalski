@@ -29,6 +29,8 @@
 
 #include <sigslot/signal.hpp>
 
+#include "OutputMem.h"
+
 /*************************************************************************/
 
 class HexView : public wxScrolled<wxWindow>

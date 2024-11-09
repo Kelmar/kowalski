@@ -23,40 +23,48 @@
 /*************************************************************************/
 
 #include "StdAfx.h"
+#include "sim.h"
 #include "6502.h"
-
-#include "Events.h"
-#include "MainFrm.h"
-#include "M6502.h"
-
-#include "AsmThread.h"
 
 /*************************************************************************/
 
-wxThread::ExitCode AsmThread::Entry()
+using namespace sim::dev;
+
+/*************************************************************************/
+
+RAM::RAM(COutputMem *memory, sim_addr_t start, size_t length)
+    : m_memory(memory)
+    , m_start(start)
+    , m_length(length)
 {
-    io::output &out = m_mainFrm->console()->GetOutput("assembler");
-    COutputMem &mainMem = wxGetApp().m_global.GetMemory();
-    CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().m_global.GetDebug();
+}
 
-    std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, asmMem.get(), debug));
+RAM::~RAM()
+{
+}
 
-    CAsm::Stat res = assembler->assemble();
+/*************************************************************************/
 
-    if (res == CAsm::Stat::OK)
-    {
-        // Copy result to actual memory.
-        mainMem = *asmMem;
-    }
-    else
-        assembler->report_error(res); // TODO: Don't call this from here.
+uint8_t RAM::Peek(sim_addr_t address) const
+{
+    sim_addr_t a = address + m_start;
 
-    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
+    if (a > m_memory->size())
+        return 0;
 
-    wxQueueEvent(m_mainFrm, event.Clone());
+    return m_memory->get(a);
+}
 
-    return reinterpret_cast<wxThread::ExitCode>(res);
+/*************************************************************************/
+
+void RAM::SetByte(sim_addr_t address, uint8_t value)
+{
+    sim_addr_t a = address + m_start;
+
+    if (a > m_memory->size())
+        return;
+
+    return m_memory->set(a, value);
 }
 
 /*************************************************************************/

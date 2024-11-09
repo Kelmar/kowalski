@@ -23,8 +23,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //      are changed infrequently
 //
 
+/*************************************************************************/
+
 #ifndef STDAFX_H__
 #define STDAFX_H__
+
+/*************************************************************************/
 
 #define _SCL_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
@@ -144,6 +148,8 @@ public:
     virtual ~CMemoryException() {}
 };
 
-#include "6502.h"
+/*************************************************************************/
 
 #endif /* STDAFX_H__ */
+
+/*************************************************************************/

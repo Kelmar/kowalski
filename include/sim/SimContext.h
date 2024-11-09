@@ -27,8 +27,12 @@
 
 /*************************************************************************/
 
+#include "Asm.h"
+
 // TODO: Remove this naming conflict
 #undef OVERFLOW
+
+/*************************************************************************/
 
 struct ContextBase
 {
@@ -117,7 +121,7 @@ public:
 public:
     Bus bus;
 
-    CContext();
+    CContext(ProcessorType processor);
 
     void Reset()
     {

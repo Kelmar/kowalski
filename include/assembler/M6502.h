@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "output.h"
 
 #include "Asm.h"
+
 #include "Ident.h"
 #include "DebugInfo.h"
 #include "OutputMem.h"
@@ -31,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "InputStack.h"
 
 #include "ConditionalAsm.h"
+
+#include "MarkArea.h"
 
 enum class CTokenType
 {
@@ -686,7 +689,6 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-class CMarkArea;
 
 class CAsm6502 : public CAsm /*, public CObject */
 {

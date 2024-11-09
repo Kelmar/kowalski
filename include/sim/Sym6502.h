@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#ifndef _sym_6502_h_
-#define _sym_6502_h_
+#ifndef SIM_6502_H__
+#define SIM_6502_H__
 
 /*************************************************************************/
 
@@ -27,14 +27,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "OutputMem.h"
 #include "LogBuffer.h"
 
-#include "Bus.h"
-#include "SimContext.h"
+#include "sim.h"
 
 /*************************************************************************/
 
 class CSrc6502View;
-
-bool cpu16();
 
 struct CmdInfo	// single command info (for logging)
 {
@@ -102,7 +99,7 @@ class CSym6502
 private:
     CContext ctx;
     CDebugInfo *debug;
-    CommandLog m_Log;
+    CommandLog m_log;
 
     ULONG m_saveCycles; //% Bug Fix 1.2.12.18 - fix command log display
 
@@ -142,14 +139,14 @@ public:
 
 public:
     static int bus_width;
-    static uint32_t io_addr; // the beginning of the simulator I/O area
-    static bool io_enabled;
     static bool s_bWriteProtectArea;
     static uint32_t s_uProtectFromAddr;
     static uint32_t s_uProtectToAddr;
 
     // interrupt types
     enum IntType { NONE = 0, IRQ = 1, NMI = 2, RST = 4 };
+
+    bool cpu16() { return ctx.getProcessorType() == ProcessorType::WDC65816; }
 
 private:
     bool waiFlag;
@@ -359,16 +356,16 @@ public:
     CContext &GetContext() { return ctx; }
 
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502()
-        : ctx()
+    CSym6502(ProcessorType processor)
+        : ctx(processor)
         //, eventRedraw(true, true)
     {
         init();
     }
 
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502(CDebugInfo *debug) 
-        : ctx()
+    CSym6502(ProcessorType processor, CDebugInfo *debug) 
+        : ctx(processor)
         //, eventRedraw(true)
         , debug(debug)
     {
@@ -380,7 +377,8 @@ public:
     }
 
     void Restart();
-    void SymStart(uint32_t org);
+
+    void SetStart(sim_addr_t address);
 
     void StepInto();
     void StepOver();
@@ -409,7 +407,7 @@ public:
 
     const CommandLog& GetLog() const
     {
-        return m_Log;
+        return m_log;
     }
 };
 
@@ -417,6 +415,6 @@ typedef std::shared_ptr<CSym6502> PSym6502;
 
 /*************************************************************************/
 
-#endif /* _sym_6502_h_ */
+#endif /* SIM_6502_H__ */
 
 /*************************************************************************/

@@ -21,13 +21,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Odczyt i zapis kodu wynikowego w postaci Intel-HEX
 
 #include "StdAfx.h"
+#include "sim.h"
 
 #include "formats/MotorolaSRecord.h"
 #include "resource.h"
 #include "MarkArea.h"
-#include "Sym6502.h"
 
-void CMotorolaSRecord::SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start)
+void CMotorolaSRecord::SaveHexFormat(Archive &archive, COutputMem &mem, CMarkArea &area, int prog_start)
 {
     UNUSED(archive);
     UNUSED(mem);
@@ -130,7 +130,7 @@ UINT CMotorolaSRecord::geth(const char *&ptr, UINT &sum)
 
 //-----------------------------------------------------------------------------
 
-void CMotorolaSRecord::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start)
+void CMotorolaSRecord::LoadHexFormat(Archive &archive, COutputMem &mem, CMarkArea &area, int &prog_start)
 {
     UNUSED(archive);
     UNUSED(mem);

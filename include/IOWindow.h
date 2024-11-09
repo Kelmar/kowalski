@@ -42,6 +42,12 @@ public:
     char GetChar();
 
     /**
+     * @brief Get next available character waiting without advancing the read pointer.
+     * @return The next character or 0 if no characters available.
+     */
+    char PeekChar() const;
+
+    /**
      * places char in the buffer (char is ignored if there is no space)
      */
     void PutChar(char c);
@@ -169,6 +175,12 @@ public: // Input functions
      * @return The key pressed, or 0 if no keys available.
      */
     int Input();
+
+    /**
+     * @brief Read input from IOWindow without consuming it.
+     * @return The key pressed, or 0 of no keys available.
+     */
+    int PeekInput() const;
 
 public: // Attributes
     static wxColour m_rgbTextColor, m_rgbBackgndColor;

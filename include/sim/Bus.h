@@ -26,79 +26,8 @@
 #define BUS_6502_H__
 
 /*************************************************************************/
-/**
- * @brief Base type for simulator addresses.
- */
-typedef uint32_t sim_addr_t;
 
-/**
- * @brief Invalid address constant.
- */
-static const sim_addr_t INVALID_ADDRESS = (sim_addr_t)(-1);
-
-/*************************************************************************/
-/**
- * @brief Abstraction for a device on simulated bus.
- * 
- * @remarks
- * Addresses presented to the device are mapped to that device's local
- * address space.  For example, if a UART is mapped to the bus locations $8000-$800F
- * the device will receive $0-$F as the requested addresses; the bus handles
- * mapping from the global address space.
- */
-class Device
-{
-private:
-    // Remove copy/move construction
-
-    /* constructor */ Device(const Device &) = delete;
-    /* constructor */ Device(Device &&) = delete;
-
-    const Device &operator =(const Device &) = delete;
-    const Device &operator =(Device &&) = delete;
-
-protected:
-    /* constructor */ Device() { }
-
-public:
-    virtual ~Device() { }
-
-    /**
-     * @brief Gets the number of address pins this device has.
-     */
-    virtual uint8_t AddressBits() const = 0;
-
-    /**
-     * @brief Called by the simulator to indicate that the device should reset itself its initial state.
-     */
-    virtual void Reset() = 0;
-
-    /**
-     * @brief Read a byte from the device at the given local address without affecting the device's state.
-     * @param address The local address to read from.
-     * @return The byte value at that address.
-     * @remarks
-     * This method is used by the UI and debugger to display the device's current state
-     * without affecting it's state so as not to cause issues with the simulated program.
-     */
-    virtual uint8_t Peek(sim_addr_t address) const = 0;
-
-    /**
-     * @brief Read a byte from the device at the given local address.
-     * @param address The device local address to read from.
-     * @return The byte value read from that device.
-     */
-    virtual uint8_t GetByte(sim_addr_t address) = 0;
-
-    /**
-     * @brief Write a byte to the device at the given local address.
-     * @param address The local address to write to.
-     * @param value The value to be written.
-     */
-    virtual void SetByte(sim_addr_t address, uint8_t value) = 0;
-};
-
-typedef std::shared_ptr<Device> PDevice;
+#include "sim/dev/base.h"
 
 /*************************************************************************/
 /**
@@ -133,16 +62,14 @@ public:
 private:
     struct Node
     {
-        PDevice device;
+        sim::PDevice device;
         sim_addr_t start;
         sim_addr_t end;
-        sim_addr_t mask;
 
         Node(const Node &n)
             : device(n.device)
             , start(n.start)
             , end(n.end)
-            , mask(n.mask)
         {
         }
 
@@ -150,15 +77,13 @@ private:
             : device(std::move(n.device))
             , start(std::move(n.start))
             , end(std::move(n.end))
-            , mask(std::move(n.mask))
         {
         }
 
-        Node(PDevice d, sim_addr_t s, sim_addr_t e, sim_addr_t m)
+        Node(sim::PDevice d, sim_addr_t s, sim_addr_t e)
             : device(d)
             , start(s)
             , end(e)
-            , mask(m)
         {
         }
 
@@ -166,22 +91,28 @@ private:
 
         inline void Reset() { device->Reset(); }
 
+        inline 
+        sim_addr_t makeLocal(sim_addr_t global) const
+        {
+            return global - start;
+        }
+
         inline
         uint8_t Peek(sim_addr_t global) const
         {
-            return device->Peek(global & mask);
+            return device->Peek(makeLocal(global));
         }
 
         inline
         void SetByte(sim_addr_t global, uint8_t value)
         {
-            device->SetByte(global & mask, value);
+            device->SetByte(makeLocal(global), value);
         }
 
         inline
         uint8_t GetByte(sim_addr_t global)
         {
-            return device->GetByte(global & mask);
+            return device->GetByte(makeLocal(global));
         }
     };
 
@@ -220,19 +151,19 @@ public:
     /**
      * @brief Get the width of the address bus in number of lines.
      */
-    int getWidth() const { return m_width; }
+    int width() const { return m_width; }
 
     /**
      * @brief Returns the maximum valid address for this bus.
      */
-    sim_addr_t getMaxAddress() const { return m_maxAddress; }
+    sim_addr_t maxAddress() const { return m_maxAddress; }
 
     /**
      * @brief Checks to see if the supplied device is already mapped to the bus.
      * @param device The device to check for.
      * @return true if the device was found, false if not.
      */
-    bool Contains(PDevice device) const;
+    bool Contains(sim::PDevice device) const;
 
     /**
      * @brief Checks if the supplied address is in a valid range for this bus.
@@ -242,7 +173,10 @@ public:
      * that will respond to the given address, just that the address falls
      * within the valid range of addresses that this bus can handle.
      */
-    bool InRange(sim_addr_t address) const { return address <= m_maxAddress; }
+    bool InRange(sim_addr_t address) const
+    { 
+        return address <= m_maxAddress;
+    }
 
     /**
      * @brief Checks if there is a device at the otherwise valid address.
@@ -265,7 +199,7 @@ public:
      * @return true if the device was added, false if the device falls outside
      * of a valid address range for this bus at the supplied address.
      */
-    MapError AddDevice(PDevice device, sim_addr_t address);
+    MapError AddDevice(sim::PDevice device, sim_addr_t address);
 
     /**
      * @brief Send reset to all devices on the bus.

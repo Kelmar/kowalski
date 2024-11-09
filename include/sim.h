@@ -26,7 +26,23 @@
 #define SIM_BASE_6502_H__
 
 /*************************************************************************/
+/**
+ * @brief Base type for simulator addresses.
+ */
+typedef uint32_t sim_addr_t;
 
+
+namespace sim
+{
+    /**
+     * @brief Invalid address constant.
+     */
+    static const sim_addr_t INVALID_ADDRESS = (sim_addr_t)(-1);
+}
+
+/*************************************************************************/
+
+#include "sim/devices.h"
 #include "sim/Bus.h"
 #include "sim/SimContext.h"
 #include "sim/Sym6502.h"

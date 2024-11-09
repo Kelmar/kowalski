@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#include <ctime>
 #include "StdAfx.h"
+#include "sim.h"
 
 #include "M6502.h"
 

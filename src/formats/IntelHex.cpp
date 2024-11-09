@@ -21,12 +21,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Odczyt i zapis kodu wynikowego w postaci Intel-HEX
 
 #include "StdAfx.h"
+#include "sim.h"
+
 #include "formats/IntelHex.h"
 #include "resource.h"
 #include "MarkArea.h"
-#include "Sym6502.h"
 
-void CIntelHex::SaveHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int prog_start/*= -1*/)
+void CIntelHex::SaveHexFormat(Archive &archive, COutputMem &mem, CMarkArea &area, int prog_start/*= -1*/)
 {
     UNUSED(archive);
     UNUSED(mem);
@@ -125,7 +126,7 @@ UINT CIntelHex::geth(const char *&ptr, UINT &sum)
 
 //-----------------------------------------------------------------------------
 
-void CIntelHex::LoadHexFormat(CArchive &archive, COutputMem &mem, CMarkArea &area, int &prog_start)
+void CIntelHex::LoadHexFormat(Archive &archive, COutputMem &mem, CMarkArea &area, int &prog_start)
 {
     UNUSED(archive);
     UNUSED(mem);

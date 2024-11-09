@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /////////////////////////////////////////////////////////////////////////////
 
 #include "StdAfx.h"
+#include "sim.h"
 
 #include "DialBar.h"
 #include "ToolBox.h"
@@ -118,6 +119,8 @@ public:
     void DelayedUpdateAll();
 
     void ShowDynamicHelp(const std::string& strLine, int nWordStart, int nWordEnd);
+
+    CIOWindow *ioWindow() const { return m_ioWindow; }
 
     ConsoleFrame *console() const { return m_output; }
 
