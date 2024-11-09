@@ -54,7 +54,7 @@ namespace encodings
 
         static CodePage437 *Ptr() { return s_self; }
 
-        virtual wxString name() const { return "Code Page 437"; }
+        virtual wxString name() const { return _("Code Page 437"); }
 
         virtual wxString toUnicode(uint8_t c);
     };

@@ -46,14 +46,12 @@ protected:
     /* constructor */ CDeasm6502Doc(); // protected constructor used by dynamic creation
 
 public:
-    const CContext *m_pCtx;
     uint32_t m_uStartAddr;
     uint32_t m_nPointerAddr; // pointer address by arrow (->) or CAsm::INVALID_ADDRESS
 
     bool GetSaveOptions();
     void DeassembleSave(std::ostream &stream, const CContext &ctx, uint32_t start, uint32_t end, int opt);
     
-    void SetContext(const CContext *pCtx);
     void SetStart(uint32_t addr, bool draw = true);
     void SetPointer(uint32_t addr, bool scroll = false);
 

@@ -222,17 +222,13 @@ void CRegisterBar::SetDlgItemMem(int nID, int nBytes, uint16_t ptr, const CConte
 {
     UNUSED(nID);
 
-    std::string str;
-    char num[16];
+    std::string buf;
 
     for (int i = 0; i < nBytes; i++)
-    {
-        snprintf(num, sizeof(num), i == nBytes ? "%02X" : "%02X ", pCtx->mem[(ptr + i) & pCtx->mem_mask] & 0xFF);
-        str += num;
-    }
+        buf += fmt::format("%02X ", pCtx->peekByte(ptr + i));
 
 #if REWRITE_TO_WX_WIDGET
-    SetDlgItemText(nID, str);
+    SetDlgItemText(nID, buf | str::trim);
     UpdateItem(nID);
 #endif
 }
@@ -565,15 +561,16 @@ void CRegisterBar::ChangeRegister(int ID, int reg_no)
 
 void CRegisterBar::ChangeFlags(int flag_bit, bool set) // changing the flag register bit
 {
-    CSym6502 *pSym = wxGetApp().m_global.GetSimulator();
+    PSym6502 pSym = wxGetApp().m_global.GetSimulator();
 
-    if (pSym == nullptr)
+    if (!pSym)
     {
         ASSERT(false);
         return;
     }
 
-    CContext ctx(*(pSym->GetContext())); // program context
+    CContext &ctx = pSym->GetContext(); // program context
+
     uint8_t flags = ctx.get_status_reg();
 
     if (set)
@@ -593,12 +590,7 @@ void CRegisterBar::ChangeFlags(int flag_bit, bool set) // changing the flag regi
 
     ctx.set_status_reg_bits(flags);
 
-    if (wxGetApp().m_global.GetProcType() != ProcessorType::M6502)
-        ctx.reserved = true; // 'reserved' bit always set
-
     SetDlgItemByteHex(IDC_REGS_P, ctx.get_status_reg());
-
-    pSym->SetContext(ctx); // context change
 }
 
 //-----------------------------------------------------------------------------
@@ -701,9 +693,9 @@ void CRegisterBar::OnRegsCyclesClr()
         return;
     }
 
-    CSym6502 *pSym = wxGetApp().m_global.GetSimulator();
+    PSym6502 pSym = wxGetApp().m_global.GetSimulator();
     
-    if (pSym == nullptr)
+    if (!pSym)
     {
         ASSERT(false);
         return;

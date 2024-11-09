@@ -75,60 +75,39 @@ std::string CDeasm::DeasmInstr(const CmdInfo &ci, CAsm::DeasmFmt flags)
     return str;
 }
 
-std::string CDeasm::DeasmInstr(const CContext &ctx, CAsm::DeasmFmt flags, int &ptr)
+std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, int &ptr)
 {
     ASSERT((ptr == -1) || ((ptr >= 0) && (ptr <= 0xFFFFFF)));
 
     std::string str;
-    wxString fmt;
+    str.reserve(128); // Preallocate some initial space to work with.
 
-    uint32_t addr;
+    sim_addr_t addr;
 
     ProcessorType procType = wxGetApp().m_global.m_procType;
 
-    if (procType == ProcessorType::WDC65816)
-        addr = (ptr >= 0) ? ptr : (ctx.pc + (ctx.pbr << 16));
-    else
-        addr = (ptr >= 0) ? ptr : ctx.pc;
+    const CContext &ctx =m_sim->GetContext();
 
-    uint8_t cmd = ctx.mem[addr];
-    uint16_t uLen = cmd == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[cmd]];
+    addr = (ptr >= 0) ? ptr : ctx.getProgramAddress();
+
+    uint8_t cmd = ctx.peekByte(addr);
+    uint16_t len = cmd == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[cmd]];
 
     if (cmd == 0 && CAsm6502::generateBRKExtraByte)
-        uLen = 2;
+        len = 2;
 
     if (flags & CAsm::DF_ADDRESS)
-    {
-        fmt.Printf("%06X  ", addr);
-        str += fmt;
-    }
+        str += fmt::format("%06X  ", addr);
 
     if (flags & CAsm::DF_CODE_BYTES)
     {
-        switch (uLen)
-        {
-        case 1:
-            fmt.Printf("%02X           ", int(ctx.mem[addr]));
-            break;
+        int pad = 13;
 
-        case 2:
-            fmt.Printf("%02X %02X        ", int(ctx.mem[addr]), int(ctx.mem[addr + 1]));
-            break;
+        for (uint16_t i = 0; i < len; ++i, pad -= 3)
+            str += fmt::format("%02X ", (int)(ctx.peekByte(addr + i)));
 
-        case 3:
-            fmt.Printf("%02X %02X %02X     ", int(ctx.mem[addr]), int(ctx.mem[addr + 1]), int(ctx.mem[addr + 2]));
-            break;
-
-        case 4:
-            fmt.Printf("%02X %02X %02X %02X  ", int(ctx.mem[addr]), int(ctx.mem[addr + 1]), int(ctx.mem[addr + 2]), int(ctx.mem[addr + 3]));
-            break;
-
-        default:
-            ASSERT(FALSE);
-            break;
-        }
-
-        str += fmt.ToStdString();
+        // Add remaining needed padding
+        str += std::string(pad, ' ');
     }
 
     str += Mnemonic(cmd, procType, 1); //% Bug fix 1.2.12.2 - allow BRK vs. .DB in disassembly listings
@@ -145,7 +124,12 @@ std::string CDeasm::DeasmInstr(const CContext &ctx, CAsm::DeasmFmt flags, int &p
             mode = CAsm::A_IMM2;
     }
 
-    str += Argument(cmd, (CAsm::CodeAdr)mode, addr, ctx.mem[addr + 1], ctx.mem[addr + 2], ctx.mem[addr + 3], flags & CAsm::DF_LABELS);
+    str += Argument(
+        cmd,
+        (CAsm::CodeAdr)mode,
+        addr,
+        ctx.peekByte(addr + 1), ctx.peekByte(addr + 2), ctx.peekByte(addr + 3),
+        flags & CAsm::DF_LABELS);
 
     if (flags & CAsm::DF_BRANCH_INFO)
     {
@@ -199,18 +183,18 @@ std::string CDeasm::DeasmInstr(const CContext &ctx, CAsm::DeasmFmt flags, int &p
 
         case CAsm::C_BBS:
         {
-            uint8_t zpg = ctx.mem[addr + 1];
+            uint8_t zpg = ctx.peekByte(addr + 1);
             int bit_no = (cmd >> 4) & 0x07;
-            if (ctx.mem[zpg] & uint8_t(1 << bit_no))
+            if (ctx.peekByte(zpg) & uint8_t(1 << bit_no))
                 sign = true;
             break;
         }
 
         case CAsm::C_BBR:
         {
-            uint8_t zpg = ctx.mem[addr + 1];
+            uint8_t zpg = ctx.peekByte(addr + 1);
             int bit_no = (cmd >> 4) & 0x07;
-            if (!(ctx.mem[zpg] & uint8_t(1 << bit_no)))
+            if (!(ctx.peekByte(zpg) & uint8_t(1 << bit_no)))
                 sign = true;
             break;
         }
@@ -220,12 +204,12 @@ std::string CDeasm::DeasmInstr(const CContext &ctx, CAsm::DeasmFmt flags, int &p
             str += " ->"; // indication of active jump
     }
 
-    ptr = (addr + uLen) & 0xFFFFFF; // adr nast. instr.
+    ptr = (addr + len) & 0xFFFFFF; // adr next instr.
 
     return str;
 }
 
-std::string CDeasm::Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk/*= false*/)
+std::string CDeasm::Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk/*= false*/) const
 {
     ASSERT(CAsm::CodeToCommand(procType)[code] <= CAsm::C_ILL && CAsm::CodeToCommand(procType)[code] >= 0);
     char buf[16];
@@ -251,7 +235,7 @@ const char CDeasm::mnemonics[] =
 "BRLCOPJMLJSLMVNMVPPEAPEIPERPHBPHDPHKPLBPLDREPRTLSEPSTPTCDTCSTDCTSCTXYTYXWAIWDMXBAXCE"
 "???";
 
-std::string CDeasm::Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel, bool bHelp)
+std::string CDeasm::Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel, bool bHelp) const
 {
     wxString str;
     addr++;
@@ -436,7 +420,7 @@ std::string CDeasm::Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uin
     return str.ToStdString();
 }
 
-std::string CDeasm::ArgumentValue(const CContext &ctx, uint32_t cmd_addr /*= -1*/)
+std::string CDeasm::ArgumentValue(uint32_t cmd_addr /*= -1*/)
 {
     wxString str("-");
     uint8_t arg;
@@ -445,7 +429,7 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, uint32_t cmd_addr /*= -1*
 
     ASSERT((cmd_addr == CAsm::INVALID_ADDRESS) || (cmd_addr <= 0xFFFF)); // Invalid address
 
-    ProcessorType procType = wxGetApp().m_global.GetProcType();
+    const CContext &ctx =m_sim->GetContext();
 
     if (cmd_addr == CAsm::INVALID_ADDRESS)
     {
@@ -455,7 +439,7 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, uint32_t cmd_addr /*= -1*
             cmd_addr = ctx.pc;
     }
 
-    uint8_t cmd = ctx.mem[cmd_addr];
+    uint8_t cmd = ctx.peekByte(cmd_addr);
     uint8_t mode = CAsm::CodeToMode()[cmd];
     ++cmd_addr;
 
@@ -469,78 +453,65 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, uint32_t cmd_addr /*= -1*
             mode = CAsm::A_IMM2;
     }
 
-    uint16_t sp = ctx.s;
+    sim_addr_t sp = ctx.getStackPointer();
 
     switch (mode)
     {
     case CAsm::A_IMP:
-        switch (cmd) {
+        switch (cmd)
+        {
         case 0x60: // RTS
-            if (procType != ProcessorType::WDC65816)
-                sp = (sp & 0xff) + 0x100;
-
-            addr = (ctx.mem[sp + 1] + (ctx.mem[sp + 2] << 8)) + 1;
-            str.Format(_T("RTS->$%04X"), addr);
-            return str.ToStdString();
+            addr = ctx.peekWord(sp) + 1;
+            return fmt::format("RTS->$%04X", addr);
 
         case 0x6B: // RTL
-            addr = (ctx.mem[ctx.s + 1] + (ctx.mem[ctx.s + 2] << 8) + (ctx.mem[ctx.s + 3] << 16)) + 1;
-            str.Format(_T("RTL->$%06X"), addr);
-            return str.ToStdString();
+            addr = ctx.peekLWord(sp) + 1;
+            return fmt::format("RTL->$%06X", addr);
 
         case 0xAB: // PLB
-            addr = (ctx.mem[ctx.s + 1]);
-            str.Format(_T("DBR=$%02X"), addr);
-            return str.ToStdString();
+            addr = (ctx.peekByte(sp + 1));
+            return fmt::format("DBR=$%02X", addr);
 
         case 0x2B: // PLD
-            addr = (ctx.mem[ctx.s + 1]) + (ctx.mem[ctx.s + 2] << 8);
-            str.Format(_T("DIR=$%04X"), addr);
-            return str.ToStdString();
+            addr = ctx.peekWord(sp + 1);
+            return fmt::format("DIR=$%04X", addr);
 
         case 0x68: // PLA
-            addr = (ctx.mem[ctx.s + 1]);
+            addr = ctx.peekByte(sp + 1);
 
             if (!ctx.mem16)
             {
-                addr += (ctx.mem[ctx.s + 2] << 8);
-                str.Format(_T("A=$%04X"), addr);
+                addr += ctx.peekByte(sp + 2) << 8;
+                return fmt::format("A=$%04X", addr);
             }
-            else
-                str.Format(_T("A=$%02X"), addr);
 
-            return str.ToStdString();
+            return fmt::format("A=$%02X", addr);
 
         case 0xFA: // PLX
-            addr = (ctx.mem[ctx.s + 1]);
+            addr = ctx.peekByte(sp + 1);
 
             if (!ctx.xy16)
             {
-                addr += (ctx.mem[ctx.s + 2] << 8);
-                str.Format(_T("X=$%04X"), addr);
+                addr += ctx.peekByte(sp + 2) << 8;
+                return fmt::format("X=$%04X", addr);
             }
-            else
-                str.Format(_T("X=$%02X"), addr);
 
-            return str.ToStdString();
+            return fmt::format("X=$%02X", addr);
 
         case 0x7A: // PLY
-            addr = (ctx.mem[ctx.s + 1]);
+            addr = ctx.peekByte(sp + 1);
 
             if (!ctx.xy16)
             {
-                addr += (ctx.mem[ctx.s + 2] << 8);
-                str.Format(_T("Y=$%04X"), addr);
+                addr += ctx.peekByte(sp + 2) << 8;
+                return fmt::format("Y=$%04X", addr);
             }
-            else
-                str.Format(_T("Y=$%02X"), addr);
-
-            return str.ToStdString();
+            
+            return fmt::format("Y=$%02X", addr);
 
         case 0x28: // PLP
-            addr = (ctx.mem[ctx.s + 1]);
-            str.Format("P=$%02X", addr);
-            return str.ToStdString();
+            addr = ctx.peekByte(sp + 1);
+            return fmt::format("P=$%02X", addr);
         }
 
     case CAsm::A_IMP2:
@@ -548,10 +519,10 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, uint32_t cmd_addr /*= -1*
         break;
 
     case CAsm::A_IMM:
-        return SetValInfo(ctx.mem[cmd_addr]);
+        return SetValInfo(ctx.peekByte(cmd_addr));
 
     case CAsm::A_REL:
-        arg = ctx.mem[cmd_addr];
+        arg = ctx.peekByte(cmd_addr);
         if (arg & 0x80) // Jump back
             str.Printf("PC-$%02X", int(0x100 - arg));
         else // Jump forward
@@ -559,87 +530,79 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, uint32_t cmd_addr /*= -1*
         break;
 
     case CAsm::A_ZPGI:
-        arg = ctx.mem[cmd_addr]; // Cell address on zeropage
-        addr = ctx.mem[arg];     // Reference address through cells
-        addr += uint16_t(ctx.mem[(arg + 1) & 0xFF]) << 8;
-        //      addr &= ctx.mem_mask;
-        return SetMemInfo(addr, ctx.mem[addr]);
+        arg = ctx.peekByte(cmd_addr); // Cell address on zero page
+        addr = ctx.peekWord(arg); // Reference address through cells
+        //addr &= ctx.mem_mask;
+        return SetMemInfo(addr, ctx.peekByte(addr));
 
     case CAsm::A_ZPG:
     case CAsm::A_ZPG2:
-        addr = ctx.mem[cmd_addr];
-        return SetMemZPGInfo((uint8_t)addr, ctx.mem[addr]);
+        addr = ctx.peekByte(cmd_addr);
+        return SetMemZPGInfo((uint8_t)addr, ctx.peekByte(addr));
 
     case CAsm::A_ZPG_X:
-        addr = (ctx.mem[cmd_addr] + ctx.x) & 0xFF;
-        return SetMemZPGInfo((uint8_t)addr, ctx.mem[addr]);
+        addr = (ctx.peekByte(cmd_addr) + ctx.x) & 0xFF;
+        return SetMemZPGInfo((uint8_t)addr, ctx.peekByte(addr));
 
     case CAsm::A_ZPG_Y:
-        addr = (ctx.mem[cmd_addr] + ctx.y) & 0xFF;
-        return SetMemZPGInfo((uint8_t)addr, ctx.mem[addr]);
+        addr = (ctx.peekByte(cmd_addr) + ctx.y) & 0xFF;
+        return SetMemZPGInfo((uint8_t)addr, ctx.peekByte(addr));
 
     case CAsm::A_ABS:
-        addr = ctx.mem[cmd_addr]; // Least significant byte of address
-        addr += uint16_t(ctx.mem[cmd_addr + 1]) << 8;
-        //      addr &= ctx.mem_mask;
-        return SetMemInfo(addr, ctx.mem[addr]);
+        addr = ctx.peekWord(cmd_addr);
+        //addr &= ctx.mem_mask;
+        return SetMemInfo(addr, ctx.peekByte(addr));
 
     case CAsm::A_ABSI:
-        addr = ctx.mem[cmd_addr]; // Least significant byte of address
-        addr += uint16_t(ctx.mem[cmd_addr + 1]) << 8;
-        //      addr &= ctx.mem_mask;
-        tmp = ctx.mem[addr]; // Number at address
-        tmp += uint16_t(ctx.mem[addr + 1]) << 8;
-        //      tmp &= ctx.mem_mask;
-        return SetMemInfo(tmp, ctx.mem[tmp]);
+        addr = ctx.peekWord(cmd_addr);
+        //addr &= ctx.mem_mask;
+        tmp = ctx.peekWord(addr);
+        //tmp &= ctx.mem_mask;
+        return SetMemInfo(tmp, ctx.peekByte(tmp));
 
     case CAsm::A_ABSI_X:
-        addr = ctx.mem[cmd_addr] + ctx.x;	// Low byte of address + X offset
+        addr = ctx.peekByte(cmd_addr) + ctx.x; // Low byte of address + X offset
 
         if (wxGetApp().m_global.GetProcType() != ProcessorType::M6502 &&
             (cmd_addr & 0xFF) == 0xFF) // low byte == 0xFF?
         {
-            addr += uint16_t(ctx.mem[cmd_addr - 0xFF]) << 8; // 65C02 addressing bug
+            addr |= uint16_t(ctx.peekByte(cmd_addr - 0xFF)) << 8; // 65C02 addressing bug
         }
         else
-            addr += uint16_t(ctx.mem[cmd_addr + 1]) << 8;
-        //      addr &= ctx.mem_mask;
-        tmp = ctx.mem[addr]; // Number at address
-        tmp += uint16_t(ctx.mem[addr + 1]) << 8;
-        //      tmp &= ctx.mem_mask;
-        return SetMemInfo(tmp, ctx.mem[tmp]);
+            addr |= uint16_t(ctx.peekByte(cmd_addr + 1)) << 8;
+
+        //addr &= ctx.mem_mask;
+        tmp = ctx.peekWord(addr); // Number at address
+        //tmp &= ctx.mem_mask;
+        return SetMemInfo(tmp, ctx.peekByte(tmp));
 
     case CAsm::A_ABS_X:
-        addr = ctx.mem[cmd_addr] + ctx.x; // The low byte of the address and the X offset
-        addr += uint16_t(ctx.mem[cmd_addr + 1]) << 8;
-        //      addr &= ctx.mem_mask;
-        return SetMemInfo(addr, ctx.mem[addr]);
+        addr = ctx.peekWord(cmd_addr) + ctx.x;
+        //addr &= ctx.mem_mask;
+        return SetMemInfo(addr, ctx.peekByte(addr));
 
     case CAsm::A_ABS_Y:
-        addr = ctx.mem[cmd_addr] + ctx.y; // Low byte of the address and Y offset
-        addr += uint16_t(ctx.mem[cmd_addr + 1]) << 8;
-        //      addr &= ctx.mem_mask;
-        return SetMemInfo(addr, ctx.mem[addr]);
+        addr = ctx.peekWord(cmd_addr) + ctx.y;
+        //addr &= ctx.mem_mask;
+        return SetMemInfo(addr, ctx.peekByte(addr));
 
     case CAsm::A_ZPGI_X:
-        arg = ctx.mem[cmd_addr]; // Cell address on zeropage
+        arg = ctx.peekByte(cmd_addr); // Cell address on zero page
         arg = (arg + ctx.x) & 0xFF;
-        addr = ctx.mem[arg]; // Reference address through cells
-        addr += uint16_t(ctx.mem[(arg + 1) & 0xFF]) << 8;
-        //      addr &= ctx.mem_mask;
-        return SetMemInfo(addr, ctx.mem[addr]);
+        addr = ctx.peekWord(arg); // Reference address through cells
+        //addr &= ctx.mem_mask;
+        return SetMemInfo(addr, ctx.peekByte(addr));
 
     case CAsm::A_ZPGI_Y:
-        arg = ctx.mem[cmd_addr]; // Cell address on zeropage
-        addr = ctx.mem[arg] + ctx.y; // Reference address by cells and Y shift
-        addr += uint16_t(ctx.mem[(arg + 1) & 0xFF]) << 8;
-        //      addr &= ctx.mem_mask;
-        return SetMemInfo(addr, ctx.mem[addr]);
+        arg = ctx.peekByte(cmd_addr); // Cell address on zero page
+        addr = ctx.peekWord(arg) + ctx.y;
+        //addr &= ctx.mem_mask;
+        return SetMemInfo(addr, ctx.peekByte(addr));
 
     case CAsm::A_ZREL:
     {
-        std::string tmpStr = SetMemZPGInfo((uint8_t)cmd_addr, ctx.mem[cmd_addr]);
-        arg = ctx.mem[cmd_addr + 1];
+        std::string tmpStr = SetMemZPGInfo((uint8_t)cmd_addr, ctx.peekByte(cmd_addr));
+        arg = ctx.peekByte(cmd_addr + 1);
         if (arg & 0x80) // Jump back
             str.Printf("; PC-$%02X", int(0x100 - arg));
         else // Jump forward
@@ -648,44 +611,35 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, uint32_t cmd_addr /*= -1*
     }
 
     case CAsm::A_ABSL:
-        laddr = ctx.mem[cmd_addr]; // low byte of the address
-        laddr += ctx.mem[cmd_addr + 1] << 8;
-        laddr += ctx.mem[cmd_addr + 2] << 16;
-        return SetMemInfo(laddr, ctx.mem[laddr]);
+        laddr = ctx.peekLWord(cmd_addr);
+        return SetMemInfo(laddr, ctx.peekByte(laddr));
 
     case CAsm::A_ABSL_X:
-        laddr = ctx.mem[cmd_addr] + ctx.x; // low byte of the address
-        laddr += ctx.mem[cmd_addr + 1] << 8;
-        laddr += ctx.mem[cmd_addr + 2] << 16;
-        return SetMemInfo(laddr, ctx.mem[laddr]);
+        laddr = ctx.peekLWord(cmd_addr) + ctx.x;
+        return SetMemInfo(laddr, ctx.peekByte(laddr));
 
     case CAsm::A_ZPIL: // zero page indirect
-        arg = ctx.mem[cmd_addr]; // Cell address on zeropage
-        laddr = ctx.mem[arg]; // Reference address through cells
-        laddr += (ctx.mem[(arg + 1) & 0xFF]) << 8;
-        laddr += (ctx.mem[(arg + 2) & 0xFF]) << 16;
-        return SetMemInfo(laddr, ctx.mem[laddr]);
+        arg = ctx.peekByte(cmd_addr); // Cell address on zero page
+        laddr = ctx.peekLWord(arg); // Reference address through cells
+        return SetMemInfo(laddr, ctx.peekByte(laddr));
 
     case CAsm::A_ZPIL_Y: // zero page indirect, indexed Y
-        arg = ctx.mem[cmd_addr]; // Cell address on zeropage
-        laddr = ctx.mem[arg] + ctx.y; // Reference address through cells
-        laddr += (ctx.mem[(arg + 1) & 0xFF]) << 8;
-        laddr += (ctx.mem[(arg + 2) & 0xFF]) << 16;
-        return SetMemInfo(laddr, ctx.mem[laddr]);
+        arg = ctx.peekByte(cmd_addr); // Cell address on zero page
+        laddr = ctx.peekLWord(arg) + ctx.y; // Reference address through cells
+        return SetMemInfo(laddr, ctx.peekByte(laddr));
 
     case CAsm::A_SR: // zero page indirect
-        arg = ctx.mem[cmd_addr]; // Cell address on zeropage
-        laddr = ctx.mem[arg]; // Reference address through cells
-        return SetMemInfo(laddr, ctx.mem[laddr]);
+        arg = ctx.peekByte(cmd_addr); // Cell address on zero page
+        laddr = ctx.peekByte(arg); // Reference address through cells
+        return SetMemInfo(laddr, ctx.peekByte(laddr));
 
     case CAsm::A_SRI_Y: // zero page indirect, indexed Y
-        arg = ctx.mem[cmd_addr]; // Cell address on zeropage
-        laddr = ctx.mem[arg] + ctx.y; // Reference address through cells
-        return SetMemInfo(laddr, ctx.mem[laddr]);
+        arg = ctx.peekByte(cmd_addr); // Cell address on zero page
+        laddr = ctx.peekByte(arg) + ctx.y; // Reference address through cells
+        return SetMemInfo(laddr, ctx.peekByte(laddr));
 
     case CAsm::A_RELL: // Relative Long
-        addr = ctx.mem[cmd_addr];
-        addr += ctx.mem[cmd_addr + 1] << 8;
+        addr = ctx.peekWord(cmd_addr);
         if (addr & 0x8000) // Jump back
             str.Printf("PC-$%04X", int(0x10000 - addr));
         else // Jump forward
@@ -693,24 +647,19 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, uint32_t cmd_addr /*= -1*
         break;
 
     case CAsm::A_XYC:
-        addr = ctx.mem[cmd_addr];
-        addr += ctx.mem[cmd_addr + 1] << 8;
-        str.Printf("S-%02X, D-%02X", (uint8_t)addr & 0xFF, (uint8_t)(addr >> 8) & 0xFF);
-        break;
+        addr = ctx.peekWord(cmd_addr);
+        return fmt::format("S-%02X, D-%02X", (uint8_t)addr & 0xFF, (uint8_t)(addr >> 8) & 0xFF);
 
     case CAsm::A_IMM2:
-        addr = ctx.mem[cmd_addr]; // Low byte of the address
-        addr += uint16_t(ctx.mem[cmd_addr + 1]) << 8;
+        addr = ctx.peekWord(cmd_addr);
         return SetWordInfo(addr);
 
     case CAsm::A_ILL:
-        str.clear();
-        break;
+        return "";
 
     default:
         ASSERT(FALSE);
-        str.Format(_("MISSING MODE=%D"), mode);
-        break;
+        return fmt::format("MISSING MODE=%D", mode);
     }
 
     return str.ToStdString();
@@ -718,26 +667,20 @@ std::string CDeasm::ArgumentValue(const CContext &ctx, uint32_t cmd_addr /*= -1*
 
 std::string CDeasm::SetMemInfo(uint32_t addr, uint8_t val) // Description of the memory location
 {
-    char buf[128];
-    std::string bin = Binary(val);
-    snprintf(buf, sizeof(buf), "[%06X]: $%02X, %d, '%c', %s", int(addr), int(val), val & 0xFF, val ? (char)val : (char)' ', bin.c_str());
-    return std::string(buf);
+    char c = val ? val : ' ';
+    return fmt::format("[{0:06X}]: ${1:02X}, {1:d}, {2:c}, {1:08b}", addr, val, c);
 }
 
 std::string CDeasm::SetMemZPGInfo(uint8_t addr, uint8_t val) // Cell description of page zero of memory
 {
-    char buf[128];
-    std::string bin = Binary(val);
-    snprintf(buf, sizeof(buf), "[%02X]: $%02X, %d, '%c', %s", int(addr), int(val), val & 0xFF, val ? (char)val : (char)' ', bin.c_str());
-    return std::string(buf);
+    char c = val ? val : ' ';
+    return fmt::format("[{0:02X}]: ${1:02X}, {1:d}, {2:c}, {1:08b}", addr, val, c);
 }
 
 std::string CDeasm::SetValInfo(uint8_t val)	// Value description 'val'
 {
-    char buf[128];
-    std::string bin = Binary(val);
-    snprintf(buf, sizeof(buf), "%d, '%c', %s", val & 0xFF, val ? (char)val : (char)' ', bin.c_str());
-    return std::string(buf);
+    char c = val ? val : ' ';
+    return fmt::format("{0:d}, {1:c}, {0:08b}", val, c);
 }
 
 std::string CDeasm::SetWordInfo(uint16_t word)
@@ -745,57 +688,18 @@ std::string CDeasm::SetWordInfo(uint16_t word)
     char c = (word & 0xFF);
     c = c ? c : ' ';
 
-    return fmt::format("{0}, '{1}', {2}", word, c, Binary2(word));
-}
-
-std::string CDeasm::Binary(uint8_t val)
-{
-    char bin[9];
-
-    bin[0] = val & 0x80 ? '1' : '0';
-    bin[1] = val & 0x40 ? '1' : '0';
-    bin[2] = val & 0x20 ? '1' : '0';
-    bin[3] = val & 0x10 ? '1' : '0';
-    bin[4] = val & 0x08 ? '1' : '0';
-    bin[5] = val & 0x04 ? '1' : '0';
-    bin[6] = val & 0x02 ? '1' : '0';
-    bin[7] = val & 0x01 ? '1' : '0';
-    bin[8] = '\0';
-
-    return std::string(bin);
-}
-
-std::string CDeasm::Binary2(uint16_t val)
-{
-    std::string bin(_(' '), 16);
-
-    bin[0] = val & 0x8000 ? '1' : '0';
-    bin[1] = val & 0x4000 ? '1' : '0';
-    bin[2] = val & 0x2000 ? '1' : '0';
-    bin[3] = val & 0x1000 ? '1' : '0';
-    bin[4] = val & 0x0800 ? '1' : '0';
-    bin[5] = val & 0x0400 ? '1' : '0';
-    bin[6] = val & 0x0200 ? '1' : '0';
-    bin[7] = val & 0x0100 ? '1' : '0';
-    bin[8] = val & 0x80 ? '1' : '0';
-    bin[9] = val & 0x40 ? '1' : '0';
-    bin[10] = val & 0x20 ? '1' : '0';
-    bin[11] = val & 0x10 ? '1' : '0';
-    bin[12] = val & 0x08 ? '1' : '0';
-    bin[13] = val & 0x04 ? '1' : '0';
-    bin[14] = val & 0x02 ? '1' : '0';
-    bin[15] = val & 0x01 ? '1' : '0';
-
-    return bin;
+    return fmt::format("{0:d}, {1:c}, {0:016b}", word, c);
 }
 
 // Finding the address of the instruction preceding a given instruction
-int CDeasm::FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt/*= 1*/)
+int CDeasm::FindPrevAddr(uint32_t &addr, int cnt/*= 1*/)
 {
     ASSERT(cnt >= 0);
 
     if (cnt <= 0)
         return 0;
+
+    const CContext &ctx =m_sim->GetContext();
 
     if (cnt > 1)
     {
@@ -812,7 +716,7 @@ int CDeasm::FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt/*= 1*/)
         for (i = 0; start < addr; i++)
         {
             addresses[i] = start;
-            cmd = ctx.mem[start];
+            cmd = ctx.peekByte(start);
             start += cmd == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[cmd]];
         }
 
@@ -838,7 +742,7 @@ int CDeasm::FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt/*= 1*/)
         while (start < addr)
         {
             prev = start;
-            cmd = ctx.mem[start];
+            cmd = ctx.peekByte(start);
             if (cmd == 0) // BRK command?
                 start++;  // We only increase by 1, although normally BRK increases by 2
             else
@@ -847,7 +751,7 @@ int CDeasm::FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt/*= 1*/)
             //start &= ctx.mem_mask;
         }
 
-        cmd = ctx.mem[prev];
+        cmd = ctx.peekByte(prev);
         /*
             if (cmd == 0 && ctx.mem[prev - 1] == 0) // What about zeros before the command?
             {
@@ -869,24 +773,25 @@ int CDeasm::FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt/*= 1*/)
 }
 
 // Finding the address of the command following the 'cnt' command from 'addr'
-int CDeasm::FindNextAddr(uint32_t &addr, const CContext &ctx, int cnt/*= 1*/)
+int CDeasm::FindNextAddr(uint32_t &addr, int cnt/*= 1*/)
 {
-    //ASSERT(addr <= ctx.mem_mask); // Invalid address; too big
-
     int ret = 0;
     uint32_t next = addr;
+
+    const CContext &ctx =m_sim->GetContext();
 
     for (uint32_t address = addr; cnt; cnt--)
     {
         address = next;
-        next += ctx.mem[address] == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[ctx.mem[address]]];
+        uint8_t byte = ctx.peekByte(address);
+        next += byte == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[byte]];
 
         if (next < addr)
             ret = 0; // "scroll" the address
         else
             ret = 1; // next address found
 
-        if (address >= ctx.mem_mask)
+        if (address >= ctx.bus.getMaxAddress())
             next = address;
     }
 
@@ -895,10 +800,12 @@ int CDeasm::FindNextAddr(uint32_t &addr, const CContext &ctx, int cnt/*= 1*/)
 }
 
 // Check how many lines should the window content be moved to reach from 'addr' to 'dest'
-int CDeasm::FindDelta(uint32_t &addr, uint32_t dest, const CContext &ctx, int max_lines)
+int CDeasm::FindDelta(uint32_t &addr, uint32_t dest, int max_lines)
 {
     if (dest == addr)
         return 0;
+
+    const CContext &ctx =m_sim->GetContext();
 
     if (dest < addr)
     {
@@ -907,7 +814,8 @@ int CDeasm::FindDelta(uint32_t &addr, uint32_t dest, const CContext &ctx, int ma
 
         for (i = 0; start < addr; i++)
         {
-            start += ctx.mem[start] == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[ctx.mem[start]]];
+            uint8_t byte = ctx.peekByte(start);
+            start += byte == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[byte]];
 
             if (i >= max_lines)
                 break;
@@ -924,7 +832,8 @@ int CDeasm::FindDelta(uint32_t &addr, uint32_t dest, const CContext &ctx, int ma
 
         for (i = 0; start < dest; i++)
         {
-            start += ctx.mem[start] == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[ctx.mem[start]]];
+            uint8_t byte = ctx.peekByte(start);
+            start += byte == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[byte]];
 
             if (i >= max_lines)
                 break;

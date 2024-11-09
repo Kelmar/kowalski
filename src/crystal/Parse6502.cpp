@@ -22,6 +22,96 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502View.h"
 #include "Deasm.h"
 
+/*************************************************************************/
+
+namespace Instructions
+{
+    std::string AddMode(const CDeasm &deasm, uint8_t cmd, CAsm::OpCode inst, CAsm::CodeAdr mode, ProcessorType procType)
+    {
+        UNUSED(inst);
+
+        std::string cs;
+        cs = deasm.Mnemonic(cmd, procType, true);
+        cs += deasm.Argument(cmd, mode, 0x8000, 0x34, 0x12, 0x00, false, true);
+        cs += "\n";
+        return cs;
+    }
+
+    std::string GetModes(const CDeasm &deasm, CAsm::OpCode inst)
+    {
+        const uint8_t NA = 0x42;  //WDM on 65816
+        std::string strModes;
+        bool bExt1 = false;
+        bool bExt2 = false;
+        bool bExt3 = false;
+
+        uint8_t codeC;
+
+        for (int i = 0; i < CAsm::A_NO_OF_MODES; ++i)
+        {
+            uint8_t code = CAsm::trans_table[inst][i];
+            if (code != NA)
+                strModes += "<pre> " + AddMode(deasm, code, inst, CAsm::CodeAdr(i), ProcessorType::M6502);
+            else
+            {
+                codeC = CAsm::trans_table_c[inst][i];
+                if (codeC != NA)
+                {
+                    code = CAsm::trans_table_8[inst][i];
+                    if (code != NA)
+                    {
+                        bExt3 = true;
+                        strModes += "<pre>�" + AddMode(deasm, code, inst, CAsm::CodeAdr(i), ProcessorType::WDC65816);
+                    }
+                    else
+                    {
+                        strModes += "<pre>�" + AddMode(deasm, codeC, inst, CAsm::CodeAdr(i), ProcessorType::WDC65C02);
+                        bExt1 = true;
+                    }
+                }
+                else
+                {
+                    code = CAsm::trans_table_8[inst][i];
+                    if (code != NA)
+                    {
+                        strModes += "<pre>�" + AddMode(deasm, code, inst, CAsm::CodeAdr(i), ProcessorType::WDC65816);
+                        bExt2 = true;
+                    }
+                }
+            }
+        }
+
+        if (bExt3)
+            strModes += "\n<pre>�<small> (65c02 and 65816 opcode)";
+
+        if (bExt1)
+            strModes += "\n<pre>�<small> (65c02 opcode)";
+
+        if (bExt2)
+            strModes += "\n<pre>�<small> (65816 opcode)";
+
+        if (bExt1 || bExt2 || bExt3)
+            strModes += "\n";
+
+        return strModes;
+    }
+
+    std::string GetBranchInfo(bool bConditional = true)
+    {
+        wxString str = _("All branch instructions are relative to the PC (current location--program counter)."
+            " They can jump forward or backward but are limited to local range (+/- 128 bytes).");
+
+        if (bConditional)
+            str += _(" Jump is effective if corresponding flag in status register is set/clear.");
+        else
+            str += _(" Jump is always effective regardless of flags set in status register.");
+
+        return str.ToStdString();
+    }
+};
+
+/*************************************************************************/
+
 static const char * s_vpszInstructionList[] =
 {
     "LDA",
@@ -1079,104 +1169,11 @@ extern int MatchingInstructions(const std::string& strWord, std::string& strResu
 }
 
 
-class Instructions : CDeasm
-{
-    std::string AddMode(uint8_t cmd, CAsm::OpCode inst, CAsm::CodeAdr mode, ProcessorType procType);
-
-public:
-
-    std::string GetModes(CAsm::OpCode inst);
-    std::string GetBranchInfo(bool bConditional = true);
-};
-
-std::string Instructions::AddMode(uint8_t cmd, CAsm::OpCode inst, CAsm::CodeAdr mode, ProcessorType procType)
-{
-    UNUSED(inst);
-
-    std::string cs;
-    cs = CDeasm::Mnemonic(cmd, procType, true);
-    cs += CDeasm::Argument(cmd, mode, 0x8000, 0x34, 0x12, 0x00, false, true);
-    cs += "\n";
-    return cs;
-}
-
-std::string Instructions::GetBranchInfo(bool bConditional/*= true*/)
-{
-    std::string str = "All branch instructions are relative to the PC (current location--program counter)."
-                      " They can jump forward or backward but are limited to local range (+/- 128 bytes).";
-
-    if (bConditional)
-        str += " Jump is effective if corresponding flag in status register is set/clear.";
-    else
-        str += " Jump is always effective regardless of flags set in status register.";
-
-    return str;
-}
-
-std::string Instructions::GetModes(CAsm::OpCode inst)
-{
-    const uint8_t NA = 0x42;  //WDM on 65816
-    std::string strModes;
-    bool bExt1 = false;
-    bool bExt2 = false;
-    bool bExt3 = false;
-
-    uint8_t codeC;
-
-    for (int i = 0; i < CAsm::A_NO_OF_MODES; ++i)
-    {
-        uint8_t code = CAsm::trans_table[inst][i];
-        if (code != NA)
-            strModes += "<pre> " + AddMode(code, inst, CAsm::CodeAdr(i), ProcessorType::M6502);
-        else
-        {
-            codeC = CAsm::trans_table_c[inst][i];
-            if (codeC != NA)
-            {
-                code = CAsm::trans_table_8[inst][i];
-                if (code != NA)
-                {
-                    bExt3 = true;
-                    strModes += "<pre>�" + AddMode(code, inst, CAsm::CodeAdr(i), ProcessorType::WDC65816);
-                }
-                else
-                {
-                    strModes += "<pre>�" + AddMode(codeC, inst, CAsm::CodeAdr(i), ProcessorType::WDC65C02);
-                    bExt1 = true;
-                }
-            }
-            else
-            {
-                code = CAsm::trans_table_8[inst][i];
-                if (code != NA)
-                {
-                    strModes += "<pre>�" + AddMode(code, inst, CAsm::CodeAdr(i), ProcessorType::WDC65816);
-                    bExt2 = true;
-                }
-            }
-        }
-    }
-
-    if (bExt3)
-        strModes += "\n<pre>�<small> (65c02 and 65816 opcode)";
-
-    if (bExt1)
-        strModes += "\n<pre>�<small> (65c02 opcode)";
-
-    if (bExt2)
-        strModes += "\n<pre>�<small> (65816 opcode)";
-
-    if (bExt1 || bExt2 || bExt3)
-        strModes += "\n";
-
-    return strModes;
-}
-
 //	desc += GetInstructionModes(C_ADC);
 
 extern std::string GetInstructionDesc(const std::string& instruction)
 {
-    Instructions inst;
+    CDeasm deasm(wxGetApp().m_global.GetSimulator());
     std::string desc;
 
     std::string instUpper;
@@ -1189,7 +1186,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#ADC#text#\nAdd Memory to Accumulator with Carry."
                "#flags#NVZC#modes#";
-        desc += inst.GetModes(CAsm::C_ADC);
+        desc += Instructions::GetModes(deasm, CAsm::C_ADC);
         desc += "#desc#ADC adds memory to the accumulator. If D (decimal) flag bit is set ADC operates"
                 " in BCD (packed Binary Coded Decimal) mode, where only decimal digits are allowed. If D flag is clear"
                 " ADC operates in binary two's complement mode.\n"
@@ -1218,7 +1215,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#AND#text#\n\"AND\" Memory with Accumulator."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_AND);
+        desc += Instructions::GetModes(deasm, CAsm::C_AND);
 //		desc += "#desc#opis blah blah";
         desc +=
             "#exmpl#"
@@ -1230,7 +1227,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#ASL#text#\nShift One Bit Left."
                "#flags#NZC#modes#";
-        desc += inst.GetModes(CAsm::C_ASL);
+        desc += Instructions::GetModes(deasm, CAsm::C_ASL);
         desc += "#desc#ASL shifts all bits left one position. Bit 0 is cleared and original bit 7 is moved into the Carry.\n"
                 "#exmpl#"
                 " ; extract bits 4-7\n"
@@ -1245,54 +1242,54 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#BBR#text#\nBranch on Bit Reset."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BBR);
+        desc += Instructions::GetModes(deasm, CAsm::C_BBR);
 //		desc += "#desc#opis blah blah";
     }
     else if (instUpper == "BBS")
     {
         desc = "#title#BBS#text#\nBranch on Bit Set."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BBS);
+        desc += Instructions::GetModes(deasm, CAsm::C_BBS);
     }
     else if (instUpper == "BCC")
     {
         desc = "#title#BCC#text#\nBranch on Carry Clear."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BCC);
+        desc += Instructions::GetModes(deasm, CAsm::C_BCC);
         desc += "#exmpl#"
                 " LDA data  ; load data\n"
                 " CMP #10\n"
                 " BCC .less ; jump if data < 10\n";
-        desc += "#desc#" + inst.GetBranchInfo();
+        desc += "#desc#" + Instructions::GetBranchInfo();
     }
     else if (instUpper == "BCS")
     {
         desc = "#title#BCS#text#\nBranch on Carry Set."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BCS);
+        desc += Instructions::GetModes(deasm, CAsm::C_BCS);
         desc += "#exmpl#"
                 " LDA data  ; load data\n"
                 " CMP #10\n"
                 " BCS .gt_eq ; jump if data >= 10\n";
-        desc += "#desc#" + inst.GetBranchInfo();
+        desc += "#desc#" + Instructions::GetBranchInfo();
     }
     else if (instUpper == "BEQ")
     {
         desc = "#title#BEQ#text#\nBranch on Result Zero."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BEQ);
+        desc += Instructions::GetModes(deasm, CAsm::C_BEQ);
         desc += "#exmpl#"
                 " LDA flag  ; load data\n"
                 " BEQ .zero ; jump if flag == 0\n"
                 " CMP #5\n"
                 " BEQ .five ; jump if flag == 5\n";
-        desc += "#desc#" + inst.GetBranchInfo();
+        desc += "#desc#" + Instructions::GetBranchInfo();
     }
     else if (instUpper == "BIT")
     {
         desc = "#title#BIT#text#\nTest Memory Bits with Accumulator."
                "#flags#NVZ#modes#";
-        desc += inst.GetModes(CAsm::C_BIT);
+        desc += Instructions::GetModes(deasm, CAsm::C_BIT);
         desc += "#desc#BIT performs \"AND\" operation on its argument and accumulator."
                 " Result is not stored but Z(ero) flag is set accordingly. Flags N and V become"
                 " copies of 7-th (oldest) and 6-th bits of BIT argument.\n"
@@ -1305,51 +1302,51 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#BMI#text#\nBranch on Result Minus."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BMI);
+        desc += Instructions::GetModes(deasm, CAsm::C_BMI);
         desc += "#exmpl#"
                 " BIT flag  ; flag to test\n"
                 " BMI .neg  ; jump if flag negative\n";
-        desc += "#desc#" + inst.GetBranchInfo();
+        desc += "#desc#" + Instructions::GetBranchInfo();
     }
     else if (instUpper == "BNE")
     {
         desc = "#title#BNE#text#\nBranch on Result Not Zero."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BNE);
+        desc += Instructions::GetModes(deasm, CAsm::C_BNE);
         desc += "#exmpl#"
                 " LDA flag      ; load data\n"
                 " BNE .not_zero ; jump if flag != 0\n"
                 " CMP #2\n"
                 " BNE .not_two  ; jump if flag != 2\n";
-        desc += "#desc#" + inst.GetBranchInfo();
+        desc += "#desc#" + Instructions::GetBranchInfo();
     }
     else if (instUpper == "BPL")
     {
         desc = "#title#BPL#text#\nBranch on Result Plus."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BPL);
+        desc += Instructions::GetModes(deasm, CAsm::C_BPL);
         desc += "#exmpl#"
                 " LDX #10    ; load counter\n"
                 ".delay:\n"
                 " DEX\n"
                 " BPL .delay ; jump if X >= 0\n";
-        desc += "#desc#" + inst.GetBranchInfo();
+        desc += "#desc#" + Instructions::GetBranchInfo();
     }
     else if (instUpper == "BRA")
     {
         desc = "#title#BRA#text#\nBranch Always."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BRA);
-        desc += "#desc#" + inst.GetBranchInfo(false);
+        desc += Instructions::GetModes(deasm, CAsm::C_BRA);
+        desc += "#desc#" + Instructions::GetBranchInfo(false);
     }
     else if (instUpper == "BRK")
     {
         desc = "#title#BRK#text#\nForce Break."
                "#flags#B�DI#modes#";
-        desc += inst.GetModes(CAsm::C_BRK);
+        desc += Instructions::GetModes(deasm, CAsm::C_BRK);
         desc += "#desc#BRK forces interrupt. CPU fetches interrupt vector"
             " and jumps to the interrupt handler routine. 6502 and 65c02 sets bits I and B.\n"
-            "6502/65c02/65816 (emmulation mode) Vector is at $FFFE/F.  65816 (native mode)"
+            "6502/65c02/65816 (emulation mode) Vector is at $FFFE/F.  65816 (native mode)"
             " is at $FFE6,7.  65816 (native mode) only sets bit I.\n"
             "Simulator can use this instruction to stop execution of your program.\n"
             "\n�<small> (D flag cleared only by 65c02 and 65816 CPU)\n";
@@ -1358,7 +1355,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#BRL#text#\nBranch Long."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BRL);
+        desc += Instructions::GetModes(deasm, CAsm::C_BRL);
         desc += "#desc#BRL jumps relative to the PC (current location--program counter)."
                 " It can jump forward or backward but are limited to local range (+/- 32767 bytes)."
                 " Jump is always effective regardless of flags set in status register."
@@ -1368,51 +1365,51 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#BVC#text#\nBranch on Overflow Clear."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BVC);
-        desc += "#desc#" + inst.GetBranchInfo();
+        desc += Instructions::GetModes(deasm, CAsm::C_BVC);
+        desc += "#desc#" + Instructions::GetBranchInfo();
     }
     else if (instUpper == "BVS")
     {
         desc = "#title#BVS#text#\nBranch on Overflow Set."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_BVS);
-        desc += "#desc#" + inst.GetBranchInfo();
+        desc += Instructions::GetModes(deasm, CAsm::C_BVS);
+        desc += "#desc#" + Instructions::GetBranchInfo();
     }
     else if (instUpper == "CLC")
     {
         desc = "#title#CLC#text#\nClear Carry Flag."
                "#flags#C#modes#";
-        desc += inst.GetModes(CAsm::C_CLC);
+        desc += Instructions::GetModes(deasm, CAsm::C_CLC);
     }
     else if (instUpper == "CLD")
     {
         desc = "#title#CLD#text#\nClear Decimal Mode."
                "#flags#D#modes#";
-        desc += inst.GetModes(CAsm::C_CLD);
+        desc += Instructions::GetModes(deasm, CAsm::C_CLD);
     }
     else if (instUpper == "CLI")
     {
         desc = "#title#CLI#text#\nClear Interrupt Disable Bit."
                "#flags#I#modes#";
-        desc += inst.GetModes(CAsm::C_CLI);
+        desc += Instructions::GetModes(deasm, CAsm::C_CLI);
     }
     else if (instUpper == "CLV")
     {
         desc = "#title#CLV#text#\nClear Overflow Flag."
                "#flags#V#modes#";
-        desc += inst.GetModes(CAsm::C_CLV);
+        desc += Instructions::GetModes(deasm, CAsm::C_CLV);
     }
     else if (instUpper == "CMP")
     {
         desc = "#title#CMP#text#\nCompare Memory and Accumulator."
                "#flags#NZC#modes#";
-        desc += inst.GetModes(CAsm::C_CMP);
+        desc += Instructions::GetModes(deasm, CAsm::C_CMP);
     }
     else if (instUpper == "COP")
     {
         desc = "#title#COP#text#\nCo-processor interrupt."
                "#flags#NZC#modes#";
-        desc += inst.GetModes(CAsm::C_COP);
+        desc += Instructions::GetModes(deasm, CAsm::C_COP);
         desc += "#desc#COP forces an interrupt. CPU fetches COP vector ($FFF4,5 / $FFE4,5)"
                 " and jumps to the COP handler routine. Bit I is set and D is cleared in the flag register."
                 "Like BRK, the return address from COP is 2 bytes after the COP opcode. There is "
@@ -1422,25 +1419,25 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#CPX#text#\nCompare Memory and Index X."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_CPX);
+        desc += Instructions::GetModes(deasm, CAsm::C_CPX);
     }
     else if (instUpper == "CPY")
     {
         desc = "#title#CPY#text#\nCompare Memory and Index Y."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_CPY);
+        desc += Instructions::GetModes(deasm, CAsm::C_CPY);
     }
     else if (instUpper == "DEA")
     {
         desc = "#title#DEA#text#\n.Decrement Accumulator by One"
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_DEA);
+        desc += Instructions::GetModes(deasm, CAsm::C_DEA);
     }
     else if (instUpper == "DEC")
     {
         desc = "#title#DEC#text#\nDecrement by One."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_DEC);
+        desc += Instructions::GetModes(deasm, CAsm::C_DEC);
         desc += "#exmpl#"
                 " ; subtract 1 from 6 conecutive bytes\n"
                 " LDX #5      ; counter\n"
@@ -1453,7 +1450,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#DEX#text#\nDecrement Index X by One."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_DEX);
+        desc += Instructions::GetModes(deasm, CAsm::C_DEX);
         desc += "#exmpl#"
                 " ; clear buf[0..31]\n"
                 " LDX #31   ; counter\n"
@@ -1467,7 +1464,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#DEY#text#\nDecrement Index Y by One."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_DEY);
+        desc += Instructions::GetModes(deasm, CAsm::C_DEY);
         desc += "#exmpl#"
                 " ; copy 200 bytes\n"
                 " LDY #200\n"
@@ -1481,19 +1478,19 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#EOR#text#\n\"Exclusive-or\" Memory with Accumulator."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_EOR);
+        desc += Instructions::GetModes(deasm, CAsm::C_EOR);
     }
     else if (instUpper == "INA")
     {
         desc = "#title#INA#text#\nIncrement Accumulator by One."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_INA);
+        desc += Instructions::GetModes(deasm, CAsm::C_INA);
     }
     else if (instUpper == "INC")
     {
         desc = "#title#INC#text#\nIncrement by One."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_INC);
+        desc += Instructions::GetModes(deasm, CAsm::C_INC);
         desc += "#exmpl#"
                 " ; add 1 to 'data' word\n"
                 " INC data   ; inc low byte\n"
@@ -1505,19 +1502,19 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#INX#text#\nIncrement Index X by One."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_INX);
+        desc += Instructions::GetModes(deasm, CAsm::C_INX);
     }
     else if (instUpper == "INY")
     {
         desc = "#title#INY#text#\n.Increment Index Y by One"
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_INY);
+        desc += Instructions::GetModes(deasm, CAsm::C_INY);
     }
     else if (instUpper == "JML")
     {
         desc = "#title#JML#text#\nLong Jump to New Location using absolute indirect long addressing."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_JML);
+        desc += Instructions::GetModes(deasm, CAsm::C_JML);
         desc += "#desc#JML looks up the 3 bytes starting at the absolute address provided and moves them into the"
                 "PBR and PC registers.";
 
@@ -1526,13 +1523,13 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#JMP#text#\nJump to New Location."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_JMP);
+        desc += Instructions::GetModes(deasm, CAsm::C_JMP);
     }
     else if (instUpper == "JSL")
     {
         desc = "#title#JSL#text#\nLong Jump to Subroutine."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_JSL);
+        desc += Instructions::GetModes(deasm, CAsm::C_JSL);
         desc += "#desc#JSR calls subroutine: it jumps to the new location saving return address on the stack,"
                 "including the PBR register, so program execution can be resumed when subroutine ends with RTL.\n"
                 "Due to the peculiarity of 6502 return address pushed on the stack is one less then an address of the"
@@ -1542,7 +1539,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#JSR#text#\nJump to Subroutine."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_JSR);
+        desc += Instructions::GetModes(deasm, CAsm::C_JSR);
         desc += "#desc#JSR calls subroutine: it jumps to the new location saving return address on the stack,"
                 " so program execution can be resumed when subroutine ends with RTS.\n"
                 "Due to the peculiarity of 6502 return address pushed on the stack is one less then an address of the"
@@ -1552,25 +1549,25 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#LDA#text#\nLoad Accumulator with Memory."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_LDA);
+        desc += Instructions::GetModes(deasm, CAsm::C_LDA);
     }
     else if (instUpper == "LDX")
     {
         desc = "#title#LDX#text#\nLoad Index X with Memory."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_LDX);
+        desc += Instructions::GetModes(deasm, CAsm::C_LDX);
     }
     else if (instUpper == "LDY")
     {
         desc = "#title#LDY#text#\nLoad Index Y with Memory."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_LDY);
+        desc += Instructions::GetModes(deasm, CAsm::C_LDY);
     }
     else if (instUpper == "LSR")
     {
         desc = "#title#LSR#text#\nShift One Bit Right."
                "#flags#NZC#modes#";
-        desc += inst.GetModes(CAsm::C_LSR);
+        desc += Instructions::GetModes(deasm, CAsm::C_LSR);
         desc += "#desc#LSR shifts all bits right one position. Bit 7 is cleared and original bit 0 is moved into the Carry.\n"
                 "#exmpl#"
                 " ; fast multiply by 4\n"
@@ -1582,13 +1579,13 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#NOP#text#\nNo Operation."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_NOP);
+        desc += Instructions::GetModes(deasm, CAsm::C_NOP);
     }
     else if (instUpper == "MVN")
     {
         desc = "#title#MVN#text#\nBlock move descending."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_MVN);
+        desc += Instructions::GetModes(deasm, CAsm::C_MVN);
         desc += "#desc#MVN moves a block of data from a higher source to a lower destination.\n"
                 "#exmpl#"
                 " MVN #00, #01;  Move a block of data from Bank 0 to Bank 1\n"
@@ -1598,7 +1595,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#MVP#text#\nBlock move ascending."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_MVP);
+        desc += Instructions::GetModes(deasm, CAsm::C_MVP);
         desc += "#desc#MVP moves a block of data from a lower source to a higher destination..\n"
                 "#exmpl#"
                 " MVP #00, #01;  Move a block of data from Bank 0 to Bank 1\n"
@@ -1608,34 +1605,34 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#ORA#text#\n\"OR\" Memory with Accumulator."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_ORA);
+        desc += Instructions::GetModes(deasm, CAsm::C_ORA);
     }
     else if (instUpper == "PEA")
     {
         desc = "#title#PEA#text#\nPush Effective address Immediate."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PEA);
+        desc += Instructions::GetModes(deasm, CAsm::C_PEA);
         desc += "#desc#PEA stores a 16bit immediate value on the stack. RTS could be used to retrieve it.\n";
     }
     else if (instUpper == "PEI")
     {
         desc = "#title#PEI#text#\nPush Effective indirect address."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PEI);
+        desc += Instructions::GetModes(deasm, CAsm::C_PEI);
         desc += "#desc#PEI stores a 16 bit value from a direct page address on the stack. RTS could be used to retrieve it.\n";
     }
     else if (instUpper == "PER")
     {
         desc = "#title#PER#text#\nPush Effective relative address."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PER);
+        desc += Instructions::GetModes(deasm, CAsm::C_PER);
         desc += "#desc#PER stores a 16 bit value relative to its location on the stack. RTS could be used to retrieve it.\n";
     }
     else if (instUpper == "PHA")
     {
         desc = "#title#PHA#text#\nPush Accumulator on the Stack."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PHA);
+        desc += Instructions::GetModes(deasm, CAsm::C_PHA);
         desc += "#desc#PHA stores accumulator on the stack. PLA could be used to restore it.\n"
                 "#exmpl#"
                 " PHA      ; push A\n"
@@ -1646,94 +1643,94 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#PHB#text#\nPush Data Bank Register (DB) on Stack."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PHB);
+        desc += Instructions::GetModes(deasm, CAsm::C_PHB);
         desc += "#desc#PHB stores the Data Bank Register (DB) on the stack. PLB could be used to restore it.\n";
     }
     else if (instUpper == "PHD")
     {
         desc = "#title#PHD#text#\nPush the direct page register (DP) on the Stack."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PHD);
+        desc += Instructions::GetModes(deasm, CAsm::C_PHD);
         desc += "#desc#PHD stores the direct page register (DP) on the stack. PLD could be used to restore it.\n";
     }
     else if (instUpper == "PHK")
     {
         desc = "#title#PHK#text#\nPush the program bank register on the Stack."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PHK);
+        desc += Instructions::GetModes(deasm, CAsm::C_PHK);
         desc += "#desc#PHK stores the program bank register on the stack.\n";
     }
     else if (instUpper == "PHP")
     {
         desc = "#title#PHP#text#\nPush Processor Status on Stack."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PHP);
+        desc += Instructions::GetModes(deasm, CAsm::C_PHP);
     }
     else if (instUpper == "PHX")
     {
         desc = "#title#PHX#text#\nPush Index X on Stack."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PHX);
+        desc += Instructions::GetModes(deasm, CAsm::C_PHX);
     }
     else if (instUpper == "PHY")
     {
         desc = "#title#PHY#text#\nPush Index Y on Stack."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_PHY);
+        desc += Instructions::GetModes(deasm, CAsm::C_PHY);
     }
     else if (instUpper == "PLA")
     {
         desc = "#title#PLA#text#\nPull Accumulator from Stack."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_PLA);
+        desc += Instructions::GetModes(deasm, CAsm::C_PLA);
     }
     else if (instUpper == "PLB")
     {
         desc = "#title#PLB#text#\nPull Data Bank Register (DB) from Stack."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_PLB);
+        desc += Instructions::GetModes(deasm, CAsm::C_PLB);
     }
     else if (instUpper == "PLD")
     {
         desc = "#title#PLD#text#\nPull Direct Page Register (DP) from Stack."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_PLD);
+        desc += Instructions::GetModes(deasm, CAsm::C_PLD);
     }
     else if (instUpper == "PLP")
     {
         desc = "#title#PLP#text#\nPull Process Status from Stack."
                "#flags#all#modes#";
-        desc += inst.GetModes(CAsm::C_PLP);
+        desc += Instructions::GetModes(deasm, CAsm::C_PLP);
     }
     else if (instUpper == "PLX")
     {
         desc = "#title#PLX#text#\nPull Index X from Stack."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_PLX);
+        desc += Instructions::GetModes(deasm, CAsm::C_PLX);
     }
     else if (instUpper == "PLY")
     {
         desc = "#title#PLY#text#\nPull Index Y from Stack."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_PLY);
+        desc += Instructions::GetModes(deasm, CAsm::C_PLY);
     }
     else if (instUpper == "REP")
     {
         desc = "#title#REP#text#\nReset bits in Status Register (P)."
                "#flags#NVMXDZC#modes#";
-        desc += inst.GetModes(CAsm::C_REP);
+        desc += Instructions::GetModes(deasm, CAsm::C_REP);
     }
     else if (instUpper == "RMB")
     {
         desc = "#title#RMB#text#\nReset Memory Bit."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_RMB);
+        desc += Instructions::GetModes(deasm, CAsm::C_RMB);
     }
     else if (instUpper == "ROL")
     {
         desc = "#title#ROL#text#\nRotate One Bit Left."
                "#flags#NZC#modes#";
-        desc += inst.GetModes(CAsm::C_ROL);
+        desc += Instructions::GetModes(deasm, CAsm::C_ROL);
         desc += "#desc#ROL shifts all bits left one position. Carry is copied to bit 0 and original bit 7 is moved into the Carry.\n"
                 "#exmpl#"
                 " ; shift left word data\n"
@@ -1745,7 +1742,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#ROR#text#\nRotate One Bit Right."
                "#flags#NZC#modes#";
-        desc += inst.GetModes(CAsm::C_ROR);
+        desc += Instructions::GetModes(deasm, CAsm::C_ROR);
         desc += "#desc#ROR shifts all bits right one position. Carry is copied to bit 7 and original bit 0 is moved into the Carry.\n"
                 "#exmpl#"
                 " ; shift right word data\n"
@@ -1757,7 +1754,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#RTI#text#\nReturn from Interrupt."
                "#flags#NVDIZC#modes#";
-        desc += inst.GetModes(CAsm::C_RTI);
+        desc += Instructions::GetModes(deasm, CAsm::C_RTI);
         desc += "#desc#RTI retrieves flags register from the stack, then it retrieves return address, so"
                 " program execution can be resumed after an interrupt.";
     }
@@ -1765,7 +1762,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#RTL#text#\nLong Return from Subroutine."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_RTL);
+        desc += Instructions::GetModes(deasm, CAsm::C_RTL);
         desc += "#desc#RTL retrieves return address from the stack, including the Program Bank Register. RTL is used to return from subroutine invoked by JSL.\n"
                 "Note: because JSL places address-1 value on the stack, RTL modifies it by adding 1 before it's used.";
     }
@@ -1773,7 +1770,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#RTS#text#\nReturn from Subroutine."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_RTS);
+        desc += Instructions::GetModes(deasm, CAsm::C_RTS);
         desc += "#desc#RTS retrieves return address from the stack. RTS is used to return from subroutine invoked by JSR.\n"
                 "Note: because JSR places address-1 value on the stack, RTS modifies it by adding 1 before it's used.";
     }
@@ -1781,7 +1778,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#SBC#text#\nSubtract Memory from Accumulator with Borrow."
                "#flags#NVZC#modes#";
-        desc += inst.GetModes(CAsm::C_SBC);
+        desc += Instructions::GetModes(deasm, CAsm::C_SBC);
         desc += "#desc#SBC subtracts memory from the accumulator. If D (decimal) flag bit is set SBC operates"
                 " in BCD (packed Binary Coded Decimal) mode, where only decimal digits are allowed. If D flag is clear"
                 " SBC operates in binary two's complement mode.\n"
@@ -1803,13 +1800,13 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#SEC#text#\nSet Carry Flag."
                "#flags#C#modes#";
-        desc += inst.GetModes(CAsm::C_SEC);
+        desc += Instructions::GetModes(deasm, CAsm::C_SEC);
     }
     else if (instUpper == "SED")
     {
         desc = "#title#SED#text#\nSet Decimal Mode."
                "#flags#D#modes#";
-        desc += inst.GetModes(CAsm::C_SED);
+        desc += Instructions::GetModes(deasm, CAsm::C_SED);
         desc += "#desc#SED sets decimal mode for ADC and SBC instructions. In BCD (packed Binary Coded Decimal)"
                 " mode addition and subtraction operates on packed BCD numbers.";
     }
@@ -1817,25 +1814,25 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#SEI#text#\nSet Interrupt Disable Bit."
                "#flags#I#modes#";
-        desc += inst.GetModes(CAsm::C_SEI);
+        desc += Instructions::GetModes(deasm, CAsm::C_SEI);
     }
     else if (instUpper == "SEP")
     {
         desc = "#title#SEP#text#\nSet bits in Status Register (P)."
                "#flags#NVMXDZC#modes#";
-        desc += inst.GetModes(CAsm::C_SEP);
+        desc += Instructions::GetModes(deasm, CAsm::C_SEP);
     }
     else if (instUpper == "SMB")
     {
         desc = "#title#SMB#text#\nSet Memory Bit."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_SMB);
+        desc += Instructions::GetModes(deasm, CAsm::C_SMB);
     }
     else if (instUpper == "STA")
     {
         desc = "#title#STA#text#\nStore Accumulator in Memory."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_STA);
+        desc += Instructions::GetModes(deasm, CAsm::C_STA);
         desc += "#exmpl#"
                 " LDA #$FF\n"
                 " STA flag ; flag = $FF\n";
@@ -1844,26 +1841,26 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#STP#text#\nStop the clock."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_STP);
+        desc += Instructions::GetModes(deasm, CAsm::C_STP);
         desc += "#desc#STP will stop the clock and the processor will wait for a hard reset via the /RES pin.";
     }
     else if (instUpper == "STX")
     {
         desc = "#title#STX#text#\nStore Index X in Memory."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_STX);
+        desc += Instructions::GetModes(deasm, CAsm::C_STX);
     }
     else if (instUpper == "STY")
     {
         desc = "#title#STY#text#\nStore Index Y in Memory."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_STY);
+        desc += Instructions::GetModes(deasm, CAsm::C_STY);
     }
     else if (instUpper == "STZ")
     {
         desc = "#title#STZ#text#\nStore Zero in Memory."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_STZ);
+        desc += Instructions::GetModes(deasm, CAsm::C_STZ);
         desc += "#exmpl#"
                 " STZ data  ; clear data byte\n";
     }
@@ -1871,75 +1868,75 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#TAX#text#\nTransfer Accumulator in Index X."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_TAX);
+        desc += Instructions::GetModes(deasm, CAsm::C_TAX);
         desc += "#desc#TAX copies accumulator into the X register.\n";
     }
     else if (instUpper == "TAY")
     {
         desc = "#title#TAY#text#\nTransfer Accumulator in Index Y."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_TAY);
+        desc += Instructions::GetModes(deasm, CAsm::C_TAY);
         desc += "#desc#TAY copies accumulator into the Y register.\n";
     }
     else if (instUpper == "TCD")
     {
         desc = "#title#TCD#text#\nTransfer 16 bit Accumulator (C) to the Direct Register (D)."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_TCD);
+        desc += Instructions::GetModes(deasm, CAsm::C_TCD);
         desc += "#desc#TCD copies 16 bit accumulator into the Direct register.\n";
     }
     else if (instUpper == "TCS")
     {
         desc = "#title#TCS#text#\nTransfer 16 bit Accumulator (C) to the Stack Register (S)."
                   "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_TCS);
+        desc += Instructions::GetModes(deasm, CAsm::C_TCS);
         desc += "#desc#TCS copies 16 bit accumulator into the Stack register.\n";
     }
     else if (instUpper == "TDC")
     {
         desc = "#title#TDC#text#\nTransfer Direct Register (D) to the 16 bit Accumulator (C)."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_TDC);
+        desc += Instructions::GetModes(deasm, CAsm::C_TDC);
         desc += "#desc#TDC copies Direct register into the 16 bit accumulator (C).\n";
     }
     else if (instUpper == "TRB")
     {
         desc = "#title#TRB#text#\nTest and Reset Memory Bits with Accumulator."
                "#flags#Z#modes#";
-        desc += inst.GetModes(CAsm::C_TRB);
+        desc += Instructions::GetModes(deasm, CAsm::C_TRB);
     }
     else if (instUpper == "TSB")
     {
         desc = "#title#TSB#text#\nTest and Set Memory Bits with Accumulator."
                "#flags#Z#modes#";
-        desc += inst.GetModes(CAsm::C_TSB);
+        desc += Instructions::GetModes(deasm, CAsm::C_TSB);
     }
     else if (instUpper == "TSC")
     {
         desc = "#title#TSC#text#\nTransfer Stack register (S) to the 16 bit Accumulator (C)."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_TSC);
+        desc += Instructions::GetModes(deasm, CAsm::C_TSC);
         desc += "#desc#TSC copies the Stack register to the 16 bit accumulator.\n";
     }
     else if (instUpper == "TSX")
     {
         desc = "#title#TSX#text#\nTransfer Stack Pointer to Index X."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_TSX);
+        desc += Instructions::GetModes(deasm, CAsm::C_TSX);
         desc += "#desc#TSX copies stack pointer register S into the X register.\n";
     }
     else if (instUpper == "TXA")
     {
         desc = "#title#TXA#text#\nTransfer Index X to Accumulator."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_TXA);
+        desc += Instructions::GetModes(deasm, CAsm::C_TXA);
         desc += "#desc#TXA copies X register into the accumulator.\n";
     }
     else if (instUpper == "TXS")
     {
         desc = "#title#TXS#text#\nTransfer Index X to Stack Pointer."
                "#flags##modes#";
-        desc += inst.GetModes(CAsm::C_TXS);
+        desc += Instructions::GetModes(deasm, CAsm::C_TXS);
         desc += "#desc#TXS copies X register into the stack pointer register S.\n"
                 "#exmpl#"
                 " LDX #$FF\n"
@@ -1949,7 +1946,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#TXY#text#\nTransfer Index X to Index Y."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_TXY);
+        desc += Instructions::GetModes(deasm, CAsm::C_TXY);
         desc += "#desc#TXY copies X register to the Y register.\n"
                 "#exmpl#"
                 " LDX #$FF\n"
@@ -1959,7 +1956,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#TYA#text#\nTransfer Index Y to Accumulator."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_TYA);
+        desc += Instructions::GetModes(deasm, CAsm::C_TYA);
         desc += "#desc#TYA copies Y register into the accumulator.\n"
                 "#exmpl#"
                 " PHA ; store accumulator\n"
@@ -1970,7 +1967,7 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#TYX#text#\nTransfer Index Y to Index X."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_TYX);
+        desc += Instructions::GetModes(deasm, CAsm::C_TYX);
         desc += "#desc#TYX copies Y register to the X register.\n"
                 "#exmpl#"
                 " LDY #$FF\n"
@@ -1980,28 +1977,28 @@ extern std::string GetInstructionDesc(const std::string& instruction)
     {
         desc = "#title#WAI#text#\nWiat for Interrupt."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_WAI);
+        desc += Instructions::GetModes(deasm, CAsm::C_WAI);
         desc += "#desc#WAI Stops execution and waits for an Interrupt to occur.\n";
     }
     else if (instUpper == "WDM")
     {
         desc = "#title#WDM#text#\nReserved for future use.  Executes as a NOP."
                "#flags#-#modes#";
-        desc += inst.GetModes(CAsm::C_WDM);
+        desc += Instructions::GetModes(deasm, CAsm::C_WDM);
         desc += "#desc#WDM Reserved for future use.  Executes as a NOP.\n";
     }
     else if (instUpper == "XBA")
     {
         desc = "#title#XBA#text#\nSwaps 8 bit Accumulator (A) with upper 8 bits of 16 bit accumulator (B)."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_XBA);
+        desc += Instructions::GetModes(deasm, CAsm::C_XBA);
         desc += "\n";
     }
     else if (instUpper == "XCE")
     {
         desc = "#title#XCE#text#\nExchange carry bit C with Emulation bit E in the Status Register P."
                "#flags#NZ#modes#";
-        desc += inst.GetModes(CAsm::C_XCE);
+        desc += Instructions::GetModes(deasm, CAsm::C_XCE);
         desc += "\n";
     }
     return desc;

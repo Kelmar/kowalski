@@ -2455,14 +2455,12 @@ void CMainFrame::UpdateAll()
     m_Memory.Refresh();
     m_ZeroPage.Refresh();
 
-    CSym6502 *pSimulator = wxGetApp().m_global.GetSimulator();
+    PSym6502 pSimulator = wxGetApp().m_global.GetSimulator();
 
     if (pSimulator)
     {
-        if (wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816)
-            m_Stack.InvalidateView(pSimulator->GetContext()->s);
-        else
-            m_Stack.InvalidateView(pSimulator->GetContext()->s + 0x100);  //***
+        sim_addr_t addr = pSimulator->GetContext().getStackPointer();
+        m_Stack.InvalidateView(addr);
     }
     else
         m_Stack.Refresh();

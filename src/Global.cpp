@@ -110,20 +110,17 @@ bool CGlobal::CreateDeasm()
 
 void CGlobal::StartDebug()
 {
-    //if (wxGetApp().m_global.m_procType == ProcessorType::WDC65816) // 1.3.3 disable debugger for 65816
-    //    return;
-
     bool restart;
 
-    if (m_simulator == nullptr)
+    if (!m_simulator)
     {
         restart = false;
-        m_simulator = new CSym6502(m_memory, &m_debugInfo, m_busWidth);
+        m_simulator.reset(new CSym6502(&m_debugInfo));
     }
     else
     {
         restart = true;
-        m_simulator->Restart(m_memory);
+        m_simulator->Restart();
     }
 
     m_simulator->finish = m_simFinish;
@@ -144,13 +141,12 @@ void CGlobal::StartDebug()
 
 void CGlobal::ExitDebugger()
 {
-    if (m_simulator == nullptr)
+    if (!m_simulator)
         return;
 
     Broadcast::ToViews(EVT_EXIT_DEBUGGER, 0, 0);
     Broadcast::ToPopups(EVT_EXIT_DEBUGGER, 0, 0);
 
-    delete m_simulator;
     m_simulator = nullptr;
 }
 

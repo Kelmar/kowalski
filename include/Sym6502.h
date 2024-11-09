@@ -21,183 +21,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _sym_6502_h_
 #define _sym_6502_h_
 
+/*************************************************************************/
+
 #include "DebugInfo.h"
 #include "OutputMem.h"
 #include "LogBuffer.h"
 
+#include "Bus.h"
+#include "SimContext.h"
+
+/*************************************************************************/
+
 class CSrc6502View;
-#undef OVERFLOW
 
 bool cpu16();
-
-struct ContextBase
-{
-    uint8_t b;
-    uint16_t a, x, y, s;
-    uint32_t pc;
-
-    ULONG uCycles;
-    bool intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
-
-    bool negative, overflow, zero, carry;
-    bool reserved, break_bit, decimal, interrupt;
-
-    bool emm;   // Emmulation mode
-    bool mem16; // 8 bit mode
-    bool xy16;  // 8 bit mode
-
-    uint8_t dbr; // Data Bank Register
-    uint8_t pbr; // Program Bank Register
-    uint16_t dir; // Direct Register
-
-    uint32_t mem_mask; // memory mask - depends on the width of the address bus,
-    // contains ones in place of valid address bits
-    bool io;
-    uint16_t io_from, io_to;
-
-    ContextBase()
-    {
-        memset(this, 0, sizeof(ContextBase));
-    }
-
-    ContextBase(const ContextBase &rhs)
-    {
-        memcpy(this, &rhs, sizeof(ContextBase));
-    }
-
-    const ContextBase &operator =(const ContextBase &rhs)
-    {
-        memcpy(this, &rhs, sizeof(ContextBase));
-        return *this;
-    }
-};
-
-class CContext : public ContextBase
-{
-    void reset()
-    {
-        pc = 0;
-        b = a = x = y = s = 0;
-        io = false;
-        negative = overflow = zero = carry = false;
-        break_bit = decimal = interrupt = false;
-        reserved = true;
-        uCycles = 0;
-    }
-
-public:
-    
-    enum Flags
-    {
-        NEGATIVE   = 0x80,
-        OVERFLOW   = 0x40,
-        MEMORY     = 0x20,
-        RESERVED   = 0x20,
-        INDEX      = 0x10,
-        BREAK      = 0x10,
-        DECIMAL    = 0x08,
-        INTERRUPT  = 0x04,
-        ZERO       = 0x02,
-        EMMULATION = 0x01,
-        CARRY      = 0x01,
-        NONE       = 0x00,
-        ALL        = 0xFF,
-
-        // bit numbers
-        N_NEGATIVE   = 7,
-        N_OVERFLOW   = 6,
-        N_MEMORY     = 5,
-        N_RESERVED   = 5,
-        N_INDEX      = 4,
-        N_BREAK      = 4,
-        N_DECIMAL    = 3,
-        N_INTERRUPT  = 2,
-        N_ZERO       = 1,
-        N_EMMULATION = 1,
-        N_CARRY      = 0
-    };
-
-    COutputMem &mem;
-
-    // functions that change the contents of the flag register
-    void set_status_reg_VZNC(bool v, bool z, bool n, bool c)
-    {
-        negative = !!n;
-        overflow = !!v;
-        zero = !!z;
-        carry = !!c;
-    }
-    
-    void set_status_reg_ZNC(bool z, bool n, bool c)
-    {
-        negative = !!n;
-        zero = !!z;
-        carry = !!c;
-    }
-
-    void set_status_reg_VZN(bool v, bool z, bool n)
-    {
-        negative = !!n;
-        overflow = !!v;
-        zero = !!z;
-    }
-
-    void set_status_reg_ZN(bool z, bool n)
-    {
-        negative = !!n;
-        zero = !!z;
-    }
-
-    void set_status_reg(uint8_t val)
-    {
-        zero = val == 0;
-        negative = !!(val & 0x80);
-    }
-
-    void set_status_reg16(uint16_t val)
-    {
-        zero = val == 0;
-        negative = !!(val & 0x8000);
-    }
-
-    uint8_t get_status_reg() const;
-
-    void set_status_reg_bits(uint8_t reg);
-
-    void set_addr_bus_width(uint32_t w)
-    {
-        mem_mask = uint32_t((1 << w) - 1);
-        ASSERT(w >= 10 && w <= 24);
-    }
-
-    CContext(COutputMem &mem, int addr_bus_width)
-        : mem(mem)
-    {
-        set_addr_bus_width(addr_bus_width);
-        reset();
-    }
-
-    CContext(const CContext &src) 
-        : ContextBase(src)
-        , mem(src.mem)
-    {
-        reset();
-    }
-
-    CContext &operator= (const CContext &src)
-    {
-        ContextBase::operator =(src);
-        mem = src.mem;
-        return *this;
-    }
-
-    void Reset(const COutputMem &newMem)
-    {
-        this->mem = newMem;
-        reset();
-    }
-};
-
 
 struct CmdInfo	// single command info (for logging)
 {
@@ -209,10 +46,10 @@ struct CmdInfo	// single command info (for logging)
         s = ctx.s;
         flags = ctx.get_status_reg();
         pc = ctx.pc;
-        cmd = ctx.mem[ctx.pc];
-        arg1 = ctx.mem[ctx.pc + 1];
-        arg2 = ctx.mem[ctx.pc + 2];
-        arg3 = ctx.mem[ctx.pc + 3];
+        cmd = ctx.bus.PeekByte(ctx.pc);
+        arg1 = ctx.bus.PeekByte(ctx.pc + 1);
+        arg2 = ctx.bus.PeekByte(ctx.pc + 2);
+        arg3 = ctx.bus.PeekByte(ctx.pc + 3);
         uCycles = ctx.uCycles;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
         intFlag = ctx.intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
         argVal = 0;
@@ -258,14 +95,16 @@ struct CmdInfo	// single command info (for logging)
 
 typedef CLogBuffer<CmdInfo> CommandLog;
 
-//=============================================================================
+/*************************************************************************/
 
 class CSym6502
 {
 private:
-    CContext ctx, pre, old; //% bug Fix 1.2.13.18 - command log assembly not lined up with registers (added pre)
+    CContext ctx;
     CDebugInfo *debug;
     CommandLog m_Log;
+
+    ULONG m_saveCycles; //% Bug Fix 1.2.12.18 - fix command log display
 
 public:
     /// @brief Simulator Status
@@ -309,31 +148,11 @@ public:
     static uint32_t s_uProtectFromAddr;
     static uint32_t s_uProtectToAddr;
 
-    enum IOFunc // functions of subsequent bytes from the simulator's I/O area
-    {
-        IO_NONE      = -1,
-        TERMINAL_CLS = 0,
-        TERMINAL_OUT,
-        TERMINAL_OUT_CHR,
-        TERMINAL_OUT_HEX,
-        TERMINAL_IN,
-        TERMINAL_GET_X_POS,
-        TERMINAL_GET_Y_POS,
-        TERMINAL_SET_X_POS,
-        TERMINAL_SET_Y_POS,
-        IO_LAST_FUNC = TERMINAL_SET_Y_POS
-    };
-
     // interrupt types
     enum IntType { NONE = 0, IRQ = 1, NMI = 2, RST = 4 };
 
 private:
     bool waiFlag;
-
-    IOFunc io_func;
-
-    wxWindow *io_window(); // Finding the terminal window
-    wxWindow *io_open_window(); // Opening a terminal window
 
     void inc_prog_counter(int step = 1)
     {
@@ -363,32 +182,24 @@ private:
     uint16_t get_word_indirect(uint16_t zp)
     {
         ASSERT(zp <= ((cpu16() && !ctx.emm) ? 0xFF : 0xFFFF));
-
-        uint16_t lo = ctx.mem[zp];
-        uint16_t hi = ctx.mem[zp + 1];
-
-        return lo | (hi << 8);
+        return ctx.getWord(zp);
     }
 
     uint16_t get_word(uint32_t addr)
     {
-        return ctx.mem.getWord(addr);
+        return ctx.getWord(addr);
     }
 
     uint32_t get_Lword_indirect(uint16_t zp)
     {
         ASSERT(zp <= ((cpu16() && !ctx.emm) ? 0xFF : 0xFFFF));
 
-        uint32_t lo = ctx.mem[zp];
-        uint32_t mid = ctx.mem[zp + 1];
-        uint32_t hi = ctx.mem[zp + 2];
-
-        return lo | (mid << 8) | (hi << 16);
+        return ctx.getLWord(zp);
     }
 
     uint32_t get_Lword(uint32_t addr)
     {
-        return ctx.mem.getLWord(addr);
+        return ctx.getLWord(addr);
     }
 
     void push_on_stack(uint8_t arg)
@@ -398,13 +209,13 @@ private:
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
                 throw CSym6502::Status::ILL_WRITE;
 
-            ctx.mem.set(ctx.s, arg);
+            ctx.setByte(ctx.s, arg);
             --ctx.s;
             ctx.s &= 0xFFFF;
         }
         else
         {
-            ctx.mem.set(0x100 + ctx.s--, arg);
+            ctx.setByte(0x100 + ctx.s--, arg);
             --ctx.s;
             ctx.s = (ctx.s & 0xFF) + 0x100;
         }        
@@ -417,23 +228,23 @@ private:
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
                 throw CSym6502::Status::ILL_WRITE;
 
-            ctx.mem.set(ctx.s, (arg >> 8) & 0xFF);
+            ctx.setByte(ctx.s, (arg >> 8) & 0xFF);
             --ctx.s;
             ctx.s &= 0xFFFF;
 
             if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
                 throw CSym6502::Status::ILL_WRITE;
 
-            ctx.mem.set(ctx.s, arg & 0xFF);
+            ctx.setByte(ctx.s, arg & 0xFF);
             --ctx.s;
             ctx.s &= 0xFFFF;
         }
         else
         {
-            ctx.mem.set(0x100 + (ctx.s & 0xFF), (arg >> 8) & 0xFF);
+            ctx.setByte(0x100 + (ctx.s & 0xFF), (arg >> 8) & 0xFF);
             --ctx.s;
             ctx.s = (ctx.s & 0xFF) + 0x100;
-            ctx.mem.set(0x100 + (ctx.s & 0xFF), arg & 0xFF);
+            ctx.setByte(0x100 + (ctx.s & 0xFF), arg & 0xFF);
             --ctx.s;
             ctx.s = (ctx.s & 0xFF) + 0x100;
         }
@@ -446,15 +257,15 @@ private:
             if (ctx.emm && ((ctx.s & 0xFF) == 0xFF))
             {
                 ctx.s = 0x100;
-                return ctx.mem[ctx.s];
+                return ctx.bus.GetByte(ctx.s);
             }
             else
-                return ctx.mem[++ctx.s];
+                return ctx.bus.GetByte(++ctx.s);
         }
         else
         {
             ++ctx.s;
-            return ctx.mem[0x100 + (ctx.s & 0xFF)];
+            return ctx.bus.GetByte(0x100 + (ctx.s & 0xFF));
         }
     }
 
@@ -479,8 +290,8 @@ private:
         {
             uint8_t tmp = ++ctx.s & 0xFF;
             ++ctx.s;
-            uint16_t tmp2 = ctx.mem[0x100 + tmp];
-            tmp2 |= uint16_t(ctx.mem[0x100 + (ctx.s & 0xFF)]) << uint16_t(8);
+            uint16_t tmp2 = ctx.bus.GetByte(0x100 + tmp);
+            tmp2 |= uint16_t(ctx.bus.GetByte(0x100 + (ctx.s & 0xFF))) << uint16_t(8);
             return tmp2;
         }
     }
@@ -515,12 +326,6 @@ private:
     void init();
     void set_translation_tables();
 
-    bool check_io_write(uint32_t addr);
-    bool check_io_read(uint32_t addr);
-
-    Status io_function(uint8_t arg);
-    uint8_t io_function();
-
     const uint8_t* m_vCodeToCommand;
     const uint8_t* m_vCodeToCycles;
     const uint8_t* m_vCodeToMode;
@@ -528,17 +333,17 @@ private:
 public:
     CAsm::Finish finish; // Specifying how to end program execution
 
-    uint16_t get_irq_addr();
-    uint16_t get_rst_addr();
-    uint16_t get_nmi_addr();
-    uint16_t get_abort_addr();
-    uint16_t get_cop_addr();
+    uint16_t get_cop_addr() { return ctx.getWord(0xFFF4); }
+    uint16_t get_abort_addr() { return ctx.getWord(0xFFF8); }
+    uint16_t get_nmi_addr() { return ctx.getWord(0xFFFA); }
+    uint16_t get_rst_addr() { return ctx.getWord(0xFFFC); }
+    uint16_t get_irq_addr() { return ctx.getWord(0xFFFE); }
 
-    uint16_t get_irq_addr16();
-    uint16_t get_nmi_addr16();
-    uint16_t get_abort_addr16();
-    uint16_t get_brk_addr16();
-    uint16_t get_cop_addr16();
+    uint16_t get_cop_addr16() { return ctx.getWord(0xFFE4); }
+    uint16_t get_brk_addr16() { return ctx.getWord(0xFFE6); }
+    uint16_t get_abort_addr16() { return ctx.getWord(0xFFE8); }
+    uint16_t get_nmi_addr16() { return ctx.getWord(0xFFEA); }
+    uint16_t get_irq_addr16() { return ctx.getWord(0xFFEE); }
 
     std::string GetStatMsg(Status stat) const;
     std::string GetLastStatMsg() const { return GetStatMsg(CurrentStatus); }
@@ -550,24 +355,20 @@ public:
     uint32_t get_pc() const { return ctx.pc; }
     void set_pc(uint32_t pc) { ctx.pc = pc; }
 
-    const CContext* GetContext() { return &ctx; }
-    void SetContext(CContext &context) { ctx = context; }
+    const CContext &GetContext() const { return ctx; }
+    CContext &GetContext() { return ctx; }
 
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502(COutputMem &mem, int addr_bus_width)
-        : ctx(mem, addr_bus_width)
-        , pre(mem, addr_bus_width)
-        , old(mem, addr_bus_width)
+    CSym6502()
+        : ctx()
         //, eventRedraw(true, true)
     {
         init();
     }
 
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502(COutputMem &mem, CDebugInfo *debug, int addr_bus_width) 
-        : ctx(mem, addr_bus_width)
-        , pre(mem, addr_bus_width)
-        , old(mem, addr_bus_width)
+    CSym6502(CDebugInfo *debug) 
+        : ctx()
         //, eventRedraw(true)
         , debug(debug)
     {
@@ -578,7 +379,7 @@ public:
     {
     }
 
-    void Restart(const COutputMem &mem);
+    void Restart();
     void SymStart(uint32_t org);
 
     void StepInto();
@@ -612,4 +413,10 @@ public:
     }
 };
 
-#endif
+typedef std::shared_ptr<CSym6502> PSym6502;
+
+/*************************************************************************/
+
+#endif /* _sym_6502_h_ */
+
+/*************************************************************************/

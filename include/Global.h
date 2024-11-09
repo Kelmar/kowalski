@@ -41,7 +41,8 @@ private:
 
     /// Start address override
     uint32_t m_startAddress;
-    CSym6502 *m_simulator;    // simulator
+
+    PSym6502 m_simulator;     // simulator
     CAsm::Finish m_simFinish; // how the simulator ends the program
     CMarkArea m_markArea;     // designation of fragments of memory containing the object code
 
@@ -74,7 +75,6 @@ public:
 
     ~CGlobal()
     {
-        delete m_simulator;
     }
 
     void SetAddrBusWidth(UINT w)
@@ -147,10 +147,7 @@ public:
         m_startAddress = prog_start;
     }
 
-    CSym6502 *GetSimulator()
-    {
-        return m_simulator;
-    }
+    PSym6502 GetSimulator() const { return m_simulator; }
 
     std::string GetStatMsg()
     {
@@ -166,7 +163,9 @@ public:
     void SetSymFinish(CAsm::Finish fin)
     {
         m_simFinish = fin;
-        if (m_simulator) m_simulator->finish = fin;
+
+        if (m_simulator)
+            m_simulator->finish = fin;
     }
 
     CAsm::Breakpoint SetBreakpoint(int line, const std::string &doc_title);

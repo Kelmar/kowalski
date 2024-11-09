@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CDeasm
 {
+private:
     static const char mnemonics[];
 
     std::string SetMemZPGInfo(uint8_t addr, uint8_t val);   // Cell description of page zero of memory
@@ -27,25 +28,26 @@ class CDeasm
     std::string SetValInfo(uint8_t val);                    // Value description 'val'
     std::string SetWordInfo(uint16_t val);                   // Value description 'val'
 
+    std::shared_ptr<CSym6502> m_sim;
+
 public:
-    /* constructor */ CDeasm()
-    { }
+    /* constructor */ CDeasm(std::shared_ptr<CSym6502> sim)
+        : m_sim(sim)
+    {
+    }
 
     virtual ~CDeasm()
-    { }
+    {
+    }
 
-    std::string DeasmInstr(const CContext &ctx, CAsm::DeasmFmt flags, int32_t &ptr);
+    std::string DeasmInstr(CAsm::DeasmFmt flags, int32_t &ptr);
     std::string DeasmInstr(const CmdInfo &ci, CAsm::DeasmFmt flags);
-    std::string ArgumentValue(const CContext &ctx, uint32_t ptr = CAsm::INVALID_ADDRESS);
+    std::string ArgumentValue(uint32_t ptr = CAsm::INVALID_ADDRESS);
 
-    std::string Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk = false);
-    std::string Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel = false, bool bHelp = false);
+    std::string Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk = false) const;
+    std::string Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel = false, bool bHelp = false) const;
 
-    // TODO: Move Binary() and Binary2() into string utilities
-    std::string Binary(uint8_t val);
-    std::string Binary2(uint16_t val);
-
-    int FindPrevAddr(uint32_t &addr, const CContext &ctx, int cnt = 1);
-    int FindNextAddr(uint32_t &addr, const CContext &ctx, int cnt = 1);
-    int FindDelta(uint32_t &addr, uint32_t dest, const CContext &ctx, int max_lines);
+    int FindPrevAddr(uint32_t &addr, int cnt = 1);
+    int FindNextAddr(uint32_t &addr, int cnt = 1);
+    int FindDelta(uint32_t &addr, uint32_t dest, int max_lines);
 };

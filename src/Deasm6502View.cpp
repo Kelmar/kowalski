@@ -195,7 +195,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
         wxRect rect = GetViewRect();
         int lines = CalcLineCount(rect);
 
-        CDeasm deasm;
+        CDeasm deasm(wxGetApp().m_global.GetSimulator());
 
         uint32_t start = addr; // Start at addr
         bool redraw = true;
@@ -203,7 +203,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
         for (int i = 0; i < lines; i++) // We go down from 'addr' until we meet 'm_uStartAddr'
         {
             // or the number of available lines runs out
-            if (deasm.FindNextAddr(start,*pDoc->m_pCtx) == 0)
+            if (deasm.FindNextAddr(start) == 0)
                 break; // "scroll" the address
 
             if (start > pDoc->m_uStartAddr)
@@ -233,7 +233,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
         wxRect rect = GetViewRect();
         int lines = CalcLineCount(rect);
 
-        CDeasm deasm;
+        CDeasm deasm(wxGetApp().m_global.GetSimulator());
 
         uint32_t start = pDoc->m_uStartAddr;
         bool redraw = true;
@@ -242,7 +242,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
         for (i = 1; i < lines; i++) // We go down from 'm_uStartAddr' until we meet 'addr'
         {
             // or the number of available lines runs out
-            if (deasm.FindNextAddr(start, *pDoc->m_pCtx) == 0)
+            if (deasm.FindNextAddr(start) == 0)
                 break; // "scroll" the address
 
             if (start > addr)
@@ -257,7 +257,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
             for (i = 0; i < lines; i++) // We go from 'start' down until we meet 'addr'
             {
                 // Or the number of available lines runs out
-                if (deasm.FindNextAddr(start, *pDoc->m_pCtx) == 0)
+                if (deasm.FindNextAddr(start) == 0)
                     break; // "scroll" the address
 
                 if (start > addr)
@@ -269,7 +269,7 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
                     UpdateWindow(); // To avoid refreshing problems
 
                     for (int j = 0; j <= i; j++) // Designating a new address for the start of the window
-                        deasm.FindNextAddr(pDoc->m_uStartAddr, *pDoc->m_pCtx);
+                        deasm.FindNextAddr(pDoc->m_uStartAddr);
 
                     //ScrollWindow(0, -y, &rect, &rect);
                     UpdateWindow();

@@ -33,7 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 CDeasm6502Doc::CDeasm6502Doc()
 {
-    m_pCtx = NULL;
     m_nPointerAddr = CAsm::INVALID_ADDRESS;
 
     m_uStart  = 0x0000;
@@ -47,7 +46,6 @@ bool CDeasm6502Doc::OnNewDocument()
     if (!wxDocument::OnNewDocument())
         return false;
 
-    SetContext(wxGetApp().m_global.GetSimulator()->GetContext());
     SetStart(wxGetApp().m_global.GetStartAddr());
  
     return true;
@@ -85,7 +83,8 @@ std::ostream &CDeasm6502Doc::SaveObject(std::ostream &stream)
     if (!GetSaveOptions())
         return stream; // Abort save
 
-    DeassembleSave(stream, *m_pCtx, m_uStart, m_uEnd, 0);
+    CContext &ctx = wxGetApp().m_global.GetSimulator()->GetContext();
+    DeassembleSave(stream, ctx, m_uStart, m_uEnd, 0);
 
     return stream;
 }
@@ -96,12 +95,6 @@ void CDeasm6502Doc::SetStart(uint32_t addr, bool bDraw)
 {
     UNUSED(bDraw);
     m_uStartAddr = addr;
-}
-
-void CDeasm6502Doc::SetContext(const CContext *pCtx)
-{
-    ASSERT(m_pCtx == NULL); // The context cannot be changed
-    m_pCtx = pCtx;
 }
 
 // Drawing/erasing an arrow in the line
