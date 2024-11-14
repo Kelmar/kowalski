@@ -65,8 +65,8 @@ public:
 
     void LoadEncodings();
 
-    const CMainFrame *mainFrame() const { return m_mainFrame; }
-    const wxLogWindow *logFrame() const { return m_logFrame; }
+    CMainFrame *mainFrame() const { return m_mainFrame; }
+    wxLogWindow *logFrame() const { return m_logFrame; }
 
     wxConfig &Config() { return *m_config; }
 

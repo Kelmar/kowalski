@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // MainFrm.h : interface of the CMainFrame class
 //
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
 
 #include "StdAfx.h"
 #include "sim.h"
@@ -41,12 +41,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "MemFrame.h"
 
+/*************************************************************************/
+
 class CMainFrame;
 class CSrc6502Doc;
 class CSrc6502View;
 
+class DebugController;
+
+/*************************************************************************/
+
 #include "ConsoleFrm.h"
-#include "AsmThread.h"
 
 #include "mdi65.h"
 
@@ -55,18 +60,24 @@ class CMainFrame : public MAIN_BASE
 private:
     static constexpr char REG_ENTRY_MAINFRM[] = "MainFrame";
 
+private: // Controllers
+    DebugController *m_debugController;
+
+private:
+    CRegisterBar m_wndRegisterBar;
+    CMemoryInfo m_Memory;
+    CMemoryInfo m_ZeroPage;
+    CMemoryInfo m_Stack;
+    CIdentInfo m_Idents;
+    CDynamicHelp m_wndHelpBar;
+
+private:
     ConsoleFrame *m_output;
 
     MemoryFrame *m_memory;
 
     wxAuiManager m_auiManager;
     wxDocManager *m_docManager;
-
-    wxCriticalSection m_critSect;
-
-    wxSemaphore m_semaphore;
-
-    AsmThread* m_asmThread;
 
     CIOWindow *m_ioWindow;
 
@@ -87,7 +98,6 @@ private:
     int Options(int page);
     int m_nLastPage;
     void ConfigSettings(bool load);
-    void ExitDebugMode();
 
     // Control setup
     void InitMenu();
@@ -102,19 +112,11 @@ public:
 //  virtual HMENU GetWindowMenuPopup(HMENU hMenuBar);
 
 //  void ShowRegisterBar(bool bShow = TRUE);
-    void SetPositionText(int row, int col);
 //  void SetRowColumn(CEdit &edit);
     CSrc6502View *GetCurrentView();
     CSrc6502Doc *GetCurrentDocument();
 
 public:
-    CRegisterBar m_wndRegisterBar;
-    CMemoryInfo m_Memory;
-    CMemoryInfo m_ZeroPage;
-    CMemoryInfo m_Stack;
-    CIdentInfo m_Idents;
-    CDynamicHelp m_wndHelpBar;
-
     void UpdateAll();
     void DelayedUpdateAll();
 
@@ -138,14 +140,11 @@ protected: // control bar embedded members
     void UpdateSymGenInterrupt(CCmdUI* pCmdUI);
     void StopIntGenerator();
     void StartIntGenerator();
-
-// Generated message map functions
+    // Generated message map functions
 protected:
     afx_msg void OnClose();
     
     afx_msg void OnUpdateAssemble(CCmdUI* pCmdUI);
-    afx_msg void OnUpdateSymDebug(CCmdUI* pCmdUI);
-    afx_msg void OnSymDebug();
     afx_msg void OnSymStepInto();
     afx_msg void OnUpdateSymStepInto(CCmdUI* pCmdUI);
     afx_msg void OnSymSkipInstr();
@@ -207,7 +206,6 @@ protected:
     afx_msg void OnHelpDynamic();
     afx_msg void OnUpdateHelpDynamic(CCmdUI* pCmdUI);
 
-    afx_msg void OnSymDebugStop();
     afx_msg LRESULT OnStartDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnExitDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
@@ -226,22 +224,10 @@ private: // Event handlers
     void OnAbout(wxCommandEvent &);
 
     // Simulator menu events
-    void OnAssemble(wxCommandEvent &);
-
-    void OnSymUpdate();
-
-    void OnSymGo(wxCommandEvent &);
-    void OnUpdateSymGo(wxUpdateUIEvent &);
-
-    void OnSymBreak(wxCommandEvent &);
-    void OnUpdateSymBreak(wxUpdateUIEvent &);
 
 private: // UI Updaters
     void OnUpdateShowLog(wxUpdateUIEvent &);
 
-private: // Thread events
-    void OnAsmComplete(wxThreadEvent &);
-    
 private:
 
     void EnableDockingEx(uint32_t dwDockStyle);

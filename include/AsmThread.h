@@ -33,13 +33,13 @@
 class AsmThread : public wxThread
 {
 private:
-    CMainFrame *m_mainFrm;
+    wxEvtHandler *m_parent;
     std::string m_path;
 
 public:
-    AsmThread(CMainFrame *mainFrm, const std::string &path)
+    AsmThread(wxEvtHandler *parent, const std::string &path)
         : wxThread(wxTHREAD_JOINABLE)
-        , m_mainFrm(mainFrm)
+        , m_parent(parent)
         , m_path(path)
     {
     }

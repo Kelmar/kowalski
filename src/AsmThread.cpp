@@ -35,7 +35,9 @@
 
 wxThread::ExitCode AsmThread::Entry()
 {
-    io::output &out = m_mainFrm->console()->GetOutput("assembler");
+    // TODO: Remove direct call to wxGetApp() from here; place in DebugController
+    io::output &out = wxGetApp().mainFrame()->console()->GetOutput("assembler");
+
     COutputMem &mainMem = wxGetApp().m_global.GetMemory();
     CMemoryPtr asmMem(new COutputMem());
     CDebugInfo *debug = wxGetApp().m_global.GetDebug();
@@ -54,7 +56,7 @@ wxThread::ExitCode AsmThread::Entry()
 
     wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
 
-    wxQueueEvent(m_mainFrm, event.Clone());
+    wxQueueEvent(m_parent, event.Clone());
 
     return reinterpret_cast<wxThread::ExitCode>(res);
 }

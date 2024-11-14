@@ -44,7 +44,7 @@ wxDEFINE_EVENT(evID_SHOW_TEST, wxCommandEvent);
 // Simulator menu events
 wxDEFINE_EVENT(evID_ASSEMBLE, wxCommandEvent);
 wxDEFINE_EVENT(evID_DEBUG, wxCommandEvent);
-wxDEFINE_EVENT(evID_SYM_GO, wxCommandEvent);
+wxDEFINE_EVENT(evID_RUN, wxCommandEvent);
 wxDEFINE_EVENT(evID_RESET, wxCommandEvent);
 wxDEFINE_EVENT(evID_BREAK, wxCommandEvent);
 wxDEFINE_EVENT(evID_STEP_INTO, wxCommandEvent);

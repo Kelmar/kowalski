@@ -27,7 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502.h"
 #include "Events.h"
 #include "MainFrm.h"
+
 #include "ProjectManager.h"
+#include "DebugController.h"
 
 #include "ChildFrm.h"
 
@@ -498,9 +500,9 @@ static UINT indicators[] =
 
 CMainFrame::CMainFrame(wxDocManager *docManager)
     : MAIN_BASE(docManager, nullptr, wxID_ANY, _(""), wxDefaultPosition, wxDefaultSize)
+    , m_debugController(nullptr)
     , m_auiManager()
     , m_docManager(docManager)
-    , m_asmThread()
 {
     m_auiManager.SetManagedWindow(this);
 
@@ -509,6 +511,8 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
 
     // TODO: Move this to the options dialog class, not here.
     m_nLastPage = 0; // the last page called up (tab) in the options box
+
+    m_debugController = new DebugController(this);
 
     InitMenu();
 
@@ -520,6 +524,7 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
     BindEvents();
 
     PushEventHandler(ProjectManager::Ptr());
+    PushEventHandler(m_debugController);
 
 #if 0
     int i = 0;
@@ -572,7 +577,10 @@ CMainFrame::~CMainFrame()
 {
     m_auiManager.UnInit();
 
-    PopEventHandler(ProjectManager::Ptr());
+    PopEventHandler(false); // DebugController
+    PopEventHandler(false); // ProjectHandler
+
+    delete m_debugController;
 
     //  if (m_Idents)
     //    delete m_Idents;
@@ -609,21 +617,11 @@ void CMainFrame::BindEvents()
     Bind(wxEVT_MENU, &CMainFrame::OnShowTest, this, evID_SHOW_TEST);
     Bind(wxEVT_MENU, &CMainFrame::OnShowIO, this, evID_SHOW_IOWINDOW);
 
-    // Simulator menu bindings
-    Bind(wxEVT_MENU, &CMainFrame::OnAssemble, this, evID_ASSEMBLE);
-    Bind(wxEVT_MENU, &CMainFrame::OnSymGo, this, evID_SYM_GO);
-    Bind(wxEVT_MENU, &CMainFrame::OnSymBreak, this, evID_BREAK);
-
     // Help menu bindings
     Bind(wxEVT_MENU, &CMainFrame::OnAbout, this, wxID_ABOUT);
 
     // UI update bindings
     Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateShowLog, this, evID_SHOW_LOG);
-    Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateSymGo, this, evID_SYM_GO);
-    Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateSymBreak, this, evID_BREAK);
-
-    // Thread event bindings
-    Bind(wxEVT_THREAD, &CMainFrame::OnAsmComplete, this, evTHD_ASM_COMPLETE);
 }
 
 /*************************************************************************/
@@ -790,21 +788,6 @@ void CMainFrame::InitMenu()
     view->Append(evID_SHOW_IOWINDOW, _("&IO Window"));
     view->Append(evID_SHOW_TEST, _("Test Window"));
 
-    // Simulator Menu
-    wxMenu *sim = new wxMenu();
-    sim->Append(evID_ASSEMBLE, _("Assemble\tF7"));
-    sim->AppendSeparator();
-    sim->Append(evID_DEBUG, _("Debug\tF6"));
-    sim->AppendSeparator();
-    sim->Append(evID_SYM_GO, _("Run\tF5"));
-    sim->Append(evID_RESET, _("Reset\tCtrl+Shift+F5"));
-    sim->Append(evID_BREAK, _("Break\tCtrl+Break"));
-    sim->AppendSeparator();
-    sim->Append(evID_STEP_INTO, _("Step Info"));
-    sim->Append(evID_STEP_OVER, _("Step Over"));
-    sim->Append(evID_STEP_OUT, _("Run Till Return"));
-    sim->Append(evID_RUN_TO, _("Run to Cursor"));
-
     // Help Menu
     wxMenu *help = new wxMenu();
     help->Append(wxID_ABOUT);
@@ -813,7 +796,9 @@ void CMainFrame::InitMenu()
     menuBar->Append(file, wxGetStockLabel(wxID_FILE));
     menuBar->Append(edit, wxGetStockLabel(wxID_EDIT));
     menuBar->Append(view, _("View"));
-    menuBar->Append(sim, _("Simulator"));
+
+    m_debugController->BuildMenu(menuBar);
+
     menuBar->Append(help, wxGetStockLabel(wxID_HELP));
 
     SetMenuBar(menuBar);
@@ -1205,115 +1190,6 @@ void CMainFrame::OnDestroy()
 /*************************************************************************/
 // Simulator menu events
 
-void CMainFrame::OnAssemble(wxCommandEvent &)
-{
-    if (m_asmThread)
-        return; // Currently assembling code, wait for completion.
-
-    CSrc6502View *pView = GetCurrentView();
-
-    if (pView == nullptr)
-        return;
-
-    CSrc6502Doc *doc = pView->GetDocument();
-
-    if (doc == nullptr)
-        return;
-
-    /*if (m_IOWindow.IsWaiting())
-    {
-        m_IOWindow.SetFocus();
-        return;
-    }*/
-
-    //SendMessageToViews(WM_USER_REMOVE_ERR_MARK);
-
-    if (wxGetApp().m_global.IsDebugging())
-    {
-        auto res = wxMessageBox(
-            _("Assemble stops running simulator.\nExit debugger to assemble the program?"),
-            _("Stop debugging?"),
-            wxYES_NO | wxICON_QUESTION);
-
-        if (res != wxOK)
-            return;
-
-        ExitDebugMode();
-    }
-
-    // TODO: Remove this, the assembler should be able to find the includes itself. -- B.Simonds (July 28, 2024)
-
-    // before assembly start set current dir to the document directory,
-    // so include directive will find included files
-    //
-
-    const std::string &path = doc->GetFilename().ToStdString();
-
-    const std::string &dirName = file::getDirectory(path);
-
-    if (!dirName.empty())
-    {
-        if (chdir(dirName.c_str()))
-            throw FileError(FileError::CannotChangeDir);
-    }
-
-    wxCriticalSectionLocker enter(m_critSect);
-
-    m_asmThread = new AsmThread(this, path);
-
-    if (m_asmThread->Create() != wxTHREAD_NO_ERROR)
-    {
-        wxLogError("Can't create background thread!");
-        delete m_asmThread;
-        m_asmThread = nullptr;
-        return;
-    }
-
-    if (m_asmThread->Run() != wxTHREAD_NO_ERROR)
-    {
-        wxLogError("Can't start background thread!");
-        delete m_asmThread;
-        m_asmThread = nullptr;
-    }
-    else
-        wxLogStatus("Assembler started");
-}
-
-/*************************************************************************/
-
-void CMainFrame::OnAsmComplete(wxThreadEvent &)
-{
-    wxLogDebug("OnAsmComplete() enter");
-
-    wxCriticalSectionLocker enter(m_critSect);
-
-    if (!m_asmThread)
-        return;
-
-    wxThread::ExitCode exit = m_asmThread->Wait();
-
-    //CAsm::Stat res = reinterpret_cast<CAsm::Stat>(exit);
-
-    delete m_asmThread;
-    m_asmThread = nullptr;
-
-    // TODO: Give better output of what the assembler is doing.
-
-    //if (res != CAsm::OK)
-    if (exit != nullptr)
-    {
-        wxLogStatus("Assembly failed");
-        m_output->AppendText("Error from assembler!\r\n");
-    }
-    else
-    {
-        wxLogStatus("Assembly completed");
-        m_output->AppendText("Assemble OK\r\n");
-    }
-}
-
-/*************************************************************************/
-
 void CMainFrame::OnUpdateAssemble(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
@@ -1351,75 +1227,6 @@ CSrc6502View *CMainFrame::GetCurrentView()
 }
 
 /*************************************************************************/
-
-void CMainFrame::OnUpdateSymDebug(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is the program assembled?
-    pCmdUI->SetCheck(wxGetApp().m_global.IsDebugger());  // Debugger started
-#endif
-}
-
-void CMainFrame::OnSymDebug() // Start the debugger
-{
-#if REWRITE_TO_WX_WIDGET
-    if (wxGetApp().m_global.IsDebugger()) // Already started?
-    {
-        OnSymDebugStop();
-    }
-    else
-    {
-        if (!theApp.m_global.IsCodePresent())
-            return;
-
-        //if (wxGetApp().m_global.m_bProc6502 == 2) // 1.3 65816 mode - disable simulator mode
-        //{
-        //    std::string cs;
-        //    cs.Format("The debugger does not currently support the 65816 processor.  Please go to the program options and selected a different processor to use the debugger.");
-        //    MessageBoxA(cs, "Reminder", MB_OK );
-        //    return;
-        //}
-        wxGetApp().m_global.StartDebug();
-        //		m_wndToolBar.OnInitialUpdate();
-        DelayedUpdateAll();
-        StartIntGenerator();
-    }
-    /*
-      if (wxGetApp().m_global.GetSimulator() == NULL)
-        return;
-      m_wndRegisterBar.Update(wxGetApp().m_global.GetSimulator()->GetContext(), wxGetApp().m_global.GetStatMsg());
-
-      if (m_IOWindow.m_hWnd != 0)
-      {
-        m_IOWindow.SendMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
-        m_IOWindow.SendMessage(CIOWindow::CMD_CLS);
-      }
-      if (m_wndRegisterBar.m_hWnd != 0)
-        m_wndRegisterBar.PostMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
-      if (m_Idents.m_hWnd != 0)
-        m_Idents.PostMessage(CBroadcast::WM_USER_START_DEBUGGER,0,0);
-    */
-#endif
-}
-
-//-----------------------------------------------------------------------------
-/*
-void CMainFrame::ClearPositionText()
-{
-  m_statusBar.SetPaneText(1,NULL);
-}
-*/
-
-void CMainFrame::SetPositionText(int row, int col)
-{
-    char buf[128];
-
-    snprintf(buf, sizeof(buf), m_strFormat.c_str(), row, col);
-
-    //m_statusBar.SetStatusText(buf, 1);
-}
 
 /*
 void CMainFrame::SetRowColumn(CEdit &edit)
@@ -1581,30 +1388,6 @@ void CMainFrame::OnUpdateSymEditBreakpoint(CCmdUI *pCmdUI)
 
 /*************************************************************************/
 
-void CMainFrame::OnSymBreak(wxCommandEvent &)
-{
-    if (!wxGetApp().m_global.IsProgramRunning())
-        return;
-
-    wxGetApp().m_global.GetSimulator()->Break(); // Break the running program
-    DelayedUpdateAll();
-
-    // Restore focus to main window.
-    if (m_ioWindow->HasFocus())
-    {
-        // But only if the focus is on the I/O window.
-        SetFocus(); 
-    }
-}
-
-void CMainFrame::OnUpdateSymBreak(wxUpdateUIEvent &e)
-{
-    // Is there a working program and debugger?
-    e.Enable(wxGetApp().m_global.IsProgramRunning());
-}
-
-/*************************************************************************/
-
 void CMainFrame::OnSymSkipInstr()	// Skip the current statement
 {
     if (!wxGetApp().m_global.IsDebugging() ||
@@ -1626,34 +1409,6 @@ void CMainFrame::OnUpdateSymSkipInstr(CCmdUI *pCmdUI)
         !wxGetApp().m_global.IsProgramRunning() && // and a stopped
         !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
 #endif
-}
-
-/*************************************************************************/
-
-void CMainFrame::OnSymUpdate()
-{
-    // Force the window to recalculate it's menus.
-    UpdateWindowUI(wxUPDATE_UI_PROCESS_ALL);
-}
-
-/*************************************************************************/
-
-void CMainFrame::OnSymGo(wxCommandEvent &)
-{
-    C6502App &app = wxGetApp();
-
-    if (app.m_global.IsProgramRunning())
-        return;
-
-    app.m_global.StartDebug();
-    app.m_global.GetSimulator()->Run();
-
-    return;
-}
-
-void CMainFrame::OnUpdateSymGo(wxUpdateUIEvent &e)
-{
-    e.Enable(!wxGetApp().m_global.IsProgramRunning()); // Enable while not running.
 }
 
 /*************************************************************************/
@@ -1803,17 +1558,6 @@ void CMainFrame::OnUpdateSymStepInto(CCmdUI *pCmdUI)
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnSymStepOver()
-{
-    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished())
-    {
-        return;
-    }
-
-    wxGetApp().m_global.GetSimulator()->StepOver();
-}
-
 void CMainFrame::OnUpdateSymStepOver(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
@@ -1871,25 +1615,6 @@ void CMainFrame::OnUpdateSymAnimate(CCmdUI *pCmdUI)
 }
 
 //-----------------------------------------------------------------------------
-
-void CMainFrame::OnSymDebugStop()
-{
-    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning())
-    {
-        wxBell();
-        return;
-    }
-    wxGetApp().m_global.ExitDebugger();
-    StopIntGenerator();
-    /*
-      if (m_IOWindow.m_hWnd != 0)
-        m_IOWindow.PostMessage(CBroadcast::WM_USER_EXIT_DEBUGGER,0,0);
-      if (m_wndRegisterBar.m_hWnd != 0)
-        m_wndRegisterBar.PostMessage(CBroadcast::WM_USER_EXIT_DEBUGGER,0,0);
-      if (m_Idents.m_hWnd != 0)
-        m_Idents.PostMessage(CBroadcast::WM_USER_EXIT_DEBUGGER,0,0);
-    */
-}
 
 //void CMainFrame::OnUpdateSymDebugStop(CCmdUI* pCmdUI)
 //{
@@ -2324,16 +2049,6 @@ void CMainFrame::OnUpdateFileLoadCode(CCmdUI *pCmdUI)
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(true);
 #endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CMainFrame::ExitDebugMode()
-{
-    if (wxGetApp().m_global.IsProgramRunning())
-        wxGetApp().m_global.GetSimulator()->AbortProg(); // Interrupt the running program
-
-    OnSymDebugStop();
 }
 
 //-----------------------------------------------------------------------------

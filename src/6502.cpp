@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "MainFrm.h"
 #include "ProjectManager.h"
+#include "DebugController.h"
 #include "FontController.h"
 
 #include "6502Doc.h"
