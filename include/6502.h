@@ -70,8 +70,6 @@ public:
 
     wxConfig &Config() { return *m_config; }
 
-    CIOWindow *ioWindow() { return nullptr; }// m_ioWindow; }
-
     virtual void AddToRecentFileList(const std::string &pathName);
 
     wxFrame *CreateChildFrame(wxView *view);

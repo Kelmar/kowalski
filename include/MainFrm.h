@@ -120,6 +120,9 @@ public:
     void UpdateAll();
     void DelayedUpdateAll();
 
+    // Update the status bar flea image based on the current application state.
+    void UpdateFlea();
+
     void ShowDynamicHelp(const std::string& strLine, int nWordStart, int nWordEnd);
 
     CIOWindow *ioWindow() const { return m_ioWindow; }
@@ -154,20 +157,28 @@ protected:
 
     afx_msg void OnOptions();
     afx_msg void OnUpdateOptions(CCmdUI* pCmdUI);
+
     afx_msg void OnSymGoToLine();
     afx_msg void OnUpdateSymGoToLine(CCmdUI* pCmdUI);
+
     afx_msg void OnSymSkipToLine();
     afx_msg void OnUpdateSymSkipToLine(CCmdUI* pCmdUI);
+
     afx_msg void OnSymGoToRts();
     afx_msg void OnUpdateSymGoToRts(CCmdUI* pCmdUI);
+
     afx_msg void OnSymStepOver();
     afx_msg void OnUpdateSymStepOver(CCmdUI* pCmdUI);
+
     afx_msg void OnSymEditBreakpoint();
     afx_msg void OnUpdateSymEditBreakpoint(CCmdUI* pCmdUI);
+
     afx_msg void OnSymRestart();
     afx_msg void OnUpdateSymRestart(CCmdUI* pCmdUI);
+
     afx_msg void OnSymAnimate();
     afx_msg void OnUpdateSymAnimate(CCmdUI* pCmdUI);
+
     afx_msg void OnUpdateIdViewRegisterbar(CCmdUI* pCmdUI);
     afx_msg void OnFileSaveCode();
     afx_msg void OnUpdateFileSaveCode(CCmdUI* pCmdUI);
@@ -194,14 +205,19 @@ protected:
     afx_msg void OnTimer(UINT nIDEvent);
     afx_msg void OnViewStack();
     afx_msg void OnUpdateViewStack(CCmdUI* pCmdUI);
+
     afx_msg void OnSymGenIRQ();
     afx_msg void OnUpdateSymGenIRG(CCmdUI* pCmdUI);
+
     afx_msg void OnSymGenNMI();
     afx_msg void OnUpdateSymGenNMI(CCmdUI* pCmdUI);
+
     afx_msg void OnSymGenReset();
     afx_msg void OnUpdateSymGenReset(CCmdUI* pCmdUI);
+
     afx_msg void OnHtmlHelp();  //% Bug fix 1.2.14.1 - convert to HTML help
     afx_msg void OnSymGenIntDlg();
+
     afx_msg void OnUpdateSymGenIntDlg(CCmdUI* pCmdUI);
     afx_msg void OnHelpDynamic();
     afx_msg void OnUpdateHelpDynamic(CCmdUI* pCmdUI);

@@ -34,7 +34,7 @@
 enum class DebugState
 {
     /// Simulator is currently not loaded
-    Unlaoded = 0,
+    Unloaded = 0,
 
     /// Simulator has been loaded but has not yet been started.
     NotStarted = 1,
@@ -73,6 +73,8 @@ public:
     /* constructor */ DebugController(CMainFrame *view);
     virtual          ~DebugController();
 
+public: // Properties
+
     PSym6502 Simulator() const;
 
     DebugState CurrentState() const;
@@ -87,7 +89,7 @@ public:
             (state == DebugState::Stopped);
     }
 
-    // Commands
+public: // Commands
     void BuildMenu(wxMenuBar *);
 
     void Run();

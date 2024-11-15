@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
+include (fontawesome.cmake)
 include(FetchContent)
 
 SET (CMAKE_CXX_STANDARD 20)
@@ -10,6 +11,10 @@ project (6502 C CXX)
 
 SET (FETCHCONTENT_QUIET FALSE)
 
+##############
+# fmt package
+##############
+
 FetchContent_Declare(fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
     GIT_TAG 10.2.1
@@ -18,6 +23,10 @@ FetchContent_Declare(fmt
 
 FetchContent_MakeAvailable(fmt)
 
+##################
+# Sigslot package
+##################
+
 FetchContent_Declare(
     sigslot
     GIT_REPOSITORY https://github.com/palacaze/sigslot
@@ -25,6 +34,10 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(sigslot)
+
+####################
+# wxWidgets package
+####################
 
 if (WIN32)
   SET (wxBUILD_SHARED OFF  CACHE BOOL "Build wx libraries as shared libs")
@@ -61,6 +74,8 @@ endif()
 file (GLOB_RECURSE SRCS src/*.cpp)
 file (GLOB_RECURSE HDRS include/*.h)
 
+download_font_awesome()
+
 add_executable(6502 ${execType} README.md ${SRCS} ${HDRS})
 
 configure_file(res/res6502.xrc res6502.xrc COPYONLY)
@@ -79,7 +94,9 @@ target_include_directories(6502
     PRIVATE ${wxWidgets_SOURCE_DIR}/include
 )
 
-target_link_libraries(6502 PRIVATE ${wxLibs} fmt::fmt Pal::Sigslot)
+target_link_libraries(6502 PRIVATE ${wxLibs}
+    fmt::fmt
+    Pal::Sigslot)
 
 if (MSVC)
   target_precompile_headers(6502 PRIVATE include/StdAfx.h)

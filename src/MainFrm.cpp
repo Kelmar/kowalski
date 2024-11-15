@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Except.h"
 
 #include "6502.h"
+#include "glyphs.h"
 #include "Events.h"
 #include "MainFrm.h"
 
@@ -399,10 +400,6 @@ void CMainFrame::ConfigSettings(bool load)
 BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_WM_CREATE()
     ON_WM_CLOSE()
-    ON_COMMAND(ID_SYM_ASSEMBLE, OnAssemble)
-    ON_UPDATE_COMMAND_UI(ID_SYM_ASSEMBLE, OnUpdateAssemble)
-    ON_UPDATE_COMMAND_UI(ID_SYM_DEBUG, OnUpdateSymDebug)
-    ON_COMMAND(ID_SYM_DEBUG, OnSymDebug)
     ON_COMMAND(ID_SYM_STEP_INTO, OnSymStepInto)
     ON_UPDATE_COMMAND_UI(ID_SYM_STEP_INTO, OnUpdateSymStepInto)
     ON_COMMAND(ID_SYM_SKIP_INSTR, OnSymSkipInstr)
@@ -411,8 +408,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_UPDATE_COMMAND_UI(ID_SYM_BREAKPOINT, OnUpdateSymBreakpoint)
     ON_COMMAND(ID_SYM_BREAK, OnSymBreak)
     ON_UPDATE_COMMAND_UI(ID_SYM_BREAK, OnUpdateSymBreak)
-    ON_COMMAND(ID_SYM_GO, OnSymGo)
-    ON_UPDATE_COMMAND_UI(ID_SYM_GO, OnUpdateSymGo)
     ON_COMMAND(ID_SYM_OPTIONS, OnOptions)
     ON_UPDATE_COMMAND_UI(ID_SYM_OPTIONS, OnUpdateOptions)
     ON_COMMAND(ID_SYM_GO_LINE, OnSymGoToLine)
@@ -516,7 +511,7 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
 
     InitMenu();
 
-    CreateStatusBar();
+    CreateStatusBar(2);
 
     if (!wxPersistentRegisterAndRestore(this, REG_ENTRY_MAINFRM))
         SetClientSize(FromDIP(wxSize(800, 600)));
@@ -525,19 +520,6 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
 
     PushEventHandler(ProjectManager::Ptr());
     PushEventHandler(m_debugController);
-
-#if 0
-    int i = 0;
-    m_hWindows[i++] = &m_hWnd;
-    m_hWindows[i++] = &m_wndRegisterBar.m_hWnd;
-    m_hWindows[i++] = &m_IOWindow.m_hWnd;
-    m_hWindows[i++] = &m_Memory.m_hWnd;
-    m_hWindows[i++] = &m_ZeroPage.m_hWnd;
-    m_hWindows[i++] = &m_Idents.m_hWnd;
-    m_hWindows[i++] = &m_Stack.m_hWnd;
-    m_hWindows[i++] = &m_wndLog.m_hWnd;
-    m_hWindows[i++] = NULL;
-#endif
 
     m_uTimer = 0;
 
@@ -2192,6 +2174,31 @@ void CMainFrame::DelayedUpdateAll()
 #endif
 }
 
+void CMainFrame::UpdateFlea()
+{
+    auto statusBar = GetStatusBar();
+    wxString text;
+
+    switch (m_debugController->CurrentState())
+    {
+    default:
+    case DebugState::Unloaded:
+    case DebugState::NotStarted:
+    case DebugState::Finished:
+        text = "";
+        break;
+
+    case DebugState::Running:
+    case DebugState::Stopped:
+        //text = wxString(FA_BUG);
+        text = "Debugging";
+        break;
+    }
+
+    // TODO: Remove hard coded number
+    statusBar->SetStatusText(text, 1);
+}
+
 void CMainFrame::OnTimer(UINT nIDEvent)
 {
     UNUSED(nIDEvent);
@@ -2202,7 +2209,7 @@ void CMainFrame::OnTimer(UINT nIDEvent)
     UpdateAll();
 #endif
 
-    //  CMDIFrameWnd::OnTimer(nIDEvent);
+    //CMDIFrameWnd::OnTimer(nIDEvent);
 }
 
 void CMainFrame::SymGenInterrupt(CSym6502::IntType eInt)

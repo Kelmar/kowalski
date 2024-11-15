@@ -62,7 +62,7 @@ DebugState DebugController::CurrentState() const
     PSym6502 simulator = Simulator();
 
     if (!simulator)
-        return DebugState::Unlaoded;
+        return DebugState::Unloaded;
 
     if (simulator->IsRunning())
         return DebugState::Running;
@@ -141,10 +141,11 @@ void DebugController::BuildMenu(wxMenuBar *menuBar)
 
 void DebugController::Run()
 {
-    if (CurrentState() == DebugState::Unlaoded)
+    if (CurrentState() == DebugState::Unloaded)
         wxGetApp().m_global.StartDebug();
 
     wxGetApp().m_global.GetSimulator()->Run();
+    m_view->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -153,6 +154,7 @@ void DebugController::Restart()
 {
     wxGetApp().m_global.StartDebug();
     wxGetApp().m_global.GetSimulator()->Run();
+    m_view->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -163,6 +165,7 @@ void DebugController::Break()
         return;
 
     wxGetApp().m_global.GetSimulator()->Break();
+    m_view->UpdateFlea();
 
 #if 0
     // Likely this will come from the simulator sending an event.
@@ -183,6 +186,7 @@ void DebugController::StepOver()
         return;
 
     wxGetApp().m_global.GetSimulator()->StepOver();
+    m_view->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -193,6 +197,7 @@ void DebugController::ExitDebugMode()
         wxGetApp().m_global.GetSimulator()->AbortProg(); // Interrupt the running program
 
     DebugStopped();
+    m_view->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -256,7 +261,7 @@ void DebugController::OnAssemble(wxCommandEvent &)
 
     switch (CurrentState())
     {
-    case DebugState::Unlaoded:
+    case DebugState::Unloaded:
     case DebugState::NotStarted:
     case DebugState::Finished:
         break; // Don't prompt

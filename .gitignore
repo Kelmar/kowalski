@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# Downloaded assets
+assets/
+
 # Visual Studio user files
 *.user
 *.suo

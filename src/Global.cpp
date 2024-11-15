@@ -150,16 +150,12 @@ bool CGlobal::CreateDeasm()
 
 void CGlobal::StartDebug()
 {
-    bool restart;
-
     if (!m_simulator)
     {
-        restart = false;
         CreateSimulator();
     }
     else
     {
-        restart = true;
         m_simulator->Restart();
 
         m_simulator->finish = m_simFinish;

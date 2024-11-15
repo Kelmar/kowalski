@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+ /*************************************************************************/
 
 #ifndef HEXVIEW_H__
 #define HEXVIEW_H__
@@ -37,6 +37,7 @@ class HexView : public wxScrolled<wxWindow>
 {
 private:
     static const int LINE_WIDTH = 16; // Values per line
+    sigslot::connection m_memoryConnection;
 
     /**
      * @brief View into memory to dump.
@@ -50,7 +51,7 @@ private:
 
     /**
      * @brief Defines how memory page boundaries should shown.
-     * 
+     *
      * @remarks 0 indicates no page boundaries, otherwise a page
      * boundary is shown every pageBoundary bytes.
      */
@@ -89,7 +90,7 @@ private:
     void Init();
 
     inline
-    void MemoryUpdated() { Refresh(); }
+        void MemoryUpdated() { Refresh(); }
 
 public:
     /* constructor */ HexView();
@@ -107,13 +108,13 @@ public:
 
     void SetMemory(COutputMem *mem)
     {
-        if (m_memory)
-            m_memory->onUpdate.disconnect(&HexView::MemoryUpdated, this);
+        if (m_memoryConnection.connected())
+            m_memoryConnection.disconnect();
 
         m_memory = mem;
 
         if (m_memory)
-            m_memory->onUpdate.connect(&HexView::MemoryUpdated, this);
+            m_memoryConnection = m_memory->onUpdate.connect(&HexView::MemoryUpdated, this);
 
         UpdateScrollInfo();
     }

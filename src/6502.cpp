@@ -80,13 +80,22 @@ bool C6502App::OnInit()
     SetAppName(APP_NAME);
 
     // Load up resources
-    //wxXmlResource::Get()->AddHandler(hexViewHandler);
     wxXmlResource::Get()->InitAllHandlers();
 
-    wxLogDebug("Loading resource file....");
-    if (!wxXmlResource::Get()->Load("res6502.xrc"))
+    bool loadOkay = true;
+
+    wxLogDebug("Loading resource files....");
+
+#if wxUSE_PRIVATE_FONTS
+    loadOkay &= wxFont::AddPrivateFont("icon-regular.otf");
+    loadOkay &= wxFont::AddPrivateFont("icon-solid.otf");
+#endif
+
+    loadOkay &= wxXmlResource::Get()->Load("res6502.xrc");
+
+    if (!loadOkay)
     {
-        wxLogError("Unable to load XRC resources!");
+        wxLogError("Unable to load resources!");
         wxMessageBox(
             _("Unable to load resources!"),
             _("6502 Simulator - Fatal Error"),

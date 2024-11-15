@@ -374,6 +374,11 @@ public:
 
     virtual ~CSym6502()
     {
+        if (m_thread.joinable())
+        {
+            m_thread.get_stop_source().request_stop();
+            m_thread.join();
+        }
     }
 
     void Restart();
