@@ -31,8 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CChildFrame : public CHILD_BASE
 {
 private:
-    HexView *m_hexView;
-    uint8_t m_data[1024 * 64]; // Dummy data
+    //HexView *m_hexView;
+    //uint8_t m_data[1024 * 64]; // Dummy data
 
 public:
     //CSplitterWnd m_wndSplitter;

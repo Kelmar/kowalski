@@ -91,7 +91,7 @@ public:
 
     CAsm::FileUID GetFirstLineFileUID() { return m_nFirstLineFuid; }
 
-    void Start(CConditionalAsm* cond, int line, CAsm::FileUID file) // prepare for reading
+    void MacroStart(CConditionalAsm* cond, int line, CAsm::FileUID file) // prepare for reading
     {
         CSource::Start(cond);
         m_nLineNo = 0;

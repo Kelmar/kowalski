@@ -79,7 +79,7 @@ bool CDockBarEx::OnSetCursor(wxWindow* pWnd, UINT nHitTest, UINT message)
 //	return CDockBar::OnSetCursor(pWnd, nHitTest, message);
 }
 
-const int nMARGIN = 5;
+//const int nMARGIN = 5;
 
 // Return screen coord rect of dockbar resizing area
 //

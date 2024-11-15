@@ -38,7 +38,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Options.h"
 #include "DialEditBrkp.h"
 #include "SaveCode.h"
-#include "LoadCode.h"
 #include "Deasm6502View.h"
 #include "Splash.h"
 #include "6502View.h"

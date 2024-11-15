@@ -32,12 +32,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CIdentInfo : public CIdentInfoFrame
 {
 private:
-    CDebugInfo *m_pDebugInfo;
+    //CDebugInfo *m_pDebugInfo;
     CIdentInfoDoc m_doc;
 
 public:
     CIdentInfo()
-        : m_pDebugInfo(nullptr)
+        //: m_pDebugInfo(nullptr)
     {
     }
 

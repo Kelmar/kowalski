@@ -570,7 +570,7 @@ void CDeasm6502View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 //=============================================================================
 
-void CDeasm6502View::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
+void CDeasm6502View::OnUpdate_MFC(wxView* pSender, LPARAM lHint, wxObject* pHint)
 {
     UNUSED(pSender);
     UNUSED(lHint);

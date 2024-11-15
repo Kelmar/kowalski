@@ -669,7 +669,7 @@ void CStackView::OnMemoryChg()
 #endif
 }
 
-void CStackView::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
+void CStackView::OnUpdate_MFC(wxView* pSender, LPARAM lHint, wxObject* pHint)
 {
     UNUSED(pSender);
     UNUSED(lHint);

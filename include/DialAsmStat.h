@@ -40,7 +40,7 @@ private:
     void SetLineNo(int val);
     void SetPassNo(int val);
 
-    uint16_t m_dwTimer;
+    //uint16_t m_dwTimer;
     //int m_nUpdateInit;
     //int m_nUpdateDelay; // Delay refreshing info. about the assembled line
     //int m_nUpdateLineDelay;

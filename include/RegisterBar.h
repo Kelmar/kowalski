@@ -60,7 +60,7 @@ public:
 
     /* constructor */ CRegisterBar();
 
-    void Update(const CContext *ctx, const std::string &stat, const CContext *old = NULL, bool draw = true);
+    void UpdateValues(const CContext *ctx, const std::string &stat, const CContext *old = NULL, bool draw = true);
 
     bool Create(wxWindow* pParentWnd, UINT nStyle, UINT nID);
     

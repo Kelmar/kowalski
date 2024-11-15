@@ -34,8 +34,8 @@ class CMemoryView : public wxView //CView
 private:
     int m_nCx;      // Number of columns
     int m_nCy;      // Number of lines
-    int m_nChrW;    // Character width (mono font)
-    int m_nChrH;    // Character height
+    //int m_nChrW;    // Character width (mono font)
+    //int m_nChrH;    // Character height
 
     int max_mem;
 
@@ -88,7 +88,8 @@ public:
 protected:
     virtual void OnDraw(wxDC *dc); // overridden to draw this view
     //virtual bool PreCreateWindow(CREATESTRUCT& cs);
-    virtual void OnUpdate(wxView *sender, LPARAM lHint, wxObject *hint);
+
+    //virtual void OnUpdate(wxView *sender, LPARAM lHint, wxObject *hint);
 
     afx_msg void OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);
     afx_msg bool OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt);

@@ -28,9 +28,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // CMemoryChg dialog
 
 
-CMemoryChg::CMemoryChg(COutputMem& mem)
+CMemoryChg::CMemoryChg(COutputMem& /*mem*/)
     : wxDialog()
-    , m_Mem(mem)
+    //, m_Mem(mem)
 {
     m_uAddr = 0;
     m_nData = 0;

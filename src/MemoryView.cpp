@@ -820,18 +820,14 @@ void CMemoryView::OnUpdateMemoryText(CCmdUI *pCmdUI)
 #endif
 }
 
+#if REWRITE_TO_WX_WIDGET
 void CMemoryView::OnUpdate(wxView *pSender, LPARAM lHint, wxObject *pHint)
 {
-    UNUSED(pSender);
-    UNUSED(lHint);
-    UNUSED(pHint);
-
-#if REWRITE_TO_WX_WIDGET
     if (lHint == 'show')
     {
         CClientDC dc(this);
         calc(&dc);
         set_scroll_range();
     }
-#endif
 }
+#endif

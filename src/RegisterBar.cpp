@@ -114,7 +114,7 @@ bool CRegisterBar::UpdateItem(int itemID)
     return false;
 }
 
-void CRegisterBar::Update(const CContext *pCtx, const std::string &stat, const CContext *pOld /*= NULL*/, bool bDraw /*= TRUE*/)
+void CRegisterBar::UpdateValues(const CContext *pCtx, const std::string &stat, const CContext *pOld /*= NULL*/, bool bDraw /*= TRUE*/)
 {
     UNUSED(pCtx);
     UNUSED(stat);

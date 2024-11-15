@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CIdentInfoView //: public wxListView //CListView
 {
     //static int CALLBACK CompareLVIFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-    int m_nSortBy;
+    //int m_nSortBy;
 
 protected:
     CIdentInfoView(); // protected constructor used by dynamic creation

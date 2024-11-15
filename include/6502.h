@@ -74,9 +74,9 @@ public:
 
     wxFrame *CreateChildFrame(wxView *view);
 
-    virtual bool OnExceptionInMainLoop();
+    virtual bool OnExceptionInMainLoop() override;
 
-    virtual int FilterEvent(wxEvent &event);
+    virtual int FilterEvent(wxEvent &event) override;
 
 protected:
     int OnExit() override;

@@ -232,7 +232,7 @@ void CIOWindow::Paste()
     if (wxTheClipboard->Open())
     {
         // Ensure clipboard is closed when we exit.
-        auto _ = defer([this] () { wxTheClipboard->Close(); });
+        auto _ = defer([] () { wxTheClipboard->Close(); });
 
         wxTextDataObject data;
         wxTheClipboard->GetData(data);

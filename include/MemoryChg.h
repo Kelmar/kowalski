@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CMemoryChg : public wxDialog
 {
 private:
-    COutputMem& m_Mem;
+    //COutputMem& m_Mem;
 
     void Modify();
 // Construction

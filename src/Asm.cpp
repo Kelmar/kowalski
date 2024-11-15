@@ -29,6 +29,9 @@ const char CAsm::MULTIPARAM[] = "...";   // Ellipsis -any number of parameters
 
 static const uint8_t NA = 0x42; // Invalid in 6502 and 65C02 and WDM in 65816
 
+//#pragma clang diagnostic push
+//#pragma clang diagnostic ignored "-Wmissing-braces"
+
 //-----------------------------------------------------------------------------
 
 // Converting an instruction in a given addressing mode into a code (65XX)
@@ -585,6 +588,8 @@ const uint8_t CAsm::code_cycles_8[256] =
     2, 6, 3, 4, 3, 3, 5, 6, 2, 2, 2, 3, 4, 4, 6, 5, // ex
     2, 5, 5, 7, 5, 4, 6, 6, 2, 4, 4, 2, 8, 4, 7, 5  // fx
 };
+
+//#pragma clang diagnostic pop
 
 const uint8_t (&CAsm::TransformTable(const ProcessorType procType))[C_ILL][A_NO_OF_MODES]
 {

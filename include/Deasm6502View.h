@@ -36,7 +36,6 @@ class CDeasm6502View : public wxView //, public CMarks, CAsm
 {
     int m_nFontHeight;
     int m_nFontWidth;
-    int max_mem;
 
     int CalcLineCount(const wxRect &prect);
     void Scroll(UINT nSBCODE, int nPos, int nRepeat= 1);
@@ -95,7 +94,7 @@ protected:
     virtual void OnDraw(wxDC* pDC);      // overridden to draw this view
     //virtual bool PreCreateWindow(CREATESTRUCT& cs);
     virtual bool OnScrollBy(wxSize sizeScroll, bool bDoScroll = true);
-    virtual void OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint);
+    virtual void OnUpdate_MFC(wxView* pSender, LPARAM lHint, wxObject* pHint);
 
     afx_msg LRESULT OnExitDebugger(WPARAM /* wParam */, LPARAM /* lParam */);
     afx_msg void OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);

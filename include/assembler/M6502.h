@@ -439,15 +439,12 @@ private:
     std::vector<std::string> m_strarrLines;
     std::vector<uint32_t> m_narrLineNums;
 
-    int m_growBy;
-
     int m_nLine;
 
 public:
-    CRecorder(int nInitSize = 10, int nGrowBy = 10) // Initial array sizes
+    CRecorder(int nInitSize = 10) // Initial array sizes
         : m_strarrLines(nInitSize)
         , m_narrLineNums(nInitSize)
-        , m_growBy(nGrowBy)
         , m_nLine(0)
     {
     }
@@ -563,24 +560,24 @@ public:
     CSourceText()
     {}
 
-    virtual void Start(CConditionalAsm* cond) // start reading lines
+    virtual void Start(CConditionalAsm* cond) override // start reading lines
     {
         CSource::Start(cond);
         input.SeekToBegin();
     }
 
-    virtual bool GetCurrLine(std::string &str) // reading less than an entire line
+    virtual bool GetCurrLine(std::string &str) override // reading less than an entire line
     {
         str.reserve(1024 + 4);
         return input.ReadLine(str);
     }
 
-    virtual int GetLineNo() const // read the line number
+    virtual int GetLineNo() const override // read the line number
     {
         return input.GetLineNumber();
     }
 
-    CAsm::FileUID GetFileUID() // read file ID
+    virtual CAsm::FileUID GetFileUID() const override // read file ID
     {
         return input.GetFileUID();
     }
@@ -615,7 +612,7 @@ public:
     { return input.IsPresent(); }
     */
    
-    virtual std::string GetFileName() const
+    virtual std::string GetFileName() const override
     {
         return input.GetFileName();
     }
@@ -628,7 +625,6 @@ class CSourceStack
 {
 private:
     std::vector<CSource *> m_items;
-    int m_nIndex;
 
     template <typename T>
     T *ReverseFind()
@@ -646,7 +642,6 @@ private:
 public:
     CSourceStack()
         : m_items()
-        , m_nIndex(0)
     {
     }
 

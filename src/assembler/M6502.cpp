@@ -955,7 +955,7 @@ CAsm6502::Stat CAsm6502::assemble_line() // Line interpretation
                     proc_area++;
 
                 // remember condition nesting level
-                pMacro->Start(&conditional_asm, text->GetLineNo(), text->GetFileUID());
+                pMacro->MacroStart(&conditional_asm, text->GetLineNo(), text->GetFileUID());
                 source.Push(text); // the current row source on the stack
                 text = expanding_macro = pMacro;
                 //	    text->Start();

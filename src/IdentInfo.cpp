@@ -25,8 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //-----------------------------------------------------------------------------
 //Construction and ending
 
-CIdentInfo::CIdentInfo(CDebugInfo *pDebugInfo)
-    : m_pDebugInfo(pDebugInfo)
+CIdentInfo::CIdentInfo(CDebugInfo */*pDebugInfo*/)
+    //: m_pDebugInfo(pDebugInfo)
 {
 }
 

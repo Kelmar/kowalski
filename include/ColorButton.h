@@ -40,8 +40,8 @@ class CColorButton : public wxControl // CButton
 private:
     wxColour m_color;
 
-    int m_nDx;
-    int m_nDy;
+    //int m_nDx;
+    //int m_nDy;
 
     void PaintIt(int offset);
 

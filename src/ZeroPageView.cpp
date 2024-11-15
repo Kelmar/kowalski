@@ -671,7 +671,7 @@ void CZeroPageView::OnMemoryChg()
 #endif
 }
 
-void CZeroPageView::OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint)
+void CZeroPageView::OnUpdate_MFC(wxView* pSender, LPARAM lHint, wxObject* pHint)
 {
     UNUSED(pSender);
     UNUSED(lHint);

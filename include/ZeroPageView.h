@@ -77,7 +77,7 @@ public:
 protected:
     virtual void OnDraw(wxDC* pDC);      // overridden to draw this view
     //virtual bool PreCreateWindow(CREATESTRUCT& cs);
-    virtual void OnUpdate(wxView* pSender, LPARAM lHint, wxObject* pHint);
+    virtual void OnUpdate_MFC(wxView* pSender, LPARAM lHint, wxObject* pHint);
     
     afx_msg void OnVScroll(UINT nSBCode, UINT nPos, wxScrollBar* pScrollBar);
     afx_msg bool OnMouseWheel(UINT nFlags, short zDelta, wxPoint pt);
