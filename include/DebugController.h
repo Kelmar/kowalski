@@ -61,7 +61,11 @@ private:
     wxSemaphore m_semaphore;
     class AsmThread *m_asmThread;
 
-    void BindEvents();
+    PSym6502 m_simulator;
+
+    sigslot::connection m_simConn;
+
+    void StartDebug();
 
     void ExitDebugMode();
 
@@ -98,14 +102,18 @@ public: // Commands
     void StepOver();
 
 private:
+    void BindEvents();
+
     // Menu handlers
     void OnAssemble(wxCommandEvent &);
     void OnRun(wxCommandEvent &);
+    void OnStop(wxCommandEvent &);
     void OnBreak(wxCommandEvent &);
     void OnStepOver(wxCommandEvent &);
 
     // Update handlers
     void OnUpdateRun(wxUpdateUIEvent &);
+    void OnUpdateStop(wxUpdateUIEvent &);
     void OnUpdateBreak(wxUpdateUIEvent &);
     void OnUpdateStepOver(wxUpdateUIEvent &);
 

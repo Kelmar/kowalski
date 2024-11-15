@@ -46,6 +46,8 @@ DebugController::DebugController(CMainFrame *view)
 
 DebugController::~DebugController()
 {
+    if (m_simConn.connected())
+        m_simConn.disconnect();
 }
 
 /*************************************************************************/
@@ -83,10 +85,12 @@ void DebugController::BindEvents()
     // Menu handlers
     Bind(wxEVT_MENU, &DebugController::OnAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_MENU, &DebugController::OnRun, this, evID_RUN);
+    Bind(wxEVT_MENU, &DebugController::OnStop, this, evID_STOP);
     Bind(wxEVT_MENU, &DebugController::OnStepOver, this, evID_STEP_OVER);
 
     // Update handlers
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateRun, this, evID_RUN);
+    Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateStop, this, evID_STOP);
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateBreak, this, evID_BREAK);
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateStepOver, this, evID_STEP_OVER);
 
@@ -103,6 +107,7 @@ void DebugController::BuildMenu(wxMenuBar *menuBar)
     menu->Append(evID_ASSEMBLE, _("Assemble\tF7"));
     menu->AppendSeparator();
     menu->Append(evID_RUN, _("Run\tF5"));
+    menu->Append(evID_STOP, _("Stop\tShift+F5"));
     menu->Append(evID_RESET, _("Reset\tCtrl+Shift+F5"));
     menu->Append(evID_BREAK, _("Break\tCtrl+Break"));
     menu->AppendSeparator();
@@ -142,9 +147,9 @@ void DebugController::BuildMenu(wxMenuBar *menuBar)
 void DebugController::Run()
 {
     if (CurrentState() == DebugState::Unloaded)
-        wxGetApp().m_global.StartDebug();
+        StartDebug();
 
-    wxGetApp().m_global.GetSimulator()->Run();
+    Simulator()->Run();
     m_view->UpdateFlea();
 }
 
@@ -152,8 +157,8 @@ void DebugController::Run()
 
 void DebugController::Restart()
 {
-    wxGetApp().m_global.StartDebug();
-    wxGetApp().m_global.GetSimulator()->Run();
+    StartDebug();
+    Simulator()->Run();
     m_view->UpdateFlea();
 }
 
@@ -164,7 +169,7 @@ void DebugController::Break()
     if (CurrentState() == DebugState::Running)
         return;
 
-    wxGetApp().m_global.GetSimulator()->Break();
+    Simulator()->Break();
     m_view->UpdateFlea();
 
 #if 0
@@ -185,8 +190,28 @@ void DebugController::StepOver()
     if (CurrentState() != DebugState::Stopped)
         return;
 
-    wxGetApp().m_global.GetSimulator()->StepOver();
+    Simulator()->StepOver();
     m_view->UpdateFlea();
+}
+
+/*************************************************************************/
+
+void DebugController::StartDebug()
+{
+    bool connect = !Simulator();
+
+    if (connect && m_simConn.connected())
+        m_simConn.disconnect();
+
+    wxGetApp().m_global.StartDebug();
+
+    if (connect)
+    {
+        m_simConn = Simulator()->CurrentStatus.onChange.connect([this] (auto)
+        {
+            OnSimUpdate();
+        });
+    }
 }
 
 /*************************************************************************/
@@ -194,7 +219,7 @@ void DebugController::StepOver()
 void DebugController::ExitDebugMode()
 {
     if (CurrentState() == DebugState::Running)
-        wxGetApp().m_global.GetSimulator()->AbortProg(); // Interrupt the running program
+        Simulator()->AbortProg(); // Interrupt the running program
 
     DebugStopped();
     m_view->UpdateFlea();
@@ -204,6 +229,9 @@ void DebugController::ExitDebugMode()
 
 void DebugController::DebugStopped()
 {
+    if (m_simConn.connected())
+        m_simConn.disconnect();
+
     if (!IsDebugging())
     {
         wxBell();
@@ -320,6 +348,11 @@ void DebugController::OnRun(wxCommandEvent &)
     Run();
 }
 
+void DebugController::OnStop(wxCommandEvent &)
+{
+    ExitDebugMode();
+}
+
 /*************************************************************************/
 
 void DebugController::OnBreak(wxCommandEvent &)
@@ -344,6 +377,16 @@ void DebugController::OnUpdateRun(wxUpdateUIEvent &e)
 
     e.SetText(title);
     e.Enable(CurrentState() != DebugState::Running);
+}
+
+/*************************************************************************/
+
+void DebugController::OnUpdateStop(wxUpdateUIEvent &e)
+{
+    auto state = CurrentState();
+    wxLogDebug(fmt::format("CurrentState(): {0}", (int)state).c_str());
+
+    e.Enable(state == DebugState::Running);
 }
 
 /*************************************************************************/

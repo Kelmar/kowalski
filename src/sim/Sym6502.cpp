@@ -2894,6 +2894,8 @@ void CSym6502::RunThread(std::stop_token stopToken)
     CurrentStatus = CSym6502::Status::RUN;
 
     run(stopToken);
+
+    running = false;
 }
 
 /*************************************************************************/
