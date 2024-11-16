@@ -46,8 +46,6 @@ DebugController::DebugController(CMainFrame *view)
 
 DebugController::~DebugController()
 {
-    if (m_simConn.connected())
-        m_simConn.disconnect();
 }
 
 /*************************************************************************/
@@ -198,20 +196,7 @@ void DebugController::StepOver()
 
 void DebugController::StartDebug()
 {
-    bool connect = !Simulator();
-
-    if (connect && m_simConn.connected())
-        m_simConn.disconnect();
-
     wxGetApp().m_global.StartDebug();
-
-    if (connect)
-    {
-        m_simConn = Simulator()->CurrentStatus.onChange.connect([this] (auto)
-        {
-            OnSimUpdate();
-        });
-    }
 }
 
 /*************************************************************************/
@@ -229,9 +214,6 @@ void DebugController::ExitDebugMode()
 
 void DebugController::DebugStopped()
 {
-    if (m_simConn.connected())
-        m_simConn.disconnect();
-
     if (!IsDebugging())
     {
         wxBell();
@@ -431,14 +413,6 @@ void DebugController::OnAsmComplete(wxThreadEvent &)
         wxLogStatus("Assembly completed");
         m_view->console()->AppendText("Assemble OK\r\n");
     }
-}
-
-/*************************************************************************/
-
-void DebugController::OnSimUpdate()
-{
-    // Force the window to recalculate it's menus.
-    m_view->UpdateWindowUI(wxUPDATE_UI_PROCESS_ALL);
 }
 
 /*************************************************************************/

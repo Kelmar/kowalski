@@ -63,8 +63,6 @@ private:
 
     PSym6502 m_simulator;
 
-    sigslot::connection m_simConn;
-
     void StartDebug();
 
     void ExitDebugMode();
@@ -119,8 +117,6 @@ private:
 
     // Thread handlers
     void OnAsmComplete(wxThreadEvent &);
-
-    void OnSimUpdate();
 };
 
 /*************************************************************************/
