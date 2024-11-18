@@ -54,7 +54,7 @@ enum class DebugState
 class DebugController : public wxEvtHandler
 {
 private:
-    CMainFrame *m_view;
+    CMainFrame *m_mainFrame;
     wxMenuItem *m_menu;
 
     wxCriticalSection m_critSect;
@@ -72,7 +72,7 @@ private:
     bool ConfirmStop(const wxString &msg);
 
 public:
-    /* constructor */ DebugController(CMainFrame *view);
+    /* constructor */ DebugController(CMainFrame *mainFrame);
     virtual          ~DebugController();
 
 public: // Properties
@@ -110,6 +110,7 @@ private:
     void OnStepOver(wxCommandEvent &);
 
     // Update handlers
+    void OnUpdateAssemble(wxUpdateUIEvent &);
     void OnUpdateRun(wxUpdateUIEvent &);
     void OnUpdateStop(wxUpdateUIEvent &);
     void OnUpdateBreak(wxUpdateUIEvent &);

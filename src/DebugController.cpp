@@ -35,8 +35,8 @@
 
 /*************************************************************************/
 
-DebugController::DebugController(CMainFrame *view)
-    : m_view(view)
+DebugController::DebugController(CMainFrame *mainFrame)
+    : m_mainFrame(mainFrame)
     , m_critSect()
     , m_semaphore()
     , m_asmThread(nullptr)
@@ -87,6 +87,7 @@ void DebugController::BindEvents()
     Bind(wxEVT_MENU, &DebugController::OnStepOver, this, evID_STEP_OVER);
 
     // Update handlers
+    Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateRun, this, evID_RUN);
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateStop, this, evID_STOP);
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateBreak, this, evID_BREAK);
@@ -109,7 +110,7 @@ void DebugController::BuildMenu(wxMenuBar *menuBar)
     menu->Append(evID_RESET, _("Reset\tCtrl+Shift+F5"));
     menu->Append(evID_BREAK, _("Break\tCtrl+Break"));
     menu->AppendSeparator();
-    menu->Append(evID_STEP_INTO, _("Step Info"));
+    menu->Append(evID_STEP_INTO, _("Step Into"));
     menu->Append(evID_STEP_OVER, _("Step Over"));
     menu->Append(evID_STEP_OUT, _("Run Till Return"));
     menu->Append(evID_RUN_TO, _("Run to Cursor"));
@@ -148,7 +149,7 @@ void DebugController::Run()
         StartDebug();
 
     Simulator()->Run();
-    m_view->UpdateFlea();
+    m_mainFrame->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -157,7 +158,7 @@ void DebugController::Restart()
 {
     StartDebug();
     Simulator()->Run();
-    m_view->UpdateFlea();
+    m_mainFrame->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -168,7 +169,7 @@ void DebugController::Break()
         return;
 
     Simulator()->Break();
-    m_view->UpdateFlea();
+    m_mainFrame->UpdateFlea();
 
 #if 0
     // Likely this will come from the simulator sending an event.
@@ -189,7 +190,7 @@ void DebugController::StepOver()
         return;
 
     Simulator()->StepOver();
-    m_view->UpdateFlea();
+    m_mainFrame->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -207,7 +208,7 @@ void DebugController::ExitDebugMode()
         Simulator()->AbortProg(); // Interrupt the running program
 
     DebugStopped();
-    m_view->UpdateFlea();
+    m_mainFrame->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -251,7 +252,7 @@ void DebugController::OnAssemble(wxCommandEvent &)
     if (m_asmThread)
         return; // Currently assembling code, wait for completion.
 
-    CSrc6502View *pView = m_view->GetCurrentView();
+    CSrc6502View *pView = m_mainFrame->GetCurrentView();
 
     if (pView == nullptr)
         return;
@@ -353,6 +354,25 @@ void DebugController::OnStepOver(wxCommandEvent &)
 // Update handlers
 /*************************************************************************/
 
+void DebugController::OnUpdateAssemble(wxUpdateUIEvent &e)
+{
+    bool enabled = m_asmThread == nullptr; // Enabled only if we're not currently assembling code.
+
+    CSrc6502View *pView = m_mainFrame->GetCurrentView();
+
+    enabled &= pView != nullptr;
+
+    if (pView != nullptr)
+    {
+        CSrc6502Doc *doc = pView->GetDocument();
+        enabled &= doc != nullptr;
+    }
+
+    e.Enable(enabled);
+}
+
+/*************************************************************************/
+
 void DebugController::OnUpdateRun(wxUpdateUIEvent &e)
 {
     wxString title = IsDebugging() ? _("Continue\tF5") : _("Run\tF5");
@@ -406,12 +426,12 @@ void DebugController::OnAsmComplete(wxThreadEvent &)
     if (exit != nullptr)
     {
         wxLogStatus("Assembly failed");
-        m_view->console()->AppendText("Error from assembler!\r\n");
+        m_mainFrame->console()->AppendText("Error from assembler!\r\n");
     }
     else
     {
         wxLogStatus("Assembly completed");
-        m_view->console()->AppendText("Assemble OK\r\n");
+        m_mainFrame->console()->AppendText("Assemble OK\r\n");
     }
 }
 
