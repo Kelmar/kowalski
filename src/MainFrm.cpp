@@ -403,8 +403,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_UPDATE_COMMAND_UI(ID_SYM_BREAKPOINT, OnUpdateSymBreakpoint)
     ON_COMMAND(ID_SYM_BREAK, OnSymBreak)
     ON_UPDATE_COMMAND_UI(ID_SYM_BREAK, OnUpdateSymBreak)
-    ON_COMMAND(ID_SYM_OPTIONS, OnOptions)
-    ON_UPDATE_COMMAND_UI(ID_SYM_OPTIONS, OnUpdateOptions)
     ON_COMMAND(ID_SYM_GO_LINE, OnSymGoToLine)
     ON_UPDATE_COMMAND_UI(ID_SYM_GO_LINE, OnUpdateSymGoToLine)
     ON_COMMAND(ID_SYM_SKIP_TO_LINE, OnSymSkipToLine)
@@ -1609,6 +1607,9 @@ afx_msg LRESULT CMainFrame::OnUpdateState(WPARAM wParam, LPARAM lParam)
 
 int CMainFrame::Options(int page)
 {
+    UNUSED(page);
+
+#if 0
     COptions dial(page);
 
     int i;
@@ -1792,20 +1793,8 @@ int CMainFrame::Options(int page)
 #endif
 
     return dial.GetLastActivePage();
-    }
-
-void CMainFrame::OnOptions()
-{
-    m_nLastPage = Options(m_nLastPage);
-}
-
-void CMainFrame::OnUpdateOptions(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(true);
 #endif
+    return 0;
 }
 
 int CMainFrame::RedrawAllViews(int chgHint) // 'Invalidate' all windows

@@ -18,19 +18,21 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef OPTIONS_6502_H__
+#define OPTIONS_6502_H__
+
 #include "ColorButton.h"
 #include "OptionsViewPage.h"
 #include "SyntaxExample.h"
 
-
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
 // COptionsSymPage dialog
 
 class COptionsSymPage : public wxPanel
 {
 // Construction
 public:
-    /* constructor */ COptionsSymPage();
+    /* constructor */ COptionsSymPage(wxBookCtrlBase *parent);
     virtual ~COptionsSymPage();
 
     uint32_t m_nIOAddress;
@@ -49,13 +51,13 @@ protected:
     afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
 };
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
 // COptionsEditPage dialog
 
 class COptionsEditPage : public wxPanel
 {
 public:
-    /* constructor */ COptionsEditPage();
+    /* constructor */ COptionsEditPage(wxBookCtrlBase *parent);
     virtual ~COptionsEditPage();
 
     enum { IDD = IDD_PROPPAGE_EDITOR };
@@ -93,13 +95,13 @@ protected:
     bool* GetFontStyle();
 };
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
 // COptionsAsmPage dialog
 
 class COptionsAsmPage : public wxPanel
 {
 public:
-    /* constructor */ COptionsAsmPage();
+    /* constructor */ COptionsAsmPage(wxBookCtrlBase *parent);
     virtual ~COptionsAsmPage();
 
     int m_nCaseSensitive;
@@ -117,7 +119,7 @@ protected:
     afx_msg void OnOptAsmChooseFile();
 };
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
 // COptionsDeasmPage dialog
 
 class COptionsDeasmPage : public wxPanel
@@ -136,7 +138,7 @@ public:
 
     // Construction
 public:
-    /* constructor */ COptionsDeasmPage();
+    /* constructor */ COptionsDeasmPage(wxBookCtrlBase *parent);
     virtual ~COptionsDeasmPage();
 
     bool m_ShowCode;
@@ -154,8 +156,8 @@ protected:
 };
 
 
-/////////////////////////////////////////////////////////////////////////////
-// COptionsMarksPage dialog
+/*************************************************************************/
+// COptionsMarksPage panel
 
 class COptionsMarksPage : public wxPanel
 {
@@ -176,7 +178,7 @@ public:
 
     // Construction
 public:
-    /* constructor */ COptionsMarksPage();
+    /* constructor */ COptionsMarksPage(wxBookCtrlBase *parent);
     virtual ~COptionsMarksPage();
 
     int m_nProc6502;
@@ -197,38 +199,42 @@ protected:
     afx_msg void OnOptFontBtn();
 };
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
+// Utilities
+
+namespace options
+{
+    bool SelectColor(wxPanel *parent, wxColor *baseColor, CColorButton *colorBtn);
+}
+
+/*************************************************************************/
 // COptions
 
-class COptions : public wxNotebook
+class COptions : public wxDialog, public wxExtra
 {
-    int m_nLastActivePageIndex;
+private:
+    static int s_lastActivePage;
 
-    //static int CALLBACK PropSheetProc(HWND hwndDlg, UINT uMsg, LPARAM lParam);
+    wxNotebook *m_notebook;
+
+    COptionsAsmPage *m_AsmPage;
+    COptionsEditPage *m_EditPage;
+    COptionsSymPage *m_SymPage;
+    COptionsDeasmPage *m_DeasmPage;
+    COptionsMarksPage *m_MarksPage;
+    COptionsViewPage *m_ViewPage;
 
 public:
-    /* constructor */ COptions(UINT iSelectPage = 0);
+    /* constructor */ COptions(wxFrame *parent);
     virtual          ~COptions();
 
-    // Attributes
-public:
-    static uint32_t m_arrIds[];
-    COptionsAsmPage m_AsmPage;
-    COptionsEditPage m_EditPage;
-    COptionsSymPage m_SymPage;
-    COptionsDeasmPage m_DeasmPage;
-    COptionsMarksPage m_MarksPage;
-    COptionsViewPage m_ViewPage;
-
-    // Operations
-public:
-    int GetLastActivePage();
-
 protected:
-    virtual bool OnCommand(WPARAM wParam, LPARAM lParam);
-
     //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
     afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
 };
 
-/////////////////////////////////////////////////////////////////////////////
+/*************************************************************************/
+
+#endif /* OPTIONS_6502_H__ */
+
+/*************************************************************************/

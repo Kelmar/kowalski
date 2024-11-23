@@ -78,6 +78,8 @@ wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
 wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
 wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
 
+wxDECLARE_EVENT(evID_OPTIONS, wxCommandEvent);
+
 static const int evTHD_ASM_COMPLETE = wxID_HIGHEST + 1;
 static const int evTHD_OUTPUT_ID = wxID_HIGHEST + 2;
 

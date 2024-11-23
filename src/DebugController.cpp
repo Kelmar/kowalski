@@ -29,6 +29,7 @@
 #include "ChildFrm.h"
 #include "6502View.h"
 #include "6502Doc.h"
+#include "Options.h"
 
 #include "DebugController.h"
 #include "AsmThread.h"
@@ -86,6 +87,8 @@ void DebugController::BindEvents()
     Bind(wxEVT_MENU, &DebugController::OnStop, this, evID_STOP);
     Bind(wxEVT_MENU, &DebugController::OnStepOver, this, evID_STEP_OVER);
 
+    Bind(wxEVT_MENU, &DebugController::OnOptions, this, evID_OPTIONS);
+
     // Update handlers
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateRun, this, evID_RUN);
@@ -114,6 +117,9 @@ void DebugController::BuildMenu(wxMenuBar *menuBar)
     menu->Append(evID_STEP_OVER, _("Step Over"));
     menu->Append(evID_STEP_OUT, _("Run Till Return"));
     menu->Append(evID_RUN_TO, _("Run to Cursor"));
+
+    menu->AppendSeparator();
+    menu->Append(evID_OPTIONS, _("Options\tCtrl+E"));
 
     /*
     auto intMenu = new wxMenu();
@@ -348,6 +354,18 @@ void DebugController::OnBreak(wxCommandEvent &)
 void DebugController::OnStepOver(wxCommandEvent &)
 {
     StepOver();
+}
+
+/*************************************************************************/
+
+void DebugController::OnOptions(wxCommandEvent &)
+{
+    auto options = std::unique_ptr<COptions>(new COptions(m_mainFrame));
+
+    if (options->ShowModal() != wxID_OK)
+        return;
+
+    wxLogDebug("Save global options here.");
 }
 
 /*************************************************************************/

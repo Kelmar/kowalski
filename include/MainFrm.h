@@ -155,9 +155,6 @@ protected:
     afx_msg void OnSymBreakpoint();
     afx_msg void OnUpdateSymBreakpoint(CCmdUI* pCmdUI);
 
-    afx_msg void OnOptions();
-    afx_msg void OnUpdateOptions(CCmdUI* pCmdUI);
-
     afx_msg void OnSymGoToLine();
     afx_msg void OnUpdateSymGoToLine(CCmdUI* pCmdUI);
 

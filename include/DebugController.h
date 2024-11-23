@@ -109,6 +109,8 @@ private:
     void OnBreak(wxCommandEvent &);
     void OnStepOver(wxCommandEvent &);
 
+    void OnOptions(wxCommandEvent &);
+
     // Update handlers
     void OnUpdateAssemble(wxUpdateUIEvent &);
     void OnUpdateRun(wxUpdateUIEvent &);

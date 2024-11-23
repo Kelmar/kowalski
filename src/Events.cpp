@@ -52,6 +52,8 @@ wxDEFINE_EVENT(evID_STEP_OVER, wxCommandEvent);
 wxDEFINE_EVENT(evID_STEP_OUT, wxCommandEvent);
 wxDEFINE_EVENT(evID_RUN_TO, wxCommandEvent);
 
+wxDEFINE_EVENT(evID_OPTIONS, wxCommandEvent);
+
 wxDEFINE_EVENT(evTHD_OUTPUT, MessageEvent);
 
 /*************************************************************************/

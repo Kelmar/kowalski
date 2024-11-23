@@ -21,13 +21,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef OPT_VIEW_PAGE_H__
 #define OPT_VIEW_PAGE_H__
 
+/*************************************************************************/
+
 // OptionsViewPage.h : header file
 //
 
 #include "ColorButton.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// COptionsViewPage dialog
+/*************************************************************************/
 
 class COptionsViewPage : public wxPanel
 {
@@ -51,7 +52,8 @@ public:
     };
     static TextDef m_Text[];
 
-    /* constructor */ COptionsViewPage();
+public:
+    /* constructor */ COptionsViewPage(wxBookCtrlBase *parent);
     virtual ~COptionsViewPage();
 
 public:
@@ -69,4 +71,8 @@ protected:
 
 };
 
+/*************************************************************************/
+
 #endif /* OPT_VIEW_PAGE_H__ */
+
+/*************************************************************************/

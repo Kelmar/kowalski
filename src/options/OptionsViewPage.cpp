@@ -18,21 +18,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// OptionsViewPage.cpp : implementation file
-//
-
 #include "StdAfx.h"
-//#include "6502.h"
+
 #include "OptionsViewPage.h"
 #include "ConfigSettings.h"
 
+/*************************************************************************/
+
 COptionsViewPage::TextDef COptionsViewPage::m_Text[6];
 
-/////////////////////////////////////////////////////////////////////////////
-// COptionsViewPage property page
+/*************************************************************************/
 
-COptionsViewPage::COptionsViewPage()
-    : wxPanel()
+COptionsViewPage::COptionsViewPage(wxBookCtrlBase *parent)
+    : wxPanel(parent)
 {
     m_bSubclassed = false;
     m_nSelection = 0;
@@ -58,6 +56,8 @@ COptionsViewPage::~COptionsViewPage()
     }
 #endif
 }
+
+/*************************************************************************/
 
 #if REWRITE_TO_WX_WIDGETS
 
