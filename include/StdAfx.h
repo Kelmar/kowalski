@@ -62,7 +62,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <algorithm>
 #include <array>
 #include <atomic>
-//#include <format> // Not on GNU yet....
 #include <functional>
 #include <list>
 #include <memory>

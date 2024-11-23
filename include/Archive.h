@@ -77,9 +77,9 @@ public:
     {
         if (m_head < m_tail)
         {
-            int id = m_head;
+            int idx = m_head;
             ++m_head;
-            return m_inner[id];
+            return m_inner[idx];
         }
 
         return 0;
@@ -209,7 +209,7 @@ public:
      * @param line The string to write.
      * @remarks
      * Line endings are added.  If the line already has a line ending then it
-     * is stripped and converted to the type  given in the lineEnding parameter
+     * is stripped and converted to the type given in the lineEnding parameter
      * of the constructor.
      */
     void writeLine(const std::string &line);

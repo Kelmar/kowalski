@@ -24,70 +24,73 @@
 
 #include "StdAfx.h"
 #include "6502.h"
-
-#include "PersistEx.h"
+#include "config.h"
 
 #include "MemFrame.h"
 #include "FormatNums.h"
 
 /*************************************************************************/
-
-#if false
-
-class PersistentMemoryFrame : public PersistentExtended
-{
-public:
-    PersistentMemoryFrame(MemoryFrame *frame)
-        : PersistentExtended(frame)
-    {
-    }
-
-    MemoryFrame *Get() const
-    {
-        return static_cast<MemoryFrame *>(GetObject());
-    }
-
-    virtual wxString GetName() const
-    {
-        return "MemoryFrame";
-    }
-
-    virtual wxString GetKind() const
-    {
-        return "MemoryFrame";
-    }
-
-    virtual void Save() const
-    {
-        MemoryFrame *frm = Get();
-
-        wxSize sz = frm->GetSize();
-
-        SaveSize("Size", sz);
-    }
-
-    virtual bool Restore()
-    {
-        MemoryFrame *frm = Get();
-
-        wxSize sz = wxDefaultSize;
-
-        RestoreSize("Size", &sz);
-
-        frm->SetSize(sz);
-
-        return true;
-    }
-};
-
 /*************************************************************************/
 
-wxPersistentObject *wxCreatePersistentObject(MemoryFrame *frame)
+namespace
 {
-    return new PersistentMemoryFrame(frame);
-}
+    struct MemoryFrameConfig
+    {
+        int sizeH;
+        int sizeW;
+        int posX;
+        int posY;
+        bool hidden;
+    };
 
+    struct MemoryFrameConfigMap : config::Mapper<MemoryFrameConfig>
+    {
+        bool to(MemoryFrameConfig &cfg, config::Context &ctx) const
+        {
+            return
+                ctx.map("MemoryH", cfg.sizeH) ||
+                ctx.map("MemoryW", cfg.sizeW) ||
+                ctx.map("MemoryXPos", cfg.posX) ||
+                ctx.map("MemoryYPos", cfg.posY) ||
+                ctx.map("MemoryWndHidden", cfg.hidden)
+            ;
+        }
+    };
+
+    MemoryFrameConfig s_frameConfig;
+
+    // Setup default config for the MemoryFrame
+    void InitDefaultConfig()
+    {
+        s_frameConfig =
+        {
+            .sizeH = wxDefaultSize.GetHeight(),
+            .sizeW = wxDefaultSize.GetWidth(),
+            .posX = wxDefaultPosition.x,
+            .posY = wxDefaultPosition.y,
+            .hidden = false
+        };
+    }
+
+    // Load in configuration for the MemoryFrame
+    void LoadConfig()
+    {
+#if WIN32
+        config::source::WinRegistry reg("/");
+        
+        if (!reg.read("MemoryFrame", s_frameConfig))
+            InitDefaultConfig();
+#else
+        InitDefaultConfig();
 #endif
+    }
+
+    // Save the configuration for the MemoryFrame
+    void SaveConfig()
+    {
+
+    }
+}
 
 /*************************************************************************/
 /*************************************************************************/
@@ -112,12 +115,12 @@ MemoryFrame::MemoryFrame(wxWindow *parent)
 
     BindEvents();
 
-    //wxPersistenceManager::Get().RegisterAndRestore(this);
+    LoadConfig();
 }
 
 MemoryFrame::~MemoryFrame()
 {
-    //wxPersistenceManager::Get().SaveAndUnregister(this);
+    SaveConfig();
 }
 
 /*************************************************************************/
@@ -195,4 +198,3 @@ void MemoryFrame::OnJumpTo(wxCommandEvent &)
 }
 
 /*************************************************************************/
-

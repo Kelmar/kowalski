@@ -131,11 +131,7 @@ void CMainFrame::ConfigSettings(bool load)
     static const char VIEW_IDENTS_Y[] = "IdentsYPos";
     static const char VIEW_IDENTS_W[] = "IdentsW";
     static const char VIEW_IDENTS_H[] = "IdentsH";
-    static const char VIEW_MEMO_X[] = "MemoryXPos";
-    static const char VIEW_MEMO_Y[] = "MemoryYPos";
-    static const char VIEW_MEMO_W[] = "MemoryW";
-    static const char VIEW_MEMO_H[] = "MemoryH";
-    static const char VIEW_MEMO_HID[] = "MemoryWndHidden";
+
     static const char VIEW_ZMEM_X[] = "ZeroPageXPos";
     static const char VIEW_ZMEM_Y[] = "ZeroPageYPos";
     static const char VIEW_ZMEM_W[] = "ZeroPageW";
@@ -187,7 +183,7 @@ void CMainFrame::ConfigSettings(bool load)
 #if REWRITE_TO_WX_WIDGET
     CWinApp *pApp = &wxGetApp();
 
-    if (load)		// reading?
+    if (load)
     {
         theApp.m_global.SetSymFinish((CAsm::Finish)(pApp->GetProfileInt(ENTRY_SYM, SYM_FIN, 0)));
         CSym6502::io_addr = pApp->GetProfileInt(ENTRY_SYM, SYM_IO_ADDR, 0xE000);
@@ -297,7 +293,7 @@ void CMainFrame::ConfigSettings(bool load)
         //    pApp->GetProfileInt(ENTRY_ASM,ASM_CASE,1);
 
     }
-    else			// record
+    else // record
     {
         pApp->WriteProfileInt(ENTRY_SYM, SYM_FIN, theApp.m_global.GetSymFinish());
         pApp->WriteProfileInt(ENTRY_SYM, SYM_IO_ADDR, CSym6502::io_addr);
@@ -578,14 +574,6 @@ void CMainFrame::BindPaneToggle(int id, const wxString &name)
 
 void CMainFrame::BindEvents()
 {
-    //CSym6502 *sim = wxGetApp().m_global.GetSimulator();
-
-    //// Setup notification updates from simulator
-    //sim->CurrentStatus.onChange.connect([this] (CSym6502::Status)
-    //{
-    //    OnSymUpdate();
-    //});
-
     // File menu bindings
     Bind(wxEVT_MENU, &CMainFrame::OnExit, this, wxID_EXIT);
 
@@ -623,8 +611,7 @@ void CMainFrame::OnTogglePane(const wxString &name)
 
     ASSERT(info.IsValid());
 
-    bool isShown = info.IsShown();
-    info.Show(!isShown);
+    info.Show(!info.IsShown());
 
     m_auiManager.Update();
 }

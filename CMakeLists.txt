@@ -17,7 +17,7 @@ SET (FETCHCONTENT_QUIET FALSE)
 
 FetchContent_Declare(fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG 10.2.1
+    GIT_TAG 11.0.2
     GIT_SHALLOW ON
 )
 
@@ -30,7 +30,7 @@ FetchContent_MakeAvailable(fmt)
 FetchContent_Declare(
     sigslot
     GIT_REPOSITORY https://github.com/palacaze/sigslot
-    GIT_TAG        19a6f0f5ea11fc121fe67f81fd5e491f2d7a4637 # v1.2.0
+    GIT_TAG v1.2.2
 )
 
 FetchContent_MakeAvailable(sigslot)
@@ -44,7 +44,7 @@ if (WIN32)
 
   FetchContent_Declare(wxWidgets
       GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
-      GIT_TAG v3.2.5
+      GIT_TAG v3.2.6
       GIT_SHALLOW ON
       OVERRIDE_FIND_PACKAGE
   )
