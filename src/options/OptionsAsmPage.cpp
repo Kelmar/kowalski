@@ -35,8 +35,11 @@
 /*************************************************************************/
 
 COptionsAsmPage::COptionsAsmPage(wxBookCtrlBase *parent)
-    : wxPanel(parent)
+    : wxPanel()
 {
+    if (!wxXmlResource::Get()->LoadPanel(this, parent, "OptionsAsmPage"))
+        throw ResourceError();
+
     m_nCaseSensitive = -1;
     m_nSwapBin = true;
     m_bGenerateListing = false;

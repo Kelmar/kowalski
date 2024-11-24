@@ -37,6 +37,9 @@
 COptionsSymPage::COptionsSymPage(wxBookCtrlBase *parent)
     : wxPanel()
 {
+    if (!wxXmlResource::Get()->LoadPanel(this, parent, "OptionsSimPage"))
+        throw ResourceError();
+
     m_nIOAddress = 0;
     m_bIOEnable = FALSE;
     m_nFinish = -1;
@@ -45,9 +48,6 @@ COptionsSymPage::COptionsSymPage(wxBookCtrlBase *parent)
     m_bProtectMemory = FALSE;
     m_nProtFromAddr = 0;
     m_nProtToAddr = 0;
-
-    if (!wxXmlResource::Get()->LoadPanel(this, parent, "OptionsSimPage"))
-        throw ResourceError();
 }
 
 COptionsSymPage::~COptionsSymPage()
