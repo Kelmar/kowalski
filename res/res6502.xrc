@@ -528,4 +528,401 @@
       </object>
     </object>
   </object>
+  <object class="wxPanel" name="OptionsEditPage">
+    <size>500,300</size>
+    <style>wxTAB_TRAVERSAL</style>
+    <object class="wxBoxSizer" name="bSizer15">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxBoxSizer" name="bSizer17">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxStaticText" name="m_staticText10">
+              <label>Tab Size:</label>
+              <wrap>-1</wrap>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxSpinCtrl" name="m_tabStopSpin">
+              <style>wxSP_ARROW_KEYS</style>
+              <value>8</value>
+              <min>0</min>
+              <max>0</max>
+            </object>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxCheckBox" name="m_synCheckChk">
+          <label>Check Syntax While Typing</label>
+          <checked>1</checked>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxCheckBox" name="m_autoIndentChk">
+          <label>Auto Indent</label>
+          <checked>1</checked>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxCheckBox" name="m_autoCapChk">
+          <label>Auto Captialize Instructions and Directives</label>
+          <checked>0</checked>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxCheckBox" name="m_synColorChk">
+          <label>Color Syntax</label>
+          <checked>0</checked>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxCheckBox" name="m_openNewChk">
+          <label>Open New Document on Startup</label>
+          <checked>0</checked>
+        </object>
+      </object>
+    </object>
+  </object>
+  <object class="wxPanel" name="MyPanel6">
+    <size>500,300</size>
+    <style>wxTAB_TRAVERSAL</style>
+    <object class="wxStaticBoxSizer" name="sbSizer11">
+      <orient>wxHORIZONTAL</orient>
+      <label>Color Syntax</label>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxBoxSizer" name="bSizer18">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <flag>wxEXPAND</flag>
+            <border>5</border>
+            <option>1</option>
+            <object class="wxBoxSizer" name="bSizer19">
+              <orient>wxVERTICAL</orient>
+              <object class="sizeritem">
+                <flag>wxALL</flag>
+                <border>5</border>
+                <option>0</option>
+                <object class="wxStaticText" name="m_staticText11">
+                  <label>Element:</label>
+                  <wrap>-1</wrap>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALL</flag>
+                <border>5</border>
+                <option>0</option>
+                <object class="wxComboBox" name="m_elemSel">
+                  <value>Combo!</value>
+                  <content/>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxEXPAND</flag>
+                <border>5</border>
+                <option>0</option>
+                <object class="wxBoxSizer" name="bSizer20">
+                  <orient>wxHORIZONTAL</orient>
+                  <object class="sizeritem">
+                    <flag>wxALL</flag>
+                    <border>5</border>
+                    <option>0</option>
+                    <object class="wxStaticText" name="Color:">
+                      <label>MyLabel</label>
+                      <wrap>-1</wrap>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <flag>wxALL</flag>
+                    <border>5</border>
+                    <option>0</option>
+                    <object class="wxColourPickerCtrl" name="m_clrPick">
+                      <style>wxCLRP_DEFAULT_STYLE</style>
+                      <value>#000000</value>
+                    </object>
+                  </object>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALL</flag>
+                <border>5</border>
+                <option>0</option>
+                <object class="wxCheckBox" name="m_boldChk">
+                  <label>Bold</label>
+                  <checked>0</checked>
+                </object>
+              </object>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxEXPAND | wxALL</flag>
+            <border>5</border>
+            <option>1</option>
+            <object class="unknown" name="m_preview"/>
+          </object>
+        </object>
+      </object>
+    </object>
+  </object>
+  <object class="wxPanel" name="OptionsFontPage">
+    <size>500,400</size>
+    <style>wxTAB_TRAVERSAL</style>
+    <object class="wxGridBagSizer" name="gbSizer1">
+      <vgap>0</vgap>
+      <hgap>0</hgap>
+      <growablerows>10</growablerows>
+      <growablecols>0</growablecols>
+      <object class="sizeritem">
+        <flag>wxLEFT|wxRIGHT|wxTOP</flag>
+        <border>5</border>
+        <cellpos>0,0</cellpos>
+        <cellspan>1,3</cellspan>
+        <object class="wxStaticText" name="m_staticText13">
+          <label>Settings For:</label>
+          <wrap>-1</wrap>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL|wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>1,0</cellpos>
+        <cellspan>1,3</cellspan>
+        <object class="wxChoice" name="m_categoryChoice">
+          <selection>0</selection>
+          <content/>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxEXPAND|wxLEFT|wxRIGHT</flag>
+        <border>5</border>
+        <cellpos>1,3</cellpos>
+        <cellspan>1,1</cellspan>
+        <object class="wxButton" name="m_defBtn">
+          <label>Use Defaults</label>
+          <default>0</default>
+          <auth_needed>0</auth_needed>
+          <markup>0</markup>
+          <bitmap/>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxLEFT|wxRIGHT|wxTOP</flag>
+        <border>5</border>
+        <cellpos>2,0</cellpos>
+        <cellspan>1,3</cellspan>
+        <object class="wxStaticText" name="m_staticText14">
+          <label>Font:</label>
+          <wrap>-1</wrap>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxLEFT|wxRIGHT|wxTOP</flag>
+        <border>5</border>
+        <cellpos>2,3</cellpos>
+        <cellspan>1,1</cellspan>
+        <object class="wxStaticText" name="m_staticText17">
+          <label>Size:</label>
+          <wrap>-1</wrap>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL|wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>3,0</cellpos>
+        <cellspan>1,3</cellspan>
+        <object class="wxChoice" name="m_fontCombo">
+          <style>wxCB_SORT</style>
+          <selection>0</selection>
+          <content/>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL|wxEXPAND|wxLEFT|wxRIGHT</flag>
+        <border>5</border>
+        <cellpos>3,3</cellpos>
+        <cellspan>1,1</cellspan>
+        <object class="wxSpinCtrl" name="m_fontSizeSpin">
+          <style>wxSP_ARROW_KEYS</style>
+          <value>10</value>
+          <min>6</min>
+          <max>24</max>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxLEFT|wxRIGHT|wxTOP</flag>
+        <border>5</border>
+        <cellpos>4,0</cellpos>
+        <cellspan>1,3</cellspan>
+        <object class="wxStaticText" name="m_staticText18">
+          <label>Display items:</label>
+          <wrap>-1</wrap>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL|wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>5,0</cellpos>
+        <cellspan>7,1</cellspan>
+        <object class="wxListBox" name="m_elementList">
+          <content/>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+        <border>5</border>
+        <cellpos>5,1</cellpos>
+        <cellspan>1,1</cellspan>
+        <object class="wxStaticText" name="m_staticText19">
+          <label>Foreground:</label>
+          <wrap>-1</wrap>
+        </object>
+      </object>
+      <object class="spacer">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>5,2</cellpos>
+        <cellspan>1,1</cellspan>
+        <size>0,0</size>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_RIGHT|wxALL</flag>
+        <border>5</border>
+        <cellpos>5,3</cellpos>
+        <cellspan>1,1</cellspan>
+        <object class="wxColourPickerCtrl" name="m_colourPicker3">
+          <style>wxCLRP_DEFAULT_STYLE</style>
+          <value>#000000</value>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+        <border>5</border>
+        <cellpos>6,1</cellpos>
+        <cellspan>1,1</cellspan>
+        <object class="wxStaticText" name="m_staticText25">
+          <label>Background:</label>
+          <wrap>-1</wrap>
+        </object>
+      </object>
+      <object class="spacer">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>6,2</cellpos>
+        <cellspan>1,1</cellspan>
+        <size>0,0</size>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_RIGHT|wxALL</flag>
+        <border>5</border>
+        <cellpos>6,3</cellpos>
+        <cellspan>1,1</cellspan>
+        <object class="wxColourPickerCtrl" name="m_colourPicker4">
+          <style>wxCLRP_DEFAULT_STYLE</style>
+          <value>#000000</value>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag></flag>
+        <border>5</border>
+        <cellpos>7,1</cellpos>
+        <cellspan>1,3</cellspan>
+        <object class="wxGridSizer" name="gSizer2">
+          <rows>2</rows>
+          <cols>2</cols>
+          <vgap>0</vgap>
+          <hgap>0</hgap>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxCheckBox" name="m_boldChk">
+              <label>Bold</label>
+              <checked>0</checked>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxCheckBox" name="m_strikeChk">
+              <label>Strikethrough</label>
+              <checked>0</checked>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxCheckBox" name="m_italicChk">
+              <label>Italic</label>
+              <checked>0</checked>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxCheckBox" name="m_underlineChk">
+              <label>Underline</label>
+              <checked>0</checked>
+            </object>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL</flag>
+        <border>5</border>
+        <cellpos>8,1</cellpos>
+        <cellspan>1,3</cellspan>
+        <object class="wxStaticText" name="m_staticText21">
+          <label>Sample:</label>
+          <wrap>-1</wrap>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALL</flag>
+        <border>5</border>
+        <cellpos>9,1</cellpos>
+        <cellspan>1,3</cellspan>
+        <object class="wxStaticBitmap" name="m_bitmap1">
+          <style>wxBORDER_SUNKEN</style>
+          <bitmap/>
+        </object>
+      </object>
+      <object class="spacer">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>10,1</cellpos>
+        <cellspan>1,3</cellspan>
+        <size>0,0</size>
+      </object>
+    </object>
+  </object>
 </resource>

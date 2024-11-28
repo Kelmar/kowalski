@@ -25,6 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "OptionsViewPage.h"
 #include "SyntaxExample.h"
 
+#include "options/OptionsFontPage.h"
+
 /*************************************************************************/
 // COptionsSymPage dialog
 
@@ -60,7 +62,6 @@ public:
     /* constructor */ COptionsEditPage(wxBookCtrlBase *parent);
     virtual ~COptionsEditPage();
 
-    enum { IDD = IDD_PROPPAGE_EDITOR };
     wxCheckBox m_btnBold;
     CColorButton m_btnColor;
     wxComboBox m_wndElement;
@@ -219,6 +220,7 @@ private:
 
     COptionsAsmPage *m_AsmPage;
     COptionsEditPage *m_EditPage;
+    OptionsFontPage *m_FontPage;
     COptionsSymPage *m_SymPage;
     COptionsDeasmPage *m_DeasmPage;
     COptionsMarksPage *m_MarksPage;

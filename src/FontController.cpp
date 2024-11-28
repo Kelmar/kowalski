@@ -23,6 +23,9 @@
 /*************************************************************************/
 
 #include "StdAfx.h"
+
+#include "wx/fontenum.h"
+
 #include "FontController.h"
 
 /*************************************************************************/
@@ -38,6 +41,33 @@ FontController::FontController()
 FontController::~FontController()
 {
     delete m_monoFont;
+}
+
+/*************************************************************************/
+
+std::vector<BasicFontInfo> FontController::GetInstalledFonts()
+{
+    wxFontEnumerator fontEnum;
+
+    auto fontNames = fontEnum.GetFacenames();
+
+    std::vector<BasicFontInfo> rval;
+
+    for (wxString name : fontNames)
+    {
+        auto fnt = std::make_unique<wxFont>(wxFontInfo(10).FaceName(name));
+
+        if (!fnt->IsOk())
+            continue;
+
+        rval.push_back(BasicFontInfo
+        {
+            .name = name,
+            .isFixedWidth = fnt->IsFixedWidth()
+        });
+    }
+
+    return rval;
 }
 
 /*************************************************************************/

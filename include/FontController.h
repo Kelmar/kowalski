@@ -26,6 +26,14 @@
 #define FONT_CONTROLLER_6502_H__
 
 /*************************************************************************/
+
+struct BasicFontInfo
+{
+    wxString name;
+    bool isFixedWidth;
+};
+
+/*************************************************************************/
 /**
  * @brief Manages configured fonts throughout the application.
  */
@@ -42,6 +50,8 @@ private:
      */
     wxSize m_cellSize;
 
+    std::vector<BasicFontInfo> m_fonts;
+
     void LoadFonts();
 
     void CalcCellSizes();
@@ -49,6 +59,8 @@ private:
 public:
     /* constructor */ FontController();
     virtual          ~FontController();
+
+    std::vector<BasicFontInfo> GetInstalledFonts();
 
     const wxFont &getMonoFont() const { return *m_monoFont; }
 

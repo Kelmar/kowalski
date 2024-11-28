@@ -22,16 +22,28 @@
  */
 /*************************************************************************/
 
-#ifndef GLYPHS_6502_H__
-#define GLYPHS_6502_H__
+#ifndef OPTIONS_FONT_PAGE_6502_H__
+#define OPTIONS_FONT_PAGE_6502_H__
 
 /*************************************************************************/
 
-// Font Awesome glyphs
-static const wchar_t FA_BUG = 0xF188;
+class OptionsFontPage : public wxPanel, public wxExtra
+{
+private:
+    wxChoice *m_categoryChoice;
+    wxChoice *m_fontChoice;
+
+private:
+    void InitCategories();
+    void InitFontList();
+
+public:
+    /* constructor */ OptionsFontPage(wxBookCtrlBase *parent);
+    virtual ~OptionsFontPage();
+};
 
 /*************************************************************************/
 
-#endif
+#endif /* OPTIONS_FONT_PAGE_6502_H__ */
 
 /*************************************************************************/

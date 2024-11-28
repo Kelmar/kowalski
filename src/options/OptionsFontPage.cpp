@@ -20,18 +20,56 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+ /*************************************************************************/
 
-#ifndef GLYPHS_6502_H__
-#define GLYPHS_6502_H__
+#include "StdAfx.h"
 
-/*************************************************************************/
-
-// Font Awesome glyphs
-static const wchar_t FA_BUG = 0xF188;
+#include "Options.h"
+#include "FontController.h"
 
 /*************************************************************************/
 
-#endif
+OptionsFontPage::OptionsFontPage(wxBookCtrlBase *parent)
+    : wxPanel()
+    , wxExtra(this)
+{
+    if (!wxXmlResource::Get()->LoadPanel(this, parent, "OptionsFontPage"))
+        throw ResourceError();
+
+    m_categoryChoice = FindChild<wxChoice>("m_categoryChoice");
+    m_fontChoice = FindChild<wxChoice>("m_fontCombo");
+
+    InitCategories();
+    InitFontList();
+}
+
+OptionsFontPage::~OptionsFontPage()
+{
+}
+
+/*************************************************************************/
+
+void OptionsFontPage::InitCategories()
+{
+    m_categoryChoice->Append(_("Editor"));
+    m_categoryChoice->Append(_("Memory View"));
+
+    m_categoryChoice->SetSelection(0);
+}
+
+/*************************************************************************/
+
+void OptionsFontPage::InitFontList()
+{
+    for (auto font : FontController::Get().GetInstalledFonts())
+    {
+        wxString name = font.name;
+
+        if (font.isFixedWidth)
+            name += " *";
+
+        m_fontChoice->Append(name);
+    }
+}
 
 /*************************************************************************/

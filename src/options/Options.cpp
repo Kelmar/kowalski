@@ -67,6 +67,7 @@ COptions::COptions(wxFrame *parent)
 
     m_SymPage = new COptionsSymPage(m_notebook);
     m_AsmPage = new COptionsAsmPage(m_notebook);
+    m_FontPage = new OptionsFontPage(m_notebook);
     //m_EditPage = new COptionsEditPage(m_notebook);
     //m_DeasmPage = new COptionsDeasmPage(m_notebook);
     //m_MarksPage = new COptionsMarksPage(m_notebook);
@@ -74,6 +75,7 @@ COptions::COptions(wxFrame *parent)
 
     m_notebook->AddPage(m_SymPage, _("Simulator"));
     m_notebook->AddPage(m_AsmPage, _("Assembler"));
+    m_notebook->AddPage(m_FontPage, _("Fonts and Colors"));
     //m_notebook->AddPage(m_EditPage, _("Editor"));
     //m_notebook->AddPage(m_DeasmPage, _("Disassembler"));
     //m_notebook->AddPage(m_MarksPage, _("General"));
