@@ -31,16 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "options/OptionsDeasmPage.h"
 #include "options/OptionsMarksPage.h"
 
-#include "ColorButton.h"
-
-/*************************************************************************/
-// Utilities
-
-namespace options
-{
-    bool SelectColor(wxPanel *parent, wxColor *baseColor, CColorButton *colorBtn);
-}
-
 /*************************************************************************/
 // COptions
 

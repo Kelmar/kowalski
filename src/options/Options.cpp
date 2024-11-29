@@ -22,31 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <wx/colordlg.h>
 
-#include "resource.h"
 #include "Options.h"
 #include "ConfigSettings.h"
-
-/*************************************************************************/
-
-namespace options
-{
-    bool SelectColor(wxPanel *parent, wxColour *baseColor, CColorButton *colorBtn)
-    {
-        wxColourData data;
-        data.SetColour(*baseColor);
-
-        wxColourDialog dlg(parent, &data);
-
-        if (dlg.ShowModal() == wxID_OK)
-        {
-            *baseColor = data.GetColour();
-            colorBtn->Refresh();
-            return true;
-        }
-
-        return false;
-    }
-}
 
 /*************************************************************************/
 // COptions
@@ -138,4 +115,3 @@ void COptions::OnContextMenu(wxWindow* pWnd, wxPoint point)
 }
 
 /*************************************************************************/
-
