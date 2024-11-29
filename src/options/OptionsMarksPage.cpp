@@ -24,9 +24,6 @@
 
 #include "StdAfx.h"
 
-#include <wx/colordlg.h>
-
-#include "resource.h"
 #include "Options.h"
 #include "ConfigSettings.h"
 
@@ -108,22 +105,6 @@ void COptionsMarksPage::OnContextMenu(wxWindow *pWnd, wxPoint point)
     //HtmlHelpA(59995, HH_HELP_CONTEXT);
 }
 #endif
-
-
-void COptionsMarksPage::OnBrkpColButton()
-{
-    m_colorChanged |= options::SelectColor(this, &m_rgbBreakpoint, &m_ColorButtonBreakpoint);
-}
-
-void COptionsMarksPage::OnErrColButton()
-{
-    m_colorChanged |= options::SelectColor(this, &m_rgbError, &m_ColorButtonError);
-}
-
-void COptionsMarksPage::OnPtrColButton()
-{
-    m_colorChanged |= options::SelectColor(this, &m_rgbPointer, &m_ColorButtonPointer);
-}
 
 bool COptionsMarksPage::OnSetActive()
 {

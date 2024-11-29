@@ -23,18 +23,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
-// OptionsViewPage.h : header file
-//
-
-#include "ColorButton.h"
-
-/*************************************************************************/
-
 class COptionsViewPage : public wxPanel
 {
 private:
-    CColorButton m_ColorButtonText;
-    CColorButton m_ColorButtonBkgnd;
+    wxColourPickerCtrl m_ColorButtonText;
+    wxColourPickerCtrl m_ColorButtonBkgnd;
     bool m_bSubclassed;
     int m_nSelection;
     wxColour m_rgbBkgndCol;

@@ -816,7 +816,7 @@
         <border>5</border>
         <cellpos>5,3</cellpos>
         <cellspan>1,1</cellspan>
-        <object class="wxColourPickerCtrl" name="m_colourPicker3">
+        <object class="wxColourPickerCtrl" name="m_foreColor">
           <style>wxCLRP_DEFAULT_STYLE</style>
           <value>#000000</value>
         </object>
@@ -843,7 +843,7 @@
         <border>5</border>
         <cellpos>6,3</cellpos>
         <cellspan>1,1</cellspan>
-        <object class="wxColourPickerCtrl" name="m_colourPicker4">
+        <object class="wxColourPickerCtrl" name="m_backColor">
           <style>wxCLRP_DEFAULT_STYLE</style>
           <value>#000000</value>
         </object>

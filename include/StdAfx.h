@@ -40,8 +40,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
-#include <wx/config.h>
 #include <wx/clipbrd.h>
+#include <wx/clrpicker.h>
+#include <wx/config.h>
 #include <wx/docmdi.h>
 #include <wx/docview.h>
 #include <wx/event.h>

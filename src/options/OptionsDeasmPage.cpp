@@ -66,16 +66,6 @@ END_MESSAGE_MAP()
 /*************************************************************************/
 // Message handlers
 
-void COptionsDeasmPage::OnAddrColButton()
-{
-    m_bColorChanged |= options::SelectColor(this, &m_rgbAddress, &m_ColorButtonAddress);
-}
-
-void COptionsDeasmPage::OnCodeColButton()
-{
-    m_bColorChanged |= options::SelectColor(this, &m_rgbCode, &m_ColorButtonCode);
-}
-
 bool COptionsDeasmPage::OnSetActive()
 {
 #if REWRITE_TO_WX_WIDGET

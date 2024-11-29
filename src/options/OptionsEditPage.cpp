@@ -30,6 +30,8 @@
 #include "Options.h"
 #include "ConfigSettings.h"
 
+
+
 /*************************************************************************/
 
 COptionsEditPage::COptionsEditPage(wxBookCtrlBase *parent)
