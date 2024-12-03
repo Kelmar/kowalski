@@ -531,7 +531,7 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
 
     wxAuiPaneInfo memoryInfo;
     memoryInfo
-        .Name("memory").Caption(_("6502 Memory"))
+        .Name("memory").Caption(_("Memory"))
         .Left().Layer(1).Position(1)
         .Floatable().CloseButton()
         //.PinButton()

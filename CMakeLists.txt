@@ -39,7 +39,7 @@ FetchContent_MakeAvailable(sigslot)
 # wxWidgets package
 ####################
 
-if (WIN32)
+
   SET (wxBUILD_SHARED OFF  CACHE BOOL "Build wx libraries as shared libs")
 
   FetchContent_Declare(wxWidgets
@@ -57,15 +57,6 @@ if (WIN32)
   endif ()
 
   SET (wxLibs wx::base wx::core wx::richtext wx::adv wx::stc wx::aui wx::html wx::xml wx::xrc)
-else ()
-  find_package(wxWidgets 3.0
-    COMPONENTS base core richtext adv stc aui html xml xrc
-    REQUIRED)
-
-  include("${wxWidgets_USE_FILE}")
-
-  SET (wxLibs ${wxWidgets_LIBRARIES})
-endif ()
 
 if (WIN32)
   SET (execType WIN32)

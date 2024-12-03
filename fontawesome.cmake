@@ -1,7 +1,7 @@
 function(download_font_awesome)
     set(FA_VERSION "6.6.0")
     set(FA_URL "https://use.fontawesome.com/releases/v${FA_VERSION}/fontawesome-free-${FA_VERSION}-desktop.zip")
-    set(FA_WORK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+    set(FA_WORK_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets")
 
     set(FA_ZIP "fontawesome-free-${FA_VERSION}-desktop.zip")
     set(FA_ZIP_FULL "${FA_WORK_DIR}/${FA_ZIP}")

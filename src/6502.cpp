@@ -86,11 +86,6 @@ bool C6502App::OnInit()
 
     wxLogDebug("Loading resource files....");
 
-#if wxUSE_PRIVATE_FONTS
-    loadOkay &= wxFont::AddPrivateFont("icon-regular.otf");
-    loadOkay &= wxFont::AddPrivateFont("icon-solid.otf");
-#endif
-
     loadOkay &= wxXmlResource::Get()->Load("res6502.xrc");
 
     if (!loadOkay)
@@ -122,8 +117,8 @@ bool C6502App::OnInit()
         "Any File", "Assembly View",
         CLASSINFO(CSrc6502Doc), CLASSINFO(CSrc6502View));
 
-    new ProjectManager();
     new FontController();
+    new ProjectManager();
 
     if (!InitFrame())
         return false;

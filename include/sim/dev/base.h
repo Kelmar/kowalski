@@ -70,8 +70,10 @@ namespace sim
          * @param address The local address to read from.
          * @return The byte value at that address.
          * @remarks
-         * This method is used by the UI and debugger to display the device's current state
-         * without affecting it's state so as not to cause issues with the simulated program.
+         * This method is used by the UI and debugger to display the what the next value will be when it is read
+         * from the device without affecting the device's state.
+         * 
+         * For example, if the device is a UART, this method would not remove the byte from the read buffer.
          */
         virtual uint8_t Peek(sim_addr_t address) const = 0;
 

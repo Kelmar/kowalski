@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "resource.h"
 #include "MemoryView.h"
-#include "MemoryGoto.h"
+//#include "MemoryGoto.h"
 #include "MemoryChg.h"
 
 wxFont CMemoryView::m_Font;
@@ -739,6 +739,8 @@ void CMemoryView::OnUpdateMemoryGoto(CCmdUI *pCmdUI)
 
 void CMemoryView::OnMemoryGoto()
 {
+#if REWRITE_TO_WX_WIDGET
+    // Not really needed now, we have this handled with the jump edit.
     static uint32_t addr = 0; // TODO: Remove static variable
     CMemoryGoto dlg;
     dlg.m_uAddr = addr;
@@ -746,10 +748,10 @@ void CMemoryView::OnMemoryGoto()
     if (dlg.ShowModal() == wxID_OK)
     {
         addr = dlg.m_uAddr;
-#if REWRITE_TO_WX_WIDGET
+
         scroll(SB_THUMBTRACK, addr, 2);  //1.3.3 change ,1 to ,2 to allow passing nPos
+    }
 #endif
-}
 }
 
 void CMemoryView::OnUpdateMemoryChg(CCmdUI *pCmdUI)
