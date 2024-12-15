@@ -46,8 +46,8 @@ bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
     size_t maxSize = procType == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
 
     size_t sz = std::min(ar.size(), maxSize);
-    std::unique_ptr<uint8_t> data(new uint8_t[sz]);
-    std::span<uint8_t> span(data.get(), sz);
+    std::vector<uint8_t> data(sz);
+    std::span<uint8_t> span(data);
 
     size_t rd = ar.read(span);
 
