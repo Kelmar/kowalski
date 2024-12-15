@@ -47,9 +47,9 @@ jobs:
       shell: bash
       if: runner.os == 'Linux'
       run: |
-        sudo apt-get update -y
-        sudo apt-get upgrade -y
-        sudo apt-get install -y libwxgtk3.2-gtk3-dev
+        #sudo apt-get update -y
+        #sudo apt-get upgrade -y
+        sudo apt-get install -y libwxgtk3.2-dev
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
