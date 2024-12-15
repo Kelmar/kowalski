@@ -64,10 +64,12 @@ protected:
 
     // Attributes
 public:
+#if 0
     static wxFont m_Font;
     static wxFontInfo m_LogFont;
     static wxColour m_rgbTextColor;
     static wxColour m_rgbBkgndColor;
+#endif
 
     virtual ~CZeroPageView();
 

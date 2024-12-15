@@ -31,13 +31,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "DeasmGoto.h"
 #include "Deasm.h"
 
+#if 0
 wxFont CDeasm6502View::m_Font;
 wxFontInfo CDeasm6502View::m_LogFont;
 wxColour CDeasm6502View::m_rgbBkgnd;
 wxColour CDeasm6502View::m_rgbAddress = wxColour(127, 127, 127);
 wxColour CDeasm6502View::m_rgbCode = wxColour(191, 191, 191);
 wxColour CDeasm6502View::m_rgbInstr = wxColour(0, 0, 0);
+
 bool CDeasm6502View::m_bDrawCode = true;
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CDeasm6502View

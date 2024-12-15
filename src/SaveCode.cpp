@@ -29,9 +29,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#include "IntelHex.h"
 
-UINT CSaveCode::m_uStart= 0;
-UINT CSaveCode::m_uEnd= 0xFFFF;
-int CSaveCode::m_nInitPos= 0;
+//UINT CSaveCode::m_uStart= 0;
+//UINT CSaveCode::m_uEnd= 0xFFFF;
+//int CSaveCode::m_nInitPos= 0;
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -23,12 +23,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 namespace ConfigSettings
 {
+#if 0
     extern wxFontInfo *const fonts[];    // LOGFONT structures throughout the program
     extern wxFont *const cfonts[];     // CFont structures throughout the program
     extern wxColour *text_color[];
     extern wxColour *bkgnd_color[];
     extern wxColour *color_syntax[];
     extern uint8_t *syntax_font_style[];
+#endif
 
     void Load();
     void Save(bool);

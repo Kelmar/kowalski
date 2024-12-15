@@ -22,33 +22,76 @@
  */
 /*************************************************************************/
 
-#ifndef SINGLETON_6502_H__
-#define SINGLETON_6502_H__
+#ifndef OPTIONS_CONTROLLER_6502_H__
+#define OPTIONS_CONTROLLER_6502_H__
 
 /*************************************************************************/
 
-template <typename TBase>
-class Singleton
+#include "MainFrm.h"
+
+/*************************************************************************/
+
+class OptionsPage : public wxPanel
 {
+protected:
+    OptionsPage() : wxPanel() { }
+
 public:
-    static TBase *Ptr()
+    virtual ~OptionsPage() { }
+
+    /**
+     * @brief Called by OptionsDialog when any pending changes should be discarded.
+     */
+    virtual void AbortChanges() = 0;
+
+    /**
+     * @brief Called by OptionsDialog when any pending changes to should be commited.
+     */
+    virtual void SaveChanges() = 0;
+};
+
+typedef std::shared_ptr<OptionsPage> POptionsPage;
+
+/*************************************************************************/
+
+struct OptionPageFactory
+{
+    virtual POptionsPage Create(wxBookCtrlBase *parent) const = 0;
+};
+
+typedef std::shared_ptr<OptionPageFactory> POptionPageFactory;
+
+/*************************************************************************/
+
+class OptionsController : public wxEvtHandler
+{
+private:
+    struct PageInfo
     {
-        static TBase *self = nullptr;
+        POptionPageFactory factory;
+        wxString text;
+    };
 
-        if (!self)
-            self = new TBase();
+    CMainFrame *m_mainFrame;
+    std::vector<PageInfo> m_pageFactories;
 
-        return self;
-    }
+    void BindEvents();
+    void OnOptions(wxCommandEvent &);
 
-    static TBase &Get()
-    {
-        return *Ptr();
-    }
+public:
+    /* constructor */ OptionsController();
+    virtual ~OptionsController();
+
+    bool Init(CMainFrame *mainFrame);
+
+public:
+    void RegisterPage(const POptionPageFactory &factory, const wxString &text);
+
+    void BuildMenu(wxMenuBar *);
 };
 
 /*************************************************************************/
 
-#endif /* SINGLETON_6502_H__ */
+#endif /* OPTIONS_CONTROLLER_6502_H__ */
 
 /*************************************************************************/

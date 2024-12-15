@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "RegisterBar.h"
 #include "Deasm.h"
 
-bool CRegisterBar::m_bHidden = false;
+//bool CRegisterBar::m_bHidden = false;
 
 /////////////////////////////////////////////////////////////////////////////
 // CRegisterBar dialog

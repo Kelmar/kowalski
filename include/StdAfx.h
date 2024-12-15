@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string.h>
 
 #include <wx/wx.h>
+#include <wx/apptrait.h>
 #include <wx/aui/aui.h>
 #include <wx/clipbrd.h>
 #include <wx/clrpicker.h>
@@ -55,6 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <wx/settings.h>
 #include <wx/spinctrl.h>
 #include <wx/stc/stc.h>
+#include <wx/stdpaths.h>
 #include <wx/utils.h>
 #include <wx/validate.h>
 #include <wx/valnum.h>
@@ -103,7 +105,6 @@ typedef wxOutputStream DocOStream;
 #include "Except.h"
 #include "Utils.h"
 #include "StrUtils.h"
-#include "Singleton.h"
 #include "property.h"
 
 #include "wxExtra.h"

@@ -26,7 +26,7 @@ private:
     std::string SetMemZPGInfo(uint8_t addr, uint8_t val);   // Cell description of page zero of memory
     std::string SetMemInfo(uint32_t addr, uint8_t val);     // Memory cell description
     std::string SetValInfo(uint8_t val);                    // Value description 'val'
-    std::string SetWordInfo(uint16_t val);                   // Value description 'val'
+    std::string SetWordInfo(uint16_t val);                  // Value description 'val'
 
     std::shared_ptr<CSym6502> m_sim;
 

@@ -23,6 +23,7 @@
  /*************************************************************************/
 
 #include "StdAfx.h"
+#include "6502.h"
 
 #include "Options.h"
 #include "FontController.h"
@@ -61,7 +62,7 @@ void OptionsFontPage::InitCategories()
 
 void OptionsFontPage::InitFontList()
 {
-    for (auto font : FontController::Get().GetInstalledFonts())
+    for (auto font : wxGetApp().fontController().GetInstalledFonts())
     {
         wxString name = font.name;
 

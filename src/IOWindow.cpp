@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
 #include "StdAfx.h"
+#include "6502.h"
 #include "encodings.h"
 
 #include <wx/dcbuffer.h>
@@ -31,17 +32,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
-wxColour CIOWindow::m_rgbTextColor = wxColour(0, 0, 0);
-wxColour CIOWindow::m_rgbBackgndColor = wxColour(255, 255, 255);
-
-/*************************************************************************/
-
 CIOWindow::CIOWindow(wxWindow *parent)
     : wxFrame(parent, wxID_ANY, _("IO Window"))
     , m_memory(nullptr)
     , m_charCnt(40, 25)
     , m_cursorPos()
     , m_timer(this)
+    , m_rgbTextColor(wxColor(0, 0, 0))
+    , m_rgbBackgndColor(wxColor(255, 255, 255))
 {
     // We're going to override the saved size anyhow with our own calculations.
 
@@ -99,8 +97,8 @@ void CIOWindow::SetSize(int w, int h, bool resize/* = true*/)
 
 void CIOWindow::Invalidate(const wxPoint &location)
 {
-    wxSize cellSize = FontController::Get().getCellSize();
-
+    wxSize cellSize = wxGetApp().fontController().getCellSize();
+        
     // TODO: Redundant assertion? -- B.Simonds (Oct 20, 2024)
     ASSERT(cellSize.x > 0 && cellSize.y > 0);
 
@@ -291,12 +289,12 @@ void CIOWindow::Draw(wxDC &dc)
     if (m_memory == nullptr)
         return;
 
-    FontController &fontController = FontController::Get();
+    FontController &fontController = wxGetApp().fontController();
     wxSize cellSize = fontController.getCellSize();
     dc.SetFont(fontController.getMonoFont());
 
     // TODO: Allow map to other character sets.
-    encodings::Encoding &encoding = encodings::CodePage437::Get();
+    //auto encoding = encodings::CodePage437::Get();
     wxString lineBuffer;
 
     lineBuffer.reserve(m_charCnt.x + 1);
@@ -309,7 +307,8 @@ void CIOWindow::Draw(wxDC &dc)
         for (int x = 0; x < m_charCnt.x; ++x, ++offset)
         {
             uint8_t c = m_memory[offset];
-            lineBuffer += encoding.toUnicode(c == 0 ? ' ' : c);
+            //lineBuffer += encoding.toUnicode(c == 0 ? ' ' : c);
+            lineBuffer += (char)c;
         }
 
         dc.DrawText(lineBuffer, 0, pos_y);
@@ -325,7 +324,7 @@ void CIOWindow::DrawCursor(wxDC &dc)
     if (!m_showCursor)
         return;
 
-    wxSize cellSize = FontController::Get().getCellSize();
+    wxSize cellSize = wxGetApp().fontController().getCellSize();
 
     wxPoint loc(m_cursorPos.x * cellSize.x, m_cursorPos.y * cellSize.y);
     wxRect area(loc, cellSize);

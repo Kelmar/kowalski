@@ -37,9 +37,13 @@ struct BasicFontInfo
 /**
  * @brief Manages configured fonts throughout the application.
  */
-class FontController : public Singleton<FontController>
+class FontController
 {
 private:
+    friend class C6502App;
+
+    /* constructor */ FontController();
+
     /**
      * @brief Monospaced font for rendering HexView and IOWindow
      */
@@ -57,8 +61,7 @@ private:
     void CalcCellSizes();
 
 public:
-    /* constructor */ FontController();
-    virtual          ~FontController();
+    virtual ~FontController();
 
     std::vector<BasicFontInfo> GetInstalledFonts();
 

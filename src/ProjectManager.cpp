@@ -30,10 +30,7 @@
 #include "Events.h"
 #include "ProjectManager.h"
 
-#include "formats/AtariBin.h"
-#include "formats/Code65p.h"
-#include "formats/MotorolaSRecord.h"
-#include "formats/RawBin.h"
+
 
 /*************************************************************************/
 /*************************************************************************/
@@ -103,28 +100,12 @@ bool BinaryCodeTemplate::write(const std::string &filename, LoadCodeState *state
 /*************************************************************************/
 
 ProjectManager::ProjectManager()
-    : Singleton()
-    , m_templates()
+    : m_templates()
 {
-    InitCodeTemplates();
 }
 
 ProjectManager::~ProjectManager()
 {
-}
-
-/*************************************************************************/
-
-void ProjectManager::InitCodeTemplates()
-{
-    // Hard coded for now.
-
-    //AddTemplate<CMotorolaSRecord>();
-    AddTemplate<CAtariBin>();
-    AddTemplate<CCode65p>();
-
-    // Keep RawBin last so it shows up as the last option in the drop down.
-    AddTemplate<CRawBin>();
 }
 
 /*************************************************************************/

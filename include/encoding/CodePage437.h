@@ -29,6 +29,7 @@
 
 namespace encodings
 {
+#if 0
     class CodePage437 : public Encoding
     {
     private:
@@ -58,6 +59,7 @@ namespace encodings
 
         virtual wxString toUnicode(uint8_t c);
     };
+#endif
 }
 
 /*************************************************************************/

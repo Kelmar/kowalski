@@ -23,24 +23,38 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <wx/colordlg.h>
 
 #include "Options.h"
+#include "options/OptionsDialog.h"
+
 #include "ConfigSettings.h"
 
 /*************************************************************************/
-// COptions
 
-int COptions::s_lastActivePage = 0;
+//int OptionsDialog::s_lastActivePage = 0;
 
 /*************************************************************************/
 
-COptions::COptions(wxFrame *parent)
+OptionsDialog::OptionsDialog()
     : wxDialog()
     , wxExtra(this)
     , m_notebook(nullptr)
+{
+}
+
+OptionsDialog::~OptionsDialog()
+{
+    //s_lastActivePage = m_notebook->GetSelection();
+}
+
+/*************************************************************************/
+
+void OptionsDialog::Create(wxFrame *parent)
 {
     if (!wxXmlResource::Get()->LoadDialog(this, parent, "OptionsDlg"))
         throw ResourceError();
 
     m_notebook = FindChild<wxNotebook>("m_notebook");
+
+#if 0
 
     m_SymPage = new COptionsSymPage(m_notebook);
     m_AsmPage = new COptionsAsmPage(m_notebook);
@@ -57,6 +71,8 @@ COptions::COptions(wxFrame *parent)
     //m_notebook->AddPage(m_DeasmPage, _("Disassembler"));
     //m_notebook->AddPage(m_MarksPage, _("General"));
     //m_notebook->AddPage(m_ViewPage, _("Appearance"));
+
+#endif
 
     // set up HH_POPUP defaults for all context sensitive help
     // Initialize structure to NULLs
@@ -79,20 +95,25 @@ COptions::COptions(wxFrame *parent)
     Fit();
 }
 
-COptions::~COptions()
+/*************************************************************************/
+
+void OptionsDialog::AddPage(const POptionPageFactory &factory, const wxString &text)
 {
-    //s_lastActivePage = m_notebook->GetSelection();
+    auto page = factory->Create(m_notebook);
+
+    m_pages.push_back(page);
+    m_notebook->AddPage(page.get(), text);
 }
 
 /*************************************************************************/
-// COptions message handlers
+// OptionsDialog message handlers
 
 /*************************************************************************/
 // Context Sensitive Help
 
 #if REWRITE_TO_WX_WIDGET
 
-bool COptions::OnHelpInfo(HELPINFO* pHelpInfo)
+bool OptionsDialog::OnHelpInfo(HELPINFO* pHelpInfo)
 {
     if (pHelpInfo->iCtrlId > 1000 && pHelpInfo->iCtrlId < 2999)
     {
@@ -106,7 +127,7 @@ bool COptions::OnHelpInfo(HELPINFO* pHelpInfo)
 
 #endif
 
-void COptions::OnContextMenu(wxWindow* pWnd, wxPoint point)
+void OptionsDialog::OnContextMenu(wxWindow* pWnd, wxPoint point)
 {
     UNUSED(pWnd);
     UNUSED(point);

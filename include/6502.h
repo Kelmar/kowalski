@@ -25,33 +25,47 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
-// 6502.h : main header file for the 6502 application
-//
-
 #include "Global.h"
 #include "MainFrm.h"
+#include "Splash.h"
 #include "encodings.h"
+
+#include "FontController.h"
+#include "ProjectManager.h"
+#include "DebugController.h"
 
 class CIOWindow;
 
 /*************************************************************************/
-// C6502App:
-// See 6502.cpp for the implementation of this class
-//
 
 class C6502App : public wxApp
 {
 private:
+    class FontController *m_fontController;
+    class ProjectManager *m_projectManager;
+    class DebugController *m_debugController;
+
     CMainFrame *m_mainFrame;
     wxLogWindow *m_logFrame;
-
     wxConfig *m_config;
+    wxAppTraits *m_traits;
 
+    std::unique_ptr<SplashWnd> m_splash;
+
+    bool LoadResources();
     bool InitFrame();
 
+    void SetupSingletons();
+    void DisposeSingletons();
+
+    void InitBinaryTemplates();
+
 public:
-    static bool m_bMaximize; // flag - maximum window dimensions at startup;
-    static bool m_bFileNew;  // flag - opening a blank document at startup
+#if 0
+    // TODO: Move to config
+    bool m_bMaximize; // flag - maximum window dimensions at startup;
+    bool m_bFileNew;  // flag - opening a blank document at startup
+#endif
 
     CGlobal m_global;        // application global variables
 
@@ -65,6 +79,10 @@ public:
 
     void LoadEncodings();
 
+    FontController &fontController() const { return *m_fontController; }
+    ProjectManager &projectManager() const { return *m_projectManager; }
+    DebugController &debugController() const { return *m_debugController; }
+
     CMainFrame *mainFrame() const { return m_mainFrame; }
     wxLogWindow *logFrame() const { return m_logFrame; }
 
@@ -77,6 +95,10 @@ public:
     virtual bool OnExceptionInMainLoop() override;
 
     virtual int FilterEvent(wxEvent &event) override;
+
+    const wxStandardPaths &GetStandardPaths() const { return m_traits->GetStandardPaths(); }
+
+    wxPathList GetResourcePaths() const;
 
 protected:
     int OnExit() override;

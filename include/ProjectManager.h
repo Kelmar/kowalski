@@ -100,18 +100,19 @@ public:
 
 /*************************************************************************/
 
-class ProjectManager : public wxEvtHandler, public Singleton<ProjectManager>
+class ProjectManager : public wxEvtHandler
 {
 private:
+    friend class C6502App;
+
     std::vector<std::shared_ptr<CodeTemplate>> m_templates;
 
-    void InitCodeTemplates();
+    /* constructor */ ProjectManager();
 
     wxString GetSupportedFileTypes(std::function<bool (const std::shared_ptr<CodeTemplate> &)> predicate);
 
 public:
-    /* constructor */ ProjectManager();
-    virtual          ~ProjectManager();
+    virtual ~ProjectManager();
 
     template <typename T>
     void AddTemplate()

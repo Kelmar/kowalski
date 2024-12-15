@@ -18,54 +18,46 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// 6502.cpp : Defines the class behaviors for the application.
-//
-
 #include "StdAfx.h"
 
+#include "Splash.h"
 #include "MainFrm.h"
-#include "ProjectManager.h"
-#include "DebugController.h"
-#include "FontController.h"
 
 #include "6502Doc.h"
 #include "6502View.h"
 
 #include "Events.h"
 
-//#include "ChildFrm.h"
-//#include "ChildFrmDeAsm.h"
-//#include "Deasm6502Doc.h"
-//#include "Deasm6502View.h"
-//#include "Splash.h"
-//#include "CXMultiDocTemplate.h"
-//#include "About.h"
+#include "formats/AtariBin.h"
+#include "formats/Code65p.h"
+#include "formats/MotorolaSRecord.h"
+#include "formats/RawBin.h"
+
+/*************************************************************************/
 
 const char VENDOR_NAME[] = "MikSoft";
 const char APP_NAME[] = "6502_simulator";
 
-bool C6502App::m_bMaximize = false; // flag - maximum window dimensions at startup;
-bool C6502App::m_bFileNew = true; // flag - opening a blank document at startup
-
 /*************************************************************************/
-// C6502App
 
 C6502App::C6502App()
     : m_mainFrame(nullptr)
     , m_config(nullptr)
+    , m_traits()
     , m_bDoNotAddToRecentFileList(false)
 {
 }
 
 C6502App::~C6502App()
 {
+    DisposeSingletons();
+
     delete m_config;
 }
 
 wxIMPLEMENT_APP(C6502App);
 
 /*************************************************************************/
-// C6502App initialization
 
 bool C6502App::OnInit()
 {
@@ -76,34 +68,28 @@ bool C6502App::OnInit()
     if (!wxApp::OnInit())
         return false;
 
+    m_traits = GetTraits();
+
     SetVendorName(VENDOR_NAME);
     SetAppName(APP_NAME);
+    SetAppDisplayName(_("6502 Simulator"));
 
-    // Load up resources
-    wxXmlResource::Get()->InitAllHandlers();
+    m_splash = std::make_unique<SplashWnd>();
 
     bool loadOkay = true;
 
-    wxLogDebug("Loading resource files....");
-
-    loadOkay &= wxXmlResource::Get()->Load("res6502.xrc");
-
-    if (!loadOkay)
-    {
-        wxLogError("Unable to load resources!");
-        wxMessageBox(
-            _("Unable to load resources!"),
-            _("6502 Simulator - Fatal Error"),
-            wxCENTER | wxOK | wxICON_ERROR);
-
-        return false;
-    }
+    loadOkay &= LoadResources();
+    m_splash->Show();
+    m_splash->Refresh();
+    wxYield();
 
     LoadEncodings();
-
-    SetAppDisplayName(_("6502 Simulator"));
+    m_splash->Refresh();
+    wxYield();
 
     m_config = new wxConfig();
+    m_splash->Refresh();
+    wxYield();
 
     wxDocManager *docManager = new wxDocManager();
 
@@ -117,18 +103,93 @@ bool C6502App::OnInit()
         "Any File", "Assembly View",
         CLASSINFO(CSrc6502Doc), CLASSINFO(CSrc6502View));
 
-    new FontController();
-    new ProjectManager();
+    m_splash->Refresh();
+    wxYield();
+
+    SetupSingletons();
+
+    m_splash->Refresh();
+    wxYield();
+
+    InitBinaryTemplates();
 
     if (!InitFrame())
         return false;
 
+    m_splash->Refresh();
+    wxYield();
     // File history has to be loaded after the frame is created.
     docManager->FileHistoryLoad(*m_config);
+    m_splash->Refresh();
+    wxYield();
+
+    wxLogStatus("Application loaded!");
+    m_splash->Refresh();
+    wxYield();
+
+    wxSleep(5);
 
     m_mainFrame->Show();
 
-    wxLogStatus("Application loaded!");
+    m_splash.reset(nullptr);
+
+    return true;
+}
+
+/*************************************************************************/
+
+void C6502App::SetupSingletons()
+{
+    m_fontController = new FontController();
+    m_projectManager = new ProjectManager();
+    m_debugController = new DebugController();
+}
+
+/*************************************************************************/
+
+void C6502App::DisposeSingletons()
+{
+    delete m_debugController;
+    delete m_projectManager;
+    delete m_fontController;
+}
+
+/*************************************************************************/
+
+void C6502App::InitBinaryTemplates()
+{
+    // Hard coded for now.
+
+    //AddTemplate<CMotorolaSRecord>();
+    m_projectManager->AddTemplate<CAtariBin>();
+    m_projectManager->AddTemplate<CCode65p>();
+
+    // Keep RawBin last so it shows up as the last option in the drop down.
+    m_projectManager->AddTemplate<CRawBin>();
+}
+
+/*************************************************************************/
+
+bool C6502App::LoadResources()
+{
+    wxXmlResource::Get()->InitAllHandlers();
+    wxLogDebug("Loading resource files....");
+
+    wxPathList dirs = GetResourcePaths();
+    wxString file = dirs.FindAbsoluteValidPath("res6502.xrc");
+
+    bool result = wxXmlResource::Get()->Load(file);
+
+    if (!result)
+    {
+        wxLogError("Unable to load resources!");
+        wxMessageBox(
+            _("Unable to load resources!"),
+            _("6502 Simulator - Fatal Error"),
+            wxCENTER | wxOK | wxICON_ERROR);
+
+        return false;
+    }
 
     return true;
 }
@@ -137,7 +198,7 @@ bool C6502App::OnInit()
 
 void C6502App::LoadEncodings()
 {
-    new encodings::CodePage437();
+    //new encodings::CodePage437();
 }
 
 /*************************************************************************/
@@ -165,6 +226,23 @@ int C6502App::FilterEvent(wxEvent &event)
     //}
 
     return wxApp::FilterEvent(event);
+}
+
+/*************************************************************************/
+
+wxPathList C6502App::GetResourcePaths() const
+{
+    auto paths = wxStandardPaths::Get();
+
+    wxFileName exe(paths.GetExecutablePath());
+    wxPathList dirs;
+
+    //dirs.Add(paths.GetLocalizedResourcesDir());
+    dirs.Add(paths.GetResourcesDir());
+    dirs.Add(paths.GetDataDir());
+    dirs.Add(exe.GetPath());
+
+    return dirs;
 }
 
 /*************************************************************************/
@@ -375,12 +453,6 @@ int C6502App::OnExit()
     wxDocManager *const docManager = wxDocManager::GetDocumentManager();
 
     docManager->FileHistorySave(*m_config);
-
-    //wxPoint pos = m_mainFrame->GetPosition();
-    //wxSize size = m_mainFrame->GetSize();
-
-    //m_config->Write("main_pos", pos);
-    //m_config->Write("main_size", size);
 
     m_config->Flush();
 

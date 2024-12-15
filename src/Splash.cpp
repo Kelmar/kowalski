@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-	6502 Macroassembler and Simulator
+        6502 Macroassembler and Simulator
 
 Copyright (C) 1995-2003 Michal Kowalski
 
@@ -18,209 +18,129 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-// CG: This file was added by the Splash Screen component.
-// Splash.cpp : implementation file
-//
+#include "StdAfx.h"
 
-#include "StdAfx.h"  // e. g. stdafx.h
-#include "resource.h"  // e.g. resource.h
+#include "6502.h"
+#include "Splash.h"
 
-#include "Splash.h"  // e.g. splash.h
+/*************************************************************************/
+/*************************************************************************/
+
+#define SPLASH_STYLE (wxSIMPLE_BORDER | wxFRAME_NO_TASKBAR | wxSTAY_ON_TOP)
+#define SPLASH_FILE_NAME "splash.bmp"
+#define SPLASH_DELAY 2000 /* two seconds */
+
+#define TIMER_ID 99999
+
+/*************************************************************************/
+/*************************************************************************/
+
+SplashController::SplashController()
+    : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxPoint(0, 0), wxSize(100, 100), SPLASH_STYLE)
+    , m_window(nullptr)
+    , m_timer()
+{
+    m_timer.SetOwner(this, TIMER_ID);
+
+    CenterOnScreen();
+
+    m_window->Show(true);
+    Update();
+    wxYield();
+}
+
+SplashController::~SplashController()
+{
+
+}
 
 /*************************************************************************/
 
-bool CSplashWnd::s_showSplash = false;
-CSplashWnd *CSplashWnd::s_splashWnd = nullptr;
-
-/////////////////////////////////////////////////////////////////////////////
-//   Splash Screen class
-
-CSplashWnd::CSplashWnd()
-    : m_bitmap()
+void SplashController::SetStatus(const wxString &text)
 {
-}
-
-CSplashWnd::~CSplashWnd()
-{
-}
-
-#if REWRITE_TO_WX_WIDGET
-BEGIN_MESSAGE_MAP(CSplashWnd, CWnd)
-//{{AFX_MSG_MAP(CSplashWnd)
-    ON_WM_CREATE()
-    ON_WM_PAINT()
-    ON_WM_TIMER()
-//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-#endif
-
-void CSplashWnd::EnableSplashScreen(bool bEnable /*= TRUE*/)
-{
-    s_showSplash = bEnable;
-}
-
-void CSplashWnd::ShowSplashScreen(wxWindow* pParentWnd /*= NULL*/)
-{
-    UNUSED(pParentWnd);
-
-#if REWRITE_TO_WX_WIDGET
-    if (!s_showSplash || s_splashWnd != NULL)
-        return;
-
-    // Allocate a new splash screen, and create the window.
-    c_pSplashWnd = new CSplashWnd;
-    if (!c_pSplashWnd->Create(pParentWnd))
-        delete c_pSplashWnd;
-    else
-        c_pSplashWnd->UpdateWindow();
-#endif
-}
-
-#if REWRITE_TO_WX_WIDGET
-void CSplashWnd::PreTranslateAppMessage(MSG* pMsg)
-{
-    if (c_pSplashWnd == NULL)
-        return;
-
-    // If we get a keyboard or mouse message, hide the splash screen.
-    if (pMsg->message == WM_KEYDOWN ||
-        pMsg->message == WM_SYSKEYDOWN ||
-        pMsg->message == WM_LBUTTONDOWN ||
-        pMsg->message == WM_RBUTTONDOWN ||
-        pMsg->message == WM_MBUTTONDOWN ||
-        pMsg->message == WM_NCLBUTTONDOWN ||
-        pMsg->message == WM_NCRBUTTONDOWN ||
-        pMsg->message == WM_NCMBUTTONDOWN)
+    if (m_window)
     {
-        c_pSplashWnd->HideSplashScreen();
+        m_window->SetStatus(text);
+
+        /*
+         * We're likely in a tight loading loop, we call wxYield() here to give
+         * the UI a chance to update the changed status text.
+         */
+        Update();
+        wxYield();
     }
 }
-#endif
 
-bool CSplashWnd::Create(wxWindow* pParentWnd /*= NULL*/)
+/*************************************************************************/
+
+void SplashController::Done(std::function<void()> continueWith)
 {
-    UNUSED(pParentWnd);
-
-#if REWRITE_TO_WX_WIDGET
-
-#ifdef _DEBUG
-    return false;
-#endif
-    HDC hdc= ::GetWindowDC(HWND_DESKTOP);
-    int nColors= ::GetDeviceCaps(hdc,NUMCOLORS);
-    ::ReleaseDC(HWND_DESKTOP,hdc);
-
-    m_hdib = LoadImage(		// za�adowanie obrazka i palety kolor�w
-                 AfxGetResourceHandle(),	// handle of the instance that contains the image
-                 (LPCTSTR)MAKEINTRESOURCE(nColors==-1 ? IDB_SPLASH : IDB_SPLASH16),
-                 IMAGE_BITMAP,		// type of image
-                 0,				// desired width
-                 0,				// desired height
-                 LR_CREATEDIBSECTION		// load flags (tutaj: format DIB)
-             );
-
-    if (m_hdib == NULL)
-        return FALSE;
-//  if (!m_bitmap.LoadBitmap(nColors==-1 ? IDB_SPLASH : IDB_SPLASH16))
-//    return FALSE;
-
-    BITMAP bm;
-    ::GetObject(m_hdib, sizeof(BITMAP), &bm);
-//  m_bitmap.GetBitmap(&bm);
-
-    return CreateEx(WS_EX_TOPMOST,
-                    AfxRegisterWndClass(0, AfxGetApp()->LoadStandardCursor(IDC_ARROW)),
-                    NULL, WS_POPUP | WS_VISIBLE, 0, 0, bm.bmWidth, bm.bmHeight,
-                    pParentWnd ? pParentWnd->GetSafeHwnd() : HWND_DESKTOP, NULL);
-#endif
-
-    return false;
+    m_timer.Start(SPLASH_DELAY, true);
+    m_timer.CallAfter(continueWith);
 }
 
-void CSplashWnd::HideSplashScreen()
+/*************************************************************************/
+/*************************************************************************/
+
+SplashWnd::SplashWnd()
+    : wxFrame(
+        nullptr,
+        wxID_ANY,
+        "",
+        wxDefaultPosition,
+        wxDefaultSize,
+        SPLASH_STYLE)
+    , m_bitmap()
+    , m_text(nullptr)
 {
-#if REWRITE_TO_WX_WIDGET
-    // Destroy the window, and update the mainframe.
-    DestroyWindow();
-    CWnd *pWnd = AfxGetMainWnd();
-    if (pWnd)
-        pWnd->UpdateWindow();
-#endif
+    SetExtraStyle(GetExtraStyle() | wxWS_EX_TRANSIENT);
+
+    LoadBackground();
+
+    m_text = std::make_unique<wxStaticText>(this, wxID_ANY, "");
+
+    m_text->SetPosition(wxPoint(10, 20));
+    m_text->SetLabel("Sample Text");
+    m_text->Fit();
+    m_text->Show();
+
+    Bind(wxEVT_PAINT, &SplashWnd::OnPaint, this);
+
+    Update();
+    CenterOnScreen();
+    Show();
+    wxYield();
 }
 
-#if REWRITE_TO_WX_WIDGET
-
-void CSplashWnd::PostNcDestroy()
+SplashWnd::~SplashWnd()
 {
-    // Free the C++ class.
-    delete this;
 }
 
-int CSplashWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
+/*************************************************************************/
+
+void SplashWnd::LoadBackground()
 {
-    if (CWnd::OnCreate(lpCreateStruct) == -1)
-        return -1;
+    auto dirs = wxGetApp().GetResourcePaths();
 
-    // Center the window.
-    CenterWindow();
+    wxString file = dirs.FindAbsoluteValidPath(SPLASH_FILE_NAME);
 
-    // Set a timer to destroy the splash screen.
-    SetTimer(1, 1000, NULL);	// 0.75 sekundy - adjusted to 1 second
-
-    return 0;
-}
-#endif
-
-void CSplashWnd::OnPaint()
-{
-#if REWRITE_TO_WX_WIDGET
-    CPaintDC dc(this);
-
-    CDC dcImage;
-    if (!dcImage.CreateCompatibleDC(&dc))
-        return;
-
-    BITMAP bm;
-    ::GetObject(m_hdib, sizeof(BITMAP), &bm);
-
-    // Paint the image.
-    HGDIOBJ hOldBitmap = SelectObject(dcImage.GetSafeHdc(),(HGDIOBJ)m_hdib);
-
-    int nColors = dc.GetDeviceCaps(NUMCOLORS); // number of entries in the color palette
-    if (nColors != -1)
+    if (!file.IsEmpty())
     {
-        RGBQUAD rgbColors[16];
-        BYTE buf[sizeof(LOGPALETTE) + 16 * sizeof(PALETTEENTRY)];
-        LOGPALETTE *pLogPalette= (LOGPALETTE *)buf;
-        pLogPalette->palVersion = 0x300;
-        pLogPalette->palNumEntries = 16;
-        PALETTEENTRY *pEntry= (PALETTEENTRY *)(pLogPalette+1);
-        CPalette Palette;
-        UINT ret= GetDIBColorTable(dcImage.GetSafeHdc(),0,16,rgbColors);
-        if (ret)
-        {
-            for (int i=0; i<16; i++)
-            {
-                pEntry[i].peRed = rgbColors[i].rgbRed;
-                pEntry[i].peGreen = rgbColors[i].rgbGreen;
-                pEntry[i].peBlue = rgbColors[i].rgbBlue;
-                pEntry[i].peFlags = 0; //PC_NOCOLLAPSE;
-            }
-            Palette.CreatePalette(pLogPalette);
-            dc.SelectPalette(&Palette,FALSE);
-            dc.RealizePalette();
-        }
+        m_bitmap.LoadFile(file);
+
+        if (m_bitmap.IsOk())
+            SetSize(m_bitmap.GetSize());
     }
-
-    dc.BitBlt(0, 0, bm.bmWidth, bm.bmHeight, &dcImage, 0, 0, SRCCOPY);
-    SelectObject(dcImage.GetSafeHdc(),hOldBitmap);
-#endif
 }
 
-void CSplashWnd::OnTimer(UINT nIDEvent)
+/*************************************************************************/
+
+void SplashWnd::OnPaint(wxPaintEvent &)
 {
-    UNUSED(nIDEvent);
+    wxPaintDC dc(this);
 
-    // Destroy the splash screen window.
-    HideSplashScreen();
+    if (m_bitmap.IsOk())
+        dc.DrawBitmap(m_bitmap, 0, 0);
 }
+
+/*************************************************************************/

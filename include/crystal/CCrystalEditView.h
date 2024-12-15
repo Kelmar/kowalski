@@ -86,7 +86,7 @@ public:
 
     bool ReplaceSelection(const char *newText);
 
-    virtual void OnEditOperation(int nAction, const char *text);
+    virtual void OnEditOperation(int nAction, const std::string &text) override;
 
     enum LineChange { NOTIF_NO_CHANGES, NOTIF_LINE_MODIFIED, NOTIF_LINE_ERROR };
     virtual LineChange NotifyEnterPressed(wxPoint ptCursor, std::string& strLine);

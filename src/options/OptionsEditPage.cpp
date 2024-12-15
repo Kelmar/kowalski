@@ -97,6 +97,7 @@ bool COptionsEditPage::OnInitDialog()
 {
     //CPropertyPage::OnInitDialog();
 
+#if 0
     // copy color settings
     m_wndExample.m_rgbInstruction = *ConfigSettings::color_syntax[0];
     m_wndExample.m_rgbDirective = *ConfigSettings::color_syntax[1];
@@ -110,6 +111,7 @@ bool COptionsEditPage::OnInitDialog()
     m_wndExample.m_vbBold[2] = *ConfigSettings::syntax_font_style[2];
     m_wndExample.m_vbBold[3] = *ConfigSettings::syntax_font_style[3];
     m_wndExample.m_vbBold[4] = *ConfigSettings::syntax_font_style[4];
+#endif
 
     OnSelChangeElement();
 

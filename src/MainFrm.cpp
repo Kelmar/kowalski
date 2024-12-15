@@ -57,7 +57,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
-std::string CMainFrame::ProjName = "";
+//std::string CMainFrame::ProjName = "";
 
 void CMainFrame::ConfigSettings(bool load)
 {
@@ -488,7 +488,6 @@ static UINT indicators[] =
 
 CMainFrame::CMainFrame(wxDocManager *docManager)
     : MAIN_BASE(docManager, nullptr, wxID_ANY, _(""), wxDefaultPosition, wxDefaultSize)
-    , m_debugController(nullptr)
     , m_auiManager()
     , m_docManager(docManager)
 {
@@ -500,8 +499,6 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
     // TODO: Move this to the options dialog class, not here.
     m_nLastPage = 0; // the last page called up (tab) in the options box
 
-    m_debugController = new DebugController(this);
-
     InitMenu();
 
     CreateStatusBar(2);
@@ -511,8 +508,8 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
 
     BindEvents();
 
-    PushEventHandler(ProjectManager::Ptr());
-    PushEventHandler(m_debugController);
+    PushEventHandler(&wxGetApp().projectManager());
+    PushEventHandler(&wxGetApp().debugController());
 
     m_uTimer = 0;
 
@@ -554,8 +551,6 @@ CMainFrame::~CMainFrame()
 
     PopEventHandler(false); // DebugController
     PopEventHandler(false); // ProjectHandler
-
-    delete m_debugController;
 
     //  if (m_Idents)
     //    delete m_Idents;
@@ -763,7 +758,7 @@ void CMainFrame::InitMenu()
     menuBar->Append(edit, wxGetStockLabel(wxID_EDIT));
     menuBar->Append(view, _("View"));
 
-    m_debugController->BuildMenu(menuBar);
+    wxGetApp().debugController().BuildMenu(menuBar);
 
     menuBar->Append(help, wxGetStockLabel(wxID_HELP));
 
@@ -2154,7 +2149,7 @@ void CMainFrame::UpdateFlea()
     auto statusBar = GetStatusBar();
     wxString text;
 
-    switch (m_debugController->CurrentState())
+    switch (wxGetApp().debugController().CurrentState())
     {
     default:
     case DebugState::Unloaded:

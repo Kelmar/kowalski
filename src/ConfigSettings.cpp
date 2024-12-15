@@ -30,6 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502View.h"
 #include "StackView.h"
 
+#if 0
+
 wxFontInfo* const ConfigSettings::fonts[] =
 {
     &CSrc6502View::s_logFont,
@@ -96,6 +98,8 @@ uint8_t* ConfigSettings::syntax_font_style[] =
     &CSrc6502View::m_vbyFontStyle[5],
     0
 };
+
+#endif
 
 void ConfigSettings::Save(bool)
 {

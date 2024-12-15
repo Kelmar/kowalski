@@ -29,10 +29,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CSaveCode : public wxDialog
 {
-    static UINT m_uStart;
-    static UINT m_uEnd;
+    UINT m_uStart;
+    UINT m_uEnd;
     int m_nPos;
-    static int m_nInitPos;
+    int m_nInitPos;
 
     void EnableOptions(bool bRedraw = true);
 

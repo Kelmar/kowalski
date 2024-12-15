@@ -23,10 +23,11 @@
  /*************************************************************************/
 
 #include "StdAfx.h"
+#include "6502.h"
+
 #include <wx/dcbuffer.h>
 
 #include "encodings.h"
-#include "FontController.h"
 #include "HexView.h"
 
 /*************************************************************************/
@@ -131,7 +132,7 @@ void HexView::CalculateScrollInfo()
     width += 3; // Buffer between hex digits and characters
     width += LINE_WIDTH;
 
-    wxSize cellSize = FontController::Get().getCellSize();
+    wxSize cellSize = wxGetApp().fontController().getCellSize();
 
     m_virtualSize.Set(width * cellSize.x, lines * cellSize.y);
 }
@@ -143,7 +144,7 @@ void HexView::UpdateScrollInfo()
     CalculateScrollInfo();
     CalcAddressFormat();
 
-    wxSize cellSize = FontController::Get().getCellSize();
+    wxSize cellSize = wxGetApp().fontController().getCellSize();
 
     SetScrollRate(0, cellSize.y);
     SetVirtualSize(m_virtualSize.GetWidth(), m_virtualSize.GetHeight());
@@ -184,7 +185,7 @@ void HexView::CalcAddressFormat()
 
 wxPoint HexView::GetHitCell(const wxPoint &p) const
 {
-    wxSize cellSize = FontController::Get().getCellSize();
+    wxSize cellSize = wxGetApp().fontController().getCellSize();
 
     int row = p.y / cellSize.y;
 
@@ -298,7 +299,7 @@ void HexView::Draw(wxDC &dc)
     dc.SetBackground(*wxWHITE_BRUSH);
     dc.Clear();
 
-    FontController &fontController = FontController::Get();
+    FontController &fontController = wxGetApp().fontController();
     wxSize cellSize = fontController.getCellSize();
     dc.SetFont(fontController.getMonoFont());
 
@@ -336,7 +337,7 @@ void HexView::Draw(wxDC &dc)
         return;
 
     // TODO: Allow map to other character sets.
-    auto encoding = encodings::CodePage437::Get();
+    //auto encoding = encodings::CodePage437::Get();
 
     while(y < area.GetHeight() && addr < m_memory->size())
     {
@@ -352,7 +353,8 @@ void HexView::Draw(wxDC &dc)
         for (int i = 0; i < LINE_WIDTH && addr < m_memory->size(); ++i, ++addr)
         {
             uint8_t val = m_memory->get(addr);
-            charDisplay += encoding.toUnicode(val);
+            //charDisplay += encoding.toUnicode(val);
+            charDisplay += (char)val;
 
             w = txt.Printf("%02X ", val);
 

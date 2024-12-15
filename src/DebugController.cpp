@@ -31,14 +31,19 @@
 #include "6502Doc.h"
 #include "Options.h"
 
+#include "options/OptionsSymPage.h"
+
 #include "DebugController.h"
 #include "AsmThread.h"
 
 /*************************************************************************/
 
-DebugController::DebugController(CMainFrame *mainFrame)
-    : m_mainFrame(mainFrame)
-    , m_critSect()
+/*************************************************************************/
+
+/*************************************************************************/
+
+DebugController::DebugController()
+    : m_critSect()
     , m_semaphore()
     , m_asmThread(nullptr)
 {
@@ -86,8 +91,6 @@ void DebugController::BindEvents()
     Bind(wxEVT_MENU, &DebugController::OnRun, this, evID_RUN);
     Bind(wxEVT_MENU, &DebugController::OnStop, this, evID_STOP);
     Bind(wxEVT_MENU, &DebugController::OnStepOver, this, evID_STEP_OVER);
-
-    Bind(wxEVT_MENU, &DebugController::OnOptions, this, evID_OPTIONS);
 
     // Update handlers
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateAssemble, this, evID_ASSEMBLE);
@@ -155,7 +158,7 @@ void DebugController::Run()
         StartDebug();
 
     Simulator()->Run();
-    m_mainFrame->UpdateFlea();
+    wxGetApp().mainFrame()->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -164,7 +167,7 @@ void DebugController::Restart()
 {
     StartDebug();
     Simulator()->Run();
-    m_mainFrame->UpdateFlea();
+    wxGetApp().mainFrame()->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -175,7 +178,7 @@ void DebugController::Break()
         return;
 
     Simulator()->Break();
-    m_mainFrame->UpdateFlea();
+    wxGetApp().mainFrame()->UpdateFlea();
 
 #if 0
     // Likely this will come from the simulator sending an event.
@@ -196,7 +199,7 @@ void DebugController::StepOver()
         return;
 
     Simulator()->StepOver();
-    m_mainFrame->UpdateFlea();
+    wxGetApp().mainFrame()->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -214,7 +217,7 @@ void DebugController::ExitDebugMode()
         Simulator()->AbortProg(); // Interrupt the running program
 
     DebugStopped();
-    m_mainFrame->UpdateFlea();
+    wxGetApp().mainFrame()->UpdateFlea();
 }
 
 /*************************************************************************/
@@ -258,7 +261,7 @@ void DebugController::OnAssemble(wxCommandEvent &)
     if (m_asmThread)
         return; // Currently assembling code, wait for completion.
 
-    CSrc6502View *pView = m_mainFrame->GetCurrentView();
+    CSrc6502View *pView = wxGetApp().mainFrame()->GetCurrentView();
 
     if (pView == nullptr)
         return;
@@ -357,18 +360,6 @@ void DebugController::OnStepOver(wxCommandEvent &)
 }
 
 /*************************************************************************/
-
-void DebugController::OnOptions(wxCommandEvent &)
-{
-    auto options = std::unique_ptr<COptions>(new COptions(m_mainFrame));
-
-    if (options->ShowModal() != wxID_OK)
-        return;
-
-    wxLogDebug("Save global options here.");
-}
-
-/*************************************************************************/
 // Update handlers
 /*************************************************************************/
 
@@ -376,7 +367,7 @@ void DebugController::OnUpdateAssemble(wxUpdateUIEvent &e)
 {
     bool enabled = m_asmThread == nullptr; // Enabled only if we're not currently assembling code.
 
-    CSrc6502View *pView = m_mainFrame->GetCurrentView();
+    CSrc6502View *pView = wxGetApp().mainFrame()->GetCurrentView();
 
     enabled &= pView != nullptr;
 
@@ -444,12 +435,12 @@ void DebugController::OnAsmComplete(wxThreadEvent &)
     if (exit != nullptr)
     {
         wxLogStatus("Assembly failed");
-        m_mainFrame->console()->AppendText("Error from assembler!\r\n");
+        wxGetApp().mainFrame()->console()->AppendText("Error from assembler!\r\n");
     }
     else
     {
         wxLogStatus("Assembly completed");
-        m_mainFrame->console()->AppendText("Assemble OK\r\n");
+        wxGetApp().mainFrame()->console()->AppendText("Assemble OK\r\n");
     }
 }
 

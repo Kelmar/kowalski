@@ -25,6 +25,8 @@
 #include "StdAfx.h"
 #include "encodings.h"
 
+#if 0
+
 /*************************************************************************/
 
 using namespace encodings;
@@ -244,3 +246,4 @@ wxString CodePage437::toUnicode(uint8_t c)
 }
 
 /*************************************************************************/
+#endif

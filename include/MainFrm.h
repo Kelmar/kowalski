@@ -60,9 +60,6 @@ class CMainFrame : public MAIN_BASE
 private:
     static constexpr char REG_ENTRY_MAINFRM[] = "MainFrame";
 
-private: // Controllers
-    DebugController *m_debugController;
-
 private:
     CRegisterBar m_wndRegisterBar;
     CMemoryInfo m_Memory;
@@ -82,12 +79,12 @@ private:
     CIOWindow *m_ioWindow;
 
     // TODO: Move into a project document
-    static std::string ProjName;
+    //std::string ProjName;
     
     //static LRESULT CALLBACK StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-    //static wxBitmap m_bmpCode;
-    //static wxBitmap m_bmpDebug;
+    //wxBitmap m_bmpCode;
+    //wxBitmap m_bmpDebug;
 
     std::string m_strFormat; // Formatting characters for paragraph. row/column in the status bar
     UINT m_uTimer;

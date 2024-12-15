@@ -313,9 +313,6 @@ public:
     bool GetDisableDragAndDrop() const;
     void SetDisableDragAndDrop(bool bDDAD);
 
-    // Default handle to resources
-    //static HINSTANCE s_hResourceInst;
-
 // Operations
 public:
     void AttachToBuffer(CCrystalTextBuffer *pBuf = nullptr);
@@ -343,7 +340,7 @@ public:
     bool HighlightText(const wxPoint &ptStartPos, int nLength);
 
     //	Overridable: an opportunity for Auto-Indent, Smart-Indent etc.
-    virtual void OnEditOperation(int action, const std::string &text);
+    virtual void OnEditOperation(int nAction, const std::string &text);
 
 public:
     virtual void OnDraw(wxDC* pDC); // overridden to draw this view

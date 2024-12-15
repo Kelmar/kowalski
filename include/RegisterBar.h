@@ -56,7 +56,10 @@ private:
     afx_msg LRESULT OnExitDebug(WPARAM wParam, LPARAM lParam);
 
 public:
-    static bool m_bHidden;
+#if 0
+    // TODO: Move to config
+    bool m_bHidden;
+#endif
 
     /* constructor */ CRegisterBar();
 

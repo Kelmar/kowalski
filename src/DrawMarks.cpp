@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Arrow, break and error tracing functions
 // Used in ...View classes
 
+#if 0
+
 wxColour CMarks::s_rgbPointer = wxColour(255, 255, 0);
 wxColour CMarks::s_rgbBreakpoint = wxColour(0, 0, 255);
 wxColour CMarks::s_rgbError = wxColour(255, 0, 0);
@@ -102,5 +104,7 @@ void CMarks::draw_mark(wxDC &dc, int x, int y, int h)
 
     dc.DrawPolygon(size, coords);
 }
+
+#endif
 
 //-----------------------------------------------------------------------------

@@ -1189,7 +1189,7 @@ void CCrystalEditView::OnUpdateEditRedo(CCmdUI* pCmdUI)
 #endif
 }
 
-void CCrystalEditView::OnEditOperation(int nAction, const char *text)
+void CCrystalEditView::OnEditOperation(int nAction, const std::string &text)
 {
     UNUSED(nAction);
     UNUSED(text);

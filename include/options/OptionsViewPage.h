@@ -43,7 +43,7 @@ public:
         int changed;
         int brush;
     };
-    static TextDef m_Text[];
+    //static TextDef m_Text[];
 
 public:
     /* constructor */ COptionsViewPage(wxBookCtrlBase *parent);

@@ -18,49 +18,37 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
-#ifndef SPLASH_WND_H__
-#define SPLASH_WND_H__
+#ifndef OPTIONS_DIALOG_6502_H__
+#define OPTIONS_DIALOG_6502_H__
 
 /*************************************************************************/
 
-class SplashController : public wxFrame, public wxEventFilter
+class OptionsDialog : public wxDialog, public wxExtra
 {
 private:
-    class SplashWnd *m_window;
-    wxTimer m_timer;
+    int s_lastActivePage;
+
+    wxNotebook *m_notebook;
+
+    std::vector<POptionsPage> m_pages;
 
 public:
-    /* constructor */ SplashController();
-    virtual	     ~SplashController();
+    /* constructor */ OptionsDialog();
+    virtual          ~OptionsDialog();
 
-    void SetStatus(const wxString &text);
-    void Done(std::function<void()> continueWith);
+    void Create(wxFrame *parent);
+
+    void AddPage(const POptionPageFactory &factory, const wxString &text);
+
+    const std::vector<POptionsPage> &GetPages() const { return m_pages; }
+
+protected:
+    //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
+    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
 };
 
 /*************************************************************************/
 
-class SplashWnd : public wxFrame
-{
-private:
-    wxBitmap m_bitmap;
-    std::unique_ptr<wxStaticText> m_text;
-
-    void LoadBackground();
-    void OnPaint(wxPaintEvent &);
-
-public:
-    /* constructor */ SplashWnd();
-    virtual	     ~SplashWnd();
-
-    // Operations
-    void SetStatus(const wxString &text)
-    {
-	m_text->SetLabelText(text);
-    }
-};
-
-/*************************************************************************/
-
-#endif /* SPLASH_WND_H__ */
+#endif /* OPTIONS_6502_H__ */
 
 /*************************************************************************/

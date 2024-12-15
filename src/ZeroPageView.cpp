@@ -27,10 +27,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "MemoryGoto.h"
 #include "MemoryChg.h"
 
+#if 0
+
 wxFont CZeroPageView::m_Font;
 wxFontInfo CZeroPageView::m_LogFont;
 wxColour CZeroPageView::m_rgbTextColor;
 wxColour CZeroPageView::m_rgbBkgndColor;
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CZeroPageView

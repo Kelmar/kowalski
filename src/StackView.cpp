@@ -27,10 +27,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "MemoryGoto.h"
 #include "MemoryChg.h"
 
+#if 0
+
 wxFont CStackView::m_Font;
 wxFontInfo CStackView::m_LogFont;
 wxColour CStackView::m_rgbTextColor;
 wxColour CStackView::m_rgbBkgndColor;
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CStackView

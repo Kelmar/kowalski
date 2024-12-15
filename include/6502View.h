@@ -64,23 +64,26 @@ private:
     void UpdatePositionInfo();
 
 public:
-    //static wxFont s_Font;
-    //static wxFontInfo s_LogFont;
+#if 0
+    // TODO: Move to config
+    wxFont s_Font;
+    wxFontInfo s_LogFont;
 
-    static wxColour s_rgbTextColor;
-    static wxColour s_rgbBkgndColor;
+    wxColour s_rgbTextColor;
+    wxColour s_rgbBkgndColor;
 
-    static wxFontInfo s_logFont;
-    static wxFont s_font;
+    wxFontInfo s_logFont;
+    wxFont s_font;
 
-    static bool m_bAutoIndent;
-    static int m_nTabStep;
-    static bool m_bAutoSyntax;
-    static bool m_bAutoUppercase;
+    bool m_bAutoIndent;
+    int m_nTabStep;
+    bool m_bAutoSyntax;
+    bool m_bAutoUppercase;
 
-    static wxColour s_vrgbColorSyntax[];
+    wxColour s_vrgbColorSyntax[];
 
-    static uint8_t m_vbyFontStyle[];
+    uint8_t m_vbyFontStyle[];
+#endif
         
 public:
     /* constructor */ CSrc6502View();

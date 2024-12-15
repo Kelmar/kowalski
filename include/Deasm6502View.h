@@ -54,6 +54,7 @@ class CDeasm6502View : public wxView //, public CMarks, CAsm
     void ScrollToLine(uint32_t addr);
 
 public:
+/*
     static wxColour m_rgbAddress;
     static wxColour m_rgbCode;
     static wxColour m_rgbInstr;
@@ -61,6 +62,7 @@ public:
     static bool m_bDrawCode;
     static wxFont m_Font;
     static wxFontInfo m_LogFont;
+*/
 
     virtual ~CDeasm6502View();
 

@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
+#include "options/OptionsController.h"
+
 #include "options/OptionsViewPage.h"
 #include "options/OptionsFontPage.h"
 #include "options/OptionsSymPage.h"
@@ -30,33 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "options/OptionsAsmPage.h"
 #include "options/OptionsDeasmPage.h"
 #include "options/OptionsMarksPage.h"
-
-/*************************************************************************/
-// COptions
-
-class COptions : public wxDialog, public wxExtra
-{
-private:
-    static int s_lastActivePage;
-
-    wxNotebook *m_notebook;
-
-    COptionsAsmPage *m_AsmPage;
-    COptionsEditPage *m_EditPage;
-    OptionsFontPage *m_FontPage;
-    COptionsSymPage *m_SymPage;
-    COptionsDeasmPage *m_DeasmPage;
-    COptionsMarksPage *m_MarksPage;
-    COptionsViewPage *m_ViewPage;
-
-public:
-    /* constructor */ COptions(wxFrame *parent);
-    virtual          ~COptions();
-
-protected:
-    //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
-    afx_msg void OnContextMenu(wxWindow* pWnd, wxPoint point);
-};
 
 /*************************************************************************/
 

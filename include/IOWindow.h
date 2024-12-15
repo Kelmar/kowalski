@@ -183,7 +183,7 @@ public: // Input functions
     int PeekInput() const;
 
 public: // Attributes
-    static wxColour m_rgbTextColor, m_rgbBackgndColor;
+    wxColour m_rgbTextColor, m_rgbBackgndColor;
 
     /**
      * @brief Set the size of the display area in characters.

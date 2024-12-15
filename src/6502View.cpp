@@ -30,6 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502View.h"
 #include "M6502.h"
 
+#if 0
+
 bool CSrc6502View::m_bAutoIndent = true; // static component -automatic indentation
 int CSrc6502View::m_nTabStep = 8;
 bool CSrc6502View::m_bAutoSyntax = true;
@@ -56,6 +58,7 @@ uint8_t CSrc6502View::m_vbyFontStyle[6] =
 {
     0, 0, 0, 0, 0, 0
 };
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CSrc6502View construction/destruction

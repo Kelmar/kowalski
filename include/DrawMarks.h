@@ -33,9 +33,11 @@ enum class MarkType
 class CMarks
 {
 public:
+#if 0
     static wxColour s_rgbPointer;
     static wxColour s_rgbBreakpoint;
     static wxColour s_rgbError;
+#endif
 
     static void draw_breakpoint(wxDC &dc, int x, int y, int h, bool active);
     static void draw_pointer(wxDC &dc, int x, int y, int h);
