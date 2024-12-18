@@ -92,12 +92,12 @@ void OptionsDialog::Create(wxFrame *parent)
 
 /*************************************************************************/
 
-void OptionsDialog::AddPage(const POptionPageFactory &factory, const wxString &text)
+void OptionsDialog::AddPage(const OptionsPageFactory &factory, const wxString &text)
 {
-    auto page = factory->Create(m_notebook);
+    auto page = factory(m_notebook);
 
     m_pages.push_back(page);
-    m_notebook->AddPage(page.get(), text);
+    m_notebook->AddPage(page, text);
 }
 
 /*************************************************************************/

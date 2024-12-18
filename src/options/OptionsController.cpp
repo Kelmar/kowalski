@@ -54,7 +54,7 @@ bool OptionsController::Init(CMainFrame *mainFrame)
 
 /*************************************************************************/
 
-void OptionsController::RegisterPage(const POptionPageFactory &factory, const wxString &text)
+void OptionsController::RegisterPage(OptionsPageFactory factory, const wxString &text)
 {
     m_pageFactories.push_back(PageInfo
     {

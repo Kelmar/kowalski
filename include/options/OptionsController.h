@@ -50,16 +50,9 @@ public:
     virtual void SaveChanges() = 0;
 };
 
-typedef std::shared_ptr<OptionsPage> POptionsPage;
-
 /*************************************************************************/
 
-struct OptionPageFactory
-{
-    virtual POptionsPage Create(wxBookCtrlBase *parent) const = 0;
-};
-
-typedef std::shared_ptr<OptionPageFactory> POptionPageFactory;
+typedef std::function<OptionsPage *(wxBookCtrlBase *)> OptionsPageFactory;
 
 /*************************************************************************/
 
@@ -68,7 +61,7 @@ class OptionsController : public wxEvtHandler
 private:
     struct PageInfo
     {
-        POptionPageFactory factory;
+        OptionsPageFactory factory;
         wxString text;
     };
 
@@ -85,7 +78,7 @@ public:
     bool Init(CMainFrame *mainFrame);
 
 public:
-    void RegisterPage(const POptionPageFactory &factory, const wxString &text);
+    void RegisterPage(OptionsPageFactory factory, const wxString &text);
 
     void BuildMenu(wxMenuBar *);
 };

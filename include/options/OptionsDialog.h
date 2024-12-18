@@ -30,7 +30,7 @@ private:
 
     wxNotebook *m_notebook;
 
-    std::vector<POptionsPage> m_pages;
+    std::vector<OptionsPage *> m_pages;
 
 public:
     /* constructor */ OptionsDialog();
@@ -38,10 +38,10 @@ public:
 
     void Create(wxFrame *parent);
 
-    void AddPage(const POptionPageFactory &factory, const wxString &text);
+    void AddPage(const OptionsPageFactory &factory, const wxString &text);
     void UpdateSize();
 
-    const std::vector<POptionsPage> &GetPages() const { return m_pages; }
+    const std::vector<OptionsPage *> &GetPages() const { return m_pages; }
 
 protected:
     //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);

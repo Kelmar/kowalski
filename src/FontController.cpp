@@ -34,21 +34,6 @@
 
 /*************************************************************************/
 
-namespace
-{
-    class FontPageFactory : public OptionPageFactory
-    {
-    public:
-        virtual POptionsPage Create(wxBookCtrlBase *parent) const override
-        {
-            return std::make_shared<OptionsFontPage>(parent);
-        }
-    };
-}
-
-/*************************************************************************/
-/*************************************************************************/
-
 FontController::FontController()
     : m_monoFont(nullptr)
     , m_cellSize()
@@ -89,10 +74,12 @@ void FontController::CalcCellSizes()
 
 void FontController::InitOptions()
 {
-    wxGetApp().optionsController().RegisterPage(
-        std::make_shared<FontPageFactory>(),
-        _("Fonts and Colors")
-    );
+    OptionsPageFactory factory = [] (wxBookCtrlBase *parent)
+    {
+        return new OptionsFontPage(parent);
+    };
+
+    wxGetApp().optionsController().RegisterPage(factory, _("Fonts and Colors"));
 }
 
 /*************************************************************************/

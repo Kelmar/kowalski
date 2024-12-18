@@ -26,6 +26,7 @@
 #include "6502.h"
 
 #include "Options.h"
+#include "options/OptionsFontPage.h"
 #include "FontController.h"
 
 /*************************************************************************/

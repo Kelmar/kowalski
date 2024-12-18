@@ -41,10 +41,10 @@ const char APP_NAME[] = "6502_simulator";
 /*************************************************************************/
 
 C6502App::C6502App()
-    : m_fontController(nullptr)
+    : m_optionsController(nullptr)
+    , m_fontController(nullptr)
     , m_projectManager(nullptr)
     , m_debugController(nullptr)
-    , m_optionsController(nullptr)
     , m_mainFrame(nullptr)
     , m_config(nullptr)
     , m_bDoNotAddToRecentFileList(false)
