@@ -56,6 +56,13 @@ DebugController::~DebugController()
 
 /*************************************************************************/
 
+void DebugController::InitOptions()
+{
+    //wxGetApp().optionsController().RegisterPage(factory, _("Debugging"));
+}
+
+/*************************************************************************/
+
 PSym6502 DebugController::Simulator() const
 {
     return wxGetApp().m_global.GetSimulator();
@@ -120,9 +127,6 @@ void DebugController::BuildMenu(wxMenuBar *menuBar)
     menu->Append(evID_STEP_OVER, _("Step Over"));
     menu->Append(evID_STEP_OUT, _("Run Till Return"));
     menu->Append(evID_RUN_TO, _("Run to Cursor"));
-
-    menu->AppendSeparator();
-    menu->Append(evID_OPTIONS, _("Options\tCtrl+E"));
 
     /*
     auto intMenu = new wxMenu();

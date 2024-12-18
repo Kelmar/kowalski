@@ -508,9 +508,6 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
 
     BindEvents();
 
-    PushEventHandler(&wxGetApp().projectManager());
-    PushEventHandler(&wxGetApp().debugController());
-
     m_uTimer = 0;
 
     m_output = new ConsoleFrame(this);
@@ -549,6 +546,7 @@ CMainFrame::~CMainFrame()
 {
     m_auiManager.UnInit();
 
+    PopEventHandler(false); // OptionsController
     PopEventHandler(false); // DebugController
     PopEventHandler(false); // ProjectHandler
 
@@ -584,6 +582,10 @@ void CMainFrame::BindEvents()
 
     // UI update bindings
     Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateShowLog, this, evID_SHOW_LOG);
+
+    PushEventHandler(&wxGetApp().projectManager());
+    PushEventHandler(&wxGetApp().debugController());
+    PushEventHandler(&wxGetApp().optionsController());
 }
 
 /*************************************************************************/
@@ -692,8 +694,6 @@ void CMainFrame::EnableDockingEx(uint32_t dwDockStyle)
 
 void CMainFrame::InitMenu()
 {
-    //wxDocManager *docManager = wxDocManager::GetDocumentManager();
-
     // File Menu
     wxMenu *file = new wxMenu();
     file->Append(wxID_NEW);
@@ -712,17 +712,7 @@ void CMainFrame::InitMenu()
     file->Append(wxID_PRINT_SETUP, _("Print &Setup..."));
     file->Append(wxID_PREVIEW);
 
-#if 0
-    if (!m_bDoNotAddToRecentFileList)
-    {
-        wxMenu *recentFiles = new wxMenu();
-
-        file->AppendSeparator();
-        file->AppendSubMenu(recentFiles, _("Recent &Files"));
-
-        docManager->FileHistoryUseMenu(recentFiles);
-}
-#endif
+    // TODO: Add most recently used files here.
 
     file->AppendSeparator();
     file->Append(wxID_EXIT);
@@ -737,13 +727,16 @@ void CMainFrame::InitMenu()
     edit->Append(wxID_COPY);
     edit->Append(wxID_PASTE);
 
+    edit->AppendSeparator();
+    edit->Append(evID_OPTIONS, _("&Options...\tCtrl+E"));
+
     // View Menu
     wxMenu *view = new wxMenu();
     view->AppendCheckItem(evID_SHOW_LOG, _("Log"));
-    view->Append(evID_SHOW_DISASM, _("Disassembler\tAlt+0"));
+    view->Append(evID_SHOW_DISASM, _("&Disassembler\tAlt+0"));
     
     view->AppendSeparator();
-    view->Append(evID_SHOW_REGS, _("Registers\tAlt+1"));
+    view->Append(evID_SHOW_REGS, _("&Registers\tAlt+1"));
     view->Append(evID_SHOW_MEMORY, _("&Memory\tAlt+2"));
     view->Append(evID_SHOW_OUTPUT, _("&Output"));
     view->Append(evID_SHOW_IOWINDOW, _("&IO Window"));
@@ -756,7 +749,7 @@ void CMainFrame::InitMenu()
     wxMenuBar *menuBar = new wxMenuBar();
     menuBar->Append(file, wxGetStockLabel(wxID_FILE));
     menuBar->Append(edit, wxGetStockLabel(wxID_EDIT));
-    menuBar->Append(view, _("View"));
+    menuBar->Append(view, _("&View"));
 
     wxGetApp().debugController().BuildMenu(menuBar);
 

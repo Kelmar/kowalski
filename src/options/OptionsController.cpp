@@ -81,12 +81,14 @@ void OptionsController::BindEvents()
 
 void OptionsController::OnOptions(wxCommandEvent &)
 {
-    auto options = std::unique_ptr<OptionsDialog>(new OptionsDialog());
+    auto options = std::make_unique<OptionsDialog>();
 
     options->Create(m_mainFrame);
 
     for (auto info : m_pageFactories)
         options->AddPage(info.factory, info.text);
+
+    options->UpdateSize();
 
     if (options->ShowModal() == wxID_OK)
     {

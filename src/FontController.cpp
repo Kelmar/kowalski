@@ -24,10 +24,29 @@
 
 #include "StdAfx.h"
 
+#include "6502.h"
+#include "Options.h"
+
 #include "wx/fontenum.h"
 
 #include "FontController.h"
+#include "options/OptionsFontPage.h"
 
+/*************************************************************************/
+
+namespace
+{
+    class FontPageFactory : public OptionPageFactory
+    {
+    public:
+        virtual POptionsPage Create(wxBookCtrlBase *parent) const override
+        {
+            return std::make_shared<OptionsFontPage>(parent);
+        }
+    };
+}
+
+/*************************************************************************/
 /*************************************************************************/
 
 FontController::FontController()
@@ -64,6 +83,16 @@ void FontController::CalcCellSizes()
     dc.SetFont(*m_monoFont);
 
     m_cellSize = dc.GetTextExtent(" ");
+}
+
+/*************************************************************************/
+
+void FontController::InitOptions()
+{
+    wxGetApp().optionsController().RegisterPage(
+        std::make_shared<FontPageFactory>(),
+        _("Fonts and Colors")
+    );
 }
 
 /*************************************************************************/

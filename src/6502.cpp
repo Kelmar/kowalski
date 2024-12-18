@@ -41,9 +41,12 @@ const char APP_NAME[] = "6502_simulator";
 /*************************************************************************/
 
 C6502App::C6502App()
-    : m_mainFrame(nullptr)
+    : m_fontController(nullptr)
+    , m_projectManager(nullptr)
+    , m_debugController(nullptr)
+    , m_optionsController(nullptr)
+    , m_mainFrame(nullptr)
     , m_config(nullptr)
-    , m_traits()
     , m_bDoNotAddToRecentFileList(false)
 {
 }
@@ -51,8 +54,6 @@ C6502App::C6502App()
 C6502App::~C6502App()
 {
     DisposeSingletons();
-
-    delete m_config;
 }
 
 wxIMPLEMENT_APP(C6502App);
@@ -68,28 +69,21 @@ bool C6502App::OnInit()
     if (!wxApp::OnInit())
         return false;
 
-    m_traits = GetTraits();
-
     SetVendorName(VENDOR_NAME);
     SetAppName(APP_NAME);
     SetAppDisplayName(_("6502 Simulator"));
 
     m_splash = std::make_unique<SplashWnd>();
-
-    bool loadOkay = true;
-
-    loadOkay &= LoadResources();
     m_splash->Show();
-    m_splash->Refresh();
-    wxYield();
 
+    UpdateStatus(_("Loading resources..."));
+
+    LoadResources();
+
+    UpdateStatus(_("Loading character encodings..."));
     LoadEncodings();
-    m_splash->Refresh();
-    wxYield();
 
-    m_config = new wxConfig();
-    m_splash->Refresh();
-    wxYield();
+    UpdateStatus(_("Initializing controllers..."));
 
     wxDocManager *docManager = new wxDocManager();
 
@@ -103,31 +97,27 @@ bool C6502App::OnInit()
         "Any File", "Assembly View",
         CLASSINFO(CSrc6502Doc), CLASSINFO(CSrc6502View));
 
-    m_splash->Refresh();
-    wxYield();
-
     SetupSingletons();
 
-    m_splash->Refresh();
-    wxYield();
+    InitOptionPages();
+
+    UpdateStatus(_("Initializing file formats..."));
 
     InitBinaryTemplates();
+
+    UpdateStatus(_("Setting up primary window..."));
 
     if (!InitFrame())
         return false;
 
-    m_splash->Refresh();
-    wxYield();
     // File history has to be loaded after the frame is created.
     docManager->FileHistoryLoad(*m_config);
     m_splash->Refresh();
     wxYield();
 
-    wxLogStatus("Application loaded!");
-    m_splash->Refresh();
-    wxYield();
+    UpdateStatus(_("Application loaded!"));
 
-    wxSleep(5);
+    wxSleep(2); // TODO: Remove this
 
     m_mainFrame->Show();
 
@@ -140,6 +130,14 @@ bool C6502App::OnInit()
 
 void C6502App::SetupSingletons()
 {
+    m_config = new wxConfig();
+
+    /*
+     * The options controller needs to be created first so the other
+     * controllers have a chance to register their option handlers with it.
+     */
+    m_optionsController = new OptionsController();
+
     m_fontController = new FontController();
     m_projectManager = new ProjectManager();
     m_debugController = new DebugController();
@@ -152,6 +150,18 @@ void C6502App::DisposeSingletons()
     delete m_debugController;
     delete m_projectManager;
     delete m_fontController;
+
+    delete m_optionsController;
+    delete m_config;
+}
+
+/*************************************************************************/
+
+void C6502App::InitOptionPages()
+{
+    m_fontController->InitOptions();
+    m_debugController->InitOptions();
+    //m_projectManager->InitOptions();
 }
 
 /*************************************************************************/
@@ -465,6 +475,20 @@ int C6502App::OnExit()
 void C6502App::OnAppExit(wxCommandEvent &)
 {
     Exit();
+}
+
+/*************************************************************************/
+
+void C6502App::InnerUpdateStatus(const std::string &msg)
+{
+    wxLogStatus(msg.c_str());
+
+    if (m_splash)
+    {
+        m_splash->SetStatus(msg);
+        m_splash->Refresh();
+        wxYield();
+    }
 }
 
 /*************************************************************************/

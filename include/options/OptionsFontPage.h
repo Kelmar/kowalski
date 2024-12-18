@@ -27,7 +27,7 @@
 
 /*************************************************************************/
 
-class OptionsFontPage : public wxPanel, public wxExtra
+class OptionsFontPage : public OptionsPage, public wxExtra
 {
 private:
     wxChoice *m_categoryChoice;
@@ -40,6 +40,9 @@ private:
 public:
     /* constructor */ OptionsFontPage(wxBookCtrlBase *parent);
     virtual ~OptionsFontPage();
+
+    virtual void AbortChanges() override;
+    virtual void SaveChanges() override;
 };
 
 /*************************************************************************/

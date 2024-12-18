@@ -55,6 +55,8 @@ class DebugController;
 
 #include "mdi65.h"
 
+/*************************************************************************/
+
 class CMainFrame : public MAIN_BASE
 {
 private:

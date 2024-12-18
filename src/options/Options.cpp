@@ -58,7 +58,6 @@ void OptionsDialog::Create(wxFrame *parent)
 
     m_SymPage = new COptionsSymPage(m_notebook);
     m_AsmPage = new COptionsAsmPage(m_notebook);
-    m_FontPage = new OptionsFontPage(m_notebook);
     //m_EditPage = new COptionsEditPage(m_notebook);
     //m_DeasmPage = new COptionsDeasmPage(m_notebook);
     //m_MarksPage = new COptionsMarksPage(m_notebook);
@@ -66,7 +65,6 @@ void OptionsDialog::Create(wxFrame *parent)
 
     m_notebook->AddPage(m_SymPage, _("Simulator"));
     m_notebook->AddPage(m_AsmPage, _("Assembler"));
-    m_notebook->AddPage(m_FontPage, _("Fonts and Colors"));
     //m_notebook->AddPage(m_EditPage, _("Editor"));
     //m_notebook->AddPage(m_DeasmPage, _("Disassembler"));
     //m_notebook->AddPage(m_MarksPage, _("General"));
@@ -89,10 +87,7 @@ void OptionsDialog::Create(wxFrame *parent)
     hPop.pszFont = NULL; // Font
 #endif
 
-    auto sizer = this->GetSizer();
-    sizer->Layout();
-
-    Fit();
+    UpdateSize();
 }
 
 /*************************************************************************/
@@ -103,6 +98,16 @@ void OptionsDialog::AddPage(const POptionPageFactory &factory, const wxString &t
 
     m_pages.push_back(page);
     m_notebook->AddPage(page.get(), text);
+}
+
+/*************************************************************************/
+
+void OptionsDialog::UpdateSize()
+{
+    auto sizer = this->GetSizer();
+    sizer->Layout();
+
+    Fit();
 }
 
 /*************************************************************************/

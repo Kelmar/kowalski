@@ -30,6 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Splash.h"
 #include "encodings.h"
 
+#include "Options.h"
+
 #include "FontController.h"
 #include "ProjectManager.h"
 #include "DebugController.h"
@@ -41,14 +43,16 @@ class CIOWindow;
 class C6502App : public wxApp
 {
 private:
-    class FontController *m_fontController;
-    class ProjectManager *m_projectManager;
-    class DebugController *m_debugController;
+    // This needs to be created first.
+    OptionsController *m_optionsController;
+
+    FontController *m_fontController;
+    ProjectManager *m_projectManager;
+    DebugController *m_debugController;
 
     CMainFrame *m_mainFrame;
     wxLogWindow *m_logFrame;
     wxConfig *m_config;
-    wxAppTraits *m_traits;
 
     std::unique_ptr<SplashWnd> m_splash;
 
@@ -58,7 +62,11 @@ private:
     void SetupSingletons();
     void DisposeSingletons();
 
+    void InitOptionPages();
+
     void InitBinaryTemplates();
+
+    void InnerUpdateStatus(const std::string &str);
 
 public:
 #if 0
@@ -82,6 +90,7 @@ public:
     FontController &fontController() const { return *m_fontController; }
     ProjectManager &projectManager() const { return *m_projectManager; }
     DebugController &debugController() const { return *m_debugController; }
+    OptionsController &optionsController() const { return *m_optionsController; }
 
     CMainFrame *mainFrame() const { return m_mainFrame; }
     wxLogWindow *logFrame() const { return m_logFrame; }
@@ -99,6 +108,12 @@ public:
     const wxStandardPaths &GetStandardPaths() const { return m_traits->GetStandardPaths(); }
 
     wxPathList GetResourcePaths() const;
+
+    template <typename... T>
+    void UpdateStatus(const wxString &fmt, T&&... args)
+    {
+        InnerUpdateStatus(fmt::vformat(fmt.ToStdString(), fmt::make_format_args(args...)));
+    }
 
 protected:
     int OnExit() override;

@@ -39,6 +39,7 @@ public:
     void Create(wxFrame *parent);
 
     void AddPage(const POptionPageFactory &factory, const wxString &text);
+    void UpdateSize();
 
     const std::vector<POptionsPage> &GetPages() const { return m_pages; }
 

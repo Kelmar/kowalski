@@ -63,6 +63,8 @@ private:
 public:
     virtual ~FontController();
 
+    void InitOptions();
+
     std::vector<BasicFontInfo> GetInstalledFonts();
 
     const wxFont &getMonoFont() const { return *m_monoFont; }

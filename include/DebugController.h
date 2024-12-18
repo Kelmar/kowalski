@@ -92,6 +92,7 @@ public: // Properties
     }
 
 public: // Commands
+    void InitOptions();
     void BuildMenu(wxMenuBar *);
 
     void Run();

@@ -31,7 +31,7 @@
 /*************************************************************************/
 
 OptionsFontPage::OptionsFontPage(wxBookCtrlBase *parent)
-    : wxPanel()
+    : OptionsPage()
     , wxExtra(this)
 {
     if (!wxXmlResource::Get()->LoadPanel(this, parent, "OptionsFontPage"))
@@ -46,6 +46,20 @@ OptionsFontPage::OptionsFontPage(wxBookCtrlBase *parent)
 
 OptionsFontPage::~OptionsFontPage()
 {
+}
+
+/*************************************************************************/
+
+void OptionsFontPage::AbortChanges()
+{
+
+}
+
+/*************************************************************************/
+
+void OptionsFontPage::SaveChanges()
+{
+
 }
 
 /*************************************************************************/
