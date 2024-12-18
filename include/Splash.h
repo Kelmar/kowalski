@@ -23,9 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
-class SplashController : public wxFrame, public wxEventFilter
+class SplashController : public wxFrame
 {
 private:
+    std::function<void()> m_continueWith;
     class SplashWnd *m_window;
     wxTimer m_timer;
 
@@ -35,11 +36,15 @@ public:
 
     void SetStatus(const wxString &text);
     void Done(std::function<void()> continueWith);
+
+private: // Event Handlers
+    void OnTimer(wxTimerEvent &);
+    void OnCloseWindow(wxCloseEvent &);
 };
 
 /*************************************************************************/
 
-class SplashWnd : public wxFrame
+class SplashWnd : public wxWindow
 {
 private:
     wxBitmap m_bitmap;
@@ -49,7 +54,7 @@ private:
     void OnPaint(wxPaintEvent &);
 
 public:
-    /* constructor */ SplashWnd();
+    /* constructor */ SplashWnd(SplashController *parent);
     virtual	     ~SplashWnd();
 
     // Operations

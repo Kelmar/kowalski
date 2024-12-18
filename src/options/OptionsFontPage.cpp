@@ -51,20 +51,6 @@ OptionsFontPage::~OptionsFontPage()
 
 /*************************************************************************/
 
-void OptionsFontPage::AbortChanges()
-{
-
-}
-
-/*************************************************************************/
-
-void OptionsFontPage::SaveChanges()
-{
-
-}
-
-/*************************************************************************/
-
 void OptionsFontPage::InitCategories()
 {
     m_categoryChoice->Append(_("Editor"));
@@ -86,6 +72,17 @@ void OptionsFontPage::InitFontList()
 
         m_fontChoice->Append(name);
     }
+}
+/*************************************************************************/
+
+void OptionsFontPage::AbortChanges()
+{
+}
+
+/*************************************************************************/
+
+void OptionsFontPage::SaveChanges()
+{
 }
 
 /*************************************************************************/

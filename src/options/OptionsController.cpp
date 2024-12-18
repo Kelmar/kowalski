@@ -65,13 +65,6 @@ void OptionsController::RegisterPage(OptionsPageFactory factory, const wxString 
 
 /*************************************************************************/
 
-void OptionsController::BuildMenu(wxMenuBar *)
-{
-
-}
-
-/*************************************************************************/
-
 void OptionsController::BindEvents()
 {
     Bind(wxEVT_MENU, &OptionsController::OnOptions, this, evID_OPTIONS);

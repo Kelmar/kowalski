@@ -73,8 +73,7 @@ bool C6502App::OnInit()
     SetAppName(APP_NAME);
     SetAppDisplayName(_("6502 Simulator"));
 
-    m_splash = std::make_unique<SplashWnd>();
-    m_splash->Show();
+    m_splash = std::make_unique<SplashController>();
 
     UpdateStatus(_("Loading resources..."));
 
@@ -117,11 +116,11 @@ bool C6502App::OnInit()
 
     UpdateStatus(_("Application loaded!"));
 
-    wxSleep(2); // TODO: Remove this
-
-    m_mainFrame->Show();
-
-    m_splash.reset(nullptr);
+    m_splash->Done([this] ()
+    {
+        m_mainFrame->Show();
+        m_splash.reset(nullptr);
+    });
 
     return true;
 }

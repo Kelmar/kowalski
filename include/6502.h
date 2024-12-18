@@ -54,7 +54,7 @@ private:
     wxLogWindow *m_logFrame;
     wxConfig *m_config;
 
-    std::unique_ptr<SplashWnd> m_splash;
+    std::unique_ptr<SplashController> m_splash;
 
     bool LoadResources();
     bool InitFrame();

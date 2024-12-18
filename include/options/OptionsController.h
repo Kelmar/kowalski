@@ -79,8 +79,6 @@ public:
 
 public:
     void RegisterPage(OptionsPageFactory factory, const wxString &text);
-
-    void BuildMenu(wxMenuBar *);
 };
 
 /*************************************************************************/

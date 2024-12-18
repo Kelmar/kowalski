@@ -36,22 +36,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*************************************************************************/
 
 SplashController::SplashController()
-    : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxPoint(0, 0), wxSize(100, 100), SPLASH_STYLE)
+    : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxPoint(0, 0), wxSize(640, 480), SPLASH_STYLE)
+    , m_continueWith()
     , m_window(nullptr)
     , m_timer()
 {
     m_timer.SetOwner(this, TIMER_ID);
 
+    Bind(wxEVT_TIMER, &SplashController::OnTimer, this, TIMER_ID);
+    Bind(wxEVT_CLOSE_WINDOW, &SplashController::OnCloseWindow, this);
+
     CenterOnScreen();
 
-    m_window->Show(true);
+    m_window = new SplashWnd(this);
+    Show(true);
+    m_window->SetFocus();
+
     Update();
     wxYield();
 }
 
 SplashController::~SplashController()
 {
-
+    delete m_window;
 }
 
 /*************************************************************************/
@@ -76,20 +83,37 @@ void SplashController::SetStatus(const wxString &text)
 void SplashController::Done(std::function<void()> continueWith)
 {
     m_timer.Start(SPLASH_DELAY, true);
-    m_timer.CallAfter(continueWith);
+    m_continueWith = continueWith;
+}
+
+/*************************************************************************/
+
+void SplashController::OnTimer(wxTimerEvent &)
+{
+    Close(true);
+}
+
+/*************************************************************************/
+
+void SplashController::OnCloseWindow(wxCloseEvent &)
+{
+    m_timer.Stop();
+    Destroy();
+
+    if (m_continueWith)
+        m_continueWith();
 }
 
 /*************************************************************************/
 /*************************************************************************/
 
-SplashWnd::SplashWnd()
-    : wxFrame(
-        nullptr,
+SplashWnd::SplashWnd(SplashController *parent)
+    : wxWindow(
+        parent,
         wxID_ANY,
-        "",
         wxDefaultPosition,
-        wxDefaultSize,
-        SPLASH_STYLE)
+        wxSize(640, 480),
+        wxNO_BORDER)
     , m_bitmap()
     , m_text(nullptr)
 {
@@ -105,11 +129,6 @@ SplashWnd::SplashWnd()
     m_text->Show();
 
     Bind(wxEVT_PAINT, &SplashWnd::OnPaint, this);
-
-    Update();
-    CenterOnScreen();
-    Show();
-    wxYield();
 }
 
 SplashWnd::~SplashWnd()
