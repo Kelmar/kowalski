@@ -688,13 +688,13 @@ void CRegisterBar::OnRegFlagEmm()
 
 void CRegisterBar::OnRegsCyclesClr()
 {
-    if (wxGetApp().m_global.IsProgramRunning())
+    if (wxGetApp().debugController().CurrentState() == DebugState::Running)
     {
         wxBell();
         return;
     }
 
-    PSym6502 pSym = wxGetApp().m_global.GetSimulator();
+    PSym6502 pSym = wxGetApp().debugController().Simulator();
     
     if (!pSym)
     {

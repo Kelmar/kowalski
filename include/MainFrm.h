@@ -147,17 +147,8 @@ protected:
     afx_msg void OnSymBreakpoint();
     afx_msg void OnUpdateSymBreakpoint(CCmdUI* pCmdUI);
 
-    afx_msg void OnSymGoToLine();
-    afx_msg void OnUpdateSymGoToLine(CCmdUI* pCmdUI);
-
-    afx_msg void OnSymSkipToLine();
-    afx_msg void OnUpdateSymSkipToLine(CCmdUI* pCmdUI);
-
     afx_msg void OnSymEditBreakpoint();
     afx_msg void OnUpdateSymEditBreakpoint(CCmdUI* pCmdUI);
-
-    afx_msg void OnSymRestart();
-    afx_msg void OnUpdateSymRestart(CCmdUI* pCmdUI);
 
     afx_msg void OnUpdateIdViewRegisterbar(CCmdUI* pCmdUI);
     afx_msg void OnFileSaveCode();

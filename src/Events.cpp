@@ -48,7 +48,7 @@ wxDEFINE_EVENT(evID_SHOW_TEST, wxCommandEvent);
 wxDEFINE_EVENT(evID_ASSEMBLE, wxCommandEvent);
 wxDEFINE_EVENT(evID_RUN, wxCommandEvent);
 wxDEFINE_EVENT(evID_STOP, wxCommandEvent);
-wxDEFINE_EVENT(evID_RESET, wxCommandEvent);
+wxDEFINE_EVENT(evID_RESTART, wxCommandEvent);
 wxDEFINE_EVENT(evID_BREAK, wxCommandEvent);
 wxDEFINE_EVENT(evID_STEP_INTO, wxCommandEvent);
 wxDEFINE_EVENT(evID_STEP_OVER, wxCommandEvent);

@@ -3059,6 +3059,9 @@ void CSym6502::SkipToAddr(uint16_t addr)
 {
     ASSERT(!IsFinished());
 
+    if (addr == sim::INVALID_ADDRESS)
+        return;
+
     if (running)
         return;
 

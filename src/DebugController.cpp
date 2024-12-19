@@ -92,11 +92,14 @@ void DebugController::BindEvents()
     // Menu handlers
     Bind(wxEVT_MENU, &DebugController::OnAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_MENU, &DebugController::OnRun, this, evID_RUN);
+    Bind(wxEVT_MENU, &DebugController::OnRestart, this, evID_RESTART);
     Bind(wxEVT_MENU, &DebugController::OnStop, this, evID_STOP);
 
     Bind(wxEVT_MENU, &DebugController::OnStepInto, this, evID_STEP_INTO);
     Bind(wxEVT_MENU, &DebugController::OnStepOver, this, evID_STEP_OVER);
     Bind(wxEVT_MENU, &DebugController::OnStepOut, this, evID_STEP_OUT);
+
+    Bind(wxEVT_MENU, &DebugController::OnRunToCursor, this, evID_RUN_TO);
 
     Bind(wxEVT_MENU, &DebugController::OnSkipInstruction, this, evID_SKIP_INSTR);
     Bind(wxEVT_MENU, &DebugController::OnSkipToCursor, this, evID_SKIP_TO_LINE);
@@ -104,6 +107,7 @@ void DebugController::BindEvents()
     // Update handlers
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateRun, this, evID_RUN);
+    Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateRestart, this, evID_RESTART);
 
     Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenRunning, this, evID_STOP);
     Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenRunning, this, evID_BREAK);
@@ -111,6 +115,8 @@ void DebugController::BindEvents()
     Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_STEP_INTO);
     Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_STEP_OVER);
     Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_STEP_OUT);
+
+    Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_RUN_TO);
 
     Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_SKIP_INSTR);
     Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_SKIP_TO_LINE);
@@ -126,11 +132,13 @@ void DebugController::BuildMenu(wxMenuBar *menuBar)
     wxMenu *menu = new wxMenu();
 
     menu->Append(evID_ASSEMBLE, _("Assemble\tF7"));
+
     menu->AppendSeparator();
     menu->Append(evID_RUN, _("Run\tF5"));
     menu->Append(evID_STOP, _("Stop\tShift+F5"));
-    menu->Append(evID_RESET, _("Reset\tCtrl+Shift+F5"));
+    menu->Append(evID_RESTART, _("Reset\tCtrl+Shift+F5"));
     menu->Append(evID_BREAK, _("Break\tCtrl+Break"));
+
     menu->AppendSeparator();
     menu->Append(evID_STEP_INTO, _("Step Into"));
     menu->Append(evID_STEP_OVER, _("Step Over"));
@@ -157,8 +165,6 @@ void DebugController::BuildMenu(wxMenuBar *menuBar)
     menu->AppendSeparator();
     menu->Append(0, _("Breakpoint\tF9"));
     menu->Append(0, _("Breakpoint Params...\tAlt+F9"));
-    menu->AppendSeparator();
-    menu->Append(0, _("Options...\tAlt+E"));
     */
 
     menuBar->Append(menu, _("Simulator"));
@@ -172,6 +178,19 @@ void DebugController::Run()
         StartDebug();
 
     Simulator()->Run();
+    wxGetApp().mainFrame()->UpdateFlea();
+}
+
+/*************************************************************************/
+
+void DebugController::RunToAddress(sim_addr_t address)
+{
+    if (address == sim::INVALID_ADDRESS)
+        return;
+
+    wxGetApp().m_global.SetTempExecBreakpoint(address);
+    Simulator()->Run(); // Run after setting a temporary breakpoint
+
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
@@ -242,8 +261,11 @@ void DebugController::SkipInstruction()
 
 /*************************************************************************/
 
-void DebugController::SkipToAddress(uint16_t address)
+void DebugController::SkipToAddress(sim_addr_t address)
 {
+    if (address == sim::INVALID_ADDRESS)
+        return;
+
     Simulator()->SkipToAddr(address);
     wxGetApp().mainFrame()->UpdateFlea();
 }
@@ -296,6 +318,51 @@ bool DebugController::ConfirmStop(const wxString &msg)
 {
     auto res = wxMessageBox(msg, _("Stop debugging?"), wxYES_NO | wxICON_QUESTION);
     return res == wxOK;
+}
+
+/*************************************************************************/
+
+sim_addr_t DebugController::GetCursorAddress(bool skipping)
+{
+    auto view = wxGetApp().mainFrame()->GetCurrentView();
+
+    if (!view)
+        return sim::INVALID_ADDRESS;
+
+    std::string pathName = view->GetDocument()->GetFilename().ToStdString();
+
+    int line = view->GetCurrLineNo();
+    CAsm::DbgFlag flag = wxGetApp().m_global.GetLineDebugFlags(line, pathName);
+    int msgResult = wxID_OK;
+
+    if ((flag == CAsm::DBG_EMPTY) || ((flag & CAsm::DBG_MACRO) != 0))
+    {
+        wxString skipMessage = _("Current row doesn't contain machine code.\nSkip to cursor not possible.");
+        wxString runMessage = _("Current row doesn't contain machine code.\nRun to cursor not possible.");
+
+        // Line without result code.
+        wxMessageBox(
+            skipping ? skipMessage : runMessage,
+            wxGetApp().GetAppDisplayName(),
+            wxICON_ERROR
+        );
+
+        return sim::INVALID_ADDRESS;
+    }
+    else if ((flag & CAsm::DBG_DATA) != 0)
+    {
+        // Line with data instead of commands
+        msgResult = wxMessageBox(
+            _("Current row contains data, not code.\nContinue anyway?"),
+            wxGetApp().GetAppDisplayName(),
+            wxICON_ASTERISK | wxYES_NO
+        );
+    }
+
+    if (msgResult != wxID_OK)
+        return sim::INVALID_ADDRESS;
+
+    return wxGetApp().m_global.GetLineCodeAddr(line, pathName);
 }
 
 /*************************************************************************/
@@ -386,6 +453,23 @@ void DebugController::OnRun(wxCommandEvent &)
     Run();
 }
 
+/*************************************************************************/
+
+void DebugController::OnRunToCursor(wxCommandEvent &)
+{
+    sim_addr_t address = GetCursorAddress(false);
+    RunToAddress(address);
+}
+
+/*************************************************************************/
+
+void DebugController::OnRestart(wxCommandEvent &)
+{
+    Restart();
+}
+
+/*************************************************************************/
+
 void DebugController::OnStop(wxCommandEvent &)
 {
     ExitDebugMode();
@@ -430,7 +514,8 @@ void DebugController::OnSkipInstruction(wxCommandEvent &)
 
 void DebugController::OnSkipToCursor(wxCommandEvent &)
 {
-    //SkipToAddress(0);
+    sim_addr_t address = GetCursorAddress(true);
+    SkipToAddress(address);
 }
 
 /*************************************************************************/
@@ -462,6 +547,13 @@ void DebugController::OnUpdateRun(wxUpdateUIEvent &e)
 
     e.SetText(title);
     e.Enable(CurrentState() != DebugState::Running);
+}
+
+/*************************************************************************/
+
+void DebugController::OnUpdateRestart(wxUpdateUIEvent &e)
+{
+    e.Enable(CurrentState() != DebugState::Unloaded);
 }
 
 /*************************************************************************/

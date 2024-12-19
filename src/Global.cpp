@@ -100,7 +100,9 @@ CAsm::DbgFlag CGlobal::GetLineDebugFlags(int line, const std::string &doc_title)
     return (CAsm::DbgFlag)dl.flags; // Flags describing the program line
 }
 
-uint32_t CGlobal::GetLineCodeAddr(int line, const std::string &doc_title)
+/*************************************************************************/
+
+sim_addr_t CGlobal::GetLineCodeAddr(int line, const std::string &doc_title)
 {
     CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title); // File ID
     CDebugLine dl;
@@ -108,19 +110,16 @@ uint32_t CGlobal::GetLineCodeAddr(int line, const std::string &doc_title)
     return dl.addr;
 }
 
-bool CGlobal::SetTempExecBreakpoint(int line, const std::string &doc_title)
+/*************************************************************************/
+
+void CGlobal::SetTempExecBreakpoint(sim_addr_t address)
 {
-    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title); // File ID
-    CDebugLine dl;
-    m_debugInfo.GetAddress(dl, line, fuid); // Find the address corresponding to the line
+    ASSERT(address != sim::INVALID_ADDRESS);
 
-    if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
-        return false; // There is no code in line 'line'
-
-    m_debugInfo.SetTemporaryExecBreakpoint(dl.addr);
-
-    return true;
+    m_debugInfo.SetTemporaryExecBreakpoint(address);
 }
+
+/*************************************************************************/
 
 bool CGlobal::CreateDeasm()
 {

@@ -402,11 +402,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_COMMAND(ID_SYM_BREAKPOINT, OnSymBreakpoint)
     ON_UPDATE_COMMAND_UI(ID_SYM_BREAKPOINT, OnUpdateSymBreakpoint)
 
-    ON_COMMAND(ID_SYM_GO_LINE, OnSymGoToLine)
-    ON_UPDATE_COMMAND_UI(ID_SYM_GO_LINE, OnUpdateSymGoToLine)
-    ON_COMMAND(ID_SYM_SKIP_TO_LINE, OnSymSkipToLine)
-    ON_UPDATE_COMMAND_UI(ID_SYM_SKIP_TO_LINE, OnUpdateSymSkipToLine)
-
     ON_COMMAND(ID_SYM_GO_RTS, OnSymGoToRts)
     ON_UPDATE_COMMAND_UI(ID_SYM_GO_RTS, OnUpdateSymGoToRts)
 
@@ -1277,123 +1272,6 @@ void CMainFrame::OnUpdateSymEditBreakpoint(CCmdUI *pCmdUI)
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // is there a working debugger
         GetActiveFrame()->GetActiveView()); // and an active document?
-#endif
-}
-
-/*************************************************************************/
-
-void CMainFrame::OnSymGoToLine() // Run to line
-{
-#if REWRITE_TO_WX_WIDGET
-    CSrc6502View *pView = (CSrc6502View *)(GetActiveFrame()->GetActiveView());
-    ASSERT(pView == NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
-
-    if (pView == NULL ||
-        !wxGetApp().m_global.IsDebugger() ||
-        wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished())
-    {
-        return;
-    }
-
-    int line = pView->GetCurrLineNo();
-    CAsm::DbgFlag flg = wxGetApp().m_global.GetLineDebugFlags(line, pView->GetDocument()->GetPathName());
-
-    if (flg == CAsm::DBG_EMPTY || (flg & CAsm::DBG_MACRO)) // Line without result code?
-    {
-        AfxMessageBox(IDS_SRC_NO_CODE2);
-        return;
-    }
-    else if (flg & CAsm::DBG_DATA) // Line with data instead of commands?
-    {
-        if (AfxMessageBox(IDS_SRC_DATA, MB_YESNO) != IDYES)
-            return;
-    }
-
-    wxGetApp().m_global.SetTempExecBreakpoint(line, pView->GetDocument()->GetPathName());
-    wxGetApp().m_global.GetSimulator()->Run(); // Run after setting a temporary interrupt
-#endif
-}
-
-void CMainFrame::OnUpdateSymGoToLine(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&          // Is there a running debugger 
-        !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
-        !wxGetApp().m_global.IsProgramFinished() &&  // unfinished program
-        GetActiveFrame()->GetActiveView() &&         // and an active document?
-        GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CMainFrame::OnSymSkipToLine()	// przestawienie PC na bie��cy wiersz
-{
-#if REWRITE_TO_WX_WIDGET
-    CSrc6502View *pView = (CSrc6502View *)(GetActiveFrame()->GetActiveView());
-    ASSERT(pView == NULL || pView->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
-
-    if (pView == NULL ||
-        !wxGetApp().m_global.IsDebugger() ||
-        wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished())
-    {
-        return;
-    }
-
-    int line = pView->GetCurrLineNo();
-    CAsm::DbgFlag flg = wxGetApp().m_global.GetLineDebugFlags(line, pView->GetDocument()->GetPathName());
-
-    if (flg == CAsm::DBG_EMPTY || (flg & CAsm::DBG_MACRO)) // Line without result code?
-    {
-        AfxMessageBox(IDS_SRC_NO_CODE3);
-        return;
-    }
-    else if (flg & CAsm::DBG_DATA) // Line with data instead of commands?
-    {
-        if (AfxMessageBox(IDS_SRC_DATA, MB_YESNO) != IDYES)
-            return;
-    }
-
-    uint32_t addr = wxGetApp().m_global.GetLineCodeAddr(line, pView->GetDocument()->GetPathName());
-    wxGetApp().m_global.GetSimulator()->SkipToAddr(addr);
-#endif
-}
-
-void CMainFrame::OnUpdateSymSkipToLine(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&          // Is there a running debugger 
-        !wxGetApp().m_global.IsProgramRunning() &&   // and a stopped 
-        !wxGetApp().m_global.IsProgramFinished() &&  // unfinished program
-        GetActiveFrame()->GetActiveView() &&         // and an active document?
-        GetActiveFrame()->GetActiveView()->IsKindOf(RUNTIME_CLASS(CSrc6502View)));
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CMainFrame::OnSymRestart()
-{
-    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning())
-        return;
-
-    wxGetApp().m_global.RestartProgram();
-    DelayedUpdateAll();
-}
-
-void CMainFrame::OnUpdateSymRestart(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-        !wxGetApp().m_global.IsProgramRunning()); // and stopped program?
 #endif
 }
 

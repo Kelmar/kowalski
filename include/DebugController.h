@@ -70,6 +70,8 @@ private:
 
     bool ConfirmStop(const wxString &msg);
 
+    sim_addr_t GetCursorAddress(bool skipping);
+
 public:
     virtual          ~DebugController();
 
@@ -94,6 +96,7 @@ public: // Commands
     void BuildMenu(wxMenuBar *);
 
     void Run();
+    void RunToAddress(sim_addr_t address);
     void Restart();
     void Break();
     void ExitDebugMode();
@@ -103,7 +106,7 @@ public: // Commands
     void StepOut();
 
     void SkipInstruction();
-    void SkipToAddress(uint16_t address);
+    void SkipToAddress(sim_addr_t address);
 
 private:
     void BindEvents();
@@ -111,6 +114,8 @@ private:
     // Menu handlers
     void OnAssemble(wxCommandEvent &);
     void OnRun(wxCommandEvent &);
+    void OnRunToCursor(wxCommandEvent &);
+    void OnRestart(wxCommandEvent &);
     void OnStop(wxCommandEvent &);
     void OnBreak(wxCommandEvent &);
     void OnStepOver(wxCommandEvent &);
@@ -122,6 +127,7 @@ private:
     // Update handlers
     void OnUpdateAssemble(wxUpdateUIEvent &);
     void OnUpdateRun(wxUpdateUIEvent &);
+    void OnUpdateRestart(wxUpdateUIEvent &);
 
     void EnableWhenRunning(wxUpdateUIEvent &);
     void EnableWhenStopped(wxUpdateUIEvent &);

@@ -137,11 +137,6 @@ public:
         return m_simulator != NULL;
     }
 
-    bool IsProgramRunning()
-    {
-        return m_simulator ? m_simulator->IsRunning() : false;
-    }
-
     bool IsProgramFinished()
     {
         return m_simulator ? m_simulator->IsFinished() : false;
@@ -192,14 +187,8 @@ public:
     CAsm::Breakpoint ModifyBreakpoint(int line, const std::string &doc_title, CAsm::Breakpoint bp);
     void ClrBreakpoint(int line, const std::string &doc_title);
     CAsm::DbgFlag GetLineDebugFlags(int line, const std::string &doc_title);
-    uint32_t GetLineCodeAddr(int line, const std::string &doc_title);
-    bool SetTempExecBreakpoint(int line, const std::string &doc_title);
-
-    void AbortProg()
-    {
-        if (m_simulator != NULL)
-            m_simulator->AbortProg();
-    }
+    sim_addr_t GetLineCodeAddr(int line, const std::string &doc_title);
+    void SetTempExecBreakpoint(sim_addr_t address);
 
     //---------------------------------------------------------------------------
 
