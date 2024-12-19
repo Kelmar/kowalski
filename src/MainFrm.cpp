@@ -395,28 +395,24 @@ void CMainFrame::ConfigSettings(bool load)
 BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_WM_CREATE()
     ON_WM_CLOSE()
-    ON_COMMAND(ID_SYM_STEP_INTO, OnSymStepInto)
-    ON_UPDATE_COMMAND_UI(ID_SYM_STEP_INTO, OnUpdateSymStepInto)
-    ON_COMMAND(ID_SYM_SKIP_INSTR, OnSymSkipInstr)
-    ON_UPDATE_COMMAND_UI(ID_SYM_SKIP_INSTR, OnUpdateSymSkipInstr)
+    ON_WM_DESTROY()
+    ON_WM_SYSCOLORCHANGE()
+    ON_WM_TIMER()
+
     ON_COMMAND(ID_SYM_BREAKPOINT, OnSymBreakpoint)
     ON_UPDATE_COMMAND_UI(ID_SYM_BREAKPOINT, OnUpdateSymBreakpoint)
-    ON_COMMAND(ID_SYM_BREAK, OnSymBreak)
-    ON_UPDATE_COMMAND_UI(ID_SYM_BREAK, OnUpdateSymBreak)
+
     ON_COMMAND(ID_SYM_GO_LINE, OnSymGoToLine)
     ON_UPDATE_COMMAND_UI(ID_SYM_GO_LINE, OnUpdateSymGoToLine)
     ON_COMMAND(ID_SYM_SKIP_TO_LINE, OnSymSkipToLine)
     ON_UPDATE_COMMAND_UI(ID_SYM_SKIP_TO_LINE, OnUpdateSymSkipToLine)
+
     ON_COMMAND(ID_SYM_GO_RTS, OnSymGoToRts)
     ON_UPDATE_COMMAND_UI(ID_SYM_GO_RTS, OnUpdateSymGoToRts)
-    ON_COMMAND(ID_SYM_STEP_OVER, OnSymStepOver)
-    ON_UPDATE_COMMAND_UI(ID_SYM_STEP_OVER, OnUpdateSymStepOver)
+
     ON_COMMAND(ID_SYM_EDIT_BREAKPOINT, OnSymEditBreakpoint)
     ON_UPDATE_COMMAND_UI(ID_SYM_EDIT_BREAKPOINT, OnUpdateSymEditBreakpoint)
-    ON_COMMAND(ID_SYM_RESTART, OnSymRestart)
-    ON_UPDATE_COMMAND_UI(ID_SYM_RESTART, OnUpdateSymRestart)
-    ON_COMMAND(ID_SYM_ANIMATE, OnSymAnimate)
-    ON_UPDATE_COMMAND_UI(ID_SYM_ANIMATE, OnUpdateSymAnimate)
+
     ON_UPDATE_COMMAND_UI(ID_VIEW_REGISTERBAR, OnUpdateIdViewRegisterbar)
     ON_COMMAND(ID_FILE_SAVE_CODE, OnFileSaveCode)
     ON_UPDATE_COMMAND_UI(ID_FILE_SAVE_CODE, OnUpdateFileSaveCode)
@@ -424,24 +420,19 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_UPDATE_COMMAND_UI(ID_VIEW_DEASM, OnUpdateViewDeasm)
     ON_COMMAND(ID_VIEW_IDENT, OnViewIdents)
     ON_UPDATE_COMMAND_UI(ID_VIEW_IDENT, OnUpdateViewIdents)
-    ON_COMMAND(ID_VIEW_MEMORY, OnViewMemory)
-    ON_UPDATE_COMMAND_UI(ID_VIEW_MEMORY, OnUpdateViewMemory)
+
     ON_COMMAND(ID_EDITOR_OPT, OnEditorOpt)
     ON_UPDATE_COMMAND_UI(ID_EDITOR_OPT, OnUpdateEditorOpt)
-    ON_COMMAND(ID_VIEW_IO_WINDOW, OnViewIOWindow)
-    ON_UPDATE_COMMAND_UI(ID_VIEW_IO_WINDOW, OnUpdateViewIOWindow)
-    ON_WM_DESTROY()
-    ON_COMMAND(ID_FILE_OPEN_CODE, OnFileLoadCode)
-    ON_UPDATE_COMMAND_UI(ID_FILE_OPEN_CODE, OnUpdateFileLoadCode)
+
     ON_COMMAND(ID_DEASM_OPTIONS, OnDeasmOptions)
     ON_UPDATE_COMMAND_UI(ID_DEASM_OPTIONS, OnUpdateDeasmOptions)
     ON_COMMAND(ID_VIEW_REGISTERBAR, OnViewRegisterWnd)
-    ON_WM_SYSCOLORCHANGE()
+    
     ON_UPDATE_COMMAND_UI(ID_VIEW_ZEROPAGEBAR, OnUpdateViewZeropage)
     ON_COMMAND(ID_VIEW_ZEROPAGEBAR, OnViewZeropage)
     ON_UPDATE_COMMAND_UI(ID_MEMORY_OPTIONS, OnUpdateMemoryOptions)
     ON_COMMAND(ID_MEMORY_OPTIONS, OnMemoryOptions)
-    ON_WM_TIMER()
+    
     ON_COMMAND(ID_VIEW_STACK, OnViewStack)
     ON_UPDATE_COMMAND_UI(ID_VIEW_STACK, OnUpdateViewStack)
     ON_COMMAND(ID_SYM_GEN_IRQ, OnSymGenIRQ)
@@ -454,11 +445,13 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_UPDATE_COMMAND_UI(ID_SYM_GEN_INT, OnUpdateSymGenIntDlg)
     ON_COMMAND(ID_VIEW_LOG, OnViewLog)
     ON_UPDATE_COMMAND_UI(ID_VIEW_LOG, OnUpdateViewLog)
+
     ON_COMMAND(ID_HELP_DYNAMIC, OnHelpDynamic)
     ON_UPDATE_COMMAND_UI(ID_HELP_DYNAMIC, OnUpdateHelpDynamic)
     ON_COMMAND(ID_HELP_FINDER, OnHtmlHelp)   //% Bug fix 1.2.14.1 - convert to HTML help
     ON_COMMAND(ID_HELP, OnHtmlHelp)          //% Bug fix 1.2.14.1 - convert to HTML help
     ON_COMMAND(ID_DEFAULT_HELP, OnHtmlHelp)  //% Bug fix 1.2.14.1 - convert to HTML help
+
     ON_MESSAGE(WM_USER + 9998, OnUpdateState)
     ON_MESSAGE(CBroadcast::WM_USER_START_DEBUGGER, OnStartDebugger)
     ON_MESSAGE(CBroadcast::WM_USER_EXIT_DEBUGGER, OnExitDebugger)
@@ -594,7 +587,6 @@ void CMainFrame::BindEvents()
 
 void CMainFrame::OnExit(wxCommandEvent &)
 {
-    wxGetApp().m_global.ExitDebugger();
     wxGetApp().Exit();
 }
 
@@ -973,28 +965,6 @@ LRESULT CALLBACK CMainFrame::StatusBarWndProc(HWND hWnd, UINT msg, WPARAM wParam
 
 //-----------------------------------------------------------------------------
 
-afx_msg LRESULT CMainFrame::OnStartDebugger(WPARAM /*wParam*/, LPARAM /*lParam*/)
-{
-#if REWRITE_TO_WX_WIDGET
-    wxRect rect;
-    m_statusBar.SendMessage(SB_GETRECT, 2, (LPARAM)&rect); // space for the image -dimensions
-    m_statusBar.RefreshRect(&rect); // flea image to be redrawn
-#endif
-    return 0;
-}
-
-
-afx_msg LRESULT CMainFrame::OnExitDebugger(WPARAM /*wParam*/, LPARAM /*lParam*/)
-{
-#if REWRITE_TO_WX_WIDGET
-    wxRect rect;
-    m_statusBar.SendMessage(SB_GETRECT, 2, (LPARAM)&rect); // space for the image -dimensions
-    m_statusBar.RefreshRect(&rect); // flea image to be redrawn
-#endif
-    return 0;
-}
-
-
 afx_msg LRESULT CMainFrame::OnChangeCode(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 #if REWRITE_TO_WX_WIDGET
@@ -1041,7 +1011,15 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT &cs)
 
 #endif
 
-//-----------------------------------------------------------------------------
+/*************************************************************************/
+
+CSrc6502View *CMainFrame::GetCurrentView()
+{
+    return dynamic_cast<CSrc6502View *>(m_docManager->GetCurrentView());
+}
+
+/*************************************************************************/
+
 /*
 HMENU CMainFrame::GetWindowMenuPopup(HMENU hMenuBar)
   // find which popup is the "Window" menu
@@ -1130,6 +1108,8 @@ void CMainFrame::OnClose()
 #endif
 }
 
+/*************************************************************************/
+
 void CMainFrame::OnDestroy()
 {
 #if REWRITE_TO_WX_WIDGET
@@ -1138,46 +1118,6 @@ void CMainFrame::OnDestroy()
 #endif
 
     ConfigSettings::Save(false);
-}
-
-/*************************************************************************/
-/*************************************************************************/
-// Simulator menu events
-
-void CMainFrame::OnUpdateAssemble(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(GetCurrentDocument() != nullptr && // Is the document active?
-        !m_IOWindow.IsWaiting());
-#endif
-}
-
-CSrc6502Doc *CMainFrame::GetCurrentDocument()
-{
-#if REWRITE_TO_WX_WIDGET
-    CMDIChildWnd *pWnd = MDIGetActive();
-
-    if (pWnd == nullptr)
-        return nullptr;
-
-    CDocument *pDoc = pWnd->GetActiveDocument(); // Active document
-
-    if (pDoc == nullptr || !pDoc->IsKindOf(RUNTIME_CLASS(CSrc6502Doc)))
-        return nullptr;
-
-    return static_cast<CSrc6502Doc *>(pDoc);
-#endif
-
-    return nullptr;
-}
-
-/*************************************************************************/
-
-CSrc6502View *CMainFrame::GetCurrentView()
-{
-    return dynamic_cast<CSrc6502View *>(m_docManager->GetCurrentView());
 }
 
 /*************************************************************************/
@@ -1342,31 +1282,6 @@ void CMainFrame::OnUpdateSymEditBreakpoint(CCmdUI *pCmdUI)
 
 /*************************************************************************/
 
-void CMainFrame::OnSymSkipInstr()	// Skip the current statement
-{
-    if (!wxGetApp().m_global.IsDebugging() ||
-        wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished())
-    {
-        return;
-    }
-
-    wxGetApp().m_global.GetSimulator()->SkipInstr();
-}
-
-void CMainFrame::OnUpdateSymSkipInstr(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() &&        // is there a running debugger
-        !wxGetApp().m_global.IsProgramRunning() && // and a stopped
-        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
-#endif
-}
-
-/*************************************************************************/
-
 void CMainFrame::OnSymGoToLine() // Run to line
 {
 #if REWRITE_TO_WX_WIDGET
@@ -1463,68 +1378,6 @@ void CMainFrame::OnUpdateSymSkipToLine(CCmdUI *pCmdUI)
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnSymGoToRts() // Run to return from the subroutine
-{
-    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished())
-    {
-        return;
-    }
-
-    wxGetApp().m_global.GetSimulator()->RunTillRet();
-}
-
-void CMainFrame::OnUpdateSymGoToRts(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-        !wxGetApp().m_global.IsProgramRunning() && // and stopped
-        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CMainFrame::OnSymStepInto()	// wykonanie bie��cej instrukcji
-{
-    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished())
-    {
-        return;
-    }
-
-    wxGetApp().m_global.GetSimulator()->StepInto();
-    DelayedUpdateAll();
-}
-
-void CMainFrame::OnUpdateSymStepInto(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-        !wxGetApp().m_global.IsProgramRunning() && // and stopped
-        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CMainFrame::OnUpdateSymStepOver(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-        !wxGetApp().m_global.IsProgramRunning() && // and stopped
-        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
 void CMainFrame::OnSymRestart()
 {
     if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning())
@@ -1541,30 +1394,6 @@ void CMainFrame::OnUpdateSymRestart(CCmdUI *pCmdUI)
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
         !wxGetApp().m_global.IsProgramRunning()); // and stopped program?
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CMainFrame::OnSymAnimate()
-{
-    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramRunning() ||
-        wxGetApp().m_global.IsProgramFinished())
-    {
-        return;
-    }
-
-    wxGetApp().m_global.GetSimulator()->Run();
-}
-
-void CMainFrame::OnUpdateSymAnimate(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger() && // there is a working debugger
-        !wxGetApp().m_global.IsProgramRunning() && // and stopped
-        !wxGetApp().m_global.IsProgramFinished()); // and unfinished program?
 #endif
 }
 
@@ -1926,26 +1755,6 @@ void CMainFrame::OnUpdateViewIdents(CCmdUI *pCmdUI)
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnViewMemory()
-{
-    if (wxGetApp().m_global.IsCodePresent()) // is there a program?
-        m_Memory.Show(!m_Memory.IsShown());
-    else		// nie ma programu
-        m_Memory.Hide();
-}
-
-void CMainFrame::OnUpdateViewMemory(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is there a program?
-    pCmdUI->SetCheck(m_Memory.IsShown());
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
 void CMainFrame::OnEditorOpt()
 {
     m_nLastPage = Options(2); // Editor options
@@ -2112,8 +1921,10 @@ void CMainFrame::UpdateAll()
     Refresh();
 
     m_ioWindow->Refresh();
-    m_Memory.Refresh();
-    m_ZeroPage.Refresh();
+    m_memory->Refresh();
+    //m_ZeroPage.Refresh();
+
+#if 0
 
     PSym6502 pSimulator = wxGetApp().m_global.GetSimulator();
 
@@ -2124,6 +1935,7 @@ void CMainFrame::UpdateAll()
     }
     else
         m_Stack.Refresh();
+#endif
 }
 
 void CMainFrame::DelayedUpdateAll()

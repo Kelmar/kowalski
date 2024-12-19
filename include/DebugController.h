@@ -66,8 +66,6 @@ private:
 
     void StartDebug();
 
-    void ExitDebugMode();
-
     void DebugStopped();
 
     bool ConfirmStop(const wxString &msg);
@@ -98,7 +96,14 @@ public: // Commands
     void Run();
     void Restart();
     void Break();
+    void ExitDebugMode();
+
     void StepOver();
+    void StepInto();
+    void StepOut();
+
+    void SkipInstruction();
+    void SkipToAddress(uint16_t address);
 
 private:
     void BindEvents();
@@ -109,13 +114,17 @@ private:
     void OnStop(wxCommandEvent &);
     void OnBreak(wxCommandEvent &);
     void OnStepOver(wxCommandEvent &);
+    void OnStepInto(wxCommandEvent &);
+    void OnStepOut(wxCommandEvent &);
+    void OnSkipInstruction(wxCommandEvent &);
+    void OnSkipToCursor(wxCommandEvent &);
 
     // Update handlers
     void OnUpdateAssemble(wxUpdateUIEvent &);
     void OnUpdateRun(wxUpdateUIEvent &);
-    void OnUpdateStop(wxUpdateUIEvent &);
-    void OnUpdateBreak(wxUpdateUIEvent &);
-    void OnUpdateStepOver(wxUpdateUIEvent &);
+
+    void EnableWhenRunning(wxUpdateUIEvent &);
+    void EnableWhenStopped(wxUpdateUIEvent &);
 
     // Thread handlers
     void OnAsmComplete(wxThreadEvent &);

@@ -64,7 +64,6 @@ private:
 
 private:
     CRegisterBar m_wndRegisterBar;
-    CMemoryInfo m_Memory;
     CMemoryInfo m_ZeroPage;
     CMemoryInfo m_Stack;
     CIdentInfo m_Idents;
@@ -113,7 +112,6 @@ public:
 //  void ShowRegisterBar(bool bShow = TRUE);
 //  void SetRowColumn(CEdit &edit);
     CSrc6502View *GetCurrentView();
-    CSrc6502Doc *GetCurrentDocument();
 
 public:
     void UpdateAll();
@@ -145,12 +143,7 @@ protected: // control bar embedded members
     // Generated message map functions
 protected:
     afx_msg void OnClose();
-    
-    afx_msg void OnUpdateAssemble(CCmdUI* pCmdUI);
-    afx_msg void OnSymStepInto();
-    afx_msg void OnUpdateSymStepInto(CCmdUI* pCmdUI);
-    afx_msg void OnSymSkipInstr();
-    afx_msg void OnUpdateSymSkipInstr(CCmdUI* pCmdUI);
+
     afx_msg void OnSymBreakpoint();
     afx_msg void OnUpdateSymBreakpoint(CCmdUI* pCmdUI);
 
@@ -160,20 +153,11 @@ protected:
     afx_msg void OnSymSkipToLine();
     afx_msg void OnUpdateSymSkipToLine(CCmdUI* pCmdUI);
 
-    afx_msg void OnSymGoToRts();
-    afx_msg void OnUpdateSymGoToRts(CCmdUI* pCmdUI);
-
-    afx_msg void OnSymStepOver();
-    afx_msg void OnUpdateSymStepOver(CCmdUI* pCmdUI);
-
     afx_msg void OnSymEditBreakpoint();
     afx_msg void OnUpdateSymEditBreakpoint(CCmdUI* pCmdUI);
 
     afx_msg void OnSymRestart();
     afx_msg void OnUpdateSymRestart(CCmdUI* pCmdUI);
-
-    afx_msg void OnSymAnimate();
-    afx_msg void OnUpdateSymAnimate(CCmdUI* pCmdUI);
 
     afx_msg void OnUpdateIdViewRegisterbar(CCmdUI* pCmdUI);
     afx_msg void OnFileSaveCode();
@@ -182,8 +166,7 @@ protected:
     afx_msg void OnUpdateViewDeasm(CCmdUI* pCmdUI);
     afx_msg void OnViewIdents();
     afx_msg void OnUpdateViewIdents(CCmdUI* pCmdUI);
-    afx_msg void OnViewMemory();
-    afx_msg void OnUpdateViewMemory(CCmdUI* pCmdUI);
+
     afx_msg void OnEditorOpt();
     afx_msg void OnUpdateEditorOpt(CCmdUI* pCmdUI);
     afx_msg void OnUpdateViewIOWindow(CCmdUI* pCmdUI);
@@ -218,8 +201,6 @@ protected:
     afx_msg void OnHelpDynamic();
     afx_msg void OnUpdateHelpDynamic(CCmdUI* pCmdUI);
 
-    afx_msg LRESULT OnStartDebugger(WPARAM wParam, LPARAM lParam);
-    afx_msg LRESULT OnExitDebugger(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnChangeCode(WPARAM wParam, LPARAM lParam);
 
 private: // Event handlers

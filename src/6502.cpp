@@ -117,10 +117,10 @@ bool C6502App::OnInit()
     UpdateStatus(_("Application loaded!"));
 
     m_splash->Done([this] ()
-    {
-        m_mainFrame->Show();
-        m_splash.reset(nullptr);
-    });
+        {
+            m_mainFrame->Show();
+            m_splash.reset(nullptr);
+        });
 
     return true;
 }
@@ -455,9 +455,9 @@ wxFrame *C6502App::CreateChildFrame(wxView *view)
 
 int C6502App::OnExit()
 {
-   wxLogDebug("Application shutting down");
+    wxLogDebug("Application shutting down");
 
-    m_global.ExitDebugger();
+    m_debugController->ExitDebugMode();
 
     wxDocManager *const docManager = wxDocManager::GetDocumentManager();
 

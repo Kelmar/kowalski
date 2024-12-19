@@ -32,6 +32,9 @@
 wxDEFINE_EVENT(evID_LOAD_CODE, wxCommandEvent);
 wxDEFINE_EVENT(evID_SAVE_CODE, wxCommandEvent);
 
+// Edit menu events
+wxDEFINE_EVENT(evID_OPTIONS, wxCommandEvent);
+
 // View menu events
 wxDEFINE_EVENT(evID_SHOW_OUTPUT, wxCommandEvent);
 wxDEFINE_EVENT(evID_SHOW_IOWINDOW, wxCommandEvent);
@@ -52,7 +55,8 @@ wxDEFINE_EVENT(evID_STEP_OVER, wxCommandEvent);
 wxDEFINE_EVENT(evID_STEP_OUT, wxCommandEvent);
 wxDEFINE_EVENT(evID_RUN_TO, wxCommandEvent);
 
-wxDEFINE_EVENT(evID_OPTIONS, wxCommandEvent);
+wxDEFINE_EVENT(evID_SKIP_INSTR, wxCommandEvent);
+wxDEFINE_EVENT(evID_SKIP_TO_LINE, wxCommandEvent);
 
 wxDEFINE_EVENT(evTHD_OUTPUT, MessageEvent);
 

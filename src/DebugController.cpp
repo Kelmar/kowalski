@@ -38,10 +38,6 @@
 
 /*************************************************************************/
 
-/*************************************************************************/
-
-/*************************************************************************/
-
 DebugController::DebugController()
     : m_critSect()
     , m_semaphore()
@@ -97,14 +93,27 @@ void DebugController::BindEvents()
     Bind(wxEVT_MENU, &DebugController::OnAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_MENU, &DebugController::OnRun, this, evID_RUN);
     Bind(wxEVT_MENU, &DebugController::OnStop, this, evID_STOP);
+
+    Bind(wxEVT_MENU, &DebugController::OnStepInto, this, evID_STEP_INTO);
     Bind(wxEVT_MENU, &DebugController::OnStepOver, this, evID_STEP_OVER);
+    Bind(wxEVT_MENU, &DebugController::OnStepOut, this, evID_STEP_OUT);
+
+    Bind(wxEVT_MENU, &DebugController::OnSkipInstruction, this, evID_SKIP_INSTR);
+    Bind(wxEVT_MENU, &DebugController::OnSkipToCursor, this, evID_SKIP_TO_LINE);
 
     // Update handlers
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateRun, this, evID_RUN);
-    Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateStop, this, evID_STOP);
-    Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateBreak, this, evID_BREAK);
-    Bind(wxEVT_UPDATE_UI, &DebugController::OnUpdateStepOver, this, evID_STEP_OVER);
+
+    Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenRunning, this, evID_STOP);
+    Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenRunning, this, evID_BREAK);
+
+    Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_STEP_INTO);
+    Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_STEP_OVER);
+    Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_STEP_OUT);
+
+    Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_SKIP_INSTR);
+    Bind(wxEVT_UPDATE_UI, &DebugController::EnableWhenStopped, this, evID_SKIP_TO_LINE);
 
     // Thread event bindings
     Bind(wxEVT_THREAD, &DebugController::OnAsmComplete, this, evTHD_ASM_COMPLETE);
@@ -140,10 +149,11 @@ void DebugController::BuildMenu(wxMenuBar *menuBar)
     menu->AppendSubMenu(intMenu, _("Interrupts"));
     */
 
-    /*
     menu->AppendSeparator();
-    menu->Append(0, _("Skip Instruction\tShift+F11"));
-    menu->Append(0, _("Skip to Cursor\tCtrl+Shift+F11"));
+    menu->Append(evID_SKIP_INSTR, _("Skip Instruction\tShift+F11"));
+    menu->Append(evID_SKIP_TO_LINE, _("Skip to Cursor\tCtrl+Shift+F11"));
+
+    /*
     menu->AppendSeparator();
     menu->Append(0, _("Breakpoint\tF9"));
     menu->Append(0, _("Breakpoint Params...\tAlt+F9"));
@@ -203,6 +213,38 @@ void DebugController::StepOver()
         return;
 
     Simulator()->StepOver();
+    wxGetApp().mainFrame()->UpdateFlea();
+}
+
+/*************************************************************************/
+
+void DebugController::StepInto()
+{
+    Simulator()->StepInto();
+    wxGetApp().mainFrame()->UpdateFlea();
+}
+
+/*************************************************************************/
+
+void DebugController::StepOut()
+{
+    Simulator()->RunTillRet();
+    wxGetApp().mainFrame()->UpdateFlea();
+}
+
+/*************************************************************************/
+
+void DebugController::SkipInstruction()
+{
+    Simulator()->SkipInstr();
+    wxGetApp().mainFrame()->UpdateFlea();
+}
+
+/*************************************************************************/
+
+void DebugController::SkipToAddress(uint16_t address)
+{
+    Simulator()->SkipToAddr(address);
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
@@ -364,6 +406,34 @@ void DebugController::OnStepOver(wxCommandEvent &)
 }
 
 /*************************************************************************/
+
+void DebugController::OnStepInto(wxCommandEvent &)
+{
+    StepInto();
+}
+
+/*************************************************************************/
+
+void DebugController::OnStepOut(wxCommandEvent &)
+{
+    StepOut();
+}
+
+/*************************************************************************/
+
+void DebugController::OnSkipInstruction(wxCommandEvent &)
+{
+    SkipInstruction();
+}
+
+/*************************************************************************/
+
+void DebugController::OnSkipToCursor(wxCommandEvent &)
+{
+    //SkipToAddress(0);
+}
+
+/*************************************************************************/
 // Update handlers
 /*************************************************************************/
 
@@ -396,24 +466,14 @@ void DebugController::OnUpdateRun(wxUpdateUIEvent &e)
 
 /*************************************************************************/
 
-void DebugController::OnUpdateStop(wxUpdateUIEvent &e)
-{
-    auto state = CurrentState();
-    wxLogDebug(fmt::format("CurrentState(): {0}", (int)state).c_str());
-
-    e.Enable(state == DebugState::Running);
-}
-
-/*************************************************************************/
-
-void DebugController::OnUpdateBreak(wxUpdateUIEvent &e)
+void DebugController::EnableWhenRunning(wxUpdateUIEvent &e)
 {
     e.Enable(CurrentState() == DebugState::Running);
 }
 
 /*************************************************************************/
 
-void DebugController::OnUpdateStepOver(wxUpdateUIEvent &e)
+void DebugController::EnableWhenStopped(wxUpdateUIEvent &e)
 {
     e.Enable(CurrentState() == DebugState::Stopped);
 }

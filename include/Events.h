@@ -58,6 +58,9 @@ public:
 wxDECLARE_EVENT(evID_LOAD_CODE, wxCommandEvent);
 wxDECLARE_EVENT(evID_SAVE_CODE, wxCommandEvent);
 
+// Edit menu events
+wxDECLARE_EVENT(evID_OPTIONS, wxCommandEvent);
+
 // View menu events
 wxDECLARE_EVENT(evID_SHOW_LOG, wxCommandEvent);
 wxDECLARE_EVENT(evID_SHOW_DISASM, wxCommandEvent);
@@ -78,7 +81,8 @@ wxDECLARE_EVENT(evID_STEP_OVER, wxCommandEvent);
 wxDECLARE_EVENT(evID_STEP_OUT, wxCommandEvent);
 wxDECLARE_EVENT(evID_RUN_TO, wxCommandEvent);
 
-wxDECLARE_EVENT(evID_OPTIONS, wxCommandEvent);
+wxDECLARE_EVENT(evID_SKIP_INSTR, wxCommandEvent);
+wxDECLARE_EVENT(evID_SKIP_TO_LINE, wxCommandEvent);
 
 static const int evTHD_ASM_COMPLETE = wxID_HIGHEST + 1;
 static const int evTHD_OUTPUT_ID = wxID_HIGHEST + 2;
