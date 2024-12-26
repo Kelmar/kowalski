@@ -27,6 +27,8 @@
 #ifndef DEBUG_H__
 #define DEBUG_H__
 
+/*************************************************************************/
+
 #ifdef _MSC_VER
 // Microsoft provides some handy static analysis keywords, pull those in.
 # include <sal.h>
@@ -42,6 +44,8 @@
 # define _Outptr_opt_
 #endif
 
+/*************************************************************************/
+
 #include <assert.h>
 
 #ifdef _DEBUG
@@ -53,5 +57,9 @@
 
 #define VERIFY(X_) assert(X_)
 
+/*************************************************************************/
+
 #endif /* DEBUG_H__ */
+
+/*************************************************************************/
 

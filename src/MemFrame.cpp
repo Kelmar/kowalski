@@ -30,17 +30,18 @@
 #include "FormatNums.h"
 
 /*************************************************************************/
+// Configuration
 /*************************************************************************/
 
 namespace
 {
     struct MemoryFrameConfig
     {
-        int sizeH;
-        int sizeW;
-        int posX;
-        int posY;
-        bool hidden;
+        int sizeH;   // Window height
+        int sizeW;   // Window width
+        int posX;    // Window X position
+        int posY;    // Window Y position
+        bool hidden; // Set if window should be hidden
     };
 
     struct MemoryFrameConfigMap : config::Mapper<MemoryFrameConfig>

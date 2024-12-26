@@ -54,14 +54,26 @@ class DebugController : public wxEvtHandler
 private:
     friend class C6502App;
 
-    wxMenuItem *m_menu;
+    // Temporary until we remove CGlobal
+    friend class CGlobal;
 
+private: // Simulator items
     wxCriticalSection m_critSect;
     wxSemaphore m_semaphore;
     class AsmThread *m_asmThread;
 
     PSym6502 m_simulator;
 
+    /**
+     * @brief Factory method for creating a new simulator instance
+     * @remark If an instance already exists, it is replaced with a new one.
+     */
+    void CreateSimulator();
+
+private: // UI items
+    wxMenuItem *m_menu;
+
+private:
     /* constructor */ DebugController();
 
     void StartDebug();
@@ -73,11 +85,11 @@ private:
     sim_addr_t GetCursorAddress(bool skipping);
 
 public:
-    virtual          ~DebugController();
+    virtual ~DebugController();
 
 public: // Properties
 
-    PSym6502 Simulator() const;
+    PSym6502 Simulator() const { return m_simulator; }
 
     DebugState CurrentState() const;
 
@@ -90,6 +102,8 @@ public: // Properties
             (state == DebugState::Running) ||
             (state == DebugState::Stopped);
     }
+
+    ProcessorType processor() const;
 
 public: // Commands
     void InitOptions();

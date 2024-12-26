@@ -79,7 +79,7 @@ void FontController::InitOptions()
         return new OptionsFontPage(parent);
     };
 
-    wxGetApp().optionsController().RegisterPage(factory, _("Fonts and Colors"));
+    wxGetApp().optionsController().RegisterPage(factory, _("Fonts and Colors"), 30);
 }
 
 /*************************************************************************/

@@ -611,7 +611,7 @@ const uint8_t (&CAsm::TransformTable(const ProcessorType procType))[C_ILL][A_NO_
 
 const uint8_t (&CAsm::CodeToCommand())[0x100]
 {
-    return CodeToCommand(wxGetApp().m_global.m_procType);
+    return CodeToCommand(wxGetApp().debugController().processor());
 }
 
 const uint8_t (&CAsm::CodeToCommand(const ProcessorType procType))[0x100]
@@ -634,7 +634,7 @@ const uint8_t (&CAsm::CodeToCommand(const ProcessorType procType))[0x100]
 
 const uint8_t (&CAsm::CodeToMode())[0x100]
 {
-    return CodeToMode(wxGetApp().m_global.m_procType);
+    return CodeToMode(wxGetApp().debugController().processor());
 }
 
 const uint8_t (&CAsm::CodeToMode(const ProcessorType procType))[0x100]
@@ -657,12 +657,12 @@ const uint8_t (&CAsm::CodeToMode(const ProcessorType procType))[0x100]
 
 inline ProcessorType CAsm::ProcType()
 {
-    return wxGetApp().m_global.m_procType;
+    return wxGetApp().debugController().processor();
 }
 
 const uint8_t (&CAsm::CodeToCycles())[0x100]
 {
-    return CodeToCycles(wxGetApp().m_global.m_procType);
+    return CodeToCycles(wxGetApp().debugController().processor());
 }
 
 const uint8_t (&CAsm::CodeToCycles(const ProcessorType procType))[0x100]

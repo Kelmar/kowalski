@@ -63,7 +63,22 @@ private:
     {
         OptionsPageFactory factory;
         wxString text;
+        int ordering;
     };
+
+    struct
+    {
+        bool operator()(const PageInfo &lhs, const PageInfo &rhs) const
+        {
+            // Lowest weight first, then by name
+            return
+                lhs.ordering < rhs.ordering ||
+                lhs.text < rhs.text
+            ;
+        }
+    } infoComparator;
+
+private:
 
     CMainFrame *m_mainFrame;
     std::vector<PageInfo> m_pageFactories;
@@ -78,7 +93,7 @@ public:
     bool Init(CMainFrame *mainFrame);
 
 public:
-    void RegisterPage(OptionsPageFactory factory, const wxString &text);
+    void RegisterPage(OptionsPageFactory factory, const wxString &text, int ordering);
 };
 
 /*************************************************************************/

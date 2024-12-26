@@ -1596,7 +1596,7 @@ void CMainFrame::OnUpdateFileSaveCode(CCmdUI *pCmdUI)
 
 void CMainFrame::OnViewDeasm()
 {
-    if (!wxGetApp().m_global.IsDebugging())
+    if (!wxGetApp().debugController().IsDebugging())
         return; // No debugger running.
 
     wxGetApp().m_global.CreateDeasm();
@@ -1867,10 +1867,10 @@ void CMainFrame::OnTimer(UINT nIDEvent)
 
 void CMainFrame::SymGenInterrupt(CSym6502::IntType eInt)
 {
-    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramFinished())
+    if (!wxGetApp().debugController().IsDebugging() || wxGetApp().m_global.IsProgramFinished())
         return;
 
-    wxGetApp().m_global.GetSimulator()->Interrupt(eInt);
+    wxGetApp().debugController().Simulator()->Interrupt(eInt);
 }
 
 void CMainFrame::UpdateSymGenInterrupt(CCmdUI *pCmdUI)
@@ -2006,7 +2006,7 @@ void CMainFrame::StopIntGenerator()
 
 void CMainFrame::StartIntGenerator()
 {
-    if (!wxGetApp().m_global.IsDebugging() || wxGetApp().m_global.IsProgramFinished())
+    if (!wxGetApp().debugController().IsDebugging() || wxGetApp().m_global.IsProgramFinished())
         return;
 
 #if REWRITE_TO_WX_WIDGET

@@ -27,13 +27,9 @@
 
 /*************************************************************************/
 
-class COptionsSymPage : public wxPanel
+class OptionsSymPage : public OptionsPage, public wxExtra
 {
-    // Construction
-public:
-    /* constructor */ COptionsSymPage(wxBookCtrlBase *parent);
-    virtual ~COptionsSymPage();
-
+private:
     uint32_t m_nIOAddress;
     bool m_bIOEnable;
     int m_nFinish;
@@ -43,11 +39,18 @@ public:
     uint32_t m_nProtFromAddr;
     uint32_t m_nProtToAddr;
 
+public:
+    /* constructor */ OptionsSymPage(wxBookCtrlBase *parent);
+    virtual ~OptionsSymPage();
+
+    virtual void AbortChanges() override;
+    virtual void SaveChanges() override;
+
 protected:
     //virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
     //afx_msg bool OnHelpInfo(HELPINFO* pHelpInfo);
-    afx_msg void OnContextMenu(wxWindow *pWnd, wxPoint point);
+    //afx_msg void OnContextMenu(wxWindow *pWnd, wxPoint point);
 };
 
 /*************************************************************************/

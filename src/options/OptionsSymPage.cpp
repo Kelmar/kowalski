@@ -27,13 +27,17 @@
 #include <wx/colordlg.h>
 
 #include "resource.h"
+
 #include "Options.h"
+#include "options/OptionsSymPage.h"
+
 #include "ConfigSettings.h"
 
 /*************************************************************************/
 
-COptionsSymPage::COptionsSymPage(wxBookCtrlBase *parent)
-    : wxPanel()
+OptionsSymPage::OptionsSymPage(wxBookCtrlBase *parent)
+    : OptionsPage()
+    , wxExtra(this)
 {
     if (!wxXmlResource::Get()->LoadPanel(this, parent, "OptionsSimPage"))
         throw ResourceError();
@@ -48,7 +52,19 @@ COptionsSymPage::COptionsSymPage(wxBookCtrlBase *parent)
     m_nProtToAddr = 0;
 }
 
-COptionsSymPage::~COptionsSymPage()
+OptionsSymPage::~OptionsSymPage()
+{
+}
+
+/*************************************************************************/
+
+void OptionsSymPage::AbortChanges()
+{
+}
+
+/*************************************************************************/
+
+void OptionsSymPage::SaveChanges()
 {
 }
 
@@ -56,7 +72,7 @@ COptionsSymPage::~COptionsSymPage()
 
 #if REWRITE_TO_WX_WIDGET
 
-void COptionsSymPage::DoDataExchange(CDataExchange *pDX)
+void OptionsSymPage::DoDataExchange(CDataExchange *pDX)
 {
     if (!pDX->m_bSaveAndValidate)
     {
@@ -98,7 +114,7 @@ void COptionsSymPage::DoDataExchange(CDataExchange *pDX)
         DDV_MinMaxUInt(pDX, m_nProtToAddr, 0, 0x0000FFFF);
 }
 
-BEGIN_MESSAGE_MAP(COptionsSymPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(OptionsSymPage, CPropertyPage)
     ON_WM_HELPINFO()
     ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
@@ -108,7 +124,7 @@ END_MESSAGE_MAP()
 /*************************************************************************/
 
 #if 0
-bool COptionsSymPage::OnHelpInfo(HELPINFO *pHelpInfo)
+bool OptionsSymPage::OnHelpInfo(HELPINFO *pHelpInfo)
 {
     if (pHelpInfo->iCtrlId > 0)
     {
@@ -120,7 +136,7 @@ bool COptionsSymPage::OnHelpInfo(HELPINFO *pHelpInfo)
     return true;
 }
 
-void COptionsSymPage::OnContextMenu(wxWindow *pWnd, wxPoint point)
+void OptionsSymPage::OnContextMenu(wxWindow *pWnd, wxPoint point)
 {
     UNUSED(pWnd);
     UNUSED(point);

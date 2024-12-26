@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CGlobal
 {
 private:
+    friend class DebugController;
+
     UINT m_busWidth;          // width of the address bus (in bits)
     bool m_isCodePresent;     // true -> after successful assembly
     COutputMem m_memory;      // memory written in the assembly process
@@ -43,21 +45,12 @@ private:
     /// I/O address override
     sim_addr_t m_ioAddress;
 
-    PSym6502 m_simulator;     // simulator
     CAsm::Finish m_simFinish; // how the simulator ends the program
     CMarkArea m_markArea;     // designation of fragments of memory containing the object code
 
-    /**
-     * @brief Factory method for creating a new simulator instance
-     * @remark If an instance already exists, it is replaced with a new one.
-     */
-    void CreateSimulator();
+    PSym6502 Simulator() const;
 
 public:
-
-    /// Selected processor type
-    ProcessorType m_procType;
-
     bool m_bBank; // Flag for member above bank 0 for deasm view
     uint8_t m_bPBR; // PBR register for deasm view
     uint16_t m_bSRef; // Stack pointer reference
@@ -74,10 +67,8 @@ public:
         , m_debugInfo()
         , m_startAddress(sim::INVALID_ADDRESS)
         , m_ioAddress(sim::INVALID_ADDRESS)
-        , m_simulator(nullptr)
         , m_simFinish(CAsm::Finish::FIN_BY_BRK)
         , m_markArea()
-        , m_procType(ProcessorType::M6502)
     {
     }
 
@@ -88,8 +79,8 @@ public:
     void SetAddrBusWidth(UINT w)
     {
         m_busWidth = w;
-        if (m_simulator)
-            m_simulator->set_addr_bus_width(w);
+        if (Simulator())
+            Simulator()->set_addr_bus_width(w);
     }
 
     CDebugInfo *GetDebug()
@@ -132,14 +123,9 @@ public:
         return m_isCodePresent; // to improve
     }
 
-    bool IsDebugging()
-    {
-        return m_simulator != NULL;
-    }
-
     bool IsProgramFinished()
     {
-        return m_simulator ? m_simulator->IsFinished() : false;
+        return Simulator() ? Simulator()->IsFinished() : false;
     }
 
     void SetCodePresence(bool present)
@@ -147,30 +133,21 @@ public:
         m_isCodePresent = present;
     }
 
-    void StartDebug();
-
-    void RestartProgram()
-    {
-        StartDebug();
-    }
-
-    void ExitDebugger();
-
     void SetStart(sim_addr_t address)
     {
         m_startAddress = address;
     }
 
-    PSym6502 GetSimulator() const { return m_simulator; }
+    PSym6502 GetSimulator() const { return Simulator(); }
 
     std::string GetStatMsg()
     {
-        return m_simulator->GetLastStatMsg();
+        return Simulator()->GetLastStatMsg();
     }
 
     CAsm::Finish GetSymFinish()
     {
-        ASSERT(m_simulator == NULL || m_simulator->finish == m_simFinish);
+        ASSERT(!Simulator() || Simulator()->finish == m_simFinish);
         return m_simFinish;
     }
 
@@ -178,8 +155,8 @@ public:
     {
         m_simFinish = fin;
 
-        if (m_simulator)
-            m_simulator->finish = fin;
+        if (Simulator())
+            Simulator()->finish = fin;
     }
 
     CAsm::Breakpoint SetBreakpoint(int line, const std::string &doc_title);
@@ -192,15 +169,7 @@ public:
 
     //---------------------------------------------------------------------------
 
-    ProcessorType GetProcType()
-    {
-        return m_procType;
-    }
-
-    void SetProcType(ProcessorType newType)
-    {
-        m_procType = newType;
-    }
+    ProcessorType GetProcType() const;
 
     uint8_t GetHelpType() //^^ Help
     {

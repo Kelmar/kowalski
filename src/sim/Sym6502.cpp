@@ -250,7 +250,7 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
     case CAsm::A_ABSI: // only JMP(xxxx) supports this addr mode
         addr = (cpu16() && !ctx.emm) ? get_word(ctx.pc + (ctx.pbr << 16)) : get_word(ctx.pc);
 
-        if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && (addr & 0xFF) == 0xFF) // LSB == 0xFF?
+        if (wxGetApp().debugController().processor() != ProcessorType::M6502 && (addr & 0xFF) == 0xFF) // LSB == 0xFF?
         {
             // Recreate 6502 bug
             uint16_t hAddr = addr - 0xFF;
@@ -917,7 +917,7 @@ void CSym6502::PerformCommandInner()
                 acc = (uint8_t)(tmp & 0xFF);
                 zeroc = acc == 0;
 
-                bool isM6502 = wxGetApp().m_global.m_procType == ProcessorType::M6502;
+                bool isM6502 = wxGetApp().debugController().processor() == ProcessorType::M6502;
 
                 ctx.zero = isM6502 ? !!zero : !!zeroc;
                 ctx.carry = tmp > 0x99;
@@ -1029,7 +1029,7 @@ void CSym6502::PerformCommandInner()
                 negativec = (acc & 0x80) != 0;
                 zeroc = acc == 0;
 
-                bool isM6502 = wxGetApp().m_global.m_procType == ProcessorType::M6502;
+                bool isM6502 = wxGetApp().debugController().processor() == ProcessorType::M6502;
 
                 ctx.carry = !carry; // Carray negation in accordance with convention 6502
                 ctx.overflow = !!overflow;
@@ -1209,7 +1209,7 @@ void CSym6502::PerformCommandInner()
             }
         }
 
-        if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
+        if (wxGetApp().debugController().processor() != ProcessorType::M6502 && extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
 
         ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -1269,7 +1269,7 @@ void CSym6502::PerformCommandInner()
             }
         }
 
-        if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
+        if (wxGetApp().debugController().processor() != ProcessorType::M6502 && extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
 
         ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -1344,7 +1344,7 @@ void CSym6502::PerformCommandInner()
             }
         }
 
-        if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
+        if (wxGetApp().debugController().processor() != ProcessorType::M6502 && extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
 
         ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -1424,7 +1424,7 @@ void CSym6502::PerformCommandInner()
             zero = acc == 0;
         }
 
-        if (wxGetApp().m_global.m_procType != ProcessorType::M6502 && extracycle)
+        if (wxGetApp().debugController().processor() != ProcessorType::M6502 && extracycle)
             ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
 
         ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -2637,7 +2637,7 @@ void CSym6502::PerformCommandInner()
             return;
         }
 
-        if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
+        if (wxGetApp().debugController().processor() != ProcessorType::M6502)
         {
             // 65C02 mode
             arg = get_argument_value(false);
@@ -2975,7 +2975,7 @@ void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
     {
         ctx.interrupt = false;
 
-        if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
+        if (wxGetApp().debugController().processor() != ProcessorType::M6502)
             ctx.decimal = false; //% 65C02 clears this bit
 
         ctx.pc = get_rst_addr();
@@ -3005,7 +3005,7 @@ void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
         ctx.break_bit = false;
         push_on_stack(ctx.get_status_reg());
 
-        if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
+        if (wxGetApp().debugController().processor() != ProcessorType::M6502)
             ctx.decimal = false; // 65C02 clears this bit
 
         ctx.break_bit = true;
@@ -3042,7 +3042,7 @@ void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
         ctx.break_bit = true;
         ctx.interrupt = true;
 
-        if (wxGetApp().m_global.m_procType != ProcessorType::M6502)
+        if (wxGetApp().debugController().processor() != ProcessorType::M6502)
             ctx.decimal = false; // 65C02 clears this bit
 
         ctx.uCycles += 7;

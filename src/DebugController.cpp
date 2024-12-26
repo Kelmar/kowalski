@@ -24,11 +24,13 @@
 
 #include "StdAfx.h"
 #include "6502.h"
+#include "config.h"
 
 #include "MainFrm.h"
 #include "ChildFrm.h"
 #include "6502View.h"
 #include "6502Doc.h"
+
 #include "Options.h"
 
 #include "options/OptionsSymPage.h"
@@ -37,6 +39,70 @@
 #include "AsmThread.h"
 
 /*************************************************************************/
+// Configuration
+/*************************************************************************/
+
+namespace
+{
+    struct SimulatorConfig
+    {
+        ProcessorType Processor;     // Type of processor selected
+        CAsm::Finish  SimFinish;     // How the simulator should terminate
+        bool          IOEnable;      // Set if the I/O functions should be enabled
+        sim_addr_t    IOAddress;     // I/O Address location
+        bool          ProtectMemory; // Set if a section of memroy should be write protected
+        sim_addr_t    ProtectStart;  // Start of write protected memory area
+        sim_addr_t    ProtectEnd;    // End of write protected memory area
+    };
+
+    struct SimulatorConfigMap : config::Mapper<SimulatorConfig>
+    {
+        bool to(SimulatorConfig &cfg, config::Context &ctx) const
+        {
+            return
+                ctx.map("ProcType", cfg.Processor) ||
+                ctx.map("SimFinish", cfg.SimFinish) ||
+                ctx.map("IOEnabled", cfg.IOEnable) ||
+                ctx.map("IOAddress", cfg.IOAddress) ||
+                ctx.map("ProtecteMem", cfg.ProtectMemory) ||
+                ctx.map("ProtectMemFrom", cfg.ProtectStart) ||
+                ctx.map("ProtectMemTo", cfg.ProtectEnd)
+            ;
+        }
+    };
+
+    SimulatorConfig s_simConfig;
+
+    void InitDefaultConfig()
+    {
+        s_simConfig =
+        {
+            .Processor = ProcessorType::M6502,
+            .SimFinish = CAsm::Finish::FIN_BY_BRK,
+            .IOEnable = true,
+            .IOAddress = 0xE000,
+            .ProtectMemory = false,
+            .ProtectStart = 0,
+            .ProtectEnd = 0
+        };
+    }
+
+    void LoadConfig()
+    {
+        InitDefaultConfig();
+
+#if WIN32
+        // TODO: Import old config if detected.
+#endif
+    }
+
+    void SaveConfig()
+    {
+    }
+}
+
+/*************************************************************************/
+/*************************************************************************/
 
 DebugController::DebugController()
     : m_critSect()
@@ -44,24 +110,63 @@ DebugController::DebugController()
     , m_asmThread(nullptr)
 {
     BindEvents();
+
+    LoadConfig();
 }
 
 DebugController::~DebugController()
 {
+    SaveConfig();
 }
+
+/*************************************************************************/
+
+ProcessorType DebugController::processor() const { return s_simConfig.Processor; }
 
 /*************************************************************************/
 
 void DebugController::InitOptions()
 {
-    //wxGetApp().optionsController().RegisterPage(factory, _("Debugging"));
+    OptionsPageFactory factory = [] (wxBookCtrlBase *parent)
+    {
+        return new OptionsSymPage(parent);
+    };
+
+    wxGetApp().optionsController().RegisterPage(factory, _("Simulator"), 0);
 }
 
 /*************************************************************************/
 
-PSym6502 DebugController::Simulator() const
+void DebugController::CreateSimulator()
 {
-    return wxGetApp().m_global.GetSimulator();
+    CGlobal *global = &wxGetApp().m_global;
+
+    // Get a fresh new simulator
+    m_simulator.reset(new CSym6502(global->GetProcType(), global->GetDebug()));
+
+    CContext &ctx = m_simulator->GetContext();
+
+    // Build up device list
+    // For now hard coded to a RAM and IOWindow module.
+
+    sim_addr_t ioAddr = global->ioAddress();
+
+    sim::PDevice lowRam(new sim::dev::RAM(&global->GetMemory(), 0, ioAddr));
+
+    const CMainFrame *mainFrame = wxGetApp().mainFrame();
+    sim::PDevice simpleIO(new sim::dev::SimpleIO(mainFrame->ioWindow()));
+
+    sim_addr_t hiRamStart = ioAddr + simpleIO->AddressSize();
+    size_t hiRamSize = (ctx.bus.maxAddress() - hiRamStart) + 1;
+
+    sim::PDevice hiRam(new sim::dev::RAM(&global->GetMemory(), hiRamStart, hiRamSize));
+
+    ctx.bus.AddDevice(lowRam, 0);
+    ctx.bus.AddDevice(simpleIO, ioAddr);
+    ctx.bus.AddDevice(hiRam, hiRamStart);
+
+    m_simulator->finish = global->m_simFinish;
+    m_simulator->SetStart(global->m_startAddress);
 }
 
 /*************************************************************************/
@@ -274,7 +379,7 @@ void DebugController::SkipToAddress(sim_addr_t address)
 
 void DebugController::StartDebug()
 {
-    wxGetApp().m_global.StartDebug();
+    CreateSimulator();
 }
 
 /*************************************************************************/
@@ -298,7 +403,7 @@ void DebugController::DebugStopped()
         return;
     }
 
-    wxGetApp().m_global.ExitDebugger();
+    m_simulator.reset();
 
     //m_view->StopIntGenerator();
 

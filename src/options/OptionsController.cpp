@@ -54,12 +54,13 @@ bool OptionsController::Init(CMainFrame *mainFrame)
 
 /*************************************************************************/
 
-void OptionsController::RegisterPage(OptionsPageFactory factory, const wxString &text)
+void OptionsController::RegisterPage(OptionsPageFactory factory, const wxString &text, int ordering)
 {
     m_pageFactories.push_back(PageInfo
     {
         .factory = factory,
-        .text = text
+        .text = text,
+        .ordering = ordering
     });
 }
 
@@ -77,6 +78,8 @@ void OptionsController::OnOptions(wxCommandEvent &)
     auto options = std::make_unique<OptionsDialog>();
 
     options->Create(m_mainFrame);
+
+    std::ranges::sort(m_pageFactories, infoComparator);
 
     for (auto info : m_pageFactories)
         options->AddPage(info.factory, info.text);

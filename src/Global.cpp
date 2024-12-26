@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Deasm6502Doc.h"
 
+#include "DebugController.h"
+
 #if 0
 #include "IntelHex.h"
 #include "MotorolaSRecord.h"
@@ -33,37 +35,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
-void CGlobal::CreateSimulator()
+PSym6502 CGlobal::Simulator() const
 {
-    m_simulator.reset(new CSym6502(m_procType, &m_debugInfo));
-
-    CContext &ctx = m_simulator->GetContext();
-
-    // Build up device list
-    // For now hard coded to a RAM and IOWindow module.
-
-    // TODO: Read settings for IO later
-    //uint32_t CSym6502::io_addr = 0xE000; // Beginning of the simulator I/O area
-    //bool CSym6502::io_enabled = true;
-
-    sim_addr_t ioAddr = ioAddress();
-
-    sim::PDevice lowRam(new sim::dev::RAM(&m_memory, 0, ioAddr));
-
-    const CMainFrame *mainFrame = wxGetApp().mainFrame();
-    sim::PDevice simpleIO(new sim::dev::SimpleIO(mainFrame->ioWindow()));
-
-    sim_addr_t hiRamStart = ioAddr + simpleIO->AddressSize();
-    size_t hiRamSize = (ctx.bus.maxAddress() - hiRamStart) + 1;
-
-    sim::PDevice hiRam(new sim::dev::RAM(&m_memory, hiRamStart, hiRamSize));
-
-    ctx.bus.AddDevice(lowRam, 0);
-    ctx.bus.AddDevice(simpleIO, ioAddr);
-    ctx.bus.AddDevice(hiRam, hiRamStart);
-
-    m_simulator->finish = m_simFinish;
-    m_simulator->SetStart(m_startAddress);
+    return wxGetApp().debugController().Simulator();
 }
 
 /*************************************************************************/
@@ -121,9 +95,16 @@ void CGlobal::SetTempExecBreakpoint(sim_addr_t address)
 
 /*************************************************************************/
 
+ProcessorType CGlobal::GetProcType() const
+{
+    return wxGetApp().debugController().processor();
+}
+
+/*************************************************************************/
+
 bool CGlobal::CreateDeasm()
 {
-    ASSERT(m_simulator);
+    ASSERT(Simulator());
 
 #if 0
 
@@ -143,33 +124,6 @@ bool CGlobal::CreateDeasm()
 #endif
 
     return true;
-}
-
-//-----------------------------------------------------------------------------
-
-void CGlobal::StartDebug()
-{
-    if (!m_simulator)
-    {
-        CreateSimulator();
-    }
-    else
-    {
-        m_simulator->Restart();
-
-        m_simulator->finish = m_simFinish;
-        m_simulator->SetStart(m_startAddress);
-    }
-}
-
-/*************************************************************************/
-
-void CGlobal::ExitDebugger()
-{
-    if (!m_simulator)
-        return;
-
-    m_simulator = nullptr;
 }
 
 /*************************************************************************/
@@ -230,7 +184,7 @@ void CGlobal::LoadCode(const LoadCodeState &state)
 
     SetStart(start);
 
-    StartDebug();
+    wxGetApp().debugController().StartDebug();
 }
 
 #if 0
