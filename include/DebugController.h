@@ -22,8 +22,8 @@
  */
 /*************************************************************************/
 
-#ifndef DEBUG_CONTROLLER_6502_H__
-#define DEBUG_CONTROLLER_6502_H__
+#ifndef SIMULATOR_CONTROLLER_6502_H__
+#define SIMULATOR_CONTROLLER_6502_H__
 
 /*************************************************************************/
 /**
@@ -49,7 +49,7 @@ enum class DebugState
 
 /*************************************************************************/
 
-class DebugController : public wxEvtHandler
+class SimulatorController : public wxEvtHandler
 {
 private:
     friend class C6502App;
@@ -74,7 +74,7 @@ private: // UI items
     wxMenuItem *m_menu;
 
 private:
-    /* constructor */ DebugController();
+    /* constructor */ SimulatorController();
 
     void StartDebug();
 
@@ -85,7 +85,7 @@ private:
     sim_addr_t GetCursorAddress(bool skipping);
 
 public:
-    virtual ~DebugController();
+    virtual ~SimulatorController();
 
 public: // Properties
 
@@ -152,6 +152,6 @@ private:
 
 /*************************************************************************/
 
-#endif /* DEBUG_CONTROLLER_6502_H__ */
+#endif /* SIMULATOR_CONTROLLER_6502_H__ */
 
 /*************************************************************************/

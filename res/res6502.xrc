@@ -42,6 +42,7 @@
                     <option>0</option>
                     <object class="wxTextCtrl" name="m_startAddrTxt">
                       <value></value>
+                      <maxlength>0</maxlength>
                     </object>
                   </object>
                 </object>
@@ -67,6 +68,7 @@
                     <option>0</option>
                     <object class="wxTextCtrl" name="m_loadAddrTxt">
                       <value></value>
+                      <maxlength>0</maxlength>
                     </object>
                   </object>
                 </object>
@@ -167,10 +169,28 @@
     </object>
   </object>
   <object class="wxPanel" name="OptionsSimPage">
-    <size>500,300</size>
+    <size>500,428</size>
     <style>wxTAB_TRAVERSAL</style>
     <object class="wxBoxSizer" name="m_mainSizer">
       <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <flag>wxALL|wxEXPAND</flag>
+        <border>5</border>
+        <option>0</option>
+        <object class="wxStaticBoxSizer" name="m_cpuSizer">
+          <orient>wxVERTICAL</orient>
+          <label>Processor</label>
+          <object class="sizeritem">
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxChoice" name="m_cpuSelect">
+              <selection>0</selection>
+              <content/>
+            </object>
+          </object>
+        </object>
+      </object>
       <object class="sizeritem">
         <flag>wxEXPAND</flag>
         <border>5</border>
@@ -256,6 +276,7 @@
                     <option>1</option>
                     <object class="wxTextCtrl" name="m_ioAddrTxt">
                       <value>0xE000</value>
+                      <maxlength>0</maxlength>
                     </object>
                   </object>
                 </object>
@@ -268,7 +289,7 @@
         <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
         <option>0</option>
-        <object class="wxStaticBoxSizer" name="sbSizer4">
+        <object class="wxStaticBoxSizer" name="m_ioSizer">
           <orient>wxHORIZONTAL</orient>
           <label>Input/Output Window</label>
           <object class="sizeritem">
@@ -317,7 +338,7 @@
         <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
         <option>0</option>
-        <object class="wxStaticBoxSizer" name="sbSizer5">
+        <object class="wxStaticBoxSizer" name="m_memSizer">
           <orient>wxVERTICAL</orient>
           <label>Memory Protection</label>
           <object class="sizeritem">
@@ -350,6 +371,7 @@
                 <option>0</option>
                 <object class="wxTextCtrl" name="m_writeStartTxt">
                   <value>0xC000</value>
+                  <maxlength>0</maxlength>
                 </object>
               </object>
               <object class="sizeritem">
@@ -367,11 +389,18 @@
                 <option>0</option>
                 <object class="wxTextCtrl" name="m_writeEndTxt">
                   <value>0xCFFF</value>
+                  <maxlength>0</maxlength>
                 </object>
               </object>
             </object>
           </object>
         </object>
+      </object>
+      <object class="spacer">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <size>0,0</size>
       </object>
     </object>
   </object>
@@ -491,6 +520,7 @@
             <option>0</option>
             <object class="wxTextCtrl" name="m_codeTxt">
               <value></value>
+              <maxlength>0</maxlength>
             </object>
           </object>
         </object>
