@@ -44,7 +44,7 @@ C6502App::C6502App()
     : m_optionsController(nullptr)
     , m_fontController(nullptr)
     , m_projectManager(nullptr)
-    , m_debugController(nullptr)
+    , m_simulatorController(nullptr)
     , m_mainFrame(nullptr)
     , m_config(nullptr)
     , m_bDoNotAddToRecentFileList(false)
@@ -139,14 +139,14 @@ void C6502App::SetupSingletons()
 
     m_fontController = new FontController();
     m_projectManager = new ProjectManager();
-    m_debugController = new DebugController();
+    m_simulatorController = new SimulatorController();
 }
 
 /*************************************************************************/
 
 void C6502App::DisposeSingletons()
 {
-    delete m_debugController;
+    delete m_simulatorController;
     delete m_projectManager;
     delete m_fontController;
 
@@ -159,7 +159,7 @@ void C6502App::DisposeSingletons()
 void C6502App::InitOptionPages()
 {
     m_fontController->InitOptions();
-    m_debugController->InitOptions();
+    m_simulatorController->InitOptions();
     //m_projectManager->InitOptions();
 }
 
@@ -457,7 +457,7 @@ int C6502App::OnExit()
 {
     wxLogDebug("Application shutting down");
 
-    m_debugController->ExitDebugMode();
+    m_simulatorController->ExitDebugMode();
 
     wxDocManager *const docManager = wxDocManager::GetDocumentManager();
 

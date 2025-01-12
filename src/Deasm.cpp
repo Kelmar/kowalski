@@ -68,7 +68,7 @@ std::string CDeasm::DeasmInstr(const CmdInfo &ci, CAsm::DeasmFmt flags)
         str += fmt.ToStdString();
     }
 
-    ProcessorType procType = wxGetApp().debugController().processor();
+    ProcessorType procType = wxGetApp().simulatorController().processor();
     str += Mnemonic(cmd, procType, !!(flags & CAsm::DF_USE_BRK));
 
     str += Argument(cmd, (CAsm::CodeAdr)CAsm::CodeToMode(procType)[cmd], addr, ci.arg1, ci.arg2, ci.arg3, flags & CAsm::DF_LABELS, flags & CAsm::DF_HELP);
@@ -85,7 +85,7 @@ std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, int &ptr)
 
     sim_addr_t addr;
 
-    ProcessorType procType = wxGetApp().debugController().processor();
+    ProcessorType procType = wxGetApp().simulatorController().processor();
 
     const CContext &ctx =m_sim->GetContext();
 

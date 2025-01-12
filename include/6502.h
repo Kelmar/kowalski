@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "FontController.h"
 #include "ProjectManager.h"
-#include "DebugController.h"
+#include "SimulatorController.h"
 
 class CIOWindow;
 
@@ -48,7 +48,7 @@ private:
 
     FontController *m_fontController;
     ProjectManager *m_projectManager;
-    DebugController *m_debugController;
+    SimulatorController *m_simulatorController;
 
     CMainFrame *m_mainFrame;
     wxLogWindow *m_logFrame;
@@ -89,7 +89,7 @@ public:
 
     FontController &fontController() const { return *m_fontController; }
     ProjectManager &projectManager() const { return *m_projectManager; }
-    DebugController &debugController() const { return *m_debugController; }
+    SimulatorController &simulatorController() const { return *m_simulatorController; }
     OptionsController &optionsController() const { return *m_optionsController; }
 
     CMainFrame *mainFrame() const { return m_mainFrame; }

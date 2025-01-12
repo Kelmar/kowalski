@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Deasm6502Doc.h"
 
-#include "DebugController.h"
+#include "SimulatorController.h"
 
 #if 0
 #include "IntelHex.h"
@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 PSym6502 CGlobal::Simulator() const
 {
-    return wxGetApp().debugController().Simulator();
+    return wxGetApp().simulatorController().Simulator();
 }
 
 /*************************************************************************/
@@ -97,7 +97,7 @@ void CGlobal::SetTempExecBreakpoint(sim_addr_t address)
 
 ProcessorType CGlobal::GetProcType() const
 {
-    return wxGetApp().debugController().processor();
+    return wxGetApp().simulatorController().processor();
 }
 
 /*************************************************************************/
@@ -184,7 +184,7 @@ void CGlobal::LoadCode(const LoadCodeState &state)
 
     SetStart(start);
 
-    wxGetApp().debugController().StartDebug();
+    wxGetApp().simulatorController().StartDebug();
 }
 
 #if 0

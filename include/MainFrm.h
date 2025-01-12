@@ -47,8 +47,6 @@ class CMainFrame;
 class CSrc6502Doc;
 class CSrc6502View;
 
-class DebugController;
-
 /*************************************************************************/
 
 #include "ConsoleFrm.h"

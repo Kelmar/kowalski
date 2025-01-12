@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class CGlobal
 {
 private:
-    friend class DebugController;
+    friend class SimulatorController;
 
     UINT m_busWidth;          // width of the address bus (in bits)
     bool m_isCodePresent;     // true -> after successful assembly

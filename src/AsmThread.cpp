@@ -35,7 +35,7 @@
 
 wxThread::ExitCode AsmThread::Entry()
 {
-    // TODO: Remove direct call to wxGetApp() from here; place in DebugController
+    // TODO: Remove direct call to wxGetApp() from here; place in SimulatorController
     io::output &out = wxGetApp().mainFrame()->console()->GetOutput("assembler");
 
     COutputMem &mainMem = wxGetApp().m_global.GetMemory();

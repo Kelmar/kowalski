@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "MainFrm.h"
 
 #include "ProjectManager.h"
-#include "DebugController.h"
+#include "SimulatorController.h"
 
 #include "ChildFrm.h"
 
@@ -534,8 +534,10 @@ CMainFrame::~CMainFrame()
 {
     m_auiManager.UnInit();
 
+    // TODO: These should probably get handled by the controller manager.
+
     PopEventHandler(false); // OptionsController
-    PopEventHandler(false); // DebugController
+    PopEventHandler(false); // SimulatorController
     PopEventHandler(false); // ProjectHandler
 
     //  if (m_Idents)
@@ -572,7 +574,7 @@ void CMainFrame::BindEvents()
     Bind(wxEVT_UPDATE_UI, &CMainFrame::OnUpdateShowLog, this, evID_SHOW_LOG);
 
     PushEventHandler(&wxGetApp().projectManager());
-    PushEventHandler(&wxGetApp().debugController());
+    PushEventHandler(&wxGetApp().simulatorController());
     PushEventHandler(&wxGetApp().optionsController());
 }
 
@@ -738,7 +740,7 @@ void CMainFrame::InitMenu()
     menuBar->Append(edit, wxGetStockLabel(wxID_EDIT));
     menuBar->Append(view, _("&View"));
 
-    wxGetApp().debugController().BuildMenu(menuBar);
+    wxGetApp().simulatorController().BuildMenu(menuBar);
 
     menuBar->Append(help, wxGetStockLabel(wxID_HELP));
 
@@ -1596,7 +1598,7 @@ void CMainFrame::OnUpdateFileSaveCode(CCmdUI *pCmdUI)
 
 void CMainFrame::OnViewDeasm()
 {
-    if (!wxGetApp().debugController().IsDebugging())
+    if (!wxGetApp().simulatorController().IsDebugging())
         return; // No debugger running.
 
     wxGetApp().m_global.CreateDeasm();
@@ -1832,7 +1834,7 @@ void CMainFrame::UpdateFlea()
     auto statusBar = GetStatusBar();
     wxString text;
 
-    switch (wxGetApp().debugController().CurrentState())
+    switch (wxGetApp().simulatorController().CurrentState())
     {
     default:
     case DebugState::Unloaded:
@@ -1867,10 +1869,10 @@ void CMainFrame::OnTimer(UINT nIDEvent)
 
 void CMainFrame::SymGenInterrupt(CSym6502::IntType eInt)
 {
-    if (!wxGetApp().debugController().IsDebugging() || wxGetApp().m_global.IsProgramFinished())
+    if (!wxGetApp().simulatorController().IsDebugging() || wxGetApp().m_global.IsProgramFinished())
         return;
 
-    wxGetApp().debugController().Simulator()->Interrupt(eInt);
+    wxGetApp().simulatorController().Simulator()->Interrupt(eInt);
 }
 
 void CMainFrame::UpdateSymGenInterrupt(CCmdUI *pCmdUI)
@@ -2006,7 +2008,7 @@ void CMainFrame::StopIntGenerator()
 
 void CMainFrame::StartIntGenerator()
 {
-    if (!wxGetApp().debugController().IsDebugging() || wxGetApp().m_global.IsProgramFinished())
+    if (!wxGetApp().simulatorController().IsDebugging() || wxGetApp().m_global.IsProgramFinished())
         return;
 
 #if REWRITE_TO_WX_WIDGET
