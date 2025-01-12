@@ -51,7 +51,7 @@ public:
     bool m_bBank; // Flag for member above bank 0 for deasm view
     uint8_t m_bPBR; // PBR register for deasm view
     uint16_t m_bSRef; // Stack pointer reference
-    
+
     uint8_t m_bHelpFile;            // ^^ help file type
     bool m_bGenerateListing;        // generate listing during assembly?
     std::string m_strListingFile;   // listing file

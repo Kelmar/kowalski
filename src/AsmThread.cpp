@@ -40,7 +40,7 @@ wxThread::ExitCode AsmThread::Entry()
 
     COutputMem &mainMem = wxGetApp().m_global.GetMemory();
     CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().m_global.GetDebug();
+    CDebugInfo *debug = wxGetApp().simulatorController().DebugInfo();
 
     std::unique_ptr<CAsm6502> assembler(new CAsm6502(m_path.c_str(), out, asmMem.get(), debug));
 
