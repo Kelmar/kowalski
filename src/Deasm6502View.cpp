@@ -200,7 +200,8 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
         wxRect rect = GetViewRect();
         int lines = CalcLineCount(rect);
 
-        CDeasm deasm(wxGetApp().m_global.GetSimulator());
+        // TODO: Remove direct refence to simualtor.
+        CDeasm deasm(wxGetApp().simulatorController().Simulator());
 
         uint32_t start = addr; // Start at addr
         bool redraw = true;
@@ -238,7 +239,8 @@ void CDeasm6502View::ScrollToLine(uint32_t addr)
         wxRect rect = GetViewRect();
         int lines = CalcLineCount(rect);
 
-        CDeasm deasm(wxGetApp().m_global.GetSimulator());
+        // TODO: Remove direct refence to simualtor.
+        CDeasm deasm(wxGetApp().simulatorController().Simulator());
 
         uint32_t start = pDoc->m_uStartAddr;
         bool redraw = true;

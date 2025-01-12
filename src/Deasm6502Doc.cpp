@@ -85,7 +85,10 @@ std::ostream &CDeasm6502Doc::SaveObject(std::ostream &stream)
     if (!GetSaveOptions())
         return stream; // Abort save
 
-    CContext &ctx = wxGetApp().m_global.GetSimulator()->GetContext();
+    // TODO: Remove direct reference to simulator.
+    PSym6502 sym = wxGetApp().simulatorController().Simulator();
+
+    CContext &ctx = sym->GetContext();
     DeassembleSave(stream, ctx, m_uStart, m_uEnd, 0);
 
     return stream;

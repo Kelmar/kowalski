@@ -3380,7 +3380,8 @@ void CSym6502::set_translation_tables()
 
 std::string CmdInfo::Asm() const
 {
-    CDeasm deasm (wxGetApp().m_global.GetSimulator());
+    // TODO: Remove direct refence to simualtor.
+    CDeasm deasm (wxGetApp().simulatorController().Simulator());
     CAsm::DeasmFmt fmt = CAsm::DeasmFmt(CAsm::DF_ADDRESS | CAsm::DF_CODE_BYTES | CAsm::DF_USE_BRK);  //% bug Fix 1.2.13.18 - show BRK vs. .DB $00
 
     wxString strLine = deasm.DeasmInstr(*this, fmt);

@@ -562,7 +562,7 @@ void CRegisterBar::ChangeRegister(int ID, int reg_no)
 
 void CRegisterBar::ChangeFlags(int flag_bit, bool set) // changing the flag register bit
 {
-    PSym6502 pSym = wxGetApp().m_global.GetSimulator();
+    PSym6502 pSym = wxGetApp().simulatorController().Simulator();
 
     if (!pSym)
     {

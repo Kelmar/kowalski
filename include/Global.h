@@ -34,7 +34,6 @@ class CGlobal
 private:
     friend class SimulatorController;
 
-    UINT m_busWidth;          // width of the address bus (in bits)
     bool m_isCodePresent;     // true -> after successful assembly
     COutputMem m_memory;      // memory written in the assembly process
     CDebugInfo m_debugInfo;   // startup information for the simulator
@@ -61,8 +60,7 @@ public:
     CIntGenerator m_IntGenerator;   // interrupt request generator data
 
     CGlobal()
-        : m_busWidth(24) //**memfix
-        , m_isCodePresent(false)
+        : m_isCodePresent(false)
         , m_memory()
         , m_debugInfo()
         , m_startAddress(sim::INVALID_ADDRESS)
@@ -74,13 +72,6 @@ public:
 
     ~CGlobal()
     {
-    }
-
-    void SetAddrBusWidth(UINT w)
-    {
-        m_busWidth = w;
-        if (Simulator())
-            Simulator()->set_addr_bus_width(w);
     }
 
     CDebugInfo *GetDebug()
@@ -123,11 +114,6 @@ public:
         return m_isCodePresent; // to improve
     }
 
-    bool IsProgramFinished()
-    {
-        return Simulator() ? Simulator()->IsFinished() : false;
-    }
-
     void SetCodePresence(bool present)
     {
         m_isCodePresent = present;
@@ -137,8 +123,6 @@ public:
     {
         m_startAddress = address;
     }
-
-    PSym6502 GetSimulator() const { return Simulator(); }
 
     std::string GetStatMsg()
     {
@@ -170,16 +154,6 @@ public:
     //---------------------------------------------------------------------------
 
     ProcessorType GetProcType() const;
-
-    uint8_t GetHelpType() //^^ Help
-    {
-        return m_bHelpFile;
-    }
-
-    void SetHelpType(uint8_t bHelp) //^^ Help
-    {
-        m_bHelpFile = bHelp;
-    }
 
     //---------------------------------------------------------------------------
 

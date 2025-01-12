@@ -29,9 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "sim.h"
 
-// TODO: Remove direct references to the simulator controller from here.
-#include "SimulatorController.h"
-
 /*************************************************************************/
 
 class CSrc6502View;

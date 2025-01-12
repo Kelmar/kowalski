@@ -1869,7 +1869,7 @@ void CMainFrame::OnTimer(UINT nIDEvent)
 
 void CMainFrame::SymGenInterrupt(CSym6502::IntType eInt)
 {
-    if (!wxGetApp().simulatorController().IsDebugging() || wxGetApp().m_global.IsProgramFinished())
+    if (!wxGetApp().simulatorController().IsDebugging())
         return;
 
     wxGetApp().simulatorController().Simulator()->Interrupt(eInt);
@@ -2008,7 +2008,7 @@ void CMainFrame::StopIntGenerator()
 
 void CMainFrame::StartIntGenerator()
 {
-    if (!wxGetApp().simulatorController().IsDebugging() || wxGetApp().m_global.IsProgramFinished())
+    if (!wxGetApp().simulatorController().IsDebugging())
         return;
 
 #if REWRITE_TO_WX_WIDGET

@@ -1173,7 +1173,8 @@ extern int MatchingInstructions(const std::string& strWord, std::string& strResu
 
 extern std::string GetInstructionDesc(const std::string& instruction)
 {
-    CDeasm deasm(wxGetApp().m_global.GetSimulator());
+    // TODO: Remove direct reference to simulator from here.
+    CDeasm deasm(wxGetApp().simulatorController().Simulator());
     std::string desc;
 
     std::string instUpper;
