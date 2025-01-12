@@ -42,8 +42,10 @@ CRawBin::~CRawBin()
 
 bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
 {
-    ProcessorType procType = wxGetApp().m_global.GetProcType();
-    size_t maxSize = procType == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
+    // TODO: Remove direct reference to simulator controller
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    size_t maxSize = config.Processor == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
 
     size_t sz = std::min(ar.size(), maxSize);
     std::vector<uint8_t> data(sz);
@@ -88,8 +90,10 @@ bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
 
 bool CRawBin::write(BinaryArchive &ar, LoadCodeState *state)
 {
-    ProcessorType procType = wxGetApp().m_global.GetProcType();
-    size_t sz = procType == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
+    // TODO: Remove direct reference to simulator controller
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    size_t sz = config.Processor == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
 
     ar.write(state->Memory->getSpan(0, sz));
 

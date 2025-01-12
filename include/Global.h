@@ -153,10 +153,6 @@ public:
 
     //---------------------------------------------------------------------------
 
-    ProcessorType GetProcType() const;
-
-    //---------------------------------------------------------------------------
-
     bool CreateDeasm(); // New disassembler window
 
     CAsm::Breakpoint GetBreakpoint(uint32_t addr) // Get the interrupt at the given address

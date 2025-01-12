@@ -95,14 +95,6 @@ void CGlobal::SetTempExecBreakpoint(sim_addr_t address)
 
 /*************************************************************************/
 
-ProcessorType CGlobal::GetProcType() const
-{
-    auto config = wxGetApp().simulatorController().GetConfig();
-    return config.Processor;
-}
-
-/*************************************************************************/
-
 bool CGlobal::CreateDeasm()
 {
     ASSERT(Simulator());

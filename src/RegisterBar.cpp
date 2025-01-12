@@ -350,7 +350,9 @@ void CRegisterBar::UpdateRegA(const CContext *pCtx, const CContext *pOld /*= NUL
 
     //SetDlgItemByteHex(IDC_REGS_A,pCtx->a);
 
-    bool word = (wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816 && !pCtx->emm && !pCtx->mem16);
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    bool word = (config.Processor == ProcessorType::WDC65816 && !pCtx->emm && !pCtx->mem16);
     SetDlgItemInf(IDC_REGS_A_MEM, pCtx->a, word);
 }
 
@@ -361,7 +363,9 @@ void CRegisterBar::UpdateRegX(const CContext *pCtx, const CContext *pOld /*= NUL
 
     //SetDlgItemInf(IDC_REGS_X_MEM, pCtx->x);
 
-    bool word = (wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816 && !pCtx->emm && !pCtx->xy16);
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    bool word = (config.Processor == ProcessorType::WDC65816 && !pCtx->emm && !pCtx->xy16);
     SetDlgItemInf(IDC_REGS_X_MEM, pCtx->x, word);
 }
 
@@ -372,7 +376,9 @@ void CRegisterBar::UpdateRegY(const CContext *pCtx, const CContext *pOld /*= NUL
 
     //SetDlgItemInf(IDC_REGS_Y_MEM, pCtx->y);
 
-    bool word = (wxGetApp().m_global.GetProcType() == ProcessorType::WDC65816 && !pCtx->emm && !pCtx->xy16);
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    bool word = (config.Processor == ProcessorType::WDC65816 && !pCtx->emm && !pCtx->xy16);
     SetDlgItemInf(IDC_REGS_Y_MEM, pCtx->y, word);
 }
 

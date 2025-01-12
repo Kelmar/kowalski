@@ -459,6 +459,9 @@ std::string CDeasm::ArgumentValue(uint32_t cmd_addr /*= -1*/)
 
     sim_addr_t sp = ctx.getStackPointer();
 
+    // TODO: Remove direct reference to wxGetApp()
+    auto config = wxGetApp().simulatorController().GetConfig();
+
     switch (mode)
     {
     case CAsm::A_IMP:
@@ -567,7 +570,7 @@ std::string CDeasm::ArgumentValue(uint32_t cmd_addr /*= -1*/)
     case CAsm::A_ABSI_X:
         addr = ctx.peekByte(cmd_addr) + ctx.x; // Low byte of address + X offset
 
-        if (wxGetApp().m_global.GetProcType() != ProcessorType::M6502 &&
+        if (config.Processor != ProcessorType::M6502 &&
             (cmd_addr & 0xFF) == 0xFF) // low byte == 0xFF?
         {
             addr |= uint16_t(ctx.peekByte(cmd_addr - 0xFF)) << 8; // 65C02 addressing bug
