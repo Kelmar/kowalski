@@ -42,55 +42,42 @@ PSym6502 CGlobal::Simulator() const
 
 /*************************************************************************/
 
+CDebugInfo *CGlobal::GetDebug() const
+{
+    return wxGetApp().simulatorController().DebugInfo();
+}
+
+/*************************************************************************/
+
+void CGlobal::ioAddress(sim_addr_t addr)
+{
+    wxGetApp().simulatorController().SetIOAddress(addr);
+}
+
+/*************************************************************************/
+
 CAsm::Breakpoint CGlobal::SetBreakpoint(int line, const std::string &doc_title)
 {
-    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title);
-    return m_debugInfo.ToggleBreakpoint(line, fuid); // set/delete breakpoint
+    CAsm::FileUID fuid = GetDebug()->GetFileUID(doc_title);
+    return GetDebug()->ToggleBreakpoint(line, fuid); // set/delete breakpoint
 }
 
 CAsm::Breakpoint CGlobal::GetBreakpoint(int line, const std::string &doc_title)
 {
-    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title);
-    return m_debugInfo.GetBreakpoint(line, fuid); // set/delete breakpoint
+    CAsm::FileUID fuid = GetDebug()->GetFileUID(doc_title);
+    return GetDebug()->GetBreakpoint(line, fuid); // set/delete breakpoint
 }
 
 CAsm::Breakpoint CGlobal::ModifyBreakpoint(int line, const std::string &doc_title, CAsm::Breakpoint bp)
 {
-    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title);
-    return m_debugInfo.ModifyBreakpoint(line, fuid, bp); // Breakpoint setting
+    CAsm::FileUID fuid = GetDebug()->GetFileUID(doc_title);
+    return GetDebug()->ModifyBreakpoint(line, fuid, bp); // Breakpoint setting
 }
 
 void CGlobal::ClrBreakpoint(int line, const std::string &doc_title)
 {
-    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title);
-    m_debugInfo.ClrBreakpoint(line, fuid); // Clear the breakpoint
-}
-
-CAsm::DbgFlag CGlobal::GetLineDebugFlags(int line, const std::string &doc_title)
-{
-    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title); //File ID
-    CDebugLine dl;
-    m_debugInfo.GetAddress(dl, line, fuid); // Find the address corresponding to the line
-    return (CAsm::DbgFlag)dl.flags; // Flags describing the program line
-}
-
-/*************************************************************************/
-
-sim_addr_t CGlobal::GetLineCodeAddr(int line, const std::string &doc_title)
-{
-    CAsm::FileUID fuid = m_debugInfo.GetFileUID(doc_title); // File ID
-    CDebugLine dl;
-    m_debugInfo.GetAddress(dl, line, fuid); // Find the address corresponding to the line
-    return dl.addr;
-}
-
-/*************************************************************************/
-
-void CGlobal::SetTempExecBreakpoint(sim_addr_t address)
-{
-    ASSERT(address != sim::INVALID_ADDRESS);
-
-    m_debugInfo.SetTemporaryExecBreakpoint(address);
+    CAsm::FileUID fuid = GetDebug()->GetFileUID(doc_title);
+    GetDebug()->ClrBreakpoint(line, fuid); // Clear the breakpoint
 }
 
 /*************************************************************************/
@@ -170,8 +157,6 @@ void CGlobal::SaveCode(Archive &archive, uint32_t start, uint32_t end, int info)
 void CGlobal::LoadCode(const LoadCodeState &state)
 {
     m_memory = *state.Memory;
-
-    SetCodePresence(true);
 
     uint32_t start = state.StartAddress;
 

@@ -18,12 +18,20 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef DEBUG_INFO_6502_H__
+#define DEBUG_INFO_6502_H__
+
+/*************************************************************************/
+
+//#include "sim.h"
+
+typedef uint32_t sim_addr_t;
+
 #include "MapFile.h"
 #include "Asm.h"
 #include "Ident.h"
 
-#ifndef _debug_info_h_
-#define _debug_info_h_
+/*************************************************************************/
 
 struct CLine
 {
@@ -87,11 +95,13 @@ struct std::hash<CLine>
     }
 };
 
+/*************************************************************************/
+
 // Info for the simulator with one line of program source
 struct CDebugLine
 {
     uint8_t flags; // Flags describing the line (Dbg Flag)
-    uint32_t addr; // Program address 6502
+    sim_addr_t addr; // Program address 6502
     CLine line;
 
     CDebugLine()
@@ -100,7 +110,7 @@ struct CDebugLine
     {
     }
 
-    CDebugLine(int ln, CAsm::FileUID uid, uint32_t addr, int flg)
+    CDebugLine(int ln, CAsm::FileUID uid, sim_addr_t addr, int flg)
         : flags((uint8_t)flg)
         , addr(addr)
         , line(ln, uid)
@@ -140,6 +150,8 @@ struct CDebugLine
     }
 };
 
+/*************************************************************************/
+
 class CDebugLines
 {
 private:
@@ -157,29 +169,29 @@ public:
     }
 
     // Finding the line corresponding to the address
-    void GetLine(CDebugLine &ret, uint32_t addr)
+    CDebugLine GetLine(sim_addr_t addr)
     {
         static const CDebugLine empty; // empty object -to mark "line not found"
 
         auto search = addr_to_idx.find(addr);
 
         if (search != addr_to_idx.end())
-            ret = m_lines.at(search->second);
+            return m_lines.at(search->second);
 
-        ret = empty;
+        return empty;
     }
 
     // Finding the address corresponding to the line
-    void GetAddress(CDebugLine &ret, int ln, CAsm::FileUID file)
+    CDebugLine GetAddress(int ln, CAsm::FileUID file)
     {
         static const CDebugLine empty; // empty object -to mark "address not found"
 
         auto search = line_to_idx.find(CLine(ln, file));
 
         if (search != line_to_idx.end())
-            ret = m_lines.at(search->second);
+            return m_lines.at(search->second);
 
-        ret = empty;
+        return empty;
     }
 
     void AddLine(CDebugLine &dl)
@@ -201,6 +213,8 @@ public:
         line_to_idx.clear();
     }
 };
+
+/*************************************************************************/
 
 // Tracks locations of breakpoints
 class CDebugBreakpoints
@@ -293,6 +307,8 @@ public:
     }
 };
 
+/*************************************************************************/
+
 // Information about identifiers
 class CDebugIdents
 {
@@ -336,6 +352,8 @@ public:
     }
 };
 
+/*************************************************************************/
+
 class CDebugInfo
 {
     CDebugLines m_lines;             // Information about lines
@@ -356,14 +374,16 @@ public:
         m_lines.AddLine(dl);
     }
 
-    void GetLine(CDebugLine &ret, uint32_t addr) // Finding the line corresponding to the address
+    // Finding info that corresponds to the document and line number.
+    CDebugLine GetLineInfo(CAsm::FileUID fileId, int lineNumber)
     {
-        m_lines.GetLine(ret,addr);
+        return m_lines.GetAddress(lineNumber, fileId);;
     }
 
-    void GetAddress(CDebugLine &ret, int ln, CAsm::FileUID file) // Finding the address corresponding to the line
+    // Finding the line corresponding to the address
+    CDebugLine GetLineInfo(sim_addr_t address)
     {
-        m_lines.GetAddress(ret, ln, file);
+        return m_lines.GetLine(address);
     }
 
     CAsm::Breakpoint SetBreakpoint(int line, CAsm::FileUID file, int bp= CAsm::BPT_NONE); // Interrupt setting
@@ -423,5 +443,10 @@ public:
     }
 };
 
+typedef std::shared_ptr<CDebugInfo> PDebugInfo;
 
-#endif
+/*************************************************************************/
+
+#endif /* DEBUG_INFO_6502_H__ */
+
+/*************************************************************************/

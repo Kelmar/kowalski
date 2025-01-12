@@ -1617,7 +1617,7 @@ void CMainFrame::OnUpdateViewDeasm(CCmdUI *pCmdUI)
 
 void CMainFrame::OnViewIdents()
 {
-    if (wxGetApp().m_global.IsDebugInfoPresent()) // Is the program assembled?
+    if (wxGetApp().simulatorController().IsLoaded()) // Is the program assembled?
         m_Idents.Show(!m_Idents.IsShown());
     else // There is no assembled program
         m_Idents.Hide();
@@ -1729,7 +1729,7 @@ void CMainFrame::OnUpdateViewZeropage(CCmdUI *pCmdUI)
 
 void CMainFrame::OnViewZeropage()
 {
-    if (wxGetApp().m_global.IsCodePresent()) // is simulator present?
+    if (wxGetApp().simulatorController().IsLoaded()) // is simulator present?
         m_ZeroPage.Show(!m_ZeroPage.IsShown());
     else // There is no program
         m_ZeroPage.Hide();
@@ -1739,7 +1739,7 @@ void CMainFrame::OnViewZeropage()
 
 void CMainFrame::OnViewStack()
 {
-    if (wxGetApp().m_global.IsCodePresent()) // Is there a program?
+    if (wxGetApp().simulatorController().IsLoaded()) // Is there a program?
         m_Stack.Show(!m_Stack.IsShown());
     else // There is no program
         m_Stack.Hide();

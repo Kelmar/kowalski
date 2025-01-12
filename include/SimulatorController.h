@@ -29,6 +29,8 @@
 
 #include "sim.h"
 
+#include "DebugInfo.h"
+
 /*************************************************************************/
 /**
  * @brief Indicates the current state of the debugger.
@@ -66,6 +68,9 @@ private: // Simulator items
     wxSemaphore m_semaphore;
     class AsmThread *m_asmThread;
 
+    // startup information for the simulator
+    CDebugInfo m_debugInfo;
+
     PSym6502 m_simulator;
 
     /**
@@ -73,6 +78,9 @@ private: // Simulator items
      * @remark If an instance already exists, it is replaced with a new one.
      */
     void CreateSimulator();
+
+    // Temporary until removal of CGlobal
+    void SetIOAddress(sim_addr_t addr);
 
 private: // UI items
     wxMenuItem *m_menu;
@@ -96,6 +104,10 @@ public: // Properties
     PSym6502 Simulator() const { return m_simulator; }
 
     DebugState CurrentState() const;
+
+    CDebugInfo *DebugInfo() { return &m_debugInfo; }
+
+    inline bool IsLoaded() const { return CurrentState() != DebugState::Unloaded; }
 
     inline
     bool IsDebugging() const

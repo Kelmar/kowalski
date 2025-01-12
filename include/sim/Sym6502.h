@@ -39,7 +39,7 @@ class CSym6502
 {
 private:
     CContext m_ctx;
-    CDebugInfo *debug;
+    class CDebugInfo *debug;
     //CommandLog m_log;
 
     ULONG m_saveCycles; //% Bug Fix 1.2.12.18 - fix command log display

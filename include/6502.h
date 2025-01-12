@@ -75,7 +75,8 @@ public:
     bool m_bFileNew;  // flag - opening a blank document at startup
 #endif
 
-    CGlobal m_global;        // application global variables
+    // TODO: Remove direct references to this
+    CGlobal m_global; // application global variables
 
     bool m_bDoNotAddToRecentFileList;
     //CDocTemplate *m_pDocDeasmTemplate;

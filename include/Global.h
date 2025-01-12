@@ -34,9 +34,7 @@ class CGlobal
 private:
     friend class SimulatorController;
 
-    bool m_isCodePresent;     // true -> after successful assembly
-    COutputMem m_memory;      // memory written in the assembly process
-    CDebugInfo m_debugInfo;   // startup information for the simulator
+    COutputMem m_memory; // memory written in the assembly process
 
     /// Start address override
     sim_addr_t m_startAddress;
@@ -60,9 +58,7 @@ public:
     CIntGenerator m_IntGenerator;   // interrupt request generator data
 
     CGlobal()
-        : m_isCodePresent(false)
-        , m_memory()
-        , m_debugInfo()
+        : m_memory()
         , m_startAddress(sim::INVALID_ADDRESS)
         , m_ioAddress(sim::INVALID_ADDRESS)
         , m_simFinish(CAsm::Finish::FIN_BY_BRK)
@@ -74,10 +70,7 @@ public:
     {
     }
 
-    CDebugInfo *GetDebug()
-    {
-        return &m_debugInfo;
-    }
+    CDebugInfo *GetDebug() const;
 
     CMarkArea *GetMarkArea()
     {
@@ -93,31 +86,7 @@ public:
         return m_startAddress;
     }
 
-    void ioAddress(sim_addr_t address)
-    {
-        m_ioAddress = address;
-    }
-
-    sim_addr_t ioAddress() const
-    {
-        // TODO: Load value from config
-        return (m_ioAddress == sim::INVALID_ADDRESS) ? 0xE000 : m_ioAddress;
-    }
-
-    bool IsCodePresent()
-    {
-        return m_isCodePresent;
-    }
-
-    bool IsDebugInfoPresent()
-    {
-        return m_isCodePresent; // to improve
-    }
-
-    void SetCodePresence(bool present)
-    {
-        m_isCodePresent = present;
-    }
+    void ioAddress(sim_addr_t address);
 
     void SetStart(sim_addr_t address)
     {
@@ -129,27 +98,10 @@ public:
         return Simulator()->GetLastStatMsg();
     }
 
-    CAsm::Finish GetSymFinish()
-    {
-        ASSERT(!Simulator() || Simulator()->finish == m_simFinish);
-        return m_simFinish;
-    }
-
-    void SetSymFinish(CAsm::Finish fin)
-    {
-        m_simFinish = fin;
-
-        if (Simulator())
-            Simulator()->finish = fin;
-    }
-
     CAsm::Breakpoint SetBreakpoint(int line, const std::string &doc_title);
     CAsm::Breakpoint GetBreakpoint(int line, const std::string &doc_title);
     CAsm::Breakpoint ModifyBreakpoint(int line, const std::string &doc_title, CAsm::Breakpoint bp);
     void ClrBreakpoint(int line, const std::string &doc_title);
-    CAsm::DbgFlag GetLineDebugFlags(int line, const std::string &doc_title);
-    sim_addr_t GetLineCodeAddr(int line, const std::string &doc_title);
-    void SetTempExecBreakpoint(sim_addr_t address);
 
     //---------------------------------------------------------------------------
 
@@ -157,7 +109,7 @@ public:
 
     CAsm::Breakpoint GetBreakpoint(uint32_t addr) // Get the interrupt at the given address
     {
-        return m_debugInfo.GetBreakpoint(addr);
+        return GetDebug()->GetBreakpoint(addr);
     }
 
     //---------------------------------------------------------------------------

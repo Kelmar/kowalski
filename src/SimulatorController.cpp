@@ -133,31 +133,47 @@ void SimulatorController::CreateSimulator()
     CGlobal *global = &wxGetApp().m_global;
 
     // Get a fresh new simulator
-    m_simulator.reset(new CSym6502(GetConfig(), global->GetDebug()));
+    m_simulator.reset(new CSym6502(GetConfig(), &m_debugInfo));
 
     CContext &ctx = m_simulator->GetContext();
 
     // Build up device list
     // For now hard coded to a RAM and IOWindow module.
 
-    sim_addr_t ioAddr = global->ioAddress();
+    COutputMem *memory = &global->GetMemory();
 
-    sim::PDevice lowRam(new sim::dev::RAM(&global->GetMemory(), 0, ioAddr));
+    if (s_simConfig.IOEnable)
+    {
+        sim_addr_t ioAddr = s_simConfig.IOAddress;
 
-    const CMainFrame *mainFrame = wxGetApp().mainFrame();
-    sim::PDevice simpleIO(new sim::dev::SimpleIO(mainFrame->ioWindow()));
+        sim::PDevice lowRam(new sim::dev::RAM(memory, 0, ioAddr));
 
-    sim_addr_t hiRamStart = ioAddr + simpleIO->AddressSize();
-    size_t hiRamSize = (ctx.bus.maxAddress() - hiRamStart) + 1;
+        const CMainFrame *mainFrame = wxGetApp().mainFrame();
+        sim::PDevice simpleIO(new sim::dev::SimpleIO(mainFrame->ioWindow()));
 
-    sim::PDevice hiRam(new sim::dev::RAM(&global->GetMemory(), hiRamStart, hiRamSize));
+        sim_addr_t hiRamStart = ioAddr + simpleIO->AddressSize();
+        size_t hiRamSize = (ctx.bus.maxAddress() - hiRamStart) + 1;
 
-    ctx.bus.AddDevice(lowRam, 0);
-    ctx.bus.AddDevice(simpleIO, ioAddr);
-    ctx.bus.AddDevice(hiRam, hiRamStart);
+        sim::PDevice hiRam(new sim::dev::RAM(memory, hiRamStart, hiRamSize));
 
-    m_simulator->finish = global->m_simFinish;
+        ctx.bus.AddDevice(lowRam, 0);
+        ctx.bus.AddDevice(simpleIO, ioAddr);
+        ctx.bus.AddDevice(hiRam, hiRamStart);
+    }
+    else
+    {
+        sim::PDevice lowRam(new sim::dev::RAM(memory, 0, ctx.bus.maxAddress()));
+    }
+
+    m_simulator->finish = s_simConfig.SimFinish;
     m_simulator->SetStart(global->m_startAddress);
+}
+
+/*************************************************************************/
+// TODO: Remove after removal of CGlobal
+void SimulatorController::SetIOAddress(sim_addr_t addr)
+{
+    s_simConfig.IOAddress = addr;
 }
 
 /*************************************************************************/
@@ -284,7 +300,7 @@ void SimulatorController::RunToAddress(sim_addr_t address)
     if (address == sim::INVALID_ADDRESS)
         return;
 
-    wxGetApp().m_global.SetTempExecBreakpoint(address);
+    m_debugInfo.SetTemporaryExecBreakpoint(address);
     Simulator()->Run(); // Run after setting a temporary breakpoint
 
     wxGetApp().mainFrame()->UpdateFlea();
@@ -428,7 +444,12 @@ sim_addr_t SimulatorController::GetCursorAddress(bool skipping)
     std::string pathName = view->GetDocument()->GetFilename().ToStdString();
 
     int line = view->GetCurrLineNo();
-    CAsm::DbgFlag flag = wxGetApp().m_global.GetLineDebugFlags(line, pathName);
+
+    CAsm::FileUID fuid = m_debugInfo.GetFileUID(pathName);
+    CDebugLine dl = m_debugInfo.GetLineInfo(fuid, line);
+
+    CAsm::DbgFlag flag = (CAsm::DbgFlag)dl.flags;
+
     int msgResult = wxID_OK;
 
     if ((flag == CAsm::DBG_EMPTY) || ((flag & CAsm::DBG_MACRO) != 0))
@@ -458,7 +479,7 @@ sim_addr_t SimulatorController::GetCursorAddress(bool skipping)
     if (msgResult != wxID_OK)
         return sim::INVALID_ADDRESS;
 
-    return wxGetApp().m_global.GetLineCodeAddr(line, pathName);
+    return dl.addr;
 }
 
 /*************************************************************************/

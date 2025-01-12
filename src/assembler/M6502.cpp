@@ -1126,7 +1126,6 @@ CAsm6502::Stat CAsm6502::predef_const(const std::string &str, Expr &expr, bool &
 
     if (nConstant == 0)
     {
-        //		if (origin > 0xFFFF)
         if (origin > mem_mask)
             return ERR_UNDEF_ORIGIN;
 
@@ -1137,7 +1136,10 @@ CAsm6502::Stat CAsm6502::predef_const(const std::string &str, Expr &expr, bool &
     }
     else if (nConstant == 1)
     {
-        expr.value = wxGetApp().m_global.ioAddress(); // io simulator area
+        // TODO: Remove direct reference to wxGetApp()
+        auto config = wxGetApp().simulatorController().GetConfig();
+
+        expr.value = config.IOAddress; // io simulator area
         found = true;
 
         return OK;

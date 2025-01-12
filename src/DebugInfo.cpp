@@ -25,8 +25,7 @@ CAsm::Breakpoint CDebugInfo::SetBreakpoint(int line, CAsm::FileUID file, int bp)
 {
     ASSERT( (bp & ~CAsm::BPT_MASK) == 0 ); // Illegal combination of breakpoint bits
 
-    CDebugLine dl;
-    GetAddress(dl, line, file); // Find the address corresponding to the line
+    CDebugLine dl = GetLineInfo(file, line);
 
     if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
         return CAsm::BPT_NO_CODE; // There is no code in line 'line'
@@ -42,8 +41,7 @@ CAsm::Breakpoint CDebugInfo::ModifyBreakpoint(int line, CAsm::FileUID file, int 
     // Illegal combination of breakpoint bits
     ASSERT((bp & ~(CAsm::BPT_MASK | CAsm::BPT_DISABLED)) == 0);
 
-    CDebugLine dl;
-    GetAddress(dl, line, file); // Finding the address corresponding to the line
+    CDebugLine dl = GetLineInfo(file, line);
 
     if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
         return CAsm::BPT_NO_CODE; // There is no code in line 'line'
@@ -62,8 +60,7 @@ CAsm::Breakpoint CDebugInfo::ModifyBreakpoint(int line, CAsm::FileUID file, int 
 
 CAsm::Breakpoint CDebugInfo::GetBreakpoint(int line, CAsm::FileUID file)
 {
-    CDebugLine dl;
-    GetAddress(dl, line, file); // Finding the address corresponding to the line
+    CDebugLine dl = GetLineInfo(file, line);
 
     if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
     {
@@ -76,8 +73,7 @@ CAsm::Breakpoint CDebugInfo::GetBreakpoint(int line, CAsm::FileUID file)
 
 CAsm::Breakpoint CDebugInfo::ToggleBreakpoint(int line, CAsm::FileUID file)
 {
-    CDebugLine dl;
-    GetAddress(dl, line, file); // Find the address corresponding to the line
+    CDebugLine dl = GetLineInfo(file, line);
 
     if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
         return CAsm::BPT_NO_CODE; // There is no code in line 'line'
@@ -90,8 +86,7 @@ CAsm::Breakpoint CDebugInfo::ToggleBreakpoint(int line, CAsm::FileUID file)
 
 void CDebugInfo::ClrBreakpoint(int line, CAsm::FileUID file)
 {
-    CDebugLine dl;
-    GetAddress(dl, line, file);// Find the address corresponding to the line
+    CDebugLine dl = GetLineInfo(file, line);
 
     if (dl.flags == CAsm::DBG_EMPTY || (dl.flags & CAsm::DBG_MACRO))
     {

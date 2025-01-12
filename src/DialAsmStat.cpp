@@ -379,7 +379,6 @@ afx_msg LRESULT CDialAsmStat::OnFinished(WPARAM wParam, LPARAM /* lParam */)
 
     bool isStatusOkay = (CAsm::Stat)wParam == CAsm::Stat::OK;
 
-    globals.SetCodePresence(isStatusOkay);
     globals.SetStart(m_pAsm6502->GetProgramStart());
     
     Broadcast::ToViews(EVT_PROG_MEM_CHANGED, (WPARAM)-1, isStatusOkay ? 0 : -1);

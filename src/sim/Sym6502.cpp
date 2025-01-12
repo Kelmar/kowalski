@@ -3204,8 +3204,7 @@ void CSym6502::SetStart(sim_addr_t address)
 
     if (debug)
     {
-        CDebugLine dl;
-        debug->GetLine(dl, address);
+        CDebugLine dl = debug->GetLineInfo(address);
         SetPointer(dl.line, address);
     }
 }
