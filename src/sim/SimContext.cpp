@@ -20,16 +20,16 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- /*************************************************************************/
+/*************************************************************************/
 
 #include "StdAfx.h"
 #include "sim.h"
 
 /*************************************************************************/
 
-CContext::CContext(ProcessorType processor)
-    : m_processor(processor)
-    , bus(m_processor == ProcessorType::WDC65816 ? 24 : 16)
+CContext::CContext(const SimulatorConfig &config)
+    : m_config(config)
+    , bus(config.Processor == ProcessorType::WDC65816 ? 24 : 16)
 {
     reset();
 }
@@ -47,7 +47,7 @@ uint8_t CContext::get_status_reg() const
     ASSERT(decimal == false || decimal == true);
     ASSERT(interrupt == false || interrupt == true);
 
-    if (m_processor == ProcessorType::WDC65816)
+    if (Processor() == ProcessorType::WDC65816)
     {
         return
             negative << N_NEGATIVE |
@@ -84,7 +84,7 @@ void CContext::set_status_reg_bits(uint8_t reg)
     decimal = !!(reg & DECIMAL);
     interrupt = !!(reg & INTERRUPT);
 
-    if (m_processor == ProcessorType::WDC65816)
+    if (Processor() == ProcessorType::WDC65816)
     {
         mem16 = !!(reg & MEMORY);
         xy16 = !!(reg & INDEX);

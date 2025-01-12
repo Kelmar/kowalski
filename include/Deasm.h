@@ -18,6 +18,77 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -----------------------------------------------------------------------------*/
 
+#ifndef DEASM_6502_H__
+#define DEASM_6502_H__
+
+/*************************************************************************/
+
+#include "sim.h"
+
+/*************************************************************************/
+
+class CSrc6502View;
+
+struct CmdInfo	// single command info (for logging)
+{
+    CmdInfo(const CContext &m_ctx)
+    {
+        a = m_ctx.a;
+        x = m_ctx.x;
+        y = m_ctx.y;
+        s = m_ctx.s;
+        flags = m_ctx.get_status_reg();
+        pc = m_ctx.pc;
+        cmd = m_ctx.bus.PeekByte(m_ctx.pc);
+        arg1 = m_ctx.bus.PeekByte(m_ctx.pc + 1);
+        arg2 = m_ctx.bus.PeekByte(m_ctx.pc + 2);
+        arg3 = m_ctx.bus.PeekByte(m_ctx.pc + 3);
+        uCycles = m_ctx.uCycles;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
+        intFlag = m_ctx.intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
+        argVal = 0;
+    }
+
+    //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
+    CmdInfo(uint16_t a, uint16_t x, uint16_t y, uint8_t s, uint8_t flags, uint8_t cmd, uint8_t arg1, uint8_t arg2, uint32_t pc)
+        : a(a)
+        , x(x)
+        , y(y)
+        , s(s)
+        , flags(flags)
+        , cmd(cmd)
+        , arg1(arg1)
+        , arg2(arg2)
+        , arg3(0)
+        , pc(pc)
+        , uCycles(0)
+        , intFlag(0)
+        , argVal(0)
+    { }
+
+    CmdInfo() { }
+
+    std::string Asm() const;
+
+    uint16_t a;
+    uint8_t b;
+    uint16_t x;
+    uint16_t y;
+    uint16_t s;
+    uint8_t flags;
+    uint8_t cmd;
+    uint8_t arg1;
+    uint8_t arg2;
+    uint8_t arg3; //% 65816
+    uint32_t pc;
+    ULONG uCycles; //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
+    bool intFlag;
+    uint16_t argVal;
+};
+
+typedef CLogBuffer<CmdInfo> CommandLog;
+
+/*************************************************************************/
+
 class CDeasm
 {
 private:
@@ -51,3 +122,9 @@ public:
     int FindNextAddr(uint32_t &addr, int cnt = 1);
     int FindDelta(uint32_t &addr, uint32_t dest, int max_lines);
 };
+
+/*************************************************************************/
+
+#endif /* DEASM_6502_H__ */
+
+/*************************************************************************/

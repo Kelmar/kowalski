@@ -27,7 +27,7 @@
 
 /*************************************************************************/
 
-#include "sim/Sym6502.h"
+#include "sim.h"
 
 /*************************************************************************/
 /**
@@ -107,7 +107,7 @@ public: // Properties
             (state == DebugState::Stopped);
     }
 
-    ProcessorType processor() const;
+    const SimulatorConfig &GetConfig() const;
 
 public: // Commands
     void InitOptions();

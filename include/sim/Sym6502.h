@@ -31,75 +31,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
+// TODO: Remove direct references to views.
 class CSrc6502View;
 
-struct CmdInfo	// single command info (for logging)
-{
-    CmdInfo(const CContext& ctx)
-    {
-        a = ctx.a;
-        x = ctx.x;
-        y = ctx.y;
-        s = ctx.s;
-        flags = ctx.get_status_reg();
-        pc = ctx.pc;
-        cmd = ctx.bus.PeekByte(ctx.pc);
-        arg1 = ctx.bus.PeekByte(ctx.pc + 1);
-        arg2 = ctx.bus.PeekByte(ctx.pc + 2);
-        arg3 = ctx.bus.PeekByte(ctx.pc + 3);
-        uCycles = ctx.uCycles;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
-        intFlag = ctx.intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
-        argVal = 0;
-    }
-
-    //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
-    CmdInfo(uint16_t a, uint16_t x, uint16_t y, uint8_t s, uint8_t flags, uint8_t cmd, uint8_t arg1, uint8_t arg2, uint32_t pc)
-        : a(a)
-        , x(x)
-        , y(y)
-        , s(s)
-        , flags(flags)
-        , cmd(cmd)
-        , arg1(arg1)
-        , arg2(arg2)
-        , arg3(0)
-        , pc(pc)
-        , uCycles(0)
-        , intFlag(0)
-        , argVal(0)
-    {
-    }
-
-    CmdInfo() {}
-
-    std::string Asm() const;
-
-    uint16_t a;
-    uint8_t b;
-    uint16_t x;
-    uint16_t y;
-    uint16_t s;
-    uint8_t flags;
-    uint8_t cmd;
-    uint8_t arg1;
-    uint8_t arg2;
-    uint8_t arg3; //% 65816
-    uint32_t pc;
-    ULONG uCycles; //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
-    bool intFlag;
-    uint16_t argVal;
-};
-
-typedef CLogBuffer<CmdInfo> CommandLog;
-
-/*************************************************************************/
 
 class CSym6502
 {
 private:
-    CContext ctx;
+    CContext m_ctx;
     CDebugInfo *debug;
-    CommandLog m_log;
+    //CommandLog m_log;
 
     ULONG m_saveCycles; //% Bug Fix 1.2.12.18 - fix command log display
 
@@ -146,14 +87,16 @@ public:
     // interrupt types
     enum IntType { NONE = 0, IRQ = 1, NMI = 2, RST = 4 };
 
-    bool cpu16() { return ctx.getProcessorType() == ProcessorType::WDC65816; }
+    ProcessorType Processor() const { return m_ctx.Processor(); }
+
+    bool cpu16() { return Processor() == ProcessorType::WDC65816; }
 
 private:
     bool waiFlag;
 
     void inc_prog_counter(int step = 1)
     {
-        ctx.pc = uint32_t(ctx.pc + step);
+        m_ctx.pc = uint32_t(m_ctx.pc + step);
     }
 
     bool running; // TODO: Make atomic?
@@ -178,72 +121,72 @@ private:
 
     uint16_t get_word_indirect(uint16_t zp)
     {
-        ASSERT(zp <= ((cpu16() && !ctx.emm) ? 0xFF : 0xFFFF));
-        return ctx.getWord(zp);
+        ASSERT(zp <= ((cpu16() && !m_ctx.emm) ? 0xFF : 0xFFFF));
+        return m_ctx.getWord(zp);
     }
 
     uint16_t get_word(uint32_t addr)
     {
-        return ctx.getWord(addr);
+        return m_ctx.getWord(addr);
     }
 
     uint32_t get_Lword_indirect(uint16_t zp)
     {
-        ASSERT(zp <= ((cpu16() && !ctx.emm) ? 0xFF : 0xFFFF));
+        ASSERT(zp <= ((cpu16() && !m_ctx.emm) ? 0xFF : 0xFFFF));
 
-        return ctx.getLWord(zp);
+        return m_ctx.getLWord(zp);
     }
 
     uint32_t get_Lword(uint32_t addr)
     {
-        return ctx.getLWord(addr);
+        return m_ctx.getLWord(addr);
     }
 
     void push_on_stack(uint8_t arg)
     {
-        if (cpu16() && !ctx.emm)
+        if (cpu16() && !m_ctx.emm)
         {
-            if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
+            if (s_bWriteProtectArea && m_ctx.s >= s_uProtectFromAddr && m_ctx.s <= s_uProtectToAddr)
                 throw CSym6502::Status::ILL_WRITE;
 
-            ctx.setByte(ctx.s, arg);
-            --ctx.s;
-            ctx.s &= 0xFFFF;
+            m_ctx.setByte(m_ctx.s, arg);
+            --m_ctx.s;
+            m_ctx.s &= 0xFFFF;
         }
         else
         {
-            ctx.setByte(0x100 + ctx.s--, arg);
-            --ctx.s;
-            ctx.s = (ctx.s & 0xFF) + 0x100;
+            m_ctx.setByte(0x100 + m_ctx.s--, arg);
+            --m_ctx.s;
+            m_ctx.s = (m_ctx.s & 0xFF) + 0x100;
         }        
     }
 
     void push_addr_on_stack(uint16_t arg)
     {
-        if (cpu16() && !ctx.emm)
+        if (cpu16() && !m_ctx.emm)
         {
-            if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
+            if (s_bWriteProtectArea && m_ctx.s >= s_uProtectFromAddr && m_ctx.s <= s_uProtectToAddr)
                 throw CSym6502::Status::ILL_WRITE;
 
-            ctx.setByte(ctx.s, (arg >> 8) & 0xFF);
-            --ctx.s;
-            ctx.s &= 0xFFFF;
+            m_ctx.setByte(m_ctx.s, (arg >> 8) & 0xFF);
+            --m_ctx.s;
+            m_ctx.s &= 0xFFFF;
 
-            if (s_bWriteProtectArea && ctx.s >= s_uProtectFromAddr && ctx.s <= s_uProtectToAddr)
+            if (s_bWriteProtectArea && m_ctx.s >= s_uProtectFromAddr && m_ctx.s <= s_uProtectToAddr)
                 throw CSym6502::Status::ILL_WRITE;
 
-            ctx.setByte(ctx.s, arg & 0xFF);
-            --ctx.s;
-            ctx.s &= 0xFFFF;
+            m_ctx.setByte(m_ctx.s, arg & 0xFF);
+            --m_ctx.s;
+            m_ctx.s &= 0xFFFF;
         }
         else
         {
-            ctx.setByte(0x100 + (ctx.s & 0xFF), (arg >> 8) & 0xFF);
-            --ctx.s;
-            ctx.s = (ctx.s & 0xFF) + 0x100;
-            ctx.setByte(0x100 + (ctx.s & 0xFF), arg & 0xFF);
-            --ctx.s;
-            ctx.s = (ctx.s & 0xFF) + 0x100;
+            m_ctx.setByte(0x100 + (m_ctx.s & 0xFF), (arg >> 8) & 0xFF);
+            --m_ctx.s;
+            m_ctx.s = (m_ctx.s & 0xFF) + 0x100;
+            m_ctx.setByte(0x100 + (m_ctx.s & 0xFF), arg & 0xFF);
+            --m_ctx.s;
+            m_ctx.s = (m_ctx.s & 0xFF) + 0x100;
         }
     }
 
@@ -251,18 +194,18 @@ private:
     {
         if (cpu16())
         {
-            if (ctx.emm && ((ctx.s & 0xFF) == 0xFF))
+            if (m_ctx.emm && ((m_ctx.s & 0xFF) == 0xFF))
             {
-                ctx.s = 0x100;
-                return ctx.bus.GetByte(ctx.s);
+                m_ctx.s = 0x100;
+                return m_ctx.bus.GetByte(m_ctx.s);
             }
             else
-                return ctx.bus.GetByte(++ctx.s);
+                return m_ctx.bus.GetByte(++m_ctx.s);
         }
         else
         {
-            ++ctx.s;
-            return ctx.bus.GetByte(0x100 + (ctx.s & 0xFF));
+            ++m_ctx.s;
+            return m_ctx.bus.GetByte(0x100 + (m_ctx.s & 0xFF));
         }
     }
 
@@ -270,25 +213,25 @@ private:
     {
         if (cpu16())
         {
-            if (ctx.emm && ((ctx.s & 0xFF) == 0xFF))
+            if (m_ctx.emm && ((m_ctx.s & 0xFF) == 0xFF))
             {
                 uint16_t tmp = 0x100;
-                ctx.s = 0x101;
+                m_ctx.s = 0x101;
                 return get_word(tmp);
             }
             else
             {
-                uint16_t tmp = ++ctx.s;
-                ++ctx.s;
+                uint16_t tmp = ++m_ctx.s;
+                ++m_ctx.s;
                 return get_word(tmp);
             }
         }
         else
         {
-            uint8_t tmp = ++ctx.s & 0xFF;
-            ++ctx.s;
-            uint16_t tmp2 = ctx.bus.GetByte(0x100 + tmp);
-            tmp2 |= uint16_t(ctx.bus.GetByte(0x100 + (ctx.s & 0xFF))) << uint16_t(8);
+            uint8_t tmp = ++m_ctx.s & 0xFF;
+            ++m_ctx.s;
+            uint16_t tmp2 = m_ctx.bus.GetByte(0x100 + tmp);
+            tmp2 |= uint16_t(m_ctx.bus.GetByte(0x100 + (m_ctx.s & 0xFF))) << uint16_t(8);
             return tmp2;
         }
     }
@@ -312,13 +255,10 @@ private:
     void SetPointer(CSrc6502View* pView, int nLine, bool bScroll); // helper fn
     void ResetPointer(); // Hiding the arrow
 
-    CSrc6502View *FindDocView(CAsm::FileUID fuid);	// Find the document window
-    CAsm::FileUID m_fuidLastView;			// Remembering the window in which the arrow is drawn
-    //HWND m_hwndLastView;				// j.w.
+    CSrc6502View *FindDocView(CAsm::FileUID fuid); // Find the document window
+    CAsm::FileUID m_fuidLastView; // Remembering the window in which the arrow is drawn
+    //HWND m_hwndLastView; // j.w.
     void AddBranchCycles(uint8_t arg);
-
-    // This was problematic for me -- B.Simonds (April 25, 2024)
-    //CEvent eventRedraw;			// Window refresh synchronization during animation
 
     void init();
     void set_translation_tables();
@@ -327,20 +267,22 @@ private:
     const uint8_t* m_vCodeToCycles;
     const uint8_t* m_vCodeToMode;
 
+    const SimulatorConfig &Config() const { return m_ctx.Config(); }
+
 public:
     CAsm::Finish finish; // Specifying how to end program execution
 
-    uint16_t get_cop_addr() { return ctx.getWord(0xFFF4); }
-    uint16_t get_abort_addr() { return ctx.getWord(0xFFF8); }
-    uint16_t get_nmi_addr() { return ctx.getWord(0xFFFA); }
-    uint16_t get_rst_addr() { return ctx.getWord(0xFFFC); }
-    uint16_t get_irq_addr() { return ctx.getWord(0xFFFE); }
+    uint16_t get_cop_addr() { return m_ctx.getWord(0xFFF4); }
+    uint16_t get_abort_addr() { return m_ctx.getWord(0xFFF8); }
+    uint16_t get_nmi_addr() { return m_ctx.getWord(0xFFFA); }
+    uint16_t get_rst_addr() { return m_ctx.getWord(0xFFFC); }
+    uint16_t get_irq_addr() { return m_ctx.getWord(0xFFFE); }
 
-    uint16_t get_cop_addr16() { return ctx.getWord(0xFFE4); }
-    uint16_t get_brk_addr16() { return ctx.getWord(0xFFE6); }
-    uint16_t get_abort_addr16() { return ctx.getWord(0xFFE8); }
-    uint16_t get_nmi_addr16() { return ctx.getWord(0xFFEA); }
-    uint16_t get_irq_addr16() { return ctx.getWord(0xFFEE); }
+    uint16_t get_cop_addr16() { return m_ctx.getWord(0xFFE4); }
+    uint16_t get_brk_addr16() { return m_ctx.getWord(0xFFE6); }
+    uint16_t get_abort_addr16() { return m_ctx.getWord(0xFFE8); }
+    uint16_t get_nmi_addr16() { return m_ctx.getWord(0xFFEA); }
+    uint16_t get_irq_addr16() { return m_ctx.getWord(0xFFEE); }
 
     std::string GetStatMsg(Status stat) const;
     std::string GetLastStatMsg() const { return GetStatMsg(CurrentStatus); }
@@ -349,24 +291,22 @@ public:
     void SkipToAddr(uint16_t addr);
     void set_addr_bus_width(UINT w) { UNUSED(w); }
 
-    uint32_t get_pc() const { return ctx.pc; }
-    void set_pc(uint32_t pc) { ctx.pc = pc; }
+    uint32_t get_pc() const { return m_ctx.pc; }
+    void set_pc(uint32_t pc) { m_ctx.pc = pc; }
 
-    const CContext &GetContext() const { return ctx; }
-    CContext &GetContext() { return ctx; }
+    const CContext &GetContext() const { return m_ctx; }
+    CContext &GetContext() { return m_ctx; }
 
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502(ProcessorType processor)
-        : ctx(processor)
-        //, eventRedraw(true, true)
+    CSym6502(const SimulatorConfig &config)
+        : m_ctx(config)
     {
         init();
     }
 
     //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502(ProcessorType processor, CDebugInfo *debug) 
-        : ctx(processor)
-        //, eventRedraw(true)
+    CSym6502(const SimulatorConfig &config, CDebugInfo *debug) 
+        : m_ctx(config)
         , debug(debug)
     {
         init();
@@ -409,11 +349,6 @@ public:
     void ExitSym();
 
     void ClearCyclesCounter();
-
-    const CommandLog& GetLog() const
-    {
-        return m_log;
-    }
 };
 
 typedef std::shared_ptr<CSym6502> PSym6502;

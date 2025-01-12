@@ -40,7 +40,9 @@ LoadCodeOptionsDlg::LoadCodeOptionsDlg(LoadCodeState *state)
     HexValidator loadAddrValidate(&m_state->LoadAddress);
     HexValidator byteValidate(&m_state->FillByte, NumberFormat::DollarHex, 2);
 
-    if (wxGetApp().simulatorController().processor() == ProcessorType::WDC65816)
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    if (config.Processor == ProcessorType::WDC65816)
     {
         startAddrValidate.SetMaxValue(0x00FF'FFFF); // 1.3.3 support for 24-bit addressing
         loadAddrValidate.SetMaxValue(0x00FF'FFFF);

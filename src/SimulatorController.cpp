@@ -26,12 +26,14 @@
 #include "6502.h"
 #include "config.h"
 
-#include "MainFrm.h"
-#include "ChildFrm.h"
 #include "6502View.h"
 #include "6502Doc.h"
 
+/*************************************************************************/
+
 #include "Options.h"
+
+#include "sim.h"
 
 #include "options/OptionsSymPage.h"
 
@@ -44,17 +46,6 @@
 
 namespace
 {
-    struct SimulatorConfig
-    {
-        ProcessorType Processor;     // Type of processor selected
-        CAsm::Finish  SimFinish;     // How the simulator should terminate
-        bool          IOEnable;      // Set if the I/O functions should be enabled
-        sim_addr_t    IOAddress;     // I/O Address location
-        bool          ProtectMemory; // Set if a section of memroy should be write protected
-        sim_addr_t    ProtectStart;  // Start of write protected memory area
-        sim_addr_t    ProtectEnd;    // End of write protected memory area
-    };
-
     struct SimulatorConfigMap : config::Mapper<SimulatorConfig>
     {
         bool to(SimulatorConfig &cfg, config::Context &ctx) const
@@ -121,7 +112,7 @@ SimulatorController::~SimulatorController()
 
 /*************************************************************************/
 
-ProcessorType SimulatorController::processor() const { return s_simConfig.Processor; }
+const SimulatorConfig &SimulatorController::GetConfig() const { return s_simConfig; }
 
 /*************************************************************************/
 
@@ -142,7 +133,7 @@ void SimulatorController::CreateSimulator()
     CGlobal *global = &wxGetApp().m_global;
 
     // Get a fresh new simulator
-    m_simulator.reset(new CSym6502(global->GetProcType(), global->GetDebug()));
+    m_simulator.reset(new CSym6502(GetConfig(), global->GetDebug()));
 
     CContext &ctx = m_simulator->GetContext();
 

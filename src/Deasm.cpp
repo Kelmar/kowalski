@@ -68,10 +68,12 @@ std::string CDeasm::DeasmInstr(const CmdInfo &ci, CAsm::DeasmFmt flags)
         str += fmt.ToStdString();
     }
 
-    ProcessorType procType = wxGetApp().simulatorController().processor();
-    str += Mnemonic(cmd, procType, !!(flags & CAsm::DF_USE_BRK));
+    // TODO: Remove reference to wxGetApp()
+    auto config = wxGetApp().simulatorController().GetConfig();
 
-    str += Argument(cmd, (CAsm::CodeAdr)CAsm::CodeToMode(procType)[cmd], addr, ci.arg1, ci.arg2, ci.arg3, flags & CAsm::DF_LABELS, flags & CAsm::DF_HELP);
+    str += Mnemonic(cmd, config.Processor, !!(flags & CAsm::DF_USE_BRK));
+
+    str += Argument(cmd, (CAsm::CodeAdr)CAsm::CodeToMode(config.Processor)[cmd], addr, ci.arg1, ci.arg2, ci.arg3, flags & CAsm::DF_LABELS, flags & CAsm::DF_HELP);
 
     return str;
 }
@@ -85,7 +87,8 @@ std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, int &ptr)
 
     sim_addr_t addr;
 
-    ProcessorType procType = wxGetApp().simulatorController().processor();
+    // TODO: Remove reference to wxGetApp()
+    auto config = wxGetApp().simulatorController().GetConfig();
 
     const CContext &ctx =m_sim->GetContext();
 
@@ -111,11 +114,11 @@ std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, int &ptr)
         str += std::string(pad, ' ');
     }
 
-    str += Mnemonic(cmd, procType, 1); //% Bug fix 1.2.12.2 - allow BRK vs. .DB in disassembly listings
+    str += Mnemonic(cmd, config.Processor, 1); //% Bug fix 1.2.12.2 - allow BRK vs. .DB in disassembly listings
 
-    int mode = CAsm::CodeToMode(procType)[cmd];
+    int mode = CAsm::CodeToMode(config.Processor)[cmd];
 
-    if (procType == ProcessorType::WDC65816 && !ctx.emm)
+    if (config.Processor == ProcessorType::WDC65816 && !ctx.emm)
     {
         if (cmd == 0xA2 && !ctx.xy16)
             mode = CAsm::A_IMM2;
@@ -845,3 +848,40 @@ int CDeasm::FindDelta(uint32_t &addr, uint32_t dest, int max_lines)
         return i;
     }
 }
+
+/*************************************************************************/
+/*************************************************************************/
+
+std::string CmdInfo::Asm() const
+{
+    // TODO: Remove direct refence to simualtor.
+    CDeasm deasm(wxGetApp().simulatorController().Simulator());
+    CAsm::DeasmFmt fmt = CAsm::DeasmFmt(CAsm::DF_ADDRESS | CAsm::DF_CODE_BYTES | CAsm::DF_USE_BRK);  //% bug Fix 1.2.13.18 - show BRK vs. .DB $00
+
+    wxString strLine = deasm.DeasmInstr(*this, fmt);
+
+    wxString strBuf;
+
+    // TODO: Remove refence to wxGetApp()
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    // * indicates RST, IRQ, or NMI have occurred
+    if (config.Processor == ProcessorType::WDC65816)
+    {
+        if (intFlag)
+            strBuf.Format("%-36s A:%04x X:%04x Y:%04x F:%02x S:%04x  Cycles=%u *", strLine, int(a), int(x), int(y), int(flags), int(s), uCycles);
+        else
+            strBuf.Format("%-36s A:%04x X:%04x Y:%04x F:%02x S:%04x  Cycles=%u ", strLine, int(a), int(x), int(y), int(flags), int(s), uCycles);
+    }
+    else
+    {
+        if (intFlag)
+            strBuf.Printf("%-30s A:%02x X:%02x Y:%02x F:%02x S:%04x  Cycles=%u *", strLine, int(a), int(x), int(y), int(flags), int(s + 0x100), uCycles);
+        else
+            strBuf.Printf("%-30s A:%02x X:%02x Y:%02x F:%02x S:%04x  Cycles=%u ", strLine, int(a), int(x), int(y), int(flags), int(s + 0x100), uCycles);
+    }
+
+    return strBuf.ToStdString();
+}
+
+/*************************************************************************/

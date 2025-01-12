@@ -31,7 +31,6 @@
  */
 typedef uint32_t sim_addr_t;
 
-
 namespace sim
 {
     /**

@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+ /*************************************************************************/
 
 #ifndef SIM_CONTEXT_6502_H__
 #define SIM_CONTEXT_6502_H__
@@ -31,6 +31,19 @@
 
 // TODO: Remove this naming conflict
 #undef OVERFLOW
+
+/*************************************************************************/
+
+struct SimulatorConfig
+{
+    ProcessorType Processor;     // Type of processor selected
+    CAsm::Finish  SimFinish;     // How the simulator should terminate
+    bool          IOEnable;      // Set if the I/O functions should be enabled
+    sim_addr_t    IOAddress;     // I/O Address location
+    bool          ProtectMemory; // Set if a section of memroy should be write protected
+    sim_addr_t    ProtectStart;  // Start of write protected memory area
+    sim_addr_t    ProtectEnd;    // End of write protected memory area
+};
 
 /*************************************************************************/
 
@@ -75,6 +88,8 @@ struct ContextBase
     }
 };
 
+/*************************************************************************/
+
 class CContext : public ContextBase
 {
 private:
@@ -85,7 +100,7 @@ private:
     CContext &operator =(const CContext &) = delete;
     CContext &operator =(CContext &&) = delete;
 
-    ProcessorType m_processor;
+    SimulatorConfig m_config;
 
 public:
     enum Flags
@@ -121,7 +136,7 @@ public:
 public:
     Bus bus;
 
-    CContext(ProcessorType processor);
+    CContext(const SimulatorConfig &config);
 
     void Reset()
     {
@@ -129,14 +144,16 @@ public:
         reset();
     }
 
-    ProcessorType getProcessorType() const { return m_processor; }
+    const SimulatorConfig &Config() const { return m_config; }
+
+    ProcessorType Processor() const { return m_config.Processor; }
 
     /**
      * @brief Get the stack pointer value based on the current processor type.
      */
     sim_addr_t getStackPointer() const
     {
-        if (m_processor == ProcessorType::WDC65816)
+        if (Processor() == ProcessorType::WDC65816)
             return s;
 
         return (s & 0xFF) | 0x0100;
@@ -147,7 +164,7 @@ public:
      */
     sim_addr_t getProgramAddress() const
     {
-        if (m_processor == ProcessorType::WDC65816)
+        if (Processor() == ProcessorType::WDC65816)
             return pc | (pbr << 16);
 
         return pc;
@@ -208,7 +225,7 @@ public:
      * @remarks Words are always read little endian.
      */
     uint32_t getLWord(sim_addr_t addr)
-    { 
+    {
         std::array<uint8_t, 3> bytes;
         std::span<uint8_t> spn(bytes);
 
@@ -338,7 +355,6 @@ private:
         uCycles = 0;
     }
 };
-
 
 /*************************************************************************/
 

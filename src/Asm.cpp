@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Asm.h"
 #include "6502.h" // TODO: Remove this reference.
 
+#include "sim.h"
+
 //-----------------------------------------------------------------------------
 
 const char CAsm::LOCAL_LABEL_CHAR = '.'; // Character that starts the local label
@@ -611,7 +613,10 @@ const uint8_t (&CAsm::TransformTable(const ProcessorType procType))[C_ILL][A_NO_
 
 const uint8_t (&CAsm::CodeToCommand())[0x100]
 {
-    return CodeToCommand(wxGetApp().simulatorController().processor());
+    // TODO: Remove reference to wxGetApp()
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    return CodeToCommand(config.Processor);
 }
 
 const uint8_t (&CAsm::CodeToCommand(const ProcessorType procType))[0x100]
@@ -634,7 +639,10 @@ const uint8_t (&CAsm::CodeToCommand(const ProcessorType procType))[0x100]
 
 const uint8_t (&CAsm::CodeToMode())[0x100]
 {
-    return CodeToMode(wxGetApp().simulatorController().processor());
+    // TODO: Remove reference to wxGetApp()
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    return CodeToMode(config.Processor);
 }
 
 const uint8_t (&CAsm::CodeToMode(const ProcessorType procType))[0x100]
@@ -657,12 +665,18 @@ const uint8_t (&CAsm::CodeToMode(const ProcessorType procType))[0x100]
 
 inline ProcessorType CAsm::ProcType()
 {
-    return wxGetApp().simulatorController().processor();
+    // TODO: Remove reference to wxGetApp()
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    return config.Processor;
 }
 
 const uint8_t (&CAsm::CodeToCycles())[0x100]
 {
-    return CodeToCycles(wxGetApp().simulatorController().processor());
+    // TODO: Remove reference to wxGetApp()
+    auto config = wxGetApp().simulatorController().GetConfig();
+
+    return CodeToCycles(config.Processor);
 }
 
 const uint8_t (&CAsm::CodeToCycles(const ProcessorType procType))[0x100]
