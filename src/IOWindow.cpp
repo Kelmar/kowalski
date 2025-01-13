@@ -20,6 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 #include "6502.h"
+#include "config.h"
+
 #include "encodings.h"
 
 #include <wx/dcbuffer.h>
@@ -32,15 +34,51 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
+// Directly exposed to OptionsSymPage
+IOWindowConfig s_ioConfig;
+
+/*************************************************************************/
+
+namespace
+{
+    struct IOWindowConfigMap : config::Mapper<IOWindowConfig>
+    {
+        bool to(IOWindowConfig &cfg, config::Context &ctx) const
+        {
+            return
+                ctx.map("Columns", cfg.Columns) ||
+                ctx.map("Rows", cfg.Rows)
+            ;
+        }
+    };
+
+    void InitDefaultConfig()
+    {
+        s_ioConfig.Columns = 80;
+        s_ioConfig.Rows = 25;
+    }
+
+    void LoadConfig()
+    {
+        InitDefaultConfig();
+
+    }
+}
+
+/*************************************************************************/
+/*************************************************************************/
+
 CIOWindow::CIOWindow(wxWindow *parent)
     : wxFrame(parent, wxID_ANY, _("IO Window"))
     , m_memory(nullptr)
-    , m_charCnt(40, 25)
+    , m_memorySz(0)
     , m_cursorPos()
     , m_timer(this)
     , m_rgbTextColor(wxColor(0, 0, 0))
     , m_rgbBackgndColor(wxColor(255, 255, 255))
 {
+    LoadConfig();
+
     // We're going to override the saved size anyhow with our own calculations.
 
     wxPersistentRegisterAndRestore(this, REG_ENTRY_IOWINDOW);
@@ -48,14 +86,12 @@ CIOWindow::CIOWindow(wxWindow *parent)
     m_showCursor = false;
     m_cursorBlinkState = false;
 
-    // Allocates our initial memory block
-    size_t sz = m_charCnt.x * m_charCnt.y;
-    m_memory = new uint8_t[sz];
-    memset(m_memory, 0, sz);
-
     // Remove ability for user to resize us with the mouse.
     int style = wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX);
     SetWindowStyle(style);
+
+    AllocateMemory();
+    Resize();
 
     SetBackgroundStyle(wxBG_STYLE_PAINT);
 
@@ -71,26 +107,50 @@ CIOWindow::~CIOWindow()
 
 /*************************************************************************/
 
-void CIOWindow::SetSize(int w, int h, bool resize/* = true*/)
+void CIOWindow::SaveConfig()
 {
-    ASSERT(w > 0 && h > 0);
+    AllocateMemory();
+    Resize();
+}
 
-    int new_size = w * h;
-    int old_size = m_charCnt.x * m_charCnt.y;
-    bool change = m_charCnt.x != w || m_charCnt.y != h;
+/*************************************************************************/
 
-    m_charCnt.Set(w, h);
+void CIOWindow::AllocateMemory()
+{
+    size_t newSize = s_ioConfig.Columns * s_ioConfig.Rows;
 
-    if (m_memory == nullptr || new_size != old_size)
+    if (newSize != m_memorySz)
     {
+        uint8_t *mem = new uint8_t[newSize];
+        
         delete[] m_memory;
-        m_memory = new uint8_t[new_size];
-        memset(m_memory, 0, new_size);
-    }
+        m_memory = mem;
+        m_memorySz = newSize;
 
-    // without changing window dimensions?
-    if (!resize || !change)
-        return;
+        memset(m_memory, 0, m_memorySz);
+    }
+}
+
+/*************************************************************************/
+
+wxSize CIOWindow::CalcPhysicalSize() const
+{
+    FontController &fontController = wxGetApp().fontController();
+    wxSize cellSize = fontController.getCellSize();
+
+    cellSize.x *= s_ioConfig.Columns;
+    cellSize.y *= s_ioConfig.Rows;
+
+    return cellSize;
+}
+
+/*************************************************************************/
+
+void CIOWindow::Resize()
+{
+    wxSize newSize = CalcPhysicalSize();
+
+    SetClientSize(newSize);
 }
 
 /*************************************************************************/
@@ -110,10 +170,10 @@ void CIOWindow::Invalidate(const wxPoint &location)
 
 void CIOWindow::Put(char chr, int x, int y)
 {
-    if (x > m_charCnt.x || y > m_charCnt.y || x < 0 || y < 0)
+    if (x > s_ioConfig.Columns || y > s_ioConfig.Rows || x < 0 || y < 0)
         return;
 
-    m_memory[x + y * m_charCnt.x] = (uint8_t)chr;
+    m_memory[x + y * s_ioConfig.Columns] = (uint8_t)chr;
     Refresh();
 }
 
@@ -124,9 +184,9 @@ void CIOWindow::PutChar(int chr)
     switch (chr)
     {
     case 0x0A: // Line Feed
-        if (++m_cursorPos.y >= m_charCnt.y)
+        if (++m_cursorPos.y >= s_ioConfig.Rows)
         {
-            ASSERT(m_cursorPos.y == m_charCnt.y);
+            ASSERT(m_cursorPos.y == s_ioConfig.Rows);
             m_cursorPos.y--;
             Scroll(1); // Shift the strings by one line
         }
@@ -139,7 +199,7 @@ void CIOWindow::PutChar(int chr)
     case 0x08: // Backspace
         if (--m_cursorPos.x < 0)
         {
-            m_cursorPos.x = m_charCnt.x - 1;
+            m_cursorPos.x = s_ioConfig.Columns - 1;
 
             if (--m_cursorPos.y < 0)
             {
@@ -163,14 +223,15 @@ void CIOWindow::RawChar(int chr) // print character (verbatim)
 {
     Put(chr, m_cursorPos.x, m_cursorPos.y);
 
-    if (++m_cursorPos.x >= m_charCnt.x)
+    if (++m_cursorPos.x >= s_ioConfig.Columns)
     {
         m_cursorPos.x = 0;
+        ++m_cursorPos.y;
 
-        if (++m_cursorPos.y >= m_charCnt.y)
+        if (m_cursorPos.y >= s_ioConfig.Rows)
         {
-            ASSERT(m_cursorPos.y == m_charCnt.y);
-            m_cursorPos.y--;
+            ASSERT(m_cursorPos.y == s_ioConfig.Rows);
+            --m_cursorPos.y;
             Scroll(1);
         }
     }
@@ -180,14 +241,14 @@ void CIOWindow::RawChar(int chr) // print character (verbatim)
 
 void CIOWindow::Scroll(int dy)
 {
-    if (dy > m_charCnt.y || dy < 0)
+    if (dy > s_ioConfig.Rows || dy < 0)
         return;
 
     // Line offset
-    memmove(m_memory, m_memory + dy * m_charCnt.y, (m_charCnt.y - dy) * m_charCnt.x);
+    memmove(m_memory, m_memory + dy * s_ioConfig.Rows, (s_ioConfig.Rows - dy) * s_ioConfig.Columns);
 
     // To the uncovered zero position
-    memset(m_memory + (m_charCnt.y - dy) * m_charCnt.x, 0, dy * m_charCnt.x);
+    memset(m_memory + (s_ioConfig.Rows - dy) * s_ioConfig.Columns, 0, dy * s_ioConfig.Columns);
 
     // Redraw entire window
     Refresh();
@@ -210,15 +271,15 @@ void CIOWindow::PutStr(const wxString &str)
 
 void CIOWindow::SetCursorPosition(const wxPoint &location)
 {
-    m_cursorPos.x = std::clamp(location.x, 0, m_charCnt.x - 1);
-    m_cursorPos.y = std::clamp(location.y, 0, m_charCnt.y - 1);
+    m_cursorPos.x = std::clamp(location.x, 0, s_ioConfig.Columns - 1);
+    m_cursorPos.y = std::clamp(location.y, 0, s_ioConfig.Rows - 1);
 }
 
 /*************************************************************************/
 
 void CIOWindow::Cls()
 {
-    memset(m_memory, 0, m_charCnt.y * m_charCnt.x);
+    memset(m_memory, 0, s_ioConfig.Rows * s_ioConfig.Columns);
     m_cursorPos.x = m_cursorPos.y = 0;
     Refresh(); // Redraw the entire window
 }
@@ -271,6 +332,13 @@ void CIOWindow::InitEvents()
 
 /*************************************************************************/
 
+wxSize CIOWindow::DoGetBestClientSize() const
+{
+    return CalcPhysicalSize();
+}
+
+/*************************************************************************/
+
 void CIOWindow::OnPaint(wxPaintEvent &)
 {
     wxAutoBufferedPaintDC dc(this);
@@ -297,14 +365,14 @@ void CIOWindow::Draw(wxDC &dc)
     //auto encoding = encodings::CodePage437::Get();
     wxString lineBuffer;
 
-    lineBuffer.reserve(m_charCnt.x + 1);
+    lineBuffer.reserve(s_ioConfig.Columns + 1);
     int offset = 0;
 
-    for (int y = 0, pos_y = 0; y < m_charCnt.y; ++y, pos_y += cellSize.y)
+    for (int y = 0, pos_y = 0; y < s_ioConfig.Rows; ++y, pos_y += cellSize.y)
     {
         lineBuffer.clear();
 
-        for (int x = 0; x < m_charCnt.x; ++x, ++offset)
+        for (int x = 0; x < s_ioConfig.Columns; ++x, ++offset)
         {
             uint8_t c = m_memory[offset];
             //lineBuffer += encoding.toUnicode(c == 0 ? ' ' : c);

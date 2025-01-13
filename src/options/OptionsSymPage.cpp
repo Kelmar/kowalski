@@ -25,6 +25,8 @@
 #include "StdAfx.h"
 #include "6502.h"
 
+#include "IOWindow.h"
+
 #include <wx/colordlg.h>
 
 #include "resource.h"
@@ -36,6 +38,12 @@
 #include "options/OptionsSymPage.h"
 
 #include "ConfigSettings.h"
+
+/*************************************************************************/
+
+// TODO: Remove direct reference to IO Config
+// Really the IO config belongs in its own configuration page of sorts.
+extern IOWindowConfig s_ioConfig;
 
 /*************************************************************************/
 
@@ -129,6 +137,8 @@ void OptionsSymPage::ReadConfig()
     m_ioAddress = s_simConfig.IOAddress;
 
     // Input/Output Window
+    m_colSpin->SetValue(s_ioConfig.Columns);
+    m_rowSpin->SetValue(s_ioConfig.Rows);
 
     // Memory Protection
     m_protectStart = s_simConfig.ProtectStart;
@@ -159,8 +169,8 @@ void OptionsSymPage::SetConfig()
     s_simConfig.IOAddress = m_ioAddress;
 
     // Input/Output Window
-    //s_simConfig.ioColumns = m_colSpin->GetValue();
-    //s_simConfig.ioRows = m_rowSpin->GetValue();
+    s_ioConfig.Columns = m_colSpin->GetValue();
+    s_ioConfig.Rows = m_rowSpin->GetValue();
 
     // Memory Protection
     s_simConfig.ProtectMemory = m_writeDetectChk->GetValue();
@@ -182,6 +192,7 @@ void OptionsSymPage::SaveChanges()
     SetConfig();
 
     wxGetApp().simulatorController().SaveConfig();
+    wxGetApp().mainFrame()->ioWindow()->SaveConfig();
 }
 
 /*************************************************************************/

@@ -28,6 +28,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*************************************************************************/
 
+struct IOWindowConfig
+{
+    int Columns;
+    int Rows;
+};
+
+/*************************************************************************/
+
 class CInputBuffer
 {
 public:
@@ -78,9 +86,9 @@ private:
     uint8_t *m_memory;
 
     /**
-     * @brief Window size in characters.
+     * @brief Size of allocated memory in bytes.
      */
-    wxSize m_charCnt;
+    size_t m_memorySz;
 
     /**
      * @brief Current location of the cursor.
@@ -109,9 +117,26 @@ private:
      */
     void Invalidate(const wxPoint &location);
 
+    /**
+     * @brief Resize character buffer based on selected size.
+     */
+    void AllocateMemory();
+
+    /**
+     * @brief Calculate the needed physical size of the client area based on the configured size.
+     */
+    wxSize CalcPhysicalSize() const;
+
+    /**
+     * @brief Resize the window's dimensions based on the configured size.
+     */
+    void Resize();
+
 public:
     /* constructor */ CIOWindow(wxWindow *parent);
     virtual          ~CIOWindow();
+
+    void SaveConfig();
 
 public: // Output functions
     /**
@@ -185,28 +210,13 @@ public: // Input functions
 public: // Attributes
     wxColour m_rgbTextColor, m_rgbBackgndColor;
 
-    /**
-     * @brief Set the size of the display area in characters.
-     * @param w, h The width and height to size to.
-     * @param resize Set if the physical size fo the window should be changed as well.
-     */
-    void SetSize(int w, int h, bool resize = true);
-
-    /**
-     * @brief Get the size of the display area in characters.
-     * @param w, h The width and height to return.
-     */
-    void GetSize(int &w, int &h) const
-    {
-        w = m_charCnt.x;
-        h = m_charCnt.y;
-    }
-
     void SetColors(wxColour text, wxColour background);
     void GetColors(wxColour &text, wxColour &background);
 
 protected: // Event Processing
     void InitEvents();
+
+    virtual wxSize DoGetBestClientSize() const override;
 
     void OnPaint(wxPaintEvent &);
     void Draw(wxDC &dc);
