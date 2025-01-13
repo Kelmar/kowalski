@@ -30,14 +30,38 @@
 class OptionsSymPage : public OptionsPage, public wxExtra
 {
 private:
-    uint32_t m_nIOAddress;
-    bool m_bIOEnable;
-    int m_nFinish;
-    int m_nWndWidth;
-    int m_nWndHeight;
-    bool m_bProtectMemory;
-    uint32_t m_nProtFromAddr;
-    uint32_t m_nProtToAddr;
+    // Processor
+    wxChoice *m_cpuSelect;
+
+    // Finish Running Program By
+    wxRadioButton *m_brkRadio;
+    wxRadioButton *m_rtsRadio;
+    wxRadioButton *m_dbRadio;
+
+    // In/Out Memory Area
+    wxCheckBox *m_ioActiveChk;
+    wxTextCtrl *m_ioAddrTxt;
+
+    // Input/Output Window
+    wxSpinCtrl *m_colSpin;
+    wxSpinCtrl *m_rowSpin;
+
+    // Memory Protection
+    wxCheckBox *m_writeDetectChk;
+    wxTextCtrl *m_writeStartTxt;
+    wxTextCtrl *m_writeEndTxt;
+
+private:
+    sim_addr_t m_ioAddress;
+    sim_addr_t m_protectStart;
+    sim_addr_t m_protectEnd;
+
+private:
+    void BindChildren();
+    void InitChildren();
+    void ReadConfig();
+
+    void SetConfig();
 
 public:
     /* constructor */ OptionsSymPage(wxBookCtrlBase *parent);

@@ -22,48 +22,20 @@
  */
 /*************************************************************************/
 
-#ifndef WX_6502_EXTRA_H__
-#define WX_6502_EXTRA_H__
+#ifndef SIM_PRIV_6502_H__
+#define SIM_PRIV_6502_H__
 
 /*************************************************************************/
 
-class wxExtra
-{
-private:
-    wxWindow *m_self;
-
-public:
-    /* constructor */ wxExtra(wxWindow *self)
-        : m_self(self)
-    {
-    }
-
-    template <class T>
-    typename std::enable_if<std::is_base_of_v<wxWindow, std::remove_pointer_t<T>>, T *>::type
-    FindChild(const wxString &name)
-    {
-        wxWindow *win = m_self->FindWindow(name);
-        T *rval = dynamic_cast<T *>(win);
-        ASSERT(rval != nullptr);
-        return rval;
-    }
-
-    template <class T>
-    typename std::enable_if<std::is_base_of_v<wxWindow, std::remove_pointer_t<T>>>::type
-    FindChild(T **ptr, const wxString &name)
-    {
-        (*ptr) = FindChild<T>(name);
-    }
-};
+#include "sim.h"
 
 /*************************************************************************/
-/**
- * @brief Convenience macro for binding a pointer member to a named child.
- */
-#define WX_BIND_CHILD(VAR__) FindChild(&VAR__, #VAR__)
+// Definitions private to the simulator controller and related UI items
+
+extern SimulatorConfig s_simConfig;
 
 /*************************************************************************/
 
-#endif /* WX_6502_EXTRA_H__ */
+#endif /* SIM_PRIV_6502_H__ */
 
 /*************************************************************************/

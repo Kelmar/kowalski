@@ -70,7 +70,17 @@ bool HexValidator::ReadValue(_Out_ uint32_t &value)
 bool HexValidator::Validate(wxWindow *)
 {
     uint32_t dmy;
-    return ReadValue(_Out_ dmy);
+    bool isValid = ReadValue(_Out_ dmy);
+
+    if (!isValid && !IsSilent())
+    {
+        auto control = GetWindow();
+        control->SetFocus();
+
+        wxMessageBox(_("Invalid hex value."));
+    }
+
+    return isValid;
 }
 
 /*************************************************************************/

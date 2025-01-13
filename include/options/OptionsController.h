@@ -71,10 +71,10 @@ private:
         bool operator()(const PageInfo &lhs, const PageInfo &rhs) const
         {
             // Lowest weight first, then by name
-            return
-                lhs.ordering < rhs.ordering ||
-                lhs.text < rhs.text
-            ;
+            if (lhs.ordering == rhs.ordering)
+                return lhs.text < rhs.text;
+
+            return lhs.ordering < rhs.ordering;
         }
     } infoComparator;
 

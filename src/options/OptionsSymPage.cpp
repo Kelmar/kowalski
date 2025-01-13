@@ -23,10 +23,14 @@
 /*************************************************************************/
 
 #include "StdAfx.h"
+#include "6502.h"
 
 #include <wx/colordlg.h>
 
 #include "resource.h"
+
+#include "sim.h"
+#include "sim_priv.h"
 
 #include "Options.h"
 #include "options/OptionsSymPage.h"
@@ -42,14 +46,9 @@ OptionsSymPage::OptionsSymPage(wxBookCtrlBase *parent)
     if (!wxXmlResource::Get()->LoadPanel(this, parent, "OptionsSimPage"))
         throw ResourceError();
 
-    m_nIOAddress = 0;
-    m_bIOEnable = FALSE;
-    m_nFinish = -1;
-    m_nWndWidth = 0;
-    m_nWndHeight = 0;
-    m_bProtectMemory = FALSE;
-    m_nProtFromAddr = 0;
-    m_nProtToAddr = 0;
+    BindChildren();
+    InitChildren();
+    ReadConfig();
 }
 
 OptionsSymPage::~OptionsSymPage()
@@ -57,15 +56,132 @@ OptionsSymPage::~OptionsSymPage()
 }
 
 /*************************************************************************/
+/**
+ * @brief Bind pointers to created controls.
+ */
+void OptionsSymPage::BindChildren()
+{
+    // Processor
+    WX_BIND_CHILD(m_cpuSelect);
+
+    // Finish Running Program By
+    WX_BIND_CHILD(m_brkRadio);
+    WX_BIND_CHILD(m_rtsRadio);
+    WX_BIND_CHILD(m_dbRadio);
+
+    // In/Out Memory Area
+    WX_BIND_CHILD(m_ioActiveChk);
+    WX_BIND_CHILD(m_ioAddrTxt);
+
+    // Input/Output Window
+    WX_BIND_CHILD(m_colSpin);
+    WX_BIND_CHILD(m_rowSpin);
+
+    // Memory Protection
+    WX_BIND_CHILD(m_writeDetectChk);
+    WX_BIND_CHILD(m_writeStartTxt);
+    WX_BIND_CHILD(m_writeEndTxt);
+}
+
+/*************************************************************************/
+/**
+ * @brief Initialize selection values and validators.
+ */
+void OptionsSymPage::InitChildren()
+{
+    // Processor
+    // TODO: Remove hard coded options
+    m_cpuSelect->Append(_("Basic 6502"));
+    m_cpuSelect->Append(_("65C02, 6501"));
+    m_cpuSelect->Append(_("65816"));
+
+    // Input/Output Window
+    m_colSpin->SetRange(1, 255);
+    m_rowSpin->SetRange(1, 255);
+
+    // In/Out Memory Area
+    HexValidator ioValidate(&m_ioAddress);
+    m_ioAddrTxt->SetValidator(ioValidate);
+
+    // Memory Protection
+    HexValidator startValidator(&m_protectStart);
+    HexValidator endValidator(&m_protectEnd);
+
+    m_writeStartTxt->SetValidator(startValidator);
+    m_writeEndTxt->SetValidator(endValidator);
+}
+
+/*************************************************************************/
+/**
+ * @brief Read values from the configuration into the controls.
+ */
+void OptionsSymPage::ReadConfig()
+{
+    // Processor
+    m_cpuSelect->SetSelection((int)s_simConfig.Processor);
+
+    // Finish Running Program by
+    m_brkRadio->SetValue(s_simConfig.SimFinish == CAsm::Finish::FIN_BY_BRK);
+    m_rtsRadio->SetValue(s_simConfig.SimFinish == CAsm::Finish::FIN_BY_RTS);
+    m_dbRadio->SetValue(s_simConfig.SimFinish == CAsm::Finish::FIN_BY_DB);
+
+    // In/Out Memory Area
+    m_ioAddress = s_simConfig.IOAddress;
+
+    // Input/Output Window
+
+    // Memory Protection
+    m_protectStart = s_simConfig.ProtectStart;
+    m_protectEnd = s_simConfig.ProtectEnd;
+}
+
+/*************************************************************************/
+/**
+ * @brief Set configuration from values presaented in the controls.
+ */
+void OptionsSymPage::SetConfig()
+{
+    // Processor
+    s_simConfig.Processor = (ProcessorType)m_cpuSelect->GetSelection();
+
+    // Finish Running Program by
+    if (m_brkRadio->GetValue())
+        s_simConfig.SimFinish = CAsm::Finish::FIN_BY_BRK;
+
+    if (m_rtsRadio->GetValue())
+        s_simConfig.SimFinish = CAsm::Finish::FIN_BY_RTS;
+
+    if (m_dbRadio->GetValue())
+        s_simConfig.SimFinish = CAsm::Finish::FIN_BY_DB;
+
+    // In/Out Memory Area
+    s_simConfig.IOEnable = m_ioActiveChk->GetValue();
+    s_simConfig.IOAddress = m_ioAddress;
+
+    // Input/Output Window
+    //s_simConfig.ioColumns = m_colSpin->GetValue();
+    //s_simConfig.ioRows = m_rowSpin->GetValue();
+
+    // Memory Protection
+    s_simConfig.ProtectMemory = m_writeDetectChk->GetValue();
+    s_simConfig.ProtectStart = m_protectStart;
+    s_simConfig.ProtectEnd = m_protectEnd;
+}
+
+/*************************************************************************/
 
 void OptionsSymPage::AbortChanges()
 {
+    // Nothing to do, we'll just re-read from the configuration on next load.
 }
 
 /*************************************************************************/
 
 void OptionsSymPage::SaveChanges()
 {
+    SetConfig();
+
+    wxGetApp().simulatorController().SaveConfig();
 }
 
 /*************************************************************************/

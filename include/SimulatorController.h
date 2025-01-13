@@ -121,6 +121,8 @@ public: // Properties
 
     const SimulatorConfig &GetConfig() const;
 
+    void SaveConfig();
+
 public: // Commands
     void InitOptions();
     void BuildMenu(wxMenuBar *);
@@ -129,7 +131,7 @@ public: // Commands
     void RunToAddress(sim_addr_t address);
     void Restart();
     void Break();
-    void ExitDebugMode();
+    void ExitDebugMode(bool uiEvent = false);
 
     void StepOver();
     void StepInto();

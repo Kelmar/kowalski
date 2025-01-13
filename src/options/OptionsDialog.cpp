@@ -52,7 +52,7 @@ void OptionsDialog::Create(wxFrame *parent)
     if (!wxXmlResource::Get()->LoadDialog(this, parent, "OptionsDlg"))
         throw ResourceError();
 
-    m_notebook = FindChild<wxNotebook>("m_notebook");
+    WX_BIND_CHILD(m_notebook);
 
 #if 0
 

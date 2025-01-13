@@ -34,6 +34,7 @@
 #include "Options.h"
 
 #include "sim.h"
+#include "sim_priv.h"
 
 #include "options/OptionsSymPage.h"
 
@@ -42,6 +43,11 @@
 
 /*************************************************************************/
 // Configuration
+/*************************************************************************/
+
+// Directly exposed to OptionsSymPage
+SimulatorConfig s_simConfig;
+
 /*************************************************************************/
 
 namespace
@@ -61,8 +67,6 @@ namespace
             ;
         }
     };
-
-    SimulatorConfig s_simConfig;
 
     void InitDefaultConfig()
     {
@@ -85,10 +89,6 @@ namespace
 #if WIN32
         // TODO: Import old config if detected.
 #endif
-    }
-
-    void SaveConfig()
-    {
     }
 }
 
@@ -113,6 +113,13 @@ SimulatorController::~SimulatorController()
 /*************************************************************************/
 
 const SimulatorConfig &SimulatorController::GetConfig() const { return s_simConfig; }
+
+/*************************************************************************/
+
+void SimulatorController::SaveConfig()
+{
+
+}
 
 /*************************************************************************/
 
@@ -391,8 +398,16 @@ void SimulatorController::StartDebug()
 
 /*************************************************************************/
 
-void SimulatorController::ExitDebugMode()
+void SimulatorController::ExitDebugMode(bool uiEvent)
 {
+    if (!IsDebugging())
+    {
+        if (uiEvent)
+            wxBell();
+
+        return;
+    }
+
     if (CurrentState() == DebugState::Running)
         Simulator()->AbortProg(); // Interrupt the running program
 
@@ -404,12 +419,6 @@ void SimulatorController::ExitDebugMode()
 
 void SimulatorController::DebugStopped()
 {
-    if (!IsDebugging())
-    {
-        wxBell();
-        return;
-    }
-
     m_simulator.reset();
 
     //m_view->StopIntGenerator();
@@ -589,7 +598,7 @@ void SimulatorController::OnRestart(wxCommandEvent &)
 
 void SimulatorController::OnStop(wxCommandEvent &)
 {
-    ExitDebugMode();
+    ExitDebugMode(true);
 }
 
 /*************************************************************************/
@@ -718,4 +727,3 @@ void SimulatorController::OnAsmComplete(wxThreadEvent &)
 }
 
 /*************************************************************************/
-
