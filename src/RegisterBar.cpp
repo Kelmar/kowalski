@@ -578,7 +578,7 @@ void CRegisterBar::ChangeFlags(int flag_bit, bool set) // changing the flag regi
 
     CContext &ctx = pSym->GetContext(); // program context
 
-    uint8_t flags = ctx.get_status_reg();
+    uint8_t flags = ctx.GetStatus();
 
     if (set)
     {
@@ -597,7 +597,7 @@ void CRegisterBar::ChangeFlags(int flag_bit, bool set) // changing the flag regi
 
     ctx.SetStatus(flags);
 
-    SetDlgItemByteHex(IDC_REGS_P, ctx.get_status_reg());
+    SetDlgItemByteHex(IDC_REGS_P, ctx.GetStatus());
 }
 
 //-----------------------------------------------------------------------------
