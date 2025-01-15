@@ -49,9 +49,8 @@ struct SimulatorConfig
 
 struct ContextBase
 {
-    uint8_t b;
-    uint16_t a, x, y, s;
-    uint32_t pc;
+    uint8_t a, b;
+    uint16_t x, y;
 
     ULONG uCycles;
     bool intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
@@ -67,13 +66,10 @@ struct ContextBase
     uint8_t pbr; // Program Bank Register
     uint16_t dir; // Direct Register
 
-    // contains ones in place of valid address bits
-    bool io;
-    uint16_t io_from, io_to;
-
     ContextBase()
     {
         memset(this, 0, sizeof(ContextBase));
+        emm = true;
     }
 
     ContextBase(const ContextBase &rhs)
@@ -101,6 +97,16 @@ private:
     CContext &operator =(CContext &&) = delete;
 
     SimulatorConfig m_config;
+
+    /**
+     * @brief Program Counter
+     */
+    sim_addr_t m_pc;
+
+    /**
+     * @brief Stack Pointer
+     */
+    sim_addr_t m_s;
 
 public:
     enum Flags
@@ -138,44 +144,226 @@ public:
 
     CContext(const SimulatorConfig &config);
 
-    void Reset()
-    {
-        bus.Reset();
-        reset();
-    }
+    /**
+     * @brief Resets the context.
+     * @param isSignal If set, signal is sent to all devices on the BUS as well.
+     */
+    void Reset(bool isSignal);
 
     const SimulatorConfig &Config() const { return m_config; }
 
     ProcessorType Processor() const { return m_config.Processor; }
 
+
+public: // Register access
+    /**
+     * @brief Get the value of the actual program counter register.
+     */
+    sim_addr_t PC() const 
+    { 
+        return m_pc;
+    }
+
+    /**
+     * @brief Set the address of the actual program counter register.
+     */
+    void PC(sim_addr_t addr)
+    {
+        m_pc = addr;
+    }
+
+    /**
+     * @brief Read the value of the C register
+     * 
+     * This behavior changes depending on the emm and mem16 status flags.
+     * 
+     * @return The value of the C register (or A register if not doing 16 bit opp)
+     */
+    uint16_t CRegister() const
+    {
+        uint16_t rval = (a & 0xFF);
+
+        if (Processor() == ProcessorType::WDC65C02 && !emm && mem16)
+            rval += (b & 0xFF) << 8;
+
+        return rval;
+    }
+
+    /**
+     * @brief Set the value of the C register.
+     * 
+     * This behavior changes depending on the emm and mem16 status flags.
+     * 
+     * @param value The value to set for the C register.
+     * @param setStatus If set, the status register will be adjusted based on the values setin the C register.
+     * 
+     * @return The actual value that is set.
+     * For 8-bit mode, this will have the MSB cleared.
+     */
+    uint16_t CRegister(uint16_t value, bool setStatus )
+    {
+        a = (value & 0xFF);
+
+        if (Processor() == ProcessorType::WDC65816 && !emm && mem16)
+            b = (value >> 8) & 0xFF;
+        else
+            value &= 0x00FF; // Mask off result
+
+        if (setStatus)
+        {
+            zero = value == 0;
+            negative = (value & 0x8000) != 0;
+        }
+
+        return value;
+    }
+
+    /**
+     * @brief Get value of S register.
+     * 
+     * This gets the raw value of the S register, it does not attempt
+     * to adjust it based on the emumulation mode set.
+     */
+    uint16_t SRegister() const { return m_s; }
+
+    /**
+     * @brief Set value of S register
+     * 
+     * This sets the raw value of the S register, it does not attempt
+     * to adjust it based on the emumulation mode set.
+     */
+    void SRegister(uint16_t value);
+
     /**
      * @brief Get the stack pointer value based on the current processor type.
+     * 
+     * This gets the adjusted value of the S register based on the emmulation mode status flag.
      */
-    sim_addr_t getStackPointer() const
+    sim_addr_t StackPointer() const
     {
         if (Processor() == ProcessorType::WDC65816)
-            return s;
+            return m_s;
 
-        return (s & 0xFF) | 0x0100;
+        return (m_s & 0xFF) | 0x0100;
     }
 
     /**
      * @brief Get the program counter based on the current processor type.
+     * @remarks For the 65816 this addjusts based on the current program bank register.
      */
-    sim_addr_t getProgramAddress() const
+    inline
+    sim_addr_t GetProgramAddress(ssize_t offset = 0) const
     {
-        if (Processor() == ProcessorType::WDC65816)
-            return pc | (pbr << 16);
+        sim_addr_t rval = PC() + offset;
 
-        return pc;
+        if (Processor() == ProcessorType::WDC65816)
+            rval += (pbr << 16);
+
+        return rval;
     }
 
-    uint8_t peekByte(sim_addr_t address) const
+    /**
+     * @brief Returns the value of the processor status register.
+     */
+    uint8_t GetStatus() const;
+
+    /**
+     * @brief Sets the value of the processor status register.
+     */
+    void SetStatus(uint8_t value);
+
+public: // Memory Access
+    /**
+     * @brief Peeks at the byte located at the current program counter.
+     * @param offset Optional offset in bytes from program counter to read from.
+     * @remarks This accounts for the program bank for 65816
+     */
+    uint8_t PeekProgramByte(ssize_t offset = 0) const;
+
+    /**
+     * @brief Reads the byte located at the current program counter
+     * @param offset Optional offset in bytes from program counter to read from.
+     * @remarks This accoutns for the program bank for 65816
+     */
+    uint8_t GetProgramByte(ssize_t offset = 0);
+
+    /**
+     * @brief Reads the word located at the current program counter
+     * @param offset Optional offset in bytes from program counter to read from.
+     * @remarks This accoutns for the program bank for 65816
+     */
+    uint16_t GetProgramWord(ssize_t offset = 0);
+
+    /**
+     * @brief Reads the LWord located at the current program counter
+     * @param offset Optional offset in bytes from program counter to read from.
+     * @remarks This accoutns for the program bank for 65816
+     */
+    uint32_t GetProgramLWord(ssize_t offset = 0);
+
+    /**
+     * @brief Reads the byte located at the current program counter and increments the counter by one
+     */
+    uint8_t ReadProgramByte();
+
+    /**
+     * @brief Reads the word located at the current program counter and increments the counter by two
+     */
+    uint16_t ReadProgramWord();
+
+    /**
+     * @brief Reads the long word located at the current program counter and increments the counter by three
+     */
+    uint32_t ReadProgramLWord();
+
+    /**
+     * @brief Push a byte into the virtual machine's stack.
+     * @remarks This function updates the stack pointer.
+     * @param byte The value to push.
+     */
+    void PushByte(uint8_t byte);
+
+    /**
+     * @brief Push a word into the virtual machine's stack.
+     * @remarks This function updates the stack pointer.
+     * @param word The value to push.
+     */
+    void PushWord(uint16_t word);
+
+    /**
+     * @brief Pull a byte from the virtual machine's stack.
+     * @remarks This function updates the stack pointer.
+     * @return The byte read from the stack.
+     */
+    uint8_t PullByte();
+
+    /**
+     * @brief Pull a word from the virtual machine's stack.
+     * @remarks This function updates the stack pointer.
+     * @return The 16-bit value read from the stack.
+     */
+    uint16_t PullWord();
+
+    /**
+     * @brief Peek at the byte at the given address on the bus.
+     * @remarks This operation is non distructive.
+     * @param address The address to read.
+     * @return The value read.
+     */
+    inline
+    uint8_t PeekByte(sim_addr_t address) const
     {
         return bus.PeekByte(address);
     }
 
-    uint16_t peekWord(sim_addr_t address) const
+    /**
+     * @brief Peek at a word at the given address on the bus.
+     * @remarks This operation is non distructive.
+     * @param address The address to read
+     * @return The 16-bit word to read.
+     */
+    inline
+    uint16_t PeekWord(sim_addr_t address) const
     {
         std::array<uint8_t, 2> bytes;
         std::span<uint8_t> spn(bytes);
@@ -185,7 +373,14 @@ public:
         return bytes[1] << 8 | bytes[0];
     }
 
-    uint32_t peekLWord(sim_addr_t address) const
+    /**
+     * @brief Peek at an LWord (24-bit value) at the given address on the bus.
+     * @remarks This operation is non distructive.
+     * @param address The address to read from.
+     * @return The 24-bit value read.
+     */
+    inline
+    uint32_t PeekLWord(sim_addr_t address) const
     {
         std::array<uint8_t, 3> bytes;
         std::span<uint8_t> spn(bytes);
@@ -339,21 +534,7 @@ public:
         negative = !!(val & 0x8000);
     }
 
-    uint8_t get_status_reg() const;
-
-    void set_status_reg_bits(uint8_t reg);
-
-private:
-    void reset()
-    {
-        pc = 0;
-        b = a = x = y = s = 0;
-        io = false;
-        negative = overflow = zero = carry = false;
-        break_bit = decimal = interrupt = false;
-        reserved = true;
-        uCycles = 0;
-    }
+    
 };
 
 /*************************************************************************/

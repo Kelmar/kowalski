@@ -29,6 +29,7 @@
 
 #include "sim/dev/base.h"
 #include "sim/dev/ram.h"
+#include "sim/dev/rom.h"
 #include "sim/dev/SimpleIO.h"
 
 /*************************************************************************/

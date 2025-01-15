@@ -72,17 +72,17 @@ uint32_t CSym6502::getVectorAddress(Vector v)
 
 uint32_t CSym6502::get_argument_address(bool bWrite)
 {
-    uint16_t arg;
+    uint16_t arg, arg16;
+    uint32_t arg32;
     uint32_t addr;
-    uint32_t pc = m_ctx.pc; // Save original PC
+
+    // ... If we're saving this, should this be a const operation!? -- B.Simonds (Jan 13, 2025)
+    uint32_t pc = m_ctx.PC(); // Save original PC
+    uint8_t byte;
     uint8_t mode;
 
-    if (cpu16())
-        mode = m_vCodeToMode[m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16))];
-    else
-        mode = m_vCodeToMode[m_ctx.getByte(m_ctx.pc)];
-
-    inc_prog_counter(); // Bypass the command
+    uint8_t instruction = m_ctx.ReadProgramByte();
+    mode = m_vCodeToMode[instruction];
 
     extracycle = false; //% bug Fix 1.2.12.1 - fix cycle timing
 
@@ -90,59 +90,61 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
     {
     case CAsm::A_ZPG:
     case CAsm::A_ZPG2:
+        addr = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
-            addr = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir) & 0xFFFF;
+            addr = (addr + m_ctx.dir) & 0xFFFF;
 
             if ((m_ctx.dir & 0xFF) != 0)
                 extracycle = true;
         }
-        else
-            addr = m_ctx.getByte(m_ctx.pc); // address on zero page
-
-        inc_prog_counter();
         break;
 
     case CAsm::A_ZPG_X:
+        byte = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
             if (m_ctx.emm && ((m_ctx.dir & 0xFF) == 0))
-                addr = m_ctx.dir + ((m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xff);
+                addr = m_ctx.dir + ((byte + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xff);
             else
-                addr = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xffff;
+                addr = (byte + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xffff;
 
             if ((m_ctx.dir & 0xff) != 0)
                 extracycle = true;
         }
         else
-            addr = (m_ctx.getByte(m_ctx.pc) + (m_ctx.x & 0xff)) & 0xff;
+            addr = (byte + (m_ctx.x & 0xff)) & 0xff;
 
-        inc_prog_counter();
         break;
 
     case CAsm::A_ZPG_Y:
+        byte = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
             if (m_ctx.emm && (m_ctx.dir & 0xff) == 0)
             {
-                addr = m_ctx.dir + ((m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.y & 0xff) : m_ctx.y)) & 0xff); //**
+                addr = m_ctx.dir + ((byte + (m_ctx.xy16 ? (m_ctx.y & 0xff) : m_ctx.y)) & 0xff); //**
             }
             else
-                addr = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.y & 0xff) : m_ctx.y)) & 0xffff;
+                addr = (byte + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.y & 0xff) : m_ctx.y)) & 0xffff;
 
             if ((m_ctx.dir & 0xff) != 0)
                 extracycle = true;
         }
         else
-            addr = (m_ctx.getByte(m_ctx.pc) + (m_ctx.y & 0xff)) & 0xff;
+            addr = (byte + (m_ctx.y & 0xff)) & 0xff;
 
-        inc_prog_counter();
         break;
 
     case CAsm::A_ZPGI: // 65c02 65816 only
+        byte = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
-            arg = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir) & 0xFFFF;
+            arg = (byte + m_ctx.dir) & 0xFFFF;
             addr = get_word_indirect(arg) + (m_ctx.dbr << 16);
 
             if ((m_ctx.dir & 0xFF) != 0)
@@ -150,61 +152,56 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
         }
         else
         {
-            arg = m_ctx.getByte(m_ctx.pc);
+            arg = byte;
             addr = get_word_indirect(arg);
         }
-
-        inc_prog_counter();
         break;
 
     case CAsm::A_ABS:
-        if (cpu16())
-            addr = get_word(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.dbr << 16);
-        else
-            addr = get_word(m_ctx.pc);
-
-        inc_prog_counter(2);
+        addr = m_ctx.ReadProgramWord();
         break;
 
     case CAsm::A_ABS_X:
+        arg16 = m_ctx.ReadProgramWord();
+
         if (cpu16())
-            addr = (get_word(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.x & 0xff) : m_ctx.x)) + (m_ctx.dbr << 16);
+            addr = (arg16 + (m_ctx.xy16 ? (m_ctx.x & 0xff) : m_ctx.x)) + (m_ctx.dbr << 16);
         else
-            addr = get_word(m_ctx.pc) + (m_ctx.x & 0xff);
+            addr = arg16 + (m_ctx.x & 0xff);
 
-        if ((addr >> 8) != static_cast<uint32_t>(get_word(m_ctx.pc) >> 8))
+        if ((addr >> 8) != static_cast<uint32_t>(arg16 >> 8))
             extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
-
-        inc_prog_counter(2);
         break;
 
     case CAsm::A_ABS_Y:
+        arg16 = m_ctx.ReadProgramWord();
+
         if (cpu16())
-            addr = (get_word(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.y & 0xff) : m_ctx.y)) + (m_ctx.dbr << 16);
+            addr = (arg16 + (m_ctx.xy16 ? (m_ctx.y & 0xff) : m_ctx.y)) + (m_ctx.dbr << 16);
         else
-            addr = get_word(m_ctx.pc) + (m_ctx.y & 0xff);
+            addr = arg16 + (m_ctx.y & 0xff);
 
-        if ((addr >> 8) != static_cast<uint32_t>(get_word(m_ctx.pc) >> 8))
+        if ((addr >> 8) != static_cast<uint32_t>(arg16 >> 8))
             extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
-
-        inc_prog_counter(2);
         break;
 
     case CAsm::A_ZPGI_X:
+        byte = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
             if (m_ctx.emm)
             {
                 if ((m_ctx.dir & 0xFF) == 0x00)
                 {
-                    arg = m_ctx.dir + ((m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xFF);
+                    arg = m_ctx.dir + ((byte + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xFF);
                     addr = m_ctx.getByte(arg) + (m_ctx.dbr << 16);
                     arg = ((arg + 1) & 0xFF) + (arg & 0xFF00);
                     addr += (m_ctx.getByte(arg) << 8);
                 }
                 else
                 {
-                    arg = m_ctx.dir + ((m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.x & 0xff) : m_ctx.x)) & 0xFFFF);
+                    arg = m_ctx.dir + ((byte + (m_ctx.xy16 ? (m_ctx.x & 0xff) : m_ctx.x)) & 0xFFFF);
                     addr = m_ctx.getByte(arg) + (m_ctx.dbr << 16);
                     arg = ((arg + 1) & 0xFF) + (arg & 0xFF00);
                     addr += (m_ctx.getByte(arg) << 8);
@@ -212,7 +209,7 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
             }
             else
             {
-                arg = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.x & 0xff) : m_ctx.x)) & 0xFFFF;
+                arg = (byte + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.x & 0xff) : m_ctx.x)) & 0xFFFF;
                 addr = get_word_indirect(arg) + (m_ctx.dbr << 16);
             }
 
@@ -221,36 +218,33 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
         }
         else
         {
-            arg = m_ctx.getByte(m_ctx.pc); // cell address on zero page
+            arg = byte; // cell address on zero page
             addr = get_word_indirect((arg + (m_ctx.x & 0xff)) & 0xff);
         }
-
-        inc_prog_counter();
         break;
 
     case CAsm::A_ZPGI_Y:
+        byte = m_ctx.ReadProgramByte();
 
         if (cpu16())
         {
-            arg = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir) & 0xffff;
+            arg = (byte + m_ctx.dir) & 0xffff;
             addr = get_word_indirect(arg) + (m_ctx.dbr << 16) + (m_ctx.xy16 ? (m_ctx.y & 0xff) : m_ctx.y);
             if ((m_ctx.dir & 0xff) != 0)
                 extracycle = true;
         }
         else
         {
-            arg = m_ctx.getByte(m_ctx.pc); // cell address on zero page
+            arg = byte; // cell address on zero page
             addr = get_word_indirect(arg) + (m_ctx.y & 0xff);
         }
 
         if (uint16_t(addr >> 8u) != (get_word_indirect(arg) >> 8u))
             extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
-
-        inc_prog_counter();
         break;
 
     case CAsm::A_ABSI: // only JMP(xxxx) supports this addr mode
-        addr = (cpu16() && !m_ctx.emm) ? get_word(m_ctx.pc + (m_ctx.pbr << 16)) : get_word(m_ctx.pc);
+        addr = m_ctx.ReadProgramWord();
 
         if (Processor() != ProcessorType::M6502 && (addr & 0xFF) == 0xFF) // LSB == 0xFF?
         {
@@ -266,44 +260,39 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
 
         if (cpu16() && !m_ctx.emm)
             addr += (m_ctx.pbr << 16);
-
-        inc_prog_counter(2);
         break;
 
     case CAsm::A_ABSI_X:
+        arg16 = m_ctx.ReadProgramWord();
+
         if (cpu16())
         {
-            addr = (get_word(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xFFFF;
+            addr = (arg16 + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xFFFF;
             addr = get_word(addr + (m_ctx.pbr << 16));
         }
         else
         {
-            addr = get_word(m_ctx.pc) + (m_ctx.x & 0xFF);
+            addr = arg16 + (m_ctx.x & 0xFF);
             addr = get_word(addr);
         }
-
-        inc_prog_counter(2);
         break;
 
     case CAsm::A_ZREL: // 65816 only
-        addr = get_word(m_ctx.pc);
-        inc_prog_counter(2);
+        addr = m_ctx.ReadProgramWord();
         break;
 
     case CAsm::A_ABSL: // 65816 only
-        addr = get_Lword(m_ctx.pc + (m_ctx.pbr << 16));
-        inc_prog_counter(3);
+        addr = m_ctx.ReadProgramLWord();
         break;
 
     case CAsm::A_ABSL_X: // 65816 only
-        addr = (get_Lword(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0x00FFFFFF;
-        inc_prog_counter(3);
+        arg32 = m_ctx.ReadProgramLWord();
+        addr = (arg32 + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0x00FFFFFF;
         break;
 
     case CAsm::A_ZPIL: // 65816 only
-        arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir; // cell address on zero page
+        arg = m_ctx.ReadProgramByte() + m_ctx.dir; // cell address on zero page
         addr = get_Lword_indirect(arg);
-        inc_prog_counter();
 
         if ((m_ctx.dir & 0xFF) != 0)
             extracycle = true;
@@ -311,10 +300,8 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
         break;
 
     case CAsm::A_ZPIL_Y: // 65816 only
-        arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir; // cell address on zero page
+        arg = m_ctx.ReadProgramByte() + m_ctx.dir; // cell address on zero page
         addr = get_Lword_indirect(arg) + (m_ctx.dbr << 16) + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y);
-
-        inc_prog_counter();
 
         if ((m_ctx.dir & 0xFF) != 0)
             extracycle = true;
@@ -322,20 +309,19 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
         break;
 
     case CAsm::A_SR: // 65816 only
-        addr = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.s) & 0xFFFF; // address on zero page
-        inc_prog_counter();
+        byte = m_ctx.ReadProgramByte();
+        addr = (byte + m_ctx.StackPointer()) & 0xFFFF; // address on zero page
         break;
 
     case CAsm::A_SRI_Y:
-        arg = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.s) & 0xFFFF; // address on zero page
+        byte = m_ctx.ReadProgramByte();
+        arg = (byte + m_ctx.StackPointer()) & 0xFFFF; // address on zero page
         addr = get_word_indirect(arg) + (m_ctx.dbr << 16) + (m_ctx.xy16 ? (m_ctx.y & 0xff) : m_ctx.y);
-        inc_prog_counter();
         break;
 
     case CAsm::A_INDL: // 65816 only
-        arg = get_word(m_ctx.pc + (m_ctx.pbr << 16));
+        arg = m_ctx.ReadProgramWord();
         addr = get_Lword_indirect(arg);
-        inc_prog_counter(2);
         break;
 
     case CAsm::A_IMP:
@@ -349,7 +335,8 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
 
     if (bWrite && addr >= s_uProtectFromAddr && addr <= s_uProtectToAddr)
     {
-        m_ctx.pc = pc; // restore original value
+        // TODO: Remove this block?  The ROM device handles this now.
+        m_ctx.PC(pc);
         CurrentStatus = CSym6502::Status::ILL_WRITE;
         throw 0; // TODO: Rework to not use exceptions
         //return INVALID_ADDR;
@@ -361,16 +348,13 @@ uint32_t CSym6502::get_argument_address(bool bWrite)
 uint16_t CSym6502::get_argument_value(bool rmask)
 {
     uint8_t arg;
+    uint16_t arg16;
     uint32_t addr;
     uint16_t val;
     uint8_t mode;
 
-    if (cpu16())
-        mode = m_vCodeToMode[m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16))];
-    else
-        mode = m_vCodeToMode[m_ctx.getByte(m_ctx.pc)];
-
-    inc_prog_counter(); // bypass the command
+    uint8_t instruction = m_ctx.ReadProgramByte();
+    mode = m_vCodeToMode[instruction];
 
     extracycle = false; //% bug Fix 1.2.12.1 - fix cycle timing
 
@@ -381,37 +365,22 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         return 0;
 
     case CAsm::A_IMM:
-        if (cpu16() && !m_ctx.emm)
-        {
-            val = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
+        val = m_ctx.ReadProgramByte();
 
-            if (rmask)
-            {
-                inc_prog_counter();
-                val += m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) << 8;
-            }
-        }
-        else
-            val = m_ctx.getByte(m_ctx.pc);
+        if (cpu16() && !m_ctx.emm && rmask)
+            val += m_ctx.ReadProgramByte() << 8;
 
-        inc_prog_counter();
         return val;
 
     case CAsm::A_IMP2:
     case CAsm::A_REL:
-        if (cpu16())
-            arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
-        else
-            arg = m_ctx.getByte(m_ctx.pc);
-
-        inc_prog_counter();
-        return arg;
+        return m_ctx.ReadProgramByte();
 
     case CAsm::A_ZPGI:
+        arg = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
-            arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
-
             if (!m_ctx.emm)
             {
                 addr = get_word_indirect((arg + m_ctx.dir) & 0xFFFF) + (m_ctx.dbr << 16);
@@ -423,7 +392,6 @@ uint16_t CSym6502::get_argument_value(bool rmask)
                 if ((m_ctx.dir & 0xFF) != 0)
                     extracycle = true;
 
-                inc_prog_counter();
                 return val;
             }
             else
@@ -447,22 +415,22 @@ uint16_t CSym6502::get_argument_value(bool rmask)
                 if ((m_ctx.dir & 0xff) != 0)
                     extracycle = true;
 
-                inc_prog_counter();
                 return val;
             }
         }
         else
         {
-            arg = m_ctx.getByte(m_ctx.pc); // cell address on zero page
+            // cell address on zero page
             addr = get_word_indirect(arg);
-            inc_prog_counter();
             return m_ctx.getByte(addr);
         }
 
     case CAsm::A_ZPG:
+        arg = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
-            addr = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir) & 0xFFFF;
+            addr = (arg + m_ctx.dir) & 0xFFFF;
             val = m_ctx.getByte(addr);
 
             if (rmask)
@@ -472,18 +440,19 @@ uint16_t CSym6502::get_argument_value(bool rmask)
                 extracycle = true;
         }
         else
-            val = m_ctx.getByte(m_ctx.getByte(m_ctx.pc)) & 0xFF; // number at address
+            val = m_ctx.getByte(arg) & 0xFF; // number at address
 
-        inc_prog_counter();
         return val;
 
     case CAsm::A_ZPG_X:
+        arg = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
             if (m_ctx.emm && ((m_ctx.dir & 0xFF) == 0))
-                addr = m_ctx.dir + ((m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xFF); // adres
+                addr = m_ctx.dir + ((arg + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xFF); // adres
             else
-                addr = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xffff; // adres
+                addr = (arg + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xffff; // adres
 
             val = m_ctx.getByte(addr);
 
@@ -495,20 +464,21 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         }
         else
         {
-            addr = (m_ctx.getByte(m_ctx.pc) + (m_ctx.x & 0xFF)) & 0xFF;
+            addr = (arg + (m_ctx.x & 0xFF)) & 0xFF;
             val = m_ctx.getByte(addr); // number at address
         }
 
-        inc_prog_counter();
         return val;
 
     case CAsm::A_ZPG_Y:
+        arg = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
             if (m_ctx.emm && ((m_ctx.dir & 0xFF) == 0))
-                addr = m_ctx.dir + ((m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y)) & 0xFF);
+                addr = m_ctx.dir + ((arg + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y)) & 0xFF);
             else
-                addr = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y)) & 0xFFFF;
+                addr = (arg + m_ctx.dir + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y)) & 0xFFFF;
 
             val = m_ctx.getByte(addr);
 
@@ -519,16 +489,16 @@ uint16_t CSym6502::get_argument_value(bool rmask)
                 extracycle = true;
         }
         else
-            val = m_ctx.getByte((m_ctx.getByte(m_ctx.pc) + (m_ctx.y & 0xFF)) & 0xFF);
+            val = m_ctx.getByte((arg + (m_ctx.y & 0xFF)) & 0xFF);
 
-        inc_prog_counter();
         return val;
 
     case CAsm::A_ABS:
+        arg16 = m_ctx.ReadProgramWord();
+
         if (cpu16())
         {
-            addr = (get_word(m_ctx.pc + (m_ctx.pbr << 16)) & 0xFFFF) + (m_ctx.dbr << 16);
-            inc_prog_counter(2);
+            addr = (arg16 & 0xFFFF) + (m_ctx.dbr << 16);
 
             val = m_ctx.getByte(addr);
 
@@ -539,16 +509,16 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         }
         else
         {
-            addr = get_word(m_ctx.pc);
-            inc_prog_counter(2);
+            addr = arg16;
             return m_ctx.getByte(addr); // number at address
         }
 
     case CAsm::A_ABS_X:
+        arg16 = m_ctx.ReadProgramWord();
+
         if (cpu16())
         {
-            addr = get_word(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.dbr << 16) + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x);
-            inc_prog_counter(2);
+            addr = arg16 + (m_ctx.dbr << 16) + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x);
             val = m_ctx.getByte(addr);
 
             if (rmask)
@@ -558,7 +528,7 @@ uint16_t CSym6502::get_argument_value(bool rmask)
                 m_ctx.uCycles++;
             else
             {
-                if (uint16_t(addr >> 8u) != (get_word(m_ctx.pc + (m_ctx.pbr << 16)) >> 8u))
+                if (uint16_t(addr >> 8u) != (arg16 >> 8u))
                     extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
             }
 
@@ -566,19 +536,19 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         }
         else
         {
-            addr = get_word(m_ctx.pc) + (m_ctx.x & 0xFF);
+            addr = arg16 + (m_ctx.x & 0xFF);
 
-            if (uint16_t(addr >> 8u) != (get_word(m_ctx.pc) >> 8u))
+            if (uint16_t(addr >> 8u) != (arg16 >> 8u))
                 extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         }
-        inc_prog_counter(2);
         return m_ctx.getByte(addr);
 
     case CAsm::A_ABS_Y:
+        arg16 = m_ctx.ReadProgramWord();
+
         if (cpu16())
         {
-            addr = get_word(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.dbr << 16) + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y);
-            inc_prog_counter(2);
+            addr = arg16 + (m_ctx.dbr << 16) + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y);
             val = m_ctx.getByte(addr);
 
             if (rmask)
@@ -588,31 +558,30 @@ uint16_t CSym6502::get_argument_value(bool rmask)
                 m_ctx.uCycles++;
             else
             {
-                if (uint16_t(addr >> 8u) != (get_word(m_ctx.pc + (m_ctx.pbr << 16)) >> 8u))
+                if (uint16_t(addr >> 8u) != (arg16 >> 8u))
                     extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
             }
-
             return val;
         }
         else
         {
-            addr = get_word(m_ctx.pc) + (m_ctx.y & 0xff);
-            if (uint16_t(addr >> 8u) != (get_word(m_ctx.pc) >> 8u))
+            addr = arg16 + (m_ctx.y & 0xff);
+            if (uint16_t(addr >> 8u) != (arg16 >> 8u))
                 extracycle = true; //% bug Fix 1.2.12.1 - fix cycle timing
         }
-        inc_prog_counter(2);
         return m_ctx.getByte(addr); // number at address
 
     case CAsm::A_ZPGI_X:
-        uint32_t adr1, adr2;
+        arg = m_ctx.ReadProgramByte();
+
         if (cpu16())
         {
-            arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
-
             if (m_ctx.emm)
             {
                 if ((m_ctx.dir & 0xFF) == 0)
                 {
+                    uint32_t adr1, adr2;
+
                     adr1 = ((arg + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xFF) + m_ctx.dir;
                     adr2 = ((arg + 1 + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xFF) + m_ctx.dir;
                     addr = m_ctx.getByte(adr1) + (m_ctx.dbr << 16);
@@ -620,6 +589,8 @@ uint16_t CSym6502::get_argument_value(bool rmask)
                 }
                 else
                 {
+                    uint32_t adr1, adr2;
+
                     adr1 = ((arg + (m_ctx.xy16 ? (m_ctx.x & 0xFF) : m_ctx.x)) & 0xFFFF) + m_ctx.dir;
                     adr2 = (adr1 & 0xFFFF00) + (((adr1 & 0xFF) + 1) & 0xFF);
                     addr = m_ctx.getByte(adr1) + (m_ctx.dbr << 16);
@@ -632,7 +603,6 @@ uint16_t CSym6502::get_argument_value(bool rmask)
             if ((m_ctx.dir & 0xFF) != 0)
                 extracycle = true;
 
-            inc_prog_counter();
             val = m_ctx.getByte(addr);
 
             if (rmask)
@@ -642,16 +612,18 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         }
         else
         {
-            arg = m_ctx.getByte(m_ctx.pc); // cell address on zero page
+            // cell address on zero page
             addr = get_word_indirect((arg + (m_ctx.x & 0xFF)) & 0xFF);
-            inc_prog_counter();
             return m_ctx.getByte(addr); // number at address
         }
 
     case CAsm::A_ZPGI_Y:
+        // TODO: Validate this, it looks like we're increment the program counter incorrectly here.
+
         if (cpu16())
         {
-            arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
+            //arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
+            arg = m_ctx.getByte(m_ctx.GetProgramAddress());
 
             if (!m_ctx.emm)
             {
@@ -704,7 +676,9 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         }
         else
         {
-            arg = m_ctx.getByte(m_ctx.pc); // cell address on zero page
+            // cell address on zero page
+            //arg = m_ctx.getByte(m_ctx.pc);
+            arg = m_ctx.getByte(m_ctx.GetProgramAddress());
             addr = get_word_indirect(arg) + (m_ctx.y & 0xFF);
         }
 
@@ -715,8 +689,7 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         return m_ctx.getByte(addr);
 
     case CAsm::A_ABSL: // 65816 only
-        addr = get_Lword(m_ctx.pc + (m_ctx.pbr << 16));
-        inc_prog_counter(3);
+        addr = m_ctx.ReadProgramLWord();
         val = m_ctx.getByte(addr);
 
         if (rmask)
@@ -725,8 +698,8 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         return val;
 
     case CAsm::A_ABSL_X: // 65816 only
-        addr = (get_Lword(m_ctx.pc + (m_ctx.pbr << 16)) + (m_ctx.xy16 ? (m_ctx.x & 0xff) : m_ctx.x)) & 0xFFFFFF;
-        inc_prog_counter(3);
+        addr = m_ctx.ReadProgramLWord();
+        addr = (addr + (m_ctx.xy16 ? (m_ctx.x & 0xff) : m_ctx.x)) & 0xFFFFFF;
         val = m_ctx.getByte(addr);
 
         if (rmask)
@@ -735,9 +708,8 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         return val;
 
     case CAsm::A_ZPIL: // 65816 only
-        arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
+        arg = m_ctx.ReadProgramByte();
         addr = get_Lword_indirect((arg + m_ctx.dir) & 0xFFFF);
-        inc_prog_counter();
 
         if ((m_ctx.dir & 0xFF) != 0)
             extracycle = true;
@@ -750,9 +722,8 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         return val;
 
     case CAsm::A_ZPIL_Y: // 65816 only
-        arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
+        arg = m_ctx.GetProgramByte();
         addr = (get_Lword_indirect((arg + m_ctx.dir) & 0xFFFF) + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y)) & 0xFFFFFF;
-        inc_prog_counter();
 
         if ((m_ctx.dir & 0xFF) != 0)
             extracycle = true;
@@ -765,19 +736,18 @@ uint16_t CSym6502::get_argument_value(bool rmask)
         return val;
 
     case CAsm::A_SR: // 65816 only
-        addr = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16)) + m_ctx.s) & 0xFFFF;
+        arg = m_ctx.ReadProgramByte();
+        addr = (arg + m_ctx.StackPointer()) & 0xFFFF;
         val = m_ctx.getByte(addr);
 
         if (rmask)
             val += (m_ctx.getByte(addr + 1)) << 8;
 
-        inc_prog_counter();
         return val;
 
     case CAsm::A_SRI_Y: // 65816 only
-        arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
-        addr = (get_word_indirect(((arg + m_ctx.s) & 0xFFFF) + (m_ctx.dbr << 16)) + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y) + (m_ctx.dbr << 16)) & 0xFFFFFF;
-        inc_prog_counter();
+        arg = m_ctx.ReadProgramByte();
+        addr = (get_word_indirect(((arg + m_ctx.StackPointer()) & 0xFFFF) + (m_ctx.dbr << 16)) + (m_ctx.xy16 ? (m_ctx.y & 0xFF) : m_ctx.y) + (m_ctx.dbr << 16)) & 0xFFFFFF;
         val = m_ctx.getByte(addr);
 
         if (rmask)
@@ -812,12 +782,14 @@ void CSym6502::PerformCommand()
 // registers and memory (m_ctx.mem)
 void CSym6502::PerformCommandInner()
 {
-    uint8_t cmd;
+    uint8_t instruction;
     uint16_t arg, acc;
     uint32_t addr, acc32;
     uint8_t zero, overflow, carry, negative;
     uint8_t zeroc, negativec;
     uint8_t acc8, arg8;
+
+    bool isOp16 = false;
 
     int tmp;
 
@@ -831,20 +803,14 @@ void CSym6502::PerformCommandInner()
         m_ctx.a = (m_ctx.a & 0xFF) | (m_ctx.b << 8);
 
     if (m_nInterruptTrigger != NONE)
-    {
         interrupt(m_nInterruptTrigger);
-        cmd = m_ctx.getByte(m_ctx.pc);
-    }
 
-    if (cpu16())
-        cmd = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
-    else
-        cmd = m_ctx.getByte(m_ctx.pc);
+    instruction = m_ctx.GetProgramByte();
 
     //bool intFlag = m_ctx.uCycles > m_saveCycles; //% bug Fix 1.2.13.18 - command log assembly not lined up with registers (added pre)
     //ULONG oldCycles = m_saveCycles;
 
-    switch (m_vCodeToCommand[cmd])
+    switch (m_vCodeToCommand[instruction])
     {
     case CAsm::C_ADC:
         carry = m_ctx.carry;
@@ -1157,7 +1123,7 @@ void CSym6502::PerformCommandInner()
     case CAsm::C_ASL:
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
-            if (m_vCodeToMode[cmd] == CAsm::A_ACC)
+            if (m_vCodeToMode[instruction] == CAsm::A_ACC)
             {
                 inc_prog_counter();
 
@@ -1185,7 +1151,7 @@ void CSym6502::PerformCommandInner()
         }
         else
         {
-            if (m_vCodeToMode[cmd] == CAsm::A_ACC) // Accumulator operation
+            if (m_vCodeToMode[instruction] == CAsm::A_ACC) // Accumulator operation
             {
                 inc_prog_counter(); // bypass the command
                 acc = m_ctx.a;
@@ -1220,7 +1186,7 @@ void CSym6502::PerformCommandInner()
     case CAsm::C_LSR:
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
-            if (m_vCodeToMode[cmd] == CAsm::A_ACC)
+            if (m_vCodeToMode[instruction] == CAsm::A_ACC)
             {
                 inc_prog_counter();
                 acc = m_ctx.a >> 1;
@@ -1245,7 +1211,7 @@ void CSym6502::PerformCommandInner()
         }
         else
         {
-            if (m_vCodeToMode[cmd] == CAsm::A_ACC) // Accumulator operation
+            if (m_vCodeToMode[instruction] == CAsm::A_ACC) // Accumulator operation
             {
                 inc_prog_counter(); // bypass the command
                 acc = m_ctx.a;
@@ -1281,7 +1247,7 @@ void CSym6502::PerformCommandInner()
         carry = m_ctx.carry;
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
-            if (m_vCodeToMode[cmd] == CAsm::A_ACC)
+            if (m_vCodeToMode[instruction] == CAsm::A_ACC)
             {
                 inc_prog_counter();
                 acc = (m_ctx.a << 1) + (carry ? 1 : 0);
@@ -1306,7 +1272,7 @@ void CSym6502::PerformCommandInner()
         }
         else
         {
-            if (m_vCodeToMode[cmd] == CAsm::A_ACC) // Accumulator operation
+            if (m_vCodeToMode[instruction] == CAsm::A_ACC) // Accumulator operation
             {
                 inc_prog_counter(); // bypass the command
                 acc = m_ctx.a;
@@ -1356,7 +1322,7 @@ void CSym6502::PerformCommandInner()
         carry = m_ctx.carry;
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
-            if (m_vCodeToMode[cmd] == CAsm::A_ACC)
+            if (m_vCodeToMode[instruction] == CAsm::A_ACC)
             {
                 inc_prog_counter();
                 acc = (m_ctx.a >> 1) + (carry ? 0x8000 : 0);;
@@ -1381,7 +1347,7 @@ void CSym6502::PerformCommandInner()
         }
         else
         {
-            if (m_vCodeToMode[cmd] == CAsm::A_ACC) // Accumulator operation
+            if (m_vCodeToMode[instruction] == CAsm::A_ACC) // Accumulator operation
             {
                 inc_prog_counter(); // bypass the command
                 acc = m_ctx.a;
@@ -1433,20 +1399,11 @@ void CSym6502::PerformCommandInner()
         break;
 
     case CAsm::C_AND:
-        if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
-        {
-            arg = get_argument_value(true);
-            m_ctx.a &= arg;
-            m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-            m_ctx.set_status_reg16(m_ctx.a);
+        isOp16 = cpu16() && !m_ctx.emm && !m_ctx.mem16;
+        m_ctx.CRegister(m_ctx.CRegister() &get_argument_value(isOp16), true);
+
+        if (isOp16)
             m_ctx.uCycles++; // 16 bit operation adds 1 cycle
-        }
-        else
-        {
-            arg = get_argument_value(false);
-            m_ctx.a &= (arg & 0xFF);
-            m_ctx.set_status_reg(m_ctx.a);
-        }
 
         if (extracycle)
             m_ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
@@ -1454,20 +1411,11 @@ void CSym6502::PerformCommandInner()
         break;
 
     case CAsm::C_ORA:
-        if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
-        {
-            arg = get_argument_value(true);
-            m_ctx.a |= arg;
-            m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-            m_ctx.set_status_reg16(m_ctx.a);
+        isOp16 = cpu16() && !m_ctx.emm && !m_ctx.mem16;
+        m_ctx.CRegister(m_ctx.CRegister() | get_argument_value(isOp16), true);
+
+        if (isOp16)
             m_ctx.uCycles++; // 16 bit operation adds 1 cycle
-        }
-        else
-        {
-            arg = get_argument_value(false);
-            m_ctx.a |= (arg & 0xFF);
-            m_ctx.set_status_reg(m_ctx.a);
-        }
 
         if (extracycle)
             m_ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
@@ -1475,20 +1423,11 @@ void CSym6502::PerformCommandInner()
         break;
 
     case CAsm::C_EOR:
-        if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
-        {
-            arg = get_argument_value(true);
-            m_ctx.a ^= arg;
-            m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-            m_ctx.set_status_reg16(m_ctx.a);
+        isOp16 = cpu16() && !m_ctx.emm && !m_ctx.mem16;
+        m_ctx.CRegister(m_ctx.CRegister() ^ get_argument_value(isOp16), true);
+
+        if (isOp16)
             m_ctx.uCycles++; // 16 bit operation adds 1 cycle
-        }
-        else
-        {
-            arg = get_argument_value(false);
-            m_ctx.a = (m_ctx.a & 0xFF) ^ (arg & 0xFF);
-            m_ctx.set_status_reg(m_ctx.a);
-        }
 
         if (extracycle)
             m_ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
@@ -1496,18 +1435,10 @@ void CSym6502::PerformCommandInner()
         break;
 
     case CAsm::C_INC:
-        if (m_vCodeToMode[cmd] == CAsm::A_ACC)
+        if (m_vCodeToMode[instruction] == CAsm::A_ACC)
         {
             inc_prog_counter();
-            m_ctx.a++;
-
-            if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
-            {
-                m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-                m_ctx.set_status_reg16(m_ctx.a);
-            }
-            else
-                m_ctx.set_status_reg(m_ctx.a);
+            m_ctx.CRegister(m_ctx.CRegister() + 1, true);
         }
         else
         {
@@ -1534,18 +1465,10 @@ void CSym6502::PerformCommandInner()
         break;
 
     case CAsm::C_DEC:
-        if (m_vCodeToMode[cmd] == CAsm::A_ACC)
+        if (m_vCodeToMode[instruction] == CAsm::A_ACC)
         {
             inc_prog_counter();
-            m_ctx.a--;
-
-            if (cpu16() && !m_ctx.emm && m_ctx.mem16)
-            {
-                m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-                m_ctx.set_status_reg16(m_ctx.a);
-            }
-            else
-                m_ctx.set_status_reg(m_ctx.a);
+            m_ctx.CRegister(m_ctx.CRegister() - 1, true);
         }
         else
         {
@@ -1573,7 +1496,7 @@ void CSym6502::PerformCommandInner()
 
     case CAsm::C_INX:
         inc_prog_counter();
-        m_ctx.x++;
+        ++m_ctx.x;
 
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
             m_ctx.set_status_reg16(m_ctx.x);
@@ -1587,42 +1510,43 @@ void CSym6502::PerformCommandInner()
 
     case CAsm::C_DEX:
         inc_prog_counter();
-        m_ctx.x--;
+        --m_ctx.x;
 
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
             m_ctx.set_status_reg16(m_ctx.x);
         else
         {
-            m_ctx.set_status_reg(m_ctx.x & 0xFF);
             m_ctx.x = m_ctx.x & 0xFF;
+            m_ctx.set_status_reg(m_ctx.x);
         }
 
         break;
 
     case CAsm::C_INY:
         inc_prog_counter();
-        m_ctx.y++;
+        ++m_ctx.y;
 
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
             m_ctx.set_status_reg16(m_ctx.y);
         else
         {
-            m_ctx.set_status_reg(m_ctx.y & 0xFF);
             m_ctx.y = m_ctx.y & 0xFF;
+            m_ctx.set_status_reg(m_ctx.y);
         }
 
         break;
 
     case CAsm::C_DEY:
         inc_prog_counter();
-        m_ctx.y--;
+        --m_ctx.y;
 
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
             m_ctx.set_status_reg16(m_ctx.y);
         else
         {
-            m_ctx.set_status_reg(m_ctx.y & 0xFF);
             m_ctx.y = m_ctx.y & 0xFF;
+            m_ctx.set_status_reg(m_ctx.y & 0xFF);
+            
         }
 
         break;
@@ -1640,82 +1564,51 @@ void CSym6502::PerformCommandInner()
 
     case CAsm::C_TXA:
         inc_prog_counter();
-        m_ctx.a = m_ctx.x;
-
-        if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
-        {
-            m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-            m_ctx.set_status_reg16(m_ctx.a);
-        }
-        else
-            m_ctx.set_status_reg(m_ctx.a & 0xFF);
-
+        m_ctx.CRegister(m_ctx.x, true);
         break;
 
     case CAsm::C_TAY:
         inc_prog_counter();
-        m_ctx.y = m_ctx.a;
+        m_ctx.y = m_ctx.CRegister();
 
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
             m_ctx.set_status_reg16(m_ctx.y);
         else
-            m_ctx.set_status_reg(m_ctx.y & 0xFF);
+            m_ctx.set_status_reg(m_ctx.y & 0xFF); // TODO: Validate that upper byte is left untouched when 16 -> 8
 
         break;
 
     case CAsm::C_TYA:
         inc_prog_counter();
-        m_ctx.a = m_ctx.y;
-
-        if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
-        {
-            m_ctx.set_status_reg16(m_ctx.a);
-            m_ctx.b = (m_ctx.a >> 8) & 0xff;
-        }
-        else
-            m_ctx.set_status_reg(m_ctx.a & 0xff);
-
+        m_ctx.CRegister(m_ctx.y, true);
         break;
 
     case CAsm::C_TSX:
         inc_prog_counter();
+        m_ctx.x = m_ctx.SRegister();
 
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
-        {
-            m_ctx.x = m_ctx.s;
             m_ctx.set_status_reg16(m_ctx.x);
-        }
         else
-        {
-            m_ctx.x = m_ctx.s & 0xFF;
-            m_ctx.set_status_reg(m_ctx.x & 0xFF);
-        }
+            m_ctx.set_status_reg(m_ctx.x & 0xFF); // TODO: Validate that upper byte is left untouched when 16 -> 8
         break;
 
     case CAsm::C_TXS:
         inc_prog_counter();
-        if (cpu16() && !m_ctx.emm)
-        {
-            m_ctx.s = m_ctx.x;
-            wxGetApp().m_global.m_bSRef = m_ctx.s;
-        }
-        else
-        {
-            m_ctx.s = 0x100 + (m_ctx.x & 0xff); //****fix
-            wxGetApp().m_global.m_bSRef = 0x1ff;
-        }
+        m_ctx.SRegister(m_ctx.x);
+        // Special op does not set status flags.
         break;
 
     case CAsm::C_STA:
         addr = get_argument_address(s_bWriteProtectArea);
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
-            m_ctx.setWord(addr, m_ctx.a);
+            m_ctx.setWord(addr, m_ctx.CRegister());
             m_ctx.uCycles++;  // add 1 cycle for 16 bit operation 
         }
         else
         {
-            m_ctx.setByte(addr, m_ctx.a & 0xFF);
+            m_ctx.setByte(addr, m_ctx.a);
         }
 
         if (cpu16() && extracycle)
@@ -1733,7 +1626,7 @@ void CSym6502::PerformCommandInner()
         }
         else
         {
-            m_ctx.setByte(addr, m_ctx.x & 0xFF);
+            m_ctx.setByte(addr, m_ctx.x);
         }
 
         if (cpu16() && extracycle)
@@ -1750,7 +1643,7 @@ void CSym6502::PerformCommandInner()
         }
         else
         {
-            m_ctx.setByte(addr, m_ctx.y & 0xFF);
+            m_ctx.setByte(addr, m_ctx.y);
         }
 
         if (cpu16() && extracycle)
@@ -1759,14 +1652,12 @@ void CSym6502::PerformCommandInner()
         break;
 
     case CAsm::C_LDA:
-        if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
-        {
-            m_ctx.set_status_reg16(m_ctx.a = get_argument_value(true));
-            m_ctx.b = (m_ctx.a >> 8) & 0xFF;
+
+        isOp16 = cpu16() && !m_ctx.emm && !m_ctx.mem16;
+        m_ctx.CRegister(get_argument_value(isOp16), true);
+
+        if (isOp16)
             m_ctx.uCycles++;  // add 1 cycle for 16 bit operation 
-        }
-        else
-            m_ctx.set_status_reg((m_ctx.a = (get_argument_value(false) & 0xFF)) & 0xFF);
 
         if (extracycle)
             m_ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
@@ -1778,7 +1669,6 @@ void CSym6502::PerformCommandInner()
         {
             m_ctx.set_status_reg16(m_ctx.x = get_argument_value(true));
             m_ctx.uCycles++;  // add 1 cycle for 16 bit operation 
-
         }
         else
             m_ctx.set_status_reg((m_ctx.x = (get_argument_value(false) & 0xFF)) & 0xFF);
@@ -1799,22 +1689,24 @@ void CSym6502::PerformCommandInner()
 
         if (extracycle)
             m_ctx.uCycles++; //% bug Fix 1.2.12.1 - fix cycle timing
+
         break;
 
     case CAsm::C_BIT:
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
             arg = get_argument_value(true);
-            m_ctx.zero = ((m_ctx.a & arg) == 0);
+            m_ctx.zero = ((m_ctx.CRegister() & arg) == 0);
             m_ctx.uCycles++; // 16 bit operation adds 1 cycle
         }
         else
         {
             arg = get_argument_value(false);
-            m_ctx.zero = (((m_ctx.a & 0xFF) & (arg & 0xFF)) == 0);
+            m_ctx.zero = ((m_ctx.a & (arg & 0xFF)) == 0);
         }
 
-        if (cmd != 0x89) // 65C02/816 BIT # only updates Z flag
+        // TODO: Verify this test, seems like it will always be true.
+        if (instruction != 0x89) // 65C02/816 BIT # only updates Z flag
         {
             if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
             {
@@ -1835,11 +1727,11 @@ void CSym6502::PerformCommandInner()
     case CAsm::C_PHA:
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
-            push_addr_on_stack(m_ctx.a);
+            m_ctx.PushWord(m_ctx.a);
             m_ctx.uCycles++;
         }
         else
-            push_on_stack(m_ctx.a & 0xFF);
+            m_ctx.PushByte(m_ctx.a);
 
         inc_prog_counter();
         break;
@@ -1847,15 +1739,13 @@ void CSym6502::PerformCommandInner()
     case CAsm::C_PLA:
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
-            m_ctx.a = pull_addr_from_stack();
-            m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-            m_ctx.set_status_reg16(m_ctx.a);
+            m_ctx.CRegister(m_ctx.PullWord(), true);
             m_ctx.uCycles++;
         }
         else
         {
-            m_ctx.a = pull_from_stack();
-            m_ctx.set_status_reg(m_ctx.a & 0xFF);
+            m_ctx.a = m_ctx.PullByte();
+            m_ctx.set_status_reg(m_ctx.a);
         }
 
         inc_prog_counter();
@@ -1864,56 +1754,56 @@ void CSym6502::PerformCommandInner()
     case CAsm::C_PHP:
         inc_prog_counter();
         if (cpu16() && !m_ctx.emm)
-            push_on_stack(m_ctx.get_status_reg());
+            m_ctx.PushByte(m_ctx.GetStatus());
         else
-            push_on_stack(m_ctx.get_status_reg() | CContext::BREAK | CContext::RESERVED);
+            m_ctx.PushByte(m_ctx.GetStatus() | CContext::BREAK | CContext::RESERVED);
         break;
 
     case CAsm::C_PLP:
         inc_prog_counter();
-        m_ctx.set_status_reg_bits(pull_from_stack());
-        if (Processor() != ProcessorType::M6502)
-        {
-            // 65C02 mode
-            m_ctx.reserved = true; // 'reserved' bit always set
-            m_ctx.break_bit = true;
-        }
+        // PHP and PLP are always 8-bit operations.
+        m_ctx.SetStatus(m_ctx.PullByte());
         break;
 
     case CAsm::C_JSR:
         addr = get_argument_address(false);
-        if (cpu16() && (cmd == 0xFC) && m_ctx.emm)
+        if (cpu16() && (instruction == 0xFC) && m_ctx.emm)
         {
             m_ctx.emm = false;
-            push_addr_on_stack((m_ctx.pc - 1) & 0xFFFF);
+            m_ctx.PushWord((m_ctx.PC() - 1) & 0xFFFF);
             m_ctx.emm = true;
         }
         else
-            push_addr_on_stack((m_ctx.pc - 1) & 0xFFFF);
-        m_ctx.pc = addr;
+            m_ctx.PushWord((m_ctx.PC() - 1) & 0xFFFF);
+        m_ctx.PC(addr);
         break;
 
     case CAsm::C_JMP:
         addr = get_argument_address(false) & 0xFFFF;
-        m_ctx.pc = addr;
+        m_ctx.PC(addr);
         break;
 
     case CAsm::C_RTS:
-        if ((finish == CAsm::FIN_BY_RTS) && ((m_ctx.s & 0xFF) == 0xFF)) // RTS on empty stack?
+        if (finish == CAsm::FIN_BY_RTS)
         {
-            CurrentStatus = CSym6502::Status::FINISH;
-            return;
+            uint16_t finValue = (m_ctx.Processor() == ProcessorType::WDC65816) ? 0xFFFF : 0x00FF;
+
+            if (m_ctx.SRegister() == finValue) // RTS on empty stack?
+            {
+                CurrentStatus = CSym6502::Status::FINISH;
+                return;
+            }
         }
 
-        m_ctx.pc = (pull_addr_from_stack() + 1) & 0xFFFF;
+        m_ctx.PC((m_ctx.PullWord() + 1) & 0xFFFF);
         break;
 
     case CAsm::C_RTI:
-        m_ctx.set_status_reg_bits(pull_from_stack());
-        m_ctx.pc = pull_addr_from_stack();
+        m_ctx.SetStatus(m_ctx.PullByte());
+        m_ctx.PC(m_ctx.PullWord());
         if (cpu16() && !m_ctx.emm)
         {
-            m_ctx.pbr = pull_from_stack();
+            m_ctx.pbr = m_ctx.PullByte();
             wxGetApp().m_global.m_bPBR = m_ctx.pbr;
             m_ctx.uCycles++; // native mode takes 1 extra cycle
         }
@@ -1924,10 +1814,11 @@ void CSym6502::PerformCommandInner()
         if (!m_ctx.carry)
         {
             AddBranchCycles(arg & 0xFF);
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
             else // jump forward
-                m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
@@ -1936,10 +1827,11 @@ void CSym6502::PerformCommandInner()
         if (m_ctx.carry)
         {
             AddBranchCycles(arg & 0xFF);
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
             else // jump forward
-                m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
@@ -1948,10 +1840,11 @@ void CSym6502::PerformCommandInner()
         if (!m_ctx.overflow)
         {
             AddBranchCycles(arg & 0xFF);
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
             else // jump forward
-                m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
@@ -1960,10 +1853,11 @@ void CSym6502::PerformCommandInner()
         if (m_ctx.overflow)
         {
             AddBranchCycles(arg && 0xFF);
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
             else // jump forward
-                m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
@@ -1972,10 +1866,11 @@ void CSym6502::PerformCommandInner()
         if (!m_ctx.zero)
         {
             AddBranchCycles(arg & 0xFF);
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
             else // jump forward
-                m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
@@ -1984,10 +1879,11 @@ void CSym6502::PerformCommandInner()
         if (m_ctx.zero)
         {
             AddBranchCycles(arg & 0xFF);
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
             else // jump forward
-                m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
@@ -1996,10 +1892,11 @@ void CSym6502::PerformCommandInner()
         if (!m_ctx.negative)
         {
             AddBranchCycles(arg & 0xFF);
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
             else // jump forward
-                m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
@@ -2008,10 +1905,11 @@ void CSym6502::PerformCommandInner()
         if (m_ctx.negative)
         {
             AddBranchCycles(arg & 0xFF);
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
             else // jump forward
-                m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
@@ -2063,21 +1961,21 @@ void CSym6502::PerformCommandInner()
 
         if (cpu16() && !m_ctx.emm)
         {
-            push_on_stack(m_ctx.pbr);
-            push_addr_on_stack(m_ctx.pc);
-            push_on_stack(m_ctx.get_status_reg());
+            m_ctx.PushByte(m_ctx.pbr);
+            m_ctx.PushWord(m_ctx.PC());
+            m_ctx.PushByte(m_ctx.GetStatus());
             m_ctx.decimal = false;
-            m_ctx.pc = get_brk_addr16();
+            m_ctx.PC(get_brk_addr16());
             m_ctx.uCycles++; // native mode takes 1 extra cycle
         }
         else
         {
-            push_addr_on_stack(m_ctx.pc);
+            m_ctx.PushWord(m_ctx.PC());
             m_ctx.break_bit = true;
-            push_on_stack(m_ctx.get_status_reg() | CContext::RESERVED);
+            m_ctx.PushByte(m_ctx.GetStatus() | CContext::RESERVED);
             if (Processor() != ProcessorType::M6502)
                 m_ctx.decimal = false;
-            m_ctx.pc = get_irq_addr();
+            m_ctx.PC(get_irq_addr());
         }
         m_ctx.interrupt = true; // after pushing status
         m_ctx.pbr = 0;
@@ -2089,24 +1987,24 @@ void CSym6502::PerformCommandInner()
     case CAsm::C_PHX:
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
         {
-            push_addr_on_stack(m_ctx.x);
+            m_ctx.PushWord(m_ctx.x);
             m_ctx.uCycles++;
         }
         else
-            push_on_stack(m_ctx.x & 0xFF);
+            m_ctx.PushByte(m_ctx.x);
         inc_prog_counter();
         break;
 
     case CAsm::C_PLX:
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
         {
-            m_ctx.x = pull_addr_from_stack();
+            m_ctx.x = m_ctx.PullWord();
             m_ctx.set_status_reg16(m_ctx.x);
             m_ctx.uCycles++;
         }
         else
         {
-            m_ctx.x = pull_from_stack();
+            m_ctx.x = m_ctx.PullByte();
             m_ctx.set_status_reg(m_ctx.x & 0xFF);
         }
         inc_prog_counter();
@@ -2115,24 +2013,24 @@ void CSym6502::PerformCommandInner()
     case CAsm::C_PHY:
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
         {
-            push_addr_on_stack(m_ctx.y);
+            m_ctx.PushWord(m_ctx.y);
             m_ctx.uCycles++;
         }
         else
-            push_on_stack(m_ctx.y & 0xFF);
+            m_ctx.PushByte(m_ctx.y);
         inc_prog_counter();
         break;
 
     case CAsm::C_PLY:
         if (cpu16() && !m_ctx.emm && !m_ctx.xy16)
         {
-            m_ctx.y = pull_addr_from_stack();
+            m_ctx.y = m_ctx.PullWord();
             m_ctx.set_status_reg16(m_ctx.y);
             m_ctx.uCycles++;
         }
         else
         {
-            m_ctx.y = pull_from_stack();
+            m_ctx.y = m_ctx.PullByte();
             m_ctx.set_status_reg(m_ctx.y & 0xFF);
         }
         inc_prog_counter();
@@ -2141,35 +2039,21 @@ void CSym6502::PerformCommandInner()
     case CAsm::C_BRA:
         arg = get_argument_value(false);
         AddBranchCycles(arg & 0xFF);
+
         if (arg & 0x80) // jump back
-            m_ctx.pc -= 0x100 - arg;
+            m_ctx.PC(m_ctx.PC() - (0x100 - arg));
         else // jump forward
-            m_ctx.pc += arg;
+            m_ctx.PC(m_ctx.PC() + arg);
         break;
 
     case CAsm::C_INA:
         inc_prog_counter();
-        m_ctx.a++;
-        if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
-        {
-            m_ctx.set_status_reg16(m_ctx.a);
-            m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-        }
-        else
-            m_ctx.set_status_reg(m_ctx.a & 0xFF);
+        m_ctx.CRegister(m_ctx.CRegister() + 1, true);
         break;
 
     case CAsm::C_DEA:
         inc_prog_counter();
-        m_ctx.a--;
-        if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
-        {
-            m_ctx.set_status_reg16(m_ctx.a);
-            m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-        }
-        else
-            m_ctx.set_status_reg(m_ctx.a & 0xFF);
-
+        m_ctx.CRegister(m_ctx.CRegister() - 1, true);
         break;
 
     case CAsm::C_STZ:
@@ -2190,15 +2074,15 @@ void CSym6502::PerformCommandInner()
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
             arg = get_word(addr);
-            m_ctx.setWord(addr, (arg & ~m_ctx.a));
-            m_ctx.zero = (arg & m_ctx.a) == 0;
+            m_ctx.setWord(addr, (arg & ~m_ctx.CRegister()));
+            m_ctx.zero = (arg & m_ctx.CRegister()) == 0;
             m_ctx.uCycles += 2;   // 16 bit operation adds 2 cycle
         }
         else
         {
-            arg = m_ctx.getByte(addr);
-            m_ctx.setByte(addr, (arg & 0xFF) & ~(m_ctx.a & 0xFF));
-            m_ctx.zero = ((arg & 0xFF) & (m_ctx.a & 0xFF)) == 0;
+            arg8 = m_ctx.getByte(addr);
+            m_ctx.setByte(addr, arg8 & ~m_ctx.a);
+            m_ctx.zero = (arg8 & m_ctx.a) == 0;
         }
 
         if (extracycle)
@@ -2212,15 +2096,15 @@ void CSym6502::PerformCommandInner()
         if (cpu16() && !m_ctx.emm && !m_ctx.mem16)
         {
             arg = get_word(addr);
-            m_ctx.setWord(addr, arg | m_ctx.a);
-            m_ctx.zero = (arg & m_ctx.a) == 0;
+            m_ctx.setWord(addr, arg | m_ctx.CRegister());
+            m_ctx.zero = (arg & m_ctx.CRegister()) == 0;
             m_ctx.uCycles += 2;   // 16 bit operation adds 2 cycle
         }
         else
         {
-            arg = m_ctx.getByte(addr);
-            m_ctx.setByte(addr, (arg & 0xFF) | (m_ctx.a & 0xFF));
-            m_ctx.zero = ((arg & 0xFF) & (m_ctx.a & 0xFF)) == 0;
+            arg8 = m_ctx.getByte(addr);
+            m_ctx.setByte(addr, arg8 | m_ctx.a);
+            m_ctx.zero = (arg8 & m_ctx.a) == 0;
         }
 
         if (extracycle)
@@ -2230,31 +2114,36 @@ void CSym6502::PerformCommandInner()
 
     case CAsm::C_BBR:
         addr = get_argument_address(false);
-        if (!(m_ctx.getByte(addr & 0xFF) & uint8_t(1 << ((cmd >> 4) & 0x07))))
+        if (!(m_ctx.getByte(addr & 0xFF) & uint8_t(1 << ((instruction >> 4) & 0x07))))
         {
             arg = addr >> 8;
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
             else // jump forward
-                m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
     case CAsm::C_BBS:
         addr = get_argument_address(false);
-        if (m_ctx.getByte(addr & 0xFF) & uint8_t(1 << ((cmd >> 4) & 0x07)))
+        if (m_ctx.getByte(addr & 0xFF) & uint8_t(1 << ((instruction >> 4) & 0x07)))
         {
             arg = addr >> 8;
+
+            // TODO: Validate this, it doesn't look consistant with the others.... -- B.Simonds (Jan 13, 2025)
+
             if (arg & 0x80) // jump back
-                m_ctx.pc -= 0x100 - arg;
-            m_ctx.pc += arg;
+                m_ctx.PC(m_ctx.PC() - (0x100 - arg));
+
+            m_ctx.PC(m_ctx.PC() + arg);
         }
         break;
 
     case CAsm::C_RMB:
     {
         addr = get_argument_address(s_bWriteProtectArea);
-        uint8_t v = m_ctx.getByte(addr) & uint8_t(~(1 << ((cmd >> 4) & 0x07)));
+        uint8_t v = m_ctx.getByte(addr) & uint8_t(~(1 << ((instruction >> 4) & 0x07)));
         m_ctx.setByte(addr, v);
         break;
     }
@@ -2262,7 +2151,7 @@ void CSym6502::PerformCommandInner()
     case CAsm::C_SMB:
     {
         addr = get_argument_address(s_bWriteProtectArea);
-        uint8_t v = m_ctx.getByte(addr) | uint8_t(1 << ((cmd >> 4) & 0x07));
+        uint8_t v = m_ctx.getByte(addr) | uint8_t(1 << ((instruction >> 4) & 0x07));
         m_ctx.setByte(addr, v);
         break;
     }
@@ -2303,43 +2192,44 @@ void CSym6502::PerformCommandInner()
 
     case CAsm::C_BRL:
         inc_prog_counter();
-        addr = get_word(m_ctx.pc + (m_ctx.pbr << 16));
-        inc_prog_counter(2);
+        addr = m_ctx.ReadProgramWord();
 
         if (addr & 0x8000)
-            m_ctx.pc = (m_ctx.pc - (0x10000 - addr)) & 0xFFFF;
+            m_ctx.PC((m_ctx.PC() - (0x10000 - addr)) & 0xFFFF);
         else
-            m_ctx.pc = (m_ctx.pc + addr) & 0xFFFF;
+            m_ctx.PC((m_ctx.PC() + addr) & 0xFFFF);
 
         break;
 
     case CAsm::C_JSL:
         inc_prog_counter();
-        addr = get_word(m_ctx.pc + (m_ctx.pbr << 16));
-        inc_prog_counter(2);
+        addr = m_ctx.ReadProgramWord();
 
-        if (m_ctx.emm && (m_ctx.s == 0x0100))
+        // TODO: Verify this logic.
+
+        if (m_ctx.emm && (m_ctx.StackPointer() == 0x0100))
         {
             m_ctx.emm = false;
-            push_on_stack(m_ctx.pbr);
-            push_addr_on_stack(m_ctx.pc & 0xFFFF);
-            m_ctx.s = 0x01FD;
+            m_ctx.PushByte(m_ctx.pbr);
+            m_ctx.PushWord(m_ctx.PC() & 0xFFFF);
+            m_ctx.SRegister(0x01FD); /// TODO: Magic number!
             m_ctx.emm = true;
         }
         else
         {
-            push_on_stack(m_ctx.pbr);
-            push_addr_on_stack(m_ctx.pc & 0xFFFF);
+            m_ctx.PushByte(m_ctx.pbr);
+            m_ctx.PushWord(m_ctx.PC() & 0xFFFF);
         }
 
-        m_ctx.pbr = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
+        m_ctx.pbr = m_ctx.GetProgramByte();
+            m_ctx.getByte(m_ctx.PC() + (m_ctx.pbr << 16));
         wxGetApp().m_global.m_bPBR = m_ctx.pbr;
-        m_ctx.pc = addr & 0xFFFF;
+        m_ctx.PC(addr & 0xFFFF);
         break;
 
     case CAsm::C_JML:
         addr = get_argument_address(false);
-        m_ctx.pc = addr & 0xFFFF;
+        m_ctx.PC(addr & 0xFFFF);
         m_ctx.pbr = (addr >> 16) & 0xFF;
         wxGetApp().m_global.m_bPBR = m_ctx.pbr;
         break;
@@ -2349,17 +2239,17 @@ void CSym6502::PerformCommandInner()
 
         if (!m_ctx.emm)
         {
-            push_on_stack(m_ctx.pbr);
-            push_addr_on_stack(m_ctx.pc);
-            push_on_stack(m_ctx.get_status_reg());
-            m_ctx.pc = get_cop_addr16();
+            m_ctx.PushByte(m_ctx.pbr);
+            m_ctx.PushWord(m_ctx.PC());
+            m_ctx.PushByte(m_ctx.GetStatus());
+            m_ctx.PC(get_cop_addr16());
             m_ctx.uCycles++; // native mode takes 1 extra cycle
         }
         else
         {
-            push_addr_on_stack(m_ctx.pc);
-            push_on_stack(m_ctx.get_status_reg());
-            m_ctx.pc = get_cop_addr();
+            m_ctx.PushWord(m_ctx.PC());
+            m_ctx.PushByte(m_ctx.GetStatus());
+            m_ctx.PC(get_cop_addr());
         }
 
         m_ctx.interrupt = true; // after pushing status
@@ -2369,8 +2259,8 @@ void CSym6502::PerformCommandInner()
 
     case CAsm::C_MVN:
     {
-        m_ctx.dbr = m_ctx.getByte(m_ctx.pc + 1 + (m_ctx.pbr << 16));
-        arg = m_ctx.getByte(m_ctx.pc + 2 + (m_ctx.pbr << 16));
+        m_ctx.dbr = m_ctx.getByte(m_ctx.PC() + 1 + (m_ctx.pbr << 16));
+        arg = m_ctx.getByte(m_ctx.PC() + 2 + (m_ctx.pbr << 16));
         //m_ctx.a++;
         //while (m_ctx.a--){
         // check for write protect error
@@ -2385,15 +2275,15 @@ void CSym6502::PerformCommandInner()
         uint8_t v = m_ctx.getByte((arg << 16) + (m_ctx.xy16 ? (m_ctx.x++ & 0xFF) : m_ctx.x++));
         m_ctx.setByte((m_ctx.dbr << 16) + (m_ctx.xy16 ? (m_ctx.y++ & 0xFF) : m_ctx.y++), v);
         //}
-        if (((--m_ctx.a) & 0xFFFF) == 0xFFFF)
+        if (m_ctx.CRegister(m_ctx.CRegister() - 1, false) == 0xFFFF)
             inc_prog_counter(3);  // repeat opcode until A = 0xFFFF
-        m_ctx.b = (m_ctx.a >> 8) & 0xFF;
+
         break;
     }
     case CAsm::C_MVP:
     {
-        m_ctx.dbr = m_ctx.getByte(m_ctx.pc + 1 + (m_ctx.pbr << 16));
-        arg = m_ctx.getByte(m_ctx.pc + 2 + (m_ctx.pbr << 16));
+        m_ctx.dbr = m_ctx.GetProgramByte();
+        arg = m_ctx.GetProgramByte(2);
         //m_ctx.a++;
         //while (m_ctx.a--){
         // check for write protect error
@@ -2409,150 +2299,146 @@ void CSym6502::PerformCommandInner()
         m_ctx.setByte((m_ctx.dbr << 16) + (m_ctx.xy16 ? (m_ctx.y-- & 0xFF) : m_ctx.y--), v);
         //}
 
-        if (((--m_ctx.a) & 0xFFFF) == 0xFFFF)
+        if (m_ctx.CRegister(m_ctx.CRegister() - 1, false) == 0xFFFF)
             inc_prog_counter(3);   // repeat opcode until A = 0xFFFF
-        m_ctx.b = (m_ctx.a >> 8) & 0xFF;
+
         break;
     }
 
     case CAsm::C_PEA:
         inc_prog_counter();
-        addr = get_word(m_ctx.pc + (m_ctx.pbr << 16));
+        addr = m_ctx.ReadProgramWord();
 
-        if (m_ctx.emm && (m_ctx.s == 0x0100))
+        if (m_ctx.emm && (m_ctx.StackPointer() == 0x0100))
         {
             m_ctx.emm = false;
-            push_addr_on_stack(addr);
-            m_ctx.s = 0x01FE;
+            m_ctx.PushWord(addr);
+            m_ctx.SRegister(0x01FE); // TODO: Magic number again!?
             m_ctx.emm = true;
         }
         else
-            push_addr_on_stack(addr);
+            m_ctx.PushWord(addr);
 
-        inc_prog_counter(2);
         break;
 
     case CAsm::C_PEI:
         inc_prog_counter();
-        arg = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
+        arg = m_ctx.ReadProgramByte();
         addr = (arg + m_ctx.dir) & 0xFFFF;
         arg = get_word(addr);
 
-        if (m_ctx.emm && (m_ctx.s == 0x0100))
+        if (m_ctx.emm && (m_ctx.StackPointer() == 0x0100))
         {
             m_ctx.emm = false;
-            push_addr_on_stack(arg);
-            m_ctx.s = 0x01FE;
+            m_ctx.PushWord(arg);
+            m_ctx.SRegister(0x01FE); // TODO: Magic number again!?
             m_ctx.emm = true;
         }
         else
-            push_addr_on_stack(arg);
+            m_ctx.PushWord(arg);
 
         if ((m_ctx.dir & 0xFF) != 0)
             m_ctx.uCycles++;
 
-        inc_prog_counter();
         break;
 
     case CAsm::C_PER:
         inc_prog_counter();
-        arg = get_word(m_ctx.pc + (m_ctx.pbr << 16));
-        inc_prog_counter(2);
+        arg = m_ctx.ReadProgramLWord();
         if (arg & 0x8000)
-            addr = (m_ctx.pc - (0x10000 - arg)) & 0xFFFF;
+            addr = (m_ctx.PC() - (0x10000 - arg)) & 0xFFFF;
         else
-            addr = (m_ctx.pc + arg) & 0xFFFF;
+            addr = (m_ctx.PC() + arg) & 0xFFFF;
 
-        if (m_ctx.emm && (m_ctx.s == 0x0100))
+        if (m_ctx.emm && (m_ctx.StackPointer() == 0x0100))
         {
             m_ctx.emm = false;
-            push_addr_on_stack(addr);
-            m_ctx.s = 0x01FE;
+            m_ctx.PushWord(addr);
+            m_ctx.SRegister(0x01FE); // TODO: Magic number again!?
             m_ctx.emm = true;
         }
         else
-            push_addr_on_stack(addr);
+            m_ctx.PushWord(addr);
         break;
 
     case CAsm::C_PHB:
-        push_on_stack(m_ctx.dbr);
+        m_ctx.PushByte(m_ctx.dbr);
         inc_prog_counter();
         break;
 
     case CAsm::C_PHD:
-        if (m_ctx.emm && (m_ctx.s == 0x0100))
+        if (m_ctx.emm && (m_ctx.StackPointer() == 0x0100))
         {
             m_ctx.setByte(0xFF, m_ctx.dir & 0xFF);
             m_ctx.setByte(0x100, (m_ctx.dir >> 8) & 0xFF);
-            m_ctx.s = 0x01FE;
+            m_ctx.SRegister(0x01FE); // TODO: Magic number again!?
         }
         else
-            push_addr_on_stack(m_ctx.dir);
+            m_ctx.PushWord(m_ctx.dir);
 
         inc_prog_counter();
         break;
 
     case CAsm::C_PHK:
-        push_on_stack(m_ctx.pbr);
+        m_ctx.PushByte(m_ctx.pbr);
         inc_prog_counter();
         break;
 
     case CAsm::C_PLB:
         inc_prog_counter();
-        if (m_ctx.emm && (m_ctx.s == 0x01FF)) // special case
+        if (m_ctx.emm && (m_ctx.StackPointer() == 0x01FF)) // special case
         {
             m_ctx.dbr = m_ctx.getByte(0x200);
-            m_ctx.s = 0x100;
+            m_ctx.SRegister(0x0100);
         }
         else
-            m_ctx.dbr = pull_from_stack();
+            m_ctx.dbr = m_ctx.PullByte();
 
         m_ctx.set_status_reg(m_ctx.dbr);
         break;
 
     case CAsm::C_PLD:
         inc_prog_counter();
-        if (m_ctx.emm && (m_ctx.s == 0x01FF)) // special case
+        if (m_ctx.emm && (m_ctx.StackPointer() == 0x01FF)) // special case
         {
             m_ctx.dir = get_word(0x200);
-            m_ctx.s = 0x0101;
+            m_ctx.SRegister(0x0101);
         }
         else
-            m_ctx.dir = pull_addr_from_stack();
+            m_ctx.dir = m_ctx.PullWord();
 
         m_ctx.set_status_reg16(m_ctx.dir);
         break;
 
     case CAsm::C_REP:
         inc_prog_counter();
-        arg8 = (m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16))) ^ (0xFF); // EOR
-        m_ctx.set_status_reg_bits(m_ctx.get_status_reg() & arg8);
-        inc_prog_counter();
+        arg8 = m_ctx.ReadProgramByte() ^ (0xFF); // EOR
+        m_ctx.SetStatus(m_ctx.GetStatus() & arg8);
         break;
 
     case CAsm::C_SEP:
         inc_prog_counter();
-        arg8 = m_ctx.getByte(m_ctx.pc + (m_ctx.pbr << 16));
-        m_ctx.set_status_reg_bits(m_ctx.get_status_reg() | arg8);
+        arg8 = m_ctx.ReadProgramByte();
+        m_ctx.SetStatus(m_ctx.GetStatus() | arg8);
         if (m_ctx.xy16)
         {
+            // TODO: Verify, should we be masking when 16-bits enabled?!
             m_ctx.x = m_ctx.x & 0xFF;
             m_ctx.y = m_ctx.y & 0xFF;
         }
-        inc_prog_counter();
         break;
 
     case CAsm::C_RTL:
-        if (m_ctx.emm && (m_ctx.s == 0x01FF))
+        if (m_ctx.emm && (m_ctx.StackPointer() == 0x01FF))
         {
-            m_ctx.pc = get_word(0x200) + 1;
+            m_ctx.PC(get_word(0x200) + 1);
             m_ctx.pbr = m_ctx.getByte(0x202);
-            m_ctx.s = 0x0102;
+            m_ctx.SRegister(0x0102);
         }
         else
         {
-            m_ctx.pc = ((pull_addr_from_stack() + 1) & 0xFFFF);
-            m_ctx.pbr = (pull_from_stack() & 0xFF);
+            m_ctx.PC((m_ctx.PullWord() + 1) & 0xFFFF);
+            m_ctx.pbr = (m_ctx.PullByte() & 0xFF);
         }
 
         wxGetApp().m_global.m_bPBR = m_ctx.pbr;
@@ -2571,31 +2457,17 @@ void CSym6502::PerformCommandInner()
 
     case CAsm::C_TCS:
         inc_prog_counter();
-
-        if (m_ctx.mem16)
-        {
-            m_ctx.s = (m_ctx.a & 0xFF) + (m_ctx.b << 8);
-            wxGetApp().m_global.m_bSRef = m_ctx.s;
-        }
-        else
-        {
-            m_ctx.s = m_ctx.a;
-            wxGetApp().m_global.m_bSRef = m_ctx.s + 0x100;
-        }
+        m_ctx.SRegister(m_ctx.CRegister());
         break;
 
     case CAsm::C_TDC:
         inc_prog_counter();
-        m_ctx.a = m_ctx.dir;
-        m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-        m_ctx.set_status_reg16(m_ctx.a);
+        m_ctx.CRegister(m_ctx.dir, true);
         break;
 
     case CAsm::C_TSC:
         inc_prog_counter();
-        m_ctx.a = m_ctx.s;
-        m_ctx.b = (m_ctx.a >> 8) & 0xFF;
-        m_ctx.set_status_reg16(m_ctx.a);
+        m_ctx.CRegister(m_ctx.SRegister(), true);
         break;
 
     case CAsm::C_WAI:
@@ -2611,10 +2483,8 @@ void CSym6502::PerformCommandInner()
 
     case CAsm::C_XBA:
         inc_prog_counter();
-        arg = m_ctx.b;
-        m_ctx.b = m_ctx.a & 0xFF;
-        m_ctx.a = arg;
-        m_ctx.set_status_reg(m_ctx.a & 0xFF);
+        std::swap(m_ctx.a, m_ctx.b);
+        m_ctx.set_status_reg(m_ctx.a);
         break;
 
     case CAsm::C_XCE:
@@ -2633,7 +2503,7 @@ void CSym6502::PerformCommandInner()
         //-------------------------------------------------------------------------
 
     case CAsm::C_ILL:
-        if (finish == CAsm::FIN_BY_DB && cmd == 0xDB) // DB is invalid for 6502 and 65C02 - STP for 65816
+        if (finish == CAsm::FIN_BY_DB && instruction == 0xDB) // DB is invalid for 6502 and 65C02 - STP for 65816
         {
             CurrentStatus = CSym6502::Status::FINISH;
             return;
@@ -2655,7 +2525,7 @@ void CSym6502::PerformCommandInner()
         break;
     }
 
-    m_ctx.uCycles += m_vCodeToCycles[cmd];
+    m_ctx.uCycles += m_vCodeToCycles[instruction];
 
 #if 0
     // TODO: Remove reference to Deasm.h
@@ -2674,7 +2544,10 @@ void CSym6502::PerformCommandInner()
 
 void CSym6502::skip_cmd() // Skip the current statement
 {
-    inc_prog_counter(CAsm::mode_to_len[m_vCodeToMode[m_ctx.getByte(m_ctx.pc)]]);
+    uint8_t instruction = m_ctx.PeekProgramByte();
+    uint8_t len = CAsm::mode_to_len[m_vCodeToMode[instruction]];
+
+    inc_prog_counter(len);
 }
 
 //=============================================================================
@@ -2745,23 +2618,22 @@ UINT CSym6502::start_step_over_thread(void *ptr)
 
 void CSym6502::step_over()
 {
-    uint32_t addr = m_ctx.pc;
+    uint32_t addr = m_ctx.GetProgramAddress();
     uint16_t stack = 0;
     bool jsr = false;
 
     running = true;
     CurrentStatus = CSym6502::Status::RUN;
 
-    if (cpu16())
-        addr += (m_ctx.pbr << 16);
-
     set_translation_tables();
 
-    switch (m_vCodeToCommand[m_ctx.getByte(addr)])
+    uint8_t instruction = m_ctx.PeekProgramByte();
+
+    switch (m_vCodeToCommand[instruction])
     {
     case CAsm::C_JSR:
     case CAsm::C_JSL:
-        stack = m_ctx.s;
+        stack = m_ctx.SRegister();
         jsr = true;
         [[fallthrough]];
 
@@ -2776,7 +2648,7 @@ void CSym6502::step_over()
             if (!CanContinue())
                 return;
 
-            if (jsr && m_ctx.s == stack)
+            if (jsr && m_ctx.SRegister() == stack)
             {
                 CurrentStatus = CSym6502::Status::BPT_TEMP;
                 return;
@@ -2838,7 +2710,7 @@ void CSym6502::run_till_ret()
 {
     set_translation_tables();
 
-    uint16_t stack = m_ctx.s + 2;
+    uint16_t stack = m_ctx.SRegister() + 2;
 
     running = true;
     CurrentStatus = CSym6502::Status::RUN;
@@ -2850,7 +2722,7 @@ void CSym6502::run_till_ret()
         if (!CanContinue())
             return;
 
-        if (m_ctx.s == stack)
+        if (m_ctx.SRegister() == stack)
         {
             CurrentStatus = CSym6502::Status::BPT_TEMP;
             return;
@@ -2922,7 +2794,7 @@ void CSym6502::perform_step()
     if (!CanContinue())
         return;
 
-    uint32_t addr = m_ctx.pc;
+    uint32_t addr = m_ctx.PC();
 
     if (cpu16())
         addr += (m_ctx.pbr << 16);
@@ -2967,7 +2839,12 @@ void CSym6502::run(std::stop_token stopToken)
         perform_step();
 
         if (!CanContinue())
+        {
+            Status s = CurrentStatus;
+            (void)s;
+
             return;
+        }
     }
 }
 
@@ -2984,7 +2861,7 @@ void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
         if (Processor() != ProcessorType::M6502)
             m_ctx.decimal = false; //% 65C02 clears this bit
 
-        m_ctx.pc = get_rst_addr();
+        m_ctx.PC(get_rst_addr());
         nInterrupt = NONE;
         m_ctx.uCycles += 7;
     }
@@ -2998,18 +2875,18 @@ void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
 
         if (cpu16() && !m_ctx.emm)
         {
-            push_on_stack(m_ctx.pbr);
-            push_addr_on_stack(m_ctx.pc);
-            m_ctx.pc = get_nmi_addr16();
+            m_ctx.PushByte(m_ctx.pbr);
+            m_ctx.PushWord(m_ctx.PC());
+            m_ctx.PC(get_nmi_addr16());
         }
         else
         {
-            push_addr_on_stack(m_ctx.pc);
-            m_ctx.pc = get_nmi_addr();
+            m_ctx.PushWord(m_ctx.PC());
+            m_ctx.PC(get_nmi_addr());
         }
 
         m_ctx.break_bit = false;
-        push_on_stack(m_ctx.get_status_reg());
+        m_ctx.PushByte(m_ctx.GetStatus());
 
         if (Processor() != ProcessorType::M6502)
             m_ctx.decimal = false; // 65C02 clears this bit
@@ -3033,18 +2910,18 @@ void CSym6502::interrupt(int &nInterrupt) // interrupt requested: load pc ***
 
         if (cpu16() && !m_ctx.emm)
         {
-            push_on_stack(m_ctx.pbr);
-            push_addr_on_stack(m_ctx.pc);
-            m_ctx.pc = get_irq_addr16();
+            m_ctx.PushByte(m_ctx.pbr);
+            m_ctx.PushWord(m_ctx.PC());
+            m_ctx.PC(get_irq_addr16());
         }
         else
         {
-            push_addr_on_stack(m_ctx.pc);
-            m_ctx.pc = get_irq_addr();
+            m_ctx.PushWord(m_ctx.PC());
+            m_ctx.PC(get_irq_addr());
         }
 
         m_ctx.break_bit = false;
-        push_on_stack(m_ctx.get_status_reg());
+        m_ctx.PushByte(m_ctx.GetStatus());
         m_ctx.break_bit = true;
         m_ctx.interrupt = true;
 
@@ -3071,7 +2948,7 @@ void CSym6502::SkipToAddr(uint16_t addr)
     if (running)
         return;
 
-    m_ctx.pc = addr;
+    m_ctx.PC(addr);
     CurrentStatus = CSym6502::Status::OK;
 }
 
@@ -3176,13 +3053,10 @@ std::string CSym6502::GetStatMsg(CSym6502::Status stat) const
 
 void CSym6502::Restart()
 {
-    m_ctx.Reset();
-    CurrentStatus = CSym6502::Status::OK;
-
-    //m_log.Clear();
-
+    m_ctx.Reset(false);
     m_saveCycles = 0;
-    m_ctx.set_status_reg_bits(0);
+
+    CurrentStatus = CSym6502::Status::OK;
 }
 
 /*************************************************************************/
@@ -3196,11 +3070,8 @@ void CSym6502::SetStart(sim_addr_t address)
         address = get_word(addr);
     }
 
-    m_ctx.pc = address;
-    m_ctx.s = 0x01FF;
-    wxGetApp().m_global.m_bSRef = m_ctx.s;
-    m_saveCycles = 0;
-    m_ctx.set_status_reg_bits(0);
+    Restart();
+    m_ctx.PC(address);
 
     if (debug)
     {
@@ -3339,12 +3210,12 @@ void CSym6502::AddBranchCycles(uint8_t arg)
     {
         if (arg & 0x80) // jump back
         {
-            if (m_ctx.pc >> 8 != static_cast<uint32_t>((m_ctx.pc - (0x100 - arg)) >> 8))
+            if (m_ctx.PC() >> 8 != static_cast<uint32_t>((m_ctx.PC() - (0x100 - arg)) >> 8))
                 m_ctx.uCycles++; // changing memory page -> additional cycle
         }
         else // jump forward
         {
-            if (m_ctx.pc >> 8 != static_cast<uint32_t>((m_ctx.pc + arg) >> 8))
+            if (m_ctx.PC() >> 8 != static_cast<uint32_t>((m_ctx.PC() + arg) >> 8))
                 m_ctx.uCycles++; // changing memory page -> additional cycle
         }
     }
@@ -3370,7 +3241,8 @@ void CSym6502::init()
     m_vCodeToCommand = 0;
     m_vCodeToCycles = 0;
     m_vCodeToMode = 0;
-    m_ctx.set_status_reg_bits(0);
+
+    m_ctx.Reset(false);
 }
 
 void CSym6502::set_translation_tables()

@@ -710,7 +710,7 @@ private:
     int macro_local_area;           // Area number of the local macro definitions
     int pass;                       // Transition number (1 or 2)
     //int conditional;              // Conditional assembly - depth level
-    std::string include_fname;
+    std::string m_includeFileName;
     std::string user_error_text;    // User error text (.ERROR directives)
 
     const char *instr_start;        // To remember the beginning and 
@@ -930,8 +930,8 @@ public:
              io::output &console,
              COutputMem *out,
              CDebugInfo *debug,
-             CMarkArea *area = NULL,
-             ProcessorType procType = ProcessorType::M6502,
+             CMarkArea *area,
+             ProcessorType procType,
              const char *listing_file = NULL)
         : m_console(console)
         , entire_text(file_in_name)

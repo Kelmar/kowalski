@@ -25,28 +25,35 @@
 #include "StdAfx.h"
 #include "sim.h"
 
+#include "6502.h"
+
 /*************************************************************************/
 
 CContext::CContext(const SimulatorConfig &config)
     : m_config(config)
     , bus(config.Processor == ProcessorType::WDC65816 ? 24 : 16)
 {
-    reset();
+    Reset(false);
 }
 
 /*************************************************************************/
 
-uint8_t CContext::get_status_reg() const
+void CContext::SRegister(uint16_t value)
 {
-    ASSERT(negative == false || negative == true);
-    ASSERT(overflow == false || overflow == true);
-    ASSERT(zero == false || zero == true);
-    ASSERT(carry == false || carry == true);
-    ASSERT(reserved == false || reserved == true);
-    ASSERT(break_bit == false || break_bit == true);
-    ASSERT(decimal == false || decimal == true);
-    ASSERT(interrupt == false || interrupt == true);
+    uint16_t mask = 0x00FF;
 
+    if (Processor() == ProcessorType::WDC65816 && !emm)
+        mask = 0xFFFF;
+
+    m_s = value & mask;
+
+    wxGetApp().m_global.m_bSRef = StackPointer();
+}
+
+/*************************************************************************/
+
+uint8_t CContext::GetStatus() const
+{
     if (Processor() == ProcessorType::WDC65816)
     {
         return
@@ -75,7 +82,7 @@ uint8_t CContext::get_status_reg() const
 
 /*************************************************************************/
 
-void CContext::set_status_reg_bits(uint8_t reg)
+void CContext::SetStatus(uint8_t reg)
 {
     negative = !!(reg & NEGATIVE);
     overflow = !!(reg & OVERFLOW);
@@ -99,3 +106,123 @@ void CContext::set_status_reg_bits(uint8_t reg)
 }
 
 /*************************************************************************/
+
+void CContext::Reset(bool isSignal)
+{
+    b = a = x = y = 0;
+
+    emm = true;
+    mem16 = false;
+    xy16 = false;
+
+    negative = overflow = zero = carry = false;
+    break_bit = decimal = interrupt = false;
+    reserved = true;
+    uCycles = 0;
+
+    if (isSignal)
+        bus.Reset();
+
+    m_pc = 0;
+    m_s = 0;
+}
+
+/*************************************************************************/
+
+uint8_t CContext::PeekProgramByte(ssize_t offset /* = 0 */) const
+{
+    sim_addr_t programAddr = GetProgramAddress(offset);
+    return PeekByte(programAddr);
+}
+
+/*************************************************************************/
+
+uint8_t CContext::GetProgramByte(ssize_t offset /* = 0 */)
+{
+    sim_addr_t programAddr = GetProgramAddress(offset);
+    return getByte(programAddr);
+}
+
+/*************************************************************************/
+
+uint16_t CContext::GetProgramWord(ssize_t offset /* = 0 */)
+{
+    sim_addr_t programAddr = GetProgramAddress(offset);
+    return getWord(programAddr);
+}
+
+/*************************************************************************/
+
+uint32_t CContext::GetProgramLWord(ssize_t offset /* = 0 */)
+{
+    sim_addr_t programAddr = GetProgramAddress(offset);
+    return getLWord(programAddr);
+}
+
+/*************************************************************************/
+
+uint8_t CContext::ReadProgramByte()
+{
+    uint8_t rval = getByte(GetProgramAddress());
+    PC(PC() + 1);
+    return rval;
+}
+
+/*************************************************************************/
+
+uint16_t CContext::ReadProgramWord()
+{
+    uint16_t rval = getWord(GetProgramAddress());
+    PC(PC() + 2);
+    return rval;
+}
+
+/*************************************************************************/
+
+uint32_t CContext::ReadProgramLWord()
+{
+    uint16_t rval = getWord(GetProgramAddress());
+    PC(PC() + 3);
+    return rval;
+}
+
+/*************************************************************************/
+
+void CContext::PushByte(uint8_t byte)
+{
+    sim_addr_t addr = StackPointer();
+    setByte(addr, byte);
+    SRegister(SRegister() - 1);
+}
+
+/*************************************************************************/
+
+void CContext::PushWord(uint16_t word)
+{
+    sim_addr_t addr = StackPointer();
+    setWord(addr, word);
+    SRegister(SRegister() - 2);
+}
+
+/*************************************************************************/
+
+uint8_t CContext::PullByte()
+{
+    sim_addr_t addr = StackPointer();
+    uint8_t rval = getByte(addr);
+    SRegister(SRegister() + 1);
+    return rval;
+}
+
+/*************************************************************************/
+
+uint16_t CContext::PullWord()
+{
+    sim_addr_t addr = StackPointer();
+    uint16_t rval = getWord(addr);
+    SRegister(SRegister() + 2);
+    return rval;
+}
+
+/*************************************************************************/
+

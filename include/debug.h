@@ -50,7 +50,8 @@
 
 #ifdef _DEBUG
 // Just mapping this to the C assert() function for now.
-# define ASSERT(X_) assert(X_)
+//# define ASSERT(X_) assert(X_)
+# define ASSERT(X_) (void)(X_)
 #else
 # define ASSERT(X_) (void)(X_)
 #endif

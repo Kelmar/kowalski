@@ -226,7 +226,7 @@ void CRegisterBar::SetDlgItemMem(int nID, int nBytes, uint16_t ptr, const CConte
     std::string buf;
 
     for (int i = 0; i < nBytes; i++)
-        buf += fmt::format("%02X ", pCtx->peekByte(ptr + i));
+        buf += fmt::format("%02X ", pCtx->PeekByte(ptr + i));
 
 #if REWRITE_TO_WX_WIDGET
     SetDlgItemText(nID, buf | str::trim);
@@ -595,7 +595,7 @@ void CRegisterBar::ChangeFlags(int flag_bit, bool set) // changing the flag regi
         flags &= ~uint8_t(1 << flag_bit);
     }
 
-    ctx.set_status_reg_bits(flags);
+    ctx.SetStatus(flags);
 
     SetDlgItemByteHex(IDC_REGS_P, ctx.get_status_reg());
 }

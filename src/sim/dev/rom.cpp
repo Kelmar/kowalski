@@ -23,49 +23,47 @@
 /*************************************************************************/
 
 #include "StdAfx.h"
+#include "sim.h"
 #include "6502.h"
-
-#include "Events.h"
-#include "MainFrm.h"
-#include "M6502.h"
-
-#include "AsmThread.h"
 
 /*************************************************************************/
 
-wxThread::ExitCode AsmThread::Entry()
+using namespace sim::dev;
+
+/*************************************************************************/
+
+ROM::ROM(COutputMem *memory, sim_addr_t start, size_t length)
+    : m_memory(memory)
+    , m_start(start)
+    , m_length(length)
 {
-    // TODO: Remove direct call to wxGetApp() from here; place in SimulatorController
-    io::output &out = wxGetApp().mainFrame()->console()->GetOutput("assembler");
+}
 
-    COutputMem &mainMem = wxGetApp().m_global.GetMemory();
-    CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().simulatorController().DebugInfo();
-    SimulatorConfig config = wxGetApp().simulatorController().GetConfig();
+ROM::~ROM()
+{
+}
 
-    auto assembler = std::make_unique<CAsm6502>(
-        m_path.c_str(),
-        out,
-        asmMem.get(),
-        debug,
-        nullptr,
-        config.Processor);
+/*************************************************************************/
 
-    CAsm::Stat res = assembler->assemble();
+uint8_t ROM::Peek(sim_addr_t address) const
+{
+    sim_addr_t a = address + m_start;
 
-    if (res == CAsm::Stat::OK)
-    {
-        // Copy result to actual memory.
-        mainMem = *asmMem;
-    }
-    else
-        assembler->report_error(res); // TODO: Don't call this from here.
+    if (a > m_memory->size())
+        return 0;
 
-    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
+    return m_memory->get(a);
+}
 
-    wxQueueEvent(m_parent, event.Clone());
+/*************************************************************************/
 
-    return reinterpret_cast<wxThread::ExitCode>(res);
+void ROM::SetByte(sim_addr_t address, uint8_t value)
+{
+    UNUSED(address);
+    UNUSED(value);
+
+    // TODO: Rework to not use exceptions
+    throw CSym6502::Status::ILL_WRITE;
 }
 
 /*************************************************************************/

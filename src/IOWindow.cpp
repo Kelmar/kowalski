@@ -62,6 +62,9 @@ namespace
     {
         InitDefaultConfig();
 
+#if WIN32
+        // TODO: Import old config if detected.
+#endif
     }
 }
 

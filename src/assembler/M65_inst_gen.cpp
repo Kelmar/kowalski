@@ -421,26 +421,8 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
             if (expr.inf != Expr::EX_STRING)
                 return ERR_STR_EXPECTED;
 
-#if REWRITE_TO_WX_WIDGET
-            // TODO: Fix this to not use Win32 path functions.
-            std::string strPath = expr.string;
-            strPath.Replace('/', '\\');
-
-            if (::PathIsRelative(strPath)) // if path is relative combine it with current dir
-            {
-                char szBuf[MAX_PATH] = { 0 };
-                ::GetCurrentDirectory(MAX_PATH, szBuf);
-                char szPath[MAX_PATH];
-                ::PathCombine(szPath, szBuf, strPath);
-                strPath = szPath;
-            }
-
-            // canonicalize the path to make sure it always looks the same
-            // or debug info won't be found by simulator
-            char szPath[MAX_PATH];
-            ::PathCanonicalize(szPath, strPath);
-            include_fname = szPath;
-#endif
+            wxFileName strPath(expr.string);
+            m_includeFileName = strPath.GetAbsolutePath();
         }
         else
             return ERR_STR_EXPECTED; // Expected string

@@ -96,7 +96,7 @@ private:
 
     void inc_prog_counter(int step = 1)
     {
-        m_ctx.pc = uint32_t(m_ctx.pc + step);
+        m_ctx.PC(m_ctx.PC() + step);
     }
 
     bool running; // TODO: Make atomic?
@@ -140,100 +140,6 @@ private:
     uint32_t get_Lword(uint32_t addr)
     {
         return m_ctx.getLWord(addr);
-    }
-
-    void push_on_stack(uint8_t arg)
-    {
-        if (cpu16() && !m_ctx.emm)
-        {
-            if (s_bWriteProtectArea && m_ctx.s >= s_uProtectFromAddr && m_ctx.s <= s_uProtectToAddr)
-                throw CSym6502::Status::ILL_WRITE;
-
-            m_ctx.setByte(m_ctx.s, arg);
-            --m_ctx.s;
-            m_ctx.s &= 0xFFFF;
-        }
-        else
-        {
-            m_ctx.setByte(0x100 + m_ctx.s--, arg);
-            --m_ctx.s;
-            m_ctx.s = (m_ctx.s & 0xFF) + 0x100;
-        }        
-    }
-
-    void push_addr_on_stack(uint16_t arg)
-    {
-        if (cpu16() && !m_ctx.emm)
-        {
-            if (s_bWriteProtectArea && m_ctx.s >= s_uProtectFromAddr && m_ctx.s <= s_uProtectToAddr)
-                throw CSym6502::Status::ILL_WRITE;
-
-            m_ctx.setByte(m_ctx.s, (arg >> 8) & 0xFF);
-            --m_ctx.s;
-            m_ctx.s &= 0xFFFF;
-
-            if (s_bWriteProtectArea && m_ctx.s >= s_uProtectFromAddr && m_ctx.s <= s_uProtectToAddr)
-                throw CSym6502::Status::ILL_WRITE;
-
-            m_ctx.setByte(m_ctx.s, arg & 0xFF);
-            --m_ctx.s;
-            m_ctx.s &= 0xFFFF;
-        }
-        else
-        {
-            m_ctx.setByte(0x100 + (m_ctx.s & 0xFF), (arg >> 8) & 0xFF);
-            --m_ctx.s;
-            m_ctx.s = (m_ctx.s & 0xFF) + 0x100;
-            m_ctx.setByte(0x100 + (m_ctx.s & 0xFF), arg & 0xFF);
-            --m_ctx.s;
-            m_ctx.s = (m_ctx.s & 0xFF) + 0x100;
-        }
-    }
-
-    uint8_t pull_from_stack()
-    {
-        if (cpu16())
-        {
-            if (m_ctx.emm && ((m_ctx.s & 0xFF) == 0xFF))
-            {
-                m_ctx.s = 0x100;
-                return m_ctx.bus.GetByte(m_ctx.s);
-            }
-            else
-                return m_ctx.bus.GetByte(++m_ctx.s);
-        }
-        else
-        {
-            ++m_ctx.s;
-            return m_ctx.bus.GetByte(0x100 + (m_ctx.s & 0xFF));
-        }
-    }
-
-    uint16_t pull_addr_from_stack()
-    {
-        if (cpu16())
-        {
-            if (m_ctx.emm && ((m_ctx.s & 0xFF) == 0xFF))
-            {
-                uint16_t tmp = 0x100;
-                m_ctx.s = 0x101;
-                return get_word(tmp);
-            }
-            else
-            {
-                uint16_t tmp = ++m_ctx.s;
-                ++m_ctx.s;
-                return get_word(tmp);
-            }
-        }
-        else
-        {
-            uint8_t tmp = ++m_ctx.s & 0xFF;
-            ++m_ctx.s;
-            uint16_t tmp2 = m_ctx.bus.GetByte(0x100 + tmp);
-            tmp2 |= uint16_t(m_ctx.bus.GetByte(0x100 + (m_ctx.s & 0xFF))) << uint16_t(8);
-            return tmp2;
-        }
     }
 
     static UINT start_step_over_thread(void *ptr);
@@ -290,9 +196,6 @@ public:
     void SkipInstr();
     void SkipToAddr(uint16_t addr);
     void set_addr_bus_width(UINT w) { UNUSED(w); }
-
-    uint32_t get_pc() const { return m_ctx.pc; }
-    void set_pc(uint32_t pc) { m_ctx.pc = pc; }
 
     const CContext &GetContext() const { return m_ctx; }
     CContext &GetContext() { return m_ctx; }

@@ -20,52 +20,42 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+ /*************************************************************************/
 
-#include "StdAfx.h"
-#include "6502.h"
-
-#include "Events.h"
-#include "MainFrm.h"
-#include "M6502.h"
-
-#include "AsmThread.h"
+#ifndef SIM_DEV_ROM_6502_H__
+#define SIM_DEV_ROM_6502_H__
 
 /*************************************************************************/
 
-wxThread::ExitCode AsmThread::Entry()
+class COutputMem; // Forward decl for output memory
+
+namespace sim::dev
 {
-    // TODO: Remove direct call to wxGetApp() from here; place in SimulatorController
-    io::output &out = wxGetApp().mainFrame()->console()->GetOutput("assembler");
-
-    COutputMem &mainMem = wxGetApp().m_global.GetMemory();
-    CMemoryPtr asmMem(new COutputMem());
-    CDebugInfo *debug = wxGetApp().simulatorController().DebugInfo();
-    SimulatorConfig config = wxGetApp().simulatorController().GetConfig();
-
-    auto assembler = std::make_unique<CAsm6502>(
-        m_path.c_str(),
-        out,
-        asmMem.get(),
-        debug,
-        nullptr,
-        config.Processor);
-
-    CAsm::Stat res = assembler->assemble();
-
-    if (res == CAsm::Stat::OK)
+    class ROM : public sim::Device
     {
-        // Copy result to actual memory.
-        mainMem = *asmMem;
-    }
-    else
-        assembler->report_error(res); // TODO: Don't call this from here.
+    private:
+        COutputMem *m_memory;
+        sim_addr_t m_start;
+        size_t m_length;
 
-    wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
+    public:
+        /* constructor */ ROM(COutputMem *memory, sim_addr_t start, size_t length);
+        virtual          ~ROM();
 
-    wxQueueEvent(m_parent, event.Clone());
+        virtual size_t AddressSize() const { return m_length; }
 
-    return reinterpret_cast<wxThread::ExitCode>(res);
+        virtual void Reset() { }
+
+        virtual uint8_t Peek(sim_addr_t address) const;
+
+        virtual uint8_t GetByte(sim_addr_t address) { return Peek(address); }
+
+        virtual void SetByte(sim_addr_t address, uint8_t value);
+    };
 }
+
+/*************************************************************************/
+
+#endif /* SIM_DEV_ROM_6502_H__ */
 
 /*************************************************************************/

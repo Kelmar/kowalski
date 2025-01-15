@@ -104,7 +104,7 @@ MemoryFrame::MemoryFrame(wxWindow *parent)
     if (!wxXmlResource::Get()->LoadPanel(this, parent, "MemoryFrame"))
         throw ResourceError();
 
-    m_jumpEdit = FindChild<wxComboBox>("m_jumpEdit");
+    WX_BIND_CHILD(m_jumpEdit);
 
     m_hexView = new HexView(this, wxID_ANY);
 

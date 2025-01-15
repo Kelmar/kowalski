@@ -42,6 +42,7 @@ public:
         : m_path(path)
         , m_id(id)
         , m_file(nullptr)
+        , m_lineNo(0)
     {
         open();
     }

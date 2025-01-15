@@ -2587,13 +2587,13 @@ CAsm6502::Stat CAsm6502::assemble() // Program translation
                 {
                 case STAT_INCLUDE:
                 {
-                    //	    if (text->IsMacro() || text->IsRepeat())
-                    //	    if (typeid(text) == typeid(CMacroDef) || typeid(text) == typeid(CRepeatDef))
+                    //if (text->IsMacro() || text->IsRepeat())
+                    //if (typeid(text) == typeid(CMacroDef) || typeid(text) == typeid(CRepeatDef))
                     CSourceText *pSrc = dynamic_cast<CSourceText *>(text);
                     if (pSrc == NULL)
                         return ERR_INCLUDE_NOT_ALLOWED;	// .INCLUDE w makrze/powt�rce niedozwolone
-                    //						proc_area++;
-                    pSrc->Include(include_fname, debug);
+                    //proc_area++;
+                    pSrc->Include(m_includeFileName, debug);
                     break;
                 }
 

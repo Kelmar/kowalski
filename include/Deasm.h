@@ -36,13 +36,16 @@ struct CmdInfo	// single command info (for logging)
         a = m_ctx.a;
         x = m_ctx.x;
         y = m_ctx.y;
-        s = m_ctx.s;
-        flags = m_ctx.get_status_reg();
-        pc = m_ctx.pc;
-        cmd = m_ctx.bus.PeekByte(m_ctx.pc);
-        arg1 = m_ctx.bus.PeekByte(m_ctx.pc + 1);
-        arg2 = m_ctx.bus.PeekByte(m_ctx.pc + 2);
-        arg3 = m_ctx.bus.PeekByte(m_ctx.pc + 3);
+        s = m_ctx.StackPointer();
+        flags = m_ctx.GetStatus();
+
+        pc = m_ctx.PC();
+
+        cmd = m_ctx.bus.PeekByte(pc);
+        arg1 = m_ctx.bus.PeekByte(pc + 1);
+        arg2 = m_ctx.bus.PeekByte(pc + 2);
+        arg3 = m_ctx.bus.PeekByte(pc + 3);
+
         uCycles = m_ctx.uCycles;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
         intFlag = m_ctx.intFlag;  //% bug Fix 1.2.13.18 - command log assembly not lined up with registers
         argVal = 0;
