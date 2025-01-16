@@ -64,6 +64,8 @@ bool C6502App::OnInit()
 {
     wxLog::EnableLogging();
 
+    //wxLog::SetActiveTarget(new wxLogStream(&std::cout));
+
     wxLogStatus("Application initializing");
 
     if (!wxApp::OnInit())

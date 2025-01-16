@@ -273,9 +273,10 @@ CToken CAsm6502::next_leks(bool nospace) // Get the next symbol
     else if (isalpha(c) || c == '_' || c == '.' || c == '?') // || c == '$') - this is dead, cannot get here due to 4 lines above
     {
         ptr--;
-        //const CLeksem &leks=
-        std::string *pStr = get_ident();
-        if (pStr == nullptr)
+        
+        auto pStr = GetIdent();
+
+        if (!pStr)
             return CToken(CToken::ERR_BAD_CHR);
 
         //% Bug Fix 1.2.12.18 - .commands commented out
@@ -287,33 +288,18 @@ CToken CAsm6502::next_leks(bool nospace) // Get the next symbol
             if (asm_instr(*pStr, it))  // only need to do this if c='.'
             {
                 if (it == CAsm::I_DB) //***
-                {
-                    delete pStr;
                     return CToken(it);
-                }
                 else
-                {
-                    delete pStr;
                     return CToken(it);
-                }
             }
         }
 
         if (pStr->size() == 3 && proc_instr(*pStr, code)) // This could be a statement
-        {
-            delete pStr;
             return CToken(code);
-        }
         else if (*pStr == "high")
-        {
-            delete pStr;
             return CToken(O_GT);
-        }
         else if (*pStr == "low")
-        {
-            delete pStr;
             return CToken(O_LT);
-        }
 
         if (*ptr == '#') // '#' character at the end of the label?
         {
@@ -449,7 +435,7 @@ CToken CAsm6502::get_char_num() // interpretation of the character constant
 /*************************************************************************/
 
 //CLeksem
-std::string *CAsm6502::get_ident()
+std::shared_ptr<std::string> CAsm6502::GetIdent()
 {
     const char *start = ptr;
     char c = *ptr++;
@@ -463,12 +449,10 @@ std::string *CAsm6502::get_ident()
     while (isalnum(*ptr) || *ptr == '_' || *ptr == '.') // Letter, digit or '_'
         ptr++;
 
-    std::string *pstr = new std::string(start, ptr - start);
     ident_start = start; // Remembering the position of the identifier on the line
     ident_fin = ptr;
 
-    //  return CLeksem(pstr,0);
-    return pstr;
+    return std::make_shared<std::string>(start, ptr - start);
 }
 
 /*************************************************************************/

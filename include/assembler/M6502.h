@@ -726,7 +726,10 @@ private:
     CToken get_hex_num();          // Interpretation of a hexadecimal number
     CToken get_bin_num();          // Interpretation of binary number
     CToken get_char_num();         // Interpretation of the character constant
-    std::string* get_ident();       // Extract the string
+
+    // Extract a string from the lexer.
+    std::shared_ptr<std::string> GetIdent();
+
     CToken get_string(char lim);	// Extracting a string of characters
     CToken eat_space();			// Skip whitespace
     bool proc_instr(const std::string &str, OpCode &code);

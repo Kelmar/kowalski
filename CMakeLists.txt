@@ -1,4 +1,44 @@
+##########################################################################
+#
+# Copyright (c) 2024 - Bryce Simonds
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+#
+##########################################################################
+# Basic Setup
+##########################################################################
+
 cmake_minimum_required(VERSION 3.20)
+
+SET (default_build_type "Debug")
+
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to '${default_build_type}', as none was specified.")
+  SET (CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Coose the type of build." FORCE)
+  SET_PROPERTY (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+else()
+  message(STATUS "Build type set to '${CMAKE_BUILD_TYPE}'")
+endif()
+
+##########################################################################
+# Dependencies
+##########################################################################
 
 include (fontawesome.cmake)
 include(FetchContent)
@@ -11,9 +51,9 @@ project (6502 C CXX)
 
 SET (FETCHCONTENT_QUIET FALSE)
 
-##############
+##########################################################################
 # fmt package
-##############
+##########################################################################
 
 FetchContent_Declare(fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
@@ -23,9 +63,9 @@ FetchContent_Declare(fmt
 
 FetchContent_MakeAvailable(fmt)
 
-##################
+##########################################################################
 # Sigslot package
-##################
+##########################################################################
 
 FetchContent_Declare(
     sigslot
@@ -35,9 +75,9 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(sigslot)
 
-####################
+##########################################################################
 # wxWidgets package
-####################
+##########################################################################
 
 if (WIN32)
   SET (wxBUILD_SHARED OFF  CACHE BOOL "Build wx libraries as shared libs")
@@ -67,14 +107,22 @@ else()
   SET (wxLibs ${wxWidgets_LIBRARIES})
 endif()
 
+##########################################################################
+# Font Awesome
+##########################################################################
+
+download_font_awesome()
+
+##########################################################################
+# Project
+##########################################################################
+
 if (WIN32)
   SET (execType WIN32)
 endif()
 
 file (GLOB_RECURSE SRCS src/*.cpp)
 file (GLOB_RECURSE HDRS include/*.h)
-
-download_font_awesome()
 
 add_executable(6502 ${execType} README.md ${SRCS} ${HDRS})
 

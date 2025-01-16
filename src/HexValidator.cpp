@@ -51,7 +51,7 @@ bool HexValidator::ReadValue(_Out_ uint32_t &value)
 
     std::string valStr = valueCtrl->GetValue().ToStdString();
 
-    uint32_t test;
+    uint32_t test = 0; // Initialized to keep valgrind happy.
 
     NumberFormat type = NumberFormats::FromString(valStr, _Out_ test);
     bool inRange = m_maxValue > 0 ? (test < m_maxValue) : true;
