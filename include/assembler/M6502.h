@@ -136,7 +136,6 @@ private:
     };
 
     std::string str; // Identifier or string
-
 public:
     CToken(const CToken &leks);
 
@@ -179,21 +178,39 @@ public:
         num.value = val;
     }
 
-    CToken(std::string str) 
+    CToken(const std::string &str)
         : type(CTokenType::L_STR)
         , str(str)
     {
     }
 
-    CToken(std::string str, int) 
+    CToken(std::string &&str)
+        : type(CTokenType::L_IDENT)
+        , str(std::move(str))
+    {
+    }
+
+    CToken(const std::string &str, int)
         : type(CTokenType::L_IDENT)
         , str(str)
     {
     }
 
-    CToken(std::string str, long) 
+    CToken(std::string &&str, int)
+        : type(CTokenType::L_IDENT)
+        , str(std::move(str))
+    {
+    }
+
+    CToken(const std::string &str, long)
         : type(CTokenType::L_IDENT_N)
         , str(str)
+    {
+    }
+
+    CToken(std::string &&str, long)
+        : type(CTokenType::L_IDENT_N)
+        , str(std::move(str))
     {
     }
 
@@ -240,21 +257,8 @@ public:
 
     void Format(int32_t val) // Normalize the form of the numeric label
     {
-#if 0
         ASSERT(type == CTokenType::L_IDENT_N);
-        CString num(' ', 9);
-        num.Format("#%08X", (int)val);
-        *str += num; // Append number
-#endif
-
-        // TODO: Definitely need to verify this change. -- B.Simonds (April 25, 2024)
-
-        ASSERT(type == CTokenType::L_IDENT_N);
-
-        char tmp[64];
-
-        snprintf(tmp, sizeof(tmp), "       #%08X%d", (int)val, num.value);
-        str = tmp;
+        str += fmt::format("#%08X%d", (int)val, num.value);
     }
 };
 
