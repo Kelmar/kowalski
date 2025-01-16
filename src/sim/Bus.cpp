@@ -37,6 +37,13 @@ Bus::Bus(int width)
     m_maxAddress = (1 << m_width) - 1;
 }
 
+Bus::Bus(Bus &&rhs)
+    : m_width(std::move(rhs.m_width))
+    , m_maxAddress(std::move(rhs.m_maxAddress))
+    , m_devices(std::move(rhs.m_devices))
+{
+}
+
 Bus::~Bus()
 {
     for (auto i : m_devices)

@@ -1795,7 +1795,7 @@ void CSym6502::PerformCommandInner()
             }
         }
 
-        m_ctx.PC((m_ctx.PullWord() + 1) & 0xFFFF);
+        m_ctx.PC(m_ctx.PullWord() + 1);
         break;
 
     case CAsm::C_RTI:
@@ -3054,6 +3054,11 @@ std::string CSym6502::GetStatMsg(CSym6502::Status stat) const
 void CSym6502::Restart()
 {
     m_ctx.Reset(false);
+
+    uint32_t addr = getVectorAddress(Vector::RESET);
+    addr = m_ctx.getWord(addr);
+    m_ctx.PC(addr);
+
     m_saveCycles = 0;
 
     CurrentStatus = CSym6502::Status::OK;
@@ -3063,15 +3068,10 @@ void CSym6502::Restart()
 
 void CSym6502::SetStart(sim_addr_t address)
 {
-    if (address == sim::INVALID_ADDRESS)
-    {
-        // Use reset vector for start
-        uint32_t addr = getVectorAddress(Vector::RESET);
-        address = get_word(addr);
-    }
-
     Restart();
-    m_ctx.PC(address);
+
+    if (address != sim::INVALID_ADDRESS)
+        m_ctx.PC(address); // Override the reset vector addres.
 
     if (debug)
     {
@@ -3230,20 +3230,23 @@ void CSym6502::Interrupt(IntType eInt)
 
 /*************************************************************************/
 
-void CSym6502::init()
+CSym6502::CSym6502(CContext &&context, sim_addr_t startAddress, CDebugInfo *debug)
+    : m_ctx(std::move(context))
+    , debug(debug)
 {
     running = false;
     m_fuidLastView = 0;
-    finish = CAsm::FIN_BY_BRK;
+    finish = m_ctx.Config().SimFinish;
     CurrentStatus = CSym6502::Status::OK;
-    //hThread = 0;
     m_nInterruptTrigger = NONE;
     m_vCodeToCommand = 0;
     m_vCodeToCycles = 0;
     m_vCodeToMode = 0;
 
-    m_ctx.Reset(false);
+    SetStart(startAddress);
 }
+
+/*************************************************************************/
 
 void CSym6502::set_translation_tables()
 {

@@ -91,10 +91,8 @@ class CContext : public ContextBase
 private:
     // Disable copy & move.
     CContext(const CContext &) = delete;
-    CContext(CContext &&) = delete;
 
     CContext &operator =(const CContext &) = delete;
-    CContext &operator =(CContext &&) = delete;
 
     SimulatorConfig m_config;
 
@@ -105,6 +103,9 @@ private:
 
     /**
      * @brief Stack Pointer
+     * 
+     * Holds the raw value of the stack pointer register.
+     * This means for Non 65816 or in emm mode, this value will be from $00 to $FF
      */
     sim_addr_t m_s;
 
@@ -143,6 +144,7 @@ public:
     Bus bus;
 
     CContext(const SimulatorConfig &config);
+    CContext(CContext &&rhs);
 
     /**
      * @brief Resets the context.

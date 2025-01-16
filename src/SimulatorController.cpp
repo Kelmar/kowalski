@@ -139,10 +139,7 @@ void SimulatorController::CreateSimulator()
 {
     CGlobal *global = &wxGetApp().m_global;
 
-    // Get a fresh new simulator
-    m_simulator.reset(new CSym6502(GetConfig(), &m_debugInfo));
-
-    CContext &ctx = m_simulator->GetContext();
+    CContext ctx(GetConfig());
 
     // Build up device list
     // For now hard coded to a RAM and IOWindow module.
@@ -172,8 +169,8 @@ void SimulatorController::CreateSimulator()
         sim::PDevice lowRam(new sim::dev::RAM(memory, 0, ctx.bus.maxAddress()));
     }
 
-    m_simulator->finish = s_simConfig.SimFinish;
-    m_simulator->SetStart(global->m_startAddress);
+    // Get a fresh new simulator
+    m_simulator = std::make_shared<CSym6502>(std::move(ctx), global->m_startAddress, &m_debugInfo);
 }
 
 /*************************************************************************/

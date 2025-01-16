@@ -89,8 +89,14 @@ private:
 
     void Init();
 
-    inline
-        void MemoryUpdated() { Refresh(); }
+    inline void MemoryUpdated()
+    {
+        // Right now the memory system is just spaming us with updates.
+        // We could be smarter about how we go about sending UI refreshes in this case.
+        // E.g.: Only refresh if the memory element that changed is within our viewed area.
+
+        //Refresh();
+    }
 
 public:
     /* constructor */ HexView();

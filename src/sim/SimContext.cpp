@@ -36,6 +36,15 @@ CContext::CContext(const SimulatorConfig &config)
     Reset(false);
 }
 
+CContext::CContext(CContext &&rhs)
+    : ContextBase(rhs) // Use copy for now
+    , m_config(std::move(rhs.m_config))
+    , m_pc(std::move(rhs.m_pc))
+    , m_s(std::move(rhs.m_s))
+    , bus(std::move(rhs.bus))
+{
+}
+
 /*************************************************************************/
 
 void CContext::SRegister(uint16_t value)
@@ -199,18 +208,20 @@ void CContext::PushByte(uint8_t byte)
 
 void CContext::PushWord(uint16_t word)
 {
-    sim_addr_t addr = StackPointer();
-    setWord(addr, word);
-    SRegister(SRegister() - 2);
+    // Word's are pushed in reverse order because stack grows downwards.
+    PushByte(word & 0x00FF);
+    PushByte((word & 0xFF00) >> 8);
 }
 
 /*************************************************************************/
 
 uint8_t CContext::PullByte()
 {
+    // Adjust stack pointer before doing pull.
+    SRegister(SRegister() + 1);
+
     sim_addr_t addr = StackPointer();
     uint8_t rval = getByte(addr);
-    SRegister(SRegister() + 1);
     return rval;
 }
 
@@ -218,10 +229,8 @@ uint8_t CContext::PullByte()
 
 uint16_t CContext::PullWord()
 {
-    sim_addr_t addr = StackPointer();
-    uint16_t rval = getWord(addr);
-    SRegister(SRegister() + 2);
-    return rval;
+    // Word's are pulled in reverse order because stack grows downwards.
+    return PullByte() << 8 | PullByte();
 }
 
 /*************************************************************************/

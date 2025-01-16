@@ -166,7 +166,7 @@ private:
     //HWND m_hwndLastView; // j.w.
     void AddBranchCycles(uint8_t arg);
 
-    void init();
+    void SetStart(sim_addr_t address);
     void set_translation_tables();
 
     const uint8_t* m_vCodeToCommand;
@@ -200,20 +200,7 @@ public:
     const CContext &GetContext() const { return m_ctx; }
     CContext &GetContext() { return m_ctx; }
 
-    //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502(const SimulatorConfig &config)
-        : m_ctx(config)
-    {
-        init();
-    }
-
-    //% bug Fix 1.2.13.18 - command log assembly not lined up with registers - added pre
-    CSym6502(const SimulatorConfig &config, CDebugInfo *debug) 
-        : m_ctx(config)
-        , debug(debug)
-    {
-        init();
-    }
+    CSym6502(CContext &&context, sim_addr_t startAddress, CDebugInfo *debug);
 
     virtual ~CSym6502()
     {
@@ -225,8 +212,6 @@ public:
     }
 
     void Restart();
-
-    void SetStart(sim_addr_t address);
 
     void StepInto();
     void StepOver();

@@ -146,6 +146,8 @@ public:
      * @param width The width of the address bus. (in number of lines)
      */
     Bus(int width);
+    Bus(Bus &&rhs);
+
     virtual ~Bus();
 
     /**
