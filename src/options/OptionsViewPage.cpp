@@ -23,11 +23,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Options.h"
 #include "ConfigSettings.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 //COptionsViewPage::TextDef COptionsViewPage::m_Text[6];
 
-/*************************************************************************/
+/*=======================================================================*/
 
 COptionsViewPage::COptionsViewPage(wxBookCtrlBase *parent)
     : wxPanel(parent)
@@ -57,7 +57,7 @@ COptionsViewPage::~COptionsViewPage()
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #if REWRITE_TO_WX_WIDGETS
 

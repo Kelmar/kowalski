@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502Doc.h"
 #include "6502View.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 // Construction/Destruction
 
 CSrc6502Doc::CSrc6502Doc()
@@ -40,14 +40,14 @@ CSrc6502Doc::~CSrc6502Doc()
 
 wxIMPLEMENT_DYNAMIC_CLASS(CSrc6502Doc, wxDocument);
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CSrc6502View *CSrc6502Doc::GetSourceView()
 {
     return dynamic_cast<CSrc6502View *>(GetFirstView());
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 // Document Create/Load/Save
 
 bool CSrc6502Doc::OnCreate(const wxString& path, long flags)
@@ -59,6 +59,8 @@ bool CSrc6502Doc::OnCreate(const wxString& path, long flags)
 
     return true;
 }
+
+/*=======================================================================*/
 
 bool CSrc6502Doc::DoOpenDocument(const wxString &filename)
 {
@@ -72,6 +74,8 @@ bool CSrc6502Doc::DoOpenDocument(const wxString &filename)
     return true;
 }
 
+/*=======================================================================*/
+
 bool CSrc6502Doc::DoSaveDocument(const wxString &filename)
 {
     CSrc6502View *sourceView = GetSourceView();
@@ -82,14 +86,14 @@ bool CSrc6502Doc::DoSaveDocument(const wxString &filename)
     Modify(false);
 
     wxString str;
-    str.Printf("Saved: %s", filename);
+    str.Printf(_("Saved: %s"), filename);
 
-    wxLogStatus(str.c_str());
+    wxLogStatus(str);
 
     return true;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CSrc6502Doc::BindViews()
 {
@@ -98,7 +102,7 @@ void CSrc6502Doc::BindViews()
     sourceView->m_text->Bind(wxEVT_STC_MODIFIED, &CSrc6502Doc::OnTextChange, this);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CSrc6502Doc::OnTextChange(wxCommandEvent& event)
 {
@@ -106,4 +110,4 @@ void CSrc6502Doc::OnTextChange(wxCommandEvent& event)
     event.Skip();
 }
 
-/*************************************************************************/
+/*=======================================================================*/

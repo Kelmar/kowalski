@@ -23,12 +23,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //      are changed infrequently
 //
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #ifndef STDAFX_H__
 #define STDAFX_H__
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #define _SCL_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
@@ -82,11 +82,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <cctype>
 
 #include <fmt/core.h>
-
-#ifndef wxHAVE_DPI_INDEPENDENT_PIXELS
-// Hack for wxWidgets 3.0 on Ubuntu
-# define FromDIP(X_) (X_)
-#endif
 
 #define UCHAR unsigned char
 #define USHORT unsigned short
@@ -149,8 +144,8 @@ public:
     virtual ~CMemoryException() {}
 };
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #endif /* STDAFX_H__ */
 
-/*************************************************************************/
+/*=======================================================================*/

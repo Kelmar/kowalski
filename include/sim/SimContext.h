@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,19 +20,19 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- /*************************************************************************/
+ /*=======================================================================*/
 
 #ifndef SIM_CONTEXT_6502_H__
 #define SIM_CONTEXT_6502_H__
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "Asm.h"
 
 // TODO: Remove this naming conflict
 #undef OVERFLOW
 
-/*************************************************************************/
+/*=======================================================================*/
 
 struct SimulatorConfig
 {
@@ -45,7 +45,7 @@ struct SimulatorConfig
     sim_addr_t    ProtectEnd;    // End of write protected memory area
 };
 
-/*************************************************************************/
+/*=======================================================================*/
 
 struct ContextBase
 {
@@ -84,7 +84,7 @@ struct ContextBase
     }
 };
 
-/*************************************************************************/
+/*=======================================================================*/
 
 class CContext : public ContextBase
 {
@@ -99,7 +99,7 @@ private:
     /**
      * @brief Program Counter
      */
-    sim_addr_t m_pc;
+    uint16_t m_pc;
 
     /**
      * @brief Stack Pointer
@@ -107,7 +107,7 @@ private:
      * Holds the raw value of the stack pointer register.
      * This means for Non 65816 or in emm mode, this value will be from $00 to $FF
      */
-    sim_addr_t m_s;
+    uint16_t m_s;
 
 public:
     enum Flags
@@ -161,7 +161,7 @@ public: // Register access
     /**
      * @brief Get the value of the actual program counter register.
      */
-    sim_addr_t PC() const 
+    uint16_t PC() const 
     { 
         return m_pc;
     }
@@ -169,7 +169,7 @@ public: // Register access
     /**
      * @brief Set the address of the actual program counter register.
      */
-    void PC(sim_addr_t addr)
+    void PC(uint16_t addr)
     {
         m_pc = addr;
     }
@@ -364,16 +364,7 @@ public: // Memory Access
      * @param address The address to read
      * @return The 16-bit word to read.
      */
-    inline
-    uint16_t PeekWord(sim_addr_t address) const
-    {
-        std::array<uint8_t, 2> bytes;
-        std::span<uint8_t> spn(bytes);
-
-        bus.PeekRange(address, _Out_ spn);
-
-        return bytes[1] << 8 | bytes[0];
-    }
+    uint16_t PeekWord(sim_addr_t address) const;
 
     /**
      * @brief Peek at an LWord (24-bit value) at the given address on the bus.
@@ -381,22 +372,14 @@ public: // Memory Access
      * @param address The address to read from.
      * @return The 24-bit value read.
      */
-    inline
-    uint32_t PeekLWord(sim_addr_t address) const
-    {
-        std::array<uint8_t, 3> bytes;
-        std::span<uint8_t> spn(bytes);
-
-        bus.PeekRange(address, _Out_ spn);
-
-        return bytes[2] << 16 | bytes[1] << 8 | bytes[0];
-    }
+    uint32_t PeekLWord(sim_addr_t address) const;
 
     /**
      * @brief Gets a byte from the bus.
      * @param addr The address to get
      */
-    uint8_t getByte(sim_addr_t address)
+    inline
+    uint8_t GetByte(sim_addr_t address)
     {
         return bus.GetByte(address);
     }
@@ -406,37 +389,22 @@ public: // Memory Access
      * @param addr The address to get
      * @remarks Words are always read little endian.
      */
-    uint16_t getWord(sim_addr_t addr)
-    {
-        std::array<uint8_t, 2> bytes;
-        std::span<uint8_t> spn(bytes);
-
-        bus.GetRange(addr, _Out_ spn);
-
-        return bytes[1] << 8 | bytes[0];
-    }
+    uint16_t GetWord(sim_addr_t addr);
 
     /**
      * @brief Gets a 24-bit word from the bus.
      * @param addr The address to get
      * @remarks Words are always read little endian.
      */
-    uint32_t getLWord(sim_addr_t addr)
-    {
-        std::array<uint8_t, 3> bytes;
-        std::span<uint8_t> spn(bytes);
-
-        bus.GetRange(addr, _Out_ spn);
-
-        return bytes[2] << 16 | bytes[1] << 8 | bytes[0];
-    }
+    uint32_t GetLWord(sim_addr_t addr);
 
     /**
      * @brief Sets a byte on the bus.
      * @param addr The address to set
      * @param value The value to set
      */
-    void setByte(sim_addr_t address, uint8_t value)
+    inline
+    void SetByte(sim_addr_t address, uint8_t value)
     {
         bus.SetByte(address, value);
     }
@@ -447,16 +415,7 @@ public: // Memory Access
      * @param word The word value to write.
      * @remarks Words are always written little endian.
      */
-    void setWord(sim_addr_t addr, uint16_t word)
-    {
-        std::array<uint8_t, 2> bytes =
-        {
-            (uint8_t)(word & 0x00FF),
-            (uint8_t)((word >> 8) & 0x00FF)
-        };
-
-        bus.SetRange(addr, _In_ bytes);
-    }
+    void SetWord(sim_addr_t addr, uint16_t word);
 
     /**
      * @brief Sets a 24-bit word on the bus
@@ -464,36 +423,7 @@ public: // Memory Access
      * @param word The 24-bit word to write.
      * @remarks Words are always written little endian.
      */
-    void setLWord(sim_addr_t addr, uint32_t word)
-    {
-        std::array<uint8_t, 3> bytes =
-        {
-            (uint8_t)(word & 0x0000'00FF),
-            (uint8_t)((word >> 8) & 0x0000'00FF),
-            (uint8_t)((word >> 16) & 0x0000'00FF)
-        };
-
-        bus.SetRange(addr, _In_ bytes);
-    }
-
-    /**
-     * @brief Sets a 32-bit word to the bus
-     * @param addr The address to set
-     * @param word The 32-bit word to write.
-     * @remarks Words are always written little endian.
-     */
-    void setDWord(sim_addr_t addr, uint32_t word)
-    {
-        std::array<uint8_t, 4> bytes =
-        {
-            (uint8_t)(word & 0x0000'00FF),
-            (uint8_t)((word >> 8) & 0x0000'00FF),
-            (uint8_t)((word >> 16) & 0x0000'00FF),
-            (uint8_t)((word >> 24) & 0x0000'00FF)
-        };
-
-        bus.SetRange(addr, _In_ bytes);
-    }
+    void SetLWord(sim_addr_t addr, uint32_t word);
 
     // functions that change the contents of the flag register
     void set_status_reg_VZNC(bool v, bool z, bool n, bool c)
@@ -539,8 +469,8 @@ public: // Memory Access
     
 };
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #endif /* SIM_CONTEXT_6502_H__ */
 
-/*************************************************************************/
+/*=======================================================================*/

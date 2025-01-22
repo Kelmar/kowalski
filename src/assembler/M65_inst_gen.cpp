@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "IOWindow.h"	// this is sloppy, but right now there's no mechanism to let framework know about requested new terminal wnd size
 
-/*************************************************************************/
+/*=======================================================================*/
 
 // Interpretation of the directive
 CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType it, const std::string *pLabel)
@@ -852,4 +852,4 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
     return OK;
 }
 
-/*************************************************************************/
+/*=======================================================================*/

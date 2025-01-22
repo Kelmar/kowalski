@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef SIM_6502_H__
 #define SIM_6502_H__
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "DebugInfo.h"
 #include "OutputMem.h"
@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "sim.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 // TODO: Remove direct references to views.
 class CSrc6502View;
@@ -40,6 +40,7 @@ class CSym6502
 private:
     CContext m_ctx;
     class CDebugInfo *debug;
+
     //CommandLog m_log;
 
     ULONG m_saveCycles; //% Bug Fix 1.2.12.18 - fix command log display
@@ -122,24 +123,14 @@ private:
     uint16_t get_word_indirect(uint16_t zp)
     {
         ASSERT(zp <= ((cpu16() && !m_ctx.emm) ? 0xFF : 0xFFFF));
-        return m_ctx.getWord(zp);
-    }
-
-    uint16_t get_word(uint32_t addr)
-    {
-        return m_ctx.getWord(addr);
+        return m_ctx.GetWord(zp);
     }
 
     uint32_t get_Lword_indirect(uint16_t zp)
     {
         ASSERT(zp <= ((cpu16() && !m_ctx.emm) ? 0xFF : 0xFFFF));
 
-        return m_ctx.getLWord(zp);
-    }
-
-    uint32_t get_Lword(uint32_t addr)
-    {
-        return m_ctx.getLWord(addr);
+        return m_ctx.GetLWord(zp);
     }
 
     static UINT start_step_over_thread(void *ptr);
@@ -178,17 +169,17 @@ private:
 public:
     CAsm::Finish finish; // Specifying how to end program execution
 
-    uint16_t get_cop_addr() { return m_ctx.getWord(0xFFF4); }
-    uint16_t get_abort_addr() { return m_ctx.getWord(0xFFF8); }
-    uint16_t get_nmi_addr() { return m_ctx.getWord(0xFFFA); }
-    uint16_t get_rst_addr() { return m_ctx.getWord(0xFFFC); }
-    uint16_t get_irq_addr() { return m_ctx.getWord(0xFFFE); }
+    uint16_t get_cop_addr() { return m_ctx.GetWord(0xFFF4); }
+    uint16_t get_abort_addr() { return m_ctx.GetWord(0xFFF8); }
+    uint16_t get_nmi_addr() { return m_ctx.GetWord(0xFFFA); }
+    uint16_t get_rst_addr() { return m_ctx.GetWord(0xFFFC); }
+    uint16_t get_irq_addr() { return m_ctx.GetWord(0xFFFE); }
 
-    uint16_t get_cop_addr16() { return m_ctx.getWord(0xFFE4); }
-    uint16_t get_brk_addr16() { return m_ctx.getWord(0xFFE6); }
-    uint16_t get_abort_addr16() { return m_ctx.getWord(0xFFE8); }
-    uint16_t get_nmi_addr16() { return m_ctx.getWord(0xFFEA); }
-    uint16_t get_irq_addr16() { return m_ctx.getWord(0xFFEE); }
+    uint16_t get_cop_addr16() { return m_ctx.GetWord(0xFFE4); }
+    uint16_t get_brk_addr16() { return m_ctx.GetWord(0xFFE6); }
+    uint16_t get_abort_addr16() { return m_ctx.GetWord(0xFFE8); }
+    uint16_t get_nmi_addr16() { return m_ctx.GetWord(0xFFEA); }
+    uint16_t get_irq_addr16() { return m_ctx.GetWord(0xFFEE); }
 
     std::string GetStatMsg(Status stat) const;
     std::string GetLastStatMsg() const { return GetStatMsg(CurrentStatus); }
@@ -241,8 +232,8 @@ public:
 
 typedef std::shared_ptr<CSym6502> PSym6502;
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #endif /* SIM_6502_H__ */
 
-/*************************************************************************/
+/*=======================================================================*/

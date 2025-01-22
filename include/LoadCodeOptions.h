@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "MarkArea.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 /**
  * @brief Model that holds the state of loading and saving raw binary code.
  */
@@ -61,7 +61,7 @@ struct LoadCodeState
     CMarkArea Marks;
 };
 
-/*************************************************************************/
+/*=======================================================================*/
 /**
  * @brief Dialog box that shows options for loading binary code.
  */
@@ -74,6 +74,6 @@ public:
     /* constructor */ LoadCodeOptionsDlg(LoadCodeState *state);
 };
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #endif /* LOAD_CODE_OPTIONS_H__ */

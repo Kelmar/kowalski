@@ -38,7 +38,7 @@ CAtariBin::~CAtariBin()
 {
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
 {
@@ -66,7 +66,7 @@ bool CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
         state->Marks.SetStart(from);
         state->Marks.SetEnd(to);
 
-        ar.read(state->Memory->getSpan(from, to));
+        ar.read(state->Memory->GetSpan(from, to));
         state->Memory->invalidate();
     }
 
@@ -84,4 +84,4 @@ bool CAtariBin::read(BinaryArchive &ar, LoadCodeState *state)
     return true;
 }
 
-/*************************************************************************/
+/*=======================================================================*/

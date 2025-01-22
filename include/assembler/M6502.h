@@ -262,7 +262,7 @@ public:
     }
 };
 
-/*************************************************************************/
+/*=======================================================================*/
 
 class CIdentTable
 {
@@ -349,7 +349,7 @@ public:
     }
 };
 
-/*************************************************************************/
+/*=======================================================================*/
 
 /**
  * @brief A class to describe an arithmetic/logical/text expression
@@ -918,7 +918,7 @@ public:
     Stat report_error(Stat err)
     {
         const std::string msg = GetErrMsg(err);
-        m_console.write(msg.c_str());
+        m_console.write(msg);
         m_console.write("\r\n");
         return err;
     }

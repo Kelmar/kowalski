@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "StdAfx.h"
 #include "6502.h"
@@ -29,7 +29,7 @@
 #include "6502View.h"
 #include "6502Doc.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "Options.h"
 
@@ -41,14 +41,14 @@
 #include "SimulatorController.h"
 #include "AsmThread.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 // Configuration
-/*************************************************************************/
+/*=======================================================================*/
 
 // Directly exposed to OptionsSymPage
 SimulatorConfig s_simConfig;
 
-/*************************************************************************/
+/*=======================================================================*/
 
 namespace
 {
@@ -92,8 +92,8 @@ namespace
     }
 }
 
-/*************************************************************************/
-/*************************************************************************/
+/*=======================================================================*/
+/*=======================================================================*/
 
 SimulatorController::SimulatorController()
     : m_critSect()
@@ -110,18 +110,18 @@ SimulatorController::~SimulatorController()
     SaveConfig();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 const SimulatorConfig &SimulatorController::GetConfig() const { return s_simConfig; }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::SaveConfig()
 {
 
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::InitOptions()
 {
@@ -133,7 +133,7 @@ void SimulatorController::InitOptions()
     wxGetApp().optionsController().RegisterPage(factory, _("Simulator"), 0);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::CreateSimulator()
 {
@@ -169,39 +169,39 @@ void SimulatorController::CreateSimulator()
         sim::PDevice lowRam(new sim::dev::RAM(memory, 0, ctx.bus.maxAddress()));
     }
 
+    //io::output &out = wxGetApp().mainFrame()->console()->GetOutput("simulator");
+
     // Get a fresh new simulator
     m_simulator = std::make_shared<CSym6502>(std::move(ctx), global->m_startAddress, &m_debugInfo);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 // TODO: Remove after removal of CGlobal
 void SimulatorController::SetIOAddress(sim_addr_t addr)
 {
     s_simConfig.IOAddress = addr;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 DebugState SimulatorController::CurrentState() const
 {
-    PSym6502 simulator = Simulator();
-
-    if (!simulator)
+    if (!m_simulator)
         return DebugState::Unloaded;
 
-    if (simulator->IsRunning())
+    if (m_simulator->IsRunning())
         return DebugState::Running;
 
-    if (simulator->IsFinished())
+    if (m_simulator->IsFinished())
         return DebugState::Finished;
 
-    if (simulator->IsBroken())
+    if (m_simulator->IsBroken())
         return DebugState::Stopped;
 
     return DebugState::NotStarted;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::BindEvents()
 {
@@ -241,7 +241,7 @@ void SimulatorController::BindEvents()
     Bind(wxEVT_THREAD, &SimulatorController::OnAsmComplete, this, evTHD_ASM_COMPLETE);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::BuildMenu(wxMenuBar *menuBar)
 {
@@ -286,18 +286,32 @@ void SimulatorController::BuildMenu(wxMenuBar *menuBar)
     menuBar->Append(menu, _("Simulator"));
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::Run()
 {
-    if (CurrentState() == DebugState::Unloaded)
-        StartDebug();
+    DebugState state = CurrentState();
 
-    Simulator()->Run();
+    switch (state)
+    {
+    case DebugState::Running:
+        return; // Shouldn't happen, don't do anything just incase!
+
+    case DebugState::Unloaded:
+    case DebugState::Finished:
+        StartDebug();
+        break;
+
+    case DebugState::NotStarted:
+    case DebugState::Stopped:
+        break; // Continue where we left off.
+    }
+
+    m_simulator->Run();
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::RunToAddress(sim_addr_t address)
 {
@@ -305,28 +319,28 @@ void SimulatorController::RunToAddress(sim_addr_t address)
         return;
 
     m_debugInfo.SetTemporaryExecBreakpoint(address);
-    Simulator()->Run(); // Run after setting a temporary breakpoint
+    m_simulator->Run(); // Run after setting a temporary breakpoint
 
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::Restart()
 {
     StartDebug();
-    Simulator()->Run();
+    m_simulator->Run();
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::Break()
 {
     if (CurrentState() == DebugState::Running)
         return;
 
-    Simulator()->Break();
+    m_simulator->Break();
     wxGetApp().mainFrame()->UpdateFlea();
 
 #if 0
@@ -340,60 +354,60 @@ void SimulatorController::Break()
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::StepOver()
 {
     if (CurrentState() != DebugState::Stopped)
         return;
 
-    Simulator()->StepOver();
+    m_simulator->StepOver();
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::StepInto()
 {
-    Simulator()->StepInto();
+    m_simulator->StepInto();
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::StepOut()
 {
-    Simulator()->RunTillRet();
+    m_simulator->RunTillRet();
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::SkipInstruction()
 {
-    Simulator()->SkipInstr();
+    m_simulator->SkipInstr();
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::SkipToAddress(sim_addr_t address)
 {
     if (address == sim::INVALID_ADDRESS)
         return;
 
-    Simulator()->SkipToAddr(address);
+    m_simulator->SkipToAddr(address);
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::StartDebug()
 {
     CreateSimulator();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::ExitDebugMode(bool uiEvent)
 {
@@ -406,13 +420,13 @@ void SimulatorController::ExitDebugMode(bool uiEvent)
     }
 
     if (CurrentState() == DebugState::Running)
-        Simulator()->AbortProg(); // Interrupt the running program
+        m_simulator->AbortProg(); // Interrupt the running program
 
     DebugStopped();
     wxGetApp().mainFrame()->UpdateFlea();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::DebugStopped()
 {
@@ -430,7 +444,7 @@ void SimulatorController::DebugStopped()
     */
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool SimulatorController::ConfirmStop(const wxString &msg)
 {
@@ -438,7 +452,7 @@ bool SimulatorController::ConfirmStop(const wxString &msg)
     return res == wxOK;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 sim_addr_t SimulatorController::GetCursorAddress(bool skipping)
 {
@@ -488,9 +502,9 @@ sim_addr_t SimulatorController::GetCursorAddress(bool skipping)
     return dl.addr;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 // Menu handlers
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnAssemble(wxCommandEvent &)
 {
@@ -569,14 +583,14 @@ void SimulatorController::OnAssemble(wxCommandEvent &)
         wxLogStatus("Assembler started");
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnRun(wxCommandEvent &)
 {
     Run();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnRunToCursor(wxCommandEvent &)
 {
@@ -584,56 +598,56 @@ void SimulatorController::OnRunToCursor(wxCommandEvent &)
     RunToAddress(address);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnRestart(wxCommandEvent &)
 {
     Restart();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnStop(wxCommandEvent &)
 {
     ExitDebugMode(true);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnBreak(wxCommandEvent &)
 {
     Break();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnStepOver(wxCommandEvent &)
 {
     StepOver();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnStepInto(wxCommandEvent &)
 {
     StepInto();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnStepOut(wxCommandEvent &)
 {
     StepOut();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnSkipInstruction(wxCommandEvent &)
 {
     SkipInstruction();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnSkipToCursor(wxCommandEvent &)
 {
@@ -641,9 +655,9 @@ void SimulatorController::OnSkipToCursor(wxCommandEvent &)
     SkipToAddress(address);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 // Update handlers
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnUpdateAssemble(wxUpdateUIEvent &e)
 {
@@ -662,7 +676,7 @@ void SimulatorController::OnUpdateAssemble(wxUpdateUIEvent &e)
     e.Enable(enabled);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnUpdateRun(wxUpdateUIEvent &e)
 {
@@ -672,30 +686,30 @@ void SimulatorController::OnUpdateRun(wxUpdateUIEvent &e)
     e.Enable(CurrentState() != DebugState::Running);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnUpdateRestart(wxUpdateUIEvent &e)
 {
     e.Enable(CurrentState() != DebugState::Unloaded);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::EnableWhenRunning(wxUpdateUIEvent &e)
 {
     e.Enable(CurrentState() == DebugState::Running);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::EnableWhenStopped(wxUpdateUIEvent &e)
 {
     e.Enable(CurrentState() == DebugState::Stopped);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 // Thread events
-/*************************************************************************/
+/*=======================================================================*/
 
 void SimulatorController::OnAsmComplete(wxThreadEvent &)
 {
@@ -723,4 +737,4 @@ void SimulatorController::OnAsmComplete(wxThreadEvent &)
     }
 }
 
-/*************************************************************************/
+/*=======================================================================*/

@@ -36,7 +36,7 @@ CMemoryInfo::~CMemoryInfo()
 {
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 // New window
 
 bool CMemoryInfo::Create(COutputMem *pMem, uint32_t uAddr, ViewType bView)
@@ -96,7 +96,7 @@ bool CMemoryInfo::Create(COutputMem *pMem, uint32_t uAddr, ViewType bView)
     return true;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #if REWRITE_TO_WX_WIDGET
 
@@ -113,7 +113,7 @@ END_MESSAGE_MAP()
 
 #endif
 
-/*************************************************************************/
+/*=======================================================================*/
 
 afx_msg LRESULT CMemoryInfo::OnChangeCode(WPARAM wParam, LPARAM lParam)
 {
@@ -127,7 +127,7 @@ afx_msg LRESULT CMemoryInfo::OnChangeCode(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 afx_msg LRESULT CMemoryInfo::OnStartDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
 {
@@ -150,7 +150,7 @@ afx_msg LRESULT CMemoryInfo::OnExitDebug(WPARAM /*wParam*/, LPARAM /* lParam */)
     return 1;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMemoryInfo::OnShowWindow(bool bShow, UINT nStatus)
 {
@@ -182,4 +182,4 @@ void CMemoryInfo::InvalidateView(uint16_t uStackPtr/*= 0*/)
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/

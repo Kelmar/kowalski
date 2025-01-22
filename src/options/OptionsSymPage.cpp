@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "StdAfx.h"
 #include "6502.h"
@@ -39,13 +39,13 @@
 
 #include "ConfigSettings.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 // TODO: Remove direct reference to IO Config
 // Really the IO config belongs in its own configuration page of sorts.
 extern IOWindowConfig s_ioConfig;
 
-/*************************************************************************/
+/*=======================================================================*/
 
 OptionsSymPage::OptionsSymPage(wxBookCtrlBase *parent)
     : OptionsPage()
@@ -63,7 +63,7 @@ OptionsSymPage::~OptionsSymPage()
 {
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 /**
  * @brief Bind pointers to created controls.
  */
@@ -91,7 +91,7 @@ void OptionsSymPage::BindChildren()
     WX_BIND_CHILD(m_writeEndTxt);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 /**
  * @brief Initialize selection values and validators.
  */
@@ -119,7 +119,7 @@ void OptionsSymPage::InitChildren()
     m_writeEndTxt->SetValidator(endValidator);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 /**
  * @brief Read values from the configuration into the controls.
  */
@@ -145,7 +145,7 @@ void OptionsSymPage::ReadConfig()
     m_protectEnd = s_simConfig.ProtectEnd;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 /**
  * @brief Set configuration from values presaented in the controls.
  */
@@ -178,14 +178,14 @@ void OptionsSymPage::SetConfig()
     s_simConfig.ProtectEnd = m_protectEnd;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void OptionsSymPage::AbortChanges()
 {
     // Nothing to do, we'll just re-read from the configuration on next load.
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void OptionsSymPage::SaveChanges()
 {
@@ -195,7 +195,7 @@ void OptionsSymPage::SaveChanges()
     wxGetApp().mainFrame()->ioWindow()->SaveConfig();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #if REWRITE_TO_WX_WIDGET
 
@@ -248,7 +248,7 @@ END_MESSAGE_MAP()
 
 #endif
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #if 0
 bool OptionsSymPage::OnHelpInfo(HELPINFO *pHelpInfo)
@@ -272,5 +272,5 @@ void OptionsSymPage::OnContextMenu(wxWindow *pWnd, wxPoint point)
 }
 #endif
 
-/*************************************************************************/
+/*=======================================================================*/
 

@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "StdAfx.h"
 
@@ -32,7 +32,7 @@
 #include "FontController.h"
 #include "options/OptionsFontPage.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 FontController::FontController()
     : m_monoFont(nullptr)
@@ -47,7 +47,7 @@ FontController::~FontController()
     delete m_monoFont;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void FontController::LoadFonts()
 {
@@ -59,7 +59,7 @@ void FontController::LoadFonts()
     m_monoFont = new wxFont(info);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void FontController::CalcCellSizes()
 {
@@ -70,7 +70,7 @@ void FontController::CalcCellSizes()
     m_cellSize = dc.GetTextExtent(" ");
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void FontController::InitOptions()
 {
@@ -82,7 +82,7 @@ void FontController::InitOptions()
     wxGetApp().optionsController().RegisterPage(factory, _("Fonts and Colors"), 30);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 std::vector<BasicFontInfo> FontController::GetInstalledFonts()
 {
@@ -109,4 +109,4 @@ std::vector<BasicFontInfo> FontController::GetInstalledFonts()
     return rval;
 }
 
-/*************************************************************************/
+/*=======================================================================*/

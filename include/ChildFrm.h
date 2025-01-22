@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define CHILD_FRAME_H__
 
 #include "mdi65.h"
-#include "HexView.h"
+#include "HexEdit.h"
 
 class CChildFrame : public CHILD_BASE
 {

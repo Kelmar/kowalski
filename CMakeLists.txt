@@ -121,10 +121,14 @@ if (WIN32)
   SET (execType WIN32)
 endif()
 
+add_subdirectory(HexEdit)
+
 file (GLOB_RECURSE SRCS src/*.cpp)
 file (GLOB_RECURSE HDRS include/*.h)
 
 add_executable(6502 ${execType} README.md ${SRCS} ${HDRS})
+
+add_dependencies(6502 HexEdit)
 
 configure_file(res/res6502.xrc res6502.xrc COPYONLY)
 
@@ -142,9 +146,11 @@ target_include_directories(6502
     PRIVATE ${wxWidgets_SOURCE_DIR}/include
 )
 
-target_link_libraries(6502 PRIVATE ${wxLibs}
+target_link_libraries(6502 PRIVATE
+    ${wxLibs}
     fmt::fmt
-    Pal::Sigslot)
+    Pal::Sigslot
+    HexEdit)
 
 if (MSVC)
   target_precompile_headers(6502 PRIVATE include/StdAfx.h)

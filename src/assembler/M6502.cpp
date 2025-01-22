@@ -39,7 +39,7 @@ uint8_t CAsm6502::forcelong = 0;
 bool CAsm6502::generateBRKExtraByte = false; // generate extra byte after BRK command?
 uint8_t CAsm6502::BRKExtraByte = 0x0; // value of extra byte generated after BRK command
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CAsm6502::init_members()
 {
@@ -71,7 +71,7 @@ void CAsm6502::init()
     init_members();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CToken CAsm6502::next_leks(bool nospace) // Get the next symbol
 {
@@ -312,7 +312,7 @@ CToken CAsm6502::next_leks(bool nospace) // Get the next symbol
     return CToken(CTokenType::L_UNKNOWN); // Unknown character -error
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CToken CAsm6502::get_hex_num() // Interpretation of a hexadecimal number
 {
@@ -347,7 +347,7 @@ CToken CAsm6502::get_hex_num() // Interpretation of a hexadecimal number
     return CToken(CToken::N_HEX, int32_t(val));
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CToken CAsm6502::get_dec_num() // Interpretation of a decimal number
 {
@@ -375,7 +375,7 @@ CToken CAsm6502::get_dec_num() // Interpretation of a decimal number
     return CToken(CToken::N_DEC, int32_t(val));
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CToken CAsm6502::get_bin_num() // Interpretation of binary number
 {
@@ -405,7 +405,7 @@ CToken CAsm6502::get_bin_num() // Interpretation of binary number
     return CToken(CToken::N_BIN, int32_t(val));
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CToken CAsm6502::get_char_num() // interpretation of the character constant
 {
@@ -432,7 +432,7 @@ CToken CAsm6502::get_char_num() // interpretation of the character constant
     }
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 //CLeksem
 std::shared_ptr<std::string> CAsm6502::GetIdent()
@@ -455,7 +455,7 @@ std::shared_ptr<std::string> CAsm6502::GetIdent()
     return std::make_shared<std::string>(start, ptr - start);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CToken CAsm6502::get_string(char lim) // extracting a string of characters
 {
@@ -474,7 +474,7 @@ CToken CAsm6502::get_string(char lim) // extracting a string of characters
     return CToken(*pstr);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CToken CAsm6502::eat_space()
 {
@@ -491,7 +491,7 @@ int CAsm6502::asm_str_key_cmp(const void *elem1, const void *elem2)
     return strcasecmp(((CAsm6502::ASM_STR_KEY *)elem1)->str, ((CAsm6502::ASM_STR_KEY *)elem2)->str);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool CAsm6502::asm_instr(const std::string &str, InstrType &it)
 {
@@ -560,7 +560,7 @@ bool CAsm6502::asm_instr(const std::string &str, InstrType &it)
     return false;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CAsm6502::Stat CAsm6502::CheckLine(const char *str, int &instr_idx_start, int &instr_idx_fin)
 {
@@ -3254,7 +3254,7 @@ CAsm::Stat CAsm6502::generate_debug(InstrType it, int line_no, FileUID file_UID)
     return OK;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CAsm6502::generate_debug()
 {
@@ -3274,7 +3274,7 @@ void CAsm6502::generate_debug()
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 std::string CAsm6502::GetErrMsg(Stat stat)
 {
@@ -3336,4 +3336,4 @@ std::string CAsm6502::GetErrMsg(Stat stat)
     );
 }
 
-/*************************************************************************/
+/*=======================================================================*/

@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,14 +20,14 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- /*************************************************************************/
+ /*=======================================================================*/
 
 #include "StdAfx.h"
 #include "6502.h"
 
 #include "formats/RawBin.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CRawBin::CRawBin()
     : BinaryCodeTemplate()
@@ -38,7 +38,7 @@ CRawBin::~CRawBin()
 {
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
 {
@@ -86,7 +86,7 @@ bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
     return true;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool CRawBin::write(BinaryArchive &ar, LoadCodeState *state)
 {
@@ -95,9 +95,9 @@ bool CRawBin::write(BinaryArchive &ar, LoadCodeState *state)
 
     size_t sz = config.Processor == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
 
-    ar.write(state->Memory->getSpan(0, sz));
+    ar.write(state->Memory->GetSpan(0, sz));
 
     return true;
 }
 
-/*************************************************************************/
+/*=======================================================================*/

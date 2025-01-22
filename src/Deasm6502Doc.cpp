@@ -52,7 +52,7 @@ bool CDeasm6502Doc::OnNewDocument()
  
     return true;
 }
-/*************************************************************************/
+/*=======================================================================*/
 
 bool CDeasm6502Doc::GetSaveOptions()
 {
@@ -78,7 +78,7 @@ bool CDeasm6502Doc::GetSaveOptions()
     return false; // Abort save
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 std::ostream &CDeasm6502Doc::SaveObject(std::ostream &stream)
 {
@@ -94,7 +94,7 @@ std::ostream &CDeasm6502Doc::SaveObject(std::ostream &stream)
     return stream;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CDeasm6502Doc::SetStart(uint32_t addr, bool bDraw)
 {
@@ -113,7 +113,7 @@ void CDeasm6502Doc::SetPointer(uint32_t addr, bool scroll/*= FALSE*/)
     UpdateAllViews(); // Redrawing of indicators
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CDeasm6502Doc::DeassembleSave(std::ostream &stream, const CContext &ctx, uint32_t start, uint32_t end, int opt)
 {
@@ -297,4 +297,4 @@ void CDeasm6502Doc::DeassembleSave(std::ostream &stream, const CContext &ctx, ui
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/

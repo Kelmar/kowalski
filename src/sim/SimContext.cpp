@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,14 +20,14 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "StdAfx.h"
 #include "sim.h"
 
 #include "6502.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CContext::CContext(const SimulatorConfig &config)
     : m_config(config)
@@ -45,7 +45,7 @@ CContext::CContext(CContext &&rhs)
 {
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CContext::SRegister(uint16_t value)
 {
@@ -59,7 +59,7 @@ void CContext::SRegister(uint16_t value)
     wxGetApp().m_global.m_bSRef = StackPointer();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint8_t CContext::GetStatus() const
 {
@@ -89,7 +89,7 @@ uint8_t CContext::GetStatus() const
     }
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CContext::SetStatus(uint8_t reg)
 {
@@ -114,7 +114,7 @@ void CContext::SetStatus(uint8_t reg)
     }
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CContext::Reset(bool isSignal)
 {
@@ -136,7 +136,7 @@ void CContext::Reset(bool isSignal)
     m_s = 0;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint8_t CContext::PeekProgramByte(ssize_t offset /* = 0 */) const
 {
@@ -144,67 +144,67 @@ uint8_t CContext::PeekProgramByte(ssize_t offset /* = 0 */) const
     return PeekByte(programAddr);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint8_t CContext::GetProgramByte(ssize_t offset /* = 0 */)
 {
     sim_addr_t programAddr = GetProgramAddress(offset);
-    return getByte(programAddr);
+    return GetByte(programAddr);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint16_t CContext::GetProgramWord(ssize_t offset /* = 0 */)
 {
     sim_addr_t programAddr = GetProgramAddress(offset);
-    return getWord(programAddr);
+    return GetWord(programAddr);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint32_t CContext::GetProgramLWord(ssize_t offset /* = 0 */)
 {
     sim_addr_t programAddr = GetProgramAddress(offset);
-    return getLWord(programAddr);
+    return GetLWord(programAddr);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint8_t CContext::ReadProgramByte()
 {
-    uint8_t rval = getByte(GetProgramAddress());
+    uint8_t rval = GetByte(GetProgramAddress());
     PC(PC() + 1);
     return rval;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint16_t CContext::ReadProgramWord()
 {
-    uint16_t rval = getWord(GetProgramAddress());
+    uint16_t rval = GetWord(GetProgramAddress());
     PC(PC() + 2);
     return rval;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint32_t CContext::ReadProgramLWord()
 {
-    uint16_t rval = getWord(GetProgramAddress());
+    uint16_t rval = GetLWord(GetProgramAddress());
     PC(PC() + 3);
     return rval;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CContext::PushByte(uint8_t byte)
 {
     sim_addr_t addr = StackPointer();
-    setByte(addr, byte);
+    SetByte(addr, byte);
     SRegister(SRegister() - 1);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CContext::PushWord(uint16_t word)
 {
@@ -213,7 +213,7 @@ void CContext::PushWord(uint16_t word)
     PushByte((word & 0xFF00) >> 8);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint8_t CContext::PullByte()
 {
@@ -221,11 +221,11 @@ uint8_t CContext::PullByte()
     SRegister(SRegister() + 1);
 
     sim_addr_t addr = StackPointer();
-    uint8_t rval = getByte(addr);
+    uint8_t rval = GetByte(addr);
     return rval;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 uint16_t CContext::PullWord()
 {
@@ -233,5 +233,81 @@ uint16_t CContext::PullWord()
     return PullByte() << 8 | PullByte();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
+
+uint16_t CContext::PeekWord(sim_addr_t address) const
+{
+    std::array<uint8_t, 2> bytes;
+    std::span<uint8_t> spn(bytes);
+
+    bus.PeekRange(address, _Out_ spn);
+
+    return bytes[1] << 8 | bytes[0];
+}
+
+/*=======================================================================*/
+
+uint32_t CContext::PeekLWord(sim_addr_t address) const
+{
+    std::array<uint8_t, 3> bytes;
+    std::span<uint8_t> spn(bytes);
+
+    bus.PeekRange(address, _Out_ spn);
+
+    return bytes[2] << 16 | bytes[1] << 8 | bytes[0];
+}
+
+/*=======================================================================*/
+
+uint16_t CContext::GetWord(sim_addr_t addr)
+{
+    std::array<uint8_t, 2> bytes;
+    std::span<uint8_t> spn(bytes);
+
+    bus.GetRange(addr, _Out_ spn);
+
+    return bytes[1] << 8 | bytes[0];
+}
+
+/*=======================================================================*/
+
+uint32_t CContext::GetLWord(sim_addr_t addr)
+{
+    std::array<uint8_t, 3> bytes;
+    std::span<uint8_t> spn(bytes);
+
+    bus.GetRange(addr, _Out_ spn);
+
+    return bytes[2] << 16 | bytes[1] << 8 | bytes[0];
+}
+
+/*=======================================================================*/
+
+void CContext::SetWord(sim_addr_t addr, uint16_t word)
+{
+    std::array<uint8_t, 2> bytes =
+    {
+        (uint8_t)(word & 0x00FF),
+        (uint8_t)((word >> 8) & 0x00FF)
+    };
+
+    bus.SetRange(addr, _In_ bytes);
+}
+
+/*=======================================================================*/
+
+void CContext::SetLWord(sim_addr_t addr, uint32_t word)
+{
+    std::array<uint8_t, 3> bytes =
+    {
+        (uint8_t)(word & 0x0000'00FF),
+        (uint8_t)((word >> 8) & 0x0000'00FF),
+        (uint8_t)((word >> 16) & 0x0000'00FF)
+    };
+
+    bus.SetRange(addr, _In_ bytes);
+}
+
+/*=======================================================================*/
+
 

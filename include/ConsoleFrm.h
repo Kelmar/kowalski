@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,17 +20,17 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #ifndef CONSOLE_FRAME_H__
 #define CONSOLE_FRAME_H__
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "Events.h"
 #include "output.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 /**
  * @brief Frame that displays the output of a console source.
@@ -38,6 +38,8 @@
 class ConsoleFrame : public wxPanel
 {
 public:
+
+
     class ConsoleOutput : public io::output
     {
         friend class ConsoleFrame;
@@ -49,18 +51,18 @@ public:
         /* constructor */ ConsoleOutput(ConsoleFrame *frame, const std::string &target)
             : m_parent(frame)
             , m_target(target)
-        {
-        }
+        { }
 
     public:
         virtual ~ConsoleOutput()
-        {
-        }
+        { }
 
-        virtual void write(const char *str)
+        virtual void write(std::string_view str) override
         {
             MessageEvent event(evTHD_OUTPUT, evTHD_OUTPUT_ID, m_target.c_str());
-            event.SetString(str);
+            std::string s(str);
+
+            event.SetString(s);
 
             //m_parent->GetEventHandler()->AddPendingEvent(event);
             wxQueueEvent(m_parent, event.Clone());
@@ -87,8 +89,8 @@ public:
     }
 };
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #endif /* CONSOLE_FRAME_H__ */
 
-/*************************************************************************/
+/*=======================================================================*/

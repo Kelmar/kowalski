@@ -21,11 +21,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef OUTPUT_MEM_H__
 #define OUTPUT_MEM_H__
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #include <sigslot/signal.hpp>
 
-/*************************************************************************/
+/*=======================================================================*/
 
 class COutputMem
 {
@@ -149,7 +149,14 @@ public:
         return lo | (mid << 8) | (hi << 16);
     }
 
-    std::span<uint8_t> getSpan(size_t from, size_t to)
+    std::span<const uint8_t> GetSpan(size_t from, size_t to) const
+    {
+        ASSERT(from < m_size);
+        to = std::min(to, m_size);
+        return std::span(&m_data[from], to);
+    }
+
+    std::span<uint8_t> GetSpan(size_t from, size_t to)
     {
         ASSERT(from < m_size);
         to = std::min(to, m_size);
@@ -223,8 +230,8 @@ public:
 
 typedef std::shared_ptr<COutputMem> CMemoryPtr;
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #endif /* OUTPUT_MEM_H__ */
 
-/*************************************************************************/
+/*=======================================================================*/

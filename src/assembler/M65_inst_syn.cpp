@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "M6502.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 // Interpretation of processor instruction arguments
 CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &expr,
     Expr &expr_bit, Expr &expr_zpg)
@@ -436,4 +436,4 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
     }
 }
 
-/*************************************************************************/
+/*=======================================================================*/

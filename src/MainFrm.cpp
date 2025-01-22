@@ -48,14 +48,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "M6502.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 // Windows MainFrame, RegisterBar, IOWindow, MemoryView, ZeroPageView, IdentInfo
 
 //wxBitmap CMainFrame::m_bmpCode; // pictures in StatusBar
 //wxBitmap CMainFrame::m_bmpDebug;
 
-/*************************************************************************/
+/*=======================================================================*/
 
 //std::string CMainFrame::ProjName = "";
 
@@ -388,7 +388,7 @@ void CMainFrame::ConfigSettings(bool load)
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 // CMainFrame
 
 #if 0
@@ -544,14 +544,14 @@ CMainFrame::~CMainFrame()
     //    delete m_Idents;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::BindPaneToggle(int id, const wxString &name)
 {
     Bind(wxEVT_MENU, [this, name] (wxCommandEvent &) { this->OnTogglePane(name); }, id);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::BindEvents()
 {
@@ -578,8 +578,8 @@ void CMainFrame::BindEvents()
     PushEventHandler(&wxGetApp().optionsController());
 }
 
-/*************************************************************************/
-/*************************************************************************/
+/*=======================================================================*/
+/*=======================================================================*/
 // File menu events
 
 void CMainFrame::OnExit(wxCommandEvent &)
@@ -587,7 +587,7 @@ void CMainFrame::OnExit(wxCommandEvent &)
     wxGetApp().Exit();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::OnTogglePane(const wxString &name)
 {
@@ -600,7 +600,7 @@ void CMainFrame::OnTogglePane(const wxString &name)
     m_auiManager.Update();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::OnShowLog(wxCommandEvent &)
 {
@@ -615,21 +615,21 @@ void CMainFrame::OnShowTest(wxCommandEvent &)
     child->Show();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::OnShowIO(wxCommandEvent &)
 {
     m_ioWindow->Show(!m_ioWindow->IsVisible());
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::OnAbout(wxCommandEvent &)
 {
     wxMessageBox("Testing");
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::OnUpdateShowLog(wxUpdateUIEvent &event)
 {
@@ -638,7 +638,7 @@ void CMainFrame::OnUpdateShowLog(wxUpdateUIEvent &event)
     event.Check(logFrame->IsVisible());
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #if REWRITE_TO_WX_WIDGET
 const uint32_t CMainFrame::dwDockBarMapEx[4][2] =
@@ -679,7 +679,7 @@ void CMainFrame::EnableDockingEx(uint32_t dwDockStyle)
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::InitMenu()
 {
@@ -747,7 +747,7 @@ void CMainFrame::InitMenu()
     SetMenuBar(menuBar);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #if REWRITE_TO_WX_WIDGET
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -1008,14 +1008,14 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT &cs)
 
 #endif
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CSrc6502View *CMainFrame::GetCurrentView()
 {
     return dynamic_cast<CSrc6502View *>(m_docManager->GetCurrentView());
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 /*
 HMENU CMainFrame::GetWindowMenuPopup(HMENU hMenuBar)
@@ -1105,7 +1105,7 @@ void CMainFrame::OnClose()
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::OnDestroy()
 {
@@ -1117,7 +1117,7 @@ void CMainFrame::OnDestroy()
     ConfigSettings::Save(false);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 /*
 void CMainFrame::SetRowColumn(CEdit &edit)
@@ -1131,7 +1131,7 @@ void CMainFrame::SetRowColumn(CEdit &edit)
 }
 */
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::OnSymBreakpoint()
 {
@@ -1179,7 +1179,7 @@ void CMainFrame::OnUpdateSymBreakpoint(CCmdUI *pCmdUI)
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::AddBreakpoint(CSrc6502View *pView, int nLine, CAsm::Breakpoint bp)
 {
@@ -1226,7 +1226,7 @@ void CMainFrame::RemoveBreakpoint(CSrc6502View *pView, int nLine)
 #endif
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CMainFrame::OnSymEditBreakpoint()
 {

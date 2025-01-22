@@ -1,4 +1,4 @@
-﻿/*************************************************************************/
+﻿/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "StdAfx.h"
 #include "6502.h"
@@ -30,8 +30,8 @@
 #include "Events.h"
 #include "ProjectManager.h"
 
-/*************************************************************************/
-/*************************************************************************/
+/*=======================================================================*/
+/*=======================================================================*/
 
 bool CodeTemplate::supportsExt(const std::string &ext) const
 {
@@ -44,7 +44,7 @@ bool CodeTemplate::supportsExt(const std::string &ext) const
     return std::ranges::any_of(m_exprCache, str::matches(ext));
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 std::vector<std::string> CodeTemplate::getWildCards() const
 {
@@ -61,7 +61,7 @@ std::vector<std::string> CodeTemplate::getWildCards() const
     return rval;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 std::string CodeTemplate::toString() const
 {
@@ -75,8 +75,8 @@ std::string CodeTemplate::toString() const
     return m_toStringCache;
 }
 
-/*************************************************************************/
-/*************************************************************************/
+/*=======================================================================*/
+/*=======================================================================*/
 
 bool BinaryCodeTemplate::read(const std::string &filename, LoadCodeState *state)
 {
@@ -85,7 +85,7 @@ bool BinaryCodeTemplate::read(const std::string &filename, LoadCodeState *state)
     return read(_In_ archive, state);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool BinaryCodeTemplate::write(const std::string &filename, LoadCodeState *state)
 {
@@ -94,8 +94,8 @@ bool BinaryCodeTemplate::write(const std::string &filename, LoadCodeState *state
     return write(_In_ archive, state);
 }
 
-/*************************************************************************/
-/*************************************************************************/
+/*=======================================================================*/
+/*=======================================================================*/
 
 ProjectManager::ProjectManager()
     : m_templates()
@@ -106,7 +106,7 @@ ProjectManager::~ProjectManager()
 {
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void ProjectManager::AddTemplate(const std::shared_ptr<CodeTemplate> &codeTemplate)
 {
@@ -115,7 +115,7 @@ void ProjectManager::AddTemplate(const std::shared_ptr<CodeTemplate> &codeTempla
     m_templates.push_back(codeTemplate);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 wxString ProjectManager::GetSupportedFileTypes(
     std::function<bool(const std::shared_ptr<CodeTemplate> &)> predicate)
@@ -127,14 +127,14 @@ wxString ProjectManager::GetSupportedFileTypes(
     );
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 wxBEGIN_EVENT_TABLE(ProjectManager, wxEvtHandler)
 EVT_MENU(evID_LOAD_CODE, ProjectManager::OnLoadCode)
 EVT_MENU(evID_SAVE_CODE, ProjectManager::OnSaveCode)
 wxEND_EVENT_TABLE()
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void ProjectManager::OnLoadCode(wxCommandEvent &event)
 {
@@ -204,7 +204,7 @@ void ProjectManager::OnLoadCode(wxCommandEvent &event)
     wxGetApp().m_global.LoadCode(state);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void ProjectManager::OnSaveCode(wxCommandEvent &event)
 {
@@ -213,4 +213,4 @@ void ProjectManager::OnSaveCode(wxCommandEvent &event)
     wxString exts = GetSupportedFileTypes([](auto t) -> bool { return t->canWrite(); });
 }
 
-/*************************************************************************/
+/*=======================================================================*/

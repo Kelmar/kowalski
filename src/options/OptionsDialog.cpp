@@ -27,11 +27,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "ConfigSettings.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 //int OptionsDialog::s_lastActivePage = 0;
 
-/*************************************************************************/
+/*=======================================================================*/
 
 OptionsDialog::OptionsDialog()
     : wxDialog()
@@ -45,7 +45,7 @@ OptionsDialog::~OptionsDialog()
     //s_lastActivePage = m_notebook->GetSelection();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void OptionsDialog::Create(wxFrame *parent)
 {
@@ -90,7 +90,7 @@ void OptionsDialog::Create(wxFrame *parent)
     UpdateSize();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void OptionsDialog::AddPage(const OptionsPageFactory &factory, const wxString &text)
 {
@@ -100,7 +100,7 @@ void OptionsDialog::AddPage(const OptionsPageFactory &factory, const wxString &t
     m_notebook->AddPage(page, text);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void OptionsDialog::UpdateSize()
 {
@@ -110,10 +110,10 @@ void OptionsDialog::UpdateSize()
     Fit();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 // OptionsDialog message handlers
 
-/*************************************************************************/
+/*=======================================================================*/
 // Context Sensitive Help
 
 #if REWRITE_TO_WX_WIDGET
@@ -140,4 +140,4 @@ void OptionsDialog::OnContextMenu(wxWindow* pWnd, wxPoint point)
     //HtmlHelpA(NULL, HH_DISPLAY_TOPIC);
 }
 
-/*************************************************************************/
+/*=======================================================================*/

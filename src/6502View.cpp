@@ -79,7 +79,7 @@ CSrc6502View::~CSrc6502View()
 
 wxIMPLEMENT_DYNAMIC_CLASS(CSrc6502View, wxView);
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool CSrc6502View::OnCreate(wxDocument *doc, long flags)
 {
@@ -128,7 +128,7 @@ void CSrc6502View::OnDraw(wxDC *)
     // Dummy method, the sub controls handle all the actual painting.
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CSrc6502View::UpdatePositionInfo()
 {
@@ -145,7 +145,7 @@ void CSrc6502View::UpdatePositionInfo()
     m_status->SetStatusText(str, 1);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 // Event processing
 
 void CSrc6502View::OnTextUpdate(wxCommandEvent &)
@@ -153,7 +153,7 @@ void CSrc6502View::OnTextUpdate(wxCommandEvent &)
     UpdatePositionInfo();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CSrc6502View::check_line(const char *buf, CAsm::Stat &stat, int &start, int &fin, std::string &msg)
 {

@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "StdAfx.h"
 
@@ -29,7 +29,7 @@
 #include "Options.h"
 #include "options/OptionsDialog.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 OptionsController::OptionsController()
     : m_mainFrame(nullptr)
@@ -42,7 +42,7 @@ OptionsController::~OptionsController()
 {
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool OptionsController::Init(CMainFrame *mainFrame)
 {
@@ -52,7 +52,7 @@ bool OptionsController::Init(CMainFrame *mainFrame)
     return true;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void OptionsController::RegisterPage(OptionsPageFactory factory, const wxString &text, int ordering)
 {
@@ -64,14 +64,14 @@ void OptionsController::RegisterPage(OptionsPageFactory factory, const wxString 
     });
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void OptionsController::BindEvents()
 {
     Bind(wxEVT_MENU, &OptionsController::OnOptions, this, evID_OPTIONS);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void OptionsController::OnOptions(wxCommandEvent &)
 {
@@ -98,4 +98,4 @@ void OptionsController::OnOptions(wxCommandEvent &)
     }
 }
 
-/*************************************************************************/
+/*=======================================================================*/

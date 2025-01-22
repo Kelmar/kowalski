@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #ifdef WIN32
 
@@ -32,7 +32,7 @@
 
 using namespace config::source;
 
-/*************************************************************************/
+/*=======================================================================*/
 
 WinRegistry::WinRegistry(const std::string_view &root)
     : Source(root)
@@ -40,7 +40,7 @@ WinRegistry::WinRegistry(const std::string_view &root)
 {
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void WinRegistry::createKey(bool reading)
 {
@@ -61,7 +61,7 @@ void WinRegistry::createKey(bool reading)
         throw std::runtime_error("Error creating registry key");
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void WinRegistry::releaseKey()
 {
@@ -73,7 +73,7 @@ void WinRegistry::releaseKey()
     }
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 std::shared_ptr<config::Context> WinRegistry::createContext(bool reading)
 {
@@ -84,7 +84,7 @@ std::shared_ptr<config::Context> WinRegistry::createContext(bool reading)
     return config::details::Source::createContext(reading);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool WinRegistry::readReg(
     const std::string &path,
@@ -136,7 +136,7 @@ bool WinRegistry::readReg(
     return true;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool WinRegistry::readValue(const std::string &path, int &value)
 {
@@ -150,7 +150,7 @@ bool WinRegistry::readValue(const std::string &path, int &value)
     return true;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool WinRegistry::readValue(const std::string &path, std::string &value)
 {
@@ -169,4 +169,4 @@ bool WinRegistry::readValue(const std::string &path, std::string &value)
 
 #endif
 
-/*************************************************************************/
+/*=======================================================================*/

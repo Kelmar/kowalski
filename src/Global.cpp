@@ -33,28 +33,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Code65p.h"
 #endif
 
-/*************************************************************************/
+/*=======================================================================*/
 
 PSym6502 CGlobal::Simulator() const
 {
     return wxGetApp().simulatorController().Simulator();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CDebugInfo *CGlobal::GetDebug() const
 {
     return wxGetApp().simulatorController().DebugInfo();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void CGlobal::ioAddress(sim_addr_t addr)
 {
     wxGetApp().simulatorController().SetIOAddress(addr);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 CAsm::Breakpoint CGlobal::SetBreakpoint(int line, const std::string &doc_title)
 {
@@ -80,7 +80,7 @@ void CGlobal::ClrBreakpoint(int line, const std::string &doc_title)
     GetDebug()->ClrBreakpoint(line, fuid); // Clear the breakpoint
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 bool CGlobal::CreateDeasm()
 {
@@ -106,7 +106,7 @@ bool CGlobal::CreateDeasm()
     return true;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #if 0
 void CGlobal::SaveCode(Archive &archive, uint32_t start, uint32_t end, int info)

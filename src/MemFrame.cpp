@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "StdAfx.h"
 #include "6502.h"
@@ -29,9 +29,9 @@
 #include "MemFrame.h"
 #include "FormatNums.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 // Configuration
-/*************************************************************************/
+/*=======================================================================*/
 
 namespace
 {
@@ -93,24 +93,70 @@ namespace
     }
 }
 
-/*************************************************************************/
-/*************************************************************************/
+/*=======================================================================*/
+/*=======================================================================*/
+// Memory adapter
+
+namespace
+{
+    class OutputMemView : public hex::MemoryView
+    {
+    public:
+        OutputMemView()
+            : hex::MemoryView()
+        {
+#if 0
+            // For testing
+            auto mem = &wxGetApp().m_global.GetMemory();
+
+            for (int i = 0; i < 256; ++i)
+                mem->set(i, (uint8_t)i);
+#endif
+        }
+
+        virtual size_t GetSize() const override
+        {
+            auto mem = &wxGetApp().m_global.GetMemory();
+            return mem->size();
+        }
+
+        virtual uint8_t GetByte(uint32_t address) const override
+        {
+            auto mem = &wxGetApp().m_global.GetMemory();
+            sim_addr_t addr = (sim_addr_t)address;
+            return mem->get(addr);
+        }
+
+        virtual void SetByte(uint32_t address, uint8_t value) override
+        {
+            auto mem = &wxGetApp().m_global.GetMemory();
+            sim_addr_t addr = (sim_addr_t)address;
+            return mem->set(addr, value);
+        }
+    };
+}
+
+/*=======================================================================*/
+/*=======================================================================*/
 
 MemoryFrame::MemoryFrame(wxWindow *parent)
     : wxPanel()
     , wxExtra(this)
-    , m_hexView(nullptr)
+    , m_hexEdit(nullptr)
 {
     if (!wxXmlResource::Get()->LoadPanel(this, parent, "MemoryFrame"))
         throw ResourceError();
 
     WX_BIND_CHILD(m_jumpEdit);
 
-    m_hexView = new HexView(this, wxID_ANY);
+    m_hexEdit = new hex::HexEdit(this, wxID_ANY);
 
-    wxXmlResource::Get()->AttachUnknownControl("m_hexView", m_hexView);
+    auto monoFont = wxGetApp().fontController().getMonoFont();
+    m_hexEdit->SetFont(monoFont);
 
-    m_hexView->SetMemory(&wxGetApp().m_global.GetMemory());
+    wxXmlResource::Get()->AttachUnknownControl("m_hexView", m_hexEdit);
+
+    m_hexEdit->SetMemory(new OutputMemView());
 
     m_jumpEdit->SetValue("");
 
@@ -124,14 +170,14 @@ MemoryFrame::~MemoryFrame()
     SaveConfig();
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void MemoryFrame::BindEvents()
 {
     m_jumpEdit->Bind(wxEVT_TEXT_ENTER, &MemoryFrame::OnJumpTo, this);
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 void MemoryFrame::OnJumpTo(wxCommandEvent &)
 {
@@ -172,7 +218,7 @@ void MemoryFrame::OnJumpTo(wxCommandEvent &)
             switch (relJump)
             {
             case -1:
-                addr = m_hexView->GetAddress() - res;
+                addr = m_hexEdit->GetAddress() - res;
                 break;
 
             default:
@@ -181,7 +227,7 @@ void MemoryFrame::OnJumpTo(wxCommandEvent &)
                 break;
 
             case 1:
-                addr = m_hexView->GetAddress() + res;
+                addr = m_hexEdit->GetAddress() + res;
                 break;
             }
         }
@@ -193,9 +239,9 @@ void MemoryFrame::OnJumpTo(wxCommandEvent &)
 
     if (addr != CAsm::INVALID_ADDRESS)
     {
-        m_hexView->JumpTo(addr);
+        m_hexEdit->JumpTo(addr);
         m_jumpEdit->SetValue("");
     }
 }
 
-/*************************************************************************/
+/*=======================================================================*/

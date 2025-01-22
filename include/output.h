@@ -1,4 +1,4 @@
-/*************************************************************************/
+/*=======================================================================*/
 /*
  * Copyright (c) 2024 - Bryce Simonds
  *
@@ -20,16 +20,16 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*************************************************************************/
+/*=======================================================================*/
 
 #ifndef OUTPUT_65_H__
 #define OUTPUT_65_H__
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #include "StrUtils.h"
 
-/*************************************************************************/
+/*=======================================================================*/
 
 namespace io
 {
@@ -62,13 +62,25 @@ namespace io
          * @param str The string to write.
          * @remarks New lines are interpreted on \r\n pair.
          */
-        virtual void write(const char *str) = 0;
+        virtual void write(std::string_view str) = 0;
+
+        /**
+         * @brief Write a formated string out to the display.
+         * @tparam ...T 
+         * @param fmt 
+         * @param ...args 
+         */
+        template <typename... T>
+        void writef(const std::string &fmt, T&&... args)
+        {
+            write(fmt::vformat(fmt, fmt::make_format_args(args...)));
+        }
     };
 }
 
 inline io::output &operator <<(io::output &target, const std::string &item)
 {
-    target.write(item.c_str());
+    target.write(item);
     return target;
 }
 
@@ -79,8 +91,8 @@ inline io::output &operator <<(io::output &target, const T &item)
     return target;
 }
 
-/*************************************************************************/
+/*=======================================================================*/
 
 #endif /* OUTPUT_65_H__ */
 
-/*************************************************************************/
+/*=======================================================================*/
