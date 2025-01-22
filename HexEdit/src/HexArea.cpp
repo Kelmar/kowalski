@@ -82,10 +82,54 @@ CellPainter::CellPainter(
     m_gapPx = m_drawState.metrics->CellMetrics.GapPx;
     m_fullPx = m_sizePx + m_gapPx;
 
+    CalcSelections();
+
+    m_cellBounds = CalcCellBounds();
+    m_charBounds = CalcCharBounds();
+}
+
+/*=======================================================================*/
+
+void CellPainter::CalcSelections()
+{
+    if (!selected())
+    {
+        m_aboveSelected = false;
+        m_leftSelected = false;
+        m_belowSelected = false;
+        m_rightSelected = false;
+    }
+    else
+    {
+        m_aboveSelected = (m_line > 0) && selected(-m_drawState.metrics->LineByteCount);
+        m_leftSelected = (m_column > 0) && selected(-1);
+
+        m_belowSelected = (m_line < (m_drawState.metrics->TotalLineCount - 1)) && selected(m_drawState.metrics->LineByteCount);
+        m_rightSelected = (m_column < (m_drawState.metrics->LineByteCount - 1)) && selected(1);
+    }
+}
+
+/*=======================================================================*/
+
+wxRect CellPainter::CalcCellBounds()
+{
     int top = m_line * m_fullPx.y;
     int left = m_column * m_fullPx.x;
 
-    m_bounds = wxRect(left, top, m_fullPx.x, m_fullPx.y);
+    return wxRect(left, top, m_fullPx.x, m_fullPx.y);
+}
+
+/*=======================================================================*/
+
+wxRect CellPainter::CalcCharBounds()
+{
+    int top = m_line * m_fullPx.y;
+
+    int left = 
+        (m_column * m_drawState.metrics->CharSizePx.x) + 
+        m_drawState.metrics->CharAreaStartX;
+
+    return wxRect(left, top, m_drawState.metrics->CharSizePx.x, m_fullPx.y);
 }
 
 /*=======================================================================*/
@@ -95,7 +139,11 @@ void CellPainter::Draw()
     if (selected())
     {
         DrawBackground();
-        DrawSelectionBounds();
+
+        m_dc.SetPen(wxPen(m_drawState.metrics->Colors.HighlightBorder, 1));
+
+        DrawSelectionBounds(m_cellBounds);
+        DrawSelectionBounds(m_charBounds);
     }
 
     DrawText();
@@ -108,40 +156,31 @@ void CellPainter::DrawBackground()
     m_dc.SetPen(*wxTRANSPARENT_PEN);
     m_dc.SetBrush(wxBrush(m_drawState.metrics->Colors.HighlightBackground));
 
-    m_dc.DrawRectangle(m_bounds);
+    m_dc.DrawRectangle(m_cellBounds);
+    m_dc.DrawRectangle(m_charBounds);
 }
 
 /*=======================================================================*/
 
-void CellPainter::DrawSelectionBounds()
+void CellPainter::DrawSelectionBounds(wxRect rect)
 {
     // Mostly works, but has some edge cases that need to be handled.
+    int x1 = rect.x;
+    int y1 = rect.y;
+    int x2 = rect.GetRight();
+    int y2 = rect.GetBottom();
 
-    bool aboveSelected = (m_line > 0) && selected(-m_drawState.metrics->LineByteCount);
-    bool leftSelected = (m_column > 0) && selected(-1);
+    if (!m_aboveSelected)
+        m_dc.DrawLine(x1, y1, x2 + 1, y1);
 
-    bool belowSelected = (m_line < (m_drawState.metrics->TotalLineCount - 1)) && selected(m_drawState.metrics->LineByteCount);
-    bool rightSelected = (m_column < (m_drawState.metrics->LineByteCount - 1)) && selected(1);
+    if (!m_leftSelected)
+        m_dc.DrawLine(x1, y1, x1, y2 + 1);
 
-    if (!aboveSelected || !leftSelected || !belowSelected || !rightSelected)
-    {
-        m_dc.SetPen(wxPen(m_drawState.metrics->Colors.HighlightBorder, 1));
+    if (!m_belowSelected)
+        m_dc.DrawLine(x1, y2, x2 + 1, y2);
 
-        int right = m_bounds.GetRight();
-        int bottom = m_bounds.GetBottom();
-
-        if (!aboveSelected)
-            m_dc.DrawLine(m_bounds.x, m_bounds.y, right + 1, m_bounds.y);
-
-        if (!leftSelected)
-            m_dc.DrawLine(m_bounds.x, m_bounds.y, m_bounds.x, bottom + 1);
-
-        if (!belowSelected)
-            m_dc.DrawLine(m_bounds.x, bottom, right + 1, bottom);
-
-        if (!rightSelected)
-            m_dc.DrawLine(right, m_bounds.y, right, bottom + 1);
-    }
+    if (!m_rightSelected)
+        m_dc.DrawLine(x2, y1, x2, y2 + 1);
 }
 
 /*=======================================================================*/
@@ -157,10 +196,19 @@ void CellPainter::DrawText()
     else
         txtColor.Set(m_drawState.metrics->Colors.FontColor);
 
-    wxString txt;
-    txt.Printf("%02X", value());
+    uint8_t val = value();
 
-    m_dc.DrawText(txt, m_bounds.GetTopLeft() + (m_gapPx / 2));
+    wxString txt;
+    txt.Printf("%02X", val);
+
+    m_dc.DrawText(txt, m_cellBounds.GetTopLeft() + (m_gapPx / 2));
+
+    txt = (val < 32) || (val > 126) ? '.' : (char)val;
+
+    wxPoint p = m_charBounds.GetTopLeft();
+    p.y += (m_gapPx.y / 2);
+
+    m_dc.DrawText(txt, p);
 }
 
 /*=======================================================================*/
@@ -226,6 +274,8 @@ bool HexArea::ToCell(wxPoint *where)
     wxString tmp;
     tmp.Printf("{%d,%d}", where->x, where->y);
     wxLogDebug(tmp);
+
+    
 
     return rval;
 }
@@ -336,45 +386,6 @@ void HexArea::ScrollWindow(int dx, int dy, const wxRect *rect)
     m_baseRows->ScrollWindow(0, dy, rect);
     m_offsetCols->ScrollWindow(dx, 0, rect);
 }
-
-/*=======================================================================*/
-
-#if 0
-
-wxString HexArea::LineToHex(const std::span<const uint8_t> &bytes)
-{
-    wxString rval;
-    wxString txt;
-
-    rval.reserve(bytes.size() * 3);
-
-    for (size_t i = 0; i < bytes.size(); ++i)
-    {
-        uint8_t val = bytes[i];
-        txt.Printf("%02X ", val);
-        rval += txt;
-    }
-
-    return rval.Trim();
-}
-
-/*=======================================================================*/
-
-wxString HexArea::LineToChars(const std::span<const uint8_t> &bytes)
-{
-    wxString rval;
-
-    rval.reserve(bytes.size());
-
-    for (size_t i = 0; i < bytes.size(); ++i)
-    {
-        uint8_t val = bytes[i];
-        rval += (val < 32) || (val > 126) ? '.' : (char)val;
-    }
-
-    return rval;
-}
-#endif
 
 /*=======================================================================*/
 

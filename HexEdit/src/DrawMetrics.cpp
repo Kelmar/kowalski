@@ -109,10 +109,10 @@ void DrawMetrics::CalcSizes()
     LineCellsWidthChars = LineByteCount * CellMetrics.CharacterCount;
 
     LineCellsWidthPx = 
-        ((LineByteCount - 1) * CellMetrics.GapPx.x) +
-        LineCellsWidthChars * CharSizePx.x;
+        (LineByteCount * CellMetrics.GapPx.x) +
+        (LineByteCount * CellMetrics.SizePx.x);
 
-    CharAreaStartX = GapSizePx.x + LineCellsWidthPx;
+    CharAreaStartX = (GapSizePx.x * 2) + LineCellsWidthPx;
 
     LineSizePx.x = LineCellsWidthChars * CharSizePx.x;
     LineSizePx.y = CharSizePx.y;

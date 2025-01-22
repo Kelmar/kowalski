@@ -141,7 +141,18 @@ namespace hex
         wxSize m_gapPx;
         wxSize m_fullPx;
 
-        wxRect m_bounds;
+        wxRect m_cellBounds;
+        wxRect m_charBounds;
+
+        bool m_aboveSelected;
+        bool m_belowSelected;
+        bool m_leftSelected;
+        bool m_rightSelected;
+
+        wxRect CalcCellBounds();
+        wxRect CalcCharBounds();
+
+        void CalcSelections();
 
     public:
         CellPainter(
@@ -155,7 +166,7 @@ namespace hex
 
     private:
         void DrawBackground();
-        void DrawSelectionBounds();
+        void DrawSelectionBounds(wxRect rect);
         void DrawText();
     };
 
