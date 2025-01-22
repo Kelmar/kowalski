@@ -94,9 +94,9 @@ namespace hex
         virtual ~DrawMetrics() { }
 
     public: // Properties
-        Colors Colors;
+        Colors colors;
 
-        CellMetrics CellMetrics;
+        CellMetrics cellMetrics;
 
         /// Size of the character area in pixels.
         int CharAreaWidthPx;

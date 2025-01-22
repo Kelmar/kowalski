@@ -58,7 +58,7 @@ Colors::Colors()
 
 DrawMetrics::DrawMetrics(const HexEdit *owner)
     : m_owner(owner)
-    , Colors()
+    , colors()
 {
     GetBaseItems();
     CalcCellMetrics();
@@ -82,9 +82,9 @@ void DrawMetrics::GetBaseItems()
 
 void DrawMetrics::CalcCellMetrics()
 {
-    CellMetrics.CharacterCount = 2; // Hard coded for now
-    CellMetrics.SizePx = wxSize(CellMetrics.CharacterCount * CharSizePx.x, CharSizePx.y);
-    CellMetrics.GapPx = wxSize(CharSizePx.x, 0);
+    cellMetrics.CharacterCount = 2; // Hard coded for now
+    cellMetrics.SizePx = wxSize(cellMetrics.CharacterCount * CharSizePx.x, CharSizePx.y);
+    cellMetrics.GapPx = wxSize(CharSizePx.x, 0);
 }
 
 /*=======================================================================*/
@@ -106,11 +106,11 @@ void DrawMetrics::CalcSizes()
 
     TotalLineCount = (int)std::ceil((float)max / LineByteCount);
 
-    LineCellsWidthChars = LineByteCount * CellMetrics.CharacterCount;
+    LineCellsWidthChars = LineByteCount * cellMetrics.CharacterCount;
 
     LineCellsWidthPx = 
-        (LineByteCount * CellMetrics.GapPx.x) +
-        (LineByteCount * CellMetrics.SizePx.x);
+        (LineByteCount * cellMetrics.GapPx.x) +
+        (LineByteCount * cellMetrics.SizePx.x);
 
     CharAreaStartX = (GapSizePx.x * 2) + LineCellsWidthPx;
 

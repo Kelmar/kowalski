@@ -78,8 +78,8 @@ CellPainter::CellPainter(
     m_line = cell / m_drawState.metrics->LineByteCount;
     m_column = cell % m_drawState.metrics->LineByteCount;
 
-    m_sizePx = m_drawState.metrics->CellMetrics.SizePx;
-    m_gapPx = m_drawState.metrics->CellMetrics.GapPx;
+    m_sizePx = m_drawState.metrics->cellMetrics.SizePx;
+    m_gapPx = m_drawState.metrics->cellMetrics.GapPx;
     m_fullPx = m_sizePx + m_gapPx;
 
     CalcSelections();
@@ -140,7 +140,7 @@ void CellPainter::Draw()
     {
         DrawBackground();
 
-        m_dc.SetPen(wxPen(m_drawState.metrics->Colors.HighlightBorder, 1));
+        m_dc.SetPen(wxPen(m_drawState.metrics->colors.HighlightBorder, 1));
 
         DrawSelectionBounds(m_cellBounds);
         DrawSelectionBounds(m_charBounds);
@@ -154,7 +154,7 @@ void CellPainter::Draw()
 void CellPainter::DrawBackground()
 {
     m_dc.SetPen(*wxTRANSPARENT_PEN);
-    m_dc.SetBrush(wxBrush(m_drawState.metrics->Colors.HighlightBackground));
+    m_dc.SetBrush(wxBrush(m_drawState.metrics->colors.HighlightBackground));
 
     m_dc.DrawRectangle(m_cellBounds);
     m_dc.DrawRectangle(m_charBounds);
@@ -170,17 +170,24 @@ void CellPainter::DrawSelectionBounds(wxRect rect)
     int x2 = rect.GetRight();
     int y2 = rect.GetBottom();
 
+    // Apparently the DrawLine() call is not consistent across Win32 and GTK
+#ifdef __WXGTK__
+    const int ADD_PIXEL = 0;
+#else
+    const int ADD_PIXEL = 1;
+#endif
+
     if (!m_aboveSelected)
-        m_dc.DrawLine(x1, y1, x2 + 1, y1);
+        m_dc.DrawLine(x1, y1, x2 + ADD_PIXEL, y1);
 
     if (!m_leftSelected)
-        m_dc.DrawLine(x1, y1, x1, y2 + 1);
+        m_dc.DrawLine(x1, y1, x1, y2 + ADD_PIXEL);
 
     if (!m_belowSelected)
-        m_dc.DrawLine(x1, y2, x2 + 1, y2);
+        m_dc.DrawLine(x1, y2, x2 + ADD_PIXEL, y2);
 
     if (!m_rightSelected)
-        m_dc.DrawLine(x2, y1, x2, y2 + 1);
+        m_dc.DrawLine(x2, y1, x2, y2 + ADD_PIXEL);
 }
 
 /*=======================================================================*/
@@ -192,9 +199,9 @@ void CellPainter::DrawText()
     wxDCTextColourChanger txtColor(m_dc);
 
     if (selected())
-        txtColor.Set(m_drawState.metrics->Colors.SelectFontColor);
+        txtColor.Set(m_drawState.metrics->colors.SelectFontColor);
     else
-        txtColor.Set(m_drawState.metrics->Colors.FontColor);
+        txtColor.Set(m_drawState.metrics->colors.FontColor);
 
     uint8_t val = value();
 
@@ -267,7 +274,7 @@ bool HexArea::ToCell(wxPoint *where)
     }
     else
     {
-        auto full = metrics->CellMetrics.SizePx + metrics->CellMetrics.GapPx;
+        auto full = metrics->cellMetrics.SizePx + metrics->cellMetrics.GapPx;
         where->x /= full.x;
     }
 
@@ -396,7 +403,7 @@ void HexArea::OnPaint(wxPaintEvent &)
 
     AreaDrawState state(dc, this);
 
-    dc.SetBackground(wxBrush(state.metrics->Colors.ControlBackground));
+    dc.SetBackground(wxBrush(state.metrics->colors.ControlBackground));
     dc.Clear();
 
     if (!state.mem)

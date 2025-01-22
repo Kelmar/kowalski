@@ -49,7 +49,7 @@ void OffsetColumns::OnPaint(wxPaintEvent &)
     auto metrics = GetMetrics();
 
     dc.SetFont(m_owner->GetFont());
-    dc.SetBackground(wxBrush(metrics->Colors.ControlBackground));
+    dc.SetBackground(wxBrush(metrics->colors.ControlBackground));
     dc.Clear();
 
     int scrollUnits, origin;
@@ -60,14 +60,14 @@ void OffsetColumns::OnPaint(wxPaintEvent &)
     dc.SetDeviceOrigin(-origin * scrollUnits, 0);
 
     wxString txt;
-    int x = metrics->CellMetrics.GapPx.x / 2;
+    int x = metrics->cellMetrics.GapPx.x / 2;
 
     for (int i = 0; i < metrics->LineByteCount; ++i)
     {
         txt.Printf("%02X ", i);
         dc.DrawText(txt, x, 0);
 
-        x += metrics->CellMetrics.SizePx.x + metrics->CellMetrics.GapPx.x;
+        x += metrics->cellMetrics.SizePx.x + metrics->cellMetrics.GapPx.x;
     }
 }
 

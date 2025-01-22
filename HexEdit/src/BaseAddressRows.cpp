@@ -63,7 +63,7 @@ void BaseAddressRows::OnPaint(wxPaintEvent &)
 
     auto metrics = GetMetrics();
 
-    dc.SetBackground(wxBrush(metrics->Colors.ControlBackground));
+    dc.SetBackground(wxBrush(metrics->colors.ControlBackground));
     dc.Clear();
 
     dc.SetFont(m_owner->GetFont());
@@ -80,7 +80,7 @@ void BaseAddressRows::OnPaint(wxPaintEvent &)
 
     m_owner->CalcUnscrolledPosition(0, scrollY, nullptr, &scrollY);
 
-    int y = metrics->CellMetrics.GapPx.y / 2;
+    int y = metrics->cellMetrics.GapPx.y / 2;
     int y_off = metrics->LineSizePx.y;
 
     int lineStart = scrollY / y_off;
