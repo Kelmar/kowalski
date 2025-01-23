@@ -28,10 +28,14 @@
 
 /*=======================================================================*/
 
+const std::string ASSEMBLER_CONSOLE = "assembler";
+
+/*=======================================================================*/
+
 ConsoleFrame::ConsoleFrame(wxFrame *parent)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize)
     , m_text(nullptr)
-    , m_output(this, "")
+    , m_output(new ConsoleOutput(this, ""))
 {
     auto font = new wxFont(11, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 

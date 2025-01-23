@@ -29,6 +29,8 @@
 #include "6502View.h"
 #include "6502Doc.h"
 
+#include "DisassemblyFrame.h"
+
 /*=======================================================================*/
 
 #include "Options.h"
@@ -209,6 +211,9 @@ void SimulatorController::BindEvents()
     // View menu handlers
     Bind(wxEVT_MENU, &SimulatorController::OnViewDisassembler, this, evID_SHOW_DISASM);
 
+    // View update handlers
+    Bind(wxEVT_UPDATE_UI, &SimulatorController::EnableWhenDebugging, this, evID_SHOW_DISASM);
+
     // Simulator menu handlers
     Bind(wxEVT_MENU, &SimulatorController::OnAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_MENU, &SimulatorController::OnRun, this, evID_RUN);
@@ -224,7 +229,7 @@ void SimulatorController::BindEvents()
     Bind(wxEVT_MENU, &SimulatorController::OnSkipInstruction, this, evID_SKIP_INSTR);
     Bind(wxEVT_MENU, &SimulatorController::OnSkipToCursor, this, evID_SKIP_TO_LINE);
 
-    // Update handlers
+    // Simulator update handlers
     Bind(wxEVT_UPDATE_UI, &SimulatorController::OnUpdateAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_UPDATE_UI, &SimulatorController::OnUpdateRun, this, evID_RUN);
     Bind(wxEVT_UPDATE_UI, &SimulatorController::OnUpdateRestart, this, evID_RESTART);
@@ -288,6 +293,92 @@ void SimulatorController::BuildMenu(wxMenuBar *menuBar)
     */
 
     menuBar->Append(menu, _("Simulator"));
+}
+
+/*=======================================================================*/
+
+void SimulatorController::Assemble()
+{
+    wxCriticalSectionLocker enter(m_critSect);
+
+    if (m_assembling)
+        return; // Currently assembling code, wait for completion.
+
+    CSrc6502View *pView = wxGetApp().mainFrame()->GetCurrentView();
+
+    if (pView == nullptr)
+        return;
+
+    CSrc6502Doc *doc = pView->GetDocument();
+
+    if (doc == nullptr)
+        return;
+
+    // Ensure the document is written to disk so the assembler can read the latest and greatest.
+    doc->Save();
+
+    /*if (m_IOWindow.IsWaiting())
+    {
+        m_IOWindow.SetFocus();
+        return;
+    }*/
+
+    //SendMessageToViews(WM_USER_REMOVE_ERR_MARK);
+
+    switch (CurrentState())
+    {
+    case DebugState::Unloaded:
+    case DebugState::NotStarted:
+    case DebugState::Finished:
+        break; // Don't prompt
+
+    default:
+        if (!ConfirmStop(_("Assemble stops running simulator.\nExit debugger to assemble the program?")))
+            return;
+
+        ExitDebugMode();
+
+        break;
+    }
+
+    // TODO: Remove this, the assembler should be able to find the includes itself. -- B.Simonds (July 28, 2024)
+
+    // before assembly start set current dir to the document directory,
+    // so include directive will find included files
+    //
+
+    const std::string &path = doc->GetFilename().ToStdString();
+
+    const std::string &dirName = file::getDirectory(path);
+
+    if (!dirName.empty())
+    {
+        if (chdir(dirName.c_str()))
+            throw FileError(FileError::CannotChangeDir);
+    }
+
+    m_assembling = true;
+    auto asmOutput = wxGetApp().GetConsole(ASSEMBLER_CONSOLE);
+
+    asmOutput->write(_("Staring assemlber...").ToStdString() + "\r\n");
+
+    m_asmThread = new AsmThread(this, path, asmOutput);
+
+    if (m_asmThread->Create() != wxTHREAD_NO_ERROR)
+    {
+        wxLogError("Can't create background thread!");
+        delete m_asmThread;
+        m_asmThread = nullptr;
+        return;
+    }
+
+    if (m_asmThread->Run() != wxTHREAD_NO_ERROR)
+    {
+        wxLogError("Can't start background thread!");
+        delete m_asmThread;
+        m_asmThread = nullptr;
+        return;
+    }
 }
 
 /*=======================================================================*/
@@ -512,87 +603,15 @@ sim_addr_t SimulatorController::GetCursorAddress(bool skipping)
 
 void SimulatorController::OnViewDisassembler(wxCommandEvent &)
 {
-    wxLogDebug("DOOT!");
+    auto wnd = new DisassemblyFrame(wxGetApp().mainFrame());
+    wnd->Show();
 }
 
 /*=======================================================================*/
 
 void SimulatorController::OnAssemble(wxCommandEvent &)
 {
-    if (m_asmThread)
-        return; // Currently assembling code, wait for completion.
-
-    CSrc6502View *pView = wxGetApp().mainFrame()->GetCurrentView();
-
-    if (pView == nullptr)
-        return;
-
-    CSrc6502Doc *doc = pView->GetDocument();
-
-    if (doc == nullptr)
-        return;
-
-    /*if (m_IOWindow.IsWaiting())
-    {
-        m_IOWindow.SetFocus();
-        return;
-    }*/
-
-    //SendMessageToViews(WM_USER_REMOVE_ERR_MARK);
-
-    switch (CurrentState())
-    {
-    case DebugState::Unloaded:
-    case DebugState::NotStarted:
-    case DebugState::Finished:
-        break; // Don't prompt
-
-    default:
-        if (!ConfirmStop(_("Assemble stops running simulator.\nExit debugger to assemble the program?")))
-            return;
-
-        ExitDebugMode();
-
-        break;
-    }
-
-    // TODO: Remove this, the assembler should be able to find the includes itself. -- B.Simonds (July 28, 2024)
-
-    // before assembly start set current dir to the document directory,
-    // so include directive will find included files
-    //
-
-    const std::string &path = doc->GetFilename().ToStdString();
-
-    const std::string &dirName = file::getDirectory(path);
-
-    if (!dirName.empty())
-    {
-        if (chdir(dirName.c_str()))
-            throw FileError(FileError::CannotChangeDir);
-    }
-
-    wxCriticalSectionLocker enter(m_critSect);
-    m_assembling = true;
-
-    m_asmThread = new AsmThread(this, path);
-
-    if (m_asmThread->Create() != wxTHREAD_NO_ERROR)
-    {
-        wxLogError("Can't create background thread!");
-        delete m_asmThread;
-        m_asmThread = nullptr;
-        return;
-    }
-
-    if (m_asmThread->Run() != wxTHREAD_NO_ERROR)
-    {
-        wxLogError("Can't start background thread!");
-        delete m_asmThread;
-        m_asmThread = nullptr;
-    }
-    else
-        wxLogStatus("Assembler started");
+    Assemble();
 }
 
 /*=======================================================================*/
@@ -702,21 +721,28 @@ void SimulatorController::OnUpdateRun(wxUpdateUIEvent &e)
 
 void SimulatorController::OnUpdateRestart(wxUpdateUIEvent &e)
 {
-    e.Enable(CurrentState() != DebugState::Unloaded);
+    e.Enable(CurrentState() != DebugState::Unloaded && !m_assembling);
+}
+
+/*=======================================================================*/
+
+void SimulatorController::EnableWhenDebugging(wxUpdateUIEvent &e)
+{
+    e.Enable(IsDebugging());
 }
 
 /*=======================================================================*/
 
 void SimulatorController::EnableWhenRunning(wxUpdateUIEvent &e)
 {
-    e.Enable(CurrentState() == DebugState::Running);
+    e.Enable(CurrentState() == DebugState::Running && !m_assembling);
 }
 
 /*=======================================================================*/
 
 void SimulatorController::EnableWhenStopped(wxUpdateUIEvent &e)
 {
-    e.Enable(CurrentState() == DebugState::Stopped);
+    e.Enable(CurrentState() == DebugState::Stopped && !m_assembling);
 }
 
 /*=======================================================================*/
@@ -725,8 +751,6 @@ void SimulatorController::EnableWhenStopped(wxUpdateUIEvent &e)
 
 void SimulatorController::OnAsmComplete(wxThreadEvent &)
 {
-    wxLogDebug("OnAsmComplete() enter");
-
     wxCriticalSectionLocker enter(m_critSect);
 
     m_assembling = false;
@@ -734,21 +758,12 @@ void SimulatorController::OnAsmComplete(wxThreadEvent &)
     if (!m_asmThread)
         return;
 
-    wxThread::ExitCode exit = m_asmThread->Wait();
+    m_asmThread->Wait();
 
     delete m_asmThread;
     m_asmThread = nullptr;
 
-    if (exit != nullptr)
-    {
-        wxLogStatus("Assembly failed");
-        wxGetApp().mainFrame()->console()->AppendText("Error from assembler!\r\n");
-    }
-    else
-    {
-        wxLogStatus("Assembly completed");
-        wxGetApp().mainFrame()->console()->AppendText("Assemble OK\r\n");
-    }
+    wxGetApp().mainFrame()->UpdateAll();
 }
 
 /*=======================================================================*/

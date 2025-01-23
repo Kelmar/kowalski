@@ -35,9 +35,6 @@
 
 wxThread::ExitCode AsmThread::Entry()
 {
-    // TODO: Remove direct call to wxGetApp() from here; place in SimulatorController
-    io::output &out = wxGetApp().mainFrame()->console()->GetOutput("assembler");
-
     COutputMem &mainMem = wxGetApp().m_global.GetMemory();
     CMemoryPtr asmMem(new COutputMem());
     CDebugInfo *debug = wxGetApp().simulatorController().DebugInfo();
@@ -45,7 +42,7 @@ wxThread::ExitCode AsmThread::Entry()
 
     auto assembler = std::make_unique<CAsm6502>(
         m_path.c_str(),
-        out,
+        m_output,
         asmMem.get(),
         debug,
         nullptr,
@@ -58,8 +55,6 @@ wxThread::ExitCode AsmThread::Entry()
         // Copy result to actual memory.
         mainMem = *asmMem;
     }
-    else
-        assembler->report_error(res); // TODO: Don't call this from here.
 
     wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);
 

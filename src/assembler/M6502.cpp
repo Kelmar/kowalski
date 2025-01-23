@@ -500,46 +500,46 @@ bool CAsm6502::asm_instr(const std::string &str, InstrType &it)
     static const ASM_STR_KEY instr[] =
     {
         // Assembly language directives in alphabetical order
-        ".ASCII",	I_DB,		// def byte
-        ".ASCIS",	I_ASCIS,	// ascii + $80 ostatni bajt
-        ".BYTE",	I_DB,
-        ".DATE",	I_DATE,		// insert date data
-        ".DB",		I_DB,		// def byte
-        ".DBYTE",	I_DD,		// def double byte
-        ".DCB",		I_DCB,		// declare block
-        ".DD",		I_DD,		// def double byte
-        ".DDW",     I_DDW,      // 32 bit word
-        ".DS",		I_RS,		// reserve space (define space)
-        ".DW",		I_DW,		// def word
-        ".DWORD",	I_DDW,      // 32 bit word
-        ".DX",      I_DX,		// 24 bit number
-        ".ELSE",	I_ELSE,
-        ".END",		I_END,		// ending the program (file)
-        ".ENDIF",	I_ENDIF,	// end .IF
-        ".ENDM",	I_ENDM,		// end .MACRO
-        ".ENDR",	I_ENDR,		// end .REPEAT
-        ".EQU",		I_SET,		// value assignment
-        ".ERROR",	I_ERROR,	// Error report
-        ".EXITM",	I_EXITM,	// end of macro expansion
-        ".IF",		I_IF,		// conditional assembly
-        ".INCLUDE",	I_INCLUDE,	// including the file in assembly
-        ".IO_WND",	I_IO_WND,	// I/O terminal window size
-        ".LSTR",	I_LS,		// Long string
-        ".LSTRING",	I_LS,		// Long string
-        ".MACRO",	I_MACRO,	// makrodefinicja
-        ".OPT",		I_OPT,		// opcje asemblera
-        ".ORG",		I_ORG,		// origin
-        ".REPEAT",	I_REPEAT,	// replay
-        ".REPT",	I_REPEAT,
-        ".ROM_AREA",I_ROM_AREA,	// protected memory area
-        ".RS",		I_RS,		// reserve space
-        ".SET",		I_SET,		// value assignment
-        ".START",	I_START,	// program start (for simulator)
-        ".STR",		I_DS,		// def string
-        ".STRING",	I_DS,		// def string
-        ".TIME",	I_TIME,		// insert time data
-        ".WORD",	I_DW,		// 16 bit number
-        ".XWORD",   I_DX        // 24 bit number
+        ".ASCII",    I_DB,       // Define byte
+        ".ASCIS",    I_ASCIS,    // ascii + $80 ostatni bajt
+        ".BYTE",     I_DB,
+        ".DATE",     I_DATE,     // Insert date data
+        ".DB",       I_DB,       // Define byte
+        ".DBYTE",    I_DD,       // Define double byte
+        ".DCB",      I_DCB,      // Declare block
+        ".DD",       I_DD,       // Define double byte
+        ".DDW",      I_DDW,      // 32 bit word
+        ".DS",       I_RS,       // Reserve space (define space)
+        ".DW",       I_DW,       // Def word
+        ".DWORD",    I_DDW,      // 32 bit word
+        ".DX",       I_DX,       // 24 bit number
+        ".ELSE",     I_ELSE,
+        ".END",      I_END,      // Ending the program (file)
+        ".ENDIF",    I_ENDIF,    // End .IF
+        ".ENDM",     I_ENDM,     // End .MACRO
+        ".ENDR",     I_ENDR,     // End .REPEAT
+        ".EQU",      I_SET,      // Value assignment
+        ".ERROR",    I_ERROR,    // Error report
+        ".EXITM",    I_EXITM,    // End of macro expansion
+        ".IF",       I_IF,       // Conditional assembly
+        ".INCLUDE",  I_INCLUDE,  // Including the file in assembly
+        ".IO_WND",   I_IO_WND,   // I/O terminal window size
+        ".LSTR",     I_LS,       // Long string
+        ".LSTRING",  I_LS,       // Long string
+        ".MACRO",    I_MACRO,    // Macro definition
+        ".OPT",      I_OPT,      // Assembler options
+        ".ORG",      I_ORG,      // Code origin
+        ".REPEAT",   I_REPEAT,   // Replay
+        ".REPT",     I_REPEAT,
+        ".ROM_AREA", I_ROM_AREA, // Protected memory area
+        ".RS",       I_RS,       // Reserve space
+        ".SET",      I_SET,      // Value assignment
+        ".START",    I_START,    // Program start (for simulator)
+        ".STR",      I_DS,       // Def string
+        ".STRING",   I_DS,       // Def string
+        ".TIME",     I_TIME,     // Insert time data
+        ".WORD",     I_DW,       // 16 bit number
+        ".XWORD",    I_DX        // 24 bit number
     };
 
     //% Bug Fix 1.2.12.18 - .commands commented out - next_leks changed back to only come here if 1st char is '.'
@@ -2482,6 +2482,8 @@ void CAsm6502::asm_fin()
 
 void CAsm6502::asm_start_pass()
 {
+    m_console->writef("Staring assembly pass {0}\r\n", pass);
+
     source.Push(&entire_text);
     text = source.Peek();
     local_area = 0;
@@ -2502,7 +2504,25 @@ void CAsm6502::asm_fin_pass()
 }
 
 //$$asm starts here
-CAsm6502::Stat CAsm6502::assemble() // Program translation
+
+CAsm6502::Stat CAsm6502::assemble()
+{
+    Stat res = InnerAssemble();
+
+    if (res == CAsm::Stat::OK)
+    {
+        m_console->write(_("Assembly completed").ToStdString());
+    }
+    else
+    {
+        report_error(res);
+        m_console->write(_("Assembly failed").ToStdString());
+    }
+
+    return res;
+}
+
+CAsm6502::Stat CAsm6502::InnerAssemble() // Program translation
 {
     Stat ret = Stat::ERR_LAST;
     swapbin = false;

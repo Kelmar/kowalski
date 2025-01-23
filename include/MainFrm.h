@@ -91,7 +91,6 @@ private:
     //afx_msg LRESULT OnUpdateState(WPARAM wParam, LPARAM lParam);
 
     int RedrawAllViews(int chgHint = 0);
-    int Options(int page);
     int m_nLastPage;
     void ConfigSettings(bool load);
 
@@ -156,20 +155,14 @@ protected:
     afx_msg void OnViewIdents();
     afx_msg void OnUpdateViewIdents(CCmdUI* pCmdUI);
 
-    afx_msg void OnEditorOpt();
-    afx_msg void OnUpdateEditorOpt(CCmdUI* pCmdUI);
     afx_msg void OnUpdateViewIOWindow(CCmdUI* pCmdUI);
     afx_msg void OnDestroy();
     afx_msg void OnFileLoadCode();
     afx_msg void OnUpdateFileLoadCode(CCmdUI* pCmdUI);
-    afx_msg void OnDeasmOptions();
-    afx_msg void OnUpdateDeasmOptions(CCmdUI* pCmdUI);
     afx_msg void OnViewRegisterWnd();
     afx_msg void OnSysColorChange();
     afx_msg void OnUpdateViewZeropage(CCmdUI* pCmdUI);
     afx_msg void OnViewZeropage();
-    afx_msg void OnUpdateMemoryOptions(CCmdUI* pCmdUI);
-    afx_msg void OnMemoryOptions();
     afx_msg void OnTimer(UINT nIDEvent);
     afx_msg void OnViewStack();
     afx_msg void OnUpdateViewStack(CCmdUI* pCmdUI);

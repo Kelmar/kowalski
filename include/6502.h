@@ -96,6 +96,8 @@ public:
     CMainFrame *mainFrame() const { return m_mainFrame; }
     wxLogWindow *logFrame() const { return m_logFrame; }
 
+    std::shared_ptr<io::output> GetConsole(const std::string &name) { return m_mainFrame->console()->GetOutput(name); }
+
     wxConfig &Config() { return *m_config; }
 
     virtual void AddToRecentFileList(const std::string &pathName);

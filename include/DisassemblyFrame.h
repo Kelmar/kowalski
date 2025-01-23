@@ -22,37 +22,25 @@
  */
 /*=======================================================================*/
 
-#ifndef ASM_THREAD_H__
-#define ASM_THREAD_H__
+#ifndef DISASM_FRM_6502_H__
+#define DISASM_FRM_6502_H__
 
 /*=======================================================================*/
 
-/**
- * Class that spins off the assembler into a background thread.
- */
-class AsmThread : public wxThread
+#include "mdi65.h"
+
+/*=======================================================================*/
+
+class DisassemblyFrame : public CHILD_BASE
 {
-private:
-    wxEvtHandler *m_parent;
-    std::string m_path;
-    std::shared_ptr<io::output> m_output;
-
 public:
-    AsmThread(wxEvtHandler *parent, 
-        const std::string &path,
-        std::shared_ptr<io::output> output)
-        : wxThread(wxTHREAD_JOINABLE)
-        , m_parent(parent)
-        , m_path(path)
-        , m_output(output)
-    {
-    }
-
-    virtual ExitCode Entry();
+    /* constructor */ DisassemblyFrame(MAIN_BASE *parent);
+    virtual ~DisassemblyFrame();
 };
 
 /*=======================================================================*/
 
-#endif /* ASM_THREAD_H__ */
+#endif /* DISASM_FRM_6502_H__ */
 
 /*=======================================================================*/
+

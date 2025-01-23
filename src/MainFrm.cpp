@@ -416,18 +416,11 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_COMMAND(ID_VIEW_IDENT, OnViewIdents)
     ON_UPDATE_COMMAND_UI(ID_VIEW_IDENT, OnUpdateViewIdents)
 
-    ON_COMMAND(ID_EDITOR_OPT, OnEditorOpt)
-    ON_UPDATE_COMMAND_UI(ID_EDITOR_OPT, OnUpdateEditorOpt)
-
-    ON_COMMAND(ID_DEASM_OPTIONS, OnDeasmOptions)
-    ON_UPDATE_COMMAND_UI(ID_DEASM_OPTIONS, OnUpdateDeasmOptions)
     ON_COMMAND(ID_VIEW_REGISTERBAR, OnViewRegisterWnd)
     
     ON_UPDATE_COMMAND_UI(ID_VIEW_ZEROPAGEBAR, OnUpdateViewZeropage)
     ON_COMMAND(ID_VIEW_ZEROPAGEBAR, OnViewZeropage)
-    ON_UPDATE_COMMAND_UI(ID_MEMORY_OPTIONS, OnUpdateMemoryOptions)
-    ON_COMMAND(ID_MEMORY_OPTIONS, OnMemoryOptions)
-    
+
     ON_COMMAND(ID_VIEW_STACK, OnViewStack)
     ON_UPDATE_COMMAND_UI(ID_VIEW_STACK, OnUpdateViewStack)
     ON_COMMAND(ID_SYM_GEN_IRQ, OnSymGenIRQ)
@@ -499,7 +492,7 @@ CMainFrame::CMainFrame(wxDocManager *docManager)
     m_uTimer = 0;
 
     m_output = new ConsoleFrame(this);
-    m_output->AppendText("This is a test.\r\n");
+    //m_output->AppendText("This is a test.\r\n");
 
     wxAuiPaneInfo outputInfo;
     outputInfo
@@ -1300,200 +1293,6 @@ afx_msg LRESULT CMainFrame::OnUpdateState(WPARAM wParam, LPARAM lParam)
 }
 #endif
 
-//---------------------------- Opcje programu ---------------------------------
-
-int CMainFrame::Options(int page)
-{
-    UNUSED(page);
-
-#if 0
-    COptions dial(page);
-
-    int i;
-
-#if REWRITE_TO_WX_WIDGET
-    dial.m_EditPage.m_bAutoIndent = CSrc6502View::m_bAutoIndent;
-    dial.m_EditPage.m_nTabStep = CSrc6502View::m_nTabStep;
-    dial.m_EditPage.m_bAutoSyntax = CSrc6502View::m_bAutoSyntax;
-    dial.m_EditPage.m_bAutoUppercase = CSrc6502View::m_bAutoUppercase;
-    dial.m_EditPage.m_bFileNew = C6502App::m_bFileNew;
-
-    dial.m_SymPage.m_nIOAddress = CSym6502::io_addr;
-    dial.m_SymPage.m_bIOEnable = CSym6502::io_enabled;
-    dial.m_SymPage.m_nFinish = wxGetApp().m_global.GetSymFinish();
-
-    m_IOWindow.GetSize(dial.m_SymPage.m_nWndWidth, dial.m_SymPage.m_nWndHeight);
-
-    dial.m_SymPage.m_bProtectMemory = CSym6502::s_bWriteProtectArea;
-    dial.m_SymPage.m_nProtFromAddr = CSym6502::s_uProtectFromAddr;
-    dial.m_SymPage.m_nProtToAddr = CSym6502::s_uProtectToAddr;
-    //  m_IOWindow.GetColors(dial.m_SymPage.m_rgbTextColor,dial.m_SymPage.m_rgbBackgndColor);
-
-    dial.m_DeasmPage.m_rgbAddress = CDeasm6502View::m_rgbAddress;
-    dial.m_DeasmPage.m_rgbCode = CDeasm6502View::m_rgbCode;
-    //  dial.m_DeasmPage.m_rgbInstr = CDeasm6502View::m_rgbInstr;
-    dial.m_DeasmPage.m_ShowCode = CDeasm6502View::m_bDrawCode;
-
-    //dial.m_MarksPage.m_nProc6502 = !wxGetApp().m_global.GetProcType();
-    dial.m_MarksPage.m_nProc6502 = wxGetApp().m_global.GetProcType();
-    dial.m_MarksPage.m_nHelpFile = wxGetApp().m_global.GetHelpType();
-
-    //dial.m_MarksPage.m_uBusWidth = CSym6502::bus_width;
-    dial.m_MarksPage.m_rgbPointer = CMarks::m_rgbPointer;
-    dial.m_MarksPage.m_rgbBreakpoint = CMarks::m_rgbBreakpoint;
-    dial.m_MarksPage.m_rgbError = CMarks::m_rgbError;
-
-    dial.m_AsmPage.m_nCaseSensitive = CAsm6502::case_insensitive;
-    dial.m_AsmPage.m_nAsmInstrWithDot = 0;
-    dial.m_AsmPage.m_bGenerateListing = wxGetApp().m_global.m_bGenerateListing;
-    dial.m_AsmPage.m_strListingFile = wxGetApp().m_global.m_strListingFile;
-    dial.m_AsmPage.m_bGenerateBRKExtraByte = CAsm6502::generateBRKExtraByte;
-    dial.m_AsmPage.m_uBrkExtraByte = CAsm6502::BRKExtraByte;
-
-    for (i = 0; text_color[i]; i++) // Read colors
-    {
-        dial.m_ViewPage.m_Text[i].text = *text_color[i];
-        dial.m_ViewPage.m_Text[i].bkgnd = *bkgnd_color[i];
-    }
-
-    if (dial.DoModal() != IDOK)
-        return dial.GetLastActivePage();
-
-    C6502App::m_bFileNew = dial.m_EditPage.m_bFileNew;
-    //CSrc6502View::m_bAutoIndent = dial.m_EditPage.m_bAutoIndent;
-    CSrc6502View::m_bAutoSyntax = dial.m_EditPage.m_bAutoSyntax;
-    CSrc6502View::m_bAutoUppercase = dial.m_EditPage.m_bAutoUppercase;
-
-    if (dial.m_EditPage.m_bColorChanged)
-    {
-        for (int nColor = 0; nColor <= 5; ++nColor)
-            CSrc6502View::m_vrgbColorSyntax[nColor] = *dial.m_EditPage.GetColorElement(nColor);
-
-        for (int nStyle = 0; nStyle <= 4; ++nStyle)
-            CSrc6502View::m_vbyFontStyle[nStyle] = *dial.m_EditPage.GetFontStyle(nStyle);
-    }
-
-    CSym6502::io_addr = dial.m_SymPage.m_nIOAddress;
-    CSym6502::io_enabled = dial.m_SymPage.m_bIOEnable;
-
-    wxGetApp().m_global.SetSymFinish((CAsm::Finish)dial.m_SymPage.m_nFinish);
-    m_IOWindow.SetSize(dial.m_SymPage.m_nWndWidth, dial.m_SymPage.m_nWndHeight, -1);
-
-    CSym6502::s_bWriteProtectArea = !!dial.m_SymPage.m_bProtectMemory;
-    CSym6502::s_uProtectFromAddr = dial.m_SymPage.m_nProtFromAddr;
-    CSym6502::s_uProtectToAddr = dial.m_SymPage.m_nProtToAddr;
-
-    if (CSym6502::s_uProtectFromAddr > CSym6502::s_uProtectToAddr)
-        std::swap(CSym6502::s_uProtectToAddr, CSym6502::s_uProtectFromAddr);
-
-    //_IOWindow.SetColors(dial.m_SymPage.m_rgbTextColor, dial.m_SymPage.m_rgbBackgndColor);
-
-    CDeasm6502View::m_rgbAddress = dial.m_DeasmPage.m_rgbAddress;
-    CDeasm6502View::m_rgbCode = dial.m_DeasmPage.m_rgbCode;
-    //CDeasm6502View::m_rgbInstr = dial.m_DeasmPage.m_rgbInstr;
-    CDeasm6502View::m_bDrawCode = dial.m_DeasmPage.m_ShowCode;
-
-    //wxGetApp().m_global.SetProcType(!dial.m_MarksPage.m_nProc6502);
-    wxGetApp().m_global.SetProcType(dial.m_MarksPage.m_nProc6502);
-    wxGetApp().m_global.SetHelpType(dial.m_MarksPage.m_nHelpFile);
-
-    //CSym6502::bus_width     = dial.m_MarksPage.m_uBusWidth;
-    CMarks::m_rgbPointer = dial.m_MarksPage.m_rgbPointer;
-    CMarks::m_rgbBreakpoint = dial.m_MarksPage.m_rgbBreakpoint;
-    CMarks::m_rgbError = dial.m_MarksPage.m_rgbError;
-
-    wxGetApp().m_global.m_bGenerateListing = dial.m_AsmPage.m_bGenerateListing;
-    wxGetApp().m_global.m_strListingFile = dial.m_AsmPage.m_strListingFile;
-
-    CAsm6502::generateBRKExtraByte = dial.m_AsmPage.m_bGenerateBRKExtraByte;
-    CAsm6502::BRKExtraByte = dial.m_AsmPage.m_uBrkExtraByte;
-    CAsm6502::case_insensitive = dial.m_AsmPage.m_nCaseSensitive;
-
-    if (dial.m_EditPage.m_nTabStep != CSrc6502View::m_nTabStep ||
-        dial.m_EditPage.m_bColorChanged ||
-        !!dial.m_EditPage.m_bAutoIndent != CSrc6502View::m_bAutoIndent)
-    {
-        CSrc6502View::m_nTabStep = dial.m_EditPage.m_nTabStep;
-        CSrc6502View::m_bAutoIndent = dial.m_EditPage.m_bAutoIndent;
-        RedrawAllViews();
-}
-#endif
-    /*
-      if (dial.m_EditPage.m_bFontChanged || dial.m_EditPage.m_nTabStep != CSrc6502View::m_nTabStep ||
-        dial.m_DeasmPage.m_bColorChanged || dial.m_MarksPage.m_bColorChanged)
-      {
-        CSrc6502View::m_nTabStep = dial.m_EditPage.m_nTabStep;
-        RedrawAllViews(dial.m_EditPage.m_bFontChanged);
-      }
-    */
-
-    for (i = 0; ConfigSettings::text_color[i]; i++) // Adjust/Save colors
-    {
-#if REWRITE_TO_WX_WIDGET
-        *ConfigSettings::text_color[i] = dial.m_ViewPage.m_Text[i].text;
-        *ConfigSettings::bkgnd_color[i] = dial.m_ViewPage.m_Text[i].bkgnd;
-#endif
-
-        if (dial.m_ViewPage.m_Text[i].changed & 2) // Font changed?
-        {
-#if REWRITE_TO_WX_WIDGET
-            dial.m_ViewPage.m_Text[i].font.GetLogFont(fonts[i]);
-
-            delete ConfigSettings::cfonts[i];
-            cfonts[i]->CreateFontIndirect(&ConfigSettings::cfonts[i]);
-#endif
-        }
-
-        if (dial.m_ViewPage.m_Text[i].changed) // Changed font or colors?
-        {
-            switch (i)
-            {
-            case 0: // Editor
-                RedrawAllViews(dial.m_ViewPage.m_Text[i].changed & 2);
-                break;
-
-            case 1: // Simulator
-                //m_ioWindow->SetSize(0, 0);
-                break;
-
-            case 2: // debugger
-                RedrawAllViews(dial.m_ViewPage.m_Text[i].changed & 2);
-                break;
-
-            case 3: // 6502 Memory
-                m_Memory.Refresh();
-                break;
-
-            case 4: // Zero page
-                m_ZeroPage.Refresh();
-                break;
-
-            case 5: // stack
-                m_Stack.Refresh();
-                break;
-
-            default:
-                ASSERT(false);
-                break;
-            }
-        }
-        }
-
-    // Redraw disassembler windows
-#if REWRITE_TO_WX_WIDGET
-    POSITION posDoc = wxGetApp().m_pDocDeasmTemplate->GetFirstDocPosition();
-    while (posDoc != NULL) // Are the windows from the disassembler?
-    {
-        CDocument *pDoc = wxGetApp().m_pDocDeasmTemplate->GetNextDoc(posDoc);
-        pDoc->UpdateAllViews(NULL);
-    }
-#endif
-
-    return dial.GetLastActivePage();
-#endif
-    return 0;
-}
-
 int CMainFrame::RedrawAllViews(int chgHint) // 'Invalidate' all windows
 {
     UNUSED(chgHint);
@@ -1635,22 +1434,6 @@ void CMainFrame::OnUpdateViewIdents(CCmdUI *pCmdUI)
 
 //-----------------------------------------------------------------------------
 
-void CMainFrame::OnEditorOpt()
-{
-    m_nLastPage = Options(2); // Editor options
-}
-
-void CMainFrame::OnUpdateEditorOpt(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(true);
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
 void CMainFrame::OnUpdateViewIOWindow(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
@@ -1677,22 +1460,6 @@ void CMainFrame::OnFileLoadCode()
 }
 
 void CMainFrame::OnUpdateFileLoadCode(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(true);
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CMainFrame::OnDeasmOptions()
-{
-    m_nLastPage = Options(3); // Disassembler options
-}
-
-void CMainFrame::OnUpdateDeasmOptions(CCmdUI *pCmdUI)
 {
     UNUSED(pCmdUI);
 
@@ -1753,22 +1520,6 @@ void CMainFrame::OnUpdateViewStack(CCmdUI *pCmdUI)
     pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is there a program?
     pCmdUI->SetCheck(m_Stack.IsShown());
 #endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CMainFrame::OnUpdateMemoryOptions(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(true);
-#endif
-}
-
-void CMainFrame::OnMemoryOptions()
-{
-    m_nLastPage = Options(5); // Memory window appearance options
 }
 
 //-----------------------------------------------------------------------------

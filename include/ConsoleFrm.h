@@ -32,14 +32,16 @@
 
 /*=======================================================================*/
 
+extern const std::string ASSEMBLER_CONSOLE;
+
+/*=======================================================================*/
+
 /**
  * @brief Frame that displays the output of a console source.
  */
 class ConsoleFrame : public wxPanel
 {
 public:
-
-
     class ConsoleOutput : public io::output
     {
         friend class ConsoleFrame;
@@ -74,7 +76,7 @@ public:
 private:
     wxTextCtrl *m_text;
 
-    ConsoleOutput m_output;
+    std::shared_ptr<io::output> m_output;
 
 public:
     /* constructor */ ConsoleFrame(wxFrame *parent);
@@ -82,7 +84,7 @@ public:
 
     void AppendText(const char *txt);
 
-    io::output &GetOutput(const char *target)
+    std::shared_ptr<io::output> GetOutput(const std::string &target)
     {
         UNUSED(target); // We don't use targets (yet)
         return m_output;

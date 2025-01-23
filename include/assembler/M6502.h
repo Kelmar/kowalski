@@ -696,7 +696,7 @@ class CAsm6502 : public CAsm /*, public CObject */
 private:
     friend class CMacroDef;
 
-    io::output &m_console;
+    std::shared_ptr<io::output> m_console;
 
     std::string current_line;
     const char *ptr;                // To keep track of the current line
@@ -913,13 +913,14 @@ private:
     void init();
     void init_members();
 
+    Stat InnerAssemble();
+
 public:
     // TODO: Make this method private later
     Stat report_error(Stat err)
     {
         const std::string msg = GetErrMsg(err);
-        m_console.write(msg);
-        m_console.write("\r\n");
+        m_console->writef("{0}\r\n", msg);
         return err;
     }
 
@@ -934,7 +935,7 @@ public:
     static uint8_t BRKExtraByte;      // The value of the additional byte after the BRK instruction
 
     CAsm6502(const std::string &file_in_name,
-             io::output &console,
+             std::shared_ptr<io::output> console,
              COutputMem *out,
              CDebugInfo *debug,
              CMarkArea *area,

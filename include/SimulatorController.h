@@ -133,6 +133,8 @@ public: // Commands
     void InitOptions();
     void BuildMenu(wxMenuBar *);
 
+    void Assemble();
+
     void Run();
     void RunToAddress(sim_addr_t address);
     void Restart();
@@ -170,6 +172,7 @@ private:
     void OnUpdateRun(wxUpdateUIEvent &);
     void OnUpdateRestart(wxUpdateUIEvent &);
 
+    void EnableWhenDebugging(wxUpdateUIEvent &);
     void EnableWhenRunning(wxUpdateUIEvent &);
     void EnableWhenStopped(wxUpdateUIEvent &);
 
