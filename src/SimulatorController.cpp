@@ -96,7 +96,8 @@ namespace
 /*=======================================================================*/
 
 SimulatorController::SimulatorController()
-    : m_critSect()
+    : m_assembling(false)
+    , m_critSect()
     , m_semaphore()
     , m_asmThread(nullptr)
 {
@@ -205,7 +206,10 @@ DebugState SimulatorController::CurrentState() const
 
 void SimulatorController::BindEvents()
 {
-    // Menu handlers
+    // View menu handlers
+    Bind(wxEVT_MENU, &SimulatorController::OnViewDisassembler, this, evID_SHOW_DISASM);
+
+    // Simulator menu handlers
     Bind(wxEVT_MENU, &SimulatorController::OnAssemble, this, evID_ASSEMBLE);
     Bind(wxEVT_MENU, &SimulatorController::OnRun, this, evID_RUN);
     Bind(wxEVT_MENU, &SimulatorController::OnRestart, this, evID_RESTART);
@@ -506,6 +510,13 @@ sim_addr_t SimulatorController::GetCursorAddress(bool skipping)
 // Menu handlers
 /*=======================================================================*/
 
+void SimulatorController::OnViewDisassembler(wxCommandEvent &)
+{
+    wxLogDebug("DOOT!");
+}
+
+/*=======================================================================*/
+
 void SimulatorController::OnAssemble(wxCommandEvent &)
 {
     if (m_asmThread)
@@ -562,6 +573,7 @@ void SimulatorController::OnAssemble(wxCommandEvent &)
     }
 
     wxCriticalSectionLocker enter(m_critSect);
+    m_assembling = true;
 
     m_asmThread = new AsmThread(this, path);
 
@@ -683,7 +695,7 @@ void SimulatorController::OnUpdateRun(wxUpdateUIEvent &e)
     wxString title = IsDebugging() ? _("Continue\tF5") : _("Run\tF5");
 
     e.SetText(title);
-    e.Enable(CurrentState() != DebugState::Running);
+    e.Enable(CurrentState() != DebugState::Running && !m_assembling);
 }
 
 /*=======================================================================*/
@@ -716,6 +728,8 @@ void SimulatorController::OnAsmComplete(wxThreadEvent &)
     wxLogDebug("OnAsmComplete() enter");
 
     wxCriticalSectionLocker enter(m_critSect);
+
+    m_assembling = false;
 
     if (!m_asmThread)
         return;
