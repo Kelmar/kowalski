@@ -278,12 +278,6 @@ bool HexArea::ToCell(wxPoint *where)
         where->x /= full.x;
     }
 
-    wxString tmp;
-    tmp.Printf("{%d,%d}", where->x, where->y);
-    wxLogDebug(tmp);
-
-    
-
     return rval;
 }
 

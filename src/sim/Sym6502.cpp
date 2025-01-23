@@ -1036,7 +1036,7 @@ void CSym6502::PerformCommandInner()
             // Compare always in binary, don't set acc
             tmp = acc - arg;
 
-            carry = tmp < 0;
+            carry = !(tmp > 0xFFFF);
             zero = (tmp & 0xFFFF) == 0;
             negative = tmp & 0x8000;
 
@@ -1050,7 +1050,7 @@ void CSym6502::PerformCommandInner()
             // Compare always in binary, don't set acc
             tmp = acc - arg;
 
-            carry = tmp < 0;
+            carry = !(tmp > 0xFF);
             zero = (tmp & 0xFF) == 0;
             negative = tmp & 0x80;
         }
@@ -1071,9 +1071,11 @@ void CSym6502::PerformCommandInner()
             // Compare always in binary, don't set acc
             tmp = acc - arg;
 
-            carry = tmp < 0;
+            carry = !(tmp > 0xFFFF);
             zero = (tmp & 0xFFFF) == 0;
             negative = tmp & 0x8000;
+
+            m_ctx.uCycles++;   // 16 bit operation adds 1 cycle
         }
         else
         {
@@ -1083,12 +1085,12 @@ void CSym6502::PerformCommandInner()
             // Compare always in binary, don't set acc
             tmp = acc - arg;
 
-            carry = tmp < 0;
+            carry = !(tmp > 0xFF);
             zero = (tmp & 0xFF) == 0;
             negative = tmp & 0x80;
         }
 
-        m_ctx.set_status_reg_ZNC(zero, negative, !carry);
+        m_ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
     case CAsm::C_CPY:
@@ -1100,9 +1102,11 @@ void CSym6502::PerformCommandInner()
             // Compare always in binary, don't set acc
             tmp = acc - arg - (m_ctx.carry ? 0 : 1);
 
-            carry = tmp < 0;
+            carry = !(tmp > 0xFFFF);
             zero = (tmp & 0xFFFF) == 0;
             negative = tmp & 0x8000;
+
+            m_ctx.uCycles++;   // 16 bit operation adds 1 cycle
         }
         else
         {
@@ -1112,12 +1116,12 @@ void CSym6502::PerformCommandInner()
             // Compare always in binary, don't set acc
             tmp = acc - arg - (m_ctx.carry ? 0 : 1);
 
-            carry = tmp < 0;
+            carry = !(tmp > 0xFF);
             zero = (tmp & 0xFF) == 0;
             negative = tmp & 0x80;
         }
 
-        m_ctx.set_status_reg_ZNC(zero, negative, !carry);
+        m_ctx.set_status_reg_ZNC(zero, negative, carry);
         break;
 
     case CAsm::C_ASL:
@@ -2201,11 +2205,14 @@ void CSym6502::PerformCommandInner()
 
         break;
 
-    case CAsm::C_JSL:
+    case CAsm::C_JSL: // 65816 only
         inc_prog_counter();
+
+        // TODO: This correct?  We're advancing only 2 bytes when we read 3?
+
         addr = m_ctx.ReadProgramWord();
 
-        // TODO: Verify this logic.
+        // TODO: Verify the logic around the stack pointer.
 
         if (m_ctx.emm && (m_ctx.StackPointer() == 0x0100))
         {

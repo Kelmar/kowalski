@@ -190,7 +190,7 @@ uint16_t CContext::ReadProgramWord()
 
 uint32_t CContext::ReadProgramLWord()
 {
-    uint16_t rval = GetLWord(GetProgramAddress());
+    uint32_t rval = GetLWord(GetProgramAddress());
     PC(PC() + 3);
     return rval;
 }
