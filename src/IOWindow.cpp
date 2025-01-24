@@ -39,17 +39,20 @@ IOWindowConfig s_ioConfig;
 
 /*=======================================================================*/
 
+template<>
+struct config::Mapper<IOWindowConfig>
+{
+    void to(IOWindowConfig &cfg, config::Context &ctx) const
+    {
+        ctx.map("Columns", cfg.Columns);
+        ctx.map("Rows", cfg.Rows);
+    }
+};
+
+/*=======================================================================*/
+
 namespace
 {
-    struct IOWindowConfigMap : config::Mapper<IOWindowConfig>
-    {
-        bool to(IOWindowConfig &cfg, config::Context &ctx) const
-        {
-            ctx.map("Columns", cfg.Columns);
-            ctx.map("Rows", cfg.Rows);
-        }
-    };
-
     void InitDefaultConfig()
     {
         s_ioConfig.Columns = 80;
