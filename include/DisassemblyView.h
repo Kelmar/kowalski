@@ -22,32 +22,31 @@
  */
 /*=======================================================================*/
 
-#ifndef DISASM_FRM_6502_H__
-#define DISASM_FRM_6502_H__
+#ifndef DISASSEMBLY_VIEW_6502_H__
+#define DISASSEMBLY_VIEW_6502_H__
 
 /*=======================================================================*/
 
-#include "mdi65.h"
-
-/*=======================================================================*/
-
-class DisassemblyView;
-
-class DisassemblyFrame : public CHILD_BASE
+class DisassemblyView : public wxScrolled<wxWindow>
 {
 private:
-    DisassemblyView *m_view;
-
     void Init();
 
 public:
-    /* constructor */ DisassemblyFrame(MAIN_BASE *parent);
-    virtual ~DisassemblyFrame();
+    /* constructor */ DisassemblyView();
+
+    /* constructor */ DisassemblyView(
+        wxWindow *parent,
+        wxWindowID id,
+        const wxPoint &pos = wxDefaultPosition,
+        const wxSize &size = wxDefaultSize,
+        const wxString &name = wxControlNameStr);
+
+    virtual ~DisassemblyView();
 };
 
 /*=======================================================================*/
 
-#endif /* DISASM_FRM_6502_H__ */
+#endif /* DISASSEMBLY_VIEW_6502_H__ */
 
 /*=======================================================================*/
-

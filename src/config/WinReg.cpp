@@ -138,33 +138,90 @@ bool WinRegistry::readReg(
 
 /*=======================================================================*/
 
-bool WinRegistry::readValue(const std::string &path, int &value)
+void WinRegistry::readValue(const std::string &path, bool &value)
 {
-    std::vector<BYTE> buffer;
-
-    if (!readReg(path, REG_DWORD, _Out_ buffer))
-        return false;
-
-    std::memcpy(&value, buffer.data(), sizeof(value));
-
-    return true;
+    int i;
+    readValue(path, i);
+    value = (i != 0);
 }
 
 /*=======================================================================*/
 
-bool WinRegistry::readValue(const std::string &path, std::string &value)
+void WinRegistry::readValue(const std::string &path, int &value)
+{
+    std::vector<BYTE> buffer;
+
+    if (!readReg(path, REG_DWORD, _Out_ buffer))
+        return;
+
+    std::memcpy(&value, buffer.data(), sizeof(value));
+}
+
+/*=======================================================================*/
+
+void WinRegistry::readValue(const std::string &path, size_t &value)
+{
+    std::vector<BYTE> buffer;
+
+    constexpr DWORD regType = sizeof(size_t) == 4 ? REG_DWORD : REG_QWORD;
+
+    if (!readReg(path, regType, _Out_ buffer))
+        return;
+
+    std::memcpy(&value, buffer.data(), sizeof(value));
+}
+
+/*=======================================================================*/
+
+void WinRegistry::readValue(const std::string &path, long &value)
+{
+    std::vector<BYTE> buffer;
+
+    constexpr DWORD regType = sizeof(long) == 4 ? REG_DWORD : REG_QWORD;
+
+    if (!readReg(path, regType, _Out_ buffer))
+        return;
+
+    std::memcpy(&value, buffer.data(), sizeof(value));
+}
+
+/*=======================================================================*/
+
+void WinRegistry::readValue(const std::string &path, float &value)
+{
+    std::vector<BYTE> buffer;
+
+    if (!readReg(path, REG_DWORD, _Out_ buffer))
+        return;
+
+    std::memcpy(&value, buffer.data(), sizeof(value));
+}
+
+/*=======================================================================*/
+
+void WinRegistry::readValue(const std::string &path, double &value)
+{
+    std::vector<BYTE> buffer;
+
+    if (!readReg(path, REG_QWORD, _Out_ buffer))
+        return;
+
+    std::memcpy(&value, buffer.data(), sizeof(value));
+}
+
+/*=======================================================================*/
+
+void WinRegistry::readValue(const std::string &path, std::string &value)
 {
     std::vector<BYTE> buffer;
 
     if (!readReg(path, REG_SZ, _Out_ buffer))
-        return false;
+        return;
 
     buffer.push_back(0); // Ensure NULL terminated.
 
     const char *ptr = reinterpret_cast<const char *>(buffer.data());
     value.assign(ptr, buffer.size());
-
-    return true;
 }
 
 #endif

@@ -114,6 +114,8 @@ private:
 public:
     virtual ~ProjectManager();
 
+    void Shutdown() { }
+
     template <typename T>
     void AddTemplate()
         requires(std::is_base_of_v<CodeTemplate, T>)

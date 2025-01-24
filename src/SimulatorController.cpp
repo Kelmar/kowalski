@@ -52,23 +52,26 @@ SimulatorConfig s_simConfig;
 
 /*=======================================================================*/
 
+template <>
+struct config::Mapper<SimulatorConfig>
+{
+    void to(SimulatorConfig &cfg, config::Context &ctx) const
+    {
+        ctx.map("ProcType", cfg.Processor);
+        ctx.map("SimFinish", cfg.SimFinish);
+        ctx.map("IOEnabled", cfg.IOEnable);
+        ctx.map("IOAddress", cfg.IOAddress);
+        ctx.map("ProtecteMem", cfg.ProtectMemory);
+        ctx.map("ProtectMemFrom", cfg.ProtectStart);
+        ctx.map("ProtectMemTo", cfg.ProtectEnd);
+    }
+};
+
+/*=======================================================================*/
+
 namespace
 {
-    struct SimulatorConfigMap : config::Mapper<SimulatorConfig>
-    {
-        bool to(SimulatorConfig &cfg, config::Context &ctx) const
-        {
-            return
-                ctx.map("ProcType", cfg.Processor) ||
-                ctx.map("SimFinish", cfg.SimFinish) ||
-                ctx.map("IOEnabled", cfg.IOEnable) ||
-                ctx.map("IOAddress", cfg.IOAddress) ||
-                ctx.map("ProtecteMem", cfg.ProtectMemory) ||
-                ctx.map("ProtectMemFrom", cfg.ProtectStart) ||
-                ctx.map("ProtectMemTo", cfg.ProtectEnd)
-            ;
-        }
-    };
+    static const std::string SIM_CONFIG_PATH = "Simulator";
 
     void InitDefaultConfig()
     {
@@ -91,6 +94,9 @@ namespace
 #if WIN32
         // TODO: Import old config if detected.
 #endif
+
+        config::source::wx reg("/");
+        reg.read(SIM_CONFIG_PATH, s_simConfig);
     }
 }
 
@@ -110,6 +116,13 @@ SimulatorController::SimulatorController()
 
 SimulatorController::~SimulatorController()
 {
+}
+
+/*=======================================================================*/
+
+void SimulatorController::Shutdown()
+{
+    ExitDebugMode();
     SaveConfig();
 }
 
@@ -121,7 +134,8 @@ const SimulatorConfig &SimulatorController::GetConfig() const { return s_simConf
 
 void SimulatorController::SaveConfig()
 {
-
+    config::source::wx reg("/");
+    reg.write(SIM_CONFIG_PATH, s_simConfig);
 }
 
 /*=======================================================================*/

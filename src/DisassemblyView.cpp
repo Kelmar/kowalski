@@ -22,32 +22,36 @@
  */
 /*=======================================================================*/
 
-#ifndef DISASM_FRM_6502_H__
-#define DISASM_FRM_6502_H__
+#include "StdAfx.h"
+#include "DisassemblyView.h"
 
 /*=======================================================================*/
 
-#include "mdi65.h"
+#define DV_STYLE (wxVSCROLL | wxHSCROLL)
 
 /*=======================================================================*/
 
-class DisassemblyView;
-
-class DisassemblyFrame : public CHILD_BASE
+DisassemblyView::DisassemblyView()
+    : wxScrolled()
 {
-private:
-    DisassemblyView *m_view;
+    Init();
+}
 
-    void Init();
+DisassemblyView::DisassemblyView(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name)
+    : wxScrolled(parent, id, pos, size, DV_STYLE, name)
+{
+    Init();
+}
 
-public:
-    /* constructor */ DisassemblyFrame(MAIN_BASE *parent);
-    virtual ~DisassemblyFrame();
-};
+DisassemblyView::~DisassemblyView()
+{
+}
 
 /*=======================================================================*/
 
-#endif /* DISASM_FRM_6502_H__ */
+void DisassemblyView::Init()
+{
+
+}
 
 /*=======================================================================*/
-

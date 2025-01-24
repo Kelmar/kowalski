@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-/*=======================================================================*/
+ /*=======================================================================*/
 
 #include "StdAfx.h"
 #include "6502.h"
@@ -43,21 +43,27 @@ namespace
         int posY;    // Window Y position
         bool hidden; // Set if window should be hidden
     };
+}
 
-    struct MemoryFrameConfigMap : config::Mapper<MemoryFrameConfig>
+/*=======================================================================*/
+
+template <>
+struct config::Mapper<MemoryFrameConfig>
+{
+    void to(MemoryFrameConfig &cfg, config::Context &ctx) const
     {
-        bool to(MemoryFrameConfig &cfg, config::Context &ctx) const
-        {
-            return
-                ctx.map("MemoryH", cfg.sizeH) ||
-                ctx.map("MemoryW", cfg.sizeW) ||
-                ctx.map("MemoryXPos", cfg.posX) ||
-                ctx.map("MemoryYPos", cfg.posY) ||
-                ctx.map("MemoryWndHidden", cfg.hidden)
-            ;
-        }
-    };
+        ctx.map("MemoryH", cfg.sizeH);
+        ctx.map("MemoryW", cfg.sizeW);
+        ctx.map("MemoryXPos", cfg.posX);
+        ctx.map("MemoryYPos", cfg.posY);
+        ctx.map("MemoryWndHidden", cfg.hidden);
+    }
+};
 
+/*=======================================================================*/
+
+namespace
+{
     MemoryFrameConfig s_frameConfig;
 
     // Setup default config for the MemoryFrame
@@ -76,20 +82,20 @@ namespace
     // Load in configuration for the MemoryFrame
     void LoadConfig()
     {
+        InitDefaultConfig();
+
 #if WIN32
         config::source::WinRegistry reg("/");
-        
-        if (!reg.read("MemoryFrame", s_frameConfig))
-            InitDefaultConfig();
-#else
-        InitDefaultConfig();
+
+        reg.read("MemoryFrame", s_frameConfig);
 #endif
     }
 
     // Save the configuration for the MemoryFrame
     void SaveConfig()
     {
-
+        config::source::wx reg("/");
+        reg.write("MemoryFrame", s_frameConfig);
     }
 }
 

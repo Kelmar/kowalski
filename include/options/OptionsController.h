@@ -90,6 +90,8 @@ public:
     /* constructor */ OptionsController();
     virtual ~OptionsController();
 
+    void Shutdown() { }
+
     bool Init(CMainFrame *mainFrame);
 
 public:

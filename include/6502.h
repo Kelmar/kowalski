@@ -57,6 +57,7 @@ private:
     std::unique_ptr<SplashController> m_splash;
 
     bool LoadResources();
+    void InitConfig();
     bool InitFrame();
 
     void SetupSingletons();
@@ -67,6 +68,8 @@ private:
     void InitBinaryTemplates();
 
     void InnerUpdateStatus(const std::string &str);
+
+    void Shutdown();
 
 public:
 #if 0

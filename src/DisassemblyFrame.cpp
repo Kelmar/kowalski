@@ -24,18 +24,28 @@
 
 #include "stdafx.h"
 #include "6502.h"
+
 #include "DisassemblyFrame.h"
+#include "DisassemblyView.h"
 
 /*=======================================================================*/
 
 DisassemblyFrame::DisassemblyFrame(MAIN_BASE *parent)
     : CHILD_BASE(parent, wxID_ANY, _("Disassmbly"))
+    , m_view(nullptr)
 {
-
+    Init();
 }
 
 DisassemblyFrame::~DisassemblyFrame()
 {
+}
+
+/*=======================================================================*/
+
+void DisassemblyFrame::Init()
+{
+    m_view = new DisassemblyView(this, wxID_ANY);
 }
 
 /*=======================================================================*/

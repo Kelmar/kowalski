@@ -33,21 +33,22 @@ namespace config
 
     static const char PATH_SEPERATOR = '/';
 
-    /****************************************************************/
+    /*===============================================================*/
 
     template <typename T>
     struct Mapper
     {
         typedef typename std::decay<T>::type type;
 
-        bool to(type &, Context &) const { return false; };
+        void to(type &, Context &) const { static_assert(false); };
     };
 
-    /****************************************************************/
+    /*===============================================================*/
 
     namespace details
     {
-        template <typename T> struct Identity { typedef T type; };
+        template <typename T>
+        struct Identity { typedef T type; };
 
         class Source
         {
@@ -60,14 +61,15 @@ namespace config
             friend config::Context;
 
 #define DECLARE_OPS(T__) \
-            virtual bool writeValue(const std::string &path, const T__ &value) = 0; \
-            virtual bool readValue(const std::string &path, T__ &value) = 0;
+            virtual void writeValue(const std::string &path, const T__ &value) = 0; \
+            virtual void readValue(const std::string &path, T__ &value) = 0;
 
-            //DECLARE_OPS(bool)
+            DECLARE_OPS(bool)
             DECLARE_OPS(int)
-            //DECLARE_OPS(unsigned int)
-            //DECLARE_OPS(float)
-            //DECLARE_OPS(double)
+            DECLARE_OPS(size_t)
+            DECLARE_OPS(long)
+            DECLARE_OPS(float)
+            DECLARE_OPS(double)
             DECLARE_OPS(std::string)
 
 #undef DECLARE_OPS
@@ -80,14 +82,14 @@ namespace config
             const std::string &root() const { return m_root; }
 
             template <typename T>
-            bool read(const std::string &path, T &value);
+            void read(const std::string &path, T &value);
 
             template <typename T>
-            bool write(const std::string &path, T &value);
+            void write(const std::string &path, T &value);
         };
     }
 
-    /****************************************************************/
+    /*===============================================================*/
 
     class Context
     {
@@ -122,14 +124,15 @@ namespace config
         virtual ~Context() { }
 
         template <typename T>
-        bool map(const std::string &path, T &value)
+        void map(const std::string &path, T &value)
         {
-            return mapValue(path, value, details::Identity<T>());
+            mapValue(path, value, details::Identity<T>());
         }
 
     private:
         template <typename T>
-        bool mapValue(const std::string &path, T &value, details::Identity<T>)
+        std::enable_if_t<!std::is_enum_v<T>>
+        mapValue(const std::string &path, T &value, details::Identity<T>)
         {
             std::string lastPath = m_currentPath;
 
@@ -138,31 +141,96 @@ namespace config
             m_currentPath = pushPath(path);
 
             Mapper<T> map;
-            return map.to(value, *this);
+            map.to(value, *this);
         }
 
-        bool mapValue(const std::string &path, int &value,
+        template <typename T>
+        std::enable_if_t<std::is_enum_v<T>>
+        mapValue(const std::string &path, T &value, details::Identity<T>)
+        {
+            std::string fullPath = pushPath(path);
+
+            int v = (int)value;
+
+            if (m_reading)
+            {
+                m_source->readValue(fullPath, v);
+                value = (T)v;
+            }
+            else
+            {
+                m_source->writeValue(fullPath, v);
+            }
+        }
+
+        void mapValue(const std::string &path, bool &value,
+            details::Identity<bool>)
+        {
+            std::string fullPath = pushPath(path);
+
+            if (m_reading)
+                m_source->readValue(fullPath, value);
+            else
+                m_source->writeValue(fullPath, value);
+        }
+
+        void mapValue(const std::string &path, int &value,
             details::Identity<int>)
         {
             std::string fullPath = pushPath(path);
 
-            return m_reading ?
-                m_source->readValue(fullPath, value) :
+            if (m_reading)
+                m_source->readValue(fullPath, value);
+            else
                 m_source->writeValue(fullPath, value);
         }
 
-        bool mapValue(const std::string &path, std::string &value,
+        void mapValue(const std::string &path, unsigned int &value,
+                details::Identity<unsigned int>)
+        {
+            std::string fullPath = pushPath(path);
+
+            int v = value;
+
+            if (m_reading)
+            {
+                m_source->readValue(fullPath, v);
+                value = (unsigned int)v;
+            }
+            else
+                m_source->writeValue(fullPath, v);
+        }
+
+        /*std::enable_if_t<!std::is_same_v<int, uint32_t>>
+        mapValue(const std::string &path, uint32_t &value,
+            details::Identity<uint32_t>)
+        {
+            std::string fullPath = pushPath(path);
+
+            int v = value;
+
+            if (m_reading)
+            {
+                m_source->readValue(fullPath, v);
+                value = (uint32_t)v;
+            }
+            else
+                m_source->writeValue(fullPath, v);
+        }*/
+
+        void mapValue(const std::string &path, std::string &value,
             details::Identity<std::string>)
         {
             std::string fullPath = pushPath(path);
 
-            return m_reading ?
-                m_source->readValue(fullPath, value) :
+            if (m_reading)
+                m_source->readValue(fullPath, value);
+            else
                 m_source->writeValue(fullPath, value);
         }
     };
 
-    /****************************************************************/
+    /*===============================================================*/
 
     inline
     std::shared_ptr<Context> details::Source::createContext(bool reading)
@@ -170,28 +238,28 @@ namespace config
         return std::shared_ptr<Context>(new Context(this, m_root, reading));
     }
 
-    /****************************************************************/
+    /*===============================================================*/
 
     template <typename T>
-    bool details::Source::read(const std::string &path, T &value)
+    void details::Source::read(const std::string &path, T &value)
     {
         auto ctx = createContext(true);
-        return ctx->map(path, value);
+        ctx->map(path, value);
     }
 
     template <typename T>
-    bool details::Source::write(const std::string &path, T &value)
+    void details::Source::write(const std::string &path, T &value)
     {
         auto ctx = createContext(false);
-        return ctx->map(path, value);
+        ctx->map(path, value);
     }
 
-    /****************************************************************/
-
-#ifdef WIN32
+    /*===============================================================*/
 
     namespace source
     {
+#ifdef WIN32
+
         /**
          * @brief Config source for reading legacy configuration.
          */
@@ -211,14 +279,15 @@ namespace config
             // We only support reading from this source.
 
 #define DECLARE_OPS(T__) \
-            virtual bool writeValue(const std::string &, const T__ &) override { return false; } \
-            virtual bool readValue(const std::string &path, T__ &value) override;
+            virtual void writeValue(const std::string &, const T__ &) override { } \
+            virtual void readValue(const std::string &path, T__ &value) override;
 
-            //DECLARE_OPS(bool)
+            DECLARE_OPS(bool)
             DECLARE_OPS(int)
-            //DECLARE_OPS(unsigned int)
-            //DECLARE_OPS(float)
-            //DECLARE_OPS(double)
+            DECLARE_OPS(size_t)
+            DECLARE_OPS(long)
+            DECLARE_OPS(float)
+            DECLARE_OPS(double)
             DECLARE_OPS(std::string)
 
 #undef DECLARE_OPS
@@ -226,11 +295,62 @@ namespace config
         public:
             /* constructor */ WinRegistry(const std::string_view &root);
         };
-    }
 
 #endif /* WIN32 */
 
-    /****************************************************************/
+        /*===============================================================*/
+
+        class wx : public config::details::Source
+        {
+        private:
+            wxConfigBase *m_config;
+            wxString m_oldPath;
+
+        protected:
+            virtual void writeValue(const std::string &path, const std::string &value)
+            {
+                m_config->Write(wxString(path), wxString(value));
+            }
+
+            virtual void readValue(const std::string &path, std::string &value)
+            {
+                wxString tmp;
+
+                bool rval = m_config->Read(path, &tmp);
+
+                if (rval)
+                    value = tmp;
+            }
+
+#define DECLARE_OPS(T__) \
+            virtual void writeValue(const std::string &path, const T__ &value) override { m_config->Write(path, value); } \
+            virtual void readValue(const std::string &path, T__ &value) override { m_config->Read(path, &value); }
+
+            DECLARE_OPS(bool)
+            DECLARE_OPS(int)
+            DECLARE_OPS(long)
+            DECLARE_OPS(size_t)
+            DECLARE_OPS(float)
+            DECLARE_OPS(double)
+#undef DECLARE_OPS
+
+        public:
+            /* constructor */ wx(const std::string_view &root)
+                : Source(root)
+            {
+                m_config = wxConfigBase::Get();
+                m_oldPath = m_config->GetPath();
+                m_config->SetPath(std::string(root));
+            }
+
+            virtual ~wx()
+            {
+                m_config->SetPath(m_oldPath);
+            }
+        };
+    }
+
+    /*===============================================================*/
 }
 
 /*=======================================================================*/

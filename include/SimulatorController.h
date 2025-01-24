@@ -103,6 +103,8 @@ private:
     sim_addr_t GetCursorAddress(bool skipping);
 
 public:
+    void Shutdown();
+
     virtual ~SimulatorController();
 
 public: // Properties

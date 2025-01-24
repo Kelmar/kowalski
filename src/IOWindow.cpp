@@ -45,10 +45,8 @@ namespace
     {
         bool to(IOWindowConfig &cfg, config::Context &ctx) const
         {
-            return
-                ctx.map("Columns", cfg.Columns) ||
-                ctx.map("Rows", cfg.Rows)
-            ;
+            ctx.map("Columns", cfg.Columns);
+            ctx.map("Rows", cfg.Rows);
         }
     };
 

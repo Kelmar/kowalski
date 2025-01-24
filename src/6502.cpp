@@ -77,11 +77,9 @@ bool C6502App::OnInit()
 
     m_splash = std::make_unique<SplashController>();
 
-    UpdateStatus(_("Loading resources..."));
+    InitConfig();
 
     LoadResources();
-
-    UpdateStatus(_("Loading character encodings..."));
     LoadEncodings();
 
     UpdateStatus(_("Initializing controllers..."));
@@ -102,11 +100,7 @@ bool C6502App::OnInit()
 
     InitOptionPages();
 
-    UpdateStatus(_("Initializing file formats..."));
-
     InitBinaryTemplates();
-
-    UpdateStatus(_("Setting up primary window..."));
 
     if (!InitFrame())
         return false;
@@ -131,8 +125,6 @@ bool C6502App::OnInit()
 
 void C6502App::SetupSingletons()
 {
-    m_config = new wxConfig();
-
     /*
      * The options controller needs to be created first so the other
      * controllers have a chance to register their option handlers with it.
@@ -153,7 +145,6 @@ void C6502App::DisposeSingletons()
     delete m_fontController;
 
     delete m_optionsController;
-    delete m_config;
 }
 
 /*=======================================================================*/
@@ -169,6 +160,8 @@ void C6502App::InitOptionPages()
 
 void C6502App::InitBinaryTemplates()
 {
+    UpdateStatus(_("Initializing file formats..."));
+
     // Hard coded for now.
 
     //AddTemplate<CMotorolaSRecord>();
@@ -183,6 +176,8 @@ void C6502App::InitBinaryTemplates()
 
 bool C6502App::LoadResources()
 {
+    UpdateStatus(_("Loading resources..."));
+
     wxXmlResource::Get()->InitAllHandlers();
     wxLogDebug("Loading resource files....");
 
@@ -209,13 +204,26 @@ bool C6502App::LoadResources()
 
 void C6502App::LoadEncodings()
 {
+    UpdateStatus(_("Loading character encodings..."));
     //new encodings::CodePage437();
+}
+
+/*=======================================================================*/
+
+void C6502App::InitConfig()
+{
+    UpdateStatus(_("Loading configuration..."));
+
+    m_config = new wxConfig();
+    wxConfig::Set(m_config);
 }
 
 /*=======================================================================*/
 
 bool C6502App::InitFrame()
 {
+    UpdateStatus(_("Setting up primary window..."));
+
     wxDocManager *docManager = wxDocManager::GetDocumentManager();
 
     m_mainFrame = new CMainFrame(docManager);
@@ -454,16 +462,29 @@ wxFrame *C6502App::CreateChildFrame(wxView *view)
 }
 
 /*=======================================================================*/
+/**
+ * @brief Calls Shutdown() on the controllers to give them a chance to clean up.
+ */
+void C6502App::Shutdown()
+{
+    m_simulatorController->Shutdown();
+    m_projectManager->Shutdown();
+    m_fontController->Shutdown();
+
+    m_optionsController->Shutdown();
+
+    wxDocManager *const docManager = wxDocManager::GetDocumentManager();
+
+    docManager->FileHistorySave(*m_config);
+}
+
+/*=======================================================================*/
 
 int C6502App::OnExit()
 {
     wxLogDebug("Application shutting down");
 
-    m_simulatorController->ExitDebugMode();
-
-    wxDocManager *const docManager = wxDocManager::GetDocumentManager();
-
-    docManager->FileHistorySave(*m_config);
+    Shutdown();
 
     m_config->Flush();
 

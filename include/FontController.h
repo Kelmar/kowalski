@@ -63,6 +63,8 @@ private:
 public:
     virtual ~FontController();
 
+    void Shutdown() { }
+
     void InitOptions();
 
     std::vector<BasicFontInfo> GetInstalledFonts();
