@@ -22,7 +22,7 @@
  */
 /*=======================================================================*/
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "6502.h"
 
 #include "DisassemblyFrame.h"
