@@ -107,6 +107,7 @@ else()
   SET (wxLibs ${wxWidgets_LIBRARIES})
 endif()
 
+
 ##########################################################################
 # Font Awesome
 ##########################################################################
@@ -140,17 +141,18 @@ target_compile_options(6502 PRIVATE
 )
 
 target_include_directories(6502
-    PRIVATE include/
-    PRIVATE include/crystal
-    PRIVATE include/assembler
-    PRIVATE ${wxWidgets_SOURCE_DIR}/include
+    PRIVATE "include/"
+    PRIVATE "../HexEdit/include"
+    PRIVATE "include/crystal"
+    PRIVATE "include/assembler"
+    PRIVATE "${wxWidgets_SOURCE_DIR}/include"
 )
 
-target_link_libraries(6502 PRIVATE
-    ${wxLibs}
-    fmt::fmt
-    Pal::Sigslot
-    HexEdit)
+target_link_libraries(6502
+    PRIVATE ${wxLibs}
+    PRIVATE fmt::fmt
+    PRIVATE Pal::Sigslot
+    PRIVATE HexEdit)
 
 if (MSVC)
   target_precompile_headers(6502 PRIVATE include/StdAfx.h)

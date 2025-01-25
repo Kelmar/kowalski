@@ -38,7 +38,7 @@ SET (SRCS
     "src/HexArea.cpp")
 
 SET (HDRS
-    "../include/HexEdit.h"
+    "publish/HexEdit.h"
     "include/he_priv.h"
     "include/DrawMetrics.h"
     "include/SubControl.h"
@@ -56,9 +56,10 @@ target_compile_options(HexEdit PRIVATE
 )
 
 target_include_directories(HexEdit
-    PRIVATE include/
-    PRIVATE ../include/
-    PRIVATE ${wxWidgets_SOURCE_DIR}/include
+    PRIVATE "include/"
+    PRIVATE "../include/"
+    PRIVATE "${wxWidgets_SOURCE_DIR}/include"
+    PUBLIC "publish/"
 )
 
 target_link_libraries(HexEdit PRIVATE ${wxLibs}
