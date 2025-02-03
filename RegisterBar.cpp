@@ -99,7 +99,7 @@ bool CRegisterBar::Create(CWnd *pParentWnd, UINT nStyle, UINT nID)
 }
 
 
-bool CRegisterBar::UpdateItem(int itemID)	// odœwie¿enie obiektu okna dialogowego
+bool CRegisterBar::UpdateItem(int itemID)	// odï¿½wieï¿½enie obiektu okna dialogowego
 {
     HWND hWnd = ::GetDlgItem(m_hWnd, itemID);
     if (hWnd)
@@ -265,7 +265,7 @@ afx_msg LRESULT CRegisterBar::OnUpdate(WPARAM wParam, LPARAM lParam)
 afx_msg LRESULT CRegisterBar::OnStartDebug(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
     CFrameWnd *pWnd = GetDockingFrame();
-    if (!m_bHidden)		// okno by³o widoczne?
+    if (!m_bHidden)		// okno byï¿½o widoczne?
         if (pWnd)
             pWnd->ShowControlBar(this, TRUE, TRUE);
     //    ShowWindow(SW_SHOW);
@@ -277,15 +277,15 @@ afx_msg LRESULT CRegisterBar::OnExitDebug(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
     CFrameWnd *pWnd = GetDockingFrame();
 
-    if (m_hWnd && IsVisible() /*(GetStyle() & WS_VISIBLE)*/)// okno aktualnie wyœwietlone?
+    if (m_hWnd && IsVisible() /*(GetStyle() & WS_VISIBLE)*/)// okno aktualnie wyï¿½wietlone?
     {
-        m_bHidden = FALSE;				// info - okno by³o wyœwietlane
+        m_bHidden = FALSE;				// info - okno byï¿½o wyï¿½wietlane
         if (pWnd)
             pWnd->ShowControlBar(this, FALSE, TRUE);
         //    ShowWindow(SW_HIDE);			// ukrycie okna
     }
     else
-        m_bHidden = TRUE;				// info - okno by³o ukryte
+        m_bHidden = TRUE;				// info - okno byï¿½o ukryte
     return 1;
 }
 
@@ -325,6 +325,10 @@ void CRegisterBar::UpdateRegP(const CContext *pCtx, const CContext *pOld /*= NUL
     CheckDlgButton(IDC_REGS_M16, pCtx->mem16);
     CheckDlgButton(IDC_REGS_X16, pCtx->xy16);
     CheckDlgButton(IDC_REGS_EMM, pCtx->emm);
+    if (theApp.m_global.m_procType == ProcessorType::WDC65816 && !pCtx->emm)
+        CheckDlgButton(IDC_REGS_BRK, 0);
+    else
+        CheckDlgButton(IDC_REGS_BRK, pCtx->break_bit);
 }
 
 void CRegisterBar::UpdateRegPC(const CContext *pCtx, const CContext *pOld /*= NULL*/)
@@ -346,7 +350,7 @@ void CRegisterBar::UpdateRegS(const CContext *pCtx, const CContext *pOld /*= NUL
 
     if (sr != theApp.m_global.m_bSRef)
         SetDlgItemMem(IDC_REGS_S_MEM, theApp.m_global.m_bSRef - sr, sr + 1, pCtx);
-    else {				// wypisujemy, ¿e nic
+    else {				// wypisujemy, ï¿½e nic
         CString str;
         str.LoadString(IDS_REGS_S_EMPTY);
         SetDlgItemText(IDC_REGS_S_MEM, str);
@@ -364,7 +368,7 @@ void CRegisterBar::UpdateCycles(ULONG uCycles)
 
 void CRegisterBar::ChangeRegister(int ID, int reg_no)
 {
-    if (m_bInUpdate || theApp.m_global.IsProgramRunning())  // update lub dzia³a program?
+    if (m_bInUpdate || theApp.m_global.IsProgramRunning())  // update lub dziaï¿½a program?
         return;					// zignorowanie zmian
     CString buf;
     if (GetDlgItemText(ID, buf) == 0)
@@ -633,7 +637,7 @@ void CRegisterBar::OnWindowPosChanging(WINDOWPOS FAR *lpwndpos)
 
 void CRegisterBar::OnRegsCyclesClr()
 {
-    if (theApp.m_global.IsProgramRunning())  // dzia³a program?
+    if (theApp.m_global.IsProgramRunning())  // dziaï¿½a program?
     {
         MessageBeep(-2);
         return;

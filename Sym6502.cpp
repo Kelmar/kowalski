@@ -32,10 +32,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 bool cpu16 = !!(theApp.m_global.GetProcType() == ProcessorType::WDC65816);
 bool waiflag = false;
 
-UINT16 CSym6502::io_addr = 0xE000;		// pocz¹tek obszaru we/wy symulatora
+UINT16 CSym6502::io_addr = 0xE000;		// poczï¿½tek obszaru we/wy symulatora
 bool CSym6502::io_enabled = true;
 int CSym6502::bus_width = 16;
-static const int SIM_THREAD_PRIORITY = THREAD_PRIORITY_BELOW_NORMAL; // priorytet (oprócz animate)
+static const int SIM_THREAD_PRIORITY = THREAD_PRIORITY_BELOW_NORMAL; // priorytet (oprï¿½cz animate)
 bool CSym6502::s_bWriteProtectArea = false;
 UINT32 CSym6502::s_uProtectFromAddr = 0xc000;
 UINT32 CSym6502::s_uProtectToAddr = 0xcfff;
@@ -649,8 +649,8 @@ UINT16 CSym6502::get_argument_value(bool rmask)  // use rmask to set return data
 }
 
 
-// funkcja wykonuje rozkaz wskazywany przez ctx.pc zmieniaj¹c odpowiednio stan
-// rejestrów i pamiêci (ctx.mem)
+// funkcja wykonuje rozkaz wskazywany przez ctx.pc zmieniajï¿½c odpowiednio stan
+// rejestrï¿½w i pamiï¿½ci (ctx.mem)
 CAsm::SymStat CSym6502::perform_cmd()
 {
     try
@@ -1231,10 +1231,14 @@ CAsm::SymStat CSym6502::perform_command()
     case C_INX:
         inc_prog_counter();
         ctx.x++;
+
         if (cpu16 && !ctx.emm && !ctx.xy16)
             ctx.set_status_reg16(ctx.x);
         else
+        {
             ctx.set_status_reg(ctx.x & 0xff);
+			ctx.x = ctx.x & 0xff;
+		}
         break;
 
     case C_DEX:
@@ -1243,7 +1247,10 @@ CAsm::SymStat CSym6502::perform_command()
         if (cpu16 && !ctx.emm && !ctx.xy16)
             ctx.set_status_reg16(ctx.x);
         else
+        {
             ctx.set_status_reg(ctx.x & 0xff);
+			ctx.x = ctx.x & 0xff;
+		}
         break;
 
     case C_INY:
@@ -1252,7 +1259,10 @@ CAsm::SymStat CSym6502::perform_command()
         if (cpu16 && !ctx.emm && !ctx.xy16)
             ctx.set_status_reg16(ctx.y);
         else
+        {
             ctx.set_status_reg(ctx.y & 0xff);
+			ctx.y = ctx.y & 0xff;
+		}
         break;
 
     case C_DEY:
@@ -1261,7 +1271,10 @@ CAsm::SymStat CSym6502::perform_command()
         if (cpu16 && !ctx.emm && !ctx.xy16)
             ctx.set_status_reg16(ctx.y);
         else
+        {
             ctx.set_status_reg(ctx.y & 0xff);
+			ctx.y = ctx.y & 0xff;
+		}
         break;
 
     case C_TAX:
@@ -1318,12 +1331,14 @@ CAsm::SymStat CSym6502::perform_command()
 
     case C_TXS:
         inc_prog_counter();
-        if (cpu16 && !ctx.emm) { // && !ctx.xy16) {
+        if (cpu16 && !ctx.emm) // && !ctx.xy16)
+        {
             ctx.s = ctx.x;
             theApp.m_global.m_bSRef = ctx.s;
         }
-        else {
-            ctx.s = ctx.x & 0xff;
+        else
+        {
+            ctx.s = 0x100 + (ctx.x & 0xff); // ****fix
             theApp.m_global.m_bSRef = 0x1ff;
         }
 
@@ -2844,10 +2859,10 @@ void CSym6502::SetPointer(const CLine &line, UINT32 addr)
     }
     if (!pView)
     {
-        return;             // nie ma okna dokumentu zawieraj¹cego aktualny wiersz
+        return;             // nie ma okna dokumentu zawierajï¿½cego aktualny wiersz
     }
 
-    SetPointer(pView, line.ln, true);  // wymuszenie przesuniêcia zawartoœci okna, jeœli potrzeba
+    SetPointer(pView, line.ln, true);  // wymuszenie przesuniï¿½cia zawartoï¿½ci okna, jeï¿½li potrzeba
     m_fuidLastView = line.file;
     m_hwndLastView = pView->m_hWnd;
 }
@@ -2867,10 +2882,10 @@ void CSym6502::SetPointer(CSrc6502View *pView, int nLine, bool bScroll)
 }
 
 
-void CSym6502::ResetPointer()   // schowanie strza³ki
+void CSym6502::ResetPointer()   // schowanie strzaï¿½ki
 {
     POSITION posDoc = theApp.m_pDocDeasmTemplate->GetFirstDocPosition();
-    while (posDoc != NULL)        // s¹ okna z deasemblera?
+    while (posDoc != NULL)        // sï¿½ okna z deasemblera?
     {
         if (CDeasm6502Doc *pDoc = dynamic_cast<CDeasm6502Doc *>(theApp.m_pDocDeasmTemplate->GetNextDoc(posDoc)))
             pDoc->SetPointer(-1, true);
@@ -2879,7 +2894,7 @@ void CSym6502::ResetPointer()   // schowanie strza³ki
     if (m_fuidLastView)
     {
         if (CSrc6502View *pView = FindDocView(m_fuidLastView))
-            SetPointer(pView, -1, false);    // zmazanie strza³ki
+            SetPointer(pView, -1, false);    // zmazanie strzaï¿½ki
     }
     m_fuidLastView = 0;
 }
@@ -3016,15 +3031,15 @@ void CSym6502::AddBranchCycles(UINT8 arg)
     ctx.uCycles++;       // branch taken
 
     if ((!cpu16) || (cpu16 && ctx.emm)) {
-        if (arg & 0x80)       // skok do ty³u
+        if (arg & 0x80)       // skok do tyï¿½u
         {
             if (ctx.pc >> 8 != UINT16(ctx.pc - (0x100 - arg)) >> 8)
-                ctx.uCycles++;     // zmiana strony pamiêci -> dodatkowy cykl
+                ctx.uCycles++;     // zmiana strony pamiï¿½ci -> dodatkowy cykl
         }
         else          // skok do przodu
         {
             if (ctx.pc >> 8 != UINT16(ctx.pc + arg) >> 8)
-                ctx.uCycles++;     // zmiana strony pamiêci -> dodatkowy cykl
+                ctx.uCycles++;     // zmiana strony pamiï¿½ci -> dodatkowy cykl
         }
     }
 }

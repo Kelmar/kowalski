@@ -126,17 +126,16 @@ protected:
         CPoint m_ptStartPos, m_ptEndPos; // Block of text participating
         int m_nAction; // For information only: action type
 
-    private:
-        // TCHAR *m_pcText;
-        // Since in most cases we have 1 character here, 
-        // we should invent a better way. Note: 2 * sizeof(WORD) <= sizeof(TCHAR*)
-        //
-        // Here we will use the following trick: on Win32 platforms high-order word
-        // of any pointer will be != 0. So we can store 1 character strings without
-        // allocating memory.
-        //
-
-        // The above is not correct, 2 * sizeof(WORD) == sizeof(TCHAR *) on 32-bit platforms
+	private:
+		//	TCHAR	*m_pcText;
+		//	Since in most cases we have 1 character here, 
+		//	we should invent a better way. Note: 2 * sizeof(WORD) <= sizeof(TCHAR*)
+		//
+		//	Here we will use the following trick: on Win32 platforms high-order word
+		//	of any pointer will be != 0. So we can store 1 character strings without
+		//	allocating memory.
+		//
+		// The above is not correct, 2 * sizeof(WORD) == sizeof(TCHAR *) on 32-bit platforms
         // Also assumes that TCHAR isn't going to mess with that upper bit, which it VERY
         // much will if the character is unicode.
 

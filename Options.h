@@ -143,7 +143,7 @@ public:
   //{{AFX_DATA(COptionsAsmPage)
   enum { IDD = IDD_PROPPAGE_ASSEMBLY };
   int	m_nCaseSensitive;
-  int	m_nAsmInstrWithDot;
+  BOOL	m_nSwapBin;
   BOOL	m_bGenerateListing;
   CString m_strListingFile;
   BOOL	m_bGenerateBRKExtraByte;

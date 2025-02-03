@@ -34,7 +34,7 @@ public:
       {
         I_UNDEF,		// identyfikator niezdefiniowany
         I_ADDRESS,		// identyfikator zawiera adres
-        I_VALUE		// identyfikator zawiera wartoœæ liczbow¹
+        I_VALUE		// identyfikator zawiera wartoï¿½ï¿½ liczbowï¿½
       };
 
       struct Ident
@@ -52,7 +52,7 @@ public:
     };
 
 
-    enum InstrArg		// rodzaj argumentów dyrektywy
+    enum InstrArg		// rodzaj argumentï¿½w dyrektywy
     {
         A_BYTE,
         A_NUM,
@@ -89,9 +89,9 @@ public:
         ERR_NUM_DEC,
         ERR_NUM_BIN,
         ERR_NUM_CHR,
-        ERR_NUM_BIG,	// b³¹d przekroczenia zakresu
+        ERR_NUM_BIG,	// bï¿½ï¿½d przekroczenia zakresu
         ERR_BAD_CHR,
-        ERR_STR_UNLIM	// niezamkniêty ³añcuch znaków
+        ERR_STR_UNLIM	// niezamkniï¿½ty ï¿½aï¿½cuch znakï¿½w
     };
 
     //...........................................................................
@@ -102,23 +102,23 @@ public:
         L_UNKNOWN,		// nierozpoznany znak
 
         L_NUM,		// liczba (dec, hex, bin, lub znak)
-        L_STR,		// ci¹g znaków w apostrofach lub cudzys³owach
+        L_STR,		// ciï¿½g znakï¿½w w apostrofach lub cudzysï¿½owach
         L_IDENT,		// identyfikator
-        L_IDENT_N,		// numerowany identyfikator (zakoñczony przez '#' i numer)
-        L_SPACE,		// odstêp
+        L_IDENT_N,		// numerowany identyfikator (zakoï¿½czony przez '#' i numer)
+        L_SPACE,		// odstï¿½p
         L_OPER,		// operator
         L_BRACKET_L,	// lewy nawias '('
         L_BRACKET_R,	// prawy nawias ')'
         L_LBRACKET_L,	// lewy nawias '('
         L_LBRACKET_R,	// prawy nawias ')'
-        L_EXPR_BRACKET_L,	// lewy nawias dla wyra¿eñ '['
-        L_EXPR_BRACKET_R,	// prawy nawias dla wyra¿eñ ']'
+        L_EXPR_BRACKET_L,	// lewy nawias dla wyraï¿½eï¿½ '['
+        L_EXPR_BRACKET_R,	// prawy nawias dla wyraï¿½eï¿½ ']'
         L_COMMENT,		// znak komentarza ';'
         L_LABEL,		// znak etykiety ':'
         L_COMMA,		// znak przecinka ','
-        L_STR_ARG,		// znak dolara '$', koñczy parametr typu tekstowego
+        L_STR_ARG,		// znak dolara '$', koï¿½czy parametr typu tekstowego
         L_MULTI,		// znak wielokropka '...'
-        L_INV_COMMAS,	// znak cudzys³owu
+        L_INV_COMMAS,	// znak cudzysï¿½owu
         L_LHASH,		// '!#'
         L_HASH,		// znak '#'
         L_EQUAL,		// znak przypisania '='
@@ -126,7 +126,7 @@ public:
         L_ASM_INSTR,	// dyrektywa asemblera
         L_CR,		// koniec wiersza
         L_FIN,		// koniec danych
-        L_ERROR		// b³¹d
+        L_ERROR		// bï¿½ï¿½d
     };
 
     const LeksType type;
@@ -179,9 +179,9 @@ private:
         OperType op;	// operator binarny lub unarny
         OpCode code;	// mnomonik
         InstrType instr;	// dyrektywa
-        //    int val;		// sta³a liczbowa lub znakowa
-        Num num;		// sta³a liczbowa lub znakowa
-        CLString *str;	// identyfikator lub ci¹g znaków
+        //    int val;		// staï¿½a liczbowa lub znakowa
+        Num num;		// staï¿½a liczbowa lub znakowa
+        CLString *str;	// identyfikator lub ciï¿½g znakï¿½w
         Error err;
     };
 
@@ -256,7 +256,7 @@ public:
         ASSERT(type == L_IDENT_N);
         CString num(' ', 9);
         num.Format("#%08X", (int)val);
-        *str += num;		// do³¹czenie numeru
+        *str += num;		// doï¿½ï¿½czenie numeru
     }
 
     //debugging log  use= leks.Logger(cs);
@@ -271,7 +271,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-// tablica asocjacyjna identyfikatorów
+// tablica asocjacyjna identyfikatorï¿½w
 class CIdentTable : public CMap<CString, LPCTSTR, CIdent, CIdent>
 {
 
@@ -300,7 +300,7 @@ public:
 
 //=============================================================================
 
-class CInputBase	// klasa bazowa dla klas odczytu danych Ÿród³owych
+class CInputBase	// klasa bazowa dla klas odczytu danych ï¿½rï¿½dï¿½owych
 {
 protected:
     int m_nLine;
@@ -359,7 +359,7 @@ public:
 
     virtual void open()
     {
-        ASSERT(m_bOpened == false);	    // plik nie mo¿e byæ jeszcze otwarty
+        ASSERT(m_bOpened == false);	    // plik nie moï¿½e byï¿½ jeszcze otwarty
         CFileException *ex = new CFileException;
         if (!Open(CInputBase::m_strFileName, CFile::modeRead | CFile::shareDenyWrite | CFile::typeText, ex))
             throw (ex);
@@ -369,7 +369,7 @@ public:
 
     virtual void close()
     {
-        ASSERT(m_bOpened == true);	    // plik musi byæ otworzony
+        ASSERT(m_bOpened == true);	    // plik musi byï¿½ otworzony
         Close();
         m_bOpened = false;
     }
@@ -469,17 +469,17 @@ public:
 
 //-----------------------------------------------------------------------------
 
-struct Expr		 // klasa do opisu wyra¿enia arytmetycznego/logicznego/tekstowego
+struct Expr		 // klasa do opisu wyraï¿½enia arytmetycznego/logicznego/tekstowego
 {
     SINT32 value;
     CString string;
     enum
     {
-        EX_UNDEF,		// wartoœæ nieznana
+        EX_UNDEF,		// wartoï¿½ï¿½ nieznana
         EX_BYTE,		// bajt, tj. od -255 do 255 (sic!)
-        EX_WORD,		// s³owo, od -65535 do 65535
+        EX_WORD,		// sï¿½owo, od -65535 do 65535
         EX_LONG,		// outside the above range
-        EX_STRING		// ci¹g znaków
+        EX_STRING		// ciï¿½g znakï¿½w
     } inf;
 
     Expr() : inf(EX_UNDEF)
@@ -532,7 +532,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-  // elementy wspólne odczytu wierszy dla .MACRO, .REPEAT i normalnego odczytu
+  // elementy wspï¿½lne odczytu wierszy dla .MACRO, .REPEAT i normalnego odczytu
 class CSource : public CObject, public CAsm
 {
     FileUID m_fuid;
@@ -543,18 +543,18 @@ public:
     virtual ~CSource()
     {}
 
-    virtual void Start(CConditionalAsm *cond)			// rozpoczêcie odczytu wierszy
+    virtual void Start(CConditionalAsm *cond)			// rozpoczï¿½cie odczytu wierszy
     {
         cond_level_ = cond ? cond->get_level() : INT_MAX;
     }
 
-    virtual void Fin(CConditionalAsm *cond)				// zakoñczenie odczytu wierszy
+    virtual void Fin(CConditionalAsm *cond)				// zakoï¿½czenie odczytu wierszy
     {
         if (cond && cond_level_ != INT_MAX)
             cond->restore_level(cond_level_);
     }
 
-    virtual const TCHAR *GetCurrLine(CString &str) = 0;	// odczyt bie¿¹cego wiersza
+    virtual const TCHAR *GetCurrLine(CString &str) = 0;	// odczyt bieï¿½ï¿½cego wiersza
 
     virtual int GetLineNo() = 0;		// odczyt numeru wiersza
 
@@ -589,14 +589,14 @@ struct CStrLines : public CStringArray
 };
 
 
-// elementy wymagane do zapamiêtywania i odtwarzania wierszy Ÿród³owych programu
+// elementy wymagane do zapamiï¿½tywania i odtwarzania wierszy ï¿½rï¿½dï¿½owych programu
 class CRecorder
 {
     CStrLines m_strarrLines;
     CDWordArray m_narrLineNums;
     int m_nLine;
 public:
-    CRecorder(int nInitSize = 10, int nGrowBy = 10) :	// pocz¹tkowe rozmiary tablic
+    CRecorder(int nInitSize = 10, int nGrowBy = 10) :	// poczï¿½tkowe rozmiary tablic
         m_strarrLines(nInitSize, nGrowBy), m_nLine(0)
     {
         m_narrLineNums.SetSize(nInitSize, nGrowBy);
@@ -604,7 +604,7 @@ public:
     virtual ~CRecorder()
     {}
 
-    void AddLine(const CString &strLine, int num)	// zapamiêtanie kolejnego wiersza
+    void AddLine(const CString &strLine, int num)	// zapamiï¿½tanie kolejnego wiersza
     {
         m_strarrLines.SetAtGrow(m_nLine, strLine); m_narrLineNums.SetAtGrow(m_nLine, num); m_nLine++;
     }
@@ -614,12 +614,12 @@ public:
         return m_strarrLines[nLineNo];
     }
 
-    int GetLineNo(int nLineNo)	// odczyt numeru wiersza w pliku Ÿród³owym
+    int GetLineNo(int nLineNo)	// odczyt numeru wiersza w pliku ï¿½rï¿½dï¿½owym
     {
         return m_narrLineNums[nLineNo];
     }
 
-    int GetSize()			// odczyt iloœci wierszy w tablicy
+    int GetSize()			// odczyt iloï¿½ci wierszy w tablicy
     {
         //    ASSERT( m_narrLineNums.GetSize() == m_narrLineNums.GetSize() );
         return m_nLine;
@@ -629,7 +629,7 @@ public:
 
 //.............................................................................
 /*
-  // obs³uga tablicy identyfikatorów etykiet lokalnych
+  // obsï¿½uga tablicy identyfikatorï¿½w etykiet lokalnych
 class CLabels : CIdentTable
 {
 
@@ -642,19 +642,19 @@ class CAsm6502;
 
 class CMacroDef : public CSource, public CRecorder
 {
-    CIdentTable param_names;	// tablica nazw parametrów makra
+    CIdentTable param_names;	// tablica nazw parametrï¿½w makra
     int m_nParams;		// required number of parameters
     int m_nParamCount;		// number of parameters in a macro call
-    CStringArray m_strarrArgs;	// kolejne argumenty wywo³ania - tylko ³añcuchy znaków
-    CDWordArray m_narrArgs;	// kolejne argumenty wywo³ania - tylko wartoœci wyra¿eñ
+    CStringArray m_strarrArgs;	// kolejne argumenty wywoï¿½ania - tylko ï¿½aï¿½cuchy znakï¿½w
+    CDWordArray m_narrArgs;	// kolejne argumenty wywoï¿½ania - tylko wartoï¿½ci wyraï¿½eï¿½
     enum ArgType { NUM, STR, UNDEF_EXPR };
-    CByteArray m_arrArgType;	// typy argumentów (NUM - liczba, STR - ³añcuch znaków)
+    CByteArray m_arrArgType;	// typy argumentï¿½w (NUM - liczba, STR - ï¿½aï¿½cuch znakï¿½w)
     int m_nLineNo;		// nr aktualnego wiersza (przy odczycie)
-    int m_nFirstLineNo;		// numer wiersza, z którego wywo³ywane jest makro
-    FileUID m_nFirstLineFuid;	// ID pliku, z którego wywo³ywane jest makro
+    int m_nFirstLineNo;		// numer wiersza, z ktï¿½rego wywoï¿½ywane jest makro
+    FileUID m_nFirstLineFuid;	// ID pliku, z ktï¿½rego wywoï¿½ywane jest makro
 public:
     CString m_strName;		// nazwa makra
-    bool m_bFirstCodeLine;	// flaga odczytu pierwszego wiersza makra zawieraj¹cego instr. 6502
+    bool m_bFirstCodeLine;	// flaga odczytu pierwszego wiersza makra zawierajï¿½cego instr. 6502
 
     CMacroDef() : param_names(2), m_nParams(0), m_nLineNo(0), m_nFirstLineNo(-1),
         m_nFirstLineFuid(FileUID(-1)), m_bFirstCodeLine(true)
@@ -667,15 +667,15 @@ public:
         if (strParam.Compare(MULTIPARAM) == 0)
         {
             m_nParams = -(m_nParams + 1);
-            return 1;		// koniec listy parametrów
+            return 1;		// koniec listy parametrï¿½w
         }
         if (!param_names.insert(strParam, CIdent(CIdent::I_VALUE, m_nParams)))
-            return -1;	// powtórzona nazwa parametru!
+            return -1;	// powtï¿½rzona nazwa parametru!
         m_nParams++;
         return 0;
     }
 
-    int GetParamsFormat()			// iloœæ przekazywanych parametrów
+    int GetParamsFormat()			// iloï¿½ï¿½ przekazywanych parametrï¿½w
     {
         return m_nParams;
     }
@@ -705,9 +705,9 @@ public:
     virtual void Fin(CConditionalAsm *cond)
     {
         CSource::Fin(cond);
-    }				// zakoñczenie rozwijania bie¿¹cego makra
+    }				// zakoï¿½czenie rozwijania bieï¿½ï¿½cego makra
 
-// wczytanie argumentów wywo³ania
+// wczytanie argumentï¿½w wywoï¿½ania
     CAsm::Stat ParseArguments(CLeksem &leks, CAsm6502 &asmb);
 
     CAsm::Stat ParamLookup(CLeksem &leks, const CString &param_name, Expr &expr, bool &found, CAsm6502 &asmb);
@@ -717,12 +717,12 @@ public:
     CAsm::Stat ParamType(const CString param_name, bool &found, int &type);
     CAsm::Stat ParamType(int param_number, bool &found, int &type);
 
-    //  virtual bool IsMacro()		// Ÿród³em danych jest rozwijane makro
+    //  virtual bool IsMacro()		// ï¿½rï¿½dï¿½em danych jest rozwijane makro
     //  { return true; }
 
     CMacroDef &operator= (const CMacroDef &src)
     {
-        ASSERT(false);	// nie wolno przypisywaæ obiektów typu CMacroDef
+        ASSERT(false);	// nie wolno przypisywaï¿½ obiektï¿½w typu CMacroDef
         return *this;
     }
 
@@ -742,7 +742,7 @@ class CMacroDefs : public CArray<CMacroDef, CMacroDef &>
 class CRepeatDef : public CSource, public CRecorder
 {
     int m_nLineNo;		// nr aktualnego wiersza (przy odczycie)
-    int m_nRepeat;		// iloœæ powtórzeñ wierszy
+    int m_nRepeat;		// iloï¿½ï¿½ powtï¿½rzeï¿½ wierszy
 public:
 
     CRepeatDef(int nRept = 0) : m_nLineNo(0), m_nRepeat(nRept)
@@ -761,17 +761,17 @@ public:
     {
         CSource::Start(cond); m_nLineNo = GetSize();
     }		// licznik wierszy na koniec
-    virtual void Fin(CConditionalAsm *cond)			// zakoñczenie powtórki wierszy
+    virtual void Fin(CConditionalAsm *cond)			// zakoï¿½czenie powtï¿½rki wierszy
     {
         CSource::Fin(cond); delete this;
     }
 
-    //  virtual bool IsRepeat()		// Ÿród³em danych jest powtórzenie (.REPEAT)
+    //  virtual bool IsRepeat()		// ï¿½rï¿½dï¿½em danych jest powtï¿½rzenie (.REPEAT)
     //  { return true; }
 
     CRepeatDef &operator= (const CRepeatDef &src)
     {
-        ASSERT(false);	// nie wolno przypisywaæ obiektów typu CRepeatDef
+        ASSERT(false);	// nie wolno przypisywaï¿½ obiektï¿½w typu CRepeatDef
         return *this;
     }
 
@@ -799,12 +799,12 @@ public:
     CSourceText()
     {}
 
-    virtual void Start(CConditionalAsm *cond)			// rozpoczêcie odczytu wierszy
+    virtual void Start(CConditionalAsm *cond)			// rozpoczï¿½cie odczytu wierszy
     {
         CSource::Start(cond); input.seek_to_begin();
     }
 
-    virtual const TCHAR *GetCurrLine(CString &str)// odczyt bie¿¹cego wiersza
+    virtual const TCHAR *GetCurrLine(CString &str)// odczyt bieï¿½ï¿½cego wiersza
     {
         const TCHAR *ret = input.read_line(str.GetBuffer(1024 + 4), 1024 + 4);
         str.ReleaseBuffer(-1);
@@ -827,25 +827,25 @@ public:
             input.set_file_UID(pDebugInfo->GetFileUID(input.get_file_name()));
     }
 
-    void Include(const CString &fname, CDebugInfo *pDebugInfo = NULL)	// w³¹czenie pliku
+    void Include(const CString &fname, CDebugInfo *pDebugInfo = NULL)	// wï¿½ï¿½czenie pliku
     {
         input.open_file(fname);
         if (pDebugInfo)
             input.set_file_UID(pDebugInfo->GetFileUID(fname));
     }
 
-    bool TextFin()			// zakoñczony bie¿¹cy plik
+    bool TextFin()			// zakoï¿½czony bieï¿½ï¿½cy plik
     {
-        if (input.get_count() > 1)	// zagnie¿d¿ony odczyt (.include) ?
+        if (input.get_count() > 1)	// zagnieï¿½dï¿½ony odczyt (.include) ?
         {
             input.close_file();
             return true;
         }
         else
-            return false;	// koniec plików Ÿród³owych
+            return false;	// koniec plikï¿½w ï¿½rï¿½dï¿½owych
     }
     /*
-      bool IsPresent()			// spr. czy jest jakiœ odczytywany plik
+      bool IsPresent()			// spr. czy jest jakiï¿½ odczytywany plik
       { return input.is_present(); }
     */
     virtual const CString &GetFileName()	// nazwa aktualnego pliku
@@ -858,7 +858,7 @@ public:
 //-----------------------------------------------------------------------------
 
 
-class CSourceStack : CTypedPtrArray<CObArray, CSource *>	// Stos obiektów bêd¹cych Ÿród³em wierszy
+class CSourceStack : CTypedPtrArray<CObArray, CSource *>	// Stos obiektï¿½w bï¿½dï¿½cych ï¿½rï¿½dï¿½em wierszy
 {
     int m_nIndex;
 public:
@@ -872,7 +872,7 @@ public:
             GetAt(i)->Fin(0);
     }
 
-    void Push(CSource *pSrc)		// Dodanie elementu na wierzcho³ku stosu
+    void Push(CSource *pSrc)		// Dodanie elementu na wierzchoï¿½ku stosu
     {
         ++m_nIndex; SetAtGrow(m_nIndex, pSrc);
     }
@@ -882,7 +882,7 @@ public:
         return m_nIndex < 0 ? NULL : GetAt(m_nIndex);
     }
 
-    CSource *Pop()			// Zdjêcie elementu ze stosu
+    CSource *Pop()			// Zdjï¿½cie elementu ze stosu
     {
         return GetAt(m_nIndex--);
     }
@@ -897,7 +897,7 @@ public:
                 return pSrc;
         return NULL;
     }
-    CSource *FindRepeat()			// odszukanie ostatniego powtórzenia
+    CSource *FindRepeat()			// odszukanie ostatniego powtï¿½rzenia
     {
         for (int i = m_nIndex; i >= 0; i--)
             if (CRepeatDef *pSrc = dynamic_cast<CRepeatDef *>(GetAt(i)))
@@ -917,40 +917,40 @@ class CAsm6502 : public CAsm, public CObject
     friend class CMacroDef;
 
     CString current_line;
-    const TCHAR *ptr;				// do œledzenia aktualnego wiersza
+    const TCHAR *ptr;				// do ï¿½ledzenia aktualnego wiersza
     const TCHAR *err_start;
-    const TCHAR *ident_start;		// po³o¿enie identyfikatora w wierszu
-    const TCHAR *ident_fin;			// po³o¿enie koñca identyfikatora w wierszu
+    const TCHAR *ident_start;		// poï¿½oï¿½enie identyfikatora w wierszu
+    const TCHAR *ident_fin;			// poï¿½oï¿½enie koï¿½ca identyfikatora w wierszu
 
     bool check_line;				// flaga: true - analiza jednego wiersza, false - programu
     UINT32 origin;
-    bool originWrapped;				// true - jeœli licznik rozkazów "przewin¹³ siê"
-    UINT32 program_start;			// pocz¹tek programu
-    UINT32 mem_mask;				// granica pamiêci procesora (maska), normalnie $FFFF
+    bool originWrapped;				// true - jeï¿½li licznik rozkazï¿½w "przewinï¿½ï¿½ siï¿½"
+    UINT32 program_start;			// poczï¿½tek programu
+    UINT32 mem_mask;				// granica pamiï¿½ci procesora (maska), normalnie $FFFF
     int local_area;					// nr obszaru etykiet lokalnych
     int proc_area;					// nr obszaru etykiet lokalnych
     int macro_local_area;			// nr obszaru etykiet lokalnych makrodefinicji
-    int pass;						// numer przejœcia (1 lub 2)
-    //int conditional;				// asemblacja warunkowa - poziom zag³êbienia
+    int pass;						// numer przejï¿½cia (1 lub 2)
+    //int conditional;				// asemblacja warunkowa - poziom zagï¿½ï¿½bienia
     CString include_fname;
-    CString user_error_text;		// tekst b³êdu u¿ytkownika (dyrektywy .ERROR)
-    const TCHAR *instr_start;		// do zapamiêtania pocz¹tku
-    const TCHAR *instr_fin;			// i koñca instrukcji w wierszu
+    CString user_error_text;		// tekst bï¿½ï¿½du uï¿½ytkownika (dyrektywy .ERROR)
+    const TCHAR *instr_start;		// do zapamiï¿½tania poczï¿½tku
+    const TCHAR *instr_fin;			// i koï¿½ca instrukcji w wierszu
     CMacroDefs macros;				// makrodefinicje
 
-    CSource *text;					// bie¿¹cy tekst Ÿród³owy
-    CSourceText entire_text;		// pierwszy (pocz¹tkowy) tekst Ÿród³owy
+    CSource *text;					// bieï¿½ï¿½cy tekst ï¿½rï¿½dï¿½owy
+    CSourceText entire_text;		// pierwszy (poczï¿½tkowy) tekst ï¿½rï¿½dï¿½owy
     CRepeatDef *pRept;
 
     // leksyka:
-    CLeksem get_dec_num();			// interpretacja liczby dziesiêtnej
+    CLeksem get_dec_num();			// interpretacja liczby dziesiï¿½tnej
     CLeksem get_hex_num();			// interpretacja liczby szesnastkowej
-    CLeksem get_bin_num();			// interpretacja liczby dwójkowej
-    CLeksem get_char_num();			// interpretacja sta³ej znakowej
-    //  CLeksem get_ident();			// wyodrêbnienie napisu
-    CLeksem::CLString *get_ident();	// wyodrêbnienie napisu
-    CLeksem get_string(TCHAR lim);	// wyodrêbnienie ³añcucha znaków
-    CLeksem eat_space();			// ominiêcie odstêpu
+    CLeksem get_bin_num();			// interpretacja liczby dwï¿½jkowej
+    CLeksem get_char_num();			// interpretacja staï¿½ej znakowej
+    //  CLeksem get_ident();			// wyodrï¿½bnienie napisu
+    CLeksem::CLString *get_ident();	// wyodrï¿½bnienie napisu
+    CLeksem get_string(TCHAR lim);	// wyodrï¿½bnienie ï¿½aï¿½cucha znakï¿½w
+    CLeksem eat_space();			// ominiï¿½cie odstï¿½pu
     bool proc_instr(const CString &str, OpCode &code);
     bool asm_instr(const CString &str, InstrType &it);
     CLeksem next_leks(bool nospace = true);	// pobranie kolejnego symbolu
@@ -958,19 +958,19 @@ class CAsm6502 : public CAsm, public CObject
 
     COutputMem *out;				// memory for the object code
     CMarkArea *markArea;			// to mark used memory areas with 'out'
-    CIdentTable local_ident;		// tablica identyfikatorów lokalnych
-    CIdentTable proc_local_ident;		// tablica identyfikatorów lokalnych
-    CIdentTable global_ident;		// tablica identyfikatorów globalnych
+    CIdentTable local_ident;		// tablica identyfikatorï¿½w lokalnych
+    CIdentTable proc_local_ident;		// tablica identyfikatorï¿½w lokalnych
+    CIdentTable global_ident;		// tablica identyfikatorï¿½w globalnych
     CIdentTable macro_name;			// tablica nazw makrodefinicji
-    CIdentTable macro_ident;		// tablica identyfikatorów w makrorozwiniêciach
+    CIdentTable macro_ident;		// tablica identyfikatorï¿½w w makrorozwiniï¿½ciach
     CDebugInfo *debug;				// commissioning information for the simulator
 
-    //	CString err_file;				// nazwa pliku, którego odczyt spowodowa³ b³¹d
-    //	int err_line;					// nr wiersza, w którym napotkano b³¹d
-    CString err_ident;				// nazwa etykiety, która spowodowa³a b³¹d
+    //	CString err_file;				// nazwa pliku, ktï¿½rego odczyt spowodowaï¿½ bï¿½ï¿½d
+    //	int err_line;					// nr wiersza, w ktï¿½rym napotkano bï¿½ï¿½d
+    CString err_ident;				// nazwa etykiety, ktï¿½ra spowodowaï¿½a bï¿½ï¿½d
 
-    bool temporary_out;				// flaga - 'out' zosta³o alokowane w konstruktorze
-    bool abort_asm;					// zmienna do wymuszenia przerwania asemblacji z zewn¹trz
+    bool temporary_out;				// flaga - 'out' zostaï¿½o alokowane w konstruktorze
+    bool abort_asm;					// zmienna do wymuszenia przerwania asemblacji z zewnï¿½trz
     bool is_aborted()
     {
         return abort_asm ? abort_asm = false, true : false;
@@ -1012,19 +1012,19 @@ class CAsm6502 : public CAsm, public CObject
     Stat cmp_expr(CLeksem &leks, Expr &expr);
     Stat bool_expr_and(CLeksem &leks, Expr &expr);
     Stat bool_expr_or(CLeksem &leks, Expr &expr);
-    Stat expression(CLeksem &leks, Expr &expr, bool str = false);	// interpretacja wyra¿enia
+    Stat expression(CLeksem &leks, Expr &expr, bool str = false);	// interpretacja wyraï¿½enia
     bool is_expression(const CLeksem &leks);
     Stat assemble_line();			// interpretacja wiersza
     Stat assemble();
     const TCHAR *get_next_line();	// wczytanie kolejnego wiersza do asemblacji
     const TCHAR *play_macro();		// odczyt kolejnego wiersza makra
-    const TCHAR *play_repeat();		// odczyt kolejnego wiersza powtórki
-    //  CPtrStack <CSource> source;		// stos obiektów zwracaj¹cych wiersze Ÿród³owe
-    CSourceStack source;			// stos obiektów zwracaj¹cych wiersze Ÿród³owe
-    void asm_start();				// rozpoczêcie asemblacji
-    void asm_fin();					// zakoñczenie asemblacji
-    void asm_start_pass();			// rozpoczêcie przejœcia asemblacji
-    void asm_fin_pass();			// zakoñczenie przejœcia asemblacji
+    const TCHAR *play_repeat();		// odczyt kolejnego wiersza powtï¿½rki
+    //  CPtrStack <CSource> source;		// stos obiektï¿½w zwracajï¿½cych wiersze ï¿½rï¿½dï¿½owe
+    CSourceStack source;			// stos obiektï¿½w zwracajï¿½cych wiersze ï¿½rï¿½dï¿½owe
+    void asm_start();				// rozpoczï¿½cie asemblacji
+    void asm_fin();					// zakoï¿½czenie asemblacji
+    void asm_start_pass();			// rozpoczï¿½cie przejï¿½cia asemblacji
+    void asm_fin_pass();			// zakoï¿½czenie przejï¿½cia asemblacji
     Stat chk_instr_code(OpCode &code, CodeAdr &mode, Expr expr, int &length);
     void generate_code(OpCode code, CodeAdr mode, Expr expr, Expr expr_bit, Expr expr_zpg);
     Stat inc_prog_counter(int dist);
@@ -1036,17 +1036,17 @@ class CAsm6502 : public CAsm, public CObject
     void generate_debug();
     Stat look_for_endm();
     Stat record_macro();
-    //  void MacroExpandStart(CMacroDef *pMacro);	// przejœcie do trybu rozwijania makrodefinicji
-    //  void MacroExpandFin();			// zakoñczenie trybu rozwijania makrodefinicji
+    //  void MacroExpandStart(CMacroDef *pMacro);	// przejï¿½cie do trybu rozwijania makrodefinicji
+    //  void MacroExpandFin();			// zakoï¿½czenie trybu rozwijania makrodefinicji
     CMacroDef *in_macro;			// aktualnie rejestrowane makro lub NULL
     CMacroDef *expanding_macro;		// aktualnie rozwijane makro lub NULL
     //  CPtrStack<CMacroDef> expand_macros;	// lista rozwijanych makr
-    CRepeatDef *repeating;			// aktualna powtórka (.REPEAT)
-    //  CPtrStack<CRepeatDef> repeats;	// lista powtórek
+    CRepeatDef *repeating;			// aktualna powtï¿½rka (.REPEAT)
+    //  CPtrStack<CRepeatDef> repeats;	// lista powtï¿½rek
     Stat record_rept(CRepeatDef *pRept);
     Stat look_for_repeat();			// szukanie .ENDR lub .REPEAT
-    int reptInit;					// wartoœæ do zainicjowania iloœci powtórzeñ
-    int reptNested;					// licznik zagnie¿d¿eñ .REPEAT (przy rejestracji)
+    int reptInit;					// wartoï¿½ï¿½ do zainicjowania iloï¿½ci powtï¿½rzeï¿½
+    int reptNested;					// licznik zagnieï¿½dï¿½eï¿½ .REPEAT (przy rejestracji)
     //  void RepeatStart(CRepeatDef *pRept);
     //  void RepeatFin();
     bool b_listing;
@@ -1063,8 +1063,8 @@ class CAsm6502 : public CAsm, public CObject
     class CListing
     {
         CStdioFile m_File;	// wsk. do pliku z listingiem
-        CString m_Str;		// bie¿¹cy wiersz listingu
-        int m_nLine;		// bie¿¹cy wiersz
+        CString m_Str;		// bieï¿½ï¿½cy wiersz listingu
+        int m_nLine;		// bieï¿½ï¿½cy wiersz
 
         void Open(const TCHAR *fname)
         {
@@ -1104,11 +1104,13 @@ class CAsm6502 : public CAsm, public CObject
 public:
     ProcessorType m_procType;
 
-    static bool case_insensitive;		// true -> ma³e i du¿e litery w etykietach nie s¹ rozró¿niane
+	static bool caseinsense;
+    static bool case_insensitive; // true -> lowercase and uppercase letters in labels are not distinguished
     static bool swapbin;
+	static bool swap_bin;
     static UINT8 forcelong;
-    static bool generateBRKExtraByte;	// generowaæ dodatkowy bajt za instrukcj¹ BRK?
-    static UINT8 BRKExtraByte;			// wartoœæ dodatkowego bajtu za instrukcj¹ BRK
+    static bool generateBRKExtraByte;	// generowaï¿½ dodatkowy bajt za instrukcjï¿½ BRK?
+    static UINT8 BRKExtraByte;			// wartoï¿½ï¿½ dodatkowego bajtu za instrukcjï¿½ BRK
 
     CAsm6502(const CString &file_in_name, 
         COutputMem *out = NULL, 
@@ -1166,9 +1168,9 @@ public:
             pRept->Fin(0);
     }
 
-    // sprawdzenie sk³adni w wierszu 'str'
-    // w 'instr_idx_start' zwracane po³o¿enie instrukcji w wierszu lub 0
-    // w 'instr_idx_fin' zwracane po³o¿enie koñca instrukcji w wierszu lub 0
+    // sprawdzenie skï¿½adni w wierszu 'str'
+    // w 'instr_idx_start' zwracane poï¿½oï¿½enie instrukcji w wierszu lub 0
+    // w 'instr_idx_fin' zwracane poï¿½oï¿½enie koï¿½ca instrukcji w wierszu lub 0
     Stat CheckLine(const TCHAR *str, int &instr_idx_start, int &instr_idx_fin);
 
     void Abort()
@@ -1176,14 +1178,14 @@ public:
         abort_asm = true;
     }
 
-    CString GetErrMsg(Stat stat);		// opis b³êdu
+    CString GetErrMsg(Stat stat);		// opis bï¿½ï¿½du
 
     Stat Assemble()						// asemblacja
     {
         return assemble();
     }
 
-    UINT32 GetProgramStart()			// pocz¹tek programu
+    UINT32 GetProgramStart()			// poczï¿½tek programu
     {
         return program_start;
     }

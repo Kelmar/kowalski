@@ -66,12 +66,13 @@ const TCHAR crlf[] = _T("\r\n");
 
 void CCrystalTextBuffer::SUndoRecord::SetText(LPCTSTR pszText)
 {
-    FreeText();
+	FreeText();
 
     if (pszText != NULL && pszText[0] != _T('\0'))
     {
         int nLength = _tcslen(pszText);
 
+	
         if (nLength > 1)
         {
             m_pszText = new TCHAR[(nLength + 1) * sizeof(TCHAR)];
@@ -81,7 +82,7 @@ void CCrystalTextBuffer::SUndoRecord::SetText(LPCTSTR pszText)
         {
             m_dwFlags |= UNDO_SM_STR;
             m_szText[0] = pszText[0];
-            m_szText[1] = 0;
+			m_szText[1] = 0;
         }
     }
 }
