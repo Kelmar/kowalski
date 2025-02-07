@@ -25,6 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "IOWindow.h"
 #include <memory.h>
+#include <iostream>
+#include <fstream>
+using namespace std;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -32,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
+fstream myFile;
 //-----------------------------------------------------------------------------
 bool CIOWindow::m_bRegistered= FALSE;
 bool CIOWindow::m_bHidden;
@@ -129,6 +132,8 @@ bool CIOWindow::Create()
   SetSize(m_nInitW,m_nInitH);
 
   m_uTimer = SetTimer(101, 250, 0);
+
+  myFile.open("output.txt",ios::out);
 
   SetFocus();
 
@@ -284,6 +289,13 @@ int CIOWindow::PutH(int chr)			// wydrukowanie liczby hex (8 bitow)
 int CIOWindow::PutC(int chr)			// wydrukowanie znaku
 {
 	HideCursor();
+
+  CString cs;
+  if (myFile.is_open()) {
+	 cs.Format("%c", (UINT8)chr);
+//	 MessageBoxA(cs, "io", MB_OK );
+     myFile << cs; 
+  }
 
   if (chr == 0x0a) // line feed?
   {
@@ -481,7 +493,7 @@ void CIOWindow::OnDestroy()
   if (m_uTimer)
     KillTimer(m_uTimer);
   m_uTimer = 0;
-
+  myFile.close();
   CMiniFrameWnd::OnDestroy();
 }
 

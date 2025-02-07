@@ -1180,8 +1180,8 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 		ret = expression(leks,expr);
 		if (ret)				// niepoprawne wyra¿enie?
 			return ret;
-		if (expr.inf==Expr::EX_LONG)
-			return ERR_NUM_LONG;		// max $FFFF
+//		if (expr.inf==Expr::EX_LONG)
+//			return ERR_NUM_LONG;		// max $FFFF
 		switch (leks.type)
 		{
 		case CLeksem::L_SPACE:
@@ -1203,7 +1203,10 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 			if (leks.type != CLeksem::L_BRACKET_R)
 				return ERR_BRACKET_R_EXPECTED;	// brak nawiasu ')'
 			if (expr.inf==Expr::EX_LONG)
-				return ERR_NUM_LONG;
+				{	
+					expr.inf = Expr::EX_WORD;
+					
+				} //return ERR_ERR_NUM_LONG;
 			if (expr.inf==Expr::EX_WORD && reg_x)
 				mode = A_ABSI_X;
 			else if (expr.inf==Expr::EX_BYTE && reg_x)
@@ -1415,7 +1418,13 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CLeksem &leks, CodeAdr &mode, Expr &e
 //				    else 
 //						mode = A_ABS_X;   //add test for A_ABS vs A_ABSL?
 				else
-					return ERR_IDX_REG_X_EXPECTED;
+					if (forcelong==3)
+						return ERR_IDX_REG_X_EXPECTED; // fix for locations above bank 0
+					else if (((expr.value>>16) & 0xFF) != (((origin)>>16) & 0xFF)) // fix using long when abs should be used
+						return ERR_IDX_REG_X_EXPECTED; // fix for locations above bank 0         
+					else
+						mode = A_ABS_Y;       // fix for locations above bank 0
+					//return ERR_IDX_REG_X_EXPECTED;
 				break;
 			default:
 				ASSERT(false);
@@ -1482,9 +1491,13 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 				return pass==1 ? OK : ERR_UNDEF_EXPR;
 			if (expr.value < 0)
 				return ERR_NUM_NEGATIVE;	// oczekiwana wartoœæ nieujemna
-			if (expr.inf==Expr::EX_LONG)	// za du¿a wartoœæ
-				return ERR_NUM_LONG;
-			program_start = expr.value & mem_mask;
+			if (expr.inf==Expr::EX_LONG)
+//			{	
+//				if((bProc6502==2))
+//					program_start = expr.value & mem_mask;
+//				else
+					return ERR_NUM_LONG;	
+//			}	
 			if (listing.IsOpen())
 				listing.AddValue(UINT32(program_start));
 			break;
