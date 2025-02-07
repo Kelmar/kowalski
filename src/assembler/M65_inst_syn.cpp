@@ -117,8 +117,8 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
         if (ret) // Incorrect expression?
             return ret;
 
-        if (expr.inf == Expr::EX_LONG)
-            return ERR_NUM_LONG; // max $FFFF
+        //if (expr.inf == Expr::EX_LONG)
+        //    return ERR_NUM_LONG; // max $FFFF
 
         switch (leks.type)
         {
@@ -149,7 +149,10 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
                 return ERR_BRACKET_R_EXPECTED;	// brak nawiasu ')'
 
             if (expr.inf == Expr::EX_LONG)
-                return ERR_NUM_LONG;
+            {
+                expr.inf = Expr::EX_WORD;
+                //return ERR_NUM_LONG;
+            }
 
             if (expr.inf == Expr::EX_WORD && reg_x)
                 mode = A_ABSI_X;
@@ -420,7 +423,15 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
                 //				    else
                 //						mode = A_ABS_X; // Add test for A_ABS vs A_ABSL?
                 else
-                    return ERR_IDX_REG_X_EXPECTED;
+                {
+                    if (forcelong == 3)
+                        return ERR_IDX_REG_X_EXPECTED; // fix for locations above bank 0
+                    else if (((expr.value >> 16) & 0xFF) != ((origin >> 16) & 0xFF)) // fix using long when abs should be used
+                        return ERR_IDX_REG_X_EXPECTED; // fix for locations above bank 0         
+                    else
+                        mode = A_ABS_Y;       // fix for locations above bank 0
+                    //return ERR_IDX_REG_X_EXPECTED;
+                }
                 break;
 
             default:

@@ -824,11 +824,16 @@ void CSym6502::PerformCommandInner()
             {
                 addr = (acc & 0x0f) + (arg & 0x0f) + (carry ? 1 : 0);
                 if ((addr & 0xff) > 9) addr += 0x06;
+                if (addr > 0x1F) addr = 0x10 + (addr & 0x0F);
                 addr += (acc & 0xf0) + (arg & 0xf0);
                 if ((addr & 0xff0) > 0x9F) addr += 0x60;
+                if (addr > 0x1F0) addr = 0x0100 + (addr & 0x00FF);
                 addr += (acc & 0xf00) + (arg & 0xf00);
                 if ((addr & 0xff00) > 0x9FF) addr += 0x0600;
+                if (addr > 0x1FFF) addr = 0x1000 + (addr & 0x0FFF);
                 addr += (acc & 0xf000) + (arg & 0xf000);
+                overflow = ((acc & 0x8000) == (arg & 0x8000)) && (addr & 0x8000) != (acc & 0x8000);
+				if ((addr & 0xff000) > 0x19000) overflow = false;
                 if ((addr & 0xff000) > 0x9FFF) addr += 0x06000;
                 if (addr > 0xffff) carry = true; else carry = false;
                 if ((addr & 0xffff) == 0) zero = true; else zero = false;
@@ -866,24 +871,20 @@ void CSym6502::PerformCommandInner()
             if (m_ctx.decimal)
             {
                 // Decimal addition
-                tmp = acc8 + arg8 + (m_ctx.carry ? 1 : 0);
-                zero = (tmp & 0xFF) == 0;
+                acc = (acc8 & 0x0F) + (arg8 & 0x0F) + (m_ctx.carry ? 1 : 0);
+                if ((acc & 0xFF) > 9) acc += 0x06;
+                if (acc > 0x1F) acc = 0x10 + (acc & 0x0F);
+                acc += (acc & 0x0F) + (arg8 & 0xF0);
+                overflow = ((acc8 & 0x80) == (arg8 & 0x80)) && (acc & 0x80) != (acc8 & 0x80);
+                if ((acc & 0xff0) > 0x190) overflow = false;
+                if ((acc & 0xFF0) > 0x9f) acc += 0x60;
 
-                bool af = ((acc8 ^ arg8) & 0x80) == 0;
-                bool at = ((acc8 ^ tmp) & 0x80) != 0;
+                m_ctx.a = acc;
+                m_ctx.overflow = overflow;
+                m_ctx.carry = acc > 255;
+                m_ctx.negative = (acc & 0x80) != 0;
 
-                m_ctx.overflow = af && at;
-
-                int test = (acc8 & 0x0F) + (arg8 & 0x0F) + (m_ctx.carry ? 1 : 0);
-
-                if (test > 9)
-                    tmp += 6;
-
-                if (tmp > 0x99)
-                    tmp += 96;
-
-                acc = (uint8_t)(tmp & 0xFF);
-                zeroc = acc == 0;
+                zero = (acc & 0xff) == 0;
 
                 bool isM6502 = Processor() == ProcessorType::M6502;
 
@@ -930,7 +931,8 @@ void CSym6502::PerformCommandInner()
 
             if (m_ctx.decimal)
             {
-                arg = ~arg;
+                addr = acc + (0xffff - arg) + (carry ? 1 : 0);
+                overflow = ((addr & 0x8000) == (arg & 0x8000)) && ((addr & 0x8000) != (acc & 0x8000));
                 addr = (acc & 0x0F) + (arg & 0x0F) + (carry ? 1 : 0);
                 if (addr <= 0x0F) addr = ((addr - 0x06) & 0x0f) + (addr & 0xfff0);
                 addr = (acc & 0xF0) + (arg & 0xF0) + (addr > 0x0F ? 0x10 : 0) + (addr & 0x0F);
@@ -938,7 +940,6 @@ void CSym6502::PerformCommandInner()
                 addr = (acc & 0xF00) + (arg & 0xF00) + (addr > 0xFF ? 0x100 : 0) + (addr & 0xFF);
                 if (addr <= 0xFFF) addr = ((addr - 0x0600) & 0x0f00) + (addr & 0xf0ff);
                 addr = (acc & 0xF000) + (arg & 0xF000) + (addr > 0xFFF ? 0x1000 : 0) + (addr & 0xFFF);
-                if (~(acc ^ arg) & (acc ^ addr) & 0x8000) overflow = true; else overflow = false;
                 if (addr <= 0xFFFF) addr = ((addr - 0x6000) & 0xf000) + (addr & 0xf0fff);
                 if (addr > 0xFFFF) carry = true; else carry = false;
                 if ((addr & 0xffff) == 0) zero = true; else zero = false;
