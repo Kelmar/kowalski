@@ -426,10 +426,17 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
                 {
                     if (forcelong == 3)
                         return ERR_IDX_REG_X_EXPECTED; // fix for locations above bank 0
-                    else if (((expr.value >> 16) & 0xFF) != ((origin >> 16) & 0xFF)) // fix using long when abs should be used
-                        return ERR_IDX_REG_X_EXPECTED; // fix for locations above bank 0         
                     else
-                        mode = A_ABS_Y;       // fix for locations above bank 0
+                    {
+                        uint32_t originByte = origin >> 16 & 0xFF;
+                        uint32_t valueByte = expr.value >> 16 & 0xFF;
+
+                        if (valueByte != originByte) // fix using long when abs should be used
+                            return ERR_IDX_REG_X_EXPECTED; // fix for locations above bank 0
+                        else
+                            mode = A_ABS_Y;       // fix for locations above bank 0
+                    }
+
                     //return ERR_IDX_REG_X_EXPECTED;
                 }
                 break;

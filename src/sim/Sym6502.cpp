@@ -832,8 +832,8 @@ void CSym6502::PerformCommandInner()
                 if ((addr & 0xff00) > 0x9FF) addr += 0x0600;
                 if (addr > 0x1FFF) addr = 0x1000 + (addr & 0x0FFF);
                 addr += (acc & 0xf000) + (arg & 0xf000);
-                overflow = ((acc & 0x8000) == (arg & 0x8000)) && (addr & 0x8000) != (acc & 0x8000);
-				if ((addr & 0xff000) > 0x19000) overflow = false;
+                overflow = ((acc & 0x8000u) == (arg & 0x8000u)) && (addr & 0x8000u) != (acc & 0x8000u);
+                if ((addr & 0xff000) > 0x19000) overflow = false;
                 if ((addr & 0xff000) > 0x9FFF) addr += 0x06000;
                 if (addr > 0xffff) carry = true; else carry = false;
                 if ((addr & 0xffff) == 0) zero = true; else zero = false;
@@ -883,14 +883,9 @@ void CSym6502::PerformCommandInner()
                 m_ctx.overflow = overflow;
                 m_ctx.carry = acc > 255;
                 m_ctx.negative = (acc & 0x80) != 0;
-
-                zero = (acc & 0xff) == 0;
+                m_ctx.zero = (acc & 0xff) == 0;
 
                 bool isM6502 = Processor() == ProcessorType::M6502;
-
-                m_ctx.zero = isM6502 ? !!zero : !!zeroc;
-                m_ctx.carry = tmp > 0x99;
-                m_ctx.negative = (acc & 0x80) != 0;
 
                 if (!isM6502) //% bug Fix 1.2.12.1 - fix cycle timing
                     m_ctx.uCycles++; // Add a cycle in BCD mode
@@ -932,7 +927,7 @@ void CSym6502::PerformCommandInner()
             if (m_ctx.decimal)
             {
                 addr = acc + (0xffff - arg) + (carry ? 1 : 0);
-                overflow = ((addr & 0x8000) == (arg & 0x8000)) && ((addr & 0x8000) != (acc & 0x8000));
+                overflow = ((addr & 0x8000u) == (arg & 0x8000u)) && ((addr & 0x8000u) != (acc & 0x8000u));
                 addr = (acc & 0x0F) + (arg & 0x0F) + (carry ? 1 : 0);
                 if (addr <= 0x0F) addr = ((addr - 0x06) & 0x0f) + (addr & 0xfff0);
                 addr = (acc & 0xF0) + (arg & 0xF0) + (addr > 0x0F ? 0x10 : 0) + (addr & 0x0F);
