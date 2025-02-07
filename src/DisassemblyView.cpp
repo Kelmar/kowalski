@@ -23,6 +23,10 @@
 /*=======================================================================*/
 
 #include "StdAfx.h"
+#include "6502.h"
+
+#include "Deasm.h"
+
 #include "DisassemblyView.h"
 
 /*=======================================================================*/
@@ -51,7 +55,40 @@ DisassemblyView::~DisassemblyView()
 
 void DisassemblyView::Init()
 {
+    Bind(wxEVT_PAINT, &DisassemblyView::OnPaint, this);
+}
 
+/*=======================================================================*/
+
+void DisassemblyView::OnPaint(wxPaintEvent &)
+{
+    wxPaintDC dc(this);
+
+    PSym6502 simulator = wxGetApp().simulatorController().Simulator();
+    CDeasm disassembler(simulator);
+
+    DisassembleInfo info;
+
+    wxFont font = wxGetApp().fontController().getMonoFont();
+    dc.SetFont(font);
+
+    wxSize sz = dc.GetTextExtent("M");
+
+    wxRect client = GetClientRect();
+    int lines = std::ceil((float)client.GetHeight() / sz.y);
+
+    info.Address = 0x8000; // Hard coded for the moment
+
+    for (int i = 0, y = 0; i < lines; ++i)
+    {
+        disassembler.Parse(&info);
+
+        dc.DrawText(info.Mnemonic, 0, y);
+
+        y += sz.y;
+
+        info.Address += info.Bytes.size();
+    }
 }
 
 /*=======================================================================*/

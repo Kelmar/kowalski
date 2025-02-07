@@ -24,7 +24,6 @@
 
 #include "StdAfx.h"
 #include "6502.h"
-#include "config.h"
 
 #include "6502View.h"
 #include "6502Doc.h"
@@ -52,52 +51,9 @@ SimulatorConfig s_simConfig;
 
 /*=======================================================================*/
 
-template <>
-struct config::Mapper<SimulatorConfig>
-{
-    void to(SimulatorConfig &cfg, config::Context &ctx) const
-    {
-        ctx.map("ProcType", cfg.Processor);
-        ctx.map("SimFinish", cfg.SimFinish);
-        ctx.map("IOEnabled", cfg.IOEnable);
-        ctx.map("IOAddress", cfg.IOAddress);
-        ctx.map("ProtecteMem", cfg.ProtectMemory);
-        ctx.map("ProtectMemFrom", cfg.ProtectStart);
-        ctx.map("ProtectMemTo", cfg.ProtectEnd);
-    }
-};
-
-/*=======================================================================*/
-
 namespace
 {
     static const std::string SIM_CONFIG_PATH = "Simulator";
-
-    void InitDefaultConfig()
-    {
-        s_simConfig =
-        {
-            .Processor = ProcessorType::M6502,
-            .SimFinish = CAsm::Finish::FIN_BY_BRK,
-            .IOEnable = true,
-            .IOAddress = 0xE000,
-            .ProtectMemory = false,
-            .ProtectStart = 0,
-            .ProtectEnd = 0
-        };
-    }
-
-    void LoadConfig()
-    {
-        InitDefaultConfig();
-
-#if WIN32
-        // TODO: Import old config if detected.
-#endif
-
-        config::source::wx reg("/");
-        reg.read(SIM_CONFIG_PATH, s_simConfig);
-    }
 }
 
 /*=======================================================================*/
@@ -108,6 +64,8 @@ SimulatorController::SimulatorController()
     , m_critSect()
     , m_semaphore()
     , m_asmThread(nullptr)
+    , m_debugInfo()
+    , m_simulator(nullptr)
 {
     BindEvents();
 
@@ -134,8 +92,62 @@ const SimulatorConfig &SimulatorController::GetConfig() const { return s_simConf
 
 void SimulatorController::SaveConfig()
 {
-    config::source::wx reg("/");
-    reg.write(SIM_CONFIG_PATH, s_simConfig);
+    auto config = wxConfig::Get();
+    wxString oldPath = config->GetPath();
+
+    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+
+    config->SetPath(SIM_CONFIG_PATH);
+
+    config->Write("ProcType", (long)s_simConfig.Processor);
+    config->Write("SimFinish", (long)s_simConfig.SimFinish);
+    config->Write("IOEnabled", s_simConfig.IOEnable);
+    config->Write("IOAddress", s_simConfig.IOAddress);
+    config->Write("ProtectMem", s_simConfig.ProtectMemory);
+    config->Write("ProtectMemFrom", s_simConfig.ProtectStart);
+    config->Write("ProtectMemTo", s_simConfig.ProtectEnd);
+}
+
+/*=======================================================================*/
+
+void SimulatorController::LoadDefaults()
+{
+    s_simConfig =
+    {
+        .Processor = ProcessorType::M6502,
+        .SimFinish = CAsm::Finish::FIN_BY_BRK,
+        .IOEnable = true,
+        .IOAddress = 0xE000,
+        .ProtectMemory = false,
+        .ProtectStart = 0,
+        .ProtectEnd = 0
+    };
+}
+
+/*=======================================================================*/
+
+void SimulatorController::LoadConfig()
+{
+    LoadDefaults();
+
+#if WIN32
+    // TODO: Import old config if detected.
+#endif
+
+    auto config = wxConfig::Get();
+    wxString oldPath = config->GetPath();
+
+    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+
+    config->SetPath(SIM_CONFIG_PATH);
+
+    s_simConfig.Processor = (ProcessorType)config->ReadLong("ProcType", (long)s_simConfig.Processor);
+    s_simConfig.SimFinish = (CAsm::Finish)config->ReadLong("SimFinish", (long)s_simConfig.SimFinish);
+    s_simConfig.IOEnable = config->ReadBool("IOEnabled", s_simConfig.IOEnable);
+    s_simConfig.IOAddress = config->ReadLong("IOAddress", s_simConfig.IOAddress);
+    s_simConfig.ProtectMemory = config->ReadBool("ProtecteMem", s_simConfig.ProtectMemory);
+    s_simConfig.ProtectStart = config->ReadLong("ProtectMemFrom", s_simConfig.ProtectStart);
+    s_simConfig.ProtectEnd = config->ReadLong("ProtectMemTo", s_simConfig.ProtectEnd);
 }
 
 /*=======================================================================*/

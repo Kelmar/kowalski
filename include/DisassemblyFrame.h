@@ -33,6 +33,9 @@
 
 class DisassemblyView;
 
+/**
+ * @brief Primary frame around overall disassembly view.
+ */
 class DisassemblyFrame : public CHILD_BASE
 {
 private:

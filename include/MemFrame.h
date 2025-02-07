@@ -39,12 +39,17 @@ private:
 
     void BindEvents();
 
-private: // Events
-    void OnJumpTo(wxCommandEvent &);
-
 public:
     MemoryFrame(wxWindow *parent);
     virtual ~MemoryFrame();
+
+public: // Configuration
+    void SaveConfig();
+    void LoadDefaults();
+    void LoadConfig();
+
+private: // Events
+    void OnJumpTo(wxCommandEvent &);
 };
 
 /*=======================================================================*/

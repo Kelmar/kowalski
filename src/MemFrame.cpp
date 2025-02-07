@@ -24,7 +24,6 @@
 
 #include "StdAfx.h"
 #include "6502.h"
-#include "config.h"
 
 #include "MemFrame.h"
 #include "FormatNums.h"
@@ -35,6 +34,8 @@
 
 namespace
 {
+    static const std::string MEM_FRAME_CONFIG_PATH = "MEMWINDOW";
+
     struct MemoryFrameConfig
     {
         int sizeH;   // Window height
@@ -43,60 +44,8 @@ namespace
         int posY;    // Window Y position
         bool hidden; // Set if window should be hidden
     };
-}
 
-/*=======================================================================*/
-
-template <>
-struct config::Mapper<MemoryFrameConfig>
-{
-    void to(MemoryFrameConfig &cfg, config::Context &ctx) const
-    {
-        ctx.map("MemoryH", cfg.sizeH);
-        ctx.map("MemoryW", cfg.sizeW);
-        ctx.map("MemoryXPos", cfg.posX);
-        ctx.map("MemoryYPos", cfg.posY);
-        ctx.map("MemoryWndHidden", cfg.hidden);
-    }
-};
-
-/*=======================================================================*/
-
-namespace
-{
-    MemoryFrameConfig s_frameConfig;
-
-    // Setup default config for the MemoryFrame
-    void InitDefaultConfig()
-    {
-        s_frameConfig =
-        {
-            .sizeH = wxDefaultSize.GetHeight(),
-            .sizeW = wxDefaultSize.GetWidth(),
-            .posX = wxDefaultPosition.x,
-            .posY = wxDefaultPosition.y,
-            .hidden = false
-        };
-    }
-
-    // Load in configuration for the MemoryFrame
-    void LoadConfig()
-    {
-        InitDefaultConfig();
-
-#if WIN32
-        config::source::WinRegistry reg("/");
-
-        reg.read("MemoryFrame", s_frameConfig);
-#endif
-    }
-
-    // Save the configuration for the MemoryFrame
-    void SaveConfig()
-    {
-        config::source::wx reg("/");
-        reg.write("MemoryFrame", s_frameConfig);
-    }
+    MemoryFrameConfig s_memFrameConfig;
 }
 
 /*=======================================================================*/
@@ -181,6 +130,55 @@ MemoryFrame::~MemoryFrame()
 void MemoryFrame::BindEvents()
 {
     m_jumpEdit->Bind(wxEVT_TEXT_ENTER, &MemoryFrame::OnJumpTo, this);
+}
+
+/*=======================================================================*/
+
+void MemoryFrame::SaveConfig()
+{
+    auto config = wxConfig::Get();
+    wxString oldPath = config->GetPath();
+
+    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+
+    config->SetPath(MEM_FRAME_CONFIG_PATH);
+
+    config->Write("MemoryH", s_memFrameConfig.sizeH);
+    config->Write("MemoryW", s_memFrameConfig.sizeW);
+    config->Write("MemoryXPos", s_memFrameConfig.posX);
+    config->Write("MemoryYPos", s_memFrameConfig.posY);
+    config->Write("MemoryWndHidden", s_memFrameConfig.hidden);
+}
+
+/*=======================================================================*/
+
+void MemoryFrame::LoadDefaults()
+{
+
+}
+
+/*=======================================================================*/
+
+void MemoryFrame::LoadConfig()
+{
+    LoadDefaults();
+
+#if WIN32
+    // TODO: Import old config if detected.
+#endif
+
+    auto config = wxConfig::Get();
+    wxString oldPath = config->GetPath();
+
+    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+
+    config->SetPath(MEM_FRAME_CONFIG_PATH);
+
+    s_memFrameConfig.sizeH = config->ReadLong("MemoryH", s_memFrameConfig.sizeH);
+    s_memFrameConfig.sizeW = config->ReadLong("MemoryW", s_memFrameConfig.sizeW);
+    s_memFrameConfig.posX = config->ReadLong("MemoryXPos", s_memFrameConfig.posX);
+    s_memFrameConfig.posY= config->ReadLong("MemoryYPos", s_memFrameConfig.posY);
+    s_memFrameConfig.hidden = config->ReadBool("MemoryWndHidden", s_memFrameConfig.hidden);
 }
 
 /*=======================================================================*/

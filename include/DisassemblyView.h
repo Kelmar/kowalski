@@ -27,6 +27,9 @@
 
 /*=======================================================================*/
 
+/**
+ * @brief Core disassembly view
+ */
 class DisassemblyView : public wxScrolled<wxWindow>
 {
 private:
@@ -43,6 +46,9 @@ public:
         const wxString &name = wxControlNameStr);
 
     virtual ~DisassemblyView();
+
+private:
+    void OnPaint(wxPaintEvent &);
 };
 
 /*=======================================================================*/

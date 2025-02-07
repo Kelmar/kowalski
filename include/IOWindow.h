@@ -136,7 +136,10 @@ public:
     /* constructor */ CIOWindow(wxWindow *parent);
     virtual          ~CIOWindow();
 
+public: // Configuration
     void SaveConfig();
+    void LoadDefaults();
+    void LoadConfig();
 
 public: // Output functions
     /**

@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "StdAfx.h"
 #include "6502.h"
-#include "config.h"
 
 #include "encodings.h"
 
@@ -39,34 +38,9 @@ IOWindowConfig s_ioConfig;
 
 /*=======================================================================*/
 
-template<>
-struct config::Mapper<IOWindowConfig>
-{
-    void to(IOWindowConfig &cfg, config::Context &ctx) const
-    {
-        ctx.map("Columns", cfg.Columns);
-        ctx.map("Rows", cfg.Rows);
-    }
-};
-
-/*=======================================================================*/
-
 namespace
 {
-    void InitDefaultConfig()
-    {
-        s_ioConfig.Columns = 80;
-        s_ioConfig.Rows = 25;
-    }
-
-    void LoadConfig()
-    {
-        InitDefaultConfig();
-
-#if WIN32
-        // TODO: Import old config if detected.
-#endif
-    }
+    static const std::string IO_CONFIG_PATH = "IOWINDOW";
 }
 
 /*=======================================================================*/
@@ -113,6 +87,45 @@ CIOWindow::~CIOWindow()
 
 void CIOWindow::SaveConfig()
 {
+    auto config = wxConfig::Get();
+    wxString oldPath = config->GetPath();
+
+    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+
+    config->SetPath(IO_CONFIG_PATH);
+
+    config->Write("Columns", s_ioConfig.Columns);
+    config->Write("Rows", s_ioConfig.Rows);
+}
+
+/*=======================================================================*/
+
+void CIOWindow::LoadDefaults()
+{
+    s_ioConfig.Columns = 80;
+    s_ioConfig.Rows = 25;
+}
+
+/*=======================================================================*/
+
+void CIOWindow::LoadConfig()
+{
+    LoadDefaults();
+
+#if WIN32
+    // TODO: Import old config if detected.
+#endif
+
+    auto config = wxConfig::Get();
+    wxString oldPath = config->GetPath();
+
+    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+
+    config->SetPath(IO_CONFIG_PATH);
+
+    s_ioConfig.Columns = config->ReadLong("Columns", s_ioConfig.Columns);
+    s_ioConfig.Rows = config->ReadLong("Rows", s_ioConfig.Rows);
+    
     AllocateMemory();
     Resize();
 }

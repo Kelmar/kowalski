@@ -23,79 +23,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Deasm.h"
 #include "M6502.h"
 
-std::string CDeasm::DeasmInstr(const CmdInfo &ci, CAsm::DeasmFmt flags)
+/*=======================================================================*/
+
+const char CDeasm::mnemonics[] =
+"LDALDXLDYSTASTXSTYSTZTAXTXATAYTYATXSTSXADCSBCCMPCPXCPYINCDECINADEAINXDEXINYDEY"
+"ASLLSRROLRORANDORAEORBITTSBTRBJMPJSRBRKBRABPLBMIBVCBVSBCCBCSBNEBEQRTSRTIPHAPLA"
+"PHXPLXPHYPLYPHPPLPCLCSECCLVCLDSEDCLISEINOP"
+"BBRBBSRMBSMB"
+"BRLCOPJMLJSLMVNMVPPEAPEIPERPHBPHDPHKPLBPLDREPRTLSEPSTPTCDTCSTDCTSCTXYTYXWAIWDMXBAXCE"
+"???";
+
+/*=======================================================================*/
+
+std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, sim_addr_t &ptr)
 {
-    std::string str;
-    wxString fmt;
-
-    uint32_t addr = ci.pc;
-    uint8_t cmd = ci.cmd;
-    uint16_t uLen = cmd == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[cmd]];
-    if (cmd == CAsm::C_BRK && !CAsm6502::generateBRKExtraByte)
-        uLen = 1;
-
-    if (flags & CAsm::DF_ADDRESS)
-    {
-        fmt.Printf("%06X  ", (int)addr);
-        str += fmt;
-    }
-
-    if (flags & CAsm::DF_CODE_BYTES)
-    {
-        switch (uLen)
-        {
-        case 1:
-            fmt.Printf("%02X           ", int(cmd));
-            break;
-
-        case 2:
-            fmt.Printf("%02X %02X        ", int(cmd), int(ci.arg1));
-            break;
-
-        case 3:
-            fmt.Printf("%02X %02X %02X     ", int(cmd), int(ci.arg1), int(ci.arg2));
-            break;
-
-        case 4:
-            fmt.Printf("%02X %02X %02X %02X  ", int(cmd), int(ci.arg1), int(ci.arg2), int(ci.arg3));
-            break;
-
-        default:
-            ASSERT(FALSE);
-            break;
-        }
-
-        str += fmt.ToStdString();
-    }
-
-    // TODO: Remove reference to wxGetApp()
-    auto config = wxGetApp().simulatorController().GetConfig();
-
-    str += Mnemonic(cmd, config.Processor, !!(flags & CAsm::DF_USE_BRK));
-
-    str += Argument(cmd, (CAsm::CodeAdr)CAsm::CodeToMode(config.Processor)[cmd], addr, ci.arg1, ci.arg2, ci.arg3, flags & CAsm::DF_LABELS, flags & CAsm::DF_HELP);
-
-    return str;
-}
-
-std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, int &ptr)
-{
-    ASSERT((ptr == -1) || ((ptr >= 0) && (ptr <= 0xFFFFFF)));
-
     std::string str;
     str.reserve(128); // Preallocate some initial space to work with.
 
     sim_addr_t addr;
 
-    // TODO: Remove reference to wxGetApp()
-    auto config = wxGetApp().simulatorController().GetConfig();
+    ProcessorType processor = GetProcessor();
 
-    const CContext &ctx =m_sim->GetContext();
+    const CContext &ctx = m_sim->GetContext();
 
-    addr = (ptr >= 0) ? ptr : ctx.GetProgramAddress();
+    addr = (ptr != sim::INVALID_ADDRESS) ? ptr : ctx.GetProgramAddress();
 
     uint8_t cmd = ctx.PeekByte(addr);
-    uint16_t len = cmd == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[cmd]];
+    int mode = CAsm::CodeToMode(processor)[cmd];
+
+    uint16_t len = cmd == 0 ? 1 : CAsm::mode_to_len[mode];
 
     if (cmd == 0 && CAsm6502::generateBRKExtraByte)
         len = 2;
@@ -114,18 +70,20 @@ std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, int &ptr)
         str += std::string(pad, ' ');
     }
 
-    str += Mnemonic(cmd, config.Processor, 1); //% Bug fix 1.2.12.2 - allow BRK vs. .DB in disassembly listings
+    str += Mnemonic(cmd, processor, true); //% Bug fix 1.2.12.2 - allow BRK vs. .DB in disassembly listings
 
-    int mode = CAsm::CodeToMode(config.Processor)[cmd];
-
-    if (config.Processor == ProcessorType::WDC65816 && !ctx.emm)
+    if (processor == ProcessorType::WDC65816 && !ctx.emm)
     {
-        if (cmd == 0xA2 && !ctx.xy16)
+        if (cmd == 0xA2 && !ctx.xy16) // LDX
             mode = CAsm::A_IMM2;
-        else if (cmd == 0xA0 && !ctx.xy16)
+        else if (cmd == 0xA0 && !ctx.xy16) // LDY
             mode = CAsm::A_IMM2;
         else if (mode == 2 && !ctx.mem16)
+        {
+            // Immediate mode or Accumulator mode?
+            // WHO KNOWS!?  YEAY MAGIC NUMBERS!....
             mode = CAsm::A_IMM2;
+        }
     }
 
     str += Argument(
@@ -213,12 +171,178 @@ std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, int &ptr)
     return str;
 }
 
+/*=======================================================================*/
+
+void CDeasm::Parse(DisassembleInfo *info)
+{
+    ASSERT(info);
+
+    const CContext &ctx = m_sim->GetContext();
+
+    if (info->Address == sim::INVALID_ADDRESS)
+        info->Address = ctx.GetProgramAddress();
+
+    sim_addr_t address = info->Address; 
+
+    info->Instruction = ctx.PeekByte(address);
+    info->ActiveJump = false;
+
+    ProcessorType processor = GetProcessor();
+    int mode = CAsm::CodeToMode(processor)[info->Instruction];
+
+    ++address;
+    info->Bytes.push_back(info->Instruction);
+
+    uint16_t len = info->Instruction == 0 ? 1 : CAsm::mode_to_len[mode];
+
+    if (info->Instruction == 0 && CAsm6502::generateBRKExtraByte)
+        len = 2;
+
+    for (int i = 0; i < len; ++i)
+        info->Bytes.push_back(ctx.PeekByte(address + i));
+
+    info->Mnemonic = Mnemonic(info->Instruction, processor, true);
+
+    if (processor == ProcessorType::WDC65816 && !ctx.emm)
+    {
+        if (info->Instruction == 0xA2 && !ctx.xy16) // LDX
+            mode = CAsm::A_IMM2;
+        else if (info->Instruction == 0xA0 && !ctx.xy16) // LDY
+            mode = CAsm::A_IMM2;
+        else if (mode == 2 && !ctx.mem16)
+        {
+            // Immediate mode or Accumulator mode?
+            // WHO KNOWS!?  YEAY MAGIC NUMBERS!....
+            mode = CAsm::A_IMM2;
+        }
+    }
+
+    info->AddressingMode = (CAsm::CodeAdr)mode;
+
+    switch (CAsm::CodeToCommand()[info->Instruction])
+    {
+    case CAsm::C_BRL: // 65816
+    case CAsm::C_BRA:
+        info->ActiveJump = true;
+        break;
+
+    case CAsm::C_BPL:
+        info->ActiveJump = !ctx.negative;
+        break;
+
+    case CAsm::C_BMI:
+        info->ActiveJump = ctx.negative;
+        break;
+
+    case CAsm::C_BVC:
+        info->ActiveJump = !ctx.overflow;
+        break;
+
+    case CAsm::C_BVS:
+        info->ActiveJump = ctx.overflow;
+        break;
+
+    case CAsm::C_BCC:
+        info->ActiveJump = !ctx.carry;
+        break;
+
+    case CAsm::C_BCS:
+        info->ActiveJump = ctx.carry;
+        break;
+
+    case CAsm::C_BNE:
+        info->ActiveJump = !ctx.zero;
+        break;
+
+    case CAsm::C_BEQ:
+        info->ActiveJump = ctx.zero;
+        break;
+
+    case CAsm::C_BBS:
+        {
+            uint8_t zpg = ctx.PeekByte(address + 1);
+            int bit_no = (info->Instruction >> 4) & 0x07;
+
+            info->ActiveJump = (ctx.PeekByte(zpg) & (1 << bit_no)) != 0;
+        }
+        break;
+
+    case CAsm::C_BBR:
+        {
+            uint8_t zpg = ctx.PeekByte(address + 1);
+            int bit_no = (info->Instruction >> 4) & 0x07;
+
+            info->ActiveJump = (ctx.PeekByte(zpg) & (1 << bit_no)) == 0;
+        }
+        break;
+    }
+}
+
+/*=======================================================================*/
+
+std::string CDeasm::DeasmInstr(const CmdInfo &ci, CAsm::DeasmFmt flags)
+{
+    std::string str;
+    wxString fmt;
+
+    uint32_t addr = ci.pc;
+    uint8_t cmd = ci.cmd;
+    uint16_t uLen = cmd == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[cmd]];
+    if (cmd == CAsm::C_BRK && !CAsm6502::generateBRKExtraByte)
+        uLen = 1;
+
+    if (flags & CAsm::DF_ADDRESS)
+    {
+        fmt.Printf("%06X  ", (int)addr);
+        str += fmt;
+    }
+
+    if (flags & CAsm::DF_CODE_BYTES)
+    {
+        switch (uLen)
+        {
+        case 1:
+            fmt.Printf("%02X           ", int(cmd));
+            break;
+
+        case 2:
+            fmt.Printf("%02X %02X        ", int(cmd), int(ci.arg1));
+            break;
+
+        case 3:
+            fmt.Printf("%02X %02X %02X     ", int(cmd), int(ci.arg1), int(ci.arg2));
+            break;
+
+        case 4:
+            fmt.Printf("%02X %02X %02X %02X  ", int(cmd), int(ci.arg1), int(ci.arg2), int(ci.arg3));
+            break;
+
+        default:
+            ASSERT(FALSE);
+            break;
+        }
+
+        str += fmt.ToStdString();
+    }
+
+    ProcessorType processor = GetProcessor();
+
+    str += Mnemonic(cmd, processor, !!(flags & CAsm::DF_USE_BRK));
+
+    str += Argument(cmd, (CAsm::CodeAdr)CAsm::CodeToMode(processor)[cmd], addr, ci.arg1, ci.arg2, ci.arg3, flags & CAsm::DF_LABELS, flags & CAsm::DF_HELP);
+
+    return str;
+}
+
+/*=======================================================================*/
+
 std::string CDeasm::Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk/*= false*/) const
 {
-    ASSERT(CAsm::CodeToCommand(procType)[code] <= CAsm::C_ILL && CAsm::CodeToCommand(procType)[code] >= 0);
-    char buf[16];
-
     uint8_t cmd = CAsm::CodeToCommand(procType)[code];
+
+    ASSERT(cmd <= CAsm::C_ILL && cmd >= 0);
+
+    char buf[16];
 
     if (cmd == CAsm::C_ILL || (cmd == CAsm::C_BRK && !bUseBrk)) // Illegal command code or BRK
         snprintf(buf, sizeof(buf), ".DB $%02X", int(code));
@@ -231,13 +355,7 @@ std::string CDeasm::Mnemonic(uint8_t code, ProcessorType procType, bool bUseBrk/
     return std::string(buf);
 }
 
-const char CDeasm::mnemonics[] =
-"LDALDXLDYSTASTXSTYSTZTAXTXATAYTYATXSTSXADCSBCCMPCPXCPYINCDECINADEAINXDEXINYDEY"
-"ASLLSRROLRORANDORAEORBITTSBTRBJMPJSRBRKBRABPLBMIBVCBVSBCCBCSBNEBEQRTSRTIPHAPLA"
-"PHXPLXPHYPLYPHPPLPCLCSECCLVCLDSEDCLISEINOP"
-"BBRBBSRMBSMB"
-"BRLCOPJMLJSLMVNMVPPEAPEIPERPHBPHDPHKPLBPLDREPRTLSEPSTPTCDTCSTDCTSCTXYTYXWAIWDMXBAXCE"
-"???";
+/*=======================================================================*/
 
 std::string CDeasm::Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uint8_t arg1, uint8_t arg2, uint8_t arg3, bool bLabel, bool bHelp) const
 {
@@ -267,6 +385,12 @@ std::string CDeasm::Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uin
         str.Printf(" #$%02X", (int)lo);
         if (bHelp)
             str += "      |Immediate";
+        break;
+
+    case CAsm::A_IMM2:
+        str.Printf(" #$%04X", word);
+        if (bHelp)
+            str += "    |Immediate Long";
         break;
 
     case CAsm::A_ZPG: // zero page
@@ -410,12 +534,6 @@ std::string CDeasm::Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uin
             str += "   |Block Move - Source bank, Destination bank";
         break;
 
-    case CAsm::A_IMM2:
-        str.Printf(" #$%04X", word);
-        if (bHelp)
-            str += "    |Immediate Long";
-        break;
-
     default:
         ASSERT(false);
         break; // Keeps some compilers happy.
@@ -423,6 +541,8 @@ std::string CDeasm::Argument(uint8_t cmd, CAsm::CodeAdr mode, uint32_t addr, uin
 
     return str.ToStdString();
 }
+
+/*=======================================================================*/
 
 std::string CDeasm::ArgumentValue(uint32_t cmd_addr /*= -1*/)
 {
@@ -459,8 +579,7 @@ std::string CDeasm::ArgumentValue(uint32_t cmd_addr /*= -1*/)
 
     sim_addr_t sp = ctx.StackPointer();
 
-    // TODO: Remove direct reference to wxGetApp()
-    auto config = wxGetApp().simulatorController().GetConfig();
+    ProcessorType processor = GetProcessor();
 
     switch (mode)
     {
@@ -570,7 +689,7 @@ std::string CDeasm::ArgumentValue(uint32_t cmd_addr /*= -1*/)
     case CAsm::A_ABSI_X:
         addr = ctx.PeekByte(cmd_addr) + ctx.x; // Low byte of address + X offset
 
-        if (config.Processor != ProcessorType::M6502 &&
+        if (processor != ProcessorType::M6502 &&
             (cmd_addr & 0xFF) == 0xFF) // low byte == 0xFF?
         {
             addr |= uint16_t(ctx.PeekByte(cmd_addr - 0xFF)) << 8; // 65C02 addressing bug
@@ -672,11 +791,15 @@ std::string CDeasm::ArgumentValue(uint32_t cmd_addr /*= -1*/)
     return str.ToStdString();
 }
 
+/*=======================================================================*/
+
 std::string CDeasm::SetMemInfo(uint32_t addr, uint8_t val) // Description of the memory location
 {
     char c = val ? val : ' ';
     return fmt::format("[{0:06X}]: ${1:02X}, {1:d}, {2:c}, {1:08b}", addr, val, c);
 }
+
+/*=======================================================================*/
 
 std::string CDeasm::SetMemZPGInfo(uint8_t addr, uint8_t val) // Cell description of page zero of memory
 {
@@ -684,11 +807,15 @@ std::string CDeasm::SetMemZPGInfo(uint8_t addr, uint8_t val) // Cell description
     return fmt::format("[{0:02X}]: ${1:02X}, {1:d}, {2:c}, {1:08b}", addr, val, c);
 }
 
+/*=======================================================================*/
+
 std::string CDeasm::SetValInfo(uint8_t val)	// Value description 'val'
 {
     char c = val ? val : ' ';
     return fmt::format("{0:d}, {1:c}, {0:08b}", val, c);
 }
+
+/*=======================================================================*/
 
 std::string CDeasm::SetWordInfo(uint16_t word)
 {
@@ -697,6 +824,8 @@ std::string CDeasm::SetWordInfo(uint16_t word)
 
     return fmt::format("{0:d}, {1:c}, {0:016b}", word, c);
 }
+
+/*=======================================================================*/
 
 // Finding the address of the instruction preceding a given instruction
 int CDeasm::FindPrevAddr(uint32_t &addr, int cnt/*= 1*/)
@@ -779,6 +908,8 @@ int CDeasm::FindPrevAddr(uint32_t &addr, int cnt/*= 1*/)
     }
 }
 
+/*=======================================================================*/
+
 // Finding the address of the command following the 'cnt' command from 'addr'
 int CDeasm::FindNextAddr(uint32_t &addr, int cnt/*= 1*/)
 {
@@ -805,6 +936,8 @@ int CDeasm::FindNextAddr(uint32_t &addr, int cnt/*= 1*/)
     addr = next;
     return ret;
 }
+
+/*=======================================================================*/
 
 // Check how many lines should the window content be moved to reach from 'addr' to 'dest'
 int CDeasm::FindDelta(uint32_t &addr, uint32_t dest, int max_lines)
@@ -866,10 +999,10 @@ std::string CmdInfo::Asm() const
     wxString strBuf;
 
     // TODO: Remove refence to wxGetApp()
-    auto config = wxGetApp().simulatorController().GetConfig();
+    ProcessorType processor = wxGetApp().simulatorController().GetConfig().Processor;
 
     // * indicates RST, IRQ, or NMI have occurred
-    if (config.Processor == ProcessorType::WDC65816)
+    if (processor == ProcessorType::WDC65816)
     {
         if (intFlag)
             strBuf.Format("%-36s A:%04x X:%04x Y:%04x F:%02x S:%04x  Cycles=%u *", strLine, int(a), int(x), int(y), int(flags), int(s), uCycles);

@@ -63,9 +63,6 @@ private:
     // Temporary until we remove CGlobal
     friend class CGlobal;
 
-private:
-    
-
 private: // Simulator items
     /// Set when we're currently assembling code.
     std::atomic_bool m_assembling;
@@ -129,7 +126,10 @@ public: // Properties
 
     const SimulatorConfig &GetConfig() const;
 
+public: // Config managements
     void SaveConfig();
+    void LoadDefaults();
+    void LoadConfig();
 
 public: // Commands
     void InitOptions();

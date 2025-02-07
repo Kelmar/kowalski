@@ -92,20 +92,46 @@ typedef CLogBuffer<CmdInfo> CommandLog;
 
 /*=======================================================================*/
 
+
+struct DisassembleInfo
+{
+    /// The memory addres instruction starts on.
+    sim_addr_t Address;
+
+    /// The instruction
+    uint8_t Instruction;
+
+    /// Textural representation of the Instruction byte.
+    std::string Mnemonic;
+
+    /// The detected addressing mode for this instruction.
+    CAsm::CodeAdr AddressingMode;
+
+    /// Indication if this jump will be active or not based on the current context.
+    bool ActiveJump;
+
+    /// List of all bytes from this disassembly
+    std::vector<uint8_t> Bytes;
+};
+
+/*=======================================================================*/
+
 class CDeasm
 {
 private:
     static const char mnemonics[];
+
+    PSym6502 m_sim;
 
     std::string SetMemZPGInfo(uint8_t addr, uint8_t val);   // Cell description of page zero of memory
     std::string SetMemInfo(uint32_t addr, uint8_t val);     // Memory cell description
     std::string SetValInfo(uint8_t val);                    // Value description 'val'
     std::string SetWordInfo(uint16_t val);                  // Value description 'val'
 
-    std::shared_ptr<CSym6502> m_sim;
+    ProcessorType GetProcessor() const { return m_sim->GetContext().Processor(); }
 
 public:
-    /* constructor */ CDeasm(std::shared_ptr<CSym6502> sim)
+    /* constructor */ CDeasm(PSym6502 sim)
         : m_sim(sim)
     {
     }
@@ -114,7 +140,10 @@ public:
     {
     }
 
-    std::string DeasmInstr(CAsm::DeasmFmt flags, int32_t &ptr);
+    void Parse(DisassembleInfo *info);
+
+    std::string DeasmInstr(CAsm::DeasmFmt flags, sim_addr_t &ptr);
+
     std::string DeasmInstr(const CmdInfo &ci, CAsm::DeasmFmt flags);
     std::string ArgumentValue(uint32_t ptr = CAsm::INVALID_ADDRESS);
 
