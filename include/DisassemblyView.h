@@ -28,6 +28,7 @@
 /*=======================================================================*/
 
 struct DisassembleInfo;
+typedef std::shared_ptr<DisassembleInfo> PDisassembleInfo;
 
 /*=======================================================================*/
 
@@ -37,7 +38,11 @@ struct DisassembleInfo;
 class DisassemblyView : public wxScrolled<wxWindow>
 {
 private:
-    sim_addr_t m_offset; // Current scroll offset
+    /// Current scroll offset
+    sim_addr_t m_offset;
+
+    /// Set if we should add labels to the listing.
+    bool m_showLabels;
 
 private: // Drawing state variables
     /// Current program address
@@ -48,6 +53,9 @@ private: // Drawing state variables
 
     /// Current drawing position (in pixels)
     int m_drawLine;
+
+    /// Color for breakpoint markers.
+    wxColour m_breakColor;
 
 private:
     void Init();
@@ -67,8 +75,9 @@ public:
 private:
     void OnPaint(wxPaintEvent &);
 
-    void DrawLineMarks(wxDC &, DisassembleInfo &);
-    void DrawLine(wxDC &, DisassembleInfo &);
+    void DrawBreakpoint(wxDC &, CAsm::Breakpoint breakpoint);
+
+    void DrawLine(wxDC &, const PDisassembleInfo &);
 };
 
 /*=======================================================================*/

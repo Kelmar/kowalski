@@ -73,6 +73,7 @@ void OptionsFontPage::InitFontList()
         m_fontChoice->Append(name);
     }
 }
+
 /*=======================================================================*/
 
 void OptionsFontPage::AbortChanges()

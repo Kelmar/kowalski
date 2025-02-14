@@ -30,6 +30,11 @@
 #include "DisassemblyView.h"
 
 /*=======================================================================*/
+/*
+ * Visual Studio behavior note:
+ * Line numbers and indicator margin are not scrolled with the horizontal scroll bar.
+ */
+/*=======================================================================*/
 
 #define DV_STYLE (wxVSCROLL | wxHSCROLL)
 #define GAP_SIZE 2
@@ -166,6 +171,8 @@ namespace
 DisassemblyView::DisassemblyView()
     : wxScrolled()
     , m_offset(sim::INVALID_ADDRESS)
+    , m_showLabels(true)
+    , m_breakColor(0xFF0000FF)
 {
     Init();
 }
@@ -173,6 +180,8 @@ DisassemblyView::DisassemblyView()
 DisassemblyView::DisassemblyView(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name)
     : wxScrolled(parent, id, pos, size, DV_STYLE, name)
     , m_offset(sim::INVALID_ADDRESS)
+    , m_showLabels(true)
+    , m_breakColor(0xFF0000FF)
 {
     Init();
 }
@@ -203,9 +212,8 @@ void DisassemblyView::OnPaint(wxPaintEvent &)
     PSym6502 simulator = wxGetApp().simulatorController().Simulator();
     CDeasm disassembler(simulator);
 
+    // TODO: Access violation when selecting "Stop" from menu?
     m_programAddress = simulator->GetContext().GetProgramAddress();
-
-    DisassembleInfo info;
 
     wxFont font = wxGetApp().fontController().getMonoFont();
     dc.SetFont(font);
@@ -215,71 +223,82 @@ void DisassemblyView::OnPaint(wxPaintEvent &)
     wxRect client = GetClientRect();
     int lines = std::ceil((float)client.GetHeight() / m_charSize.y);
 
-    info.Address = m_offset;
+    sim_addr_t address = m_offset;
 
     m_drawLine = 0;
 
     for (int i = 0; i < lines; ++i)
     {
-        //// Simulate found label.
-        //std::string testLabel = fmt::format("   label_{0}:", i);
-        //dc.DrawText(testLabel, 0, y);
-        //m_drawLine += sz.y;
+        PDisassembleInfo info = disassembler.Parse(address);
+        address += info->Bytes.size();
 
-        // TODO: Check if current address matches a label in the symbol table and add it.
+        if (!info->Label.empty() && m_showLabels)
+        {
+            // Add found symbol table label to the listing.
+            dc.DrawText("    " + info->Label, 0, m_drawLine);
+            m_drawLine += m_charSize.y;
+        }
 
-        disassembler.Parse(&info);
-
-        DrawLineMarks(dc, info);
         DrawLine(dc, info);
 
         m_drawLine += m_charSize.y;
-        info.Address += info.Bytes.size();
     }
 }
 
 /*=======================================================================*/
 
-void DisassemblyView::DrawLineMarks(wxDC &dc, DisassembleInfo &info)
+void DisassemblyView::DrawBreakpoint(wxDC &dc, CAsm::Breakpoint breakpoint)
 {
-    UNUSED(dc);
-    UNUSED(info);
+    // TODO: Move into dedicated class for drawing debugger/editor glyphs.
 
-    /*
-    Breakpoint bp = wxGetApp().m_global.GetBreakpoint(uint16_t(ptr));
+    if (breakpoint == CAsm::Breakpoint::BPT_NONE)
+        return;
 
-    if (bp & BPT_MASK) // Is there a break point?
-        draw_breakpoint(*dc, mark.left, mark.top, m_nFontHeight, bp & BPT_DISABLED ? false : true);
+    bool isDisabled = (breakpoint & CAsm::Breakpoint::BPT_DISABLED) != 0;
 
-    if (info.Address == m_programAddress)
-    {
-        draw_pointer(*dc, mark.left, mark.top, m_nFontHeight);
-    }
-    */
+    wxPen oldPen = dc.GetPen();
+    wxBrush oldBrush = dc.GetBrush();
+
+    dc.SetPen(wxPen(m_breakColor));
+    dc.SetBrush(isDisabled ? *wxTRANSPARENT_BRUSH : wxBrush(m_breakColor));
+
+    dc.DrawEllipse(0, m_drawLine, m_charSize.x, m_drawLine + m_charSize.y);
+
+    dc.SetBrush(oldBrush);
+    dc.SetPen(oldPen);
 }
 
 /*=======================================================================*/
 
-void DisassemblyView::DrawLine(wxDC &dc, DisassembleInfo &info)
+void DisassemblyView::DrawLine(wxDC &dc, const PDisassembleInfo &info)
 {
     int x = 0;
 
-    std::string txt = fmt::format("${0:06X}", info.Address);
+    DrawBreakpoint(dc, info->Breakpoint);
+
+    if (info->Executing)
+    {
+        // Draw pointer
+    }
+
+    x += m_charSize.x * 2;
+
+    std::string txt = fmt::format("${0:06X}", info->Address);
 
     dc.DrawText(txt, x, m_drawLine);
 
     x += m_charSize.x * (7 + GAP_SIZE);
 
-    dc.DrawText(info.Mnemonic, x, m_drawLine);
+    dc.DrawText(info->Mnemonic, x, m_drawLine);
 
     // TODO: Pull max mnemonic size from platform.
     x += m_charSize.x * (3 + GAP_SIZE);
 
-    auto paramFmt = s_argumentFormatters.find(info.AddressingMode);
+    auto paramFmt = s_argumentFormatters.find(info->AddressingMode);
 
     if (paramFmt != s_argumentFormatters.end())
     {
-        std::span<uint8_t> bytes(info.Bytes);
+        std::span<uint8_t> bytes(info->Bytes);
         txt = paramFmt->second(bytes.subspan(1));
     }
     else
@@ -292,7 +311,7 @@ void DisassemblyView::DrawLine(wxDC &dc, DisassembleInfo &info)
     // TODO: Figure out max parameter size?
     x += m_charSize.x * (10 + GAP_SIZE);
 
-    auto mode = CAsm::ADDRESS_MODES.find(info.AddressingMode);
+    auto mode = CAsm::ADDRESS_MODES.find(info->AddressingMode);
     txt = mode == CAsm::ADDRESS_MODES.end() ? _("Unknown Addressing Mode!") : wxString(mode->second);
 
     x += m_charSize.x * (10 + GAP_SIZE);

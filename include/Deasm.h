@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 class CSrc6502View;
 
-struct CmdInfo	// single command info (for logging)
+struct CmdInfo // single command info (for logging)
 {
     CmdInfo(const CContext &m_ctx)
     {
@@ -97,6 +97,9 @@ struct DisassembleInfo
     /// The memory addres instruction starts on.
     sim_addr_t Address;
 
+    /// Holds the name of a label if found in a symbol map.
+    std::string Label;
+
     /// The instruction
     uint8_t Instruction;
 
@@ -106,12 +109,20 @@ struct DisassembleInfo
     /// The detected addressing mode for this instruction.
     CAsm::CodeAdr AddressingMode;
 
+    /// Set if this instruction is the currently executing instruction.
+    bool Executing;
+
+    /// Details about the current insturction's breakpoint settings.
+    CAsm::Breakpoint Breakpoint;
+
     /// Indication if this jump will be active or not based on the current context.
     bool ActiveJump;
 
     /// List of all bytes from this disassembly
     std::vector<uint8_t> Bytes;
 };
+
+typedef std::shared_ptr<DisassembleInfo> PDisassembleInfo;
 
 /*=======================================================================*/
 
@@ -139,7 +150,7 @@ public:
     {
     }
 
-    void Parse(DisassembleInfo *info);
+    PDisassembleInfo Parse(sim_addr_t address);
 
     std::string DeasmInstr(CAsm::DeasmFmt flags, sim_addr_t &ptr);
 

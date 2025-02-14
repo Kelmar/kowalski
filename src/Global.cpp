@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "6502.h"
 #include "sim.h"
 
-#include "Deasm6502Doc.h"
-
 #include "SimulatorController.h"
 
 #if 0

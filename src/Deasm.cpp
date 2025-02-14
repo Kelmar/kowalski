@@ -173,19 +173,25 @@ std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, sim_addr_t &ptr)
 
 /*=======================================================================*/
 
-void CDeasm::Parse(DisassembleInfo *info)
+PDisassembleInfo CDeasm::Parse(sim_addr_t address)
 {
-    ASSERT(info);
-
     const CContext &ctx = m_sim->GetContext();
 
-    if (info->Address == sim::INVALID_ADDRESS)
-        info->Address = ctx.GetProgramAddress();
+    if (address == sim::INVALID_ADDRESS)
+        address = ctx.GetProgramAddress();
 
-    sim_addr_t address = info->Address; 
+    PDisassembleInfo info = std::make_shared<DisassembleInfo>();
+
+    info->Address = address;
+
+    // TODO: Lookup the address in the symbol table and see if we have a label there.
+    info->Label = "";
+
+    info->Executing = address == ctx.GetProgramAddress();
+    info->Breakpoint = wxGetApp().m_global.GetBreakpoint(address);
+    info->ActiveJump = false; // Assume no jump taken
 
     info->Instruction = ctx.PeekByte(address);
-    info->ActiveJump = false;
 
     ProcessorType processor = GetProcessor();
     int mode = CAsm::CodeToMode(processor)[info->Instruction];
@@ -276,6 +282,8 @@ void CDeasm::Parse(DisassembleInfo *info)
         }
         break;
     }
+
+    return info;
 }
 
 /*=======================================================================*/
