@@ -45,7 +45,7 @@ bool CRawBin::read(BinaryArchive &ar, LoadCodeState *state)
     // TODO: Remove direct reference to simulator controller
     auto config = wxGetApp().simulatorController().GetConfig();
 
-    size_t maxSize = config.Processor == ProcessorType::WDC65816 ? 0x00FFFFFF : 0x0000FFFF;
+    size_t maxSize = config.Processor == ProcessorType::WDC65816 ? 0x00FF'FFFF : 0x0000'FFFF;
 
     size_t sz = std::min(ar.size(), maxSize);
     std::vector<uint8_t> data(sz);

@@ -419,9 +419,9 @@ CAsm6502::Stat CAsm6502::proc_instr_syntax(CToken &leks, CodeAdr &mode, Expr &ex
                     }
                 }
 
-                //			 	    mode = A_ABSL_X;
-                //				    else
-                //						mode = A_ABS_X; // Add test for A_ABS vs A_ABSL?
+                //mode = A_ABSL_X;
+                //else
+                //mode = A_ABS_X; // Add test for A_ABS vs A_ABSL?
                 else
                 {
                     if (forcelong == 3)

@@ -54,6 +54,7 @@ wxThread::ExitCode AsmThread::Entry()
     {
         // Copy result to actual memory.
         mainMem = *asmMem;
+        wxGetApp().m_global.SetStart(assembler->GetProgramStart());
     }
 
     wxThreadEvent event(wxEVT_THREAD, evTHD_ASM_COMPLETE);

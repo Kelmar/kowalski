@@ -27,11 +27,28 @@
 
 /*=======================================================================*/
 
+struct DisassembleInfo;
+
+/*=======================================================================*/
+
 /**
  * @brief Core disassembly view
  */
 class DisassemblyView : public wxScrolled<wxWindow>
 {
+private:
+    sim_addr_t m_offset; // Current scroll offset
+
+private: // Drawing state variables
+    /// Current program address
+    sim_addr_t m_programAddress;
+
+    /// Size of a character
+    wxSize m_charSize;
+
+    /// Current drawing position (in pixels)
+    int m_drawLine;
+
 private:
     void Init();
 
@@ -49,6 +66,9 @@ public:
 
 private:
     void OnPaint(wxPaintEvent &);
+
+    void DrawLineMarks(wxDC &, DisassembleInfo &);
+    void DrawLine(wxDC &, DisassembleInfo &);
 };
 
 /*=======================================================================*/

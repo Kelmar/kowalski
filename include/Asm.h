@@ -21,6 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef CASM_6502_H__
 #define CASM_6502_H__
 
+#include <map>
+
+/*=======================================================================*/
+
 /**
  * @brief Type of CPU we're emulating.
  * @remark This is temporary until we refactor the simulator into a more generic
@@ -245,37 +249,40 @@ public:
         A_ILL   // value for marking illegal commands in the simulator (ILLEGAL)
     };
 
-    enum InstrType	// rodzaj dyrektywy asemblera
+    /// Human readable lookup for addressing modes.
+    static const std::map<CodeAdr, const char *> ADDRESS_MODES;
+
+    enum InstrType  // Type of assembler directive
     {
-        I_ORG,		// origin
-        I_DB,		// def byte
-        I_DW,		// def word
-        I_DD,		// def double byte
-        I_DX,		// def 24 bit number
-        I_DDW,		// def 32 bit number
-        I_DS,		// def string
-        I_LS,		// def long string
-        I_ASCIS,	// ascii + $80
-        I_DCB,		// declare block
-        I_RS,		// reserve space
-        I_END,		// zako�cz asemblacj�
-        I_ERROR,	// zg�oszenie b��du
-        I_INCLUDE,	// w��czenie pliku
-        I_IF,		// asemblacja warunkowa
+        I_ORG,      // origin
+        I_DB,       // def byte
+        I_DW,       // def word
+        I_DD,       // def double byte
+        I_DX,       // def 24 bit number
+        I_DDW,      // def 32 bit number
+        I_DS,       // def string
+        I_LS,       // def long string
+        I_ASCIS,    // ascii + $80
+        I_DCB,      // declare block
+        I_RS,       // reserve space
+        I_END,      // finish assembly
+        I_ERROR,    // bug report
+        I_INCLUDE,  // file inclusion
+        I_IF,       // conditional assembly
         I_ELSE,
         I_ENDIF,
-        I_MACRO,	// makrodefinicja
+        I_MACRO,    // macro definition
         I_EXITM,
         I_ENDM,
-        I_START,	// pocz�tek programu dla symulatora
-        I_SET,		// przypisanie warto�ci
-        I_REPEAT,	// powt�rka
+        I_START,    // the beginning of the program for the simulator
+        I_SET,      // value assignment
+        I_REPEAT,   // replay
         I_ENDR,
-        I_OPT,		// opcje asemblera
-        I_ROM_AREA,	// protected memory area
-        I_IO_WND,	// size of I/O window (columns, rows)
-        I_DATE,		// date insert
-        I_TIME		// time insert
+        I_OPT,      // assembler options
+        I_ROM_AREA, // protected memory area
+        I_IO_WND,   // size of I/O window (columns, rows)
+        I_DATE,     // date insert
+        I_TIME      // time insert
     };
 
     enum OperType		// typ operatora

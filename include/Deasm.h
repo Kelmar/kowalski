@@ -92,7 +92,6 @@ typedef CLogBuffer<CmdInfo> CommandLog;
 
 /*=======================================================================*/
 
-
 struct DisassembleInfo
 {
     /// The memory addres instruction starts on.

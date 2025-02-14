@@ -95,6 +95,8 @@ const char *CAsm::ERROR_MESSAGES[] =
     /* 63 */ wxTRANSLATE("Debugging error")
 };
 
+/*=======================================================================*/
+
 const char *CAsm::ERROR_FORMATS[] =
 {
     /* 1 */ wxTRANSLATE("{file}({line_number}): error E{error_code}: {message}"),
@@ -103,6 +105,41 @@ const char *CAsm::ERROR_FORMATS[] =
     /* 4 */ wxTRANSLATE("{file}({line_number}): error E{error_code}: {message} '{ident}'"),
     /* 5 */ wxTRANSLATE("{file}({line_number}): user error: {message}"),
     /* 6 */ wxTRANSLATE("{file}({line_number}): user error: NO MESSAGE")
+};
+
+/*=======================================================================*/
+
+const std::map<CAsm::CodeAdr, const char *> CAsm::ADDRESS_MODES =
+{
+    { CAsm::CodeAdr::A_IMP   , wxTRANSLATE("Implied") },
+    { CAsm::CodeAdr::A_ACC   , wxTRANSLATE("Accumulator") },
+    { CAsm::CodeAdr::A_IMM   , wxTRANSLATE("Immediate") },
+    { CAsm::CodeAdr::A_ZPG   , wxTRANSLATE("Zero Page") },
+    { CAsm::CodeAdr::A_ABS   , wxTRANSLATE("Absolute") },
+    { CAsm::CodeAdr::A_ABS_X , wxTRANSLATE("Absolute Indexed, X") },
+    { CAsm::CodeAdr::A_ABS_Y , wxTRANSLATE("Absolute Indexed, Y") },
+    { CAsm::CodeAdr::A_ZPG_X , wxTRANSLATE("Zero Page Indexed, X") },
+    { CAsm::CodeAdr::A_ZPG_Y , wxTRANSLATE("Zero Page Indexed, Y") },
+    { CAsm::CodeAdr::A_REL   , wxTRANSLATE("Relative") },
+    { CAsm::CodeAdr::A_ZPGI  , wxTRANSLATE("Zero Page Indirect") },
+    { CAsm::CodeAdr::A_ZPGI_X, wxTRANSLATE("Zero Page Indexed, X, Indirect") },
+    { CAsm::CodeAdr::A_ZPGI_Y, wxTRANSLATE("Zero Page Indirect, Indexed Y") },
+    { CAsm::CodeAdr::A_ABSI  , wxTRANSLATE("Absolute Indirect") },
+    { CAsm::CodeAdr::A_ABSI_X, wxTRANSLATE("Absolute Indexed X, Indirect") },
+    { CAsm::CodeAdr::A_ZREL  , wxTRANSLATE("Relative Bit Branch") },
+    { CAsm::CodeAdr::A_ZPG2  , wxTRANSLATE("Memory Bit Manipulation") },
+    { CAsm::CodeAdr::A_ABSL  , wxTRANSLATE("Absolute Long") },
+    { CAsm::CodeAdr::A_ABSL_X, wxTRANSLATE("Absolute Long Indexed, X") },
+    { CAsm::CodeAdr::A_ZPIL  , wxTRANSLATE("Zero Page Indirect Long") },
+    { CAsm::CodeAdr::A_ZPIL_Y, wxTRANSLATE("Zero Page Indirect Long Index, Y") },
+    { CAsm::CodeAdr::A_INDL  , wxTRANSLATE("?? Indirect Long ??") },
+    { CAsm::CodeAdr::A_SR    , wxTRANSLATE("Stack Relative") },
+    { CAsm::CodeAdr::A_SRI_Y , wxTRANSLATE("Stack Relative Indexed, Y") },
+    { CAsm::CodeAdr::A_RELL  , wxTRANSLATE("Relative Long") },
+    { CAsm::CodeAdr::A_XYC   , wxTRANSLATE("Block Move - Source Bank, Destination Bank") },
+    { CAsm::CodeAdr::A_IMM2  , wxTRANSLATE("Immediate Long") },
+
+    { CAsm::CodeAdr::A_ILL   , wxTRANSLATE("Illegal Addressing Mode") }
 };
 
 /*=======================================================================*/

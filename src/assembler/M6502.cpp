@@ -44,12 +44,12 @@ uint8_t CAsm6502::BRKExtraByte = 0x0; // value of extra byte generated after BRK
 void CAsm6502::init_members()
 {
     if (m_procType == ProcessorType::WDC65816)
-        mem_mask = 0xFFFFFF; // memory limit mask 65816
+        mem_mask = 0x00FF'FFFF; // memory limit mask 65816
     else
-        mem_mask = 0xFFFF; // memory limit mask 6502
+        mem_mask = 0x0000'FFFF; // memory limit mask 6502
 
     abort_asm = false;
-    m_progStart = ~0u;
+    m_progStart = sim::INVALID_ADDRESS;
     check_line = false;
     in_macro = NULL;
     expanding_macro = NULL;
