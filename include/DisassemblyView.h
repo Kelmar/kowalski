@@ -45,9 +45,6 @@ private:
     bool m_showLabels;
 
 private: // Drawing state variables
-    /// Current program address
-    sim_addr_t m_programAddress;
-
     /// Size of a character
     wxSize m_charSize;
 
@@ -59,6 +56,10 @@ private: // Drawing state variables
 
 private:
     void Init();
+
+    void CalcScollbars();
+
+    void UpdateOffset();
 
 public:
     /* constructor */ DisassemblyView();
@@ -72,8 +73,12 @@ public:
 
     virtual ~DisassemblyView();
 
+    /// Center the view to the given address
+    void JumpTo(sim_addr_t address);
+
 private:
     void OnPaint(wxPaintEvent &);
+    void OnSize(wxSizeEvent &);
 
     void DrawBreakpoint(wxDC &, CAsm::Breakpoint breakpoint);
 

@@ -49,8 +49,10 @@ std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, sim_addr_t &ptr)
     addr = (ptr != sim::INVALID_ADDRESS) ? ptr : ctx.GetProgramAddress();
 
     uint8_t cmd = ctx.PeekByte(addr);
-    int mode = CAsm::CodeToMode(processor)[cmd];
+    CAsm::CodeAdr mode = (CAsm::CodeAdr)CAsm::CodeToMode(processor)[cmd];
 
+    // TODO: Investigate this.
+    // This hack to the length appears everywhere (but one) place where we get the length of an op code.
     uint16_t len = cmd == 0 ? 1 : CAsm::mode_to_len[mode];
 
     if (cmd == 0 && CAsm6502::generateBRKExtraByte)
@@ -74,14 +76,19 @@ std::string CDeasm::DeasmInstr(CAsm::DeasmFmt flags, sim_addr_t &ptr)
 
     if (processor == ProcessorType::WDC65816 && !ctx.emm)
     {
-        if (cmd == 0xA2 && !ctx.xy16) // LDX
-            mode = CAsm::A_IMM2;
-        else if (cmd == 0xA0 && !ctx.xy16) // LDY
-            mode = CAsm::A_IMM2;
-        else if (mode == 2 && !ctx.mem16)
+        if (cmd == 0xA2 && !ctx.xy16)
         {
-            // Immediate mode or Accumulator mode?
-            // WHO KNOWS!?  YEAY MAGIC NUMBERS!....
+            // LDX instruction in 16-bit mode
+            mode = CAsm::A_IMM2;
+        }
+        else if (cmd == 0xA0 && !ctx.xy16)
+        {
+            // LDY instruction in 16-bit mode
+            mode = CAsm::A_IMM2;
+        }
+        else if (mode == CAsm::A_IMM && !ctx.mem16)
+        {
+            // 16-bit immediate mode.
             mode = CAsm::A_IMM2;
         }
     }
@@ -204,7 +211,7 @@ PDisassembleInfo CDeasm::Parse(sim_addr_t address)
     if (info->Instruction == 0 && CAsm6502::generateBRKExtraByte)
         len = 2;
 
-    for (int i = 0; i < len; ++i)
+    for (int i = 0; i < (len - 1); ++i)
         info->Bytes.push_back(ctx.PeekByte(address + i));
 
     info->Mnemonic = Mnemonic(info->Instruction, processor, true);
@@ -924,19 +931,21 @@ int CDeasm::FindNextAddr(uint32_t &addr, int cnt/*= 1*/)
     int ret = 0;
     uint32_t next = addr;
 
-    const CContext &ctx =m_sim->GetContext();
+    const CContext &ctx = m_sim->GetContext();
 
-    for (uint32_t address = addr; cnt; cnt--)
+    for (uint32_t address = addr; cnt; --cnt)
     {
         address = next;
-        uint8_t byte = ctx.PeekByte(address);
-        next += byte == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[byte]];
+
+        uint8_t opCode = ctx.PeekByte(address);
+        next += opCode == 0 ? 1 : CAsm::mode_to_len[CAsm::CodeToMode()[opCode]];
 
         if (next < addr)
             ret = 0; // "scroll" the address
         else
             ret = 1; // next address found
 
+        // This if statement doesn't make sense.....
         if (address >= ctx.bus.maxAddress())
             next = address;
     }

@@ -87,6 +87,7 @@ private: // Simulator items
 
 private: // UI items
     wxMenuItem *m_menu;
+    class RegisterView *m_regView;
 
 private:
     /* constructor */ SimulatorController();
@@ -98,6 +99,8 @@ private:
     bool ConfirmStop(const wxString &msg);
 
     sim_addr_t GetCursorAddress(bool skipping);
+
+    void UpdateUI();
 
 public:
     void Shutdown();
@@ -155,6 +158,7 @@ private:
 
     // View Menu handlers
     void OnViewDisassembler(wxCommandEvent &);
+    void OnViewRegisters(wxCommandEvent &);
 
     // Simulator Menu handlers
     void OnAssemble(wxCommandEvent &);
@@ -173,6 +177,8 @@ private:
     void OnUpdateAssemble(wxUpdateUIEvent &);
     void OnUpdateRun(wxUpdateUIEvent &);
     void OnUpdateRestart(wxUpdateUIEvent &);
+
+    void OnUpdateShowRegs(wxUpdateUIEvent &);
 
     void EnableWhenDebugging(wxUpdateUIEvent &);
     void EnableWhenRunning(wxUpdateUIEvent &);

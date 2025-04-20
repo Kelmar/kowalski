@@ -150,8 +150,6 @@ protected:
     afx_msg void OnUpdateIdViewRegisterbar(CCmdUI* pCmdUI);
     afx_msg void OnFileSaveCode();
     afx_msg void OnUpdateFileSaveCode(CCmdUI* pCmdUI);
-    afx_msg void OnViewDeasm();
-    afx_msg void OnUpdateViewDeasm(CCmdUI* pCmdUI);
     afx_msg void OnViewIdents();
     afx_msg void OnUpdateViewIdents(CCmdUI* pCmdUI);
 

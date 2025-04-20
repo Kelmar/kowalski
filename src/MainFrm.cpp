@@ -410,8 +410,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
     ON_UPDATE_COMMAND_UI(ID_VIEW_REGISTERBAR, OnUpdateIdViewRegisterbar)
     ON_COMMAND(ID_FILE_SAVE_CODE, OnFileSaveCode)
     ON_UPDATE_COMMAND_UI(ID_FILE_SAVE_CODE, OnUpdateFileSaveCode)
-    ON_COMMAND(ID_VIEW_DEASM, OnViewDeasm)
-    ON_UPDATE_COMMAND_UI(ID_VIEW_DEASM, OnUpdateViewDeasm)
     ON_COMMAND(ID_VIEW_IDENT, OnViewIdents)
     ON_UPDATE_COMMAND_UI(ID_VIEW_IDENT, OnUpdateViewIdents)
 
@@ -717,7 +715,7 @@ void CMainFrame::InitMenu()
     view->Append(evID_SHOW_DISASM, _("&Disassembler\tAlt+0"));
     
     view->AppendSeparator();
-    view->Append(evID_SHOW_REGS, _("&Registers\tAlt+1"));
+    view->AppendCheckItem(evID_SHOW_REGS, _("&Registers\tAlt+1"));
     view->Append(evID_SHOW_MEMORY, _("&Memory\tAlt+2"));
     view->Append(evID_SHOW_OUTPUT, _("&Output"));
     view->Append(evID_SHOW_IOWINDOW, _("&IO Window"));
@@ -1389,25 +1387,6 @@ void CMainFrame::OnUpdateFileSaveCode(CCmdUI *pCmdUI)
 
 #if REWRITE_TO_WX_WIDGET
     pCmdUI->Enable(wxGetApp().m_global.IsCodePresent()); // Is there a loaded program?
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-void CMainFrame::OnViewDeasm()
-{
-    if (!wxGetApp().simulatorController().IsDebugging())
-        return; // No debugger running.
-
-    wxGetApp().m_global.CreateDeasm();
-}
-
-void CMainFrame::OnUpdateViewDeasm(CCmdUI *pCmdUI)
-{
-    UNUSED(pCmdUI);
-
-#if REWRITE_TO_WX_WIDGET
-    pCmdUI->Enable(wxGetApp().m_global.IsDebugger());//is there a working debugger?
 #endif
 }
 

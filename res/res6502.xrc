@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <resource xmlns="http://www.wxwidgets.org/wxxrc" version="2.5.3.0">
   <object class="wxDialog" name="CodeLoadOptionsDlg">
-    <size>300,165</size>
+    <size>300,210</size>
     <style>wxDEFAULT_DIALOG_STYLE</style>
     <exstyle>wxWS_EX_VALIDATE_RECURSIVELY</exstyle>
     <title>Code Loading Options</title>
@@ -17,7 +17,7 @@
           <object class="sizeritem">
             <flag>wxEXPAND</flag>
             <border>5</border>
-            <option>1</option>
+            <option>0</option>
             <object class="wxStaticBoxSizer" name="sbSizer1">
               <orient>wxVERTICAL</orient>
               <label>Destination Memory</label>
@@ -39,7 +39,7 @@
                   <object class="sizeritem">
                     <flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
                     <border>5</border>
-                    <option>0</option>
+                    <option>1</option>
                     <object class="wxTextCtrl" name="m_startAddrTxt">
                       <value></value>
                       <maxlength>0</maxlength>
@@ -65,7 +65,7 @@
                   <object class="sizeritem">
                     <flag>wxALL</flag>
                     <border>5</border>
-                    <option>0</option>
+                    <option>1</option>
                     <object class="wxTextCtrl" name="m_loadAddrTxt">
                       <value></value>
                       <maxlength>0</maxlength>
@@ -91,7 +91,7 @@
                   <object class="sizeritem">
                     <flag>wxALL</flag>
                     <border>5</border>
-                    <option>0</option>
+                    <option>1</option>
                     <object class="wxSpinCtrl" name="m_byteSpin">
                       <style>wxSP_ARROW_KEYS|wxSP_WRAP</style>
                       <value>0</value>
@@ -104,7 +104,7 @@
             </object>
           </object>
           <object class="sizeritem">
-            <flag>wxEXPAND</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
             <option>1</option>
             <object class="wxStdDialogButtonSizer" name="m_sdbSizer2">
@@ -952,6 +952,492 @@
         <cellpos>10,1</cellpos>
         <cellspan>1,3</cellspan>
         <size>0,0</size>
+      </object>
+    </object>
+  </object>
+  <object class="wxPanel" name="HexEditTest">
+    <size>500,300</size>
+    <style>wxTAB_TRAVERSAL</style>
+    <object class="wxFlexGridSizer" name="fgSizer1">
+      <vgap>0</vgap>
+      <hgap>4</hgap>
+      <growablerows>1</growablerows>
+      <growablecols>1</growablecols>
+      <rows>0</rows>
+      <cols>3</cols>
+      <object class="spacer">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <size>50,25</size>
+      </object>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxPanel" name="m_offsetRows">
+          <style>wxTAB_TRAVERSAL</style>
+          <bg>#99b4d1</bg>
+        </object>
+      </object>
+      <object class="spacer">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <size>0,0</size>
+      </object>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxPanel" name="m_baseCols">
+          <style>wxTAB_TRAVERSAL</style>
+          <bg>#99b4d1</bg>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxPanel" name="m_hexArea">
+          <style>wxTAB_TRAVERSAL</style>
+          <bg>#bfcddb</bg>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <option>1</option>
+        <object class="wxPanel" name="m_charArea">
+          <size>118,-1</size>
+          <style>wxTAB_TRAVERSAL</style>
+          <bg>#0078d7</bg>
+        </object>
+      </object>
+    </object>
+  </object>
+  <object class="wxFrame" name="Reg6502Frame">
+    <size>318,310</size>
+    <style>wxCAPTION|wxCLOSE_BOX|wxFRAME_FLOAT_ON_PARENT|wxFRAME_NO_TASKBAR|wxFRAME_TOOL_WINDOW|wxTAB_TRAVERSAL</style>
+    <exstyle>wxFRAME_EX_METAL</exstyle>
+    <title>6502 Registers</title>
+    <aui_managed>0</aui_managed>
+    <object class="wxGridBagSizer" name="gbMainSizer">
+      <vgap>0</vgap>
+      <hgap>5</hgap>
+      <growablerows></growablerows>
+      <growablecols></growablecols>
+      <object class="sizeritem">
+        <flag>wxBOTTOM|wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>0,0</cellpos>
+        <cellspan>1,2</cellspan>
+        <object class="wxBoxSizer" name="bInstSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+            <option>1</option>
+            <object class="wxTextCtrl" name="m_instDisplay">
+              <enabled>0</enabled>
+              <value>[ $0000 ] LDA #$42</value>
+              <maxlength>0</maxlength>
+            </object>
+          </object>
+          <object class="sizeritem">
+            <flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxStaticBitmap" name="m_instAlert">
+              <tooltip>Invalid Opcode</tooltip>
+              <bitmap stock_id="wxART_WARNING" stock_client="wxART_BUTTON">undefined.png</bitmap>
+            </object>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>1,0</cellpos>
+        <cellspan>1,1</cellspan>
+        <object class="wxStaticBoxSizer" name="sbRegSizer">
+          <orient>wxVERTICAL</orient>
+          <label>Registers</label>
+          <object class="sizeritem">
+            <flag>wxEXPAND</flag>
+            <border>5</border>
+            <option>1</option>
+            <object class="wxGridBagSizer" name="gbSizer6">
+              <vgap>2</vgap>
+              <hgap>0</hgap>
+              <growablerows></growablerows>
+              <growablecols></growablecols>
+              <object class="sizeritem">
+                <flag>wxALIGN_CENTER_VERTICAL</flag>
+                <border>5</border>
+                <cellpos>0,0</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxStaticText" name="m_aLabel">
+                  <label>A</label>
+                  <wrap>-1</wrap>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_RIGHT</flag>
+                <border>5</border>
+                <cellpos>0,1</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxTextCtrl" name="m_aEdit">
+                  <size>24,-1</size>
+                  <value></value>
+                  <maxlength>0</maxlength>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_CENTER_VERTICAL</flag>
+                <border>5</border>
+                <cellpos>1,0</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxStaticText" name="m_xLabel">
+                  <label>X</label>
+                  <wrap>-1</wrap>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_RIGHT</flag>
+                <border>5</border>
+                <cellpos>1,1</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxTextCtrl" name="m_xEdit">
+                  <size>24,-1</size>
+                  <value></value>
+                  <maxlength>0</maxlength>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_CENTER_VERTICAL</flag>
+                <border>5</border>
+                <cellpos>2,0</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxStaticText" name="m_yLabel">
+                  <label>Y</label>
+                  <wrap>-1</wrap>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_RIGHT</flag>
+                <border>5</border>
+                <cellpos>2,1</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxTextCtrl" name="m_yEdit">
+                  <size>24,-1</size>
+                  <value></value>
+                  <maxlength>0</maxlength>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_CENTER_VERTICAL</flag>
+                <border>5</border>
+                <cellpos>3,0</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxStaticText" name="m_spLabel">
+                  <label>SP</label>
+                  <wrap>-1</wrap>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_RIGHT</flag>
+                <border>5</border>
+                <cellpos>3,1</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxTextCtrl" name="m_spEdit">
+                  <size>24,-1</size>
+                  <value></value>
+                  <maxlength>0</maxlength>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_CENTER_VERTICAL</flag>
+                <border>5</border>
+                <cellpos>4,0</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxStaticText" name="m_pcLabel">
+                  <label>PC</label>
+                  <wrap>-1</wrap>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_RIGHT</flag>
+                <border>5</border>
+                <cellpos>4,1</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxTextCtrl" name="m_pcEdit">
+                  <size>48,-1</size>
+                  <value></value>
+                  <maxlength>0</maxlength>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_CENTER_VERTICAL</flag>
+                <border>5</border>
+                <cellpos>5,0</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxStaticText" name="m_cyclesLabel">
+                  <label>Cycles</label>
+                  <wrap>-1</wrap>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_RIGHT</flag>
+                <border>5</border>
+                <cellpos>5,1</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxTextCtrl" name="m_cycleEdit">
+                  <size>48,-1</size>
+                  <value></value>
+                  <maxlength>0</maxlength>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_CENTER_VERTICAL</flag>
+                <border>5</border>
+                <cellpos>6,0</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxStaticText" name="m_pLabel">
+                  <label>P</label>
+                  <wrap>-1</wrap>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALIGN_RIGHT</flag>
+                <border>5</border>
+                <cellpos>6,1</cellpos>
+                <cellspan>1,1</cellspan>
+                <object class="wxTextCtrl" name="m_pEdit">
+                  <size>24,-1</size>
+                  <value></value>
+                  <maxlength>0</maxlength>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxEXPAND</flag>
+                <border>5</border>
+                <cellpos>7,0</cellpos>
+                <cellspan>1,2</cellspan>
+                <object class="wxBoxSizer" name="bSizer32">
+                  <orient>wxVERTICAL</orient>
+                  <object class="sizeritem">
+                    <flag>wxALIGN_CENTER_HORIZONTAL</flag>
+                    <border>5</border>
+                    <option>2</option>
+                    <object class="wxGridBagSizer" name="gbSizer4">
+                      <vgap>0</vgap>
+                      <hgap>0</hgap>
+                      <growablerows></growablerows>
+                      <growablecols></growablecols>
+                      <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_HORIZONTAL</flag>
+                        <border>0</border>
+                        <cellpos>0,0</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxStaticText" name="m_negLabel">
+                          <tooltip>Negative</tooltip>
+                          <label>N</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_HORIZONTAL</flag>
+                        <border>0</border>
+                        <cellpos>0,1</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxStaticText" name="m_overLabel">
+                          <tooltip>Overflow</tooltip>
+                          <label>V</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_HORIZONTAL</flag>
+                        <border>0</border>
+                        <cellpos>0,2</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxStaticText" name="m_naLabel">
+                          <label>-</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_HORIZONTAL</flag>
+                        <border>0</border>
+                        <cellpos>0,3</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxStaticText" name="m_breakLabel">
+                          <tooltip>Break</tooltip>
+                          <label>B</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_HORIZONTAL</flag>
+                        <border>0</border>
+                        <cellpos>0,4</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxStaticText" name="m_decLabel">
+                          <tooltip>Decimal</tooltip>
+                          <label>D</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_HORIZONTAL</flag>
+                        <border>0</border>
+                        <cellpos>0,5</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxStaticText" name="m_intLabel">
+                          <tooltip>Interrupt</tooltip>
+                          <label>I</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_HORIZONTAL</flag>
+                        <border>0</border>
+                        <cellpos>0,6</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxStaticText" name="m_zeroLabel">
+                          <tooltip>Zero</tooltip>
+                          <label>Z</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_HORIZONTAL</flag>
+                        <border>0</border>
+                        <cellpos>0,7</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxStaticText" name="m_carryLabel">
+                          <tooltip>Carry</tooltip>
+                          <label>C</label>
+                          <wrap>-1</wrap>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag></flag>
+                        <border>0</border>
+                        <cellpos>1,0</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxCheckBox" name="m_negCheck">
+                          <label></label>
+                          <checked>0</checked>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag></flag>
+                        <border>0</border>
+                        <cellpos>1,1</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxCheckBox" name="m_overCheck">
+                          <label></label>
+                          <checked>0</checked>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag></flag>
+                        <border>0</border>
+                        <cellpos>1,2</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxCheckBox" name="m_naCheck">
+                          <enabled>0</enabled>
+                          <label></label>
+                          <checked>0</checked>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag></flag>
+                        <border>0</border>
+                        <cellpos>1,3</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxCheckBox" name="m_breakCheck">
+                          <label></label>
+                          <checked>0</checked>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag></flag>
+                        <border>0</border>
+                        <cellpos>1,4</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxCheckBox" name="m_decCheck">
+                          <label></label>
+                          <checked>0</checked>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag></flag>
+                        <border>0</border>
+                        <cellpos>1,5</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxCheckBox" name="m_intCheck">
+                          <label></label>
+                          <checked>0</checked>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag></flag>
+                        <border>0</border>
+                        <cellpos>1,6</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxCheckBox" name="m_zeroCheck">
+                          <label></label>
+                          <checked>0</checked>
+                        </object>
+                      </object>
+                      <object class="sizeritem">
+                        <flag></flag>
+                        <border>0</border>
+                        <cellpos>1,7</cellpos>
+                        <cellspan>1,1</cellspan>
+                        <object class="wxCheckBox" name="m_carryCheck">
+                          <label></label>
+                          <checked>0</checked>
+                        </object>
+                      </object>
+                    </object>
+                  </object>
+                </object>
+              </object>
+              <object class="spacer">
+                <flag></flag>
+                <border>5</border>
+                <cellpos>8,0</cellpos>
+                <cellspan>1,2</cellspan>
+                <size>160,0</size>
+              </object>
+            </object>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>1,1</cellpos>
+        <cellspan>1,1</cellspan>
+        <object class="wxStaticBoxSizer" name="sbStackSizer">
+          <orient>wxHORIZONTAL</orient>
+          <label>Stack</label>
+          <object class="sizeritem">
+            <flag>wxEXPAND</flag>
+            <border>5</border>
+            <option>0</option>
+            <object class="wxListBox" name="m_stackList">
+              <content>
+                <item>[ $01FF ] $42</item>
+                <item>[ $01FE ] $AA</item>
+              </content>
+            </object>
+          </object>
+        </object>
       </object>
     </object>
   </object>

@@ -22,29 +22,63 @@
  */
 /*=======================================================================*/
 
-#ifndef HE_OFFSET_COLUMNS_H__
-#define HE_OFFSET_COLUMNS_H__
+#include "StdAfx.h"
+#include "6502.h"
+
+#include "InteractiveMargin.h"
 
 /*=======================================================================*/
 
-namespace hex
+InteractiveMargin::InteractiveMargin()
+    : wxWindow()
 {
-    class OffsetColumns : public wxWindow, public SubControl
-    {
-    private:
-        /// Format string for base address view
-        wxString m_baseAddressFmt;
-
-        void OnPaint(wxPaintEvent &);
-
-    public:
-        OffsetColumns(HexEdit *parent);
-        virtual ~OffsetColumns() { }
-    };
+    Bind(wxEVT_PAINT, &InteractiveMargin::OnPaint, this);
 }
 
 /*=======================================================================*/
 
-#endif /* HE_OFFSET_COLUMNS_H__ */
+void InteractiveMargin::OnPaint(wxPaintEvent &)
+{
+    wxPaintDC dc(this);
+
+#if 0
+    dc.SetFont(m_owner->GetFont());
+    dc.SetBackground(wxBrush(metrics->colors.InteractiveMarginBackground));
+    dc.Clear();
+
+    int scrollUnits, origin;
+
+    m_owner->GetViewStart(&origin, nullptr);
+    m_owner->GetScrollPixelsPerUnit(&scrollUnits, nullptr);
+
+    dc.SetDeviceOrigin(-origin * scrollUnits, 0);
+#endif
+}
+
+/*=======================================================================*/
+
+void InteractiveMargin::DrawBreakpoint(wxDC &dc, CAsm::Breakpoint breakpoint)
+{
+    UNUSED(dc);
+    UNUSED(breakpoint);
+
+#if 0
+    if (breakpoint == CAsm::Breakpoint::BPT_NONE)
+        return;
+
+    bool isDisabled = (breakpoint & CAsm::Breakpoint::BPT_DISABLED) != 0;
+
+    wxPen oldPen = dc.GetPen();
+    wxBrush oldBrush = dc.GetBrush();
+
+    dc.SetPen(wxPen(m_breakColor));
+    dc.SetBrush(isDisabled ? *wxTRANSPARENT_BRUSH : wxBrush(m_breakColor));
+
+    dc.DrawEllipse(0, m_drawLine, m_charSize.x, m_drawLine + m_charSize.y);
+
+    dc.SetBrush(oldBrush);
+    dc.SetPen(oldPen);
+#endif
+}
 
 /*=======================================================================*/

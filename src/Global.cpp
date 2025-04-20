@@ -160,6 +160,7 @@ void CGlobal::LoadCode(const LoadCodeState &state)
 
     SetStart(start);
 
+    wxGetApp().mainFrame()->UpdateAll();
     wxGetApp().simulatorController().StartDebug();
 }
 

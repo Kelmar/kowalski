@@ -147,8 +147,8 @@ public:
         ERR_LAST					// Last value of type Stat -no error
     };
 
-    /// @brief Processor instruction type
-    enum OpCode		
+    /// @brief Processor Instruction
+    enum OpCode
     {
         C_LDA, C_LDX, C_LDY,
         C_STA, C_STX, C_STY, C_STZ,
@@ -374,6 +374,12 @@ public:
 
 public:
     static const uint8_t mode_to_len[]; // Changing the addressing mode to the length of the instruction and arguments
+
+    inline static 
+    uint8_t OpCodeLength(uint8_t opCode)
+    {
+        return opCode == 0 ? 1 : mode_to_len[CodeToMode()[opCode]];
+    }
 
     static const uint8_t (&TransformTable(const ProcessorType procType))[C_ILL][A_NO_OF_MODES];
 

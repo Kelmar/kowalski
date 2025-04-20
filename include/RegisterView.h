@@ -22,29 +22,41 @@
  */
 /*=======================================================================*/
 
-#ifndef HE_OFFSET_COLUMNS_H__
-#define HE_OFFSET_COLUMNS_H__
+#ifndef REGISTER_VIEW_6502_H__
+#define REGISTER_VIEW_6502_H__
 
 /*=======================================================================*/
 
-namespace hex
+class RegisterView : public wxFrame, public wxExtra
 {
-    class OffsetColumns : public wxWindow, public SubControl
-    {
-    private:
-        /// Format string for base address view
-        wxString m_baseAddressFmt;
+private:
+    wxTextCtrl* m_instDisplay;
+    wxStaticBitmap* m_instAlert;
 
-        void OnPaint(wxPaintEvent &);
+    wxTextCtrl* m_aEdit;
+    wxTextCtrl* m_xEdit;
+    wxTextCtrl* m_yEdit;
+    wxTextCtrl* m_spEdit;
+    wxTextCtrl* m_pcEdit;
+    wxTextCtrl* m_cycleEdit;
+    wxTextCtrl* m_pEdit;
 
-    public:
-        OffsetColumns(HexEdit *parent);
-        virtual ~OffsetColumns() { }
-    };
-}
+private:
+    void InitControlls();
+    void BindEvents();
+
+public:
+    RegisterView(wxWindow *parent);
+    virtual ~RegisterView() { }
+
+    void UpdateStatus();
+
+private:
+    void OnClose(wxCloseEvent &);
+};
 
 /*=======================================================================*/
 
-#endif /* HE_OFFSET_COLUMNS_H__ */
+#endif /* REGISTER_VIEW_6502_H__ */
 
 /*=======================================================================*/

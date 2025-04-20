@@ -20,7 +20,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- /*=======================================================================*/
+/*=======================================================================*/
 
 #include "StdAfx.h"
 #include "6502.h"
@@ -44,6 +44,14 @@
 namespace
 {
     std::string EmptyFormat(const std::span<uint8_t> &) { return std::string(""); }
+
+    std::string SByteFormat(const std::span<uint8_t> &bytes)
+    {
+        if ((bytes[0] & 0x80) != 0)
+            return fmt::format("PC - {:02X}", 0x100 - (int)bytes[0]);
+
+        return fmt::format("PC + {:02X}", bytes[0]);
+    }
 
     std::string ByteFormat(const std::span<uint8_t> &bytes)
     {
@@ -122,46 +130,113 @@ namespace
 
     /*===============================================================*/
 
+    std::string EmptyFmt(const std::string &) { return std::string(""); }
+
+    std::string NoFmt(const std::string &arg) { return arg; }
+
+    std::string ImmediateFmt(const std::string &arg) { return "#$" + arg; }
+
+    std::string HexFmt(const std::string &arg) { return "$" + arg; }
+
+    std::string XFmt(const std::string &arg) { return "$" + arg + ", X"; }
+
+    std::string YFmt(const std::string &arg) { return "$" + arg + ", Y"; }
+
+    //std::string RelFmt(const std::string &arg) { return "PC " + arg; }
+
+    /*===============================================================*/
+
     typedef std::function<std::string(const std::span<uint8_t> &)> ArgumentFormatter;
+    typedef std::function<std::string(const std::string &)> DecorationFormat;
+
+    struct ArgFormatting
+    {
+        ArgumentFormatter ArgFormat;
+        DecorationFormat DecFormat;
+    };
+
+    /*===============================================================*/
+
+    const std::map<CAsm::CodeAdr, ArgFormatting> s_argumentFormats
+    {
+        { CAsm::CodeAdr::A_IMP   , { EmptyFormat, EmptyFmt     } },
+        { CAsm::CodeAdr::A_ACC   , { EmptyFormat, EmptyFmt     } },
+        { CAsm::CodeAdr::A_IMP   , { EmptyFormat, EmptyFmt     } },
+        { CAsm::CodeAdr::A_IMM   , { ByteFormat , ImmediateFmt } },
+        { CAsm::CodeAdr::A_ZPG   , { ByteFormat , HexFmt       } },
+        { CAsm::CodeAdr::A_ABS   , { WordFormat , HexFmt       } },
+        { CAsm::CodeAdr::A_ABS_X , { WordFormat , XFmt         } },
+        { CAsm::CodeAdr::A_ABS_Y , { WordFormat , YFmt         } },
+        { CAsm::CodeAdr::A_ZPG_X , { ByteFormat , XFmt         } },
+        { CAsm::CodeAdr::A_ZPG_Y , { ByteFormat , YFmt         } },
+        { CAsm::CodeAdr::A_REL   , { SByteFormat, NoFmt        } },
+        { CAsm::CodeAdr::A_ZPGI  , { ByteFormat , NoFmt        } },
+        { CAsm::CodeAdr::A_ZPGI_X, { ByteFormatX, NoFmt        } },
+        { CAsm::CodeAdr::A_ZPGI_Y, { ByteFormatY, NoFmt        } },
+        { CAsm::CodeAdr::A_ABSI  , { WordFormat , NoFmt        } },
+        { CAsm::CodeAdr::A_ABSI_X, { WordFormatX, NoFmt        } },
+
+        { CAsm::CodeAdr::A_ZPG2  , { UnknownFormatToDo, NoFmt  } },
+        { CAsm::CodeAdr::A_ZREL  , { UnknownFormatToDo, NoFmt  } },
+
+        { CAsm::CodeAdr::A_ABSL  , { LWordFormat      , NoFmt  } },
+        { CAsm::CodeAdr::A_ABSL_X, { LWordFormatX     , NoFmt  } },
+
+        { CAsm::CodeAdr::A_ZPIL  , { ZeroPageIndirect , NoFmt  } },
+        { CAsm::CodeAdr::A_ZPIL_Y, { ZeroPageIndirectY, NoFmt  } },
+
+        { CAsm::CodeAdr::A_SR    , { ByteFormatS      , NoFmt  } },
+        { CAsm::CodeAdr::A_SRI_Y , { ByteFormatSY     , NoFmt  } },
+
+        { CAsm::CodeAdr::A_RELL  , { WordFormat       , NoFmt  } },
+
+        { CAsm::CodeAdr::A_XYC   , { TwoByteFormat    , NoFmt  } },
+
+        { CAsm::CodeAdr::A_IMM2  , { WordFormat       , NoFmt  } },
+
+        { CAsm::CodeAdr::A_ILL   , { EmptyFormat      , NoFmt  } }
+    };
+
+    /*===============================================================*/
 
     const std::map<CAsm::CodeAdr, ArgumentFormatter> s_argumentFormatters
     {
-        { CAsm::CodeAdr::A_IMP, EmptyFormat },
-        { CAsm::CodeAdr::A_ACC, EmptyFormat },
-        { CAsm::CodeAdr::A_IMP, EmptyFormat },
-        { CAsm::CodeAdr::A_IMM, ByteFormat },
-        { CAsm::CodeAdr::A_ZPG, ByteFormat },
-        { CAsm::CodeAdr::A_ABS, WordFormat },
-        { CAsm::CodeAdr::A_ABS_X, WordFormatX },
-        { CAsm::CodeAdr::A_ABS_Y, WordFormatY },
-        { CAsm::CodeAdr::A_ZPG_X, ByteFormatX },
-        { CAsm::CodeAdr::A_ZPG_Y, ByteFormatY },
-        { CAsm::CodeAdr::A_REL, WordFormat },
-        { CAsm::CodeAdr::A_ZPGI, ByteFormat },
-        { CAsm::CodeAdr::A_ZPGI_X, ByteFormatX },
-        { CAsm::CodeAdr::A_ZPGI_Y, ByteFormatY },
-        { CAsm::CodeAdr::A_ABSI, WordFormat },
-        { CAsm::CodeAdr::A_ABSI_X, WordFormatX },
+        { CAsm::CodeAdr::A_IMP   , EmptyFormat       },
+        { CAsm::CodeAdr::A_ACC   , EmptyFormat       },
+        { CAsm::CodeAdr::A_IMP   , EmptyFormat       },
+        { CAsm::CodeAdr::A_IMM   , ByteFormat        },
+        { CAsm::CodeAdr::A_ZPG   , ByteFormat        },
+        { CAsm::CodeAdr::A_ABS   , WordFormat        },
+        { CAsm::CodeAdr::A_ABS_X , WordFormatX       },
+        { CAsm::CodeAdr::A_ABS_Y , WordFormatY       },
+        { CAsm::CodeAdr::A_ZPG_X , ByteFormatX       },
+        { CAsm::CodeAdr::A_ZPG_Y , ByteFormatY       },
+        { CAsm::CodeAdr::A_REL   , SByteFormat       },
+        { CAsm::CodeAdr::A_ZPGI  , ByteFormat        },
+        { CAsm::CodeAdr::A_ZPGI_X, ByteFormatX       },
+        { CAsm::CodeAdr::A_ZPGI_Y, ByteFormatY       },
+        { CAsm::CodeAdr::A_ABSI  , WordFormat        },
+        { CAsm::CodeAdr::A_ABSI_X, WordFormatX       },
 
-        { CAsm::CodeAdr::A_ZPG2, UnknownFormatToDo },
-        { CAsm::CodeAdr::A_ZREL, UnknownFormatToDo },
+        { CAsm::CodeAdr::A_ZPG2  , UnknownFormatToDo },
+        { CAsm::CodeAdr::A_ZREL  , UnknownFormatToDo },
 
-        { CAsm::CodeAdr::A_ABSL, LWordFormat },
-        { CAsm::CodeAdr::A_ABSL_X, LWordFormatX },
+        { CAsm::CodeAdr::A_ABSL  , LWordFormat       },
+        { CAsm::CodeAdr::A_ABSL_X, LWordFormatX      },
 
-        { CAsm::CodeAdr::A_ZPIL, ZeroPageIndirect },
+        { CAsm::CodeAdr::A_ZPIL  , ZeroPageIndirect  },
         { CAsm::CodeAdr::A_ZPIL_Y, ZeroPageIndirectY },
 
-        { CAsm::CodeAdr::A_SR, ByteFormatS },
-        { CAsm::CodeAdr::A_SRI_Y, ByteFormatSY },
+        { CAsm::CodeAdr::A_SR   , ByteFormatS        },
+        { CAsm::CodeAdr::A_SRI_Y, ByteFormatSY       },
 
-        { CAsm::CodeAdr::A_RELL, WordFormat },
+        { CAsm::CodeAdr::A_RELL , WordFormat         },
 
-        { CAsm::CodeAdr::A_XYC, TwoByteFormat },
+        { CAsm::CodeAdr::A_XYC  , TwoByteFormat      },
 
-        { CAsm::CodeAdr::A_IMM2, WordFormat },
+        { CAsm::CodeAdr::A_IMM2 , WordFormat         },
 
-        { CAsm::CodeAdr::A_ILL, EmptyFormat }
+        { CAsm::CodeAdr::A_ILL  , EmptyFormat        }
     };
 }
 
@@ -195,25 +270,79 @@ DisassemblyView::~DisassemblyView()
 void DisassemblyView::Init()
 {
     Bind(wxEVT_PAINT, &DisassemblyView::OnPaint, this);
+    Bind(wxEVT_SIZE, &DisassemblyView::OnSize, this);
 
     // Set initial scrolling value to the current program address.
 
     PSym6502 simulator = wxGetApp().simulatorController().Simulator();
 
     m_offset = simulator->GetContext().GetProgramAddress();
+
+    CalcScollbars();
 }
 
+/*=======================================================================*/
+
+void DisassemblyView::JumpTo(uint32_t address)
+{
+    UNUSED(address);
+}
+
+/*=======================================================================*/
+/// Compute m_offset from the current scroll bar values.
+void DisassemblyView::UpdateOffset()
+{
+    int pos = GetScrollPos(wxVERTICAL);
+    m_offset = pos;
+}
+
+/*=======================================================================*/
+// Sizing handlers
+/*=======================================================================*/
+
+void DisassemblyView::OnSize(wxSizeEvent &)
+{
+    CalcScollbars();
+}
+
+/*=======================================================================*/
+
+void DisassemblyView::CalcScollbars()
+{
+    wxMemoryDC dc;
+    dc.SetFont(GetFont());
+
+    wxSize charSize = dc.GetTextExtent("M");
+
+    //int displayLineCount = (int)std::ceil((float)GetRect().GetHeight() / charSize.y);
+
+    // TODO: Fix hard coded value.
+    int totalLineCount = (int)std::ceil((float)(0x00FF'FFFF) / charSize.y);
+
+    SetScrollbars(charSize.x, charSize.y,
+        0, totalLineCount,
+        0, m_offset);
+}
+
+/*=======================================================================*/
+// Painting handlers
 /*=======================================================================*/
 
 void DisassemblyView::OnPaint(wxPaintEvent &)
 {
     wxPaintDC dc(this);
 
+    UpdateOffset();
+
+    // If the user hits Stop from the menus, then debugging is stopped and we unload the simulator.
+    // In that event the pointer to the simulator will not be valid.
+
     PSym6502 simulator = wxGetApp().simulatorController().Simulator();
     CDeasm disassembler(simulator);
 
-    // TODO: Access violation when selecting "Stop" from menu?
-    m_programAddress = simulator->GetContext().GetProgramAddress();
+    /*sim_addr_t programCounter = simulator ?
+        simulator->GetContext().GetProgramAddress() :
+        sim::INVALID_ADDRESS;*/
 
     wxFont font = wxGetApp().fontController().getMonoFont();
     dc.SetFont(font);
@@ -229,6 +358,8 @@ void DisassemblyView::OnPaint(wxPaintEvent &)
 
     for (int i = 0; i < lines; ++i)
     {
+        //bool currentPC = programCounter == address;
+
         PDisassembleInfo info = disassembler.Parse(address);
         address += info->Bytes.size();
 
@@ -289,11 +420,34 @@ void DisassemblyView::DrawLine(wxDC &dc, const PDisassembleInfo &info)
 
     x += m_charSize.x * (7 + GAP_SIZE);
 
+    txt = "";
+
+    for (auto b : info->Bytes)
+        txt += fmt::format("{0:02X} ", b);
+
+    dc.DrawText(txt, x, m_drawLine);
+
+    x += m_charSize.x * (9 + GAP_SIZE);
+
     dc.DrawText(info->Mnemonic, x, m_drawLine);
 
     // TODO: Pull max mnemonic size from platform.
     x += m_charSize.x * (3 + GAP_SIZE);
 
+    auto pFmt = s_argumentFormats.find(info->AddressingMode);
+
+    if (pFmt != s_argumentFormats.end())
+    {
+        std::span<uint8_t> bytes(info->Bytes);
+        txt = pFmt->second.ArgFormat(bytes.subspan(1));
+        txt = pFmt->second.DecFormat(txt);
+    }
+    else
+    {
+        txt = "";
+    }
+
+#if 0
     auto paramFmt = s_argumentFormatters.find(info->AddressingMode);
 
     if (paramFmt != s_argumentFormatters.end())
@@ -305,6 +459,7 @@ void DisassemblyView::DrawLine(wxDC &dc, const PDisassembleInfo &info)
     {
         txt = "";
     }
+#endif
 
     dc.DrawText(txt, x, m_drawLine);
 

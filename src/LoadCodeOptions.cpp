@@ -33,7 +33,9 @@ LoadCodeOptionsDlg::LoadCodeOptionsDlg(LoadCodeState *state)
     , wxExtra(this)
     , m_state(state)
 {
-    if (!wxXmlResource::Get()->LoadDialog(this, nullptr, "CodeLoadOptionsDlg"))
+    auto mainFrame = wxGetApp().mainFrame();
+
+    if (!wxXmlResource::Get()->LoadDialog(this, mainFrame, "CodeLoadOptionsDlg"))
         throw ResourceError();
 
     HexValidator startAddrValidate(&m_state->StartAddress);
@@ -66,13 +68,16 @@ LoadCodeOptionsDlg::LoadCodeOptionsDlg(LoadCodeState *state)
     startAddrTxt->SetValidator(startAddrValidate);
     loadAddrTxt->SetValidator(loadAddrValidate);
 
-    clearChk->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, [=,this](wxCommandEvent &) {
+    clearChk->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, [=,this](wxCommandEvent &)
+    {
         m_state->ClearMemory = clearChk->IsChecked();
     });
 
     //byteTxt->SetValidator(byteValidate);
 
     startAddrTxt->SetFocus();
+
+    Fit();
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -163,7 +163,7 @@ void HexEdit::AdjustItemSizes()
     int displayLineCount = GetRect().GetHeight() / m_metrics->LineSizePx.y;
 
     // Add some virtual space for asthetics.
-    int totalLines = m_metrics->TotalLineCount +(displayLineCount / 4);
+    int totalLines = m_metrics->TotalLineCount + (displayLineCount / 4);
 
     SetScrollbars(
         m_metrics->CharSizePx.x, m_metrics->LineSizePx.y,

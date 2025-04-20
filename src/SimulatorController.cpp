@@ -29,6 +29,7 @@
 #include "6502Doc.h"
 
 #include "DisassemblyFrame.h"
+#include "RegisterView.h"
 
 /*=======================================================================*/
 
@@ -66,6 +67,8 @@ SimulatorController::SimulatorController()
     , m_asmThread(nullptr)
     , m_debugInfo()
     , m_simulator(nullptr)
+    , m_menu(nullptr)
+    , m_regView(nullptr)
 {
     BindEvents();
 
@@ -236,9 +239,11 @@ void SimulatorController::BindEvents()
 {
     // View menu handlers
     Bind(wxEVT_MENU, &SimulatorController::OnViewDisassembler, this, evID_SHOW_DISASM);
+    Bind(wxEVT_MENU, &SimulatorController::OnViewRegisters, this, evID_SHOW_REGS);
 
     // View update handlers
     Bind(wxEVT_UPDATE_UI, &SimulatorController::EnableWhenDebugging, this, evID_SHOW_DISASM);
+    Bind(wxEVT_UPDATE_UI, &SimulatorController::OnUpdateShowRegs, this, evID_SHOW_REGS);
 
     // Simulator menu handlers
     Bind(wxEVT_MENU, &SimulatorController::OnAssemble, this, evID_ASSEMBLE);
@@ -429,7 +434,7 @@ void SimulatorController::Run()
     }
 
     m_simulator->Run();
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -442,7 +447,7 @@ void SimulatorController::RunToAddress(sim_addr_t address)
     m_debugInfo.SetTemporaryExecBreakpoint(address);
     m_simulator->Run(); // Run after setting a temporary breakpoint
 
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -451,7 +456,7 @@ void SimulatorController::Restart()
 {
     StartDebug();
     m_simulator->Run();
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -462,7 +467,7 @@ void SimulatorController::Break()
         return;
 
     m_simulator->Break();
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 
 #if 0
     // Likely this will come from the simulator sending an event.
@@ -483,7 +488,7 @@ void SimulatorController::StepOver()
         return;
 
     m_simulator->StepOver();
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -491,7 +496,7 @@ void SimulatorController::StepOver()
 void SimulatorController::StepInto()
 {
     m_simulator->StepInto();
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -499,7 +504,7 @@ void SimulatorController::StepInto()
 void SimulatorController::StepOut()
 {
     m_simulator->RunTillRet();
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -507,7 +512,7 @@ void SimulatorController::StepOut()
 void SimulatorController::SkipInstruction()
 {
     m_simulator->SkipInstr();
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -518,7 +523,7 @@ void SimulatorController::SkipToAddress(sim_addr_t address)
         return;
 
     m_simulator->SkipToAddr(address);
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -526,6 +531,7 @@ void SimulatorController::SkipToAddress(sim_addr_t address)
 void SimulatorController::StartDebug()
 {
     CreateSimulator();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -544,7 +550,7 @@ void SimulatorController::ExitDebugMode(bool uiEvent)
         m_simulator->AbortProg(); // Interrupt the running program
 
     DebugStopped();
-    wxGetApp().mainFrame()->UpdateFlea();
+    UpdateUI();
 }
 
 /*=======================================================================*/
@@ -552,6 +558,8 @@ void SimulatorController::ExitDebugMode(bool uiEvent)
 void SimulatorController::DebugStopped()
 {
     m_simulator.reset();
+
+    UpdateUI();
 
     //m_view->StopIntGenerator();
 
@@ -624,6 +632,20 @@ sim_addr_t SimulatorController::GetCursorAddress(bool skipping)
 }
 
 /*=======================================================================*/
+
+void SimulatorController::UpdateUI()
+{
+    // Need some sort of "perspective" manager.
+
+    if (m_regView)
+        m_regView->UpdateStatus();
+
+    wxGetApp().mainFrame()->UpdateFlea();
+
+    wxGetApp().mainFrame()->UpdateAll();
+}
+
+/*=======================================================================*/
 // Menu handlers
 /*=======================================================================*/
 
@@ -631,6 +653,16 @@ void SimulatorController::OnViewDisassembler(wxCommandEvent &)
 {
     auto wnd = new DisassemblyFrame(wxGetApp().mainFrame());
     wnd->Show();
+}
+
+/*=======================================================================*/
+
+void SimulatorController::OnViewRegisters(wxCommandEvent &)
+{
+    if (!m_regView)
+        m_regView = new RegisterView(wxGetApp().mainFrame());
+
+    m_regView->Show();
 }
 
 /*=======================================================================*/
@@ -752,6 +784,22 @@ void SimulatorController::OnUpdateRestart(wxUpdateUIEvent &e)
 
 /*=======================================================================*/
 
+void SimulatorController::OnUpdateShowRegs(wxUpdateUIEvent &e)
+{
+    if (IsDebugging())
+    {
+        e.Enable(true);
+        e.Check(m_regView && m_regView->IsVisible());
+    }
+    else
+    {
+        e.Enable(false);
+        e.Check(false);
+    }
+}
+
+/*=======================================================================*/
+
 void SimulatorController::EnableWhenDebugging(wxUpdateUIEvent &e)
 {
     e.Enable(IsDebugging());
@@ -789,7 +837,7 @@ void SimulatorController::OnAsmComplete(wxThreadEvent &)
     delete m_asmThread;
     m_asmThread = nullptr;
 
-    wxGetApp().mainFrame()->UpdateAll();
+    UpdateUI();
 }
 
 /*=======================================================================*/

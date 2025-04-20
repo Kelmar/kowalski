@@ -22,29 +22,26 @@
  */
 /*=======================================================================*/
 
-#ifndef HE_OFFSET_COLUMNS_H__
-#define HE_OFFSET_COLUMNS_H__
+#ifndef INTERACTIVE_MARGIN_6502_H__
+#define INTERACTIVE_MARGIN_6502_H__
 
 /*=======================================================================*/
 
-namespace hex
+class InteractiveMargin : public wxWindow
 {
-    class OffsetColumns : public wxWindow, public SubControl
-    {
-    private:
-        /// Format string for base address view
-        wxString m_baseAddressFmt;
+private:
+    void DrawBreakpoint(wxDC &, CAsm::Breakpoint);
 
-        void OnPaint(wxPaintEvent &);
+public:
+    InteractiveMargin();
+    virtual ~InteractiveMargin() { }
 
-    public:
-        OffsetColumns(HexEdit *parent);
-        virtual ~OffsetColumns() { }
-    };
-}
+private: // Event handlers
+    void OnPaint(wxPaintEvent &);
+};
 
 /*=======================================================================*/
 
-#endif /* HE_OFFSET_COLUMNS_H__ */
+#endif /* INTERACTIVE_MARGIN_6502_H__ */
 
 /*=======================================================================*/

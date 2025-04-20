@@ -107,7 +107,6 @@ else()
   SET (wxLibs ${wxWidgets_LIBRARIES})
 endif()
 
-
 ##########################################################################
 # Font Awesome
 ##########################################################################
@@ -146,6 +145,7 @@ target_include_directories(6502
     PRIVATE "include/crystal"
     PRIVATE "include/assembler"
     PRIVATE "${wxWidgets_SOURCE_DIR}/include"
+    PRIVATE "${wxmaterialdesignartprovider_SOURCE_DIR}/MaterialDesign"
 )
 
 target_link_libraries(6502
