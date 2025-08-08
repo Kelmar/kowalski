@@ -2,8 +2,8 @@
 //
 #include "resource.h"
 
-#define PVERSION "1.4.0.7\0"
-#define FVERSION 1,4,0,7
+#define PVERSION "1.4.0.9\0"
+#define FVERSION 1,4,0,9
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////

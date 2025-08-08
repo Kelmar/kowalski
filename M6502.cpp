@@ -1492,12 +1492,12 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 			if (expr.value < 0)
 				return ERR_NUM_NEGATIVE;	// oczekiwana wartoœæ nieujemna
 			if (expr.inf==Expr::EX_LONG)
-//			{	
-//				if((bProc6502==2))
-//					program_start = expr.value & mem_mask;
-//				else
+			{	
+				if((bProc6502==2))
+					program_start = expr.value & mem_mask;
+				else
 					return ERR_NUM_LONG;	
-//			}	
+			}	
 			if (listing.IsOpen())
 				listing.AddValue(UINT32(program_start));
 			break;
@@ -1704,8 +1704,9 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 
 	case I_END:		// end - why expression here?
 		{
-			if (!is_expression(leks))		// nie ma wyra¿enia?
-				return STAT_FIN;
+			return STAT_FIN;
+/*			if (!is_expression(leks))		// nie ma wyra¿enia?
+
 			Expr expr;
 			ret = expression(leks,expr);	// oczekiwane s³owo
 			if (ret)
@@ -1717,7 +1718,8 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CLeksem &leks, InstrType 
 			if (expr.inf==Expr::EX_LONG)	// za du¿a wartoœæ
 				return ERR_NUM_LONG;
 			program_start = expr.value & mem_mask;
-			return STAT_FIN;
+			return STAT_FIN; 
+*/
 		}
 
 	case I_ERROR:	// zg³oszenie b³êdu

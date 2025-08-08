@@ -133,7 +133,7 @@ bool CIOWindow::Create()
 
   m_uTimer = SetTimer(101, 250, 0);
 
-  myFile.open("output.txt",ios::out);
+//  myFile.open("output.txt",ios::out); // Diagnostic use, see PutC below
 
   SetFocus();
 
@@ -289,14 +289,14 @@ int CIOWindow::PutH(int chr)			// wydrukowanie liczby hex (8 bitow)
 int CIOWindow::PutC(int chr)			// wydrukowanie znaku
 {
 	HideCursor();
-
-  CString cs;
+/*
+  CString cs;							// Diagnostic use - see CIOWindow::Create() above
   if (myFile.is_open()) {
 	 cs.Format("%c", (UINT8)chr);
 //	 MessageBoxA(cs, "io", MB_OK );
      myFile << cs; 
   }
-
+*/
   if (chr == 0x0a) // line feed?
   {
     if (++m_nPosY >= m_nHeight)
