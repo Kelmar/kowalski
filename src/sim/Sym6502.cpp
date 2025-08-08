@@ -842,7 +842,7 @@ void CSym6502::PerformCommandInner()
                 overflow = ((acc & 0x8000u) == (arg & 0x8000u)) && (addr & 0x8000u) != (acc & 0x8000u);
 
                 if (m_ctx.decimal && (addr & 0xff000) > 0x19000) overflow = false;
-                m_ctx.a = (addr & 0xff);
+                m_ctx.a = (addr & 0xffff);
                 m_ctx.b = (addr >> 8) & 0xff;
             }
             else
@@ -1400,7 +1400,7 @@ void CSym6502::PerformCommandInner()
 
     case CAsm::C_AND:
         isOp16 = cpu16() && !m_ctx.emm && !m_ctx.mem16;
-        m_ctx.CRegister(m_ctx.CRegister() &get_argument_value(isOp16), true);
+        m_ctx.CRegister(m_ctx.CRegister() & get_argument_value(isOp16), true);
 
         if (isOp16)
             m_ctx.uCycles++; // 16 bit operation adds 1 cycle
@@ -3075,7 +3075,12 @@ void CSym6502::SetStart(sim_addr_t address)
     Restart();
 
     if (address != sim::INVALID_ADDRESS)
+    {
+        if (m_ctx.Processor() == ProcessorType::WDC65816)
+            m_ctx.pbr = (address >> 16) & 0xFF;
+
         m_ctx.PC(address); // Override the reset vector addres.
+    }
 
     if (debug)
     {

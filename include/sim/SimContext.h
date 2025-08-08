@@ -40,7 +40,7 @@ struct SimulatorConfig
     CAsm::Finish  SimFinish;     // How the simulator should terminate
     bool          IOEnable;      // Set if the I/O functions should be enabled
     sim_addr_t    IOAddress;     // I/O Address location
-    bool          ProtectMemory; // Set if a section of memroy should be write protected
+    bool          ProtectMemory; // Set if a section of memory should be write protected
     sim_addr_t    ProtectStart;  // Start of write protected memory area
     sim_addr_t    ProtectEnd;    // End of write protected memory area
 };
@@ -197,24 +197,28 @@ public: // Register access
      * This behavior changes depending on the emm and mem16 status flags.
      * 
      * @param value The value to set for the C register.
-     * @param setStatus If set, the status register will be adjusted based on the values setin the C register.
+     * @param setStatus If set, the status register will be adjusted based on the values set in the C register.
      * 
      * @return The actual value that is set.
      * For 8-bit mode, this will have the MSB cleared.
      */
-    uint16_t CRegister(uint16_t value, bool setStatus )
+    uint16_t CRegister(uint16_t value, bool setStatus)
     {
+        uint16_t negBit = 0x0080;
         a = (value & 0xFF);
 
         if (Processor() == ProcessorType::WDC65816 && !emm && mem16)
+        {
+            negBit = 0x8000;
             b = (value >> 8) & 0xFF;
+        }
         else
             value &= 0x00FF; // Mask off result
 
         if (setStatus)
         {
             zero = value == 0;
-            negative = (value & 0x8000) != 0;
+            negative = (value & negBit) != 0;
         }
 
         return value;
@@ -224,7 +228,7 @@ public: // Register access
      * @brief Get value of S register.
      * 
      * This gets the raw value of the S register, it does not attempt
-     * to adjust it based on the emumulation mode set.
+     * to adjust it based on the emulation mode set.
      */
     uint16_t SRegister() const { return m_s; }
 
@@ -232,14 +236,14 @@ public: // Register access
      * @brief Set value of S register
      * 
      * This sets the raw value of the S register, it does not attempt
-     * to adjust it based on the emumulation mode set.
+     * to adjust it based on the emulation mode set.
      */
     void SRegister(uint16_t value);
 
     /**
      * @brief Get the stack pointer value based on the current processor type.
      * 
-     * This gets the adjusted value of the S register based on the emmulation mode status flag.
+     * This gets the adjusted value of the S register based on the emulation mode status flag.
      */
     sim_addr_t StackPointer() const
     {
@@ -251,7 +255,7 @@ public: // Register access
 
     /**
      * @brief Get the program counter based on the current processor type.
-     * @remarks For the 65816 this addjusts based on the current program bank register.
+     * @remarks For the 65816 this adjusts based on the current program bank register.
      */
     inline
     sim_addr_t GetProgramAddress(ssize_t offset = 0) const
@@ -285,21 +289,21 @@ public: // Memory Access
     /**
      * @brief Reads the byte located at the current program counter
      * @param offset Optional offset in bytes from program counter to read from.
-     * @remarks This accoutns for the program bank for 65816
+     * @remarks This accounts for the program bank for 65816
      */
     uint8_t GetProgramByte(ssize_t offset = 0);
 
     /**
      * @brief Reads the word located at the current program counter
      * @param offset Optional offset in bytes from program counter to read from.
-     * @remarks This accoutns for the program bank for 65816
+     * @remarks This accounts for the program bank for 65816
      */
     uint16_t GetProgramWord(ssize_t offset = 0);
 
     /**
      * @brief Reads the LWord located at the current program counter
      * @param offset Optional offset in bytes from program counter to read from.
-     * @remarks This accoutns for the program bank for 65816
+     * @remarks This accounts for the program bank for 65816
      */
     uint32_t GetProgramLWord(ssize_t offset = 0);
 
@@ -348,7 +352,7 @@ public: // Memory Access
 
     /**
      * @brief Peek at the byte at the given address on the bus.
-     * @remarks This operation is non distructive.
+     * @remarks This operation is non destructive.
      * @param address The address to read.
      * @return The value read.
      */
@@ -360,7 +364,7 @@ public: // Memory Access
 
     /**
      * @brief Peek at a word at the given address on the bus.
-     * @remarks This operation is non distructive.
+     * @remarks This operation is non destructive.
      * @param address The address to read
      * @return The 16-bit word to read.
      */
@@ -368,7 +372,7 @@ public: // Memory Access
 
     /**
      * @brief Peek at an LWord (24-bit value) at the given address on the bus.
-     * @remarks This operation is non distructive.
+     * @remarks This operation is non destructive.
      * @param address The address to read from.
      * @return The 24-bit value read.
      */

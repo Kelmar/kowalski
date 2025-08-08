@@ -205,6 +205,14 @@ void SimulatorController::CreateSimulator()
 
     // Get a fresh new simulator
     m_simulator = std::make_shared<CSym6502>(std::move(ctx), global->m_startAddress, &m_debugInfo);
+
+    if (m_simulator->GetContext().pbr > 0)
+    {
+        wxString title = _("Warning");
+        wxString message = _("Simulator will start in native mode, but has a start address past bank 0.\r\nPlease check the registers closely.");
+
+        wxMessageBox(message, title, wxICON_WARNING);
+    }
 }
 
 /*=======================================================================*/

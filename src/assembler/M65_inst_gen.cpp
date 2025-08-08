@@ -97,7 +97,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
         if (expr.value < 0)
             return ERR_NUM_NEGATIVE; // Expected non-negative value
 
-        if (expr.inf == Expr::EX_LONG) // Value too large
+        if (expr.inf == Expr::EX_LONG && (m_procType != ProcessorType::WDC65816)) // Value too large
             return ERR_NUM_LONG;
 
         m_progStart = expr.value & mem_mask;
@@ -361,6 +361,9 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
 
     case I_END: // end - why expression here?
     {
+        return STAT_FIN;
+
+        /*
         if (!is_expression(leks)) // no expression?
             return STAT_FIN;
 
@@ -381,6 +384,7 @@ CAsm6502::Stat CAsm6502::asm_instr_syntax_and_generate(CToken &leks, InstrType i
 
         m_progStart = expr.value & mem_mask;
         return STAT_FIN;
+        */
     }
 
     case I_ERROR: // Bug report
