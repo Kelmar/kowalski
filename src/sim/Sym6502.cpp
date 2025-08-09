@@ -1030,25 +1030,26 @@ void CSym6502::PerformCommandInner()
             acc = m_ctx.a;
 
             // Compare always in binary, don't set acc
-            tmp = acc - arg;
+            addr = acc - arg;
 
-            carry = !(tmp > 0xFFFF);
-            zero = (tmp & 0xFFFF) == 0;
-            negative = tmp & 0x8000;
+            carry = !(addr > 0xFFFF);
+            zero = (addr & 0xFFFF) == 0;
+            negative = addr & 0x8000;
 
             m_ctx.uCycles++;   // 16 bit operation adds 1 cycle
         }
         else
         {
-            arg = get_argument_value(false) & 0xFF;
-            acc = m_ctx.a;
+            arg = get_argument_value(false);
+            arg8 = arg & 0xFF;
+            acc8 = m_ctx.a;
 
             // Compare always in binary, don't set acc
-            tmp = acc - arg;
+            acc = acc8 - arg8;
 
-            carry = !(tmp > 0xFF);
-            zero = (tmp & 0xFF) == 0;
-            negative = tmp & 0x80;
+            carry = !(acc > 0xFF);
+            zero = (acc & 0xFF) == 0;
+            negative = acc & 0x80;
         }
 
         m_ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -1065,25 +1066,26 @@ void CSym6502::PerformCommandInner()
             acc = m_ctx.x;
 
             // Compare always in binary, don't set acc
-            tmp = acc - arg;
+            addr = acc - arg;
 
-            carry = !(tmp > 0xFFFF);
-            zero = (tmp & 0xFFFF) == 0;
-            negative = tmp & 0x8000;
+            carry = !(addr > 0xFFFF);
+            zero = (addr & 0xFFFF) == 0;
+            negative = addr & 0x8000;
 
             m_ctx.uCycles++;   // 16 bit operation adds 1 cycle
         }
         else
         {
             arg = get_argument_value(false) & 0xFF;
-            acc = m_ctx.x & 0xFF;
+            arg8 = arg & 0xFF;
+            acc8 = m_ctx.x & 0xFF;
 
             // Compare always in binary, don't set acc
-            tmp = acc - arg;
+            acc = acc8 - arg8;
 
-            carry = !(tmp > 0xFF);
-            zero = (tmp & 0xFF) == 0;
-            negative = tmp & 0x80;
+            carry = !(acc > 0xFF);
+            zero = (acc & 0xFF) == 0;
+            negative = acc & 0x80;
         }
 
         m_ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -1096,25 +1098,26 @@ void CSym6502::PerformCommandInner()
             acc = m_ctx.y;
 
             // Compare always in binary, don't set acc
-            tmp = acc - arg - (m_ctx.carry ? 0 : 1);
+            addr = acc - arg - (m_ctx.carry ? 0 : 1);
 
-            carry = !(tmp > 0xFFFF);
-            zero = (tmp & 0xFFFF) == 0;
-            negative = tmp & 0x8000;
+            carry = !(addr > 0xFFFF);
+            zero = (addr & 0xFFFF) == 0;
+            negative = addr & 0x8000;
 
             m_ctx.uCycles++;   // 16 bit operation adds 1 cycle
         }
         else
         {
             arg = get_argument_value(false) & 0xFF;
-            acc = m_ctx.y & 0xFF;
+            arg8 = arg & 0xFF;
+            acc8 = m_ctx.y & 0xFF;
 
             // Compare always in binary, don't set acc
-            tmp = acc - arg - (m_ctx.carry ? 0 : 1);
+            acc = acc8 - arg8;
 
-            carry = !(tmp > 0xFF);
-            zero = (tmp & 0xFF) == 0;
-            negative = tmp & 0x80;
+            carry = !(acc > 0xFF);
+            zero = (acc & 0xFF) == 0;
+            negative = acc & 0x80;
         }
 
         m_ctx.set_status_reg_ZNC(zero, negative, carry);
@@ -1959,6 +1962,8 @@ void CSym6502::PerformCommandInner()
             return;
         }
 
+        m_ctx.PC(m_ctx.PC() + 2);
+
         if (cpu16() && !m_ctx.emm)
         {
             m_ctx.PushByte(m_ctx.pbr);
@@ -1977,6 +1982,7 @@ void CSym6502::PerformCommandInner()
                 m_ctx.decimal = false;
             m_ctx.PC(get_irq_addr());
         }
+
         m_ctx.interrupt = true; // after pushing status
         m_ctx.pbr = 0;
         wxGetApp().m_global.m_bPBR = m_ctx.pbr;

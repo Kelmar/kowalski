@@ -72,7 +72,7 @@ void Bus::RunRange(sim_addr_t start, size_t sz, RangeOp operation) const
     if (!InRange(start))
         return;
 
-    sim_addr_t end = std::min(m_maxAddress, (sim_addr_t)(start + sz));
+    sim_addr_t end = std::min(m_maxAddress + 1, (sim_addr_t)(start + sz));
     sz = end - start; // Clamp to edge of address space
     Node *node = nullptr;
 

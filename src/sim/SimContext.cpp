@@ -209,8 +209,8 @@ void CContext::PushByte(uint8_t byte)
 void CContext::PushWord(uint16_t word)
 {
     // Word's are pushed in reverse order because stack grows downwards.
-    PushByte(word & 0x00FF);
     PushByte((word & 0xFF00) >> 8);
+    PushByte(word & 0x00FF);
 }
 
 /*=======================================================================*/
@@ -230,7 +230,7 @@ uint8_t CContext::PullByte()
 uint16_t CContext::PullWord()
 {
     // Word's are pulled in reverse order because stack grows downwards.
-    return PullByte() << 8 | PullByte();
+    return PullByte() | PullByte() << 8;
 }
 
 /*=======================================================================*/
