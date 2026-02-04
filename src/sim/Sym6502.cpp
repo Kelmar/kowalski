@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "sim.h"
 
+#include "deferred.h"
+
 // TODO: Remove direct references to the simulator controller from here.
 #include "SimulatorController.h"
 
@@ -2771,7 +2773,7 @@ void CSym6502::Run()
 void CSym6502::RunThread(std::stop_token stopToken)
 {
     // Ensure that the status gets updated even if thread crashes.
-    deferred_action([this] ()
+    auto updateStatus = defer([this] ()
     {
         running = false; // TODO: Make atomic?
         CurrentStatus = CSym6502::Status::FINISH;
