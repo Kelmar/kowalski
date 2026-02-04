@@ -94,8 +94,6 @@ public:
     {
         m_fn = fn;
         m_connected = true;
-
-        return *this;
     }
 
     const Slot &operator =(const Slot &rhs) noexcept
