@@ -26,46 +26,34 @@ cmake_minimum_required(VERSION 3.20)
 
 ##########################################################################
 
-project (HexEdit C CXX)
+project (core C CXX)
 
 SET (SRCS
-    "src/HexEdit.cpp"
-    "src/DrawMetrics.cpp"
-    "src/OffsetColumns.cpp"
-    "src/BaseAddressRows.cpp"
-    "src/HexArea.cpp")
+    "src/core.cpp"
+)
 
 SET (HDRS
-    "publish/HexEdit.h"
-    "include/he_priv.h"
-    "include/DrawMetrics.h"
-    "include/SubControl.h"
-    "include/OffsetColumns.h"
-    "include/BaseAddressRows.h"
-    "include/HexArea.h")
+    "publish/core_sig.h"
+    "publish/deferred.h"
+)
 
-add_library(HexEdit ${SRCS} ${HDRS})
+##########################################################################
 
-add_dependencies(HexEdit core)
+add_library(core ${SRCS} ${HDRS})
 
-set_property (TARGET HexEdit PROPERTY CXX_STANDARD 20)
+set_property (TARGET core PROPERTY CXX_STANDARD 20)
 
-target_compile_options(HexEdit PRIVATE
+target_compile_options(core PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
     $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
 )
 
-target_include_directories(HexEdit
+target_include_directories(core
     PRIVATE "include/"
-    PRIVATE "../include/"
-    PRIVATE "../core/include"
-    PRIVATE "${wxWidgets_SOURCE_DIR}/include"
+    PRIVATE "../include"
     PUBLIC "publish/"
 )
 
-target_link_libraries(HexEdit PRIVATE
-    ${wxLibs}
-    fmt::fmt
-)
+target_link_libraries(core PRIVATE fmt::fmt)
 
 ##########################################################################

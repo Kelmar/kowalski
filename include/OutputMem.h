@@ -23,7 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*=======================================================================*/
 
-#include <sigslot/signal.hpp>
+//#include <sigslot/signal.hpp>
+#include "core_sig.h"
 
 /*=======================================================================*/
 
@@ -56,7 +57,7 @@ public:
     /**
      * @brief Notification signal for when memory has been modified.
      */
-    sigslot::signal<> onUpdate;
+    Signal<> onUpdate;
 
     /**
      * @brief Size of the memory in bytes.

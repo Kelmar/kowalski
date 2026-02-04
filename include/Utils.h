@@ -60,49 +60,6 @@ bool TryLookup(_In_ const std::unordered_map<TKey, TItem> &map,
 
 /*=======================================================================*/
 /**
- * @brief Ensures run of code on function exit.
- */
-template <class F>
-class deferred_action
-{
-private:
-    F m_call;
-
-public:
-    explicit deferred_action(F call) noexcept
-        : m_call(std::move(call))
-    {
-    }
-
-    deferred_action(deferred_action &&other) noexcept
-        : m_call(std::move(other.m_call))
-    {
-    }
-
-    // Prevent copy
-    deferred_action(const deferred_action &) = delete;
-    deferred_action &operator =(const deferred_action &) = delete;
-
-    ~deferred_action() noexcept
-    {
-        m_call();
-    }
-};
-
-template <class F>
-inline deferred_action<F> defer(const F &f) noexcept
-{
-    return deferred_action<F>(f);
-}
-
-template <class F>
-inline deferred_action<F> defer(F &&f) noexcept
-{
-    return deferred_action<F>(std::forward<F>(f));
-}
-
-/*=======================================================================*/
-/**
  * @brief Utility class to preserve the current configuration path and 
  * restore on function exit.
  */

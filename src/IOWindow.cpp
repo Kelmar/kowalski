@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "StdAfx.h"
 #include "6502.h"
 
+#include "deferred.h"
+
 #include "encodings.h"
 
 #include <wx/dcbuffer.h>
@@ -90,7 +92,7 @@ void CIOWindow::SaveConfig()
     auto config = wxConfig::Get();
     wxString oldPath = config->GetPath();
 
-    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+    auto restorePath = defer([&] () { config->SetPath(oldPath); });
 
     config->SetPath(IO_CONFIG_PATH);
 
@@ -119,7 +121,7 @@ void CIOWindow::LoadConfig()
     auto config = wxConfig::Get();
     wxString oldPath = config->GetPath();
 
-    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+    auto restorePath = defer([&] () { config->SetPath(oldPath); });
 
     config->SetPath(IO_CONFIG_PATH);
 

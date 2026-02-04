@@ -20,39 +20,58 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- /*=======================================================================*/
-
-#ifndef PROPERTY_6502_H__
-#define PROPERTY_6502_H__
-
+/*=======================================================================*/
+/*
+ * Deferred action class
+ */
 /*=======================================================================*/
 
-//#include <sigslot/signal.hpp>
-#include "core_sig.h"
+#ifndef CORE_DEFERRED_H__
+#define CORE_DEFERRED_H__
 
 /*=======================================================================*/
-
-template <typename T>
-class property
+/**
+ * @brief Ensures run of code on function exit.
+ */
+template <class F>
+class DeferredAction
 {
 private:
-    T m_value;
+    F m_call;
 
 public:
-    Signal<T> onChange;
+    explicit DeferredAction(F call) noexcept
+        : m_call(std::move(call))
+    { }
 
-    property<T> &operator = (T value)
+    DeferredAction(DeferredAction &&other) noexcept
+        : m_call(std::move(other.m_call))
+    { }
+
+    // Prevent copy
+    DeferredAction(const DeferredAction &) = delete;
+    DeferredAction &operator =(const DeferredAction &) = delete;
+
+    ~DeferredAction() noexcept
     {
-        m_value = value;
-        onChange(value);
-        return *this;
+        m_call();
     }
-
-    operator T() const { return m_value; }
 };
+
+template <class F>
+inline DeferredAction<F> defer(const F &f) noexcept
+{
+    return DeferredAction<F>(f);
+}
+
+template <class F>
+inline DeferredAction<F> defer(F &&f) noexcept
+{
+    return DeferredAction<F>(std::forward<F>(f));
+}
 
 /*=======================================================================*/
 
-#endif /* PROPERTY_6502_H__ */
+#endif /* CORE_DEFERRED_H__ */
 
 /*=======================================================================*/

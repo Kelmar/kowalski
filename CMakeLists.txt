@@ -21,8 +21,6 @@
 # DEALINGS IN THE SOFTWARE.
 #
 ##########################################################################
-# Basic Setup
-##########################################################################
 
 cmake_minimum_required(VERSION 3.20)
 
@@ -57,23 +55,11 @@ SET (FETCHCONTENT_QUIET FALSE)
 
 FetchContent_Declare(fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG 11.0.2
+    GIT_TAG 12.1.0
     GIT_SHALLOW ON
 )
 
 FetchContent_MakeAvailable(fmt)
-
-##########################################################################
-# Sigslot package
-##########################################################################
-
-FetchContent_Declare(
-    sigslot
-    GIT_REPOSITORY https://github.com/palacaze/sigslot
-    GIT_TAG v1.2.2
-)
-
-FetchContent_MakeAvailable(sigslot)
 
 ##########################################################################
 # wxWidgets package
@@ -84,7 +70,7 @@ if (WIN32)
 
   FetchContent_Declare(wxWidgets
       GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
-      GIT_TAG v3.2.6
+      GIT_TAG v3.3.1
       GIT_SHALLOW ON
       OVERRIDE_FIND_PACKAGE
   )
@@ -121,6 +107,7 @@ if (WIN32)
   SET (execType WIN32)
 endif()
 
+add_subdirectory(core)
 add_subdirectory(HexEdit)
 
 file (GLOB_RECURSE SRCS src/*.cpp)
@@ -128,7 +115,7 @@ file (GLOB_RECURSE HDRS include/*.h)
 
 add_executable(6502 ${execType} README.md ${SRCS} ${HDRS})
 
-add_dependencies(6502 HexEdit)
+add_dependencies(6502 core HexEdit)
 
 configure_file(res/res6502.xrc res6502.xrc COPYONLY)
 
@@ -141,6 +128,7 @@ target_compile_options(6502 PRIVATE
 
 target_include_directories(6502
     PRIVATE "include/"
+    PRIVATE "../core/include"
     PRIVATE "../HexEdit/include"
     PRIVATE "include/crystal"
     PRIVATE "include/assembler"
@@ -151,10 +139,12 @@ target_include_directories(6502
 target_link_libraries(6502
     PRIVATE ${wxLibs}
     PRIVATE fmt::fmt
-    PRIVATE Pal::Sigslot
-    PRIVATE HexEdit)
+    PRIVATE core
+    PRIVATE HexEdit
+)
 
 if (MSVC)
   target_precompile_headers(6502 PRIVATE include/StdAfx.h)
 endif ()
 
+##########################################################################

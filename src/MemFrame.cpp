@@ -25,6 +25,8 @@
 #include "StdAfx.h"
 #include "6502.h"
 
+#include "deferred.h"
+
 #include "MemFrame.h"
 #include "FormatNums.h"
 
@@ -139,7 +141,7 @@ void MemoryFrame::SaveConfig()
     auto config = wxConfig::Get();
     wxString oldPath = config->GetPath();
 
-    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+    auto restorePath = defer([&] () { config->SetPath(oldPath); });
 
     config->SetPath(MEM_FRAME_CONFIG_PATH);
 
@@ -170,7 +172,7 @@ void MemoryFrame::LoadConfig()
     auto config = wxConfig::Get();
     wxString oldPath = config->GetPath();
 
-    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+    auto restorePath = defer([&] () { config->SetPath(oldPath); });
 
     config->SetPath(MEM_FRAME_CONFIG_PATH);
 

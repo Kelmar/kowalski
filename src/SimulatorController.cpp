@@ -25,6 +25,8 @@
 #include "StdAfx.h"
 #include "6502.h"
 
+#include "deferred.h"
+
 #include "6502View.h"
 #include "6502Doc.h"
 
@@ -98,7 +100,7 @@ void SimulatorController::SaveConfig()
     auto config = wxConfig::Get();
     wxString oldPath = config->GetPath();
 
-    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+    auto restorePath = defer([&] () { config->SetPath(oldPath); });
 
     config->SetPath(SIM_CONFIG_PATH);
 
@@ -140,7 +142,7 @@ void SimulatorController::LoadConfig()
     auto config = wxConfig::Get();
     wxString oldPath = config->GetPath();
 
-    auto restorePath = deferred_action([&] () { config->SetPath(oldPath); });
+    auto restorePath = defer([&] () { config->SetPath(oldPath); });
 
     config->SetPath(SIM_CONFIG_PATH);
 

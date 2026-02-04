@@ -3347,11 +3347,11 @@ std::string CAsm6502::GetErrMsg(Stat stat)
 
     wxString format = CAsm::ERROR_FORMATS[(int)errorFormat];
 
-    return str::format(_(format),
+    return str::format(format,
         fmt::arg("file", filename),
         fmt::arg("line_number", lineNumber),
         fmt::arg("error_code", statVal),
-        fmt::arg("message", _(message).ToStdString()),
+        fmt::arg("message", message),
         fmt::arg("ident", err_ident)
     );
 }
